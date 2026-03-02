@@ -13,64 +13,50 @@ class HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.vertical(
-          bottom: Radius.circular(28),
+    return Stack(
+      children: [
+        // Header background image — no rounded corners, blends into page
+        Positioned.fill(
+          child: Transform.flip(
+            flipY: true, // Clouds at top
+            child: Image.asset(
+              'assets/images/header.jpg',
+              fit: BoxFit.cover,
+              alignment: Alignment.bottomCenter,
+            ),
+          ),
         ),
-      ),
-      child: Stack(
-        children: [
-          // Header background image 
-          Positioned.fill(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(28),
-              ),
-              child: Transform.flip(
-                flipY: true, // Clouds at top
-                child: Image.asset(
-                  'assets/images/header.jpg',
-                  fit: BoxFit.cover,
-                  alignment: Alignment.bottomCenter,
-                ),
-              ),
-            ),
-          ),
-          // Semi-transparent golden overlay
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(
-                  bottom: Radius.circular(28),
-                ),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    const Color(0xFFFFB902).withOpacity(0.85),
-                    const Color(0xFFFFB902).withOpacity(0.90),
-                    const Color(0xFFFFB902).withOpacity(0.95),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-              child: Column(
-                children: [
-                  _buildGreetingRow(context),
-                  const SizedBox(height: 20),
-                  _buildSearchBar(context),
+        // Semi-transparent golden overlay that fades to transparent at bottom
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.0, 0.6, 1.0],
+                colors: [
+                  const Color(0xFFFFB902).withOpacity(0.85),
+                  const Color(0xFFFFB902).withOpacity(0.80),
+                  const Color(0xFFFFF5E0).withOpacity(0.3), // Fades to near-transparent
                 ],
               ),
             ),
           ),
-        ],
-      ),
+        ),
+        SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            child: Column(
+              children: [
+                _buildGreetingRow(context),
+                const SizedBox(height: 20),
+                _buildSearchBar(context),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
