@@ -22,7 +22,7 @@ class HomeHeader extends StatelessWidget {
             child: Image.asset(
               'assets/images/header.jpg',
               fit: BoxFit.cover,
-              alignment: Alignment.bottomCenter,
+              alignment: Alignment.center,
             ),
           ),
         ),
@@ -33,10 +33,10 @@ class HomeHeader extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                stops: const [0.0, 0.5, 0.85, 1.0],
+                stops: const [0.0, 0.55, 0.9, 1.0],
                 colors: [
-                  const Color(0xFFFFB902).withOpacity(0.85),
-                  const Color(0xFFFFB902).withOpacity(0.80),
+                  const Color(0xFFFFB902).withOpacity(0.70),
+                  const Color(0xFFFFB902).withOpacity(0.60),
                   const Color(0xFFFFF0D0), // Warm transition
                   const Color(0xFFFFF8EE), // Exact page background — fully opaque
                 ],
@@ -73,16 +73,16 @@ class HomeHeader extends StatelessWidget {
                 Text(
                   'Hello World',
                   style: GoogleFonts.poppins(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
                   ),
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 4),
                 Image.asset(
                   'assets/images/wave_hand.png',
-                  width: 28,
-                  height: 28,
+                  width: 22,
+                  height: 22,
                 ),
               ],
             ),
@@ -97,14 +97,14 @@ class HomeHeader extends StatelessWidget {
                 children: [
                   const Icon(
                     Icons.location_on_outlined,
-                    size: 16,
+                    size: 14,
                     color: AppColors.textPrimary,
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 3),
                   Text(
                     'The Palm Springs, DLF ...',
                     style: GoogleFonts.poppins(
-                      fontSize: 13,
+                      fontSize: 11,
                       fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
                     ),
@@ -112,7 +112,7 @@ class HomeHeader extends StatelessWidget {
                   const SizedBox(width: 2),
                   const Icon(
                     Icons.keyboard_arrow_down,
-                    size: 18,
+                    size: 16,
                     color: AppColors.textPrimary,
                   ),
                 ],

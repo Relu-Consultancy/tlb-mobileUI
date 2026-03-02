@@ -68,7 +68,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(14),
                     child: Image.asset(
                       event.imagePath,
                       fit: BoxFit.cover,
@@ -82,7 +82,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                                 Colors.orange.shade400,
                               ],
                             ),
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(14),
                           ),
                           child: Center(
                             child: Text(
