@@ -9,14 +9,7 @@ import '../screens/location_screen.dart';
 import '../screens/login_sheet.dart';
 
 class HomeHeader extends StatelessWidget {
-  final int selectedTab;
-  final ValueChanged<int> onTabChanged;
-
-  const HomeHeader({
-    super.key,
-    required this.selectedTab,
-    required this.onTabChanged,
-  });
+  const HomeHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,14 +21,14 @@ class HomeHeader extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Header background image — flipped vertically so clouds appear at top
+          // Header background image 
           Positioned.fill(
             child: ClipRRect(
               borderRadius: const BorderRadius.vertical(
                 bottom: Radius.circular(28),
               ),
               child: Transform.flip(
-                flipY: true,
+                flipY: true, // Clouds at top
                 child: Image.asset(
                   'assets/images/header.jpg',
                   fit: BoxFit.cover,
@@ -66,15 +59,12 @@ class HomeHeader extends StatelessWidget {
           SafeArea(
             bottom: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 16, 12, 0),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
               child: Column(
                 children: [
                   _buildGreetingRow(context),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 20),
                   _buildSearchBar(context),
-                  const SizedBox(height: 16),
-                  _buildCategoryTabs(),
-                  const SizedBox(height: 14),
                 ],
               ),
             ),
@@ -94,10 +84,10 @@ class HomeHeader extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  'Welcome User',
+                  'Hello World',
                   style: GoogleFonts.poppins(
                     fontSize: 22,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     color: AppColors.textPrimary,
                   ),
                 ),
@@ -119,7 +109,7 @@ class HomeHeader extends StatelessWidget {
               child: Row(
                 children: [
                   const Icon(
-                    Icons.location_on,
+                    Icons.location_on_outlined,
                     size: 16,
                     color: AppColors.textPrimary,
                   ),
@@ -128,6 +118,7 @@ class HomeHeader extends StatelessWidget {
                     'The Palm Springs, DLF ...',
                     style: GoogleFonts.poppins(
                       fontSize: 13,
+                      fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
                     ),
                   ),
@@ -135,7 +126,7 @@ class HomeHeader extends StatelessWidget {
                   const Icon(
                     Icons.keyboard_arrow_down,
                     size: 18,
-                    color: AppColors.blue,
+                    color: AppColors.textPrimary,
                   ),
                 ],
               ),
@@ -152,18 +143,14 @@ class HomeHeader extends StatelessWidget {
               ),
               child: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.3),
-                  shape: BoxShape.circle,
-                ),
                 child: const Icon(
                   Icons.notifications_outlined,
-                  size: 22,
+                  size: 26,
                   color: AppColors.textPrimary,
                 ),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             // Profile avatar
             GestureDetector(
               onTap: () {
@@ -177,15 +164,13 @@ class HomeHeader extends StatelessWidget {
                 }
               },
               child: Container(
-                width: 38,
-                height: 38,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 2),
-                ),
-                child: ClipOval(
-                  child: Image.asset(
-                    'assets/images/tlb_logo.png',
+                  image: const DecorationImage(
+                    image: AssetImage('assets/images/new_home/profilepic.jpg'),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -206,96 +191,29 @@ class HomeHeader extends StatelessWidget {
       child: Container(
         height: 48,
         decoration: BoxDecoration(
-          color: const Color(0xFFFFF0C8),
+          color: const Color(0xFFFCF5E8), // Very light yellow/off-white
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: Colors.white, width: 2),
         ),
         child: Row(
           children: [
-            const SizedBox(width: 16),
-            const Icon(Icons.search, color: Colors.black, size: 22),
-            const SizedBox(width: 10),
-            Text(
-              'Search...',
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: const Color(0xFF9E9E9E),
+            const SizedBox(width: 20),
+            const Icon(Icons.search, color: Color(0xFF1A1A2E), size: 22),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Search...',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: const Color(0xFF6B6B6B),
+                ),
               ),
             ),
+            const Icon(Icons.tune, color: Color(0xFF1A1A2E), size: 22), // Filter icon
+            const SizedBox(width: 20),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildCategoryTabs() {
-    final tabs = [
-      {'image': 'assets/images/foryou.png', 'label': 'For You'},
-      {'image': 'assets/images/events.png', 'label': 'Events'},
-      {'image': 'assets/images/classes.png', 'label': 'Classes'},
-      {'image': 'assets/images/program.png', 'label': 'Program'},
-      {'image': 'assets/images/spaces.png', 'label': 'Spaces'},
-    ];
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: List.generate(tabs.length, (index) {
-        final tab = tabs[index];
-        final isSelected = index == selectedTab;
-        return GestureDetector(
-          onTap: () => onTabChanged(index),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isSelected
-                      ? AppColors.primary
-                      : const Color(0xFFFFF0C8).withOpacity(0.7),
-                  border: Border.all(
-                    color: isSelected
-                        ? Colors.white
-                        : const Color(0xFFFFD54F),
-                    width: isSelected ? 2.5 : 1.5,
-                  ),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: AppColors.primary.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 3),
-                          ),
-                        ]
-                      : null,
-                ),
-                child: ClipOval(
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Image.asset(
-                      tab['image'] as String,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                tab['label'] as String,
-                style: GoogleFonts.poppins(
-                  fontSize: 11,
-                  fontWeight:
-                      isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-        );
-      }),
     );
   }
 }
