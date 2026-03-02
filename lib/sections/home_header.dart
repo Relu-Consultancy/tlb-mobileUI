@@ -33,11 +33,11 @@ class HomeHeader extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                stops: const [0.0, 0.55, 0.9, 1.0],
+                stops: const [0.0, 0.4, 0.85, 1.0],
                 colors: [
-                  const Color(0xFFFFB902).withOpacity(0.70),
-                  const Color(0xFFFFB902).withOpacity(0.60),
-                  const Color(0xFFFFF0D0), // Warm transition
+                  const Color(0xFFFFCC00).withOpacity(0.40),
+                  const Color(0xFFFFCC00).withOpacity(0.35),
+                  const Color(0xFFFFF3DC), // Warm transition
                   const Color(0xFFFFF8EE), // Exact page background — fully opaque
                 ],
               ),
@@ -47,7 +47,7 @@ class HomeHeader extends StatelessWidget {
         SafeArea(
           bottom: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 28, 16, 36),
+            padding: const EdgeInsets.fromLTRB(16, 44, 16, 36),
             child: Column(
               children: [
                 _buildGreetingRow(context),
