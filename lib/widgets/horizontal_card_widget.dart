@@ -38,7 +38,7 @@ class HorizontalCardWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 child: Image.asset(
                   imagePath,
-                  height: 220,
+                  height: 180,
                   width: double.infinity,
                   fit: BoxFit.cover,
                 ),
@@ -75,7 +75,7 @@ class HorizontalCardWidget extends StatelessWidget {
             ],
           ),
           
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           
           // Header Row (Title and Badge)
           Row(
@@ -147,7 +147,7 @@ class HorizontalCardWidget extends StatelessWidget {
             ],
           ),
           
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           RichText(
              maxLines: 2,
              overflow: TextOverflow.ellipsis,
@@ -172,7 +172,7 @@ class HorizontalCardWidget extends StatelessWidget {
              ),
           ),
           
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
             height: 38,

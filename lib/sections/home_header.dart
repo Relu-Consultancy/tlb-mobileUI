@@ -33,12 +33,12 @@ class HomeHeader extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                stops: const [0.0, 0.4, 0.85, 1.0],
+                stops: const [0.0, 0.35, 0.80, 1.0],
                 colors: [
-                  const Color(0xFFFFCC00).withOpacity(0.75),
-                  const Color(0xFFFFCC00).withOpacity(0.65),
-                  const Color(0xFFFFF3DC), // Warm transition
-                  const Color(0xFFFFF8EE), // Exact page background — fully opaque
+                  const Color(0xFFDE7104).withOpacity(0.45), // Orange tint at top
+                  const Color(0xFFE8A030).withOpacity(0.50), // Golden-orange mid
+                  const Color(0xFFFFF0D0), // Warm cream transition
+                  const Color(0xFFFFF8EE), // Page background
                 ],
               ),
             ),
