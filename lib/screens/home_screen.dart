@@ -4,6 +4,7 @@ import '../data/dummy_data.dart';
 import '../sections/home_header.dart';
 import '../widgets/banner_carousel.dart';
 import '../widgets/categories_grid.dart';
+import '../widgets/section_divider_widget.dart';
 import '../sections/hot_picks_section.dart';
 import '../sections/weekend_special_section.dart';
 import '../sections/discover_near_you_section.dart';
@@ -46,7 +47,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 16),
+                  // Spotlight section divider
+                  const SectionDividerWidget(title: 'Spotlight'),
                   RepaintBoundary(
                     child: BannerCarousel(
                       events: DummyData.bannerEvents, 
