@@ -20,7 +20,7 @@ class DummyData {
       'image': 'assets/images/new_home/eventcategory3.png',
     },
     {
-      'label': 'Venues',
+      'label': 'Spaces',
       'image': 'assets/images/new_home/eventcategory4.png',
       'isWide': true, // Indicator for the 2-item bottom row
     },

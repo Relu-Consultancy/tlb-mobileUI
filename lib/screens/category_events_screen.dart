@@ -23,7 +23,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
     'Events',
     'Classes',
     'Program',
-    'Venues',
+    'Spaces', // Changed from Venues to match the design image
     'Shop',
   ];
 
@@ -82,8 +82,8 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
 
   Widget _buildCategoryTabs() {
     return Container(
-      height: 90,
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      height: 125,
+      padding: const EdgeInsets.only(top: 12, bottom: 4),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -104,44 +104,23 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
               }
             },
             child: Container(
-              margin: const EdgeInsets.only(right: 20),
+              margin: const EdgeInsets.only(right: 8),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Icon container
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isSelected && !isHome
-                          ? const Color(0xFFFFCC00)
-                          : const Color(0xFFFFF0D0),
-                      boxShadow: isSelected && !isHome
-                          ? [
-                              BoxShadow(
-                                color: const Color(0xFFFFCC00).withOpacity(0.4),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              )
-                            ]
-                          : [],
+                  _buildCategoryItem(cat, isSelected, isHome),
+                  const SizedBox(height: 4),
+                  if (!isHome)
+                    Text(
+                      cat,
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        color: const Color(0xFF333333),
+                      ),
                     ),
-                    child: Center(
-                      child: isHome
-                          ? const Icon(Icons.home, color: Color(0xFF1A1A2E), size: 24)
-                          : _getCategoryIcon(cat, isSelected),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    cat,
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                      color: const Color(0xFF1A1A2E),
-                    ),
-                  )
+                  if (isHome) // placeholder for spacing
+                    const SizedBox(height: 18),
                 ],
               ),
             ),
@@ -151,23 +130,148 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
     );
   }
 
+  Widget _buildCategoryItem(String cat, bool isSelected, bool isHome) {
+    if (isHome) {
+      return Container(
+        width: 60,
+        height: 80, // Match visual center of other elements
+        alignment: Alignment.center,
+        child: const Icon(Icons.home_rounded, color: Color(0xFF333333), size: 34),
+      );
+    }
+
+    const double squircleSize = 60;
+    const double haloSize = 88;
+
+    Widget squircle = Container(
+      width: squircleSize,
+      height: squircleSize,
+      clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: isSelected
+            ? const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFEAA100),
+                  Color(0xFFD67300),
+                ],
+              )
+            : null,
+        color: isSelected ? null : const Color(0xFFFFF4D4),
+      ),
+      child: Stack(
+        children: [
+          if (!isSelected)
+            Positioned(
+              top: -8,
+              right: -8,
+              child: Container(
+                width: 30,
+                height: 30,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFFFDE9B7),
+                ),
+              ),
+            ),
+          Positioned(
+            bottom: -15,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 30,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? const Color(0xFFFFCE54) : const Color(0xFFFDE9B7),
+              ),
+            ),
+          ),
+          Center(
+            child: _getCategoryIcon(cat, isSelected),
+          ),
+        ],
+      ),
+    );
+
+    if (isSelected) {
+      return SizedBox(
+        width: haloSize,
+        height: haloSize,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: haloSize - 6,
+              height: haloSize - 6,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  )
+                ],
+              ),
+            ),
+            Positioned(
+              top: 6,
+              right: 12,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFFFFD54F),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 12,
+              left: 6,
+              child: Container(
+                width: 6,
+                height: 6,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFFFF9800),
+                ),
+              ),
+            ),
+            squircle,
+          ],
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: haloSize,
+      height: haloSize,
+      child: Center(child: squircle),
+    );
+  }
+
   Widget _getCategoryIcon(String category, bool isSelected) {
     IconData iconData;
     switch (category) {
       case 'Events':
-        iconData = Icons.event_note;
+        iconData = Icons.assignment_outlined;
         break;
       case 'Classes':
-        iconData = Icons.school_outlined;
+        iconData = Icons.person_outline;
         break;
       case 'Program':
         iconData = Icons.emoji_events_outlined;
         break;
       case 'Venues':
-        iconData = Icons.storefront_outlined;
+      case 'Spaces':
+        iconData = Icons.maps_home_work_outlined;
         break;
       case 'Shop':
-        iconData = Icons.shopping_bag_outlined;
+        iconData = Icons.storefront_outlined;
         break;
       default:
         iconData = Icons.star_outline;
@@ -175,8 +279,8 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
 
     return Icon(
       iconData,
-      color: isSelected ? Colors.white : const Color(0xFFDE7104),
-      size: 22,
+      color: isSelected ? Colors.white : const Color(0xFF333333),
+      size: 26,
     );
   }
 
