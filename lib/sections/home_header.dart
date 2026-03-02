@@ -35,8 +35,8 @@ class HomeHeader extends StatelessWidget {
                 end: Alignment.bottomCenter,
                 stops: const [0.0, 0.4, 0.85, 1.0],
                 colors: [
-                  const Color(0xFFFFCC00).withOpacity(0.40),
-                  const Color(0xFFFFCC00).withOpacity(0.35),
+                  const Color(0xFFFFCC00).withOpacity(0.75),
+                  const Color(0xFFFFCC00).withOpacity(0.65),
                   const Color(0xFFFFF3DC), // Warm transition
                   const Color(0xFFFFF8EE), // Exact page background — fully opaque
                 ],
@@ -151,8 +151,8 @@ class HomeHeader extends StatelessWidget {
                 }
               },
               child: Container(
-                width: 40,
-                height: 40,
+                width: 34,
+                height: 34,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 2),
