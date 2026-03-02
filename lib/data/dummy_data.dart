@@ -125,6 +125,63 @@ class DummyData {
     ),
   ];
 
+  static const List<EventModel> tlbSignature = [
+    EventModel(
+      title: 'TLB Women\'s Day Celebration 2026',
+      venue: 'An inter generational celebration honoring mothers, grandmothers, and inspiring women.',
+      imagePath: 'assets/images/new_home/tlbsignature3.png',
+    ),
+    EventModel(
+      title: 'Little Chefs Baking Competition',
+      venue: 'A fun baking face-off for kids and parents!',
+      imagePath: 'assets/images/new_home/tlbsignature2.png',
+    ),
+  ];
+
+  static const List<EventModel> specialNeeds = [
+    EventModel(
+      title: 'Sensory Play Activity Kit',
+      venue: '',
+      imagePath: 'assets/images/new_home/specialneeds1.png',
+      rating: 5.0,
+      reviewCount: '3.5k reviews',
+      price: 200.0,
+      tag: 'Therapist Recommended', // We'll hijack 'tag' for the bottom banner
+    ),
+    EventModel(
+      title: 'Therapeutic Art Class',
+      venue: '',
+      imagePath: 'assets/images/new_home/specialneeds2.png',
+      rating: 4.8,
+      reviewCount: '1.2k reviews',
+      price: 350.0,
+      tag: 'Therapist Recommended',
+    ),
+  ];
+
+  static const List<EventModel> stealers = [
+    EventModel(
+      title: 'Kids Bluetooth Karaoke Mic',
+      venue: '',
+      imagePath: 'assets/images/new_home/stealers1.png',
+      rating: 5.0,
+      reviewCount: '3.5k reviews',
+      price: 2000.0,
+      tag: '60% OFF', // Hijack tag for pink banner
+      description: 'End in 08:05:56', // Hijack description for top yellow pill
+    ),
+    EventModel(
+      title: 'Indoor Play Tent',
+      venue: '',
+      imagePath: 'assets/images/new_home/stealers2.png',
+      rating: 4.5,
+      reviewCount: '1.8k reviews',
+      price: 2500.0,
+      tag: '50% OFF',
+      description: 'End in 12:30:00',
+    ),
+  ];
+
   // Fallbacks to keep app building if other files ref these
   static const List<EventModel> spotlightEvents = bannerEvents;
   static const List<EventModel> bestForWeek = hotPicks;

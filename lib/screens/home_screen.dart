@@ -7,6 +7,9 @@ import '../widgets/categories_grid.dart';
 import '../widgets/section_divider_widget.dart';
 import '../sections/hot_picks_section.dart';
 import '../sections/weekend_special_section.dart';
+import '../sections/tlb_signature_section.dart';
+import '../sections/special_needs_section.dart';
+import '../sections/stealers_section.dart';
 import '../sections/discover_near_you_section.dart';
 import '../sections/family_feels_section.dart';
 import '../sections/app_footer.dart';
@@ -68,6 +71,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   const RepaintBoundary(child: DiscoverNearYouSection()),
                   const RepaintBoundary(child: FamilyFeelsSection()),
                   
+                  const RepaintBoundary(child: TlbSignatureSection()),
+                  const RepaintBoundary(child: SpecialNeedsSection()),
+                  const RepaintBoundary(child: StealersSection()),
+
                   // AppFooter with upward gradient
                   const AppFooter(),
                 ],

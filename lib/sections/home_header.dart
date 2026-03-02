@@ -35,10 +35,10 @@ class HomeHeader extends StatelessWidget {
                 end: Alignment.bottomCenter,
                 stops: const [0.0, 0.4, 0.8, 1.0],
                 colors: [
-                  const Color(0xFFFFF7E2).withOpacity(0.95), // Whitish tint at top
-                  const Color(0xFFFFCC00).withOpacity(0.85), // Light orange-ish yellow
-                  const Color(0xFFFFE580).withOpacity(0.90), // Lighter transition
-                  const Color(0xFFFFF8EE), // Fades perfectly into page background
+                  const Color(0xFFFFF3E0).withOpacity(0.95), // Extra light orange/whitish at top (Orange 50)
+                  const Color(0xFFFFB74D).withOpacity(0.85), // Light orange (Orange 300)
+                  const Color(0xFFFFCC80).withOpacity(0.90), // Lighter orange transition (Orange 200)
+                  const Color(0xFFFFF8EE), // Fades beautifully into page background
                 ],
               ),
             ),

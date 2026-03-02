@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../data/dummy_data.dart';
+import '../screens/category_events_screen.dart';
 
 class CategoriesGrid extends StatelessWidget {
   const CategoriesGrid({super.key});
@@ -25,9 +26,17 @@ class CategoriesGrid extends StatelessWidget {
                   padding: EdgeInsets.only(
                     right: cat == topRowCategories.last ? 0 : 12,
                   ),
-                  child: _buildCategoryCard(
-                    imagePath: cat['image'],
-                    label: cat['label'],
+                  child: GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CategoryEventsScreen(initialCategory: cat['label']),
+                      ),
+                    ),
+                    child: _buildCategoryCard(
+                      imagePath: cat['image'],
+                      label: cat['label'],
+                    ),
                   ),
                 ),
               );
@@ -43,10 +52,18 @@ class CategoriesGrid extends StatelessWidget {
                   padding: EdgeInsets.only(
                     right: cat == bottomRowCategories.last ? 0 : 12,
                   ),
-                  child: _buildCategoryCard(
-                    imagePath: cat['image'],
-                    label: cat['label'],
-                    isWide: true,
+                  child: GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CategoryEventsScreen(initialCategory: cat['label']),
+                      ),
+                    ),
+                    child: _buildCategoryCard(
+                      imagePath: cat['image'],
+                      label: cat['label'],
+                      isWide: true,
+                    ),
                   ),
                 ),
               );
