@@ -68,8 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const RepaintBoundary(child: DiscoverNearYouSection()),
                   const RepaintBoundary(child: FamilyFeelsSection()),
                   
-                  // Keep an AppFooter if it exists
-                  const SizedBox(height: 24),
+                  // AppFooter with upward gradient
                   const AppFooter(),
                 ],
               ),
