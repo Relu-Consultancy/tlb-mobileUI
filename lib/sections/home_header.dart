@@ -26,18 +26,19 @@ class HomeHeader extends StatelessWidget {
             ),
           ),
         ),
-        // Semi-transparent golden overlay that fades to transparent at bottom
+        // Golden overlay that fades to page background color at the bottom
         Positioned.fill(
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                stops: const [0.0, 0.6, 1.0],
+                stops: const [0.0, 0.5, 0.85, 1.0],
                 colors: [
                   const Color(0xFFFFB902).withOpacity(0.85),
                   const Color(0xFFFFB902).withOpacity(0.80),
-                  const Color(0xFFFFF5E0).withOpacity(0.3), // Fades to near-transparent
+                  const Color(0xFFFFF0D0), // Warm transition
+                  const Color(0xFFFFF8EE), // Exact page background — fully opaque
                 ],
               ),
             ),
