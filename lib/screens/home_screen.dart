@@ -52,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   RepaintBoundary(
                     child: BannerCarousel(
                       events: DummyData.bannerEvents, 
-                      height: 320,
+                      height: 380,
                     ),
                   ),
                   const SizedBox(height: 24),
