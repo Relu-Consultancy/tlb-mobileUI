@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 import '../core/saved_events_state.dart';
 import '../sections/home_header.dart';
 import '../models/event_model.dart';
@@ -117,7 +118,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
 
   Widget _buildCategoryTabs() {
     return Container(
-      height: 125,
+      height: Responsive.h(context, 125, min: 100),
       padding: const EdgeInsets.only(top: 12, bottom: 4),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -349,12 +350,12 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                 child: Image.asset(
                   event.imagePath,
-                  height: 220,
+                  height: Responsive.h(context, 220, min: 160),
                   width: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      height: 220,
+                      height: Responsive.h(context, 220, min: 160),
                       color: Colors.grey.shade300,
                       child: const Center(child: Icon(Icons.image, size: 50, color: Colors.grey)),
                     );

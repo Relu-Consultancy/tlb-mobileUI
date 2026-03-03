@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 
 class OffersScreen extends StatelessWidget {
   const OffersScreen({super.key});
@@ -99,9 +100,10 @@ class _CouponCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = coupon['color'] as Color;
+    final leftWidth = Responsive.w(context, 90, min: 70);
 
     return ClipPath(
-      clipper: _CouponClipper(),
+      clipper: _CouponClipper(cutX: leftWidth),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -119,7 +121,7 @@ class _CouponCard extends StatelessWidget {
           children: [
             // Left colored section
             Container(
-              width: 90,
+              width: leftWidth,
               padding: const EdgeInsets.symmetric(vertical: 24),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -148,7 +150,7 @@ class _CouponCard extends StatelessWidget {
             ),
 
             // Dashed divider
-            _buildDashedDivider(color),
+            _buildDashedDivider(context, color),
 
             // Right details section
             Expanded(
@@ -248,10 +250,10 @@ class _CouponCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDashedDivider(Color color) {
+  Widget _buildDashedDivider(BuildContext context, Color color) {
     return SizedBox(
       width: 1,
-      height: 110,
+      height: Responsive.h(context, 110, min: 90),
       child: CustomPaint(
         painter: _DashedVerticalPainter(color: color.withOpacity(0.3)),
       ),
@@ -260,6 +262,9 @@ class _CouponCard extends StatelessWidget {
 }
 
 class _CouponClipper extends CustomClipper<Path> {
+  final double cutX;
+  _CouponClipper({required this.cutX});
+
   @override
   Path getClip(Size size) {
     const radius = 10.0;
@@ -267,7 +272,6 @@ class _CouponClipper extends CustomClipper<Path> {
       ..addRRect(RRect.fromLTRBR(0, 0, size.width, size.height, const Radius.circular(16)));
 
     // Cut semi-circles at the left edge where the divider is
-    final cutX = 90.0;
     path.addOval(Rect.fromCircle(center: Offset(cutX, 0), radius: radius));
     path.addOval(Rect.fromCircle(center: Offset(cutX, size.height), radius: radius));
 

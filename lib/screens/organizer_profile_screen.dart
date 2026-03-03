@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 import '../models/event_model.dart';
 
 class OrganizerProfileScreen extends StatelessWidget {
@@ -233,13 +234,14 @@ class OrganizerProfileScreen extends StatelessWidget {
 
                   // ── Upcoming Events Cards ──
                   SizedBox(
-                    height: 260,
+                    height: Responsive.h(context, 260, min: 200),
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: upcomingEvents.length,
                       itemBuilder: (context, index) {
                         final e = upcomingEvents[index];
                         return _buildEventCard(
+                          context: context,
                           image: e['image']!,
                           title: e['title']!,
                           venue: e['venue']!,
@@ -287,12 +289,15 @@ class OrganizerProfileScreen extends StatelessWidget {
   }
 
   Widget _buildEventCard({
+    required BuildContext context,
     required String image,
     required String title,
     required String venue,
   }) {
+    final cardW = Responsive.cardWidth(context, fraction: 0.46, max: 180);
+    final imgH = Responsive.h(context, 160, min: 120);
     return Container(
-      width: 180,
+      width: cardW,
       margin: const EdgeInsets.only(right: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -302,12 +307,12 @@ class OrganizerProfileScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
             child: Image.asset(
               image,
-              height: 160,
-              width: 180,
+              height: imgH,
+              width: cardW,
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => Container(
-                height: 160,
-                width: 180,
+                height: imgH,
+                width: cardW,
                 decoration: BoxDecoration(
                   color: Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(14),

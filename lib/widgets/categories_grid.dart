@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../screens/category_events_screen.dart';
 
@@ -34,6 +35,7 @@ class CategoriesGrid extends StatelessWidget {
                       ),
                     ),
                     child: _buildCategoryCard(
+                      context: context,
                       imagePath: cat['image'],
                       label: cat['label'],
                     ),
@@ -60,6 +62,7 @@ class CategoriesGrid extends StatelessWidget {
                       ),
                     ),
                     child: _buildCategoryCard(
+                      context: context,
                       imagePath: cat['image'],
                       label: cat['label'],
                       isWide: true,
@@ -75,12 +78,13 @@ class CategoriesGrid extends StatelessWidget {
   }
 
   Widget _buildCategoryCard({
+    required BuildContext context,
     required String imagePath,
     required String label,
     bool isWide = false,
   }) {
     return Container(
-      height: 110,
+      height: Responsive.h(context, 110, min: 90),
       decoration: BoxDecoration(
         color: const Color(0xFFE5E5E5), // Light grey background
         borderRadius: BorderRadius.circular(16),
@@ -98,7 +102,7 @@ class CategoriesGrid extends StatelessWidget {
               children: [
                 Image.asset(
                   imagePath,
-                  height: 70,
+                  height: Responsive.h(context, 70, min: 50),
                   fit: BoxFit.contain,
                 ),
                 Text(

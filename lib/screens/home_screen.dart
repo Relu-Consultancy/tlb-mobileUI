@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
+import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../sections/home_header.dart';
 import '../widgets/banner_carousel.dart';
@@ -55,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   RepaintBoundary(
                     child: BannerCarousel(
                       events: DummyData.bannerEvents, 
-                      height: 380,
+                      height: Responsive.h(context, 380, min: 280),
                     ),
                   ),
                   const SizedBox(height: 24),

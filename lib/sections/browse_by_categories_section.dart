@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 import '../widgets/section_divider_widget.dart';
 
 class BrowseByCategoriesSection extends StatelessWidget {
@@ -45,7 +46,7 @@ class BrowseByCategoriesSection extends StatelessWidget {
       children: [
         const SectionDividerWidget(title: 'Browse by categories'),
         SizedBox(
-          height: 380,
+          height: Responsive.h(context, 380, min: 320),
           child: GridView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),

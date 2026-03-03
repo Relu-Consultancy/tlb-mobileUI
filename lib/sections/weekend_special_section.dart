@@ -1,3 +1,4 @@
+import '../core/responsive.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -52,7 +53,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
       children: [
         const SectionDividerWidget(title: 'Weekend Special'),
         SizedBox(
-          height: 420,
+          height: Responsive.h(context, 420, min: 350),
           child: PageView.builder(
             controller: _pageController,
             itemCount: DummyData.weekendSpecial.length,
@@ -85,7 +86,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                             ),
                             child: Image.asset(
                               event.imagePath,
-                              height: 220,
+                              height: Responsive.h(context, 220, min: 160),
                               width: double.infinity,
                               fit: BoxFit.cover,
                             ),

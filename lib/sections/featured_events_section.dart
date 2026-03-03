@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import '../widgets/section_header.dart';
 import '../widgets/featured_event_card.dart';
 import '../data/dummy_data.dart';
@@ -18,7 +19,7 @@ class FeaturedEventsSection extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         SizedBox(
-          height: 270,
+          height: Responsive.h(context, 270, min: 230),
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -28,7 +29,7 @@ class FeaturedEventsSection extends StatelessWidget {
             itemBuilder: (context, index) {
               return FeaturedEventCard(
                 event: DummyData.featuredEvents[index],
-                width: 200,
+                width: Responsive.cardWidth(context, fraction: 0.51, max: 200),
               );
             },
           ),

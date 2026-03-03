@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 import '../core/saved_events_state.dart';
 import '../models/event_model.dart';
 
@@ -44,7 +45,7 @@ class HorizontalCardWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 child: Image.asset(
                   imagePath,
-                  height: 180,
+                  height: Responsive.h(context, 180, min: 140),
                   width: double.infinity,
                   fit: BoxFit.cover,
                 ),

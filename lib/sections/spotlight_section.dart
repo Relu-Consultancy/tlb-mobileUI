@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import '../widgets/section_header.dart';
 import '../widgets/event_card.dart';
 import '../data/dummy_data.dart';
@@ -17,7 +18,7 @@ class SpotlightSection extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         SizedBox(
-          height: 290,
+          height: Responsive.h(context, 290, min: 240),
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -27,7 +28,7 @@ class SpotlightSection extends StatelessWidget {
             itemBuilder: (context, index) {
               return EventCard(
                 event: DummyData.spotlightEvents[index],
-                width: 260,
+                width: Responsive.cardWidth(context, fraction: 0.66, max: 260),
                 imageHeight: 210,
               );
             },

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../core/app_colors.dart';
+import '../core/responsive.dart';
 import '../core/saved_events_state.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
@@ -51,7 +52,7 @@ class _TrendingCardState extends State<TrendingCard> {
     return Column(
       children: [
         SizedBox(
-          height: 180,
+          height: Responsive.h(context, 180, min: 150),
           child: PageView.builder(
             controller: _pageController,
             itemCount: widget.events.length,
@@ -87,14 +88,14 @@ class _TrendingCardState extends State<TrendingCard> {
                             ),
                             child: Image.asset(
                               event.imagePath,
-                              width: 130,
-                              height: 180,
+                              width: Responsive.w(context, 130, min: 100),
+                              height: Responsive.h(context, 180, min: 150),
                               fit: BoxFit.cover,
                               cacheWidth: 260,
                               errorBuilder: (context, error, stackTrace) {
                                 return Container(
-                                  width: 130,
-                                  height: 180,
+                                  width: Responsive.w(context, 130, min: 100),
+                                  height: Responsive.h(context, 180, min: 150),
                                   color: AppColors.primary.withOpacity(0.2),
                                   child: const Icon(Icons.event, size: 40),
                                 );

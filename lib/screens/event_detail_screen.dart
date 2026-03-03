@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/auth_state.dart';
+import '../core/responsive.dart';
 import '../core/saved_events_state.dart';
 import '../models/event_model.dart';
 import 'login_sheet.dart';
@@ -26,7 +27,7 @@ class EventDetailScreen extends StatelessWidget {
               SliverAppBar(
                 backgroundColor: Colors.white,
                 surfaceTintColor: Colors.white,
-                expandedHeight: 300,
+                expandedHeight: Responsive.h(context, 300, min: 220),
                 pinned: true,
                 leading: Container(
                   margin: const EdgeInsets.all(8),
@@ -337,7 +338,7 @@ class EventDetailScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
-                      height: 100,
+                      height: Responsive.h(context, 100, min: 80),
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -345,7 +346,7 @@ class EventDetailScreen extends StatelessWidget {
                         itemBuilder: (context, index) {
                           return Container(
                             margin: const EdgeInsets.only(right: 12),
-                            width: 120,
+                            width: Responsive.w(context, 120, min: 90),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                               color: Colors.grey.shade200,
@@ -376,7 +377,7 @@ class EventDetailScreen extends StatelessWidget {
                     const SizedBox(height: 12),
                     Container(
                       margin: const EdgeInsets.symmetric(horizontal: 16),
-                      height: 180,
+                      height: Responsive.h(context, 180, min: 140),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
                         color: Colors.grey.shade200,
@@ -675,14 +676,14 @@ class EventDetailScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
-                      height: 220,
+                      height: Responsive.h(context, 220, min: 180),
                       child: ListView(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         children: [
-                          _buildRelatedEventCard('Halloween Party', 'assets/images/halloween_party.png', 'Central Park, NYC', 'Limited Seats'),
-                          _buildRelatedEventCard('Kids Party', 'assets/images/kids_party.png', 'Fun Zone, Mumbai', 'Limited Seats'),
-                          _buildRelatedEventCard('World Book Day', 'assets/images/story_telling.png', 'Library Hall, Delhi', 'Open'),
+                          _buildRelatedEventCard(context, 'Halloween Party', 'assets/images/halloween_party.png', 'Central Park, NYC', 'Limited Seats'),
+                          _buildRelatedEventCard(context, 'Kids Party', 'assets/images/kids_party.png', 'Fun Zone, Mumbai', 'Limited Seats'),
+                          _buildRelatedEventCard(context, 'World Book Day', 'assets/images/story_telling.png', 'Library Hall, Delhi', 'Open'),
                         ],
                       ),
                     ),
@@ -1098,9 +1099,9 @@ class EventDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRelatedEventCard(String title, String imagePath, String location, String tag) {
+  Widget _buildRelatedEventCard(BuildContext context, String title, String imagePath, String location, String tag) {
     return Container(
-      width: 160,
+      width: Responsive.cardWidth(context, fraction: 0.41, max: 160),
       margin: const EdgeInsets.only(right: 12),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -1122,8 +1123,8 @@ class EventDetailScreen extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                 child: Image.asset(
                   imagePath,
-                  width: 160,
-                  height: 120,
+                  width: Responsive.cardWidth(context, fraction: 0.41, max: 160),
+                  height: Responsive.h(context, 120, min: 90),
                   fit: BoxFit.cover,
                 ),
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import '../widgets/section_header.dart';
 import '../widgets/banner_carousel.dart';
 import '../data/dummy_data.dart';
@@ -19,7 +20,7 @@ class NearYouSection extends StatelessWidget {
         const SizedBox(height: 14),
         BannerCarousel(
           events: DummyData.nearYouEvents,
-          height: 200,
+          height: Responsive.h(context, 200, min: 160),
         ),
       ],
     );
