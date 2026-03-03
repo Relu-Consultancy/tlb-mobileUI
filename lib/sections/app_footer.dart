@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../core/app_colors.dart';
 
 class AppFooter extends StatelessWidget {
   const AppFooter({super.key});
@@ -8,30 +7,38 @@ class AppFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 32),
+      width: double.infinity,
+      padding: const EdgeInsets.only(top: 60, bottom: 40),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          stops: [0.0, 0.6, 1.0],
+          colors: [
+            Color(0xFFFFCC00), // Solid golden/yellow at bottom
+            Color(0xFFFFE580), // Lighter mid-transition
+            Color(0xFFFFF8EE), // Fades perfectly into page background
+          ],
+        ),
+      ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Divider(color: AppColors.divider, thickness: 1),
-          const SizedBox(height: 16),
           // TLB Logo
-          ClipOval(
-            child: Image.asset(
-              'resources- tlb-ui/tlbAppIcon.png',
-              width: 60,
-              height: 60,
-              fit: BoxFit.cover,
-            ),
+          Image.asset(
+            'resources- tlb-ui/tlbAppIcon.png',
+            width: 80,
+            fit: BoxFit.contain,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             'the little broadway',
             style: GoogleFonts.poppins(
-              fontSize: 9,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1A1A2E),
             ),
           ),
-          const SizedBox(height: 24),
         ],
       ),
     );

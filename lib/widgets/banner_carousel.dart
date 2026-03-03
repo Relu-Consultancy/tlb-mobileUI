@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import '../core/app_colors.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
 
@@ -67,81 +66,38 @@ class _BannerCarouselState extends State<BannerCarousel> {
                   MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
                 ),
                 child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Image.asset(
-                        event.imagePath,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.blue.shade300,
-                                  Colors.blue.shade600,
-                                ],
-                              ),
-                            ),
-                            child: Center(
-                              child: Text(
-                                event.title,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                      // Gradient overlay at bottom
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Image.asset(
+                      event.imagePath,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
                               colors: [
-                                Colors.black.withOpacity(0.7),
-                                Colors.transparent,
+                                Colors.orange.shade200,
+                                Colors.orange.shade400,
                               ],
                             ),
+                            borderRadius: BorderRadius.circular(14),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                event.title,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white,
-                                ),
+                          child: Center(
+                            child: Text(
+                              event.title,
+                              style: GoogleFonts.poppins(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
                               ),
-                              Text(
-                                event.venue,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 13,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                    ],
+                        );
+                      },
+                    ),
                   ),
-                ),
                 ),
               );
             },
@@ -154,8 +110,8 @@ class _BannerCarouselState extends State<BannerCarousel> {
           effect: const WormEffect(
             dotHeight: 8,
             dotWidth: 8,
-            activeDotColor: AppColors.blue,
-            dotColor: AppColors.divider,
+            activeDotColor: Color(0xFFFFB902), // Amber/yellow to match Figma
+            dotColor: Color(0xFFE0E0E0),
             spacing: 6,
           ),
         ),
