@@ -31,6 +31,7 @@ class FamilyFeelsSection extends StatelessWidget {
                   reviewCount: event.reviewCount ?? '0 reviews',
                   description: event.description ?? 'A wonderful bonding session',
                   buttonText: 'Book Now',
+                  event: event,
                   onTapBtn: () {
                     Navigator.push(
                       context,

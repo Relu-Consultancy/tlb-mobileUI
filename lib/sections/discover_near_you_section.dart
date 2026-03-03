@@ -31,6 +31,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                   reviewCount: event.reviewCount ?? '0 reviews',
                   description: event.description ?? '',
                   buttonText: 'Book Now',
+                  event: event,
                   onTapBtn: () {
                     Navigator.push(
                       context,

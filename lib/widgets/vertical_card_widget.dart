@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/saved_events_state.dart';
+import '../models/event_model.dart';
 
 class VerticalCardWidget extends StatelessWidget {
   final String imagePath;
@@ -11,6 +13,7 @@ class VerticalCardWidget extends StatelessWidget {
   final String? price;
   final String? badgeText;
   final VoidCallback? onTapBtn;
+  final EventModel? event;
 
   const VerticalCardWidget({
     super.key,
@@ -23,6 +26,7 @@ class VerticalCardWidget extends StatelessWidget {
     this.price,
     this.badgeText,
     this.onTapBtn,
+    this.event,
   });
 
   @override
@@ -57,6 +61,32 @@ class VerticalCardWidget extends StatelessWidget {
                   fit: BoxFit.cover,
                 ),
               ),
+              if (event != null)
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: GestureDetector(
+                    onTap: () => SavedEventsState.toggle(event!, context),
+                    child: ValueListenableBuilder<List<EventModel>>(
+                      valueListenable: SavedEventsState.savedEvents,
+                      builder: (context, _, __) {
+                        final isSaved = SavedEventsState.isSaved(event!);
+                        return Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.35),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            isSaved ? Icons.favorite : Icons.favorite_border,
+                            size: 18,
+                            color: isSaved ? const Color(0xFFFFB902) : Colors.white,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
               if (badgeText != null)
                 Positioned(
                   top: 0,
