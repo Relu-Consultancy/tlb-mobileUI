@@ -10,6 +10,7 @@ class HorizontalCardWidget extends StatelessWidget {
   final String description;
   final String buttonText;
   final String? badgeText;
+  final VoidCallback? onTapBtn;
 
   const HorizontalCardWidget({
     super.key,
@@ -21,6 +22,7 @@ class HorizontalCardWidget extends StatelessWidget {
     required this.description,
     required this.buttonText,
     this.badgeText,
+    this.onTapBtn,
   });
 
   @override
@@ -177,7 +179,7 @@ class HorizontalCardWidget extends StatelessWidget {
             width: double.infinity,
             height: 38,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: onTapBtn ?? () {},
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFFCC00), // Yellow
                 foregroundColor: const Color(0xFF1A1A2E),

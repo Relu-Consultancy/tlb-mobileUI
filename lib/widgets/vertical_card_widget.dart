@@ -10,6 +10,7 @@ class VerticalCardWidget extends StatelessWidget {
   final String buttonText;
   final String? price;
   final String? badgeText;
+  final VoidCallback? onTapBtn;
 
   const VerticalCardWidget({
     super.key,
@@ -21,6 +22,7 @@ class VerticalCardWidget extends StatelessWidget {
     required this.buttonText,
     this.price,
     this.badgeText,
+    this.onTapBtn,
   });
 
   @override
@@ -171,7 +173,7 @@ class VerticalCardWidget extends StatelessWidget {
                     SizedBox(
                       height: 36,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: onTapBtn ?? () {},
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFFCC00), // Yellow
                           foregroundColor: const Color(0xFF1A1A2E),

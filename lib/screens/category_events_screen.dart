@@ -7,6 +7,7 @@ import '../sections/discover_near_you_section.dart';
 import '../sections/family_feels_section.dart';
 import '../sections/tlb_signature_section.dart';
 import '../sections/app_footer.dart';
+import 'event_detail_screen.dart';
 
 class CategoryEventsScreen extends StatefulWidget {
   final String initialCategory;
@@ -318,7 +319,12 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
   }
 
   Widget _buildEventCard(EventModel event) {
-    return Container(
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+      ),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -428,7 +434,14 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                     SizedBox(
                       height: 40,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => EventDetailScreen(event: event),
+                            ),
+                          );
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFFCC00),
                           foregroundColor: const Color(0xFF1A1A2E),
@@ -453,6 +466,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

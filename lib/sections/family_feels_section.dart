@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/section_divider_widget.dart';
 import '../widgets/horizontal_card_widget.dart';
 import '../data/dummy_data.dart';
+import '../screens/event_detail_screen.dart';
 
 class FamilyFeelsSection extends StatelessWidget {
   const FamilyFeelsSection({super.key});
@@ -30,6 +31,14 @@ class FamilyFeelsSection extends StatelessWidget {
                   reviewCount: event.reviewCount ?? '0 reviews',
                   description: event.description ?? 'A wonderful bonding session',
                   buttonText: 'Book Now',
+                  onTapBtn: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EventDetailScreen(event: event),
+                      ),
+                    );
+                  },
                 ),
               );
             },
