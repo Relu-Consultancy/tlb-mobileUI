@@ -67,7 +67,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
           ),
         ),
       ),
-      body: Column(
+      body: SafeArea(
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Subtitle
@@ -174,6 +175,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
           const SizedBox(height: 24),
         ],
+        ),
       ),
     );
   }

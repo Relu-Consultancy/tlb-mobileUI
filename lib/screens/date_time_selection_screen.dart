@@ -134,48 +134,48 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
               ),
             ),
           ),
-
-          // ── Continue button ──
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-            child: SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: _canContinue
-                    ? () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                TicketBookingScreen(event: event),
-                          ),
-                        );
-                      }
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFCC00),
-                  foregroundColor: const Color(0xFF1A1A2E),
-                  disabledBackgroundColor: Colors.grey.shade300,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
-                    side: _canContinue
-                        ? const BorderSide(color: Color(0xFF1A1A2E), width: 1.5)
-                        : BorderSide.none,
-                  ),
+        ],
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: _canContinue
+                  ? () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              TicketBookingScreen(event: event),
+                        ),
+                      );
+                    }
+                  : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFFCC00),
+                foregroundColor: const Color(0xFF1A1A2E),
+                disabledBackgroundColor: Colors.grey.shade300,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28),
+                  side: _canContinue
+                      ? const BorderSide(color: Color(0xFF1A1A2E), width: 1.5)
+                      : BorderSide.none,
                 ),
-                child: Text(
-                  'Continue',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
+              ),
+              child: Text(
+                'Continue',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

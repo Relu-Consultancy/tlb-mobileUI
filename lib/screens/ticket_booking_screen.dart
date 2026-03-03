@@ -115,43 +115,43 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             // ── 5. Attendee Details ──
             _buildAttendeeDetailsSection(),
 
-            const SizedBox(height: 24),
-
-            // ── 6. Proceed Button ──
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: _isFormComplete ? () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => PaymentScreen(event: event, amount: _subtotal),
-                    ),
-                  );
-                } : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFCC00),
-                  foregroundColor: const Color(0xFF1A1A2E),
-                  disabledBackgroundColor: Colors.grey.shade300,
-                  disabledForegroundColor: Colors.grey.shade500,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
+          ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: _isFormComplete ? () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PaymentScreen(event: event, amount: _subtotal),
                   ),
+                );
+              } : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFFCC00),
+                foregroundColor: const Color(0xFF1A1A2E),
+                disabledBackgroundColor: Colors.grey.shade300,
+                disabledForegroundColor: Colors.grey.shade500,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28),
                 ),
-                child: Text(
-                  'Proceed to Pay${_subtotal > 0 ? ' • ₹$_subtotal' : ''}',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
+              ),
+              child: Text(
+                'Proceed to Pay${_subtotal > 0 ? ' • ₹$_subtotal' : ''}',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
-
-            const SizedBox(height: 24),
-          ],
+          ),
         ),
       ),
     );

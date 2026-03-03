@@ -30,7 +30,9 @@ class OrganizerProfileScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: CustomScrollView(
+      body: SafeArea(
+        top: false,
+        child: CustomScrollView(
         slivers: [
           // ── Header with gradient ──
           SliverAppBar(
@@ -251,7 +253,8 @@ class OrganizerProfileScreen extends StatelessWidget {
               ),
             ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
