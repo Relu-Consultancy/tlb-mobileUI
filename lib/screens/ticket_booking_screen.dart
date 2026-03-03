@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/event_model.dart';
-import 'seat_reservation_screen.dart';
+import 'date_time_selection_screen.dart';
+import 'payment_screen.dart';
 
 class TicketBookingScreen extends StatefulWidget {
   final EventModel event;
@@ -13,53 +14,61 @@ class TicketBookingScreen extends StatefulWidget {
 }
 
 class _TicketBookingScreenState extends State<TicketBookingScreen> {
-  final Map<int, int> _ticketCounts = {};
-
+  // Ticket data
   final List<Map<String, dynamic>> _tickets = [
-    {'name': 'GA Back - Phase 1', 'price': 4250, 'status': '', 'available': true},
-    {'name': 'GA Front - Phase 1', 'price': 6500, 'status': 'Fast Filling', 'available': true},
-    {'name': 'Early Bird Backstage', 'price': 15000, 'status': 'Fast Filling', 'available': true},
-    {'name': 'Lounge Phase 2', 'price': 28000, 'status': '', 'available': true},
-    {'name': 'Early Bird GA Back', 'price': 3500, 'status': 'Sold out', 'available': false},
-    {'name': 'Early Bird GA Front', 'price': 5000, 'status': 'Sold out', 'available': false},
+    {'name': 'Standard', 'price': 360, 'count': 0},
+    {'name': 'VIPs (Special Treat)', 'price': 2000, 'count': 0},
+    {'name': 'Weekly combo 1 for 3', 'price': 360, 'count': 0},
   ];
 
-  int get _totalTickets =>
-      _ticketCounts.values.fold(0, (sum, count) => sum + count);
+  // Attendee form controllers
+  final _childNameController = TextEditingController();
+  final _parentPhoneController = TextEditingController();
+  String? _selectedAge;
 
-  int get _totalPrice {
+  int get _totalTickets =>
+      _tickets.fold(0, (sum, t) => sum + (t['count'] as int));
+
+  int get _subtotal {
     int total = 0;
-    _ticketCounts.forEach((index, count) {
-      total += (_tickets[index]['price'] as int) * count;
-    });
+    for (final t in _tickets) {
+      total += (t['price'] as int) * (t['count'] as int);
+    }
     return total;
   }
 
+  bool get _isFormComplete =>
+      _totalTickets > 0 &&
+      _childNameController.text.trim().isNotEmpty &&
+      _selectedAge != null &&
+      _parentPhoneController.text.trim().isNotEmpty;
+
   void _addTicket(int index) {
-    if (_totalTickets >= 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Maximum 6 tickets allowed per booking')),
-      );
-      return;
-    }
     setState(() {
-      _ticketCounts[index] = (_ticketCounts[index] ?? 0) + 1;
+      _tickets[index]['count'] = (_tickets[index]['count'] as int) + 1;
     });
   }
 
-  void _removeTicket(int index) {
-    if ((_ticketCounts[index] ?? 0) > 0) {
-      setState(() {
-        _ticketCounts[index] = _ticketCounts[index]! - 1;
-        if (_ticketCounts[index] == 0) _ticketCounts.remove(index);
-      });
-    }
+  @override
+  void initState() {
+    super.initState();
+    _childNameController.addListener(() => setState(() {}));
+    _parentPhoneController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _childNameController.dispose();
+    _parentPhoneController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final event = widget.event;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF9F9F9),
       appBar: AppBar(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
@@ -68,332 +77,598 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
           onPressed: () => Navigator.pop(context),
         ),
+        centerTitle: true,
         title: Text(
-          widget.event.title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          'Checkout',
+          style: GoogleFonts.poppins(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF1A1A2E),
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── 1. Event Info Card ──
+            _buildEventInfoCard(event),
+
+            const SizedBox(height: 20),
+
+            // ── 2. Select Ticket ──
+            _buildSelectTicketSection(),
+
+            const SizedBox(height: 20),
+
+            // ── 3. Offers ──
+            _buildOffersSection(),
+
+            const SizedBox(height: 24),
+
+            // ── 4. Bill Details ──
+            _buildBillDetailsSection(),
+
+            const SizedBox(height: 20),
+
+            // ── 5. Attendee Details ──
+            _buildAttendeeDetailsSection(),
+
+          ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: _isFormComplete ? () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PaymentScreen(event: event, amount: _subtotal),
+                  ),
+                );
+              } : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFFCC00),
+                foregroundColor: const Color(0xFF1A1A2E),
+                disabledBackgroundColor: Colors.grey.shade300,
+                disabledForegroundColor: Colors.grey.shade500,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28),
+                ),
+              ),
+              child: Text(
+                'Proceed to Pay${_subtotal > 0 ? ' • ₹$_subtotal' : ''}',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ────────────────────────────────────────────────────────────
+  //  1. Event Info Card — with pencil/edit icon
+  // ────────────────────────────────────────────────────────────
+  Widget _buildEventInfoCard(EventModel event) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Event image
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.asset(
+              event.imagePath,
+              width: 100,
+              height: 110,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title row with pencil icon
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        event.title,
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF1A1A2E),
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    GestureDetector(
+                      onTap: () {
+                        // Go back to date/time selection
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                DateTimeSelectionScreen(event: event),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        child: Icon(
+                          Icons.edit_outlined,
+                          size: 18,
+                          color: Colors.orange.shade400,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.calendar_today_outlined,
+                        size: 14, color: Colors.grey.shade500),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'Saturday, March 21, 3:00 pm–6:00 pm',
+                        style: GoogleFonts.poppins(
+                            fontSize: 11, color: Colors.grey.shade600),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(Icons.location_on_outlined,
+                        size: 14, color: Colors.grey.shade500),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        event.venue,
+                        style: GoogleFonts.poppins(
+                            fontSize: 11, color: Colors.grey.shade600),
+                        maxLines: 2,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Only 5 spots lefts',
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFFFF6B6B),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ────────────────────────────────────────────────────────────
+  //  2. Select Ticket
+  // ────────────────────────────────────────────────────────────
+  Widget _buildSelectTicketSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Select Ticket',
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1A1A2E),
+            ),
+          ),
+          const SizedBox(height: 16),
+          ...List.generate(_tickets.length, (index) {
+            final ticket = _tickets[index];
+            final count = ticket['count'] as int;
+            return Column(
+              children: [
+                if (index > 0)
+                  const Divider(height: 24, color: Color(0xFFEEEEEE)),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            ticket['name'] as String,
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF1A1A2E),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '₹${ticket['price']}',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    count == 0
+                        ? SizedBox(
+                            height: 36,
+                            child: OutlinedButton(
+                              onPressed: () => _addTicket(index),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: Colors.grey.shade400),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24),
+                              ),
+                              child: Text(
+                                'Add',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF1A1A2E),
+                                ),
+                              ),
+                            ),
+                          )
+                        : Container(
+                            height: 36,
+                            decoration: BoxDecoration(
+                              border:
+                                  Border.all(color: Colors.grey.shade400),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  constraints: const BoxConstraints(
+                                      minWidth: 32, minHeight: 32),
+                                  padding: EdgeInsets.zero,
+                                  icon: const Icon(Icons.remove,
+                                      size: 16, color: Color(0xFF1A1A2E)),
+                                  onPressed: () {
+                                    setState(() {
+                                      if (count > 0) {
+                                        _tickets[index]['count'] = count - 1;
+                                      }
+                                    });
+                                  },
+                                ),
+                                Text(
+                                  '$count',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF1A1A2E),
+                                  ),
+                                ),
+                                IconButton(
+                                  constraints: const BoxConstraints(
+                                      minWidth: 32, minHeight: 32),
+                                  padding: EdgeInsets.zero,
+                                  icon: const Icon(Icons.add,
+                                      size: 16, color: Color(0xFF1A1A2E)),
+                                  onPressed: () => _addTicket(index),
+                                ),
+                              ],
+                            ),
+                          ),
+                  ],
+                ),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  // ────────────────────────────────────────────────────────────
+  //  3. Offers
+  // ────────────────────────────────────────────────────────────
+  Widget _buildOffersSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Offers',
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1A1A2E),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Icon(Icons.local_offer, size: 18, color: Colors.green.shade600),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Get FLAT OFF of ₹50',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF1A1A2E),
+                      ),
+                    ),
+                    Text(
+                      'Save ₹50 with this code',
+                      style:
+                          GoogleFonts.poppins(fontSize: 11, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 32,
+                child: ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                  ),
+                  child: Text(
+                    'Apply',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: () {},
+            child: Text(
+              'View all offers >',
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF3B82F6),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ────────────────────────────────────────────────────────────
+  //  4. Bill Details
+  // ────────────────────────────────────────────────────────────
+  Widget _buildBillDetailsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Bill Details',
           style: GoogleFonts.poppins(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
         ),
-      ),
-      body: Column(
-        children: [
-          // Progress stepper
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            color: const Color(0xFFF5F5F5),
-            child: Row(
-              children: [
-                _buildStep(1, 'Ticket', true),
-                const Icon(Icons.chevron_right, color: Colors.grey, size: 18),
-                _buildStep(2, 'Ticket Mode', false),
-                const Icon(Icons.chevron_right, color: Colors.grey, size: 18),
-                Flexible(child: _buildStep(3, 'Review & Proceed to Pay', false)),
-              ],
-            ),
-          ),
-
-          // Venue + date info
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            color: const Color(0xFFF9F9F9),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.event.venue,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1A1A2E),
-                  ),
-                ),
-                Text(
-                  'Sat 21 Nov | 04:00 PM',
-                  style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // Select tickets header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Select Tickets',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF1A1A2E),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'You can add up to 6 tickets only',
-                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          // Ticket list
-          Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _tickets.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final ticket = _tickets[index];
-                final isAvailable = ticket['available'] as bool;
-                final count = _ticketCounts[index] ?? 0;
-                final status = ticket['status'] as String;
-
-                return Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isAvailable ? Colors.grey.shade200 : Colors.grey.shade100,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  ticket['name'] as String,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: isAvailable
-                                        ? const Color(0xFF1A1A2E)
-                                        : Colors.grey,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Row(
-                                  children: [
-                                    Text(
-                                      '₹${ticket['price']}',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: isAvailable
-                                            ? const Color(0xFF1A1A2E)
-                                            : Colors.grey,
-                                      ),
-                                    ),
-                                    if (status.isNotEmpty) ...[
-                                      Text(' | ', style: GoogleFonts.poppins(color: Colors.grey)),
-                                      Text(
-                                        status,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: status == 'Sold out'
-                                              ? const Color(0xFFFF6B6B)
-                                              : const Color(0xFFFFA726),
-                                        ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (isAvailable)
-                            count == 0
-                                ? OutlinedButton(
-                                    onPressed: () => _addTicket(index),
-                                    style: OutlinedButton.styleFrom(
-                                      side: const BorderSide(color: Color(0xFFFF6B6B)),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                                    ),
-                                    child: Text(
-                                      'Add',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w600,
-                                        color: const Color(0xFFFF6B6B),
-                                      ),
-                                    ),
-                                  )
-                                : Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: const Color(0xFFFF6B6B)),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                                          padding: EdgeInsets.zero,
-                                          icon: const Icon(Icons.remove, size: 18, color: Color(0xFFFF6B6B)),
-                                          onPressed: () => _removeTicket(index),
-                                        ),
-                                        Text(
-                                          '$count',
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w700,
-                                            color: const Color(0xFF1A1A2E),
-                                          ),
-                                        ),
-                                        IconButton(
-                                          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                                          padding: EdgeInsets.zero,
-                                          icon: const Icon(Icons.add, size: 18, color: Color(0xFFFF6B6B)),
-                                          onPressed: () => _addTicket(index),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                        ],
-                      ),
-                      if (isAvailable)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 6),
-                          child: Row(
-                            children: [
-                              Text(
-                                'Know more',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: const Color(0xFFFFA726),
-                                ),
-                              ),
-                              const Icon(Icons.keyboard_arrow_down, size: 16, color: Color(0xFFFFA726)),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-
-          // Bottom bar — shows when tickets are selected
-          if (_totalTickets > 0)
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 10,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          '$_totalTickets Ticket${_totalTickets > 1 ? 's' : ''} • ₹$_totalPrice',
-                          style: GoogleFonts.poppins(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => SeatReservationScreen(event: widget.event),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFF6B6B),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'Proceed',
-                      style: GoogleFonts.poppins(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
+        const SizedBox(height: 12),
+        _buildBillRow(
+            'Sub Total (${_totalTickets > 0 ? _totalTickets : 1} x  Ticket)',
+            '₹$_subtotal'),
+        const SizedBox(height: 8),
+        _buildBillRow('Taxes & Fees', '₹0'),
+        const Divider(height: 24),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Total to be paid',
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1A1A2E),
               ),
             ),
-        ],
-      ),
+            Text(
+              '₹$_subtotal',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1A1A2E),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
-  Widget _buildStep(int number, String label, bool isActive) {
+  Widget _buildBillRow(String label, String value) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          width: 22,
-          height: 22,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isActive ? const Color(0xFF1A1A2E) : Colors.grey.shade300,
+        Text(
+          label,
+          style:
+              GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.poppins(
+              fontSize: 13, color: const Color(0xFF1A1A2E)),
+        ),
+      ],
+    );
+  }
+
+  // ────────────────────────────────────────────────────────────
+  //  5. Attendee Details — fixed layout
+  // ────────────────────────────────────────────────────────────
+  Widget _buildAttendeeDetailsSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Attendee Details',
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1A1A2E),
+            ),
           ),
-          child: Center(
-            child: Text(
-              '$number',
-              style: GoogleFonts.poppins(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: isActive ? Colors.white : Colors.grey,
+          const SizedBox(height: 16),
+          // Child name
+          TextField(
+            controller: _childNameController,
+            style: GoogleFonts.poppins(fontSize: 14),
+            decoration: InputDecoration(
+              prefixIcon: Icon(Icons.person_outline,
+                  size: 20, color: Colors.grey.shade500),
+              hintText: 'Child name',
+              hintStyle: GoogleFonts.poppins(
+                  fontSize: 13, color: Colors.grey.shade400),
+              filled: true,
+              fillColor: const Color(0xFFF5F5F5),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Age dropdown
+          Container(
+            height: 52,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F5F5),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _selectedAge,
+                hint: Row(
+                  children: [
+                    Icon(Icons.cake_outlined,
+                        size: 18, color: Colors.grey.shade500),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Select age',
+                      style: GoogleFonts.poppins(
+                          fontSize: 13, color: Colors.grey.shade400),
+                    ),
+                  ],
+                ),
+                isExpanded: true,
+                icon: Icon(Icons.keyboard_arrow_down,
+                    color: Colors.grey.shade500),
+                items: List.generate(18, (i) => '${i + 1}')
+                    .map((age) => DropdownMenuItem(
+                          value: age,
+                          child: Text(age,
+                              style: GoogleFonts.poppins(fontSize: 14)),
+                        ))
+                    .toList(),
+                onChanged: (value) => setState(() => _selectedAge = value),
               ),
             ),
           ),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 11,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-            color: isActive ? const Color(0xFF1A1A2E) : Colors.grey,
+          const SizedBox(height: 12),
+          // Parents contact number
+          TextField(
+            controller: _parentPhoneController,
+            keyboardType: TextInputType.phone,
+            style: GoogleFonts.poppins(fontSize: 14),
+            decoration: InputDecoration(
+              prefixIcon: Icon(Icons.phone_outlined,
+                  size: 20, color: Colors.grey.shade500),
+              hintText: 'Parents contact number',
+              hintStyle: GoogleFonts.poppins(
+                  fontSize: 13, color: Colors.grey.shade400),
+              filled: true,
+              fillColor: const Color(0xFFF5F5F5),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

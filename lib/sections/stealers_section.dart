@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/section_divider_widget.dart';
 import '../data/dummy_data.dart';
+import '../screens/event_detail_screen.dart';
 
 class StealersSection extends StatelessWidget {
   const StealersSection({super.key});
@@ -159,9 +160,16 @@ class StealersSection extends StatelessWidget {
                                   ),
                                 ),
                                 SizedBox(
-                                  height: 36,
+                                  height: 40,
                                   child: ElevatedButton(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => EventDetailScreen(event: event),
+                                        ),
+                                      );
+                                    },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFFFFCC00),
                                       foregroundColor: const Color(0xFF1A1A2E),

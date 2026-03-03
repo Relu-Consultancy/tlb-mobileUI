@@ -152,7 +152,12 @@ class _TrendingCardState extends State<TrendingCard> {
                               SizedBox(
                                 height: 34,
                                 child: ElevatedButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+                                    );
+                                  },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColors.primary,
                                     foregroundColor: Colors.white,

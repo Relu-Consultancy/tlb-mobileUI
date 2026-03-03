@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../sections/home_header.dart';
 import '../models/event_model.dart';
+import '../sections/browse_by_categories_section.dart';
+import '../sections/discover_near_you_section.dart';
+import '../sections/family_feels_section.dart';
+import '../sections/tlb_signature_section.dart';
+import '../sections/app_footer.dart';
+import 'event_detail_screen.dart';
 
 class CategoryEventsScreen extends StatefulWidget {
   final String initialCategory;
@@ -62,17 +68,45 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
           // Reuse Home Header exactly as is
           const HomeHeader(),
 
-          // Categories horizontal list
-          _buildCategoryTabs(),
-
-          // Vertical ListView for events
+          // Main Scrollable Content
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemCount: _categoryEvents.length,
-              itemBuilder: (context, index) {
-                return _buildEventCard(_categoryEvents[index]);
-              },
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Categories horizontal list (now scrollable with page)
+                  _buildCategoryTabs(),
+
+                  // Events List
+                  ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _categoryEvents.length,
+                    itemBuilder: (context, index) {
+                      return _buildEventCard(_categoryEvents[index]);
+                    },
+                  ),
+                  
+                  // Browse by Categories
+                  const BrowseByCategoriesSection(),
+                  const SizedBox(height: 24),
+
+                  // Discover Near You
+                  const RepaintBoundary(child: DiscoverNearYouSection()),
+                  const SizedBox(height: 16),
+
+                  // Family Feels
+                  const RepaintBoundary(child: FamilyFeelsSection()),
+                  const SizedBox(height: 16),
+
+                  // TLB Signature
+                  const RepaintBoundary(child: TlbSignatureSection()),
+                  const SizedBox(height: 16),
+
+                  // AppFooter
+                  const AppFooter(),
+                ],
+              ),
             ),
           ),
         ],
@@ -133,15 +167,15 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
   Widget _buildCategoryItem(String cat, bool isSelected, bool isHome) {
     if (isHome) {
       return Container(
-        width: 60,
-        height: 80, // Match visual center of other elements
+        width: 50,
+        height: 70, // Match visual center of other elements
         alignment: Alignment.center,
-        child: const Icon(Icons.home_rounded, color: Color(0xFF333333), size: 34),
+        child: const Icon(Icons.home_rounded, color: Color(0xFF333333), size: 30),
       );
     }
 
-    const double squircleSize = 60;
-    const double haloSize = 88;
+    const double squircleSize = 52;
+    const double haloSize = 78;
 
     Widget squircle = Container(
       width: squircleSize,
@@ -280,12 +314,17 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
     return Icon(
       iconData,
       color: isSelected ? Colors.white : const Color(0xFF333333),
-      size: 26,
+      size: 20,
     );
   }
 
   Widget _buildEventCard(EventModel event) {
-    return Container(
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+      ),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -395,7 +434,14 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                     SizedBox(
                       height: 40,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => EventDetailScreen(event: event),
+                            ),
+                          );
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFFCC00),
                           foregroundColor: const Color(0xFF1A1A2E),
@@ -420,6 +466,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

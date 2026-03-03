@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/section_divider_widget.dart';
 import '../widgets/vertical_card_widget.dart';
 import '../data/dummy_data.dart';
+import '../screens/event_detail_screen.dart';
 
 class HotPicksSection extends StatelessWidget {
   const HotPicksSection({super.key});
@@ -31,6 +32,14 @@ class HotPicksSection extends StatelessWidget {
                   buttonText: 'Book Now',
                   price: event.price != null ? '₹${event.price!.toInt()}' : null,
                   badgeText: event.tag,
+                  onTapBtn: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EventDetailScreen(event: event),
+                      ),
+                    );
+                  },
                 ),
               );
             },

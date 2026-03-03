@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../widgets/section_divider_widget.dart';
 import '../data/dummy_data.dart';
+import '../screens/event_detail_screen.dart';
 
 class WeekendSpecialSection extends StatefulWidget {
   const WeekendSpecialSection({super.key});
@@ -228,7 +229,14 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                   SizedBox(
                                     height: 34,
                                     child: ElevatedButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => EventDetailScreen(event: event),
+                                          ),
+                                        );
+                                      },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor:
                                             const Color(0xFFFFCC00),

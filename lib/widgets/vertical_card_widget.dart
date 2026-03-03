@@ -10,6 +10,7 @@ class VerticalCardWidget extends StatelessWidget {
   final String buttonText;
   final String? price;
   final String? badgeText;
+  final VoidCallback? onTapBtn;
 
   const VerticalCardWidget({
     super.key,
@@ -21,12 +22,13 @@ class VerticalCardWidget extends StatelessWidget {
     required this.buttonText,
     this.price,
     this.badgeText,
+    this.onTapBtn,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 280,
+      width: MediaQuery.of(context).size.width * 0.75 > 320 ? 320 : MediaQuery.of(context).size.width * 0.75,
       margin: const EdgeInsets.only(right: 16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -50,7 +52,7 @@ class VerticalCardWidget extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                 child: Image.asset(
                   imagePath,
-                  height: 200,
+                  height: 200, // kept as aspect fallback
                   width: double.infinity,
                   fit: BoxFit.cover,
                 ),
@@ -171,7 +173,7 @@ class VerticalCardWidget extends StatelessWidget {
                     SizedBox(
                       height: 36,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: onTapBtn ?? () {},
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFFCC00), // Yellow
                           foregroundColor: const Color(0xFF1A1A2E),

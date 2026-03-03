@@ -3,7 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/auth_state.dart';
 import '../models/event_model.dart';
 import 'login_sheet.dart';
-import 'ticket_booking_screen.dart';
+import 'date_time_selection_screen.dart';
+import 'gallery_screen.dart';
+import 'organizer_profile_screen.dart';
 
 class EventDetailScreen extends StatelessWidget {
   final EventModel event;
@@ -19,184 +21,121 @@ class EventDetailScreen extends StatelessWidget {
           // Scrollable content
           CustomScrollView(
             slivers: [
-              // AppBar
+              // Top Image Header using SliverAppBar
               SliverAppBar(
                 backgroundColor: Colors.white,
                 surfaceTintColor: Colors.white,
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                title: Text(
-                  event.title,
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF1A1A2E),
+                expandedHeight: 300,
+                pinned: true,
+                leading: Container(
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E), size: 20),
+                    onPressed: () => Navigator.pop(context),
                   ),
                 ),
                 actions: [
-                  IconButton(
-                    icon: const Icon(Icons.share_outlined, color: Color(0xFF1A1A2E)),
-                    onPressed: () {},
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.favorite_border, color: Color(0xFF1A1A2E), size: 20),
+                      onPressed: () {},
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    margin: const EdgeInsets.only(top: 8, bottom: 8, right: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.share_outlined, color: Color(0xFF1A1A2E), size: 20),
+                      onPressed: () {},
+                    ),
                   ),
                 ],
-                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+                    child: Image.asset(
+                      event.imagePath,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
               ),
 
               SliverToBoxAdapter(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Event banner image
+                    const SizedBox(height: 16),
+                    
+                    // Tag
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(
-                          event.imagePath,
-                          width: double.infinity,
-                          height: 200,
-                          fit: BoxFit.cover,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFCC00), // Yellow/Orange
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                      ),
-                    ),
-
-                    // Category tags
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                      child: Wrap(
-                        spacing: 8,
-                        children: [
-                          _buildTag(event.tag ?? 'Events'),
-                          if (event.isFeatured) _buildTag('Featured'),
-                        ],
+                        child: Text(
+                          event.tag ?? 'Kids & Family',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
 
                     const SizedBox(height: 12),
 
-                    // Interest section
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF5F5F5),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const Icon(Icons.thumb_up, color: Colors.green, size: 18),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      '2.1k are interested',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: const Color(0xFF1A1A2E),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Mark interested to know more about\nthis event.',
-                                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top:25),
-                            child: OutlinedButton(
-                              onPressed: () {},
-                              style: OutlinedButton.styleFrom(
-                                side: const BorderSide(color: Color(0xFFFF6B6B)),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              child: Text(
-                                'Interested?',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFFFF6B6B),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                    // Title
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        event.title,
+                        style: GoogleFonts.poppins(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF1A1A2E),
+                        ),
                       ),
                     ),
-
-                    const SizedBox(height: 16),
-
-                    // Event details list
-                    _buildDetailRow(Icons.calendar_today_outlined, 'Sat 21 Nov 2026'),
-                    _buildDetailRow(Icons.access_time_outlined, '4:00 PM'),
-                    _buildDetailRow(Icons.hourglass_bottom_outlined, '6 Hours'),
-                    _buildDetailRow(Icons.people_outline, 'Age Limit - 18yrs +'),
-                    _buildDetailRow(Icons.translate, 'English'),
-                    _buildDetailRow(Icons.music_note_outlined, 'EDM'),
-                    _buildDetailRow(Icons.location_on_outlined, event.venue),
 
                     const SizedBox(height: 8),
 
-                    // Ticket limit info bar
-                    Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFF8E1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                    // Rating and Reviews
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Row(
                         children: [
-                          const Icon(Icons.info_outline, size: 18, color: Colors.grey),
+                          Row(
+                            children: List.generate(
+                              4,
+                              (index) => const Icon(Icons.star, color: Colors.amber, size: 18),
+                            ),
+                          ),
+                          const Icon(Icons.star_half, color: Colors.amber, size: 18),
                           const SizedBox(width: 8),
                           Text(
-                            'Ticket limit for this booking is 6',
-                            style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF1A1A2E)),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Performer badges
-                    Container(
-                      width: double.infinity,
-                      color: const Color(0xFFF5F5F5),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      child: Row(
-                        children: [
-                          Text('Performer', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500)),
-                          const SizedBox(width: 12),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade100,
-                              borderRadius: BorderRadius.circular(6),
+                            event.reviewCount ?? '(124 reviews)',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
                             ),
-                            child: Text('🔴 live show', style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w500)),
-                          ),
-                          const SizedBox(width: 12),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.amber.shade100,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text('🥇 First Time in India', style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w500)),
                           ),
                         ],
                       ),
@@ -204,142 +143,492 @@ class EventDetailScreen extends StatelessWidget {
 
                     const SizedBox(height: 20),
 
-                    // Artists section
+                    // Location
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'Artists',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1A1A2E),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
+                      child: Row(
                         children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              width: 100,
-                              height: 120,
-                              color: Colors.grey.shade200,
-                              child: const Icon(Icons.person, size: 50, color: Colors.grey),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.location_on_outlined, size: 20, color: Colors.grey),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              event.venue,
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: const Color(0xFF1A1A2E),
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 6),
-                          Text('Artist', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600)),
-                          Text('Performer', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey)),
                         ],
                       ),
                     ),
 
-                    const Divider(height: 32),
+                    const SizedBox(height: 12),
 
-                    // About The Event
+                    // Date & Time
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'About The Event',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1A1A2E),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        event.description ??
-                            'An amazing event experience awaits you! Join us for an unforgettable time filled with entertainment, performances, and more. This event promises to deliver a truly memorable experience...',
-                        maxLines: 4,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700, height: 1.5),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: TextButton(
-                        onPressed: () {},
-                        style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                        child: Text(
-                          'Read More',
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFFFFC107),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.calendar_today_outlined, size: 20, color: Colors.grey),
                           ),
-                        ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Saturday, MARCH 21, 3:00PM-6:00 PM',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: const Color(0xFF1A1A2E),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-
-                    // You should know
-                    Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF5F5F5),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        'You should know',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1A1A2E),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Expandable sections
-                    _buildExpandableSection('Official Offline Promoter'),
-                    _buildExpandableSection('Frequently Asked Questions'),
-                    _buildExpandableSection('Terms & Conditions'),
-                    _buildExpandableSection('Venue Layout'),
 
                     const SizedBox(height: 24),
 
-                    // You May Also Like
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                    const SizedBox(height: 8),
+
+                    // 4. About Event Section
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8F9FA),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'You May Also Like',
+                            'About Event',
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                               color: const Color(0xFF1A1A2E),
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 8),
                           Text(
-                            'Events around you, book now',
-                            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                            event.description ??
+                                'Enjoy a magnificent event experience designed for everyone. From fun activities to learning experiences, this event is packed with excitement and joy. Come join us and make some beautiful memories...',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          GestureDetector(
+                            onTap: () {},
+                            child: Text(
+                              'Learn More',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF3B82F6), // Blue link
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // 5. Things to Know Section
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'Things to Know',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF1A1A2E),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        children: [
+                          _buildThingsToKnowRow(Icons.group_outlined, 'Age Group', '3 - 10 yrs'),
+                          const Divider(height: 16, color: Color(0xFFEEEEEE)),
+                          _buildThingsToKnowRow(Icons.translate, 'Language', 'English'),
+                          const Divider(height: 16, color: Color(0xFFEEEEEE)),
+                          _buildThingsToKnowRow(Icons.check_circle_outline, 'Available', '20 Spots available'),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // 6. Gallery Section
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Gallery',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF1A1A2E),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => GalleryScreen(event: event),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              'See All >',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF3B82F6),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'Sneak peek into what awaits you!',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 100,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: 4, // dummy count
+                        itemBuilder: (context, index) {
+                          return Container(
+                            margin: const EdgeInsets.only(right: 12),
+                            width: 120,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.grey.shade200,
+                              image: DecorationImage(
+                                image: AssetImage(event.imagePath),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // 7. Location Section
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        'Location',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF1A1A2E),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      height: 180,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: Colors.grey.shade200,
+                        image: const DecorationImage(
+                          image: AssetImage('assets/images/map_placeholder.png'),
+                          fit: BoxFit.cover,
+                          onError: null,
+                        ),
+                      ),
+                      child: Stack(
+                        children: [
+                          // Gradient overlay
+                          Positioned.fill(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.black.withOpacity(0.6),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Content overlay
+                          Positioned(
+                            bottom: 12,
+                            left: 12,
+                            right: 12,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  event.venue,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Free parking available on-site',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    color: const Color(0xFFFFCC00),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                SizedBox(
+                                  height: 32,
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {},
+                                    icon: const Icon(Icons.directions, size: 16),
+                                    label: Text(
+                                      'Get Direction',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFFFFCC00),
+                                      foregroundColor: const Color(0xFF1A1A2E),
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // 8. Organizer Section
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8F9FA),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          // Avatar
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => OrganizerProfileScreen(event: event),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFFDE7104).withOpacity(0.15),
+                              ),
+                              child: const Icon(Icons.person, color: Color(0xFFDE7104), size: 28),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          // Info
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'ORGANIZED BY',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFFDE7104),
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                                Text(
+                                  'Fun World Events',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF1A1A2E),
+                                  ),
+                                ),
+                                Text(
+                                  '1.2k Followers',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Follow button
+                          OutlinedButton(
+                            onPressed: () {},
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Color(0xFFDE7104)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                            ),
+                            child: Text(
+                              'Follow',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFFDE7104),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // 9. Reviews Section
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Reviews',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF1A1A2E),
+                            ),
+                          ),
+                          Text(
+                            'See All >',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF3B82F6),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          Text(
+                            'Overall Rating: ',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          const Icon(Icons.star, color: Colors.amber, size: 18),
+                          Text(
+                            ' 4.5',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF1A1A2E),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Individual reviews
+                    _buildReviewCard('Rohit Sharma', 5, 'Amazing event! Kids had a blast. Highly recommended for families.'),
+                    _buildReviewCard('Priya Mehta', 4, 'Well organized and fun. Would love more food options next time.'),
+
+                    const SizedBox(height: 24),
+
+                    // 10. Related Events Section
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Related Events',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF1A1A2E),
+                            ),
+                          ),
+                          Text(
+                            'See All >',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF3B82F6),
+                            ),
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
-                      height: 200,
+                      height: 220,
                       child: ListView(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         children: [
-                          _buildSimilarEventCard('Halloween Party', 'assets/images/halloween_party.png'),
-                          _buildSimilarEventCard('Kids Party', 'assets/images/kids_party.png'),
-                          _buildSimilarEventCard('World Book Day', 'assets/images/story_telling.png'),
+                          _buildRelatedEventCard('Halloween Party', 'assets/images/halloween_party.png', 'Central Park, NYC', 'Limited Seats'),
+                          _buildRelatedEventCard('Kids Party', 'assets/images/kids_party.png', 'Fun Zone, Mumbai', 'Limited Seats'),
+                          _buildRelatedEventCard('World Book Day', 'assets/images/story_telling.png', 'Library Hall, Delhi', 'Open'),
                         ],
                       ),
                     ),
@@ -352,7 +641,7 @@ class EventDetailScreen extends StatelessWidget {
             ],
           ),
 
-          // Sticky bottom bar
+          // 11. Sticky bottom bar
           Positioned(
             left: 0,
             right: 0,
@@ -371,57 +660,60 @@ class EventDetailScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
+                  // Price
+                  RichText(
+                    text: TextSpan(
                       children: [
-                        Text(
-                          '₹${(event.price ?? 4250).toStringAsFixed(0)} onwards',
+                        TextSpan(
+                          text: '₹${(event.price ?? 350).toStringAsFixed(0)}',
                           style: GoogleFonts.poppins(
-                            fontSize: 16,
+                            fontSize: 22,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF1A1A2E),
                           ),
                         ),
-                        Text(
-                          'Filling Fast',
+                        TextSpan(
+                          text: '/',
                           style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFFFFA726),
+                            fontSize: 14,
+                            color: Colors.grey,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (!AuthState.isLoggedIn.value) {
-                        showLoginSheet(context);
-                        return;
-                      }
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => TicketBookingScreen(event: event),
+                  const Spacer(),
+                  // Book Now button
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (!AuthState.isLoggedIn.value) {
+                          showLoginSheet(context);
+                          return;
+                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DateTimeSelectionScreen(event: event),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFFCC00),
+                        foregroundColor: const Color(0xFF1A1A2E),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFF6B6B),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        elevation: 0,
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'Book Now',
-                      style: GoogleFonts.poppins(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                      child: Text(
+                        'Book Now',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ),
@@ -434,31 +726,24 @@ class EventDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTag(String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade400),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(IconData icon, String text) {
+  Widget _buildThingsToKnowRow(IconData icon, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
           Icon(icon, size: 20, color: Colors.grey.shade600),
           const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              text,
-              style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF1A1A2E)),
+          Text(
+            label,
+            style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600),
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: GoogleFonts.poppins(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF1A1A2E),
             ),
           ),
         ],
@@ -466,57 +751,135 @@ class EventDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildExpandableSection(String title) {
+  Widget _buildReviewCard(String name, int stars, String review) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade200),
-        borderRadius: BorderRadius.circular(10),
+        color: const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: ExpansionTile(
-        tilePadding: const EdgeInsets.symmetric(horizontal: 16),
-        title: Text(
-          title,
-          style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500),
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Text(
-              'Details will be shown here.',
-              style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSimilarEventCard(String title, String imagePath) {
-    return Container(
-      width: 140,
-      margin: const EdgeInsets.only(right: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image.asset(
-              imagePath,
-              width: 140,
-              height: 150,
-              fit: BoxFit.cover,
-            ),
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: Colors.grey.shade300,
+                child: Text(
+                  name[0],
+                  style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  name,
+                  style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
+                ),
+              ),
+              Row(
+                children: List.generate(
+                  5,
+                  (i) => Icon(
+                    i < stars ? Icons.star : Icons.star_border,
+                    color: Colors.amber,
+                    size: 16,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
-            title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF1A1A2E),
+            review,
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600, height: 1.4),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRelatedEventCard(String title, String imagePath, String location, String tag) {
+    return Container(
+      width: 160,
+      margin: const EdgeInsets.only(right: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                child: Image.asset(
+                  imagePath,
+                  width: 160,
+                  height: 120,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Positioned(
+                top: 8,
+                left: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: tag == 'Limited Seats'
+                        ? const Color(0xFFFF6B6B)
+                        : const Color(0xFF4CAF50),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    tag,
+                    style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF1A1A2E),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        location,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
