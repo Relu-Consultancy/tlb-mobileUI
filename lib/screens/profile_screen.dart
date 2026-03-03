@@ -5,6 +5,10 @@ import 'saved_events_screen.dart';
 import 'help_centre_screen.dart';
 import 'account_settings_screen.dart';
 import 'edit_profile_screen.dart';
+import 'payment_settings_screen.dart';
+import 'your_reviews_screen.dart';
+import 'offers_screen.dart';
+import 'notification_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -175,22 +179,34 @@ class ProfileScreen extends StatelessWidget {
             _buildMenuItem(
               icon: Icons.credit_card_outlined,
               title: 'Payment Settings',
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PaymentSettingsScreen()),
+              ),
             ),
             _buildMenuItem(
               icon: Icons.book_outlined,
               title: 'Your Reviews',
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const YourReviewsScreen()),
+              ),
             ),
             _buildMenuItem(
               icon: Icons.local_offer_outlined,
               title: 'Offers',
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const OffersScreen()),
+              ),
             ),
             _buildMenuItem(
               icon: Icons.notifications_none,
               title: 'Notifications',
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const NotificationScreen()),
+              ),
             ),
             _buildMenuItem(
               icon: Icons.alarm,
