@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/responsive.dart';
 import '../core/auth_state.dart';
 import '../screens/search_screen.dart';
 import '../screens/notification_screen.dart';
@@ -47,7 +48,7 @@ class HomeHeader extends StatelessWidget {
         SafeArea(
           bottom: false,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 88, 16, 36),
+            padding: EdgeInsets.fromLTRB(Responsive.w(context, 16), Responsive.h(context, 88, min: 60), Responsive.w(context, 16), Responsive.h(context, 36, min: 20)),
             child: Column(
               children: [
                 _buildGreetingRow(context),
@@ -81,8 +82,8 @@ class HomeHeader extends StatelessWidget {
                 const SizedBox(width: 4),
                 Image.asset(
                   'assets/images/wave_hand.png',
-                  width: 22,
-                  height: 22,
+                  width: Responsive.w(context, 22),
+                  height: Responsive.w(context, 22),
                 ),
               ],
             ),
@@ -151,8 +152,8 @@ class HomeHeader extends StatelessWidget {
                 }
               },
               child: Container(
-                width: 34,
-                height: 34,
+                width: Responsive.w(context, 34),
+                height: Responsive.w(context, 34),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 2),
@@ -176,7 +177,7 @@ class HomeHeader extends StatelessWidget {
         MaterialPageRoute(builder: (_) => const SearchScreen()),
       ),
       child: Container(
-        height: 48,
+        height: Responsive.h(context, 48, min: 40),
         decoration: BoxDecoration(
           color: const Color(0xFFFCF5E8), // Very light yellow/off-white
           borderRadius: BorderRadius.circular(24),

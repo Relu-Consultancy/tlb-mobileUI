@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import '../widgets/section_header.dart';
 import '../widgets/event_card_with_price.dart';
 import '../data/dummy_data.dart';
@@ -18,7 +19,7 @@ class KidsFavoritesSection extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         SizedBox(
-          height: 355,
+          height: Responsive.h(context, 355, min: 300),
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -28,7 +29,7 @@ class KidsFavoritesSection extends StatelessWidget {
             itemBuilder: (context, index) {
               return EventCardWithPrice(
                 event: DummyData.kidsFavorites[index],
-                width: 300,
+                width: Responsive.cardWidth(context, fraction: 0.76, max: 300),
               );
             },
           ),

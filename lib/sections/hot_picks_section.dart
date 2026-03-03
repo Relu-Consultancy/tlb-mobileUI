@@ -1,3 +1,4 @@
+import '../core/responsive.dart';
 import 'package:flutter/material.dart';
 import '../widgets/section_divider_widget.dart';
 import '../widgets/vertical_card_widget.dart';
@@ -14,7 +15,7 @@ class HotPicksSection extends StatelessWidget {
       children: [
         const SectionDividerWidget(title: 'Hot Picks'),
         SizedBox(
-          height: 380,
+          height: Responsive.h(context, 380, min: 320),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.only(left: 16),

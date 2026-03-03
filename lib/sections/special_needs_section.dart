@@ -1,3 +1,4 @@
+import '../core/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/saved_events_state.dart';
@@ -16,7 +17,7 @@ class SpecialNeedsSection extends StatelessWidget {
       children: [
         const SectionDividerWidget(title: 'Special Needs Kids'),
         SizedBox(
-          height: 380,
+          height: Responsive.h(context, 380, min: 320),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.only(left: 16),
@@ -24,7 +25,7 @@ class SpecialNeedsSection extends StatelessWidget {
             itemBuilder: (context, index) {
               final event = DummyData.specialNeeds[index];
               return Container(
-                width: 280,
+                width: Responsive.cardWidth(context, fraction: 0.72, max: 280),
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -48,7 +49,7 @@ class SpecialNeedsSection extends StatelessWidget {
                           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                           child: Image.asset(
                             event.imagePath,
-                            height: 180,
+                            height: Responsive.h(context, 180, min: 140),
                             width: double.infinity,
                             fit: BoxFit.cover,
                           ),

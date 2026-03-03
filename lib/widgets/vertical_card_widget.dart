@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 import '../core/saved_events_state.dart';
 import '../models/event_model.dart';
 
@@ -56,7 +57,7 @@ class VerticalCardWidget extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                 child: Image.asset(
                   imagePath,
-                  height: 200, // kept as aspect fallback
+                  height: Responsive.h(context, 200, min: 150),
                   width: double.infinity,
                   fit: BoxFit.cover,
                 ),

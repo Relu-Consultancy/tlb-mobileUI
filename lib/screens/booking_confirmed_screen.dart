@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 import '../models/event_model.dart';
 
 class BookingConfirmedScreen extends StatelessWidget {
@@ -77,8 +78,8 @@ class BookingConfirmedScreen extends StatelessWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Container(
-                                    width: 72,
-                                    height: 72,
+                                    width: Responsive.w(context, 72),
+                                    height: Responsive.w(context, 72),
                                     decoration: const BoxDecoration(
                                       color: Color(0xFF4CAF50),
                                       shape: BoxShape.circle,
@@ -138,7 +139,7 @@ class BookingConfirmedScreen extends StatelessWidget {
                                 ),
                                 child: Image.asset(
                                   event.imagePath,
-                                  height: 180,
+                                  height: Responsive.h(context, 180, min: 140),
                                   width: double.infinity,
                                   fit: BoxFit.cover,
                                 ),
@@ -297,8 +298,8 @@ class BookingConfirmedScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 20),
                                     Container(
-                                      width: 180,
-                                      height: 180,
+                                      width: Responsive.w(context, 180, min: 140),
+                                      height: Responsive.w(context, 180, min: 140),
                                       decoration: BoxDecoration(
                                         color: Colors.white,
                                         border: Border.all(
@@ -308,7 +309,7 @@ class BookingConfirmedScreen extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: CustomPaint(
-                                        size: const Size(180, 180),
+                                        size: Size(Responsive.w(context, 180, min: 140), Responsive.w(context, 180, min: 140)),
                                         painter: _QRCodePainter(),
                                       ),
                                     ),

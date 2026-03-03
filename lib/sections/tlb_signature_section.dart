@@ -1,3 +1,4 @@
+import '../core/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/saved_events_state.dart';
@@ -16,7 +17,7 @@ class TlbSignatureSection extends StatelessWidget {
       children: [
         const SectionDividerWidget(title: 'TLB Signature'),
         SizedBox(
-          height: 480,
+          height: Responsive.h(context, 480, min: 380),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.only(left: 16),
@@ -24,7 +25,7 @@ class TlbSignatureSection extends StatelessWidget {
             itemBuilder: (context, index) {
               final event = DummyData.tlbSignature[index];
               return Container(
-                width: 280,
+                width: Responsive.cardWidth(context, fraction: 0.72, max: 280),
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -48,7 +49,7 @@ class TlbSignatureSection extends StatelessWidget {
                           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                           child: Image.asset(
                             event.imagePath,
-                            height: 300,
+                            height: Responsive.h(context, 300, min: 220),
                             width: double.infinity,
                             fit: BoxFit.cover,
                           ),

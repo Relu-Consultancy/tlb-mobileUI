@@ -1,3 +1,4 @@
+import '../core/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/saved_events_state.dart';
@@ -16,7 +17,7 @@ class StealersSection extends StatelessWidget {
       children: [
         const SectionDividerWidget(title: 'Stealers'),
         SizedBox(
-          height: 420,
+          height: Responsive.h(context, 420, min: 350),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.only(left: 16),
@@ -24,7 +25,7 @@ class StealersSection extends StatelessWidget {
             itemBuilder: (context, index) {
               final event = DummyData.stealers[index];
               return Container(
-                width: 250,
+                width: Responsive.cardWidth(context, fraction: 0.64, max: 250),
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -48,7 +49,7 @@ class StealersSection extends StatelessWidget {
                           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                           child: Image.asset(
                             event.imagePath,
-                            height: 250,
+                            height: Responsive.h(context, 250, min: 180),
                             width: double.infinity,
                             fit: BoxFit.cover,
                           ),
