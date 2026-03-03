@@ -7,12 +7,12 @@ import '../screens/event_detail_screen.dart';
 
 class EventCardWithPrice extends StatelessWidget {
   final EventModel event;
-  final double width;
+  final double? width;
 
   const EventCardWithPrice({
     super.key,
     required this.event,
-    this.width = 300,
+    this.width,
   });
 
   @override
@@ -23,7 +23,7 @@ class EventCardWithPrice extends StatelessWidget {
         MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
       ),
       child: Container(
-      width: width,
+      width: width ?? (MediaQuery.of(context).size.width * 0.8 > 300 ? 300 : MediaQuery.of(context).size.width * 0.8),
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
@@ -46,13 +46,13 @@ class EventCardWithPrice extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                 child: Image.asset(
                   event.imagePath,
-                  width: width,
+                  width: width ?? double.infinity,
                   height: 200,
                   fit: BoxFit.cover,
-                  cacheWidth: (width * 2).toInt(),
+                  cacheWidth: width != null ? (width! * 2).toInt() : null,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      width: width,
+                      width: width ?? double.infinity,
                       height: 200,
                       color: AppColors.primary.withOpacity(0.2),
                       child: const Icon(Icons.event, size: 48),

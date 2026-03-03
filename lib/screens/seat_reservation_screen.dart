@@ -367,102 +367,101 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
               ),
             ),
           ),
-
-          // Bottom bar
-          if (_selectedSeats.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 10,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
+        ],
+      ),
+      bottomNavigationBar: _selectedSeats.isNotEmpty ? SafeArea(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Selected seats list
-                  SizedBox(
-                    height: 28,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: _selectedSeats.map((entry) {
-                        final cat = _getCategoryForRow(entry.value);
-                        return Container(
-                          margin: const EdgeInsets.only(right: 6),
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: _categories[cat]!.color.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: _categories[cat]!.color),
-                          ),
-                          child: Text(
-                            entry.key,
-                            style: GoogleFonts.poppins(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: _categories[cat]!.color,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '${_selectedSeats.length} Seat${_selectedSeats.length > 1 ? 's' : ''} • ₹$_totalPrice',
-                              style: GoogleFonts.poppins(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF1A1A2E),
-                              ),
-                            ),
-                          ],
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Selected seats list
+              SizedBox(
+                height: 28,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: _selectedSeats.map((entry) {
+                    final cat = _getCategoryForRow(entry.value);
+                    return Container(
+                      margin: const EdgeInsets.only(right: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _categories[cat]!.color.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: _categories[cat]!.color),
+                      ),
+                      child: Text(
+                        entry.key,
+                        style: GoogleFonts.poppins(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: _categories[cat]!.color,
                         ),
                       ),
-                      ElevatedButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Booking ${_selectedSeats.length} seat(s) for ₹$_totalPrice'),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFB902),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          'Proceed',
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${_selectedSeats.length} Seat${_selectedSeats.length > 1 ? 's' : ''} • ₹$_totalPrice',
                           style: GoogleFonts.poppins(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            color: const Color(0xFF1A1A2E),
                           ),
                         ),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Booking ${_selectedSeats.length} seat(s) for ₹$_totalPrice'),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFFB902),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    ],
+                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'Proceed',
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ),
-        ],
-      ),
+            ],
+          ),
+        ),
+      ) : null,
     );
   }
 

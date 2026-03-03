@@ -28,7 +28,7 @@ class VerticalCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 280,
+      width: MediaQuery.of(context).size.width * 0.75 > 320 ? 320 : MediaQuery.of(context).size.width * 0.75,
       margin: const EdgeInsets.only(right: 16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -52,7 +52,7 @@ class VerticalCardWidget extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                 child: Image.asset(
                   imagePath,
-                  height: 200,
+                  height: 200, // kept as aspect fallback
                   width: double.infinity,
                   fit: BoxFit.cover,
                 ),

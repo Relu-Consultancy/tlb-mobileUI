@@ -28,7 +28,7 @@ class HorizontalCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 240,
+      width: MediaQuery.of(context).size.width * 0.70 > 280 ? 280 : MediaQuery.of(context).size.width * 0.70,
       margin: const EdgeInsets.only(right: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

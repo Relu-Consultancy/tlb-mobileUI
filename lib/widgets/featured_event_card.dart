@@ -7,12 +7,12 @@ import '../screens/event_detail_screen.dart';
 
 class FeaturedEventCard extends StatelessWidget {
   final EventModel event;
-  final double width;
+  final double? width;
 
   const FeaturedEventCard({
     super.key,
     required this.event,
-    this.width = 200,
+    this.width,
   });
 
   @override
@@ -23,7 +23,7 @@ class FeaturedEventCard extends StatelessWidget {
         MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
       ),
       child: Container(
-      width: width,
+      width: width ?? (MediaQuery.of(context).size.width * 0.6 > 200 ? 200 : MediaQuery.of(context).size.width * 0.6),
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
@@ -48,12 +48,12 @@ class FeaturedEventCard extends StatelessWidget {
                 ),
                 child: Image.asset(
                   event.imagePath,
-                  width: width,
+                  width: width ?? double.infinity,
                   height: 180,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      width: width,
+                      width: width ?? double.infinity,
                       height: 180,
                       color: AppColors.primary.withOpacity(0.2),
                       child: const Icon(Icons.event, size: 40),
