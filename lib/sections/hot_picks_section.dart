@@ -32,6 +32,7 @@ class HotPicksSection extends StatelessWidget {
                   buttonText: 'Book Now',
                   price: event.price != null ? '₹${event.price!.toInt()}' : null,
                   badgeText: event.tag,
+                  event: event,
                   onTapBtn: () {
                     Navigator.push(
                       context,

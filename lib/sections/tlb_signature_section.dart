@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/saved_events_state.dart';
+import '../models/event_model.dart';
 import '../widgets/section_divider_widget.dart';
 import '../data/dummy_data.dart';
 import '../screens/event_detail_screen.dart';
@@ -39,15 +41,44 @@ class TlbSignatureSection extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Top Image
-                    ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                      child: Image.asset(
-                        event.imagePath,
-                        height: 300,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
+                    // Top Image with like button
+                    Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                          child: Image.asset(
+                            event.imagePath,
+                            height: 300,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Positioned(
+                          top: 12,
+                          right: 12,
+                          child: GestureDetector(
+                            onTap: () => SavedEventsState.toggle(event, context),
+                            child: ValueListenableBuilder<List<EventModel>>(
+                              valueListenable: SavedEventsState.savedEvents,
+                              builder: (context, _, __) {
+                                final isSaved = SavedEventsState.isSaved(event);
+                                return Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.35),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    isSaved ? Icons.favorite : Icons.favorite_border,
+                                    size: 20,
+                                    color: isSaved ? const Color(0xFFFFB902) : Colors.white,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     
                     // Bottom Content

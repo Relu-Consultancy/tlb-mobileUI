@@ -178,24 +178,27 @@ class _CouponCard extends StatelessWidget {
                     const SizedBox(height: 10),
                     // Coupon code + copy
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: color.withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: color.withOpacity(0.3),
-                              style: BorderStyle.solid,
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: color.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: color.withOpacity(0.3),
+                                style: BorderStyle.solid,
+                              ),
                             ),
-                          ),
-                          child: Text(
-                            coupon['code'] as String,
-                            style: GoogleFonts.spaceMono(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: color,
-                              letterSpacing: 1.5,
+                            child: Text(
+                              coupon['code'] as String,
+                              style: GoogleFonts.spaceMono(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: color,
+                                letterSpacing: 1.5,
+                              ),
                             ),
                           ),
                         ),

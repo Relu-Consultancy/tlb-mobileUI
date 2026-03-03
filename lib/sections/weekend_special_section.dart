@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import '../core/saved_events_state.dart';
+import '../models/event_model.dart';
 import '../widgets/section_divider_widget.dart';
 import '../data/dummy_data.dart';
 import '../screens/event_detail_screen.dart';
@@ -130,26 +132,35 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                 ),
                               ),
                             ),
-                          // Heart icon (top-right)
+                          // Heart icon (top-right) - adds to Favorites
                           Positioned(
                             top: 12,
                             right: 12,
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.9),
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 6,
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.favorite_border,
-                                size: 20,
-                                color: Color(0xFF1A1A2E),
+                            child: GestureDetector(
+                              onTap: () => SavedEventsState.toggle(event, context),
+                              child: ValueListenableBuilder<List<EventModel>>(
+                                valueListenable: SavedEventsState.savedEvents,
+                                builder: (context, _, __) {
+                                  final isSaved = SavedEventsState.isSaved(event);
+                                  return Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.9),
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1),
+                                          blurRadius: 6,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Icon(
+                                      isSaved ? Icons.favorite : Icons.favorite_border,
+                                      size: 20,
+                                      color: isSaved ? const Color(0xFFFFB902) : const Color(0xFF1A1A2E),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ),

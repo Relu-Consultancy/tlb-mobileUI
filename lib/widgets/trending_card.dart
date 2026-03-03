@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../core/app_colors.dart';
+import '../core/saved_events_state.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
 
@@ -77,26 +78,55 @@ class _TrendingCardState extends State<TrendingCard> {
                   ),
                   child: Row(
                     children: [
-                      // Image
-                      ClipRRect(
-                        borderRadius: const BorderRadius.horizontal(
-                          left: Radius.circular(16),
-                        ),
-                        child: Image.asset(
-                          event.imagePath,
-                          width: 130,
-                          height: 180,
-                          fit: BoxFit.cover,
-                          cacheWidth: 260,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
+                      // Image with like button
+                      Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: const BorderRadius.horizontal(
+                              left: Radius.circular(16),
+                            ),
+                            child: Image.asset(
+                              event.imagePath,
                               width: 130,
                               height: 180,
-                              color: AppColors.primary.withOpacity(0.2),
-                              child: const Icon(Icons.event, size: 40),
-                            );
-                          },
-                        ),
+                              fit: BoxFit.cover,
+                              cacheWidth: 260,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  width: 130,
+                                  height: 180,
+                                  color: AppColors.primary.withOpacity(0.2),
+                                  child: const Icon(Icons.event, size: 40),
+                                );
+                              },
+                            ),
+                          ),
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: GestureDetector(
+                              onTap: () => SavedEventsState.toggle(event, context),
+                              child: ValueListenableBuilder<List<EventModel>>(
+                                valueListenable: SavedEventsState.savedEvents,
+                                builder: (context, _, __) {
+                                  final isSaved = SavedEventsState.isSaved(event);
+                                  return Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.35),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      isSaved ? Icons.favorite : Icons.favorite_border,
+                                      size: 18,
+                                      color: isSaved ? const Color(0xFFFFB902) : Colors.white,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       // Content
                       Expanded(
