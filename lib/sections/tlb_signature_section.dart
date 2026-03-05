@@ -114,7 +114,7 @@ class TlbSignatureSection extends StatelessWidget {
                             const SizedBox(height: 12),
                             SizedBox(
                               width: double.infinity,
-                              height: 38,
+                              height: 40,
                               child: ElevatedButton(
                                 onPressed: () {
                                   Navigator.push(
@@ -128,6 +128,7 @@ class TlbSignatureSection extends StatelessWidget {
                                   backgroundColor: const Color(0xFFFFCC00),
                                   foregroundColor: const Color(0xFF1A1A2E),
                                   elevation: 0,
+                                  minimumSize: const Size(0, 40),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
                                   ),
@@ -135,7 +136,7 @@ class TlbSignatureSection extends StatelessWidget {
                                 child: Text(
                                   'Register Now',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 13,
+                                    fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),

@@ -457,6 +457,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                           backgroundColor: const Color(0xFFFFCC00),
                           foregroundColor: const Color(0xFF1A1A2E),
                           elevation: 0,
+                          minimumSize: const Size(0, 40),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -465,7 +466,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                         child: Text(
                           'View Details',
                           style: GoogleFonts.poppins(
-                            fontSize: 13,
+                            fontSize: Responsive.sp(context, 13),
                             fontWeight: FontWeight.w600,
                           ),
                         ),

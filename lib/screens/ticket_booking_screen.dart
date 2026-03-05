@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 import '../models/event_model.dart';
 import 'date_time_selection_screen.dart';
 import 'payment_screen.dart';
@@ -146,7 +147,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
               child: Text(
                 'Proceed to Pay${_subtotal > 0 ? ' • ₹$_subtotal' : ''}',
                 style: GoogleFonts.poppins(
-                  fontSize: 16,
+                  fontSize: Responsive.sp(context, 16),
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -337,11 +338,12 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                     ),
                     count == 0
                         ? SizedBox(
-                            height: 36,
+                            height: 40,
                             child: OutlinedButton(
                               onPressed: () => _addTicket(index),
                               style: OutlinedButton.styleFrom(
                                 side: BorderSide(color: Colors.grey.shade400),
+                                minimumSize: const Size(0, 40),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
@@ -351,7 +353,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                               child: Text(
                                 'Add',
                                 style: GoogleFonts.poppins(
-                                  fontSize: 13,
+                                  fontSize: Responsive.sp(context, 13),
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xFF1A1A2E),
                                 ),
@@ -459,13 +461,14 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                 ),
               ),
               SizedBox(
-                height: 32,
+                height: 40,
                 child: ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                     elevation: 0,
+                    minimumSize: const Size(0, 40),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -474,7 +477,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                   child: Text(
                     'Apply',
                     style: GoogleFonts.poppins(
-                      fontSize: 12,
+                      fontSize: Responsive.sp(context, 13),
                       fontWeight: FontWeight.w600,
                     ),
                   ),

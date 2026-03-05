@@ -154,7 +154,7 @@ class SpecialNeedsSection extends StatelessWidget {
                                   ),
                                 ),
                                 SizedBox(
-                                  height: 38,
+                                  height: 40,
                                   child: ElevatedButton(
                                     onPressed: () {
                                       Navigator.push(
@@ -168,6 +168,7 @@ class SpecialNeedsSection extends StatelessWidget {
                                       backgroundColor: const Color(0xFFFFCC00),
                                       foregroundColor: const Color(0xFF1A1A2E),
                                       elevation: 0,
+                                      minimumSize: const Size(0, 40),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(20),
                                       ),
@@ -175,7 +176,7 @@ class SpecialNeedsSection extends StatelessWidget {
                                     child: Text(
                                       'Shop Now',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 13,
+                                        fontSize: Responsive.sp(context, 13),
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),

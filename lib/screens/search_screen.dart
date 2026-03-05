@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -397,7 +398,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: Text(
                       'Show $resultCount results',
                       style: GoogleFonts.poppins(
-                        fontSize: 16,
+                        fontSize: Responsive.sp(context, 16),
                         fontWeight: FontWeight.w600,
                       ),
                     ),

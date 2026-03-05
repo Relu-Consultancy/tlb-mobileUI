@@ -431,14 +431,14 @@ class EventDetailScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                                 SizedBox(
-                                  height: 32,
+                                  height: 40,
                                   child: ElevatedButton.icon(
                                     onPressed: () {},
                                     icon: const Icon(Icons.directions, size: 16),
                                     label: Text(
                                       'Get Direction',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 12,
+                                        fontSize: Responsive.sp(context, 12),
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -446,6 +446,7 @@ class EventDetailScreen extends StatelessWidget {
                                       backgroundColor: const Color(0xFFFFCC00),
                                       foregroundColor: const Color(0xFF1A1A2E),
                                       elevation: 0,
+                                      minimumSize: const Size(0, 40),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(20),
                                       ),
@@ -766,7 +767,7 @@ class EventDetailScreen extends StatelessWidget {
                       child: Text(
                         'Book Now',
                         style: GoogleFonts.poppins(
-                          fontSize: 16,
+                          fontSize: Responsive.sp(context, 16),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
