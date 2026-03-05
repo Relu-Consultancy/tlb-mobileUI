@@ -202,13 +202,14 @@ class VerticalCardWidget extends StatelessWidget {
                       const SizedBox(),
                     
                     SizedBox(
-                      height: 36,
+                      height: 40,
                       child: ElevatedButton(
                         onPressed: onTapBtn ?? () {},
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFCC00), // Yellow
+                          backgroundColor: const Color(0xFFFFCC00),
                           foregroundColor: const Color(0xFF1A1A2E),
                           elevation: 0,
+                          minimumSize: const Size(0, 40),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -217,7 +218,7 @@ class VerticalCardWidget extends StatelessWidget {
                         child: Text(
                           buttonText,
                           style: GoogleFonts.poppins(
-                            fontSize: 13,
+                            fontSize: Responsive.sp(context, 13),
                             fontWeight: FontWeight.w600,
                           ),
                         ),

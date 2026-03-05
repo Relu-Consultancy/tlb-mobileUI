@@ -239,7 +239,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                     ),
                                   ),
                                   SizedBox(
-                                    height: 34,
+                                    height: 40,
                                     child: ElevatedButton(
                                       onPressed: () {
                                         Navigator.push(
@@ -255,6 +255,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                         foregroundColor:
                                             const Color(0xFF1A1A2E),
                                         elevation: 0,
+                                        minimumSize: const Size(0, 40),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(20),
@@ -266,7 +267,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                       child: Text(
                                         'View Details',
                                         style: GoogleFonts.poppins(
-                                          fontSize: 12,
+                                          fontSize: Responsive.sp(context, 13),
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),

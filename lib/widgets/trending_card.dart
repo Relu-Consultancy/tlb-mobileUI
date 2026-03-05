@@ -181,7 +181,7 @@ class _TrendingCardState extends State<TrendingCard> {
                               const SizedBox(height: 8),
                               // Book Now button
                               SizedBox(
-                                height: 34,
+                                height: 40,
                                 child: ElevatedButton(
                                   onPressed: () {
                                     Navigator.push(
@@ -192,6 +192,7 @@ class _TrendingCardState extends State<TrendingCard> {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColors.primary,
                                     foregroundColor: Colors.white,
+                                    minimumSize: const Size(0, 40),
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 20,
                                     ),
@@ -203,7 +204,7 @@ class _TrendingCardState extends State<TrendingCard> {
                                   child: Text(
                                     'Book Now',
                                     style: GoogleFonts.poppins(
-                                      fontSize: 13,
+                                      fontSize: Responsive.sp(context, 13),
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
