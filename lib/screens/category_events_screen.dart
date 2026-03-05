@@ -118,7 +118,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
 
   Widget _buildCategoryTabs() {
     return Container(
-      height: Responsive.h(context, 125, min: 100),
+      height: Responsive.h(context, 140, min: 115),
       padding: const EdgeInsets.only(top: 12, bottom: 4),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
