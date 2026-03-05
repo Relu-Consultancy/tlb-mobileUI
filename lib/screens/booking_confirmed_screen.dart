@@ -2,406 +2,185 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
+import '../core/booked_events_state.dart';
 import '../models/event_model.dart';
 
-class BookingConfirmedScreen extends StatelessWidget {
+class BookingConfirmedScreen extends StatefulWidget {
   final EventModel event;
 
   const BookingConfirmedScreen({super.key, required this.event});
 
-  String get _bookingId {
-    final rand = Random();
-    final letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    final code = StringBuffer();
-    for (int i = 0; i < 4; i++) {
-      code.write(letters[rand.nextInt(letters.length)]);
-    }
-    for (int i = 0; i < 4; i++) {
-      code.write(rand.nextInt(10));
-    }
-    return code.toString();
+  @override
+  State<BookingConfirmedScreen> createState() => _BookingConfirmedScreenState();
+}
+
+class _BookingConfirmedScreenState extends State<BookingConfirmedScreen> {
+  late final String _bookingId;
+
+  @override
+  void initState() {
+    super.initState();
+    _bookingId = BookingEntry.generateId();
+    BookedEventsState.addBooking(widget.event);
   }
 
   @override
   Widget build(BuildContext context) {
-    final id = _bookingId;
+    return _TicketScreen(
+      event: widget.event,
+      bookingId: _bookingId,
+      showConfirmation: true,
+    );
+  }
+}
+
+/// Shared ticket layout used by BookingConfirmedScreen (and BookingDetailScreen).
+class _TicketScreen extends StatelessWidget {
+  final EventModel event;
+  final String bookingId;
+  final bool showConfirmation;
+
+  const _TicketScreen({
+    required this.event,
+    required this.bookingId,
+    this.showConfirmation = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final ticketHPad = screenWidth * 0.05;
+    final safeTop = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F4FD),
+      backgroundColor: const Color(0xFFD6E4F7),
       body: Stack(
         children: [
-          // Celebratory background: pastel balloons and white dots
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _CelebrationBackgroundPainter(),
-            ),
-          ),
-          SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        // Header: back button, checkmark, text
-                        SizedBox(
-                          height: 200,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              // Back button
-                              Positioned(
-                                top: 8,
-                                left: 8,
-                                child: IconButton(
-                                  icon: Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.arrow_back,
-                                      size: 20,
-                                      color: Color(0xFF1A1A2E),
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    Navigator.of(context)
-                                        .popUntil((route) => route.isFirst);
-                                  },
-                                ),
-                              ),
-                              // Checkmark + text
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: Responsive.w(context, 72),
-                                    height: Responsive.w(context, 72),
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFF4CAF50),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.check,
-                                      color: Colors.white,
-                                      size: 40,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'Booking Confirmed!',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF1A3A8F),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Booking ID: $id',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 14,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // Event details card
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 20),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.06),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Event image
-                              ClipRRect(
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(20),
-                                ),
-                                child: Image.asset(
-                                  event.imagePath,
-                                  height: Responsive.h(context, 180, min: 140),
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(20),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Event title
-                                    Text(
-                                      event.title,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700,
-                                        color: const Color(0xFF1A1A2E),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    // Location
-                                    Text(
-                                      'Location',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 12,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            event.venue,
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                              color: const Color(0xFF1A1A2E),
-                                            ),
-                                          ),
-                                        ),
-                                        OutlinedButton.icon(
-                                          onPressed: () {},
-                                          icon: Icon(
-                                            Icons.location_on_outlined,
-                                            size: 16,
-                                            color: Colors.grey.shade600,
-                                          ),
-                                          label: Text(
-                                            'Map',
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.grey.shade700,
-                                            ),
-                                          ),
-                                          style: OutlinedButton.styleFrom(
-                                            side: BorderSide(
-                                              color: Colors.grey.shade300,
-                                            ),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 14,
-                                              vertical: 8,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 16),
-                                    // Date & Time
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Date',
-                                                style: GoogleFonts.poppins(
-                                                  fontSize: 12,
-                                                  color: Colors.grey.shade600,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                'Saturday, March',
-                                                style: GoogleFonts.poppins(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: const Color(0xFF1A1A2E),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Time',
-                                                style: GoogleFonts.poppins(
-                                                  fontSize: 12,
-                                                  color: Colors.grey.shade600,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                '3:00 pm-6:00 pm',
-                                                style: GoogleFonts.poppins(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: const Color(0xFF1A1A2E),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // Dashed divider
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                ),
-                                child: SizedBox(
-                                  width: double.infinity,
-                                  height: 1,
-                                  child: CustomPaint(
-                                    painter: _DashedLinePainter(),
-                                  ),
-                                ),
-                              ),
-
-                              // QR Code section
-                              Padding(
-                                padding: const EdgeInsets.all(20),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      'Scan QR Code',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                        color: const Color(0xFF1A1A2E),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 20),
-                                    Container(
-                                      width: Responsive.w(context, 180, min: 140),
-                                      height: Responsive.w(context, 180, min: 140),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        border: Border.all(
-                                          color: Colors.grey.shade300,
-                                          width: 1,
-                                        ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: CustomPaint(
-                                        size: Size(Responsive.w(context, 180, min: 140), Responsive.w(context, 180, min: 140)),
-                                        painter: _QRCodePainter(),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 24),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Bottom action buttons
-                Container(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, -2),
+          Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      if (showConfirmation)
+                        _buildHeader(context, safeTop),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: ticketHPad),
+                        child: _buildTicket(context),
                       ),
+                      const SizedBox(height: 12),
                     ],
                   ),
-                  child: SafeArea(
-                    top: false,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.share_outlined,
-                              size: 18,
-                              color: Color(0xFF1A1A2E),
-                            ),
-                            label: Text(
-                              'Share',
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF1A1A2E),
-                              ),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              side: BorderSide(color: Colors.grey.shade300),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 14,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.download_outlined,
-                              size: 18,
-                              color: Color(0xFF1A1A2E),
-                            ),
-                            label: Text(
-                              'Download',
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF1A1A2E),
-                              ),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              side: BorderSide(color: Colors.grey.shade300),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 14,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                ),
+              ),
+              SafeArea(
+                top: false,
+                child: _buildBottomBar(),
+              ),
+            ],
+          ),
+          Positioned(
+            top: safeTop + 6,
+            left: 12,
+            child: GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 6,
                     ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.arrow_back,
+                  size: 19,
+                  color: Color(0xFF1A1A2E),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Balloon background header with checkmark + confirmation text.
+  Widget _buildHeader(BuildContext context, double safeTop) {
+    final headerH = Responsive.h(context, 230, min: 190) + safeTop;
+
+    return SizedBox(
+      width: double.infinity,
+      height: headerH,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Balloon background – extends behind status bar
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/booking_back.png',
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+            ),
+          ),
+          // Tall gradient fade for seamless blend into blue bg
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: headerH * 0.45,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.0, 0.5, 1.0],
+                  colors: [
+                    const Color(0xFFD6E4F7).withOpacity(0.0),
+                    const Color(0xFFD6E4F7).withOpacity(0.6),
+                    const Color(0xFFD6E4F7),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Checkmark + text – pushed down by safeTop
+          Positioned(
+            top: safeTop + 30,
+            left: 0,
+            right: 0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF4CAF50),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.check, color: Colors.white, size: 30),
+                ),
+                const SizedBox(height: 60),
+                Text(
+                  'Booking Confirmed!',
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 18),
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1A3A8F),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Booking ID: $bookingId',
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 12),
+                    color: Colors.grey.shade700,
                   ),
                 ),
               ],
@@ -411,60 +190,284 @@ class BookingConfirmedScreen extends StatelessWidget {
       ),
     );
   }
-}
 
-/// Paints celebratory background with pastel balloons and white dots
-class _CelebrationBackgroundPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Pastel balloon-like circles
-    final balloonColors = [
-      const Color(0xFFFFB3BA),
-      const Color(0xFFBAE1FF),
-      const Color(0xFFBFFCC6),
-      const Color(0xFFFFDFBA),
-      const Color(0xFFE0BBE4),
-    ];
-
-    final balloonPositions = [
-      Offset(size.width * 0.1, size.height * 0.08),
-      Offset(size.width * 0.85, size.height * 0.12),
-      Offset(size.width * 0.15, size.height * 0.35),
-      Offset(size.width * 0.9, size.height * 0.28),
-      Offset(size.width * 0.05, size.height * 0.6),
-      Offset(size.width * 0.92, size.height * 0.55),
-      Offset(size.width * 0.25, size.height * 0.82),
-      Offset(size.width * 0.75, size.height * 0.88),
-    ];
-
-    for (var i = 0; i < balloonPositions.length; i++) {
-      final paint = Paint()
-        ..color = balloonColors[i % balloonColors.length].withOpacity(0.5)
-        ..style = PaintingStyle.fill;
-      canvas.drawCircle(
-        balloonPositions[i],
-        28 + (i % 3) * 8,
-        paint,
-      );
-    }
-
-    // White dots
-    final dotPaint = Paint()
-      ..color = Colors.white.withOpacity(0.7)
-      ..style = PaintingStyle.fill;
-
-    for (var i = 0; i < 40; i++) {
-      final x = (i * 37.0) % size.width;
-      final y = (i * 53.0) % size.height;
-      canvas.drawCircle(Offset(x, y), 2 + (i % 3).toDouble(), dotPaint);
-    }
+  /// The ticket card with event details inside.
+  Widget _buildTicket(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, outerBox) {
+        final ticketW = outerBox.maxWidth;
+        // Let content determine height via IntrinsicHeight
+        return IntrinsicHeight(
+          child: Stack(
+            children: [
+              // Ticket background stretched to fit content
+              Positioned.fill(
+                child: Image.asset(
+                  'assets/images/updated_ticket.png',
+                  fit: BoxFit.fill,
+                ),
+              ),
+              // Content with proper margins inside the white area
+              Padding(
+                padding: EdgeInsets.only(
+                  top: ticketW * 0.06,
+                  bottom: ticketW * 0.10,
+                  left: ticketW * 0.08,
+                  right: ticketW * 0.08,
+                ),
+                child: _TicketContent(event: event, bookingId: bookingId),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  Widget _buildBottomBar() {
+    return Container(
+      height: 72,
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.share_outlined, size: 18),
+              label: Text('Share',
+                  style: GoogleFonts.poppins(
+                      fontSize: 14, fontWeight: FontWeight.w600)),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF1A1A2E),
+                side: BorderSide(color: Colors.grey.shade300),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.download_outlined, size: 18),
+              label: Text('Download',
+                  style: GoogleFonts.poppins(
+                      fontSize: 14, fontWeight: FontWeight.w600)),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF1A1A2E),
+                side: BorderSide(color: Colors.grey.shade300),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-/// Draws a simple QR-code-like pattern
+/// Event details content inside the ticket.
+class _TicketContent extends StatelessWidget {
+  final EventModel event;
+  final String bookingId;
+
+  const _TicketContent({required this.event, required this.bookingId});
+
+  @override
+  Widget build(BuildContext context) {
+    final qrSize = Responsive.w(context, 130, min: 100);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Event image with margins
+        Padding(
+          padding: const EdgeInsets.only(top: 12, left: 4, right: 4),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.asset(
+              event.imagePath,
+              height: Responsive.h(context, 120, min: 90),
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 14),
+
+        // Event title
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              event.title,
+              style: GoogleFonts.poppins(
+                fontSize: Responsive.sp(context, 14),
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1A1A2E),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 10),
+
+        // Location
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Location',
+                        style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 9.5),
+                            color: Colors.grey)),
+                    const SizedBox(height: 2),
+                    Text(
+                      event.venue,
+                      style: GoogleFonts.poppins(
+                        fontSize: Responsive.sp(context, 11.5),
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF1A1A2E),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              OutlinedButton.icon(
+                onPressed: () {},
+                icon: Icon(Icons.location_on_outlined,
+                    size: 14, color: Colors.grey.shade600),
+                label: Text('Map',
+                    style: GoogleFonts.poppins(
+                        fontSize: 10, color: Colors.grey.shade600)),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: Colors.grey.shade300),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 2),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 10),
+
+        // Date & Time
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Date',
+                        style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 9.5),
+                            color: Colors.grey)),
+                    const SizedBox(height: 2),
+                    Text('Saturday, March',
+                        style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 11.5),
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF1A1A2E))),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Time',
+                        style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 9.5),
+                            color: Colors.grey)),
+                    const SizedBox(height: 2),
+                    Text('3:00 pm–6:00 pm',
+                        style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 11.5),
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF1A1A2E))),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 18),
+
+        // Dashed divider
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: SizedBox(
+            width: double.infinity,
+            height: 1,
+            child: CustomPaint(painter: _DashedLinePainter()),
+          ),
+        ),
+
+        const SizedBox(height: 18),
+
+        // QR Code
+        Text(
+          'Scan QR Code',
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 13),
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF1A1A2E),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Container(
+          width: qrSize,
+          height: qrSize,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade200, width: 1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: CustomPaint(
+            size: Size(qrSize, qrSize),
+            painter: _QRCodePainter(),
+          ),
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────── Painters ───────────────────────────
+
 class _QRCodePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -473,13 +476,13 @@ class _QRCodePainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final rand = Random(42);
-    const cellSize = 9.0;
+    const cellSize = 8.0;
     final cols = (size.width / cellSize).floor();
     final rows = (size.height / cellSize).floor();
 
-    _drawFinderPattern(canvas, paint, 0, 0, cellSize);
-    _drawFinderPattern(canvas, paint, (cols - 7) * cellSize, 0, cellSize);
-    _drawFinderPattern(canvas, paint, 0, (rows - 7) * cellSize, cellSize);
+    _drawFinder(canvas, paint, 0, 0, cellSize);
+    _drawFinder(canvas, paint, (cols - 7) * cellSize, 0, cellSize);
+    _drawFinder(canvas, paint, 0, (rows - 7) * cellSize, cellSize);
 
     for (int r = 0; r < rows; r++) {
       for (int c = 0; c < cols; c++) {
@@ -499,38 +502,31 @@ class _QRCodePainter extends CustomPainter {
     }
   }
 
-  void _drawFinderPattern(
-      Canvas canvas, Paint paint, double x, double y, double cell) {
-    canvas.drawRect(
-        Rect.fromLTWH(x, y, cell * 7, cell * 7), paint);
-    final whitePaint = Paint()..color = Colors.white;
-    canvas.drawRect(
-        Rect.fromLTWH(x + cell, y + cell, cell * 5, cell * 5), whitePaint);
-    canvas.drawRect(
-        Rect.fromLTWH(x + cell * 2, y + cell * 2, cell * 3, cell * 3), paint);
+  void _drawFinder(Canvas canvas, Paint p, double x, double y, double c) {
+    canvas.drawRect(Rect.fromLTWH(x, y, c * 7, c * 7), p);
+    final w = Paint()..color = Colors.white;
+    canvas.drawRect(Rect.fromLTWH(x + c, y + c, c * 5, c * 5), w);
+    canvas.drawRect(Rect.fromLTWH(x + c * 2, y + c * 2, c * 3, c * 3), p);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// Paints a dashed line for the divider
 class _DashedLinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.grey.shade300
-      ..strokeWidth = 2
+      ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 
-    const dashWidth = 8.0;
-    const dashSpace = 6.0;
-    double startX = 0;
-
-    while (startX < size.width) {
-      canvas.drawLine(
-          Offset(startX, 0), Offset(startX + dashWidth, 0), paint);
-      startX += dashWidth + dashSpace;
+    const dashW = 8.0;
+    const gapW = 5.0;
+    double x = 0;
+    while (x < size.width) {
+      canvas.drawLine(Offset(x, 0), Offset(x + dashW, 0), paint);
+      x += dashW + gapW;
     }
   }
 

@@ -15,7 +15,7 @@ class HotPicksSection extends StatelessWidget {
       children: [
         const SectionDividerWidget(title: 'Hot Picks'),
         SizedBox(
-          height: Responsive.h(context, 380, min: 320),
+          height: Responsive.h(context, 420, min: 370),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.only(left: 16),

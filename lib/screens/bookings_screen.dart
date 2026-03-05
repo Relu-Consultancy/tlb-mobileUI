@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/booked_events_state.dart';
+import 'booking_detail_screen.dart';
 
 class BookingsScreen extends StatelessWidget {
   const BookingsScreen({super.key});
@@ -47,140 +49,213 @@ class BookingsScreen extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            _buildBookingsList(isOngoing: true),
-            _buildBookingsList(isOngoing: false),
+            _OngoingTab(),
+            _PastTab(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _OngoingTab extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<List<BookingEntry>>(
+      valueListenable: BookedEventsState.bookings,
+      builder: (context, allBookings, _) {
+        final ongoing = allBookings
+            .where((b) => b.status == 'Confirmed' || b.status == 'Pending')
+            .toList();
+
+        if (ongoing.isEmpty) {
+          return _emptyState('No ongoing bookings');
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: ongoing.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, index) =>
+              _BookingCard(booking: ongoing[index]),
+        );
+      },
+    );
+  }
+}
+
+class _PastTab extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<List<BookingEntry>>(
+      valueListenable: BookedEventsState.bookings,
+      builder: (context, allBookings, _) {
+        final past =
+            allBookings.where((b) => b.status == 'Completed').toList();
+
+        if (past.isEmpty) {
+          return _emptyState('No past bookings');
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: past.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, index) => _BookingCard(booking: past[index]),
+        );
+      },
+    );
+  }
+}
+
+Widget _emptyState(String message) {
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.event_busy, size: 64, color: Colors.grey.shade300),
+        const SizedBox(height: 16),
+        Text(
+          message,
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _BookingCard extends StatelessWidget {
+  final BookingEntry booking;
+
+  const _BookingCard({required this.booking});
+
+  @override
+  Widget build(BuildContext context) {
+    final event = booking.event;
+    final statusColor = _statusColor(booking.status);
+
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => BookingDetailScreen(booking: booking),
+        ),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            // Thumbnail
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                bottomLeft: Radius.circular(16),
+              ),
+              child: Image.asset(
+                event.imagePath,
+                width: 90,
+                height: 90,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Info
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            event.title,
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF1A1A2E),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            booking.status,
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: statusColor,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on_outlined,
+                            size: 14, color: Colors.grey),
+                        const SizedBox(width: 3),
+                        Expanded(
+                          child: Text(
+                            event.venue,
+                            style: GoogleFonts.poppins(
+                                fontSize: 12, color: Colors.grey.shade600),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        const Icon(Icons.calendar_today_outlined,
+                            size: 14, color: Colors.grey),
+                        const SizedBox(width: 3),
+                        Text(
+                          booking.date,
+                          style: GoogleFonts.poppins(
+                              fontSize: 12, color: Colors.grey.shade600),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBookingsList({required bool isOngoing}) {
-    final bookings = isOngoing
-        ? [
-            {
-              'title': 'Halloween Party',
-              'venue': 'City Convention Center',
-              'date': 'Oct 31, 2026 • 7:00 PM',
-              'status': 'Confirmed',
-              'statusColor': const Color(0xFF4CAF50),
-            },
-            {
-              'title': 'World Storytelling Day',
-              'venue': 'Embassy Int. Riding School',
-              'date': 'Mar 20, 2026 • 10:00 AM',
-              'status': 'Pending',
-              'statusColor': const Color(0xFFFFC107),
-            },
-          ]
-        : [
-            {
-              'title': 'Kids Party',
-              'venue': 'Fun Zone Park',
-              'date': 'Jan 15, 2026 • 3:00 PM',
-              'status': 'Completed',
-              'statusColor': Colors.grey,
-            },
-            {
-              'title': 'Summer Fete',
-              'venue': 'Central Park Arena',
-              'date': 'Dec 20, 2025 • 11:00 AM',
-              'status': 'Completed',
-              'statusColor': Colors.grey,
-            },
-          ];
-
-    if (bookings.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.event_busy, size: 64, color: Colors.grey.shade300),
-            const SizedBox(height: 16),
-            Text(
-              'No bookings yet',
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-              ),
-            ),
-          ],
-        ),
-      );
+  Color _statusColor(String status) {
+    switch (status) {
+      case 'Confirmed':
+        return const Color(0xFF4CAF50);
+      case 'Pending':
+        return const Color(0xFFFFC107);
+      case 'Completed':
+        return Colors.grey;
+      default:
+        return const Color(0xFF4CAF50);
     }
-
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: bookings.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        final b = bookings[index];
-        return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF5F5F5),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      b['title'] as String,
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1A1A2E),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: (b['statusColor'] as Color).withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      b['status'] as String,
-                      style: GoogleFonts.poppins(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: b['statusColor'] as Color,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.location_on_outlined, size: 16, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Text(
-                    b['venue'] as String,
-                    style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  const Icon(Icons.calendar_today_outlined, size: 16, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Text(
-                    b['date'] as String,
-                    style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 }
