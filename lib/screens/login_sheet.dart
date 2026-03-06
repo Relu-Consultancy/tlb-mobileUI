@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/auth_state.dart';
+import '../core/responsive.dart';
 
 /// Shows the login bottom sheet on top of ProfileScreen
 void showLoginSheet(BuildContext context) {
@@ -115,7 +116,7 @@ class _LoginSheetState extends State<_LoginSheet> {
               Text(
                 "Let's Get Started! 🚀",
                 style: GoogleFonts.poppins(
-                  fontSize: 22,
+                  fontSize: Responsive.sp(context, 20),
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF1A1A2E),
                 ),
@@ -411,7 +412,7 @@ class _OTPSheetState extends State<_OTPSheet> {
               Text(
                 'OTP Verification 🔐',
                 style: GoogleFonts.poppins(
-                  fontSize: 22,
+                  fontSize: Responsive.sp(context, 20),
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF1A1A2E),
                 ),

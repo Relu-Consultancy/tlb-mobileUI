@@ -139,31 +139,33 @@ class _RemindersScreenState extends State<RemindersScreen> {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              width: 48,
-              height: 48,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
                 color: (enabled ? color : Colors.grey).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 reminder['icon'] as IconData,
                 color: enabled ? color : Colors.grey,
-                size: 24,
+                size: 20,
               ),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     reminder['title'] as String,
                     style: GoogleFonts.poppins(
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: enabled
                           ? const Color(0xFF1A1A2E)
@@ -172,77 +174,61 @@ class _RemindersScreenState extends State<RemindersScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(Icons.calendar_today,
-                          size: 12,
-                          color: enabled ? Colors.grey.shade600 : Colors.grey.shade400),
-                      const SizedBox(width: 4),
-                      Text(
-                        reminder['date'] as String,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Icon(Icons.access_time,
-                          size: 12,
-                          color: enabled ? Colors.grey.shade600 : Colors.grey.shade400),
-                      const SizedBox(width: 4),
-                      Text(
-                        reminder['time'] as String,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 3),
+                  Text(
+                    '${reminder['date']}  •  ${reminder['time']}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      Icon(Icons.location_on_outlined,
-                          size: 12,
-                          color: enabled ? Colors.grey.shade600 : Colors.grey.shade400),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          reminder['venue'] as String,
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 1),
+                  Text(
+                    reminder['venue'] as String,
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      color: enabled ? Colors.grey.shade600 : Colors.grey.shade400,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            Column(
-              children: [
-                Switch(
-                  value: enabled,
-                  onChanged: (val) {
-                    setState(() {
-                      _reminders[index]['enabled'] = val;
-                    });
-                  },
-                  activeColor: color,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                if (enabled)
-                  GestureDetector(
-                    onTap: () => _deleteReminder(index),
-                    child: Icon(Icons.delete_outline,
-                        size: 20, color: Colors.red.shade300),
+            SizedBox(
+              width: 48,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    height: 32,
+                    width: 44,
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Switch(
+                        value: enabled,
+                        onChanged: (val) {
+                          setState(() {
+                            _reminders[index]['enabled'] = val;
+                          });
+                        },
+                        activeColor: color,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
                   ),
-              ],
+                  if (enabled) ...[
+                    const SizedBox(height: 4),
+                    GestureDetector(
+                      onTap: () => _deleteReminder(index),
+                      child: Icon(Icons.delete_outline,
+                          size: 18, color: Colors.red.shade300),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ],
         ),

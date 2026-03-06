@@ -120,7 +120,7 @@ class EventDetailScreen extends StatelessWidget {
                       child: Text(
                         event.title,
                         style: GoogleFonts.poppins(
-                          fontSize: 22,
+                          fontSize: Responsive.sp(context, 20),
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF1A1A2E),
                         ),
@@ -736,7 +736,7 @@ class EventDetailScreen extends StatelessWidget {
                         TextSpan(
                           text: '₹${(event.price ?? 350).toStringAsFixed(0)}',
                           style: GoogleFonts.poppins(
-                            fontSize: 22,
+                            fontSize: Responsive.sp(context, 20),
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF1A1A2E),
                           ),

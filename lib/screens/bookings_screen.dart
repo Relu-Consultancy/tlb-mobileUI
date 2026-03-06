@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 import '../core/booked_events_state.dart';
 import 'booking_detail_screen.dart';
 
@@ -160,8 +161,8 @@ class _BookingCard extends StatelessWidget {
               ),
               child: Image.asset(
                 event.imagePath,
-                width: 90,
-                height: 90,
+                width: Responsive.w(context, 85, min: 65),
+                height: Responsive.w(context, 85, min: 65),
                 fit: BoxFit.cover,
               ),
             ),

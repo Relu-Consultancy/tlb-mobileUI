@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/auth_state.dart';
+import '../core/responsive.dart';
 import '../core/saved_events_state.dart';
 import '../core/booked_events_state.dart';
 import 'bookings_screen.dart';
@@ -69,8 +70,8 @@ class ProfileScreen extends StatelessWidget {
                   Stack(
                     children: [
                       Container(
-                        width: 90,
-                        height: 90,
+                        width: Responsive.w(context, 80, min: 60),
+                        height: Responsive.w(context, 80, min: 60),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.grey.shade200,
