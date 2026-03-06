@@ -120,7 +120,7 @@ class EventDetailScreen extends StatelessWidget {
                       child: Text(
                         event.title,
                         style: GoogleFonts.poppins(
-                          fontSize: 22,
+                          fontSize: Responsive.sp(context, 20),
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF1A1A2E),
                         ),
@@ -200,7 +200,7 @@ class EventDetailScreen extends StatelessWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              'Saturday, MARCH 21, 3:00PM-6:00 PM',
+                              'Saturday, March 21, 3:00 PM – 6:00 PM',
                               style: GoogleFonts.poppins(
                                 fontSize: 13,
                                 color: const Color(0xFF1A1A2E),
@@ -444,7 +444,7 @@ class EventDetailScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                                 SizedBox(
-                                  height: 40,
+                                  height: Responsive.h(context, 38, min: 32),
                                   child: ElevatedButton.icon(
                                     onPressed: () {},
                                     icon: const Icon(Icons.directions, size: 16),
@@ -497,8 +497,8 @@ class EventDetailScreen extends StatelessWidget {
                               );
                             },
                             child: Container(
-                              width: 48,
-                              height: 48,
+                              width: Responsive.w(context, 44, min: 34),
+                              height: Responsive.w(context, 44, min: 34),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: const Color(0xFFDE7104).withOpacity(0.15),
@@ -736,7 +736,7 @@ class EventDetailScreen extends StatelessWidget {
                         TextSpan(
                           text: '₹${(event.price ?? 350).toStringAsFixed(0)}',
                           style: GoogleFonts.poppins(
-                            fontSize: 22,
+                            fontSize: Responsive.sp(context, 20),
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF1A1A2E),
                           ),
@@ -797,7 +797,7 @@ class EventDetailScreen extends StatelessWidget {
 
   void _showReviewsBottomSheet(BuildContext context) {
     final reviews = [
-      {'name': 'Laxman', 'stars': 4, 'comment': 'Fantastic experience! My kids has so much fun and made new friends.'},
+      {'name': 'Laxman', 'stars': 4, 'comment': 'Fantastic experience! My kids had so much fun and made new friends.'},
       {'name': 'Laxman', 'stars': 4, 'comment': 'Great organization and very engaging activities.'},
       {'name': 'Sameer', 'stars': 5, 'comment': 'Amazing event! Kids had a blast. Highly recommended for families.'},
       {'name': 'Sameer', 'stars': 5, 'comment': 'Well organized and fun. Would love more food options next time.'},
@@ -828,7 +828,7 @@ class EventDetailScreen extends StatelessWidget {
                   Text(
                     'Reviews',
                     style: GoogleFonts.poppins(
-                      fontSize: 18,
+                      fontSize: Responsive.sp(context, 17),
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF1A1A2E),
                     ),
@@ -949,7 +949,7 @@ class EventDetailScreen extends StatelessWidget {
                   Text(
                     'Terms & Conditions',
                     style: GoogleFonts.poppins(
-                      fontSize: 18,
+                      fontSize: Responsive.sp(context, 17),
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF1A1A2E),
                     ),

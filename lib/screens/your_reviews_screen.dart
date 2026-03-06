@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 
 class YourReviewsScreen extends StatelessWidget {
   const YourReviewsScreen({super.key});
@@ -28,7 +29,7 @@ class YourReviewsScreen extends StatelessWidget {
       body: SafeArea(
         top: false,
         child: _dummyReviews.isEmpty
-            ? _buildEmptyState()
+            ? _buildEmptyState(context)
             : ListView.separated(
                 padding: const EdgeInsets.all(16),
                 itemCount: _dummyReviews.length,
@@ -42,7 +43,7 @@ class YourReviewsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -52,7 +53,7 @@ class YourReviewsScreen extends StatelessWidget {
           Text(
             'No Reviews Yet',
             style: GoogleFonts.poppins(
-              fontSize: 18,
+              fontSize: Responsive.sp(context, 18),
               fontWeight: FontWeight.w600,
               color: Colors.grey.shade500,
             ),
@@ -172,11 +173,15 @@ class YourReviewsScreen extends StatelessWidget {
             children: [
               Icon(Icons.thumb_up_alt_outlined, size: 14, color: Colors.grey.shade400),
               const SizedBox(width: 6),
-              Text(
-                '${review['helpful']} people found this helpful',
-                style: GoogleFonts.poppins(
-                  fontSize: 11,
-                  color: Colors.grey.shade400,
+              Flexible(
+                child: Text(
+                  '${review['helpful']} people found this helpful',
+                  style: GoogleFonts.poppins(
+                    fontSize: 11,
+                    color: Colors.grey.shade400,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -186,7 +191,7 @@ class YourReviewsScreen extends StatelessWidget {
     );
   }
 
-  List<Map<String, dynamic>> get _dummyReviews => [
+  static final List<Map<String, dynamic>> _dummyReviews = [
         {
           'eventName': 'Halloween Party 2025',
           'image': 'assets/images/halloween_party.png',
@@ -207,7 +212,7 @@ class YourReviewsScreen extends StatelessWidget {
         },
         {
           'eventName': 'Art & Craft Workshop',
-          'image': 'assets/images/kids_party_banner.png',
+          'image': 'assets/images/kids_party.png',
           'rating': 5,
           'date': 'Feb 15, 2025',
           'text':

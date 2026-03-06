@@ -135,7 +135,7 @@ class EventCardWithPrice extends StatelessWidget {
                           TextSpan(
                             text: '₹${event.price?.toInt() ?? 0}',
                             style: GoogleFonts.poppins(
-                              fontSize: 22,
+                              fontSize: Responsive.sp(context, 20),
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
                             ),

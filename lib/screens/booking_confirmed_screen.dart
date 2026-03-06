@@ -36,6 +36,7 @@ class _BookingConfirmedScreenState extends State<BookingConfirmedScreen>
     _bookingId = BookingEntry.generateId();
     BookedEventsState.addBooking(
       widget.event,
+      bookingId: _bookingId,
       date: widget.selectedDate,
       time: widget.selectedTime,
     );
@@ -213,7 +214,7 @@ class _TicketScreen extends StatelessWidget {
               ),
               SafeArea(
                 top: false,
-                child: _buildBottomBar(),
+                child: _buildBottomBar(context),
               ),
             ],
           ),
@@ -223,8 +224,8 @@ class _TicketScreen extends StatelessWidget {
             child: GestureDetector(
               onTap: onBack ?? () => Navigator.of(context).pop(),
               child: Container(
-                width: 38,
-                height: 38,
+                width: Responsive.w(context, 36, min: 30),
+                height: Responsive.w(context, 36, min: 30),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.9),
                   shape: BoxShape.circle,
@@ -296,15 +297,15 @@ class _TicketScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 52,
-                  height: 52,
+                  width: Responsive.w(context, 48, min: 38),
+                  height: Responsive.w(context, 48, min: 38),
                   decoration: const BoxDecoration(
                     color: Color(0xFF4CAF50),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.check, color: Colors.white, size: 30),
                 ),
-                const SizedBox(height: 60),
+                SizedBox(height: Responsive.h(context, 55, min: 40)),
                 Text(
                   'Booking Confirmed!',
                   style: GoogleFonts.poppins(
@@ -367,9 +368,9 @@ class _TicketScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomBar() {
+  Widget _buildBottomBar(BuildContext context) {
     return Container(
-      height: 72,
+      height: Responsive.h(context, 68, min: 52),
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 14),
       decoration: BoxDecoration(
         color: Colors.white,

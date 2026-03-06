@@ -142,7 +142,7 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           child: SizedBox(
             width: double.infinity,
-            height: 52,
+            height: Responsive.h(context, 48, min: 40),
             child: ElevatedButton(
               onPressed: _canContinue
                   ? () {

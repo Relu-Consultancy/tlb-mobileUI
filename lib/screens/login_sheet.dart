@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/auth_state.dart';
+import '../core/responsive.dart';
 
 /// Shows the login bottom sheet on top of ProfileScreen
 void showLoginSheet(BuildContext context) {
@@ -115,7 +116,7 @@ class _LoginSheetState extends State<_LoginSheet> {
               Text(
                 "Let's Get Started! 🚀",
                 style: GoogleFonts.poppins(
-                  fontSize: 22,
+                  fontSize: Responsive.sp(context, 20),
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF1A1A2E),
                 ),
@@ -162,7 +163,7 @@ class _LoginSheetState extends State<_LoginSheet> {
               // Send OTP button
               SizedBox(
                 width: double.infinity,
-                height: 48,
+                height: Responsive.h(context, 46, min: 40),
                 child: ElevatedButton(
                   onPressed: _onSendOTP,
                   style: ElevatedButton.styleFrom(
@@ -209,13 +210,13 @@ class _LoginSheetState extends State<_LoginSheet> {
               // Continue with Google
               SizedBox(
                 width: double.infinity,
-                height: 48,
+                height: Responsive.h(context, 46, min: 40),
                 child: OutlinedButton.icon(
                   onPressed: _onGoogleSignIn,
-                  icon: const Text(
+                  icon: Text(
                     'G',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: Responsive.sp(context, 18),
                       fontWeight: FontWeight.w700,
                       color: Color(0xFFFFC107),
                     ),
@@ -411,7 +412,7 @@ class _OTPSheetState extends State<_OTPSheet> {
               Text(
                 'OTP Verification 🔐',
                 style: GoogleFonts.poppins(
-                  fontSize: 22,
+                  fontSize: Responsive.sp(context, 20),
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF1A1A2E),
                 ),
@@ -428,23 +429,27 @@ class _OTPSheetState extends State<_OTPSheet> {
               const SizedBox(height: 28),
 
               // OTP input boxes
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(6, (index) {
-                  return SizedBox(
-                    width: 44,
-                    height: 52,
-                    child: TextField(
-                      controller: _otpControllers[index],
-                      focusNode: _otpFocusNodes[index],
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
-                      maxLength: 1,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      style: GoogleFonts.poppins(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final boxW = ((constraints.maxWidth - 30) / 6).clamp(32.0, 48.0);
+                  final boxH = (boxW * 1.18).clamp(38.0, 56.0);
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(6, (index) {
+                      return SizedBox(
+                        width: boxW,
+                        height: boxH,
+                        child: TextField(
+                          controller: _otpControllers[index],
+                          focusNode: _otpFocusNodes[index],
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.number,
+                          maxLength: 1,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 18),
+                            fontWeight: FontWeight.w700,
+                          ),
                       decoration: InputDecoration(
                         counterText: '',
                         filled: true,
@@ -471,7 +476,9 @@ class _OTPSheetState extends State<_OTPSheet> {
                       },
                     ),
                   );
-                }),
+                    }),
+                  );
+                },
               ),
 
               const SizedBox(height: 20),
@@ -504,7 +511,7 @@ class _OTPSheetState extends State<_OTPSheet> {
               // Verify & Continue button
               SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: Responsive.h(context, 48, min: 40),
                 child: ElevatedButton(
                   onPressed: _onVerify,
                   style: ElevatedButton.styleFrom(

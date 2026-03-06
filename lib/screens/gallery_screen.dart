@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 import '../models/event_model.dart';
 
 class GalleryScreen extends StatefulWidget {
@@ -61,7 +62,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
         title: Text(
           'Gallery',
           style: GoogleFonts.poppins(
-            fontSize: 17,
+            fontSize: Responsive.sp(context, 17),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
@@ -138,7 +139,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
           // Thumbnail strip
           SizedBox(
-            height: 70,
+            height: Responsive.h(context, 65, min: 50),
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -148,7 +149,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                 return GestureDetector(
                   onTap: () => _goToPage(index),
                   child: Container(
-                    width: 70,
+                    width: Responsive.w(context, 65, min: 50),
                     margin: const EdgeInsets.only(right: 8),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),

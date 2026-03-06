@@ -135,9 +135,13 @@ class VerticalCardWidget extends StatelessWidget {
                   children: [
                     const Icon(Icons.people_alt_outlined, size: 14, color: Colors.grey),
                     const SizedBox(width: 4),
-                    Text(
-                      subtitle,
-                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                    Expanded(
+                      child: Text(
+                        subtitle,
+                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
@@ -151,9 +155,13 @@ class VerticalCardWidget extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      reviewCount,
-                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                    Flexible(
+                      child: Text(
+                        reviewCount,
+                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 ),
@@ -183,7 +191,7 @@ class VerticalCardWidget extends StatelessWidget {
                             TextSpan(
                               text: price,
                               style: GoogleFonts.poppins(
-                                fontSize: 18,
+                                fontSize: Responsive.sp(context, 16),
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFF1A1A2E),
                               ),
@@ -202,7 +210,7 @@ class VerticalCardWidget extends StatelessWidget {
                       const SizedBox(),
                     
                     SizedBox(
-                      height: 40,
+                      height: Responsive.h(context, 38, min: 32),
                       child: ElevatedButton(
                         onPressed: onTapBtn ?? () {},
                         style: ElevatedButton.styleFrom(

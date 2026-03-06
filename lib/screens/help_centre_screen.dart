@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 
 class HelpCentreScreen extends StatelessWidget {
   const HelpCentreScreen({super.key});
@@ -33,7 +34,7 @@ class HelpCentreScreen extends StatelessWidget {
             Text(
               'How can we help you?',
               style: GoogleFonts.poppins(
-                fontSize: 18,
+                fontSize: Responsive.sp(context, 18),
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF1A1A2E),
               ),

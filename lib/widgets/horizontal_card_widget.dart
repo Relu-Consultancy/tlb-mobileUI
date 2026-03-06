@@ -173,9 +173,13 @@ class HorizontalCardWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Text(
-                reviewCount,
-                style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+              Flexible(
+                child: Text(
+                  reviewCount,
+                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
@@ -208,7 +212,7 @@ class HorizontalCardWidget extends StatelessWidget {
           const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
-            height: 40,
+            height: Responsive.h(context, 38, min: 32),
             child: ElevatedButton(
               onPressed: onTapBtn ?? () {},
               style: ElevatedButton.styleFrom(

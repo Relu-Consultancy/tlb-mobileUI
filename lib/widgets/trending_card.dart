@@ -181,7 +181,7 @@ class _TrendingCardState extends State<TrendingCard> {
                               const SizedBox(height: 8),
                               // Book Now button
                               SizedBox(
-                                height: 40,
+                                height: Responsive.h(context, 38, min: 32),
                                 child: ElevatedButton(
                                   onPressed: () {
                                     Navigator.push(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/auth_state.dart';
+import '../core/responsive.dart';
 import '../core/saved_events_state.dart';
 import '../core/booked_events_state.dart';
 import 'bookings_screen.dart';
@@ -50,7 +51,7 @@ class ProfileScreen extends StatelessWidget {
         title: Text(
           'My Profile',
           style: GoogleFonts.poppins(
-            fontSize: 18,
+            fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.bold,
             color: const Color(0xFF1A1A2E),
           ),
@@ -69,8 +70,8 @@ class ProfileScreen extends StatelessWidget {
                   Stack(
                     children: [
                       Container(
-                        width: 90,
-                        height: 90,
+                        width: Responsive.w(context, 80, min: 60),
+                        height: Responsive.w(context, 80, min: 60),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.grey.shade200,
@@ -110,7 +111,7 @@ class ProfileScreen extends StatelessWidget {
                         Text(
                           'Laxman',
                           style: GoogleFonts.poppins(
-                            fontSize: 18,
+                            fontSize: Responsive.sp(context, 18),
                             fontWeight: FontWeight.bold,
                             color: const Color(0xFF1A1A2E),
                           ),
@@ -167,7 +168,7 @@ class ProfileScreen extends StatelessWidget {
             // Top Menu Block
             _buildMenuItem(
               icon: Icons.confirmation_num_outlined,
-              title: 'All Booking',
+              title: 'All Bookings',
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const BookingsScreen()),
@@ -264,7 +265,7 @@ class ProfileScreen extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Log Out',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 17),
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: Responsive.sp(context, 17)),
         ),
         content: Text(
           'Are you sure you want to log out?',

@@ -451,7 +451,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                 Text(
                   event.title,
                   style: GoogleFonts.poppins(
-                    fontSize: 18,
+                    fontSize: Responsive.sp(context, 17),
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFF1A1A2E),
                   ),
@@ -460,9 +460,9 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                 // Tags
                 Row(
                   children: [
-                    if (event.tag != null) _buildPill(event.tag!),
+                    if (event.tag != null) Flexible(child: _buildPill(event.tag!)),
                     const SizedBox(width: 8),
-                    if (event.description != null) _buildPill(event.description!),
+                    if (event.description != null) Flexible(child: _buildPill(event.description!)),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -485,7 +485,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                           Text(
                             '₹${event.price?.toInt() ?? 0}',
                             style: GoogleFonts.poppins(
-                              fontSize: 18,
+                              fontSize: Responsive.sp(context, 17),
                               fontWeight: FontWeight.w800,
                               color: const Color(0xFF1A1A2E),
                             ),
@@ -548,6 +548,8 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
           fontWeight: FontWeight.w500,
           color: const Color(0xFF6B6B6B),
         ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }

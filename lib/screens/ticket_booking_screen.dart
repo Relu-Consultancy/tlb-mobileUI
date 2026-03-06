@@ -89,7 +89,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
         title: Text(
           'Checkout',
           style: GoogleFonts.poppins(
-            fontSize: 17,
+            fontSize: Responsive.sp(context, 17),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),

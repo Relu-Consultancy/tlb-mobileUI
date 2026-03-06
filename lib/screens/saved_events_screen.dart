@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 import '../core/saved_events_state.dart';
 import '../models/event_model.dart';
 import 'event_detail_screen.dart';
@@ -42,7 +43,7 @@ class SavedEventsScreen extends StatelessWidget {
                   Text(
                     'No saved events yet',
                     style: GoogleFonts.poppins(
-                      fontSize: 18,
+                      fontSize: Responsive.sp(context, 18),
                       fontWeight: FontWeight.w600,
                       color: Colors.grey.shade400,
                     ),
@@ -93,12 +94,12 @@ class SavedEventsScreen extends StatelessWidget {
                             left: Radius.circular(14)),
                         child: Image.asset(
                           event.imagePath,
-                          width: 100,
-                          height: 90,
+                          width: Responsive.w(context, 100, min: 75),
+                          height: Responsive.h(context, 90, min: 70),
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(
-                            width: 100,
-                            height: 90,
+                            width: Responsive.w(context, 100, min: 75),
+                            height: Responsive.h(context, 90, min: 70),
                             color: const Color(0xFFFFF0C8),
                             child: const Icon(Icons.event,
                                 color: Color(0xFFFFB902)),

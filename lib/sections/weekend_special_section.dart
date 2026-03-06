@@ -200,11 +200,14 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  Text(
-                                    event.reviewCount ?? '3.5k reviews',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 12,
-                                      color: Colors.grey,
+                                  Flexible(
+                                    child: Text(
+                                      event.reviewCount ?? '3.5k reviews',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                 ],
@@ -239,7 +242,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                     ),
                                   ),
                                   SizedBox(
-                                    height: 40,
+                                    height: Responsive.h(context, 38, min: 32),
                                     child: ElevatedButton(
                                       onPressed: () {
                                         Navigator.push(

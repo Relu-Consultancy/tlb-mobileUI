@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import '../core/responsive.dart';
 import '../core/saved_events_state.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
@@ -91,7 +92,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                                 child: Text(
                                   event.title,
                                   style: GoogleFonts.poppins(
-                                    fontSize: 24,
+                                    fontSize: Responsive.sp(context, 22),
                                     fontWeight: FontWeight.w700,
                                     color: Colors.white,
                                   ),

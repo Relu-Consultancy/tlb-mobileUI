@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 import '../models/event_model.dart';
 import 'booking_confirmed_screen.dart';
 
@@ -32,7 +33,7 @@ class PaymentScreen extends StatelessWidget {
         title: Text(
           'Payment',
           style: GoogleFonts.poppins(
-            fontSize: 17,
+            fontSize: Responsive.sp(context, 17),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
@@ -66,7 +67,7 @@ class PaymentScreen extends StatelessWidget {
                 Text(
                   '₹${amount > 0 ? amount.toStringAsFixed(2) : "0.00"}',
                   style: GoogleFonts.poppins(
-                    fontSize: 20,
+                    fontSize: Responsive.sp(context, 18),
                     fontWeight: FontWeight.w700,
                     color: const Color(0xFF1A1A2E),
                   ),
@@ -85,7 +86,7 @@ class PaymentScreen extends StatelessWidget {
 
                   // ── Preferred Payments ──
                   _buildSectionHeader('PREFERRED PAYMENTS'),
-                  _buildPaymentTile(
+                  _buildPaymentTile(context,
                     icon: Icons.shield_outlined,
                     iconColor: const Color(0xFF6366F1),
                     iconBg: const Color(0xFFEEF2FF),
@@ -102,7 +103,7 @@ class PaymentScreen extends StatelessWidget {
 
                   // ── Other Payment Options ──
                   _buildSectionHeader('OTHER PAYMENT OPTIONS'),
-                  _buildPaymentTile(
+                  _buildPaymentTile(context,
                     icon: Icons.account_balance_wallet_outlined,
                     iconColor: const Color(0xFF4CAF50),
                     iconBg: const Color(0xFFE8F5E9),
@@ -110,7 +111,7 @@ class PaymentScreen extends StatelessWidget {
                     onTap: () => _processPayment(context),
                   ),
                   _buildPaymentDivider(),
-                  _buildPaymentTile(
+                  _buildPaymentTile(context,
                     icon: Icons.credit_card,
                     iconColor: const Color(0xFFFF9800),
                     iconBg: const Color(0xFFFFF3E0),
@@ -118,7 +119,7 @@ class PaymentScreen extends StatelessWidget {
                     onTap: () => _processPayment(context),
                   ),
                   _buildPaymentDivider(),
-                  _buildPaymentTile(
+                  _buildPaymentTile(context,
                     icon: Icons.account_balance_wallet,
                     iconColor: const Color(0xFF2196F3),
                     iconBg: const Color(0xFFE3F2FD),
@@ -126,7 +127,7 @@ class PaymentScreen extends StatelessWidget {
                     onTap: () => _processPayment(context),
                   ),
                   _buildPaymentDivider(),
-                  _buildPaymentTile(
+                  _buildPaymentTile(context,
                     icon: Icons.card_giftcard,
                     iconColor: const Color(0xFFE91E63),
                     iconBg: const Color(0xFFFCE4EC),
@@ -134,7 +135,7 @@ class PaymentScreen extends StatelessWidget {
                     onTap: () => _processPayment(context),
                   ),
                   _buildPaymentDivider(),
-                  _buildPaymentTile(
+                  _buildPaymentTile(context,
                     icon: Icons.laptop_mac,
                     iconColor: const Color(0xFF607D8B),
                     iconBg: const Color(0xFFECEFF1),
@@ -142,7 +143,7 @@ class PaymentScreen extends StatelessWidget {
                     onTap: () => _processPayment(context),
                   ),
                   _buildPaymentDivider(),
-                  _buildPaymentTile(
+                  _buildPaymentTile(context,
                     icon: Icons.currency_rupee,
                     iconColor: const Color(0xFF9C27B0),
                     iconBg: const Color(0xFFF3E5F5),
@@ -150,7 +151,7 @@ class PaymentScreen extends StatelessWidget {
                     onTap: () => _processPayment(context),
                   ),
                   _buildPaymentDivider(),
-                  _buildPaymentTile(
+                  _buildPaymentTile(context,
                     icon: Icons.pin_outlined,
                     iconColor: const Color(0xFFFF5722),
                     iconBg: const Color(0xFFFBE9E7),
@@ -227,7 +228,7 @@ class PaymentScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPaymentTile({
+  Widget _buildPaymentTile(BuildContext context, {
     required IconData icon,
     required Color iconColor,
     required Color iconBg,
@@ -243,8 +244,8 @@ class PaymentScreen extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: Responsive.w(context, 38, min: 30),
+              height: Responsive.w(context, 38, min: 30),
               decoration: BoxDecoration(
                 color: iconBg,
                 borderRadius: BorderRadius.circular(10),
