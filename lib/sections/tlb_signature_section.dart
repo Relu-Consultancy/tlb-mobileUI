@@ -114,7 +114,7 @@ class TlbSignatureSection extends StatelessWidget {
                             const SizedBox(height: 12),
                             SizedBox(
                               width: double.infinity,
-                              height: 40,
+                              height: Responsive.h(context, 38, min: 32),
                               child: ElevatedButton(
                                 onPressed: () {
                                   Navigator.push(

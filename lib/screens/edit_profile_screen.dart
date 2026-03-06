@@ -55,7 +55,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         title: Text(
           'Edit Profile',
           style: GoogleFonts.poppins(
-            fontSize: 18,
+            fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.bold,
             color: const Color(0xFF1A1A2E),
           ),
@@ -183,7 +183,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             // Update Profile Button
             SizedBox(
               width: double.infinity,
-              height: 50,
+              height: Responsive.h(context, 48, min: 40),
               child: ElevatedButton(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -235,7 +235,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     TextInputType keyboardType = TextInputType.text,
   }) {
     return SizedBox(
-      height: 48,
+      height: Responsive.h(context, 46, min: 40),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
@@ -270,7 +270,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required void Function(String?) onChanged,
   }) {
     return Container(
-      height: 48,
+      height: Responsive.h(context, 46, min: 40),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
@@ -326,7 +326,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         // Handle date selection if needed. We're keeping it static for UI now.
       },
       child: Container(
-        height: 48,
+        height: Responsive.h(context, 46, min: 40),
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         alignment: Alignment.centerLeft,

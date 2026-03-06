@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 
 class RemindersScreen extends StatefulWidget {
   const RemindersScreen({super.key});
@@ -71,7 +72,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
         title: Text(
           'Reminders',
           style: GoogleFonts.poppins(
-            fontSize: 18,
+            fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.bold,
             color: const Color(0xFF1A1A2E),
           ),
@@ -101,7 +102,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
           Text(
             'No Reminders Yet',
             style: GoogleFonts.poppins(
-              fontSize: 18,
+              fontSize: Responsive.sp(context, 18),
               fontWeight: FontWeight.w600,
               color: const Color(0xFF1A1A2E),
             ),

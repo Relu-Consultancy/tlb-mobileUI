@@ -204,7 +204,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       Text(
                         'Filters',
                         style: GoogleFonts.poppins(
-                          fontSize: 18,
+                          fontSize: Responsive.sp(context, 18),
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF1A1A2E),
                         ),

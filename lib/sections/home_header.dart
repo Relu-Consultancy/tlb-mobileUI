@@ -80,7 +80,7 @@ class HomeHeader extends StatelessWidget {
                     return Text(
                       name,
                       style: GoogleFonts.poppins(
-                        fontSize: 18,
+                        fontSize: Responsive.sp(context, 18),
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                       ),

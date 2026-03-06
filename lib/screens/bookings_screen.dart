@@ -230,10 +230,14 @@ class _BookingCard extends StatelessWidget {
                         const Icon(Icons.calendar_today_outlined,
                             size: 14, color: Colors.grey),
                         const SizedBox(width: 3),
-                        Text(
-                          booking.date,
-                          style: GoogleFonts.poppins(
-                              fontSize: 12, color: Colors.grey.shade600),
+                        Flexible(
+                          child: Text(
+                            booking.date,
+                            style: GoogleFonts.poppins(
+                                fontSize: 12, color: Colors.grey.shade600),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                     ),

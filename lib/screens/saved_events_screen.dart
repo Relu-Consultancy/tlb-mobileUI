@@ -43,7 +43,7 @@ class SavedEventsScreen extends StatelessWidget {
                   Text(
                     'No saved events yet',
                     style: GoogleFonts.poppins(
-                      fontSize: 18,
+                      fontSize: Responsive.sp(context, 18),
                       fontWeight: FontWeight.w600,
                       color: Colors.grey.shade400,
                     ),

@@ -106,7 +106,7 @@ class OrganizerProfileScreen extends StatelessWidget {
                     Text(
                       'Fun Event.co',
                       style: GoogleFonts.poppins(
-                        fontSize: 20,
+                        fontSize: Responsive.sp(context, 18),
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF1A1A2E),
                       ),
@@ -181,19 +181,19 @@ class OrganizerProfileScreen extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        _buildStatItem('50+', 'EVENTS HOSTED'),
+                        _buildStatItem(context, '50+', 'EVENTS HOSTED'),
                         Container(
                           width: 1,
                           height: 40,
                           color: Colors.grey.shade200,
                         ),
-                        _buildStatItem('4.8 ⭐', 'RATING'),
+                        _buildStatItem(context, '4.8 ⭐', 'RATING'),
                         Container(
                           width: 1,
                           height: 40,
                           color: Colors.grey.shade200,
                         ),
-                        _buildStatItem('5+', 'EXPERIENCE'),
+                        _buildStatItem(context, '5+', 'EXPERIENCE'),
                       ],
                     ),
                   ),
@@ -204,12 +204,16 @@ class OrganizerProfileScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Upcoming Events',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1A1A2E),
+                      Expanded(
+                        child: Text(
+                          'Upcoming Events',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF1A1A2E),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       Text(
@@ -261,14 +265,14 @@ class OrganizerProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(String value, String label) {
+  Widget _buildStatItem(BuildContext context, String value, String label) {
     return Expanded(
       child: Column(
         children: [
           Text(
             value,
             style: GoogleFonts.poppins(
-              fontSize: 18,
+              fontSize: Responsive.sp(context, 17),
               fontWeight: FontWeight.w700,
               color: const Color(0xFF1A1A2E),
             ),

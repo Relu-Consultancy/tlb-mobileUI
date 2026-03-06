@@ -179,16 +179,19 @@ class StealersSection extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  '₹${event.price?.toInt() ?? 2000}',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w800,
-                                    color: const Color(0xFF1A1A2E),
+                                Flexible(
+                                  child: Text(
+                                    '₹${event.price?.toInt() ?? 2000}',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                      color: const Color(0xFF1A1A2E),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                                 SizedBox(
-                                  height: 40,
+                                  height: Responsive.h(context, 38, min: 32),
                                   child: ElevatedButton(
                                     onPressed: () {
                                       Navigator.push(

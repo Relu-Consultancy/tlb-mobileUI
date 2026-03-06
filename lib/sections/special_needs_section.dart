@@ -145,16 +145,19 @@ class SpecialNeedsSection extends StatelessWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  'Price - ₹${event.price?.toInt() ?? 200}',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF1A1A2E),
+                                Flexible(
+                                  child: Text(
+                                    'Price - ₹${event.price?.toInt() ?? 200}',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF1A1A2E),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                                 SizedBox(
-                                  height: 40,
+                                  height: Responsive.h(context, 38, min: 32),
                                   child: ElevatedButton(
                                     onPressed: () {
                                       Navigator.push(

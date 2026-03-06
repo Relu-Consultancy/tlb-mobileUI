@@ -127,18 +127,46 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Share', style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey)),
+                    Flexible(
+                      child: Text(
+                        'Share',
+                        style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                     Text('  •  ', style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey)),
-                    Text('Rate Us', style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey)),
+                    Flexible(
+                      child: Text(
+                        'Rate Us',
+                        style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 6),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Terms & Conditions', style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey)),
+                    Flexible(
+                      child: Text(
+                        'Terms & Conditions',
+                        style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                     Text('  •  ', style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey)),
-                    Text('Privacy Policy', style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey)),
+                    Flexible(
+                      child: Text(
+                        'Privacy Policy',
+                        style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10),

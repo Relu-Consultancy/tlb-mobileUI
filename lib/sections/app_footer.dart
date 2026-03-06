@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 
 class AppFooter extends StatelessWidget {
   const AppFooter({super.key});
@@ -8,7 +9,10 @@ class AppFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.only(top: 60, bottom: 40),
+      padding: EdgeInsets.only(
+        top: Responsive.h(context, 50, min: 30),
+        bottom: Responsive.h(context, 30, min: 20),
+      ),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.bottomCenter,
@@ -27,7 +31,7 @@ class AppFooter extends StatelessWidget {
           // TLB Logo
           Image.asset(
             'resources- tlb-ui/tlbAppIcon.png',
-            width: 80,
+            width: Responsive.w(context, 75, min: 55),
             fit: BoxFit.contain,
           ),
           const SizedBox(height: 8),

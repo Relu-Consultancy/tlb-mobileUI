@@ -44,7 +44,7 @@ class OffersScreen extends StatelessWidget {
     );
   }
 
-  List<Map<String, dynamic>> get _dummyCoupons => [
+  static final List<Map<String, dynamic>> _dummyCoupons = [
         {
           'code': 'TLB20OFF',
           'discount': '20% OFF',

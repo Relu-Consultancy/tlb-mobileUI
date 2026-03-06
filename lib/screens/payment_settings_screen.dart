@@ -181,12 +181,16 @@ class PaymentSettingsScreen extends StatelessWidget {
             children: [
               const Icon(Icons.account_balance, color: Colors.white70, size: 20),
               const SizedBox(width: 8),
-              Text(
-                bankName,
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+              Expanded(
+                child: Text(
+                  bankName,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -338,7 +342,7 @@ class PaymentSettingsScreen extends StatelessWidget {
     );
   }
 
-  List<Map<String, dynamic>> get _dummyTransactions => [
+  static final List<Map<String, dynamic>> _dummyTransactions = [
         {
           'event': 'Halloween Party 2025',
           'amount': '1,200',
