@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../core/booked_events_state.dart';
 import '../models/event_model.dart';
+import 'event_detail_screen.dart';
 
 class BookingConfirmedScreen extends StatefulWidget {
   final EventModel event;
@@ -14,22 +15,138 @@ class BookingConfirmedScreen extends StatefulWidget {
   State<BookingConfirmedScreen> createState() => _BookingConfirmedScreenState();
 }
 
-class _BookingConfirmedScreenState extends State<BookingConfirmedScreen> {
+class _BookingConfirmedScreenState extends State<BookingConfirmedScreen>
+    with SingleTickerProviderStateMixin {
   late final String _bookingId;
+  bool _revealed = false;
+  late final AnimationController _animCtrl;
+  late final Animation<double> _flipAnimation;
+  late final Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
     _bookingId = BookingEntry.generateId();
     BookedEventsState.addBooking(widget.event);
+
+    _animCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+
+    _flipAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _animCtrl, curve: Curves.easeInOutCubic),
+    );
+
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.92), weight: 30),
+      TweenSequenceItem(tween: Tween(begin: 0.92, end: 1.0), weight: 70),
+    ]).animate(CurvedAnimation(parent: _animCtrl, curve: Curves.easeInOutCubic));
+  }
+
+  @override
+  void dispose() {
+    _animCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onReveal() {
+    if (_revealed) return;
+    _animCtrl.forward().then((_) {
+      setState(() => _revealed = true);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return _TicketScreen(
-      event: widget.event,
-      bookingId: _bookingId,
-      showConfirmation: true,
+    if (_revealed) {
+      return _TicketScreen(
+        event: widget.event,
+        bookingId: _bookingId,
+        showConfirmation: true,
+        onBack: () {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (_) => EventDetailScreen(event: widget.event),
+            ),
+            (route) => route.isFirst,
+          );
+        },
+      );
+    }
+
+    return _ClickHereTeaser(
+      flipAnimation: _flipAnimation,
+      scaleAnimation: _scaleAnimation,
+      onTap: _onReveal,
+      child: _TicketScreen(
+        event: widget.event,
+        bookingId: _bookingId,
+        showConfirmation: true,
+        onBack: () {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (_) => EventDetailScreen(event: widget.event),
+            ),
+            (route) => route.isFirst,
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ClickHereTeaser extends StatelessWidget {
+  final Animation<double> flipAnimation;
+  final Animation<double> scaleAnimation;
+  final VoidCallback onTap;
+  final Widget child;
+
+  const _ClickHereTeaser({
+    required this.flipAnimation,
+    required this.scaleAnimation,
+    required this.onTap,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final safeTop = MediaQuery.of(context).padding.top;
+
+    return AnimatedBuilder(
+      animation: flipAnimation,
+      builder: (context, _) {
+        final progress = flipAnimation.value;
+        final showBack = progress > 0.5;
+
+        return Stack(
+          children: [
+            if (showBack) child,
+            if (!showBack)
+              Scaffold(
+                backgroundColor: const Color(0xFFD6E4F7),
+                body: GestureDetector(
+                  onTap: onTap,
+                  child: Center(
+                    child: Transform.scale(
+                      scale: scaleAnimation.value,
+                      child: Opacity(
+                        opacity: (1.0 - progress * 2).clamp(0.0, 1.0),
+                        child: Padding(
+                          padding: EdgeInsets.only(top: safeTop),
+                          child: Image.asset(
+                            'assets/images/click_here_ticket.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -39,11 +156,13 @@ class _TicketScreen extends StatelessWidget {
   final EventModel event;
   final String bookingId;
   final bool showConfirmation;
+  final VoidCallback? onBack;
 
   const _TicketScreen({
     required this.event,
     required this.bookingId,
     this.showConfirmation = false,
+    this.onBack,
   });
 
   @override
@@ -83,7 +202,7 @@ class _TicketScreen extends StatelessWidget {
             top: safeTop + 6,
             left: 12,
             child: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
+              onTap: onBack ?? () => Navigator.of(context).pop(),
               child: Container(
                 width: 38,
                 height: 38,

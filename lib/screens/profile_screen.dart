@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/auth_state.dart';
+import '../core/saved_events_state.dart';
+import '../core/booked_events_state.dart';
 import 'bookings_screen.dart';
 import 'saved_events_screen.dart';
 import 'help_centre_screen.dart';
@@ -9,6 +12,8 @@ import 'payment_settings_screen.dart';
 import 'your_reviews_screen.dart';
 import 'offers_screen.dart';
 import 'notification_screen.dart';
+import 'reminders_screen.dart';
+import 'home_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -211,7 +216,10 @@ class ProfileScreen extends StatelessWidget {
             _buildMenuItem(
               icon: Icons.alarm,
               title: 'Reminders',
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const RemindersScreen()),
+              ),
             ),
 
             const SizedBox(height: 10),
@@ -237,16 +245,55 @@ class ProfileScreen extends StatelessWidget {
             ),
             _buildMenuItem(
               icon: Icons.logout,
-              iconColor: const Color(0xFFE53935), // Red
+              iconColor: const Color(0xFFE53935),
               title: 'Log Out',
               hideChevron: true,
-              onTap: () {
-                // Log out action
-              },
+              onTap: () => _showLogoutDialog(context),
             ),
             const SizedBox(height: 40),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Log Out',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 17),
+        ),
+        content: Text(
+          'Are you sure you want to log out?',
+          style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey.shade700),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel',
+                style: GoogleFonts.poppins(color: Colors.grey, fontSize: 14)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              AuthState.logout();
+              SavedEventsState.savedEvents.value = [];
+              BookedEventsState.bookings.value = [];
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const HomeScreen()),
+                (route) => false,
+              );
+            },
+            child: Text('Log Out',
+                style: GoogleFonts.poppins(
+                    color: const Color(0xFFE53935),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14)),
+          ),
+        ],
       ),
     );
   }
