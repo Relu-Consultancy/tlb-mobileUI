@@ -1,4 +1,5 @@
 class EventModel {
+  final String id;
   final String title;
   final String venue;
   final String imagePath;
@@ -10,6 +11,7 @@ class EventModel {
   final bool isFeatured;
 
   const EventModel({
+    this.id = '',
     required this.title,
     required this.venue,
     required this.imagePath,
@@ -20,4 +22,7 @@ class EventModel {
     this.description,
     this.isFeatured = false,
   });
+
+  /// Stable identifier: uses explicit id if set, otherwise title+venue hash.
+  String get uniqueId => id.isNotEmpty ? id : '${title}_$venue';
 }

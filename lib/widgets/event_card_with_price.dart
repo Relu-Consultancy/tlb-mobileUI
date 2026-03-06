@@ -48,13 +48,13 @@ class EventCardWithPrice extends StatelessWidget {
                 child: Image.asset(
                   event.imagePath,
                   width: width ?? double.infinity,
-                  height: 200,
+                  height: Responsive.h(context, 200, min: 140),
                   fit: BoxFit.cover,
                   cacheWidth: width != null ? (width! * 2).toInt() : null,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       width: width ?? double.infinity,
-                      height: 200,
+                      height: Responsive.h(context, 200, min: 140),
                       color: AppColors.primary.withOpacity(0.2),
                       child: const Icon(Icons.event, size: 48),
                     );

@@ -41,10 +41,10 @@ class _LoginSheetState extends State<_LoginSheet> {
       );
       return;
     }
-    // Close login sheet and open OTP sheet
+    final parentContext = Navigator.of(context).context;
     Navigator.pop(context);
     showModalBottomSheet(
-      context: context,
+      context: parentContext,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _OTPSheet(phoneOrEmail: phone),
@@ -53,8 +53,9 @@ class _LoginSheetState extends State<_LoginSheet> {
 
   void _onGoogleSignIn() {
     AuthState.login(name: 'Google User');
+    final messenger = ScaffoldMessenger.of(context);
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.showSnackBar(
       const SnackBar(content: Text('Signed in with Google!')),
     );
   }
@@ -348,8 +349,9 @@ class _OTPSheetState extends State<_OTPSheet> {
       return;
     }
     AuthState.login(phone: widget.phoneOrEmail);
+    final messenger = ScaffoldMessenger.of(context);
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.showSnackBar(
       const SnackBar(content: Text('OTP Verified! Logged in successfully.')),
     );
   }

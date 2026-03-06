@@ -35,7 +35,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
 
   void _startAutoSlide() {
     _autoSlideTimer = Timer.periodic(const Duration(seconds: 4), (_) {
-      if (!_pageController.hasClients) return;
+      if (!_pageController.hasClients || DummyData.weekendSpecial.isEmpty) return;
       final nextPage = ((_pageController.page?.round() ?? 0) + 1) %
           DummyData.weekendSpecial.length;
       _pageController.animateToPage(

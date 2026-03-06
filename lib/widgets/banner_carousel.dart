@@ -39,7 +39,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
 
   void _startAutoSlide() {
     _autoSlideTimer = Timer.periodic(const Duration(seconds: 3), (_) {
-      if (!_pageController.hasClients) return;
+      if (!_pageController.hasClients || widget.events.isEmpty) return;
       final nextPage = ((_pageController.page?.round() ?? 0) + 1) %
           widget.events.length;
       _pageController.animateToPage(

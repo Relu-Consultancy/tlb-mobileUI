@@ -125,13 +125,18 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                   _buildCategoryTabs(),
 
                   // Events List
-                  ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _getEventsForCategory(_selectedCategory).length,
-                    itemBuilder: (context, index) {
-                      return _buildEventCard(_getEventsForCategory(_selectedCategory)[index]);
+                  Builder(
+                    builder: (context) {
+                      final events = _getEventsForCategory(_selectedCategory);
+                      return ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: events.length,
+                        itemBuilder: (context, index) {
+                          return _buildEventCard(events[index]);
+                        },
+                      );
                     },
                   ),
                   
