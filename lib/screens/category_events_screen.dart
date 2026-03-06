@@ -9,6 +9,7 @@ import '../sections/discover_near_you_section.dart';
 import '../sections/family_feels_section.dart';
 import '../sections/tlb_signature_section.dart';
 import '../sections/app_footer.dart';
+import '../data/dummy_data.dart';
 import 'event_detail_screen.dart';
 
 class CategoryEventsScreen extends StatefulWidget {
@@ -35,25 +36,70 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
     'Shop',
   ];
 
-  // Dummy event data based on the second image design
-  final List<EventModel> _categoryEvents = [
-    EventModel(
-      title: 'Kids party',
-      venue: 'FULL PROGRAM', // using venue to store the bottom-left text
-      imagePath: 'assets/images/new_home/eventposter1.jpg',
-      price: 800,
-      tag: '2 Weeks', // using for first pill
-      description: 'Age 8-14', // using for second pill
-    ),
-    EventModel(
-      title: 'Adventure Camp',
-      venue: 'SUMMER SPECIAL',
-      imagePath: 'assets/images/new_home/eventposter2.jpg',
-      price: 1200,
-      tag: '1 Week',
-      description: 'Age 10-15',
-    ),
-  ];
+  /// Returns events for the selected category. Content reloads when tab changes.
+  List<EventModel> _getEventsForCategory(String category) {
+    switch (category) {
+      case 'Events':
+        return [
+          EventModel(
+            title: 'Kids party',
+            venue: 'FULL PROGRAM',
+            imagePath: 'assets/images/new_home/eventposter1.jpg',
+            price: 800,
+            tag: '2 Weeks',
+            description: 'Age 8-14',
+          ),
+          EventModel(
+            title: 'Adventure Camp',
+            venue: 'SUMMER SPECIAL',
+            imagePath: 'assets/images/new_home/eventposter2.jpg',
+            price: 1200,
+            tag: '1 Week',
+            description: 'Age 10-15',
+          ),
+          ...DummyData.weekendSpecial,
+        ];
+      case 'Classes':
+        return [
+          ...DummyData.hotPicks,
+          ...DummyData.familyFeels,
+        ];
+      case 'Program':
+        return [
+          ...DummyData.tlbSignature,
+          ...DummyData.weekendSpecial,
+        ];
+      case 'Spaces':
+        return [
+          ...DummyData.discoverNearYou,
+          ...DummyData.familyFeels,
+        ];
+      case 'Shop':
+        return [
+          ...DummyData.stealers,
+          ...DummyData.specialNeeds,
+        ];
+      default:
+        return [
+          EventModel(
+            title: 'Kids party',
+            venue: 'FULL PROGRAM',
+            imagePath: 'assets/images/new_home/eventposter1.jpg',
+            price: 800,
+            tag: '2 Weeks',
+            description: 'Age 8-14',
+          ),
+          EventModel(
+            title: 'Adventure Camp',
+            venue: 'SUMMER SPECIAL',
+            imagePath: 'assets/images/new_home/eventposter2.jpg',
+            price: 1200,
+            tag: '1 Week',
+            description: 'Age 10-15',
+          ),
+        ];
+    }
+  }
 
   @override
   void initState() {
@@ -83,9 +129,9 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _categoryEvents.length,
+                    itemCount: _getEventsForCategory(_selectedCategory).length,
                     itemBuilder: (context, index) {
-                      return _buildEventCard(_categoryEvents[index]);
+                      return _buildEventCard(_getEventsForCategory(_selectedCategory)[index]);
                     },
                   ),
                   
