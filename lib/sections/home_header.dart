@@ -71,13 +71,21 @@ class HomeHeader extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(
-                  'Hello World',
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
+                ValueListenableBuilder<bool>(
+                  valueListenable: AuthState.isLoggedIn,
+                  builder: (context, loggedIn, _) {
+                    final name = loggedIn && AuthState.userName != null
+                        ? 'Hello ${AuthState.userName}'
+                        : 'Hello There';
+                    return Text(
+                      name,
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(width: 4),
                 Image.asset(

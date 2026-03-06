@@ -342,7 +342,7 @@ class EventDetailScreen extends StatelessWidget {
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: 4, // dummy count
+                        itemCount: 4,
                         itemBuilder: (context, index) {
                           return Container(
                             margin: const EdgeInsets.only(right: 12),
@@ -380,15 +380,28 @@ class EventDetailScreen extends StatelessWidget {
                       height: Responsive.h(context, 180, min: 140),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
-                        color: Colors.grey.shade200,
-                        image: const DecorationImage(
-                          image: AssetImage('assets/images/map_placeholder.png'),
-                          fit: BoxFit.cover,
-                          onError: null,
-                        ),
+                        color: const Color(0xFFE8F0E8),
                       ),
                       child: Stack(
                         children: [
+                          Positioned.fill(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: CustomPaint(
+                                painter: _MapPlaceholderPainter(),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 12,
+                            left: 0,
+                            right: 0,
+                            child: Icon(
+                              Icons.location_on,
+                              size: 36,
+                              color: Colors.red.shade600,
+                            ),
+                          ),
                           // Gradient overlay
                           Positioned.fill(
                             child: Container(
@@ -436,7 +449,7 @@ class EventDetailScreen extends StatelessWidget {
                                     onPressed: () {},
                                     icon: const Icon(Icons.directions, size: 16),
                                     label: Text(
-                                      'Get Direction',
+                                      'Get Directions',
                                       style: GoogleFonts.poppins(
                                         fontSize: Responsive.sp(context, 12),
                                         fontWeight: FontWeight.w600,
@@ -1185,4 +1198,34 @@ class EventDetailScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class _MapPlaceholderPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bgPaint = Paint()..color = const Color(0xFFE8F0E8);
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), bgPaint);
+
+    final roadPaint = Paint()
+      ..color = const Color(0xFFD0D8D0)
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+
+    for (double y = 0; y < size.height; y += 30) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), roadPaint);
+    }
+    for (double x = 0; x < size.width; x += 40) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), roadPaint);
+    }
+
+    final accentPaint = Paint()
+      ..color = const Color(0xFFC8E0C8)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(size.width * 0.2, size.height * 0.3), 12, accentPaint);
+    canvas.drawCircle(Offset(size.width * 0.7, size.height * 0.6), 16, accentPaint);
+    canvas.drawCircle(Offset(size.width * 0.5, size.height * 0.15), 10, accentPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

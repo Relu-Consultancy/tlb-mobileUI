@@ -7,8 +7,15 @@ import 'payment_screen.dart';
 
 class TicketBookingScreen extends StatefulWidget {
   final EventModel event;
+  final String selectedDate;
+  final String selectedTime;
 
-  const TicketBookingScreen({super.key, required this.event});
+  const TicketBookingScreen({
+    super.key,
+    required this.event,
+    this.selectedDate = 'Saturday, March 21',
+    this.selectedTime = '3:00 PM',
+  });
 
   @override
   State<TicketBookingScreen> createState() => _TicketBookingScreenState();
@@ -130,7 +137,12 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => PaymentScreen(event: event, amount: _subtotal),
+                    builder: (_) => PaymentScreen(
+                      event: event,
+                      amount: _subtotal,
+                      selectedDate: widget.selectedDate,
+                      selectedTime: widget.selectedTime,
+                    ),
                   ),
                 );
               } : null,
@@ -183,8 +195,8 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             borderRadius: BorderRadius.circular(10),
             child: Image.asset(
               event.imagePath,
-              width: 100,
-              height: 110,
+              width: Responsive.w(context, 100, min: 80),
+              height: Responsive.h(context, 110, min: 90),
               fit: BoxFit.cover,
             ),
           ),
@@ -241,7 +253,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        'Saturday, March 21, 3:00 pm–6:00 pm',
+                        '${widget.selectedDate}, ${widget.selectedTime}',
                         style: GoogleFonts.poppins(
                             fontSize: 11, color: Colors.grey.shade600),
                       ),
@@ -266,7 +278,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Only 5 spots lefts',
+                  'Only 5 spots left',
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -445,7 +457,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Get FLAT OFF of ₹50',
+                      'Get flat ₹50 off',
                       style: GoogleFonts.poppins(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,

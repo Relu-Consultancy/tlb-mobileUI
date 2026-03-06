@@ -149,8 +149,11 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              TicketBookingScreen(event: event),
+                          builder: (_) => TicketBookingScreen(
+                            event: event,
+                            selectedDate: _dates[_selectedDateIndex!],
+                            selectedTime: _times[_selectedTimeIndex!],
+                          ),
                         ),
                       );
                     }

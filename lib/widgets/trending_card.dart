@@ -36,7 +36,7 @@ class _TrendingCardState extends State<TrendingCard> {
 
   void _startAutoSlide() {
     _autoSlideTimer = Timer.periodic(const Duration(seconds: 4), (_) {
-      if (!_pageController.hasClients) return;
+      if (!_pageController.hasClients || widget.events.isEmpty) return;
       final nextPage = ((_pageController.page?.round() ?? 0) + 1) %
           widget.events.length;
       _pageController.animateToPage(

@@ -6,11 +6,15 @@ import 'booking_confirmed_screen.dart';
 class PaymentScreen extends StatelessWidget {
   final EventModel event;
   final int amount;
+  final String selectedDate;
+  final String selectedTime;
 
   const PaymentScreen({
     super.key,
     required this.event,
     required this.amount,
+    this.selectedDate = 'Saturday, March 21',
+    this.selectedTime = '3:00 PM',
   });
 
   @override
@@ -196,7 +200,11 @@ class PaymentScreen extends StatelessWidget {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => BookingConfirmedScreen(event: event),
+          builder: (_) => BookingConfirmedScreen(
+            event: event,
+            selectedDate: selectedDate,
+            selectedTime: selectedTime,
+          ),
         ),
       );
     });

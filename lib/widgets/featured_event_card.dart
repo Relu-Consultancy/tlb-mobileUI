@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/responsive.dart';
 import '../core/saved_events_state.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
@@ -49,12 +50,12 @@ class FeaturedEventCard extends StatelessWidget {
                 child: Image.asset(
                   event.imagePath,
                   width: width ?? double.infinity,
-                  height: 180,
+                  height: Responsive.h(context, 180, min: 130),
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       width: width ?? double.infinity,
-                      height: 180,
+                      height: Responsive.h(context, 180, min: 130),
                       color: AppColors.primary.withOpacity(0.2),
                       child: const Icon(Icons.event, size: 40),
                     );

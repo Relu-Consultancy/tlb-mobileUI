@@ -8,8 +8,15 @@ import 'event_detail_screen.dart';
 
 class BookingConfirmedScreen extends StatefulWidget {
   final EventModel event;
+  final String selectedDate;
+  final String selectedTime;
 
-  const BookingConfirmedScreen({super.key, required this.event});
+  const BookingConfirmedScreen({
+    super.key,
+    required this.event,
+    this.selectedDate = 'Saturday, March',
+    this.selectedTime = '3:00 pm–6:00 pm',
+  });
 
   @override
   State<BookingConfirmedScreen> createState() => _BookingConfirmedScreenState();
@@ -27,7 +34,11 @@ class _BookingConfirmedScreenState extends State<BookingConfirmedScreen>
   void initState() {
     super.initState();
     _bookingId = BookingEntry.generateId();
-    BookedEventsState.addBooking(widget.event);
+    BookedEventsState.addBooking(
+      widget.event,
+      date: widget.selectedDate,
+      time: widget.selectedTime,
+    );
 
     _animCtrl = AnimationController(
       vsync: this,
@@ -63,6 +74,8 @@ class _BookingConfirmedScreenState extends State<BookingConfirmedScreen>
       return _TicketScreen(
         event: widget.event,
         bookingId: _bookingId,
+        selectedDate: widget.selectedDate,
+        selectedTime: widget.selectedTime,
         showConfirmation: true,
         onBack: () {
           Navigator.of(context).pushAndRemoveUntil(
@@ -82,6 +95,8 @@ class _BookingConfirmedScreenState extends State<BookingConfirmedScreen>
       child: _TicketScreen(
         event: widget.event,
         bookingId: _bookingId,
+        selectedDate: widget.selectedDate,
+        selectedTime: widget.selectedTime,
         showConfirmation: true,
         onBack: () {
           Navigator.of(context).pushAndRemoveUntil(
@@ -155,12 +170,16 @@ class _ClickHereTeaser extends StatelessWidget {
 class _TicketScreen extends StatelessWidget {
   final EventModel event;
   final String bookingId;
+  final String selectedDate;
+  final String selectedTime;
   final bool showConfirmation;
   final VoidCallback? onBack;
 
   const _TicketScreen({
     required this.event,
     required this.bookingId,
+    this.selectedDate = 'Saturday, March',
+    this.selectedTime = '3:00 pm–6:00 pm',
     this.showConfirmation = false,
     this.onBack,
   });
@@ -334,7 +353,12 @@ class _TicketScreen extends StatelessWidget {
                   left: ticketW * 0.08,
                   right: ticketW * 0.08,
                 ),
-                child: _TicketContent(event: event, bookingId: bookingId),
+                child: _TicketContent(
+                  event: event,
+                  bookingId: bookingId,
+                  selectedDate: selectedDate,
+                  selectedTime: selectedTime,
+                ),
               ),
             ],
           ),
@@ -402,8 +426,15 @@ class _TicketScreen extends StatelessWidget {
 class _TicketContent extends StatelessWidget {
   final EventModel event;
   final String bookingId;
+  final String selectedDate;
+  final String selectedTime;
 
-  const _TicketContent({required this.event, required this.bookingId});
+  const _TicketContent({
+    required this.event,
+    required this.bookingId,
+    this.selectedDate = 'Saturday, March',
+    this.selectedTime = '3:00 pm–6:00 pm',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -514,7 +545,7 @@ class _TicketContent extends StatelessWidget {
                             fontSize: Responsive.sp(context, 9.5),
                             color: Colors.grey)),
                     const SizedBox(height: 2),
-                    Text('Saturday, March',
+                    Text(selectedDate,
                         style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 11.5),
                             fontWeight: FontWeight.w500,
@@ -531,7 +562,7 @@ class _TicketContent extends StatelessWidget {
                             fontSize: Responsive.sp(context, 9.5),
                             color: Colors.grey)),
                     const SizedBox(height: 2),
-                    Text('3:00 pm–6:00 pm',
+                    Text(selectedTime,
                         style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 11.5),
                             fontWeight: FontWeight.w500,

@@ -37,7 +37,7 @@ class BookedEventsState {
   static final ValueNotifier<List<BookingEntry>> bookings =
       ValueNotifier<List<BookingEntry>>([]);
 
-  static void addBooking(EventModel event) {
+  static void addBooking(EventModel event, {String? date, String? time}) {
     final list = List<BookingEntry>.from(bookings.value);
     list.insert(
       0,
@@ -45,12 +45,14 @@ class BookedEventsState {
         event: event,
         bookingId: BookingEntry.generateId(),
         bookedAt: DateTime.now(),
+        date: date ?? 'Saturday, March',
+        time: time ?? '3:00 pm–6:00 pm',
       ),
     );
     bookings.value = list;
   }
 
   static bool hasBooking(EventModel event) {
-    return bookings.value.any((b) => b.event.title == event.title);
+    return bookings.value.any((b) => b.event.uniqueId == event.uniqueId);
   }
 }
