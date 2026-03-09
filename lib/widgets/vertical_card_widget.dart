@@ -210,14 +210,14 @@ class VerticalCardWidget extends StatelessWidget {
                       const SizedBox(),
                     
                     SizedBox(
-                      height: Responsive.h(context, 38, min: 32),
+                      height: Responsive.h(context, 44, min: 38),
                       child: ElevatedButton(
                         onPressed: onTapBtn ?? () {},
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFFCC00),
                           foregroundColor: const Color(0xFF1A1A2E),
                           elevation: 0,
-                          minimumSize: const Size(0, 40),
+                          minimumSize: const Size(0, 46),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),

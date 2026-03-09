@@ -114,7 +114,7 @@ class TlbSignatureSection extends StatelessWidget {
                             const SizedBox(height: 12),
                             SizedBox(
                               width: double.infinity,
-                              height: Responsive.h(context, 38, min: 32),
+                              height: Responsive.h(context, 44, min: 38),
                               child: ElevatedButton(
                                 onPressed: () {
                                   Navigator.push(
@@ -128,7 +128,7 @@ class TlbSignatureSection extends StatelessWidget {
                                   backgroundColor: const Color(0xFFFFCC00),
                                   foregroundColor: const Color(0xFF1A1A2E),
                                   elevation: 0,
-                                  minimumSize: const Size(0, 40),
+                                  minimumSize: const Size(0, 46),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
                                   ),

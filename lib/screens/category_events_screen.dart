@@ -508,7 +508,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                           backgroundColor: const Color(0xFFFFCC00),
                           foregroundColor: const Color(0xFF1A1A2E),
                           elevation: 0,
-                          minimumSize: const Size(0, 40),
+                          minimumSize: const Size(0, 46),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),

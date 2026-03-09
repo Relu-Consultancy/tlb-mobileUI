@@ -181,7 +181,7 @@ class _TrendingCardState extends State<TrendingCard> {
                               const SizedBox(height: 8),
                               // Book Now button
                               SizedBox(
-                                height: Responsive.h(context, 38, min: 32),
+                                height: Responsive.h(context, 44, min: 38),
                                 child: ElevatedButton(
                                   onPressed: () {
                                     Navigator.push(
@@ -192,7 +192,7 @@ class _TrendingCardState extends State<TrendingCard> {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColors.primary,
                                     foregroundColor: Colors.white,
-                                    minimumSize: const Size(0, 40),
+                                    minimumSize: const Size(0, 46),
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 20,
                                     ),
