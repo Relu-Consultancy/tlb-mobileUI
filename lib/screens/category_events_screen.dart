@@ -32,79 +32,45 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
     'Events',
     'Classes',
     'Program',
-    'Spaces', // Changed from Venues to match the design image
+    'Spaces',
     'Shop',
   ];
 
-  /// Returns events for the selected category. Content reloads when tab changes.
+  /// Maps incoming category names (e.g. from PopularCategoriesSection) to a
+  /// matching tab in this screen. Unknown names fall back to 'Events'.
+  static String _mapCategoryToTab(String input) {
+    final normalized = input.toLowerCase().trim();
+    const mapping = {
+      'creative arts': 'Classes',
+      'play & adventure': 'Events',
+      'play &\nadventure': 'Events',
+      'events': 'Events',
+      'classes': 'Classes',
+      'program': 'Program',
+      'spaces': 'Spaces',
+      'shop': 'Shop',
+      'home': 'Home',
+    };
+    return mapping[normalized] ?? 'Events';
+  }
+
+  /// Pre-built category → events map (avoids re-creating lists on every build).
+  static final Map<String, List<EventModel>> _categoryEvents = {
+    'Events': [...DummyData.categoryEventsExtra, ...DummyData.weekendSpecial],
+    'Classes': [...DummyData.hotPicks, ...DummyData.familyFeels],
+    'Program': [...DummyData.tlbSignature, ...DummyData.weekendSpecial],
+    'Spaces': [...DummyData.discoverNearYou, ...DummyData.familyFeels],
+    'Shop': [...DummyData.stealers, ...DummyData.specialNeeds],
+  };
+
   List<EventModel> _getEventsForCategory(String category) {
-    switch (category) {
-      case 'Events':
-        return [
-          EventModel(
-            title: 'Kids party',
-            venue: 'FULL PROGRAM',
-            imagePath: 'assets/images/new_home/eventposter1.jpg',
-            price: 800,
-            tag: '2 Weeks',
-            description: 'Age 8-14',
-          ),
-          EventModel(
-            title: 'Adventure Camp',
-            venue: 'SUMMER SPECIAL',
-            imagePath: 'assets/images/new_home/eventposter2.jpg',
-            price: 1200,
-            tag: '1 Week',
-            description: 'Age 10-15',
-          ),
-          ...DummyData.weekendSpecial,
-        ];
-      case 'Classes':
-        return [
-          ...DummyData.hotPicks,
-          ...DummyData.familyFeels,
-        ];
-      case 'Program':
-        return [
-          ...DummyData.tlbSignature,
-          ...DummyData.weekendSpecial,
-        ];
-      case 'Spaces':
-        return [
-          ...DummyData.discoverNearYou,
-          ...DummyData.familyFeels,
-        ];
-      case 'Shop':
-        return [
-          ...DummyData.stealers,
-          ...DummyData.specialNeeds,
-        ];
-      default:
-        return [
-          EventModel(
-            title: 'Kids party',
-            venue: 'FULL PROGRAM',
-            imagePath: 'assets/images/new_home/eventposter1.jpg',
-            price: 800,
-            tag: '2 Weeks',
-            description: 'Age 8-14',
-          ),
-          EventModel(
-            title: 'Adventure Camp',
-            venue: 'SUMMER SPECIAL',
-            imagePath: 'assets/images/new_home/eventposter2.jpg',
-            price: 1200,
-            tag: '1 Week',
-            description: 'Age 10-15',
-          ),
-        ];
-    }
+    return _categoryEvents[category] ?? DummyData.categoryEventsExtra;
   }
 
   @override
   void initState() {
     super.initState();
-    _selectedCategory = widget.initialCategory;
+    _selectedCategory = _mapCategoryToTab(widget.initialCategory);
   }
 
   @override

@@ -9,6 +9,8 @@ class EventModel {
   final String? tag;
   final String? description;
   final bool isFeatured;
+  final String? eventDate;
+  final String? eventTime;
 
   const EventModel({
     this.id = '',
@@ -21,6 +23,8 @@ class EventModel {
     this.tag,
     this.description,
     this.isFeatured = false,
+    this.eventDate,
+    this.eventTime,
   });
 
   /// Stable identifier: uses explicit id if set, otherwise title+venue hash.
