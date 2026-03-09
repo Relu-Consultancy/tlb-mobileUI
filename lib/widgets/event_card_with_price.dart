@@ -160,7 +160,7 @@ class EventCardWithPrice extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
-                        minimumSize: const Size(0, 40),
+                        minimumSize: const Size(0, 46),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 10,

@@ -62,6 +62,8 @@ class DummyData {
       reviewCount: '3.5k reviews',
       price: 5000.0,
       tag: 'Filling Fast',
+      eventDate: 'Sat, 22 Mar 2026',
+      eventTime: '10:00 AM',
     ),
     EventModel(
       title: 'Family Creativity Day',
@@ -71,6 +73,8 @@ class DummyData {
       reviewCount: '2.1k reviews',
       price: 3000.0,
       tag: 'Best Seller',
+      eventDate: 'Sun, 23 Mar 2026',
+      eventTime: '02:00 PM',
     ),
   ];
 
@@ -82,6 +86,8 @@ class DummyData {
       rating: 5.0,
       reviewCount: '3.5k reviews',
       tag: 'Sat\nmar 16',
+      eventDate: 'Sat, 16 Mar 2026',
+      eventTime: '11:00 AM',
     ),
     EventModel(
       title: 'Outdoor Art Camp',
@@ -90,6 +96,8 @@ class DummyData {
       rating: 4.5,
       reviewCount: '1.2k reviews',
       tag: 'Sun\nmar 17',
+      eventDate: 'Sun, 17 Mar 2026',
+      eventTime: '09:00 AM',
     ),
   ];
 
@@ -102,6 +110,8 @@ class DummyData {
       reviewCount: '3.5k reviews',
       description: 'Slides, Splash Zone, Mini zipline & shaded picnic areas.',
       tag: '0.8 km away',
+      eventDate: 'Sat, 22 Mar 2026',
+      eventTime: '10:00 AM',
     ),
     EventModel(
       title: 'Creative Corner',
@@ -111,6 +121,8 @@ class DummyData {
       reviewCount: '2.5k reviews',
       description: 'Arts and crafts activities for all ages.',
       tag: '1.2 km away',
+      eventDate: 'Sun, 23 Mar 2026',
+      eventTime: '11:00 AM',
     ),
   ];
 
@@ -122,6 +134,8 @@ class DummyData {
       rating: 5.0,
       reviewCount: '3.5k reviews',
       price: 200.0,
+      eventDate: 'Sat, 22 Mar 2026',
+      eventTime: '07:00 AM',
     ),
   ];
 
@@ -179,6 +193,30 @@ class DummyData {
       price: 2500.0,
       tag: '50% OFF',
       description: 'End in 12:30:00',
+    ),
+  ];
+
+  /// Extra events used in category events screen (centralized from inline)
+  static const List<EventModel> categoryEventsExtra = [
+    EventModel(
+      title: 'Kids party',
+      venue: 'FULL PROGRAM',
+      imagePath: 'assets/images/new_home/eventposter1.jpg',
+      price: 800,
+      tag: '2 Weeks',
+      description: 'Age 8-14',
+      eventDate: 'Sat, 29 Mar 2026',
+      eventTime: '10:00 AM',
+    ),
+    EventModel(
+      title: 'Adventure Camp',
+      venue: 'SUMMER SPECIAL',
+      imagePath: 'assets/images/new_home/eventposter2.jpg',
+      price: 1200,
+      tag: '1 Week',
+      description: 'Age 10-15',
+      eventDate: 'Mon, 31 Mar 2026',
+      eventTime: '09:00 AM',
     ),
   ];
 

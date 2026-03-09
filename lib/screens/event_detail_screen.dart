@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/auth_state.dart';
 import '../core/responsive.dart';
 import '../core/saved_events_state.dart';
+import '../core/user_reviews_state.dart';
 import '../models/event_model.dart';
 import 'login_sheet.dart';
 import 'date_time_selection_screen.dart';
@@ -449,7 +450,7 @@ class EventDetailScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                                 SizedBox(
-                                  height: Responsive.h(context, 38, min: 32),
+                                  height: Responsive.h(context, 44, min: 38),
                                   child: ElevatedButton.icon(
                                     onPressed: () {},
                                     icon: const Icon(Icons.directions, size: 16),
@@ -464,7 +465,7 @@ class EventDetailScreen extends StatelessWidget {
                                       backgroundColor: const Color(0xFFFFCC00),
                                       foregroundColor: const Color(0xFF1A1A2E),
                                       elevation: 0,
-                                      minimumSize: const Size(0, 40),
+                                      minimumSize: const Size(0, 46),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(20),
                                       ),
@@ -938,6 +939,29 @@ class EventDetailScreen extends StatelessWidget {
                           height: 48,
                           child: ElevatedButton(
                             onPressed: () {
+                              final text = reviewController.text.trim();
+                              if (text.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Please write a review text first.')),
+                                );
+                                return;
+                              }
+
+                              final now = DateTime.now();
+                              final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                              final dateString = '${months[now.month - 1]} ${now.day}, ${now.year}';
+
+                              final newReview = {
+                                'eventName': event.title,
+                                'image': event.imagePath,
+                                'rating': rating,
+                                'date': dateString,
+                                'text': text,
+                                'helpful': 0,
+                              };
+
+                              UserReviewsState().addReview(newReview);
+
                               Navigator.pop(ctx);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Review submitted successfully!')),

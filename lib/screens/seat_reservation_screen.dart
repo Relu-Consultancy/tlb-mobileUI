@@ -139,7 +139,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                   ),
                 ),
                 Text(
-                  '${widget.event.venue} • Sat 21 Nov | 04:00 PM',
+                  '${widget.event.venue} • ${widget.event.eventDate ?? 'TBD'} | ${widget.event.eventTime ?? 'TBD'}',
                   style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600),
                 ),
               ],
@@ -190,110 +190,122 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                   const SizedBox(height: 24),
 
                   // Seat grid
-                  ...List.generate(_seatMap.length, (row) {
-                    final cat = _getCategoryForRow(row);
-                    final isFirstInCategory = row == 0 || _getCategoryForRow(row - 1) != cat;
+                  Builder(builder: (context) {
+                    final screenWidth = MediaQuery.of(context).size.width;
+                    // Dynamic seat size: fits 12 seats + 2 labels + gaps
+                    final seatSize = ((screenWidth - 80) / 14).clamp(18.0, 28.0);
+                    final seatMargin = (seatSize * 0.06).clamp(1.0, 2.0);
 
                     return Column(
-                      children: [
-                        if (isFirstInCategory) ...[
-                          if (row > 0) const SizedBox(height: 12),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 6),
-                            child: Text(
-                              '${_categories[cat]!.name} - ₹${_categories[cat]!.price}',
-                              style: GoogleFonts.poppins(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: _categories[cat]!.color,
-                              ),
-                            ),
-                          ),
-                        ],
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(_seatMap.length, (row) {
+                        final cat = _getCategoryForRow(row);
+                        final isFirstInCategory = row == 0 || _getCategoryForRow(row - 1) != cat;
+
+                        return Column(
                           children: [
-                            // Row label
-                            SizedBox(
-                              width: 20,
-                              child: Text(
-                                _rowLabels[row],
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.grey,
+                            if (isFirstInCategory) ...[
+                              if (row > 0) const SizedBox(height: 12),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 6),
+                                child: Text(
+                                  '${_categories[cat]!.name} - ₹${_categories[cat]!.price}',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: _categories[cat]!.color,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 4),
-                            // Seats
-                            ...List.generate(_seatMap[row].length, (col) {
-                              final seat = _seatMap[row][col];
-                              if (seat == 0) return const SizedBox(width: 26, height: 26);
-
-                              Color bgColor;
-                              Color borderColor;
-                              IconData? icon;
-                              switch (seat) {
-                                case 1: // available
-                                  bgColor = Colors.white;
-                                  borderColor = _categories[cat]!.color;
-                                  break;
-                                case 2: // sold
-                                  bgColor = Colors.grey.shade200;
-                                  borderColor = Colors.grey.shade300;
-                                  icon = Icons.close;
-                                  break;
-                                case 3: // selected
-                                  bgColor = _categories[cat]!.color;
-                                  borderColor = _categories[cat]!.color;
-                                  break;
-                                default:
-                                  bgColor = Colors.white;
-                                  borderColor = Colors.grey;
-                              }
-
-                              return GestureDetector(
-                                onTap: () => _toggleSeat(row, col),
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  width: 24,
-                                  height: 24,
-                                  margin: const EdgeInsets.all(1.5),
-                                  decoration: BoxDecoration(
-                                    color: bgColor,
-                                    borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(6),
-                                      bottom: Radius.circular(2),
+                            ],
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // Row label
+                                  SizedBox(
+                                    width: 20,
+                                    child: Text(
+                                      _rowLabels[row],
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.grey,
+                                      ),
                                     ),
-                                    border: Border.all(color: borderColor, width: 1.5),
                                   ),
-                                  child: icon != null
-                                      ? Icon(icon, size: 12, color: Colors.grey)
-                                      : seat == 3
-                                          ? const Icon(Icons.check, size: 14, color: Colors.white)
-                                          : null,
-                                ),
-                              );
-                            }),
-                            const SizedBox(width: 4),
-                            // Row label
-                            SizedBox(
-                              width: 20,
-                              child: Text(
-                                _rowLabels[row],
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.grey,
-                                ),
+                                  const SizedBox(width: 4),
+                                  // Seats
+                                  ...List.generate(_seatMap[row].length, (col) {
+                                    final seat = _seatMap[row][col];
+                                    if (seat == 0) return SizedBox(width: seatSize, height: seatSize);
+
+                                    Color bgColor;
+                                    Color borderColor;
+                                    IconData? icon;
+                                    switch (seat) {
+                                      case 1: // available
+                                        bgColor = Colors.white;
+                                        borderColor = _categories[cat]!.color;
+                                        break;
+                                      case 2: // sold
+                                        bgColor = Colors.grey.shade200;
+                                        borderColor = Colors.grey.shade300;
+                                        icon = Icons.close;
+                                        break;
+                                      case 3: // selected
+                                        bgColor = _categories[cat]!.color;
+                                        borderColor = _categories[cat]!.color;
+                                        break;
+                                      default:
+                                        bgColor = Colors.white;
+                                        borderColor = Colors.grey;
+                                    }
+
+                                    return GestureDetector(
+                                      onTap: () => _toggleSeat(row, col),
+                                      child: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 200),
+                                        width: seatSize,
+                                        height: seatSize,
+                                        margin: EdgeInsets.all(seatMargin),
+                                        decoration: BoxDecoration(
+                                          color: bgColor,
+                                          borderRadius: const BorderRadius.vertical(
+                                            top: Radius.circular(6),
+                                            bottom: Radius.circular(2),
+                                          ),
+                                          border: Border.all(color: borderColor, width: 1.5),
+                                        ),
+                                        child: icon != null
+                                            ? Icon(icon, size: seatSize * 0.5, color: Colors.grey)
+                                            : seat == 3
+                                                ? Icon(Icons.check, size: seatSize * 0.6, color: Colors.white)
+                                                : null,
+                                      ),
+                                    );
+                                  }),
+                                  const SizedBox(width: 4),
+                                  // Row label
+                                  SizedBox(
+                                    width: 20,
+                                    child: Text(
+                                      _rowLabels[row],
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
-                        ),
-                      ],
+                        );
+                      }),
                     );
                   }),
 

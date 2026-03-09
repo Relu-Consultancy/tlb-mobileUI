@@ -361,7 +361,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                               onPressed: () => _addTicket(index),
                               style: OutlinedButton.styleFrom(
                                 side: BorderSide(color: Colors.grey.shade400),
-                                minimumSize: const Size(0, 40),
+                                minimumSize: const Size(0, 46),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
@@ -486,7 +486,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    minimumSize: const Size(0, 40),
+                    minimumSize: const Size(0, 46),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),

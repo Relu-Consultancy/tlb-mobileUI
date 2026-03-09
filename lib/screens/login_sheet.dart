@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/auth_state.dart';
 import '../core/responsive.dart';
+import 'signup_screen.dart';
 
 /// Shows the login bottom sheet on top of ProfileScreen
 void showLoginSheet(BuildContext context) {
@@ -252,6 +253,38 @@ class _LoginSheetState extends State<_LoginSheet> {
                     color: const Color(0xFFFFC107),
                   ),
                 ),
+              ),
+              const SizedBox(height: 8),
+
+              // Don't have an account? Sign Up
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Don't have an account? ",
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context); // close login sheet
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SignupScreen()),
+                      );
+                    },
+                    child: Text(
+                      'Sign Up',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFFFFC107),
+                      ),
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 8),
