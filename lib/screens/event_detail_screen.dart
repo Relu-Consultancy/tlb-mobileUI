@@ -81,6 +81,12 @@ class EventDetailScreen extends StatelessWidget {
                     child: Image.asset(
                       event.imagePath,
                       fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: Colors.grey.shade300,
+                        child: const Center(
+                          child: Icon(Icons.event, size: 60, color: Colors.grey),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -795,15 +801,16 @@ class EventDetailScreen extends StatelessWidget {
     );
   }
 
+  static final List<Map<String, dynamic>> _reviews = [
+    {'name': 'Laxman', 'stars': 4, 'comment': 'Fantastic experience! My kids had so much fun and made new friends.'},
+    {'name': 'Laxman', 'stars': 4, 'comment': 'Great organization and very engaging activities.'},
+    {'name': 'Sameer', 'stars': 5, 'comment': 'Amazing event! Kids had a blast. Highly recommended for families.'},
+    {'name': 'Sameer', 'stars': 5, 'comment': 'Well organized and fun. Would love more food options next time.'},
+    {'name': 'Rohit Sharma', 'stars': 5, 'comment': 'Amazing event! Kids had a blast. Highly recommended for families.'},
+    {'name': 'Priya Mehta', 'stars': 4, 'comment': 'Well organized and fun. Would love more food options next time.'},
+  ];
+
   void _showReviewsBottomSheet(BuildContext context) {
-    final reviews = [
-      {'name': 'Laxman', 'stars': 4, 'comment': 'Fantastic experience! My kids had so much fun and made new friends.'},
-      {'name': 'Laxman', 'stars': 4, 'comment': 'Great organization and very engaging activities.'},
-      {'name': 'Sameer', 'stars': 5, 'comment': 'Amazing event! Kids had a blast. Highly recommended for families.'},
-      {'name': 'Sameer', 'stars': 5, 'comment': 'Well organized and fun. Would love more food options next time.'},
-      {'name': 'Rohit Sharma', 'stars': 5, 'comment': 'Amazing event! Kids had a blast. Highly recommended for families.'},
-      {'name': 'Priya Mehta', 'stars': 4, 'comment': 'Well organized and fun. Would love more food options next time.'},
-    ];
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -878,10 +885,10 @@ class EventDetailScreen extends StatelessWidget {
               child: ListView.separated(
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                itemCount: reviews.length,
+                itemCount: _reviews.length,
                 separatorBuilder: (_, __) => Divider(height: 24, color: Colors.grey.shade300),
                 itemBuilder: (context, index) {
-                  final r = reviews[index];
+                  final r = _reviews[index];
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

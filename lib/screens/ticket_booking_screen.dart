@@ -198,6 +198,12 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
               width: Responsive.w(context, 100, min: 80),
               height: Responsive.h(context, 110, min: 90),
               fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                width: Responsive.w(context, 100, min: 80),
+                height: Responsive.h(context, 110, min: 90),
+                color: Colors.grey.shade200,
+                child: const Icon(Icons.event, size: 30, color: Colors.grey),
+              ),
             ),
           ),
           const SizedBox(width: 12),
