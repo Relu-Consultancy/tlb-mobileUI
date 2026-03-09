@@ -33,7 +33,7 @@ class SectionDividerWidget extends StatelessWidget {
 
   Widget _buildLine({required bool isLeft}) {
     return Container(
-      width: 40,
+      width: 70,
       height: 1.5,
       decoration: BoxDecoration(
         gradient: LinearGradient(

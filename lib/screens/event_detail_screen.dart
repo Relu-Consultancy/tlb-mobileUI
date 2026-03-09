@@ -414,21 +414,20 @@ class EventDetailScreen extends StatelessWidget {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(16),
                                 gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
                                   colors: [
+                                    Colors.black.withOpacity(0.8),
                                     Colors.transparent,
-                                    Colors.black.withOpacity(0.6),
                                   ],
                                 ),
                               ),
                             ),
                           ),
-                          // Content overlay
                           Positioned(
-                            bottom: 12,
-                            left: 12,
-                            right: 12,
+                            bottom: 16,
+                            left: 16,
+                            right: 90,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -455,7 +454,7 @@ class EventDetailScreen extends StatelessWidget {
                                     onPressed: () {},
                                     icon: const Icon(Icons.directions, size: 16),
                                     label: Text(
-                                      'Get Directions',
+                                      'Get Direction',
                                       style: GoogleFonts.poppins(
                                         fontSize: Responsive.sp(context, 12),
                                         fontWeight: FontWeight.w600,
@@ -487,8 +486,9 @@ class EventDetailScreen extends StatelessWidget {
                       margin: const EdgeInsets.symmetric(horizontal: 16),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF8F9FA),
-                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey.shade300),
                       ),
                       child: Row(
                         children: [
@@ -503,13 +503,26 @@ class EventDetailScreen extends StatelessWidget {
                               );
                             },
                             child: Container(
-                              width: Responsive.w(context, 44, min: 34),
-                              height: Responsive.w(context, 44, min: 34),
+                              width: Responsive.w(context, 54, min: 46),
+                              height: Responsive.w(context, 54, min: 46),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: const Color(0xFFDE7104).withOpacity(0.15),
+                                border: Border.all(color: Colors.white, width: 2),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                              child: const Icon(Icons.person, color: Color(0xFFDE7104), size: 28),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(27),
+                                child: Image.asset(
+                                  'assets/images/new_home/profilepic.jpg',
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -523,23 +536,25 @@ class EventDetailScreen extends StatelessWidget {
                                   style: GoogleFonts.poppins(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w600,
-                                    color: const Color(0xFFDE7104),
-                                    letterSpacing: 1,
+                                    color: const Color(0xFFF5A623),
+                                    letterSpacing: 0.5,
                                   ),
                                 ),
+                                const SizedBox(height: 2),
                                 Text(
-                                  'Fun World Events',
+                                  'Fun Event Co.',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
                                     color: const Color(0xFF1A1A2E),
                                   ),
                                 ),
+                                const SizedBox(height: 2),
                                 Text(
                                   '1.2k Followers',
                                   style: GoogleFonts.poppins(
                                     fontSize: 12,
-                                    color: Colors.grey,
+                                    color: Colors.grey.shade500,
                                   ),
                                 ),
                               ],
@@ -549,18 +564,18 @@ class EventDetailScreen extends StatelessWidget {
                           OutlinedButton(
                             onPressed: () {},
                             style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Color(0xFFDE7104)),
+                              side: BorderSide(color: Colors.grey.shade400),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                             ),
                             child: Text(
                               'Follow',
                               style: GoogleFonts.poppins(
-                                fontSize: 12,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: const Color(0xFFDE7104),
+                                color: Colors.grey.shade600,
                               ),
                             ),
                           ),
@@ -575,34 +590,27 @@ class EventDetailScreen extends StatelessWidget {
                       onTap: () => _showTermsConditionsBottomSheet(context),
                       child: Container(
                         margin: const EdgeInsets.symmetric(horizontal: 16),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.grey.shade200),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade300),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.description_outlined, size: 22, color: Colors.grey.shade600),
+                            Icon(Icons.description_outlined, size: 24, color: Colors.grey.shade600),
                             const SizedBox(width: 14),
                             Expanded(
                               child: Text(
                                 'Terms & Conditions',
                                 style: GoogleFonts.poppins(
                                   fontSize: 14,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                   color: const Color(0xFF1A1A2E),
                                 ),
                               ),
                             ),
-                            Icon(Icons.chevron_right, color: Colors.blue.shade400, size: 24),
+                            Icon(Icons.chevron_right, color: Colors.blue.shade500, size: 24),
                           ],
                         ),
                       ),
@@ -810,6 +818,160 @@ class EventDetailScreen extends StatelessWidget {
     {'name': 'Priya Mehta', 'stars': 4, 'comment': 'Well organized and fun. Would love more food options next time.'},
   ];
 
+  void _showAddReviewBottomSheet(BuildContext context) {
+    int rating = 5;
+    final TextEditingController reviewController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) {
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Write a Review',
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 17),
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF1A1A2E),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(ctx),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.close, size: 20, color: Color(0xFF1A1A2E)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Tap to Rate:',
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1A1A2E),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: List.generate(5, (index) {
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  rating = index + 1;
+                                });
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: Icon(
+                                  index < rating ? Icons.star : Icons.star_border,
+                                  color: Colors.amber,
+                                  size: 32,
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          'Your Review:',
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1A1A2E),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: reviewController,
+                          maxLines: 4,
+                          decoration: InputDecoration(
+                            hintText: 'Share your experience about this event...',
+                            hintStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade400),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Color(0xFFFFCC00)),
+                            ),
+                            filled: true,
+                            fillColor: const Color(0xFFF8F9FA),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(ctx);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Review submitted successfully!')),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFFFCC00),
+                              foregroundColor: const Color(0xFF1A1A2E),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              'Submit Review',
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   void _showReviewsBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -840,16 +1002,35 @@ class EventDetailScreen extends StatelessWidget {
                       color: const Color(0xFF1A1A2E),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(ctx),
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        shape: BoxShape.circle,
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(ctx);
+                          _showAddReviewBottomSheet(context);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.shade100,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.edit, size: 20, color: Color(0xFFDE7104)),
+                        ),
                       ),
-                      child: const Icon(Icons.close, size: 20, color: Color(0xFF1A1A2E)),
-                    ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(ctx),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.close, size: 20, color: Color(0xFF1A1A2E)),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
