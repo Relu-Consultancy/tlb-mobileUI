@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/auth_state.dart';
 import '../core/responsive.dart';
 import '../core/saved_events_state.dart';
+import '../core/user_reviews_state.dart';
 import '../models/event_model.dart';
 import 'login_sheet.dart';
 import 'date_time_selection_screen.dart';
@@ -938,6 +939,29 @@ class EventDetailScreen extends StatelessWidget {
                           height: 48,
                           child: ElevatedButton(
                             onPressed: () {
+                              final text = reviewController.text.trim();
+                              if (text.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Please write a review text first.')),
+                                );
+                                return;
+                              }
+
+                              final now = DateTime.now();
+                              final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                              final dateString = '${months[now.month - 1]} ${now.day}, ${now.year}';
+
+                              final newReview = {
+                                'eventName': event.title,
+                                'image': event.imagePath,
+                                'rating': rating,
+                                'date': dateString,
+                                'text': text,
+                                'helpful': 0,
+                              };
+
+                              UserReviewsState().addReview(newReview);
+
                               Navigator.pop(ctx);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Review submitted successfully!')),

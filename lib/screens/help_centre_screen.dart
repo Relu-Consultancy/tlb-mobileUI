@@ -75,19 +75,13 @@ class HelpCentreScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: _buildTopicCard(
-                    icon: Icons.workspace_premium_outlined,
-                    iconColor: const Color(0xFFFFC107),
-                    title: 'Classes Related\nQueries',
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildTopicCard(
                     icon: Icons.groups_outlined,
                     iconColor: const Color(0xFF4CAF50),
                     title: 'Ticket Booking\nQueries',
                   ),
                 ),
+                const SizedBox(width: 16),
+                const Expanded(child: SizedBox()),
               ],
             ),
 
