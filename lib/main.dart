@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'core/app_theme.dart';
@@ -15,6 +16,8 @@ void main() async {
       statusBarIconBrightness: Brightness.dark,
     ),
   );
+  // Disable runtime font fetching — use bundled fonts only
+  GoogleFonts.config.allowRuntimeFetching = false;
   runApp(const TLBApp());
 }
 
