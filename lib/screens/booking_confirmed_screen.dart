@@ -153,6 +153,7 @@ class _ClickHereTeaser extends StatelessWidget {
                           child: Image.asset(
                             'assets/images/click_here_ticket.png',
                             fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => const Icon(Icons.confirmation_num, size: 60, color: Colors.grey),
                           ),
                         ),
                       ),
@@ -265,6 +266,7 @@ class _TicketScreen extends StatelessWidget {
               'assets/images/booking_back.png',
               fit: BoxFit.cover,
               alignment: Alignment.topCenter,
+              errorBuilder: (_, __, ___) => Container(color: const Color(0xFFD6E4F7)),
             ),
           ),
           // Tall gradient fade for seamless blend into blue bg
@@ -344,6 +346,12 @@ class _TicketScreen extends StatelessWidget {
                 child: Image.asset(
                   'assets/images/updated_ticket.png',
                   fit: BoxFit.fill,
+                  errorBuilder: (_, __, ___) => Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
                 ),
               ),
               // Content with proper margins inside the white area
@@ -454,6 +462,11 @@ class _TicketContent extends StatelessWidget {
               height: Responsive.h(context, 120, min: 90),
               width: double.infinity,
               fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                height: Responsive.h(context, 120, min: 90),
+                color: Colors.grey.shade200,
+                child: const Icon(Icons.event, size: 40, color: Colors.grey),
+              ),
             ),
           ),
         ),

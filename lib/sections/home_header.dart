@@ -48,7 +48,7 @@ class HomeHeader extends StatelessWidget {
         SafeArea(
           bottom: false,
           child: Padding(
-            padding: EdgeInsets.fromLTRB(Responsive.w(context, 16), Responsive.h(context, 88, min: 60), Responsive.w(context, 16), Responsive.h(context, 36, min: 20)),
+            padding: EdgeInsets.fromLTRB(Responsive.w(context, 16), Responsive.h(context, 12, min: 8), Responsive.w(context, 16), Responsive.h(context, 24, min: 16)),
             child: Column(
               children: [
                 _buildGreetingRow(context),

@@ -69,40 +69,74 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
           // ── Venue & rating ──
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
             color: Colors.white,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Stack(
               children: [
-                Text(
-                  event.venue,
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: Colors.grey.shade600,
+                // Right side map image (blended)
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: Responsive.w(context, 140, min: 100),
+                  child: ShaderMask(
+                    shaderCallback: (Rect bounds) {
+                      return LinearGradient(
+                        colors: [Colors.white, Colors.white.withOpacity(0.0)],
+                        stops: const [0.0, 0.4],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.dstOut,
+                    child: Opacity(
+                      opacity: 0.8,
+                      child: Image.asset(
+                        'assets/images/map_bg.png', // Assuming map image is available, fallback if not
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade100),
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    ...List.generate(
-                      5,
-                      (i) => Icon(
-                        i < (event.rating?.round() ?? 4)
-                            ? Icons.star
-                            : Icons.star_border,
-                        size: 16,
-                        color: Colors.amber,
+                
+                // Content
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        event.venue,
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '(${event.reviewCount ?? "124 reviews"})',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.grey.shade500,
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          ...List.generate(
+                            5,
+                            (i) => Icon(
+                              i < (event.rating?.round() ?? 4)
+                                  ? Icons.star
+                                  : Icons.star_border,
+                              size: 16,
+                              color: Colors.amber,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '(${event.reviewCount ?? "124 reviews"})',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -159,15 +193,13 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
                     }
                   : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFCC00),
-                foregroundColor: const Color(0xFF1A1A2E),
+                backgroundColor: const Color(0xFFFFCC00), // Golden yellow
+                foregroundColor: const Color(0xFF1A1A2E), // Dark text
                 disabledBackgroundColor: Colors.grey.shade300,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(28),
-                  side: _canContinue
-                      ? const BorderSide(color: Color(0xFF1A1A2E), width: 1.5)
-                      : BorderSide.none,
+                  // Removed the outline border to match reference image
                 ),
               ),
               child: Text(
@@ -210,44 +242,58 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 10,
-              childAspectRatio: 2.6,
-            ),
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final isSelected = selectedIndex == index;
-              return GestureDetector(
-                onTap: () => onSelect(index),
-                child: Container(
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? const Color(0xFF1A1A2E)
-                        : Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: isSelected
-                          ? const Color(0xFF1A1A2E)
-                          : Colors.grey.shade300,
-                    ),
-                  ),
-                  child: Text(
-                    items[index],
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: isSelected ? Colors.white : const Color(0xFF1A1A2E),
-                    ),
-                  ),
+          Column(
+            children: [
+              for (int row = 0; row < (items.length / 3).ceil(); row++) ...[
+                if (row > 0) const SizedBox(height: 14),
+                Row(
+                  children: [
+                    for (int col = 0; col < 3; col++) ...[
+                      if (col > 0) const SizedBox(width: 8),
+                      Expanded(
+                        child: (row * 3 + col < items.length)
+                            ? GestureDetector(
+                                onTap: () => onSelect(row * 3 + col),
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: selectedIndex == (row * 3 + col)
+                                        ? const Color(0xFFFFCC00)
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: selectedIndex == (row * 3 + col)
+                                        ? null
+                                        : Border.all(
+                                            color: Colors.grey.shade300,
+                                            width: 1.0,
+                                          ),
+                                    boxShadow: [
+                                      if (selectedIndex == (row * 3 + col))
+                                        BoxShadow(
+                                          color: const Color(0xFFFFCC00).withOpacity(0.3),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                    ],
+                                  ),
+                                  child: Text(
+                                    items[row * 3 + col],
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 11,
+                                      fontWeight: selectedIndex == (row * 3 + col) ? FontWeight.w600 : FontWeight.w400,
+                                      color: const Color(0xFF1A1A2E),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : const SizedBox(),
+                      ),
+                    ],
+                  ],
                 ),
-              );
-            },
+              ],
+            ],
           ),
         ],
       ),

@@ -31,104 +31,102 @@ class OrganizerProfileScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        top: false,
-        child: CustomScrollView(
-        slivers: [
-          // ── Header with gradient ──
-          SliverAppBar(
-            expandedHeight: 260,
-            pinned: true,
-            backgroundColor: const Color(0xFFF5A623),
-            leading: IconButton(
-              icon: const CircleAvatar(
-                radius: 16,
-                backgroundColor: Colors.white,
-                child: Icon(Icons.arrow_back, size: 18, color: Color(0xFF1A1A2E)),
+      body: Column(
+        children: [
+          // ── Static Header with gradient ──
+          Container(
+            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFFF5A623),
+                  Color(0xFFFBD786),
+                  Colors.white,
+                ],
+                stops: [0.0, 0.5, 1.0],
               ),
-              onPressed: () => Navigator.pop(context),
             ),
-            actions: [
-              IconButton(
-                icon: const CircleAvatar(
-                  radius: 16,
-                  backgroundColor: Colors.white,
-                  child: Icon(Icons.share_outlined, size: 16, color: Color(0xFF1A1A2E)),
-                ),
-                onPressed: () {},
-              ),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFFF5A623),
-                      Color(0xFFFBD786),
-                      Colors.white,
+            child: Column(
+              children: [
+                // Nav bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                        icon: const CircleAvatar(
+                          radius: 16,
+                          backgroundColor: Colors.white,
+                          child: Icon(Icons.arrow_back, size: 18, color: Color(0xFF1A1A2E)),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      IconButton(
+                        icon: const CircleAvatar(
+                          radius: 16,
+                          backgroundColor: Colors.white,
+                          child: Icon(Icons.share_outlined, size: 16, color: Color(0xFF1A1A2E)),
+                        ),
+                        onPressed: () {},
+                      ),
                     ],
-                    stops: [0.0, 0.5, 1.0],
                   ),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                // Avatar with verified badge
+                Stack(
                   children: [
-                    // Avatar with verified badge
-                    Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 48,
-                          backgroundColor: Colors.grey.shade300,
-                          backgroundImage:
-                              const AssetImage('assets/images/new_home/profilepic.jpg'),
-                        ),
-                        Positioned(
-                          bottom: 2,
-                          right: 2,
-                          child: Container(
-                            width: 22,
-                            height: 22,
-                            decoration: const BoxDecoration(
-                              color: Colors.green,
-                              shape: BoxShape.circle,
-                              border: Border.fromBorderSide(
-                                BorderSide(color: Colors.white, width: 2),
-                              ),
-                            ),
-                            child: const Icon(Icons.check, size: 12, color: Colors.white),
+                    CircleAvatar(
+                      radius: 48,
+                      backgroundColor: Colors.grey.shade300,
+                      backgroundImage:
+                          const AssetImage('assets/images/new_home/profilepic.jpg'),
+                    ),
+                    Positioned(
+                      bottom: 2,
+                      right: 2,
+                      child: Container(
+                        width: 22,
+                        height: 22,
+                        decoration: const BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle,
+                          border: Border.fromBorderSide(
+                            BorderSide(color: Colors.white, width: 2),
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Fun Event.co',
-                      style: GoogleFonts.poppins(
-                        fontSize: Responsive.sp(context, 18),
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1A1A2E),
+                        child: const Icon(Icons.check, size: 12, color: Colors.white),
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '1.2k Followers',
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
                   ],
                 ),
-              ),
+                const SizedBox(height: 12),
+                Text(
+                  'Fun Event.co',
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 18),
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1A1A2E),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '1.2k Followers',
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
             ),
           ),
 
-          // ── Body content ──
-          SliverToBoxAdapter(
-            child: Padding(
+          // ── Moving Bottom Section ──
+          Expanded(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,8 +257,7 @@ class OrganizerProfileScreen extends StatelessWidget {
               ),
             ),
           ),
-          ],
-        ),
+        ],
       ),
     );
   }
