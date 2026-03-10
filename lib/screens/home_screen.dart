@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
+import '../core/location_state.dart';
 import '../sections/home_header.dart';
 import '../widgets/banner_carousel.dart';
 import '../widgets/categories_grid.dart';
 import '../widgets/section_divider_widget.dart';
+import '../widgets/empty_location_widget.dart';
 import '../sections/hot_picks_section.dart';
 import '../sections/weekend_special_section.dart';
 import '../sections/tlb_signature_section.dart';
@@ -44,42 +46,50 @@ class _HomeScreenState extends State<HomeScreen> {
           // Fixed header at top
           const HomeHeader(),
 
-          // Scrollable feed
+          // Scrollable feed or Empty State
           Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Spotlight section divider
-                  const SectionDividerWidget(title: 'Spotlight'),
-                  RepaintBoundary(
-                    child: BannerCarousel(
-                      events: DummyData.bannerEvents, 
-                      height: Responsive.h(context, 380, min: 280),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Categories Grid (3x2 layout)
-                  const RepaintBoundary(child: CategoriesGrid()),
-                  
-                  const SizedBox(height: 8),
-                  
-                  // Sections
-                  const RepaintBoundary(child: HotPicksSection()),
-                  const RepaintBoundary(child: WeekendSpecialSection()),
-                  const RepaintBoundary(child: DiscoverNearYouSection()),
-                  const RepaintBoundary(child: FamilyFeelsSection()),
-                  
-                  const RepaintBoundary(child: TlbSignatureSection()),
-                  const RepaintBoundary(child: SpecialNeedsSection()),
-                  const RepaintBoundary(child: StealersSection()),
+            child: ValueListenableBuilder<String>(
+              valueListenable: LocationState().selectedCity,
+              builder: (context, city, _) {
+                if (!LocationState().isLocationSupported(city)) {
+                  return const EmptyLocationWidget();
+                }
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Spotlight section divider
+                      const SectionDividerWidget(title: 'Spotlight'),
+                      RepaintBoundary(
+                        child: BannerCarousel(
+                          events: DummyData.bannerEvents, 
+                          height: Responsive.h(context, 380, min: 280),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      
+                      // Categories Grid (3x2 layout)
+                      const RepaintBoundary(child: CategoriesGrid()),
+                      
+                      const SizedBox(height: 8),
+                      
+                      // Sections
+                      const RepaintBoundary(child: HotPicksSection()),
+                      const RepaintBoundary(child: WeekendSpecialSection()),
+                      const RepaintBoundary(child: DiscoverNearYouSection()),
+                      const RepaintBoundary(child: FamilyFeelsSection()),
+                      
+                      const RepaintBoundary(child: TlbSignatureSection()),
+                      const RepaintBoundary(child: SpecialNeedsSection()),
+                      const RepaintBoundary(child: StealersSection()),
 
-                  // AppFooter with upward gradient
-                  const AppFooter(),
-                ],
-              ),
+                      // AppFooter with upward gradient
+                      const AppFooter(),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ],

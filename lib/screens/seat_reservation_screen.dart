@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/event_model.dart';
+import 'review_pay_screen.dart';
 
 class SeatReservationScreen extends StatefulWidget {
   final EventModel event;
@@ -445,9 +446,18 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Booking ${_selectedSeats.length} seat(s) for ₹$_totalPrice'),
+                      final ticketDetailsString = 'Selected Seats: ${_selectedSeats.join(', ')}\n(₹${widget.event.price} per seat)';
+                      
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ReviewPayScreen(
+                            event: widget.event,
+                            subtotal: _totalPrice.toDouble(),
+                            selectedDate: widget.event.eventDate ?? '',
+                            selectedTime: widget.event.eventTime ?? '',
+                            ticketDetails: ticketDetailsString,
+                          ),
                         ),
                       );
                     },

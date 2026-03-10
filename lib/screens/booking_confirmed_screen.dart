@@ -378,7 +378,6 @@ class _TicketScreen extends StatelessWidget {
 
   Widget _buildBottomBar(BuildContext context) {
     return Container(
-      height: Responsive.h(context, 68, min: 52),
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 14),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -611,7 +610,7 @@ class _TicketContent extends StatelessWidget {
             color: const Color(0xFF1A1A2E),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 15),
         Container(
           width: qrSize,
           height: qrSize,
