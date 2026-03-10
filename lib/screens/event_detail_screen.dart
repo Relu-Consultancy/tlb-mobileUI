@@ -207,7 +207,7 @@ class EventDetailScreen extends StatelessWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              'Saturday, March 21, 3:00 PM – 6:00 PM',
+                              '${event.eventDate ?? "Saturday, March 21"}, ${event.eventTime ?? "3:00 PM - 6:00 PM"}',
                               style: GoogleFonts.poppins(
                                 fontSize: 13,
                                 color: const Color(0xFF1A1A2E),

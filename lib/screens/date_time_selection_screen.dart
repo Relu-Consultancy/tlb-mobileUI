@@ -18,23 +18,39 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
   int? _selectedDateIndex;
   int? _selectedTimeIndex;
 
-  final List<String> _dates = [
-    'Sun 21 Feb',
-    'Mon 23 Feb',
-    'Tue 24 Feb',
-    'Thu 25 Feb',
-    'Fri 28 Feb',
-    'Sat 27 Feb',
-  ];
+  late List<String> _dates;
+  late List<String> _times;
 
-  final List<String> _times = [
-    '11:00 AM',
-    '12:00 AM',
-    '01:00 PM',
-    '02:00 PM',
-    '03:00 PM',
-    '04:00 PM',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Use the event date as the primary choice, creating dummy alternatives around it.
+    // Since dates are strings, building real dynamic sequences is complex without parsing logic, 
+    // so we provide the actual event date, and fallback dummies.
+    final baseDate = widget.event.eventDate ?? 'Sat 27 Feb';
+    _dates = [
+      baseDate,
+      'Sun 28 Feb',
+      'Mon 1 Mar',
+      'Tue 2 Mar',
+      'Thu 4 Mar',
+      'Fri 5 Mar',
+    ];
+
+    final baseTime = widget.event.eventTime ?? '11:00 AM';
+    _times = [
+      baseTime,
+      '12:00 PM',
+      '01:00 PM',
+      '02:00 PM',
+      '03:00 PM',
+      '04:00 PM',
+    ];
+    
+    // Auto-select the first valid entry (matching the event) if possible to avoid empty states
+    _selectedDateIndex = 0;
+    _selectedTimeIndex = 0;
+  }
 
   bool get _canContinue =>
       _selectedDateIndex != null && _selectedTimeIndex != null;
