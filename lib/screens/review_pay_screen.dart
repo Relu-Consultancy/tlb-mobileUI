@@ -31,7 +31,7 @@ class ReviewPayScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F7),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFC107), // Solid yellow header
+        backgroundColor: Colors.white, // Solid yellow header changed to white
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
@@ -41,7 +41,7 @@ class ReviewPayScreen extends StatelessWidget {
         title: Text(
           'Review & Pay',
           style: GoogleFonts.poppins(
-            fontSize: 18,
+            fontSize: 16, // Font size reduced to 16
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),

@@ -42,6 +42,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
     final normalized = input.toLowerCase().trim();
     const mapping = {
       'creative arts': 'Classes',
+      'creative art': 'Classes',        // Browse category
       'play & adventure': 'Events',
       'play &\nadventure': 'Events',
       'events': 'Events',
@@ -50,6 +51,10 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
       'spaces': 'Spaces',
       'shop': 'Shop',
       'home': 'Home',
+      'family time': 'Program',         // Browse category
+      'seasonal special': 'Events',     // Browse category
+      'science & stem': 'Classes',      // Browse category
+      'health & wellness': 'Spaces',    // Browse category
     };
     return mapping[normalized] ?? 'Events';
   }

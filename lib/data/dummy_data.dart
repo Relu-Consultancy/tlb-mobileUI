@@ -37,11 +37,13 @@ class DummyData {
       name: 'Creative\nArts',
       icon: Icons.brush,
       gradientColors: [Color(0xFFFFA726), Color(0xFFFF7043)],
+      imagePath: 'assets/images/new_home/eventcategory1.png',
     ),
     CategoryModel(
       name: 'Play\n& Adventure',
       icon: Icons.park,
       gradientColors: [Color(0xFFF48FB1), Color(0xFFE91E63)],
+      imagePath: 'assets/images/new_home/eventcategory5.png', // Using fallback asset
     ),
   ];
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/category_model.dart';
-import '../screens/category_events_screen.dart';
+import '../screens/category_detail_screen.dart';
 
 class CategoryCard extends StatelessWidget {
   final CategoryModel category;
@@ -14,7 +14,11 @@ class CategoryCard extends StatelessWidget {
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => CategoryEventsScreen(initialCategory: category.name.replaceAll('\n', ' ')),
+          builder: (_) => CategoryDetailScreen(
+            title: category.name.replaceAll('\n', ' '),
+            imagePath: category.imagePath,
+            backgroundColors: category.gradientColors,
+          ),
         ),
       ),
       child: Container(
