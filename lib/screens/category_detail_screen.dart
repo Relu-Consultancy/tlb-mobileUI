@@ -7,6 +7,8 @@ import '../widgets/category_detail/category_header.dart';
 import '../widgets/category_detail/explore_categories_widget.dart';
 import '../widgets/category_detail/horizontal_filter_chips.dart';
 import '../widgets/category_detail/category_grid_event_card.dart';
+import '../widgets/floating_navbar.dart';
+import 'category_events_screen.dart';
 
 class CategoryDetailScreen extends StatefulWidget {
   final String title;
@@ -90,120 +92,158 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
     );
   }
 
+  void _onNavTapped(int index) {
+    if (index == 0) {
+      // Home
+      Navigator.popUntil(context, (route) => route.isFirst);
+      return;
+    }
+    if (index == 1) {
+      // Events
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const CategoryEventsScreen(initialCategory: 'Events'),
+        ),
+        (route) => route.isFirst,
+      );
+      return;
+    }
+    // Cannot cleanly transition to other categories structurally from here without a larger refactor,
+    // so we just return to home or events top level screen for now.
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<EventModel> eventsToDisplay = DummyData.categoryEventsExtra;
+    final safeBottom = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: CustomScrollView(
-        slivers: [
-          // Header
-          SliverToBoxAdapter(
-            child: CategoryHeader(
-              title: widget.title,
-              imagePath: widget.imagePath,
-              backgroundColors: widget.backgroundColors,
-              searchController: _searchController,
-              onFilterTap: _showFilterBottomSheet,
-              onBackTap: () => Navigator.pop(context),
-            ),
-          ),
-          
-          const SliverToBoxAdapter(child: SizedBox(height: 10)),
+      body: Stack(
+        children: [
+          CustomScrollView(
+            slivers: [
+              // Header
+              SliverToBoxAdapter(
+                child: CategoryHeader(
+                  title: widget.title,
+                  imagePath: widget.imagePath,
+                  backgroundColors: widget.backgroundColors,
+                  searchController: _searchController,
+                  onFilterTap: _showFilterBottomSheet,
+                  onBackTap: () => Navigator.pop(context),
+                ),
+              ),
+              
+              const SliverToBoxAdapter(child: SizedBox(height: 10)),
 
-          // Explore other categories
-          SliverToBoxAdapter(
-            child: ExploreCategoriesWidget(
-              categories: _otherCategories,
-              currentCategoryTitle: widget.title,
-              showAllCategories: _showAllCategories,
-              onToggleShowAll: () {
-                setState(() {
-                  _showAllCategories = !_showAllCategories;
-                });
-              },
-            ),
-          ),
+              // Explore other categories
+              SliverToBoxAdapter(
+                child: ExploreCategoriesWidget(
+                  categories: _otherCategories,
+                  currentCategoryTitle: widget.title,
+                  showAllCategories: _showAllCategories,
+                  onToggleShowAll: () {
+                    setState(() {
+                      _showAllCategories = !_showAllCategories;
+                    });
+                  },
+                ),
+              ),
 
-          // Divider / Section Title
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 1,
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Colors.transparent, Color(0xFFFFD54F)],
+              // Divider / Section Title
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Colors.transparent, Color(0xFFFFD54F)],
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
-                      'All ${widget.title}',
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1A1A2E),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      height: 1,
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFFFFD54F), Colors.transparent],
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          'All ${widget.title}',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF1A1A2E),
+                          ),
                         ),
                       ),
-                    ),
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Color(0xFFFFD54F), Colors.transparent],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
 
-          // Horizontal Filter Chips
-          SliverToBoxAdapter(
-            child: HorizontalFilterChips(
-              filters: _filters,
-              selectedFilter: _selectedFilter,
-              onFilterSelect: (filter) {
-                setState(() {
-                  _selectedFilter = filter;
-                });
-              },
-              onOpenFiltersSheet: _showFilterBottomSheet,
-            ),
-          ),
-          
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+              // Horizontal Filter Chips
+              SliverToBoxAdapter(
+                child: HorizontalFilterChips(
+                  filters: _filters,
+                  selectedFilter: _selectedFilter,
+                  onFilterSelect: (filter) {
+                    setState(() {
+                      _selectedFilter = filter;
+                    });
+                  },
+                  onOpenFiltersSheet: _showFilterBottomSheet,
+                ),
+              ),
+              
+              const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-          // Events Grid
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 0.65,
+              // Events Grid
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.65,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      return CategoryGridEventCard(event: eventsToDisplay[index]);
+                    },
+                    childCount: eventsToDisplay.length,
+                  ),
+                ),
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  return CategoryGridEventCard(event: eventsToDisplay[index]);
-                },
-                childCount: eventsToDisplay.length,
+              
+              SliverToBoxAdapter(child: SizedBox(height: 120 + safeBottom)), // Bottom padding for navbar
+            ],
+          ),
+          Positioned(
+            bottom: safeBottom > 0 ? safeBottom + 15 : 30, // 15px above native nav
+            left: 0,
+            right: 0,
+            child: Align(
+              alignment: Alignment.center,
+              child: FloatingNavbar(
+                currentIndex: 1, // Treat sub-category as under "Events" root
+                onTap: _onNavTapped,
               ),
             ),
           ),
-          
-          const SliverToBoxAdapter(child: SizedBox(height: 40)), // Bottom padding
         ],
       ),
     );

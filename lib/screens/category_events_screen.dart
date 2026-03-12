@@ -10,6 +10,7 @@ import '../sections/family_feels_section.dart';
 import '../sections/tlb_signature_section.dart';
 import '../sections/app_footer.dart';
 import '../data/dummy_data.dart';
+import '../widgets/floating_navbar.dart';
 import 'event_detail_screen.dart';
 
 class CategoryEventsScreen extends StatefulWidget {
@@ -78,269 +79,100 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
     _selectedCategory = _mapCategoryToTab(widget.initialCategory);
   }
 
+  int get _currentNavIndex {
+    final idx = _categories.indexOf(_selectedCategory);
+    return idx >= 0 ? idx : 1; // Default to Events if not found
+  }
+
+  void _onNavTapped(int index) {
+    if (index == 0) {
+      Navigator.popUntil(context, (route) => route.isFirst);
+      return;
+    }
+    setState(() {
+      _selectedCategory = _categories[index];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final safeBottom = MediaQuery.of(context).padding.bottom;
+
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8EE),
-      body: Column(
+      body: Stack(
         children: [
-          // Reuse Home Header exactly as is
-          const HomeHeader(),
+          Column(
+            children: [
+              // Reuse Home Header exactly as is
+              const HomeHeader(),
 
-          // Main Scrollable Content
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Categories horizontal list (now scrollable with page)
-                  _buildCategoryTabs(),
+              // Main Scrollable Content
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: 120 + safeBottom), // clear navbar
+                    child: Column(
+                      children: [
+                        // Events List
+                        Builder(
+                          builder: (context) {
+                            final events = _getEventsForCategory(_selectedCategory);
+                            return ListView.builder(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: events.length,
+                              itemBuilder: (context, index) {
+                                return _buildEventCard(events[index]);
+                              },
+                            );
+                          },
+                        ),
+                        
+                        // Browse by Categories
+                        const BrowseByCategoriesSection(),
+                        const SizedBox(height: 24),
 
-                  // Events List
-                  Builder(
-                    builder: (context) {
-                      final events = _getEventsForCategory(_selectedCategory);
-                      return ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: events.length,
-                        itemBuilder: (context, index) {
-                          return _buildEventCard(events[index]);
-                        },
-                      );
-                    },
-                  ),
-                  
-                  // Browse by Categories
-                  const BrowseByCategoriesSection(),
-                  const SizedBox(height: 24),
+                        // Discover Near You
+                        const RepaintBoundary(child: DiscoverNearYouSection()),
+                        const SizedBox(height: 16),
 
-                  // Discover Near You
-                  const RepaintBoundary(child: DiscoverNearYouSection()),
-                  const SizedBox(height: 16),
+                        // Family Feels
+                        const RepaintBoundary(child: FamilyFeelsSection()),
+                        const SizedBox(height: 16),
 
-                  // Family Feels
-                  const RepaintBoundary(child: FamilyFeelsSection()),
-                  const SizedBox(height: 16),
+                        // TLB Signature
+                        const RepaintBoundary(child: TlbSignatureSection()),
+                        const SizedBox(height: 16),
 
-                  // TLB Signature
-                  const RepaintBoundary(child: TlbSignatureSection()),
-                  const SizedBox(height: 16),
-
-                  // AppFooter
-                  const AppFooter(),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryTabs() {
-    return Container(
-      height: Responsive.h(context, 140, min: 115),
-      padding: const EdgeInsets.only(top: 12, bottom: 4),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _categories.length,
-        itemBuilder: (context, index) {
-          final cat = _categories[index];
-          final isSelected = cat == _selectedCategory;
-          final isHome = cat == 'Home';
-
-          return GestureDetector(
-            onTap: () {
-              if (isHome) {
-                Navigator.pop(context);
-              } else {
-                setState(() {
-                  _selectedCategory = cat;
-                });
-              }
-            },
-            child: Container(
-              margin: const EdgeInsets.only(right: 8),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildCategoryItem(cat, isSelected, isHome),
-                  const SizedBox(height: 4),
-                  if (!isHome)
-                    Text(
-                      cat,
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                        color: const Color(0xFF333333),
-                      ),
+                        // AppFooter
+                        const AppFooter(),
+                      ],
                     ),
-                  if (isHome) // placeholder for spacing
-                    const SizedBox(height: 18),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildCategoryItem(String cat, bool isSelected, bool isHome) {
-    if (isHome) {
-      return Container(
-        width: 50,
-        height: 70, // Match visual center of other elements
-        alignment: Alignment.center,
-        child: const Icon(Icons.home_rounded, color: Color(0xFF333333), size: 30),
-      );
-    }
-
-    const double squircleSize = 52;
-    const double haloSize = 78;
-
-    Widget squircle = Container(
-      width: squircleSize,
-      height: squircleSize,
-      clipBehavior: Clip.hardEdge,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: isSelected
-            ? const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFFEAA100),
-                  Color(0xFFD67300),
-                ],
-              )
-            : null,
-        color: isSelected ? null : const Color(0xFFFFF4D4),
-      ),
-      child: Stack(
-        children: [
-          if (!isSelected)
-            Positioned(
-              top: -8,
-              right: -8,
-              child: Container(
-                width: 30,
-                height: 30,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFFFDE9B7),
+                  ),
                 ),
               ),
-            ),
+            ],
+          ),
           Positioned(
-            bottom: -15,
+            bottom: safeBottom > 0 ? safeBottom + 15 : 30, // 15px above native nav
             left: 0,
             right: 0,
-            child: Container(
-              height: 30,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isSelected ? const Color(0xFFFFCE54) : const Color(0xFFFDE9B7),
+            child: Align(
+              alignment: Alignment.center,
+              child: FloatingNavbar(
+                currentIndex: _currentNavIndex,
+                onTap: _onNavTapped,
               ),
             ),
-          ),
-          Center(
-            child: _getCategoryIcon(cat, isSelected),
           ),
         ],
       ),
     );
-
-    if (isSelected) {
-      return SizedBox(
-        width: haloSize,
-        height: haloSize,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              width: haloSize - 6,
-              height: haloSize - 6,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 10,
-                    spreadRadius: 2,
-                  )
-                ],
-              ),
-            ),
-            Positioned(
-              top: 6,
-              right: 12,
-              child: Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFFFFD54F),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 12,
-              left: 6,
-              child: Container(
-                width: 6,
-                height: 6,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFFFF9800),
-                ),
-              ),
-            ),
-            squircle,
-          ],
-        ),
-      );
-    }
-
-    return SizedBox(
-      width: haloSize,
-      height: haloSize,
-      child: Center(child: squircle),
-    );
   }
 
-  Widget _getCategoryIcon(String category, bool isSelected) {
-    IconData iconData;
-    switch (category) {
-      case 'Events':
-        iconData = Icons.assignment_outlined;
-        break;
-      case 'Classes':
-        iconData = Icons.person_outline;
-        break;
-      case 'Program':
-        iconData = Icons.emoji_events_outlined;
-        break;
-      case 'Venues':
-      case 'Spaces':
-        iconData = Icons.maps_home_work_outlined;
-        break;
-      case 'Shop':
-        iconData = Icons.storefront_outlined;
-        break;
-      default:
-        iconData = Icons.star_outline;
-    }
-
-    return Icon(
-      iconData,
-      color: isSelected ? Colors.white : const Color(0xFF333333),
-      size: 20,
-    );
-  }
+  // Start of _buildEventCard
 
   Widget _buildEventCard(EventModel event) {
     return GestureDetector(
