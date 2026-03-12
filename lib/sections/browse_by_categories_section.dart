@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../widgets/section_divider_widget.dart';
+import '../screens/category_detail_screen.dart';
 
 class BrowseByCategoriesSection extends StatelessWidget {
   const BrowseByCategoriesSection({super.key});
@@ -60,42 +61,56 @@ class BrowseByCategoriesSection extends StatelessWidget {
             itemBuilder: (context, index) {
               final cat = categories[index];
               final colors = cat['colors'] as List<Color>;
-              return Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: colors,
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CategoryDetailScreen(
+                        title: cat['title'] as String,
+                        imagePath: cat['image'] as String,
+                        backgroundColors: colors,
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: colors,
+                    ),
+                    border: Border.all(color: Colors.grey.withOpacity(0.15)),
                   ),
-                  border: Border.all(color: Colors.grey.withOpacity(0.15)),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16.0, left: 8, right: 8),
-                      child: Text(
-                        cat['title'] as String,
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1A1A2E),
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                      ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Image.asset(
-                          cat['image'] as String,
-                          fit: BoxFit.contain,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 16.0, left: 8, right: 8),
+                        child: Text(
+                          cat['title'] as String,
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1A1A2E),
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
                         ),
                       ),
-                    ),
-                  ],
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Image.asset(
+                            cat['image'] as String,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },

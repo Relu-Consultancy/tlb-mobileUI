@@ -46,3 +46,4 @@ app.*.map.json
 
 # API documentation (local reference only)
 API_DOCUMENTATION.md
+frontend_api_integration_estimates.csv

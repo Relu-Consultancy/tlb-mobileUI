@@ -58,12 +58,16 @@ class _SearchScreenState extends State<SearchScreen> {
             controller: _searchController,
             autofocus: true,
             decoration: InputDecoration(
-              hintText: 'Search for events & ...',
+              hintText: 'Search for events ...',
               hintStyle: GoogleFonts.poppins(
                 fontSize: 14,
                 color: Colors.grey,
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.tune, color: Colors.black),
+                onPressed: () => _showFiltersBottomSheet(context),
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(24),
                 borderSide: const BorderSide(color: Color(0xFF1A1A2E), width: 1.5),
@@ -80,12 +84,6 @@ class _SearchScreenState extends State<SearchScreen> {
             style: GoogleFonts.poppins(fontSize: 14),
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.tune, color: Color(0xFFFFC107)),
-            onPressed: () => _showFiltersBottomSheet(context),
-          ),
-        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,7 +135,7 @@ class _SearchScreenState extends State<SearchScreen> {
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFFFFC107),
+                color: Colors.black,
               ),
             ),
           ),

@@ -8,6 +8,7 @@ import '../screens/notification_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/location_screen.dart';
 import '../screens/login_sheet.dart';
+import '../core/location_state.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
@@ -110,13 +111,18 @@ class HomeHeader extends StatelessWidget {
                     color: AppColors.textPrimary,
                   ),
                   const SizedBox(width: 3),
-                  Text(
-                    'The Palm Springs, DLF ...',
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textPrimary,
-                    ),
+                  ValueListenableBuilder<String>(
+                    valueListenable: LocationState().selectedCity,
+                    builder: (context, city, _) {
+                      return Text(
+                        city.length > 20 ? '${city.substring(0, 20)}...' : city,
+                        style: GoogleFonts.poppins(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(width: 2),
                   const Icon(

@@ -11,7 +11,6 @@ import 'account_settings_screen.dart';
 import 'edit_profile_screen.dart';
 import 'payment_settings_screen.dart';
 import 'your_reviews_screen.dart';
-import 'offers_screen.dart';
 import 'notification_screen.dart';
 import 'reminders_screen.dart';
 import 'home_screen.dart';
@@ -196,14 +195,6 @@ class ProfileScreen extends StatelessWidget {
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const YourReviewsScreen()),
-              ),
-            ),
-            _buildMenuItem(
-              icon: Icons.local_offer_outlined,
-              title: 'Offers',
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const OffersScreen()),
               ),
             ),
             _buildMenuItem(

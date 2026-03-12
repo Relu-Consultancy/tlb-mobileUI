@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
 import 'date_time_selection_screen.dart';
-import 'payment_screen.dart';
+import 'review_pay_screen.dart';
 
 class TicketBookingScreen extends StatefulWidget {
   final EventModel event;
@@ -134,14 +134,21 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             height: 52,
             child: ElevatedButton(
               onPressed: _isFormComplete ? () {
+                // Generate ticket details string
+                final ticketDetailsString = _tickets
+                    .where((t) => (t['count'] as int) > 0)
+                    .map((t) => '${t['name']} (₹${t['price']}) × ${t['count']}')
+                    .join('\n');
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => PaymentScreen(
+                    builder: (_) => ReviewPayScreen(
                       event: event,
-                      amount: _subtotal,
+                      subtotal: _subtotal.toDouble(),
                       selectedDate: widget.selectedDate,
                       selectedTime: widget.selectedTime,
+                      ticketDetails: ticketDetailsString,
                     ),
                   ),
                 );

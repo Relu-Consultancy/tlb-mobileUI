@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/auth_state.dart';
 import '../core/responsive.dart';
 import 'home_screen.dart';
+import 'signup_otp_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -87,17 +88,15 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    // Simulate signup → log the user in and go to home
-    AuthState.login(name: name, phone: phone);
-
-    Navigator.pushAndRemoveUntil(
+    // Navigate to OTP screen instead of straight home
+    Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-      (route) => false,
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Account created successfully! 🎉')),
+      MaterialPageRoute(
+        builder: (_) => SignupOtpScreen(
+          email: email,
+          phone: phone,
+        ),
+      ),
     );
   }
 
@@ -384,7 +383,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     ),
                     label: Text(
-                      'Continue with Google',
+                      'Sign Up with Google',
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,

@@ -14,7 +14,7 @@ class BookingsScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: const Color(0xFFFFC107),
+          backgroundColor: Colors.white,
           elevation: 0,
           scrolledUnderElevation: 0,
           leading: IconButton(
@@ -24,6 +24,7 @@ class BookingsScreen extends StatelessWidget {
           title: Text(
             'Your Bookings',
             style: GoogleFonts.poppins(
+              fontSize: 16,
               fontWeight: FontWeight.w700,
               color: const Color(0xFF1A1A2E),
             ),

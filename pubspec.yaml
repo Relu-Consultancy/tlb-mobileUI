@@ -15,11 +15,13 @@ dependencies:
   flutter_rating_bar: ^4.0.1
   flutter_displaymode: ^0.7.0
   video_player: ^2.11.0
+  flutter_svg: ^2.2.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  test: ^1.26.3
 
 flutter:
   uses-material-design: true
@@ -27,5 +29,6 @@ flutter:
   assets:
     - assets/images/
     - assets/images/new_home/
+    - assets/icons/
     - resources- tlb-ui/
     - google_fonts/
