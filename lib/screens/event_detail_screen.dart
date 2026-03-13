@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/auth_state.dart';
 import '../core/responsive.dart';
-import '../core/saved_events_state.dart';
+import '../widgets/wishlist_button.dart';
 import '../core/user_reviews_state.dart';
 import '../models/event_model.dart';
 import 'login_sheet.dart';
@@ -33,7 +33,7 @@ class EventDetailScreen extends StatelessWidget {
                 leading: Container(
                   margin: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white,
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
@@ -42,32 +42,19 @@ class EventDetailScreen extends StatelessWidget {
                   ),
                 ),
                 actions: [
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
-                      shape: BoxShape.circle,
-                    ),
-                    child: ValueListenableBuilder<List<EventModel>>(
-                      valueListenable: SavedEventsState.savedEvents,
-                      builder: (context, _, __) {
-                        final isSaved = SavedEventsState.isSaved(event);
-                        return IconButton(
-                          icon: Icon(
-                            isSaved ? Icons.favorite : Icons.favorite_border,
-                            color: isSaved ? const Color(0xFFFFB902) : const Color(0xFF1A1A2E),
-                            size: 20,
-                          ),
-                          onPressed: () => SavedEventsState.toggle(event, context),
-                        );
-                      },
-                    ),
-                  ),
+                 Container(
+                   margin: const EdgeInsets.symmetric(vertical: 8),
+                   child: WishlistButton(
+                     event: event,
+                     containerSize: 40,
+                     showShadow: false,
+                   ),
+                 ),
                   const SizedBox(width: 12),
                   Container(
                     margin: const EdgeInsets.only(top: 8, bottom: 8, right: 16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white,
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
@@ -163,7 +150,7 @@ class EventDetailScreen extends StatelessWidget {
                     const SizedBox(height: 20),
 
                     // Location
-                    Padding(
+                    Padding( 
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Row(
                         children: [

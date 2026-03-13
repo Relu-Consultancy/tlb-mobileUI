@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
-import '../core/saved_events_state.dart';
 import '../models/event_model.dart';
-import 'package:like_button/like_button.dart';
+import 'wishlist_button.dart';
 
 class VerticalCardWidget extends StatelessWidget {
   final String imagePath;
@@ -67,39 +66,7 @@ class VerticalCardWidget extends StatelessWidget {
                 Positioned(
                   top: 8,
                   right: 8,
-                  child: ValueListenableBuilder<List<EventModel>>(
-                    valueListenable: SavedEventsState.savedEvents,
-                    builder: (context, _, __) {
-                      final isSaved = SavedEventsState.isSaved(event!);
-                      return Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.35),
-                          shape: BoxShape.circle,
-                        ),
-                        child: LikeButton(
-                          size: 20,
-                          isLiked: isSaved,
-                          circleColor: const CircleColor(start: Color(0xFFFF5252), end: Colors.red),
-                          bubblesColor: const BubblesColor(
-                            dotPrimaryColor: Colors.red,
-                            dotSecondaryColor: Colors.redAccent,
-                          ),
-                          onTap: (bool isLiked) async {
-                            SavedEventsState.toggle(event!, context);
-                            return !isLiked;
-                          },
-                          likeBuilder: (bool isLiked) {
-                            return Icon(
-                              isLiked ? Icons.favorite : Icons.favorite_border,
-                              color: isLiked ? Colors.red : Colors.white,
-                              size: 18,
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
+                  child: WishlistButton(event: event!, containerSize: 32),
                 ),
               if (badgeText != null)
                 Positioned(

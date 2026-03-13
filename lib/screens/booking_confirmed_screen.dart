@@ -228,7 +228,7 @@ class _TicketScreen extends StatelessWidget {
                 width: Responsive.w(context, 36, min: 30),
                 height: Responsive.w(context, 36, min: 30),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(

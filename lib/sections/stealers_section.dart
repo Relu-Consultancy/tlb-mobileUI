@@ -1,8 +1,7 @@
 import '../core/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../core/saved_events_state.dart';
-import '../models/event_model.dart';
+import '../widgets/wishlist_button.dart';
 import '../widgets/section_divider_widget.dart';
 import '../data/dummy_data.dart';
 import '../screens/event_detail_screen.dart';
@@ -57,27 +56,7 @@ class StealersSection extends StatelessWidget {
                         Positioned(
                           top: 12,
                           right: 12,
-                          child: GestureDetector(
-                            onTap: () => SavedEventsState.toggle(event, context),
-                            child: ValueListenableBuilder<List<EventModel>>(
-                              valueListenable: SavedEventsState.savedEvents,
-                              builder: (context, _, __) {
-                                final isSaved = SavedEventsState.isSaved(event);
-                                return Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.35),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    isSaved ? Icons.favorite : Icons.favorite_border,
-                                    size: 20,
-                                    color: isSaved ? const Color(0xFFFFB902) : Colors.white,
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
+                          child: WishlistButton(event: event),
                         ),
                         // Top Yellow Pill (End in time)
                         if (event.description != null)
