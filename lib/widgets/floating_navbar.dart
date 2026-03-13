@@ -60,51 +60,78 @@ class FloatingNavbar extends StatelessWidget {
           ), // subtle inner rim highlight
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: List.generate(_navItems.length, (index) {
-          final item = _navItems[index];
-          final isActive = index == currentIndex;
+      clipBehavior: Clip.antiAlias,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minWidth: screenWidth * 0.92 - 12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(_navItems.length, (index) {
+              final item = _navItems[index];
+              final isActive = index == currentIndex;
 
-          return Flexible(
-            flex: 1, // All take equal space now
-            child: GestureDetector(
-              onTap: () => onTap(index),
-              behavior: HitTestBehavior.opaque,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutCubic,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                decoration: BoxDecoration(
-                  color: isActive ? const Color(0xFFFFD580) : Colors.transparent,
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: isActive ? [
-                    BoxShadow(
-                      color: const Color(0xFFFFD580).withOpacity(0.4),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    )
-                  ] : null,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SvgPicture.asset(
-                      item.iconPath,
-                      width: 22,
-                      height: 22,
-                      colorFilter: const ColorFilter.mode(
-                        Color(0xFF1E293B), // Dark slate/metallic
-                        BlendMode.srcIn,
-                      ),
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                child: GestureDetector(
+                  onTap: () => onTap(index),
+                  behavior: HitTestBehavior.opaque,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOutCubic,
+                    padding: EdgeInsets.symmetric(horizontal: isActive ? 16 : 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isActive ? const Color(0xFFFFD580) : Colors.transparent,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: isActive ? [
+                        BoxShadow(
+                          color: const Color(0xFFFFD580).withOpacity(0.4),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        )
+                      ] : null,
                     ),
-                  ],
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          item.iconPath,
+                          width: 22,
+                          height: 22,
+                          colorFilter: const ColorFilter.mode(
+                            Color(0xFF1E293B), // Dark slate/metallic
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOutCubic,
+                          alignment: Alignment.centerLeft,
+                          child: isActive
+                              ? Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: Text(
+                                    item.label,
+                                    style: const TextStyle(
+                                      color: Color(0xFF1E293B),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          );
-        }),
+              );
+            }),
+          ),
+        ),
       ),
     );
   }

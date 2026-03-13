@@ -5,6 +5,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../core/responsive.dart';
 import '../core/saved_events_state.dart';
 import '../models/event_model.dart';
+import 'package:like_button/like_button.dart';
 import '../screens/event_detail_screen.dart';
 
 class BannerCarousel extends StatefulWidget {
@@ -105,26 +106,38 @@ class _BannerCarouselState extends State<BannerCarousel> {
                       Positioned(
                         top: 12,
                         right: 12,
-                        child: GestureDetector(
-                          onTap: () => SavedEventsState.toggle(event, context),
-                          child: ValueListenableBuilder<List<EventModel>>(
-                            valueListenable: SavedEventsState.savedEvents,
-                            builder: (context, _, __) {
-                              final isSaved = SavedEventsState.isSaved(event);
-                              return Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.35),
-                                  shape: BoxShape.circle,
+                        child: ValueListenableBuilder<List<EventModel>>(
+                          valueListenable: SavedEventsState.savedEvents,
+                          builder: (context, _, __) {
+                            final isSaved = SavedEventsState.isSaved(event);
+                            return Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.35),
+                                shape: BoxShape.circle,
+                              ),
+                              child: LikeButton(
+                                size: 24,
+                                isLiked: isSaved,
+                                circleColor: const CircleColor(start: Color(0xFFFF5252), end: Colors.red),
+                                bubblesColor: const BubblesColor(
+                                  dotPrimaryColor: Colors.red,
+                                  dotSecondaryColor: Colors.redAccent,
                                 ),
-                                child: Icon(
-                                  isSaved ? Icons.favorite : Icons.favorite_border,
-                                  size: 22,
-                                  color: isSaved ? const Color(0xFFFFB902) : Colors.white,
-                                ),
-                              );
-                            },
-                          ),
+                                onTap: (bool isLiked) async {
+                                  SavedEventsState.toggle(event, context);
+                                  return !isLiked;
+                                },
+                                likeBuilder: (bool isLiked) {
+                                  return Icon(
+                                    isLiked ? Icons.favorite : Icons.favorite_border,
+                                    color: isLiked ? Colors.red : Colors.white,
+                                    size: 22,
+                                  );
+                                },
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],

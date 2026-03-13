@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/saved_events_state.dart';
 import '../models/event_model.dart';
+import 'package:like_button/like_button.dart';
 import '../screens/event_detail_screen.dart';
 
 class EventCardWithRating extends StatelessWidget {
@@ -59,19 +60,31 @@ class EventCardWithRating extends StatelessWidget {
                   valueListenable: SavedEventsState.savedEvents,
                   builder: (context, _, __) {
                     final isSaved = SavedEventsState.isSaved(event);
-                    return GestureDetector(
-                      onTap: () => SavedEventsState.toggle(event, context),
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.35),
-                          shape: BoxShape.circle,
+                    return Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.35),
+                        shape: BoxShape.circle,
+                      ),
+                      child: LikeButton(
+                        size: 20,
+                        isLiked: isSaved,
+                        circleColor: const CircleColor(start: Color(0xFFFF5252), end: Colors.red),
+                        bubblesColor: const BubblesColor(
+                          dotPrimaryColor: Colors.red,
+                          dotSecondaryColor: Colors.redAccent,
                         ),
-                        child: Icon(
-                          isSaved ? Icons.bookmark : Icons.bookmark_border,
-                          size: 18,
-                          color: isSaved ? const Color(0xFFFFB902) : Colors.white,
-                        ),
+                        onTap: (bool isLiked) async {
+                          SavedEventsState.toggle(event, context);
+                          return !isLiked;
+                        },
+                        likeBuilder: (bool isLiked) {
+                          return Icon(
+                            isLiked ? Icons.bookmark : Icons.bookmark_border,
+                            color: isLiked ? const Color(0xFFFFB902) : Colors.white,
+                            size: 18,
+                          );
+                        },
                       ),
                     );
                   },
