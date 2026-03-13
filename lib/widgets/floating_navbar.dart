@@ -36,6 +36,7 @@ class FloatingNavbar extends StatelessWidget {
       width: screenWidth * 0.92,
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
       decoration: BoxDecoration(
+        border: Border.all(color: Colors.white, width: 2),
         gradient: const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -84,6 +85,7 @@ class FloatingNavbar extends StatelessWidget {
                     padding: EdgeInsets.symmetric(horizontal: isActive ? 16 : 14, vertical: 12),
                     decoration: BoxDecoration(
                       color: isActive ? const Color(0xFFFFD580) : Colors.transparent,
+                      border: isActive ? Border.all(color: Colors.white, width: 2) : null,
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: isActive ? [
                         BoxShadow(
