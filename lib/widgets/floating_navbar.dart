@@ -14,7 +14,6 @@ const List<NavbarItemData> _navItems = [
   NavbarItemData(label: 'Classes', iconPath: 'assets/icons/nav_classes.svg'),
   NavbarItemData(label: 'Program', iconPath: 'assets/icons/nav_program.svg'),
   NavbarItemData(label: 'Spaces', iconPath: 'assets/icons/nav_spaces.svg'),
-  NavbarItemData(label: 'Shop', iconPath: 'assets/icons/nav_shop.svg'),
 ];
 
 class FloatingNavbar extends StatelessWidget {
@@ -34,9 +33,9 @@ class FloatingNavbar extends StatelessWidget {
     
     return Container(
       width: screenWidth * 0.92,
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.white, width: 2),
+        border: Border.all(color: Colors.white, width: 1),
         gradient: const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -63,6 +62,8 @@ class FloatingNavbar extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        clipBehavior: Clip.none,
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         child: ConstrainedBox(
@@ -85,7 +86,7 @@ class FloatingNavbar extends StatelessWidget {
                     padding: EdgeInsets.symmetric(horizontal: isActive ? 16 : 14, vertical: 12),
                     decoration: BoxDecoration(
                       color: isActive ? const Color(0xFFFFD580) : Colors.transparent,
-                      border: isActive ? Border.all(color: Colors.white, width: 2) : null,
+                      border: isActive ? Border.all(color: Colors.white, width: 1) : null,
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: isActive ? [
                         BoxShadow(

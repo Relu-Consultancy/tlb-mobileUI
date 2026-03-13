@@ -114,7 +114,28 @@ class _BannerCarouselState extends State<BannerCarousel> {
             },
           ),
         ),
-        const SizedBox(height: 12),
+        // Shadow-like gradient line beneath the spotlight banner
+        Container(
+          height: 10,
+          margin: const EdgeInsets.symmetric(horizontal: 24),
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(14),
+              bottomRight: Radius.circular(14),
+            ),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.black.withOpacity(0.12),
+                Colors.black.withOpacity(0.04),
+                Colors.transparent,
+              ],
+              stops: const [0.0, 0.5, 1.0],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
         SmoothPageIndicator(
           controller: _pageController,
           count: widget.events.length,
