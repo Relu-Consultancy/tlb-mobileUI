@@ -8,7 +8,7 @@ import '../widgets/category_detail/explore_categories_widget.dart';
 import '../widgets/category_detail/horizontal_filter_chips.dart';
 import '../widgets/category_detail/category_grid_event_card.dart';
 import '../widgets/floating_navbar.dart';
-import 'category_events_screen.dart';
+import 'events_screen.dart';
 
 class CategoryDetailScreen extends StatefulWidget {
   final String title;
@@ -103,7 +103,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) => const CategoryEventsScreen(initialCategory: 'Events'),
+          builder: (context) => const EventsScreen(),
         ),
         (route) => route.isFirst,
       );

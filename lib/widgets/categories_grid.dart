@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
-import '../screens/category_events_screen.dart';
+import '../screens/events_screen.dart';
 
 class CategoriesGrid extends StatelessWidget {
   const CategoriesGrid({super.key});
@@ -31,7 +31,7 @@ class CategoriesGrid extends StatelessWidget {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => CategoryEventsScreen(initialCategory: cat['label']),
+                        builder: (_) => const EventsScreen(),
                       ),
                     ),
                     child: _buildCategoryCard(
@@ -58,7 +58,7 @@ class CategoriesGrid extends StatelessWidget {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => CategoryEventsScreen(initialCategory: cat['label']),
+                        builder: (_) => const EventsScreen(),
                       ),
                     ),
                     child: _buildCategoryCard(

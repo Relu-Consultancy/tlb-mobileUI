@@ -31,6 +31,215 @@ class DummyData {
     },
   ];
 
+  static const List<Map<String, dynamic>> exploreCategories = [
+    {
+      'label': 'Arts & Crafts',
+      'image': 'assets/images/new_home/eventcategory1.png',
+      'gradient': [Color(0xFFE8E0FF), Color(0xFFD4BFFF)],
+    },
+    {
+      'label': 'Performing Arts',
+      'image': 'assets/images/new_home/eventcategory2.png',
+      'gradient': [Color(0xFFFFE0E0), Color(0xFFFFB3B3)],
+    },
+    {
+      'label': 'STEM &\nInnovation',
+      'image': 'assets/images/new_home/eventcategory3.png',
+      'gradient': [Color(0xFFFFF0D4), Color(0xFFFFDB99)],
+    },
+    {
+      'label': 'Sports &\nFitness',
+      'image': 'assets/images/new_home/eventcategory4.png',
+      'gradient': [Color(0xFFFFF8D4), Color(0xFFFFEDA1)],
+    },
+    {
+      'label': 'Languages &\nCommunication',
+      'image': 'assets/images/new_home/eventcategory5.png',
+      'gradient': [Color(0xFFFFE8E0), Color(0xFFFFC2AD)],
+    },
+    {
+      'label': 'Life Skills',
+      'image': 'assets/images/new_home/eventcategory1.png',
+      'gradient': [Color(0xFFE0F0FF), Color(0xFFADD4FF)],
+    },
+  ];
+
+  static const List<Map<String, dynamic>> exploreFormats = [
+    {
+      'label': 'WORKSHOP',
+      'color': Color(0xFF1E1E1E), // Dark background
+    },
+    {
+      'label': 'CAMP',
+      'color': Color(0xFF00A2FF), // Blue background
+    },
+    {
+      'label': 'COMPETITION',
+      'color': Color(0xFFFFB900), // Yellow background
+    },
+    {
+      'label': 'MASTERCLASS',
+      'color': Color(0xFF1E1E1E), // Dark background
+    },
+  ];
+
+  static const List<Map<String, dynamic>> classesCategories = [
+    {
+      'label': 'Academic',
+      'image': 'assets/images/new_home/eventcategory1.png',
+      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+    },
+    {
+      'label': 'Creative Arts',
+      'image': 'assets/images/new_home/eventcategory2.png',
+      'gradient': [Color(0xFFFFF0F0), Color(0xFFFFDBDB)],
+    },
+    {
+      'label': 'Tech & Innovation',
+      'image': 'assets/images/new_home/eventcategory3.png',
+      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+    },
+    {
+      'label': 'Performing Arts',
+      'image': 'assets/images/new_home/eventcategory4.png',
+      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+    },
+    {
+      'label': 'Sports & Fitness',
+      'image': 'assets/images/new_home/eventcategory5.png',
+      'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+    },
+    {
+      'label': 'Speech &\nCommunication',
+      'image': 'assets/images/new_home/eventcategory1.png',
+      'gradient': [Color(0xFFFFE4E6), Color(0xFFFECDD3)],
+    },
+  ];
+
+  static const List<Map<String, dynamic>> pickYourPace = [
+    {
+      'label': 'Weekly\nClasses',
+      'image': 'assets/images/new_home/eventcategory5.png',
+    },
+    {
+      'label': 'Monthly\nPrograms',
+      'image': 'assets/images/new_home/eventcategory2.png',
+    },
+    {
+      'label': 'Term Courses',
+      'image': 'assets/images/new_home/eventcategory3.png',
+    },
+    {
+      'label': 'Bootcamps',
+      'image': 'assets/images/new_home/eventcategory4.png',
+    },
+  ];
+
+  static const List<Map<String, dynamic>> programsCategories = [
+    {
+      'label': 'Future Tech & AI',
+      'image': 'assets/images/new_home/eventcategory1.png',
+      'gradient': [Color(0xFFDCFCE7), Color(0xFFBBF7D0)],
+    },
+    {
+      'label': 'Design &\nInnovation',
+      'image': 'assets/images/new_home/eventcategory2.png',
+      'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+    },
+    {
+      'label': 'Leadership &\nEntrepreneurship',
+      'image': 'assets/images/new_home/eventcategory3.png',
+      'gradient': [Color(0xFFDBEAFE), Color(0xFFBFDBFE)],
+    },
+    {
+      'label': 'Media & Content\nCreation',
+      'image': 'assets/images/new_home/eventcategory4.png',
+      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+    },
+    {
+      'label': 'Stage Arts &\nPerformance',
+      'image': 'assets/images/new_home/eventcategory5.png',
+      'gradient': [Color(0xFFECFDF5), Color(0xFFD1FAE5)],
+    },
+    {
+      'label': 'Active Sports\n& Training',
+      'image': 'assets/images/new_home/eventcategory1.png',
+      'gradient': [Color(0xFFFEE2E2), Color(0xFFFECACA)],
+    },
+  ];
+
+  static const List<Map<String, dynamic>> findYourFit = [
+    {
+      'label': 'Batch\nProgram',
+      'image': 'assets/images/new_home/eventcategory2.png',
+    },
+    {
+      'label': 'Camp\nProgram',
+      'image': 'assets/images/new_home/eventcategory3.png',
+    },
+    {
+      'label': 'Holiday-\nbased',
+      'image': 'assets/images/new_home/eventcategory4.png',
+    },
+    {
+      'label': 'Flexible\nPace',
+      'image': 'assets/images/new_home/eventcategory5.png',
+    },
+  ];
+
+  static const List<Map<String, dynamic>> allCategories = [
+    {
+      'label': 'Arts & Crafts',
+      'image': 'assets/images/new_home/eventcategory1.png',
+      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+    },
+    {
+      'label': 'Performing Arts',
+      'image': 'assets/images/new_home/eventcategory2.png',
+      'gradient': [Color(0xFFFFF0F0), Color(0xFFFFDBDB)],
+    },
+    {
+      'label': 'STEM & Innovation',
+      'image': 'assets/images/new_home/eventcategory3.png',
+      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+    },
+    {
+      'label': 'Sports & Fitness',
+      'image': 'assets/images/new_home/eventcategory4.png',
+      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+    },
+    {
+      'label': 'Languages & Communication',
+      'image': 'assets/images/new_home/eventcategory5.png',
+      'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+    },
+    {
+      'label': 'Life Skills',
+      'image': 'assets/images/new_home/eventcategory1.png',
+      'gradient': [Color(0xFFFFE4E6), Color(0xFFFECDD3)],
+    },
+    {
+      'label': 'Mind & Strategy Games',
+      'image': 'assets/images/new_home/eventcategory2.png',
+      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+    },
+    {
+      'label': 'Edutainment & Experiences',
+      'image': 'assets/images/new_home/eventcategory3.png',
+      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+    },
+    {
+      'label': 'Nature & Outdoors',
+      'image': 'assets/images/new_home/eventcategory4.png',
+      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+    },
+    {
+      'label': 'Festivals & Celebrations',
+      'image': 'assets/images/new_home/eventcategory5.png',
+      'gradient': [Color(0xFFFFE4E6), Color(0xFFFECDD3)],
+    },
+  ];
+
   // Original categories kept for compatibility elsewhere
   static const List<CategoryModel> popularCategories = [
     CategoryModel(
@@ -197,6 +406,48 @@ class DummyData {
       description: 'End in 12:30:00',
     ),
   ];
+
+  static const List<EventModel> featuredPartners = [
+    EventModel(
+      title: 'The Future Is Now!',
+      venue: 'Robotics Academies\nSpecialized robotics training',
+      imagePath: 'assets/images/new_home/partner1.jpg',
+    ),
+    EventModel(
+      title: 'Kids Theater',
+      venue: 'Creative drama workshops',
+      imagePath: 'assets/images/new_home/partner2.jpg',
+    ),
+  ];
+
+  static const List<EventModel> newOnTlb = [
+    EventModel(
+      title: 'Slime Making Class',
+      venue: 'Calm Space Studio',
+      imagePath: 'assets/images/new_home/newontlb1.jpg',
+      rating: 5.0,
+      reviewCount: '3.5k reviews',
+      price: 300.0, // Used as 'Starting from ₹300'
+    ),
+  ];
+
+  static const List<EventModel> onlineEvents = [
+    EventModel(
+      title: 'Online Coding Workshop',
+      venue: 'Learn basics of programming',
+      imagePath: 'assets/images/new_home/onlineevent1.jpg',
+      tag: 'Workshop',
+      eventDate: 'Sat, 27 Apr',
+    ),
+    EventModel(
+      title: 'Virtual Art Tour',
+      venue: 'Explore global art museums online',
+      imagePath: 'assets/images/new_home/onlineevent2.jpg',
+      tag: 'Tour',
+      eventDate: 'Sun, 28 Apr',
+    ),
+  ];
+
 
   /// Extra events used in category events screen (centralized from inline)
   static const List<EventModel> categoryEventsExtra = [

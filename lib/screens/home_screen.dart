@@ -17,7 +17,10 @@ import '../sections/discover_near_you_section.dart';
 import '../sections/family_feels_section.dart';
 import '../sections/app_footer.dart';
 import '../widgets/floating_navbar.dart';
-import 'category_events_screen.dart';
+import 'events_screen.dart';
+import 'classes_screen.dart';
+import 'programs_screen.dart';
+import 'venues_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -49,7 +52,28 @@ class _HomeScreenState extends State<HomeScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const CategoryEventsScreen(initialCategory: 'Events'),
+          builder: (context) => const EventsScreen(),
+        ),
+      );
+    } else if (index == 2) { // Classes
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ClassesScreen(),
+        ),
+      );
+    } else if (index == 3) { // Programs
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ProgramsScreen(),
+        ),
+      );
+    } else if (index == 4) { // Venues
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const VenuesScreen(),
         ),
       );
     } else {
