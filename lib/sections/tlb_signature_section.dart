@@ -16,10 +16,11 @@ class TlbSignatureSection extends StatelessWidget {
       children: [
         const SectionDividerWidget(title: 'TLB Signature'),
         SizedBox(
-          height: Responsive.h(context, 480, min: 380),
+          height: Responsive.h(context, 500, min: 420),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(left: 16),
+            clipBehavior: Clip.hardEdge,
+            padding: const EdgeInsets.only(left: 16, right: 8),
             itemCount: DummyData.tlbSignature.length,
             itemBuilder: (context, index) {
               final event = DummyData.tlbSignature[index];
@@ -48,7 +49,7 @@ class TlbSignatureSection extends StatelessWidget {
                           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                           child: Image.asset(
                             event.imagePath,
-                            height: Responsive.h(context, 300, min: 220),
+                            height: Responsive.h(context, 260, min: 180),
                             width: double.infinity,
                             fit: BoxFit.cover,
                           ),
@@ -79,7 +80,7 @@ class TlbSignatureSection extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 8),
-                            Expanded(
+                            Flexible(
                               child: Text(
                                 event.venue, // Using venue for subtitle in our dummy data
                                 style: GoogleFonts.poppins(

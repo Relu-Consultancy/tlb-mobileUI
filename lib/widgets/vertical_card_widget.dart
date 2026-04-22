@@ -52,6 +52,7 @@ class VerticalCardWidget extends StatelessWidget {
         children: [
           // Image Area
           Stack(
+            clipBehavior: Clip.hardEdge,
             children: [
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),

@@ -1,72 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../screens/events_screen.dart';
+import '../screens/classes_screen.dart';
+import '../screens/programs_screen.dart';
+import '../screens/venues_screen.dart';
 
 class CategoriesGrid extends StatelessWidget {
   const CategoriesGrid({super.key});
 
+  void _navigateTo(BuildContext context, String label) {
+    Widget screen;
+    switch (label) {
+      case 'Events':
+        screen = const EventsScreen();
+        break;
+      case 'Classes':
+        screen = const ClassesScreen();
+        break;
+      case 'Program':
+        screen = const ProgramsScreen();
+        break;
+      case 'Venues':
+        screen = const VenuesScreen();
+        break;
+      default:
+        screen = const EventsScreen(); // Shop placeholder
+    }
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Top row: 3 items
-    final topRowCategories = DummyData.homeCategories.sublist(0, 3);
-    // Bottom row: 2 wide items
-    final bottomRowCategories = DummyData.homeCategories.sublist(3, 5);
+    final categories = DummyData.homeCategories;
+    // Row 1: first 3 items, Row 2: remaining items
+    final topRow = categories.sublist(0, 3);
+    final bottomRow = categories.sublist(3);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
-          // Top Row
+          // Top Row: 3 items
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: topRowCategories.map((cat) {
+            children: topRow.asMap().entries.map((entry) {
+              final index = entry.key;
+              final cat = entry.value;
               return Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(
-                    right: cat == topRowCategories.last ? 0 : 12,
+                    right: index < topRow.length - 1 ? 12 : 0,
                   ),
                   child: GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const EventsScreen(),
-                      ),
-                    ),
-                    child: _buildCategoryCard(
-                      context: context,
-                      imagePath: cat['image'],
-                      label: cat['label'],
-                    ),
+                    onTap: () => _navigateTo(context, cat['label']),
+                    child: _buildVerticalCategoryCard(context, cat),
                   ),
                 ),
               );
             }).toList(),
           ),
           const SizedBox(height: 12),
-          // Bottom Row
+          // Bottom Row: remaining items (horizontal layouts)
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: bottomRowCategories.map((cat) {
+            children: bottomRow.asMap().entries.map((entry) {
+              final index = entry.key;
+              final cat = entry.value;
               return Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(
-                    right: cat == bottomRowCategories.last ? 0 : 12,
+                    right: index < bottomRow.length - 1 ? 12 : 0,
                   ),
                   child: GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const EventsScreen(),
-                      ),
-                    ),
-                    child: _buildCategoryCard(
-                      context: context,
-                      imagePath: cat['image'],
-                      label: cat['label'],
-                      isWide: true,
-                    ),
+                    onTap: () => _navigateTo(context, cat['label']),
+                    child: _buildHorizontalCategoryCard(context, cat),
                   ),
                 ),
               );
@@ -77,67 +83,101 @@ class CategoriesGrid extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryCard({
-    required BuildContext context,
-    required String imagePath,
-    required String label,
-    bool isWide = false,
-  }) {
+  BoxDecoration _cardDecoration() {
+    return BoxDecoration(
+      gradient: LinearGradient(
+        colors: [
+          Colors.white,
+          Colors.grey.shade200,
+        ],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ),
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: Colors.grey.shade300, width: 0.5),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.04),
+          blurRadius: 8,
+          offset: const Offset(0, 3),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVerticalCategoryCard(BuildContext context, Map<String, dynamic> cat) {
     return Container(
-      height: Responsive.h(context, 110, min: 90),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE5E5E5), // Light grey background
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+      height: 110,
+      decoration: _cardDecoration(),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+              child: Image.asset(
+                cat['image'],
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.category_outlined,
+                  size: 36,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              cat['label'],
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1A1A2E),
+              ),
+            ),
           ),
         ],
       ),
-      child: isWide
-          ? Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Image.asset(
-                  imagePath,
-                  height: Responsive.h(context, 70, min: 50),
-                  fit: BoxFit.contain,
-                ),
-                Text(
-                  label,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1A1A2E),
-                  ),
-                ),
-              ],
-            )
-          : Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Image.asset(
-                      imagePath,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-                Text(
-                  label,
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1A1A2E),
-                  ),
-                ),
-                const SizedBox(height: 8),
-              ],
+    );
+  }
+
+  Widget _buildHorizontalCategoryCard(BuildContext context, Map<String, dynamic> cat) {
+    return Container(
+      height: 70, // Slightly shorter than the square cards
+      decoration: _cardDecoration(),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 8, top: 4, bottom: 4),
+            child: Image.asset(
+              cat['image'],
+              width: 50, // Constrain image width so text fits nicely
+              height: 50,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const Icon(
+                Icons.category_outlined,
+                size: 28,
+                color: Colors.grey,
+              ),
             ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              cat['label'],
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1A1A2E),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

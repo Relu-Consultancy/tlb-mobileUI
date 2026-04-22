@@ -20,14 +20,12 @@ class DummyData {
       'image': 'assets/images/new_home/eventcategory3.png',
     },
     {
-      'label': 'Spaces',
+      'label': 'Venues',
       'image': 'assets/images/new_home/eventcategory4.png',
-      'isWide': true, // Indicator for the 2-item bottom row
     },
     {
       'label': 'Shop',
       'image': 'assets/images/new_home/eventcategory5.png',
-      'isWide': true,
     },
   ];
 
@@ -184,6 +182,165 @@ class DummyData {
     {
       'label': 'Flexible\nPace',
       'image': 'assets/images/new_home/eventcategory5.png',
+    },
+  ];
+
+  static const List<Map<String, dynamic>> classesSeeAllCategories = [
+    {
+      'label': 'Academic',
+      'image': 'assets/images/new_home/eventcategory1.png',
+      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+    },
+    {
+      'label': 'Creative Arts',
+      'image': 'assets/images/new_home/eventcategory2.png',
+      'gradient': [Color(0xFFFFF0F0), Color(0xFFFFDBDB)],
+    },
+    {
+      'label': 'Tech & Innovation',
+      'image': 'assets/images/new_home/eventcategory3.png',
+      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+    },
+    {
+      'label': 'Performing Arts',
+      'image': 'assets/images/new_home/eventcategory4.png',
+      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+    },
+    {
+      'label': 'Sports & Fitness',
+      'image': 'assets/images/new_home/eventcategory5.png',
+      'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+    },
+    {
+      'label': 'Speech & Communication',
+      'image': 'assets/images/new_home/eventcategory1.png',
+      'gradient': [Color(0xFFFFE4E6), Color(0xFFFECDD3)],
+    },
+    {
+      'label': 'Life Skills & Personality Development',
+      'image': 'assets/images/new_home/eventcategory2.png',
+      'gradient': [Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
+    },
+    {
+      'label': 'Creative Media',
+      'image': 'assets/images/new_home/eventcategory3.png',
+      'gradient': [Color(0xFFFEF3C7), Color(0xFFFDE68A)],
+    },
+    {
+      'label': 'Outdoor and Nature Learning',
+      'image': 'assets/images/new_home/eventcategory4.png',
+      'gradient': [Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
+    },
+    {
+      'label': 'Culinary',
+      'image': 'assets/images/new_home/eventcategory5.png',
+      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+    },
+    {
+      'label': 'Brain Boosters',
+      'image': 'assets/images/new_home/eventcategory1.png',
+      'gradient': [Color(0xFFF5F3FF), Color(0xFFEDE9FE)],
+    },
+  ];
+
+  static const List<Map<String, dynamic>> venuesSeeAllCategories = [
+    {
+      'label': 'Play & Adventure',
+      'image': 'assets/images/new_home/eventcategory1.png',
+      'gradient': [Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
+    },
+    {
+      'label': 'Sports & Active',
+      'image': 'assets/images/new_home/eventcategory2.png',
+      'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+    },
+    {
+      'label': 'Creative & DIY',
+      'image': 'assets/images/new_home/eventcategory3.png',
+      'gradient': [Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
+    },
+    {
+      'label': 'Party & Celebration',
+      'image': 'assets/images/new_home/eventcategory4.png',
+      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+    },
+    {
+      'label': 'Science & Discovery',
+      'image': 'assets/images/new_home/eventcategory5.png',
+      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+    },
+    {
+      'label': 'Nature & Animals',
+      'image': 'assets/images/new_home/eventcategory1.png',
+      'gradient': [Color(0xFFECFDF5), Color(0xFFD1FAE5)],
+    },
+    {
+      'label': 'Reading & Study',
+      'image': 'assets/images/new_home/eventcategory2.png',
+      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+    },
+    {
+      'label': 'Dining & Cafes',
+      'image': 'assets/images/new_home/eventcategory3.png',
+      'gradient': [Color(0xFFF5F3FF), Color(0xFFEDE9FE)],
+    },
+  ];
+
+  static const List<Map<String, dynamic>> programsSeeAllCategories = [
+    {
+      'label': 'Future Tech & AI',
+      'image': 'assets/images/new_home/eventcategory1.png',
+      'gradient': [Color(0xFFDCFCE7), Color(0xFFBBF7D0)],
+    },
+    {
+      'label': 'Design & Innovation',
+      'image': 'assets/images/new_home/eventcategory2.png',
+      'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+    },
+    {
+      'label': 'Leadership & Entrepreneurship',
+      'image': 'assets/images/new_home/eventcategory3.png',
+      'gradient': [Color(0xFFDBEAFE), Color(0xFFBFDBFE)],
+    },
+    {
+      'label': 'Media & Content Creation',
+      'image': 'assets/images/new_home/eventcategory4.png',
+      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+    },
+    {
+      'label': 'Stage Arts & Performance',
+      'image': 'assets/images/new_home/eventcategory5.png',
+      'gradient': [Color(0xFFECFDF5), Color(0xFFD1FAE5)],
+    },
+    {
+      'label': 'Active Sports & Training',
+      'image': 'assets/images/new_home/eventcategory1.png',
+      'gradient': [Color(0xFFFEE2E2), Color(0xFFFECACA)],
+    },
+    {
+      'label': 'Academics & Competitive Prep',
+      'image': 'assets/images/new_home/eventcategory2.png',
+      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+    },
+    {
+      'label': 'Analytical Thinking',
+      'image': 'assets/images/new_home/eventcategory3.png',
+      'gradient': [Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
+    },
+    {
+      'label': 'Language & Communication',
+      'image': 'assets/images/new_home/eventcategory4.png',
+      'gradient': [Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
+    },
+    {
+      'label': 'Culinary & Hospitality',
+      'image': 'assets/images/new_home/eventcategory5.png',
+      'gradient': [Color(0xFFFFFBEB), Color(0xFFFEF3C7)],
+    },
+    {
+      'label': 'Grooming & Personality Development',
+      'image': 'assets/images/new_home/eventcategory1.png',
+      'gradient': [Color(0xFFFAF5FF), Color(0xFFF3E8FF)],
     },
   ];
 

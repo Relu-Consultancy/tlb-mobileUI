@@ -58,6 +58,7 @@ class WishlistButton extends StatelessWidget {
                   width: containerSize,
                   height: containerSize,
                   alignment: Alignment.center,
+                  clipBehavior: Clip.hardEdge,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,

@@ -22,7 +22,7 @@ class BannerCarousel extends StatefulWidget {
 }
 
 class _BannerCarouselState extends State<BannerCarousel> {
-  final PageController _pageController = PageController(viewportFraction: 0.92);
+  final PageController _pageController = PageController(viewportFraction: 0.88);
   Timer? _autoSlideTimer;
 
   @override
@@ -59,6 +59,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
           height: widget.height,
           child: PageView.builder(
             controller: _pageController,
+            clipBehavior: Clip.hardEdge,
             itemCount: widget.events.length,
             itemBuilder: (context, index) {
               final event = widget.events[index];
@@ -68,12 +69,14 @@ class _BannerCarouselState extends State<BannerCarousel> {
                   MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
-                        child: Image.asset(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(14),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      clipBehavior: Clip.hardEdge,
+                      children: [
+                        Image.asset(
                           event.imagePath,
                           fit: BoxFit.cover,
                           width: double.infinity,
@@ -101,37 +104,28 @@ class _BannerCarouselState extends State<BannerCarousel> {
                             );
                           },
                         ),
-                      ),
-                      Positioned(
-                        top: 12,
-                        right: 12,
-                        child: WishlistButton(event: event),
-                      ),
-                    ],
+                        Positioned(
+                          top: 12,
+                          right: 12,
+                          child: WishlistButton(event: event),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
             },
           ),
         ),
-        // Shadow-like gradient line beneath the spotlight banner
+        // Subtle warm-toned shadow strip beneath the banner
         Container(
-          height: 10,
-          margin: const EdgeInsets.symmetric(horizontal: 24),
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(14),
-              bottomRight: Radius.circular(14),
-            ),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withOpacity(0.12),
-                Colors.black.withOpacity(0.04),
-                Colors.transparent,
-              ],
-              stops: const [0.0, 0.5, 1.0],
+          height: 5,
+          margin: const EdgeInsets.symmetric(horizontal: 36),
+          decoration: const BoxDecoration(
+            color: Color(0x22E8A835),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(10),
+              bottomRight: Radius.circular(10),
             ),
           ),
         ),
@@ -142,7 +136,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
           effect: const WormEffect(
             dotHeight: 8,
             dotWidth: 8,
-            activeDotColor: Color(0xFFFFB902), // Amber/yellow to match Figma
+            activeDotColor: Color(0xFFFFB902),
             dotColor: Color(0xFFE0E0E0),
             spacing: 6,
           ),

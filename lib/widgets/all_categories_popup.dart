@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 
-/// Half-screen bottom-sheet popup that displays all categories in a scrollable grid.
-/// Triggered by tapping "View All →" in the category grid.
+/// Refined bottom-sheet popup that displays all categories with a search bar.
+/// Matches the Classes See All design.
 class AllCategoriesPopup extends StatelessWidget {
   final List<Map<String, dynamic>> categories;
 
@@ -12,7 +12,7 @@ class AllCategoriesPopup extends StatelessWidget {
     required this.categories,
   });
 
-  /// Show this popup as a modal bottom sheet (half screen, draggable).
+  /// Show this popup as a modal bottom sheet (tall, draggable).
   static void show(BuildContext context, List<Map<String, dynamic>> categories) {
     showModalBottomSheet(
       context: context,
@@ -20,7 +20,7 @@ class AllCategoriesPopup extends StatelessWidget {
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withOpacity(0.45),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(36)),
       ),
       builder: (_) => AllCategoriesPopup(categories: categories),
     );
@@ -31,10 +31,10 @@ class AllCategoriesPopup extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
-      constraints: BoxConstraints(maxHeight: screenHeight * 0.55),
+      constraints: BoxConstraints(maxHeight: screenHeight * 0.85),
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(36)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -49,60 +49,99 @@ class AllCategoriesPopup extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
 
-          // ── Header row ──
+          // ── Search Bar Row ──
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'All Categories',
-                      style: GoogleFonts.poppins(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black,
-                      ),
+                Expanded(
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3F4F6),
+                      borderRadius: BorderRadius.circular(25),
                     ),
-                    Text(
-                      '(${categories.length} Results Found)',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Icon(Icons.search, color: Colors.grey.shade600, size: 22),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Search Categories & more ..',
+                              hintStyle: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: Colors.grey.shade500,
+                              ),
+                              border: InputBorder.none,
+                              isDense: true,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
+                const SizedBox(width: 12),
                 GestureDetector(
                   onTap: () => Navigator.of(context).pop(),
                   child: Container(
-                    width: 36,
-                    height: 36,
+                    width: 44,
+                    height: 44,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: const Color(0xFFF3F4F6),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.close, size: 20),
+                    child: const Icon(Icons.close, size: 20, color: Colors.black87),
                   ),
                 ),
               ],
             ),
           ),
+          const SizedBox(height: 24),
+
+          // ── Header Section ──
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Row(
+                children: [
+                  Text(
+                    'All Categories',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '(${categories.length} Results Found)',
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 16),
 
-          // ── Scrollable grid ──
+          // ── Scrollable Grid ──
           Flexible(
             child: GridView.builder(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
               itemCount: categories.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
-                mainAxisSpacing: 14,
-                crossAxisSpacing: 14,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
                 childAspectRatio: 0.72,
               ),
               itemBuilder: (context, index) {
@@ -111,27 +150,24 @@ class AllCategoriesPopup extends StatelessWidget {
 
                 return GestureDetector(
                   onTap: () {
-                    Navigator.of(context).pop(); // Close popup
-                    // TODO: Navigate to category-filtered listing
+                    Navigator.of(context).pop();
+                    // Navigation logic here
                   },
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(16),
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.white,
-                          gradientColors.last.withOpacity(0.25),
+                          gradientColors.last.withOpacity(0.3),
                         ],
-                      ),
-                      border: Border.all(
-                        color: Colors.grey.withOpacity(0.12),
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: gradientColors.last.withOpacity(0.15),
-                          blurRadius: 8,
+                          color: gradientColors.last.withOpacity(0.12),
+                          blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
                       ],
@@ -139,26 +175,33 @@ class AllCategoriesPopup extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          const SizedBox(height: 4),
                           Text(
                             category['label'],
                             textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 10),
                               fontWeight: FontWeight.w600,
+                              height: 1.1,
                               color: Colors.black87,
                             ),
                           ),
+                          const Spacer(),
                           Expanded(
+                            flex: 5,
                             child: Padding(
-                              padding: const EdgeInsets.all(4.0),
+                              padding: const EdgeInsets.all(6.0),
                               child: Image.asset(
                                 category['image'],
                                 fit: BoxFit.contain,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    const Icon(Icons.category,
-                                        size: 30, color: Colors.grey),
+                                errorBuilder: (_, __, ___) => Icon(
+                                  Icons.category_outlined,
+                                  size: 30,
+                                  color: Colors.grey.shade400,
+                                ),
                               ),
                             ),
                           ),

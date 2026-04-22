@@ -13,7 +13,6 @@ const List<NavbarItemData> _navItems = [
   NavbarItemData(label: 'Events', iconPath: 'assets/icons/nav_events.svg'),
   NavbarItemData(label: 'Classes', iconPath: 'assets/icons/nav_classes.svg'),
   NavbarItemData(label: 'Program', iconPath: 'assets/icons/nav_program.svg'),
-  NavbarItemData(label: 'Spaces', iconPath: 'assets/icons/nav_spaces.svg'),
 ];
 
 class FloatingNavbar extends StatelessWidget {
@@ -28,7 +27,6 @@ class FloatingNavbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Utilize MediaQuery to ensure responsive max widths.
     final screenWidth = MediaQuery.of(context).size.width;
     
     return Container(
@@ -40,9 +38,9 @@ class FloatingNavbar extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Color(0xFFE5E7EB), // Metallic grey light
-            Color(0xFFD1D5DB), // Metallic grey slightly darker
-            Color(0xFF9CA3AF), // Subdued shade at the very bottom
+            Color(0xFFE5E7EB),
+            Color(0xFFD1D5DB),
+            Color(0xFF9CA3AF),
           ],
           stops: [0.0, 0.7, 1.0],
         ),
@@ -57,7 +55,7 @@ class FloatingNavbar extends StatelessWidget {
             color: Colors.white.withOpacity(0.8),
             blurRadius: 4,
             offset: const Offset(0, -2),
-          ), // subtle inner rim highlight
+          ),
         ],
       ),
       clipBehavior: Clip.antiAlias,
@@ -104,7 +102,7 @@ class FloatingNavbar extends StatelessWidget {
                           width: 22,
                           height: 22,
                           colorFilter: const ColorFilter.mode(
-                            Color(0xFF1E293B), // Dark slate/metallic
+                            Color(0xFF1E293B),
                             BlendMode.srcIn,
                           ),
                         ),

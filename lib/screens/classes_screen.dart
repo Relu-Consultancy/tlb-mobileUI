@@ -29,7 +29,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
   int _currentNavIndex = 2; // "Classes" tab is index 2
 
   void _showAllCategoriesPopup(BuildContext context) {
-    AllCategoriesPopup.show(context, DummyData.classesCategories);
+    AllCategoriesPopup.show(context, DummyData.classesSeeAllCategories);
   }
 
   void _onNavTapped(int index) {

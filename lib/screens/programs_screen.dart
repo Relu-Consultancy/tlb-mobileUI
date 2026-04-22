@@ -30,7 +30,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
   int _currentNavIndex = 3; // "Programs" tab is index 3
 
   void _showAllCategoriesPopup(BuildContext context) {
-    AllCategoriesPopup.show(context, DummyData.programsCategories);
+    AllCategoriesPopup.show(context, DummyData.programsSeeAllCategories);
   }
 
   void _onNavTapped(int index) {

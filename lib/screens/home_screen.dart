@@ -20,7 +20,6 @@ import '../widgets/floating_navbar.dart';
 import 'events_screen.dart';
 import 'classes_screen.dart';
 import 'programs_screen.dart';
-import 'venues_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -62,18 +61,11 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (context) => const ClassesScreen(),
         ),
       );
-    } else if (index == 3) { // Programs
+    } else if (index == 3) { // Program
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => const ProgramsScreen(),
-        ),
-      );
-    } else if (index == 4) { // Venues
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const VenuesScreen(),
         ),
       );
     } else {
@@ -104,10 +96,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (!LocationState().isLocationSupported(city)) {
                       return const EmptyLocationWidget();
                     }
-                    return SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      child: Padding(
-                        padding: EdgeInsets.only(bottom: 120 + safeBottom), // clear navbar
+                      return SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -140,7 +130,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             const AppFooter(),
                           ],
                         ),
-                      ),
                     );
                   },
                 ),

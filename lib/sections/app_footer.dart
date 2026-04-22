@@ -11,7 +11,7 @@ class AppFooter extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.only(
         top: Responsive.h(context, 50, min: 30),
-        bottom: Responsive.h(context, 30, min: 20),
+        bottom: Responsive.h(context, 30, min: 20) + 120 + MediaQuery.of(context).padding.bottom,
       ),
       decoration: const BoxDecoration(
         gradient: LinearGradient(

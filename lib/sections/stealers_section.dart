@@ -1,7 +1,6 @@
 import '../core/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../widgets/wishlist_button.dart';
 import '../widgets/section_divider_widget.dart';
 import '../data/dummy_data.dart';
 import '../screens/event_detail_screen.dart';
@@ -16,10 +15,11 @@ class StealersSection extends StatelessWidget {
       children: [
         const SectionDividerWidget(title: 'Stealers'),
         SizedBox(
-          height: Responsive.h(context, 420, min: 350),
+          height: Responsive.h(context, 450, min: 380),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(left: 16),
+            clipBehavior: Clip.hardEdge,
+            padding: const EdgeInsets.only(left: 16, right: 8),
             itemCount: DummyData.stealers.length,
             itemBuilder: (context, index) {
               final event = DummyData.stealers[index];
@@ -48,15 +48,10 @@ class StealersSection extends StatelessWidget {
                           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                           child: Image.asset(
                             event.imagePath,
-                            height: Responsive.h(context, 250, min: 180),
+                            height: Responsive.h(context, 260, min: 180),
                             width: double.infinity,
                             fit: BoxFit.cover,
                           ),
-                        ),
-                        Positioned(
-                          top: 12,
-                          right: 12,
-                          child: WishlistButton(event: event),
                         ),
                         // Top Yellow Pill (End in time)
                         if (event.description != null)
