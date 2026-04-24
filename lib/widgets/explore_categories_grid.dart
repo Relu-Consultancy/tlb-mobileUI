@@ -6,11 +6,13 @@ import '../core/app_colors.dart';
 class ExploreCategoriesGrid extends StatelessWidget {
   final List<Map<String, dynamic>> categories;
   final VoidCallback? onViewAll;
+  final ValueChanged<int>? onCategoryTap;
 
   const ExploreCategoriesGrid({
     super.key,
     required this.categories,
     this.onViewAll,
+    this.onCategoryTap,
   });
 
   @override
@@ -37,8 +39,10 @@ class ExploreCategoriesGrid extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final category = categories[index];
                   final gradientColors = category['gradient'] as List<Color>;
-                  
-                  return Container(
+
+                  return GestureDetector(
+                    onTap: () => onCategoryTap?.call(index),
+                    child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
                       gradient: LinearGradient(
@@ -83,6 +87,7 @@ class ExploreCategoriesGrid extends StatelessWidget {
                         ],
                       ),
                     ),
+                  ),
                   );
                 },
               ),

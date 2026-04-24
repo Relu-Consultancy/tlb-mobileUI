@@ -97,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       return const EmptyLocationWidget();
                     }
                       return SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(),
+                        physics: const ClampingScrollPhysics(),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -105,8 +105,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SectionDividerWidget(title: 'Spotlight'),
                             RepaintBoundary(
                               child: BannerCarousel(
-                                events: DummyData.bannerEvents, 
-                                height: Responsive.h(context, 380, min: 280),
+                                events: DummyData.bannerEvents,
+                                height: Responsive.h(context, 386, min: 286),
                               ),
                             ),
                             const SizedBox(height: 24),

@@ -16,7 +16,7 @@ class SpotlightSection extends StatelessWidget {
           title: 'Spotlight',
           onSeeAll: () {},
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 18),
         SizedBox(
           height: Responsive.h(context, 290, min: 240),
           child: ListView.separated(

@@ -30,6 +30,11 @@ flutter:
   assets:
     - assets/images/
     - assets/images/new_home/
+    - assets/images/event_subcategories/
+    - assets/images/explore_formats/
+    - assets/images/featured_partners/
+    - assets/images/class_page/
+    - assets/images/pick_pace/
     - assets/icons/
     - resources- tlb-ui/
     - google_fonts/

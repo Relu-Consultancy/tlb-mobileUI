@@ -1,36 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../core/responsive.dart';
+import '../core/app_colors.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
 
 class PartnerPortraitCard extends StatelessWidget {
   final EventModel event;
+  final double width;
 
-  const PartnerPortraitCard({super.key, required this.event});
+  const PartnerPortraitCard({
+    super.key,
+    required this.event,
+    this.width = 260,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => EventDetailScreen(event: event),
-          ),
-        );
-      },
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+      ),
       child: Container(
-        width: Responsive.w(context, 160, min: 140),
-        margin: const EdgeInsets.only(right: 16),
+        width: width,
+        margin: const EdgeInsets.only(right: 14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 8,
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
               offset: const Offset(0, 4),
             ),
           ],
@@ -38,21 +38,24 @@ class PartnerPortraitCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            // Poster image — portrait aspect ratio so full design is visible
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              child: AspectRatio(
+                aspectRatio: 0.78, // portrait poster
                 child: Image.asset(
                   event.imagePath,
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
+                  errorBuilder: (_, __, ___) => Container(
                     color: Colors.indigo.shade100,
                     child: const Icon(Icons.image, color: Colors.white),
                   ),
                 ),
               ),
             ),
+            // Content block under the poster
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -61,43 +64,47 @@ class PartnerPortraitCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
-                      fontSize: Responsive.sp(context, 13),
+                      fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF1A1A2E),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    event.venue, // Using venue for subtitle description
-                    maxLines: 2,
+                    event.venue, // subtitle
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
-                      fontSize: Responsive.sp(context, 11),
-                      color: Colors.grey.shade600,
+                      fontSize: 12.5,
+                      color: AppColors.textSecondary,
+                      height: 1.3,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
+                  // Full-width yellow pill Book Now
                   SizedBox(
                     width: double.infinity,
-                    height: 32,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Book now logic
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFB902), // TLB Yellow
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                    height: 40,
+                    child: Material(
+                      color: const Color(0xFFFFB902),
+                      borderRadius: BorderRadius.circular(24),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(24),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => EventDetailScreen(event: event),
+                          ),
                         ),
-                        padding: EdgeInsets.zero,
-                      ),
-                      child: Text(
-                        'Book Now',
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 12),
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1A1A2E),
+                        child: Center(
+                          child: Text(
+                            'Book Now',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
                         ),
                       ),
                     ),
