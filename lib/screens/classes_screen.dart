@@ -12,7 +12,6 @@ import '../widgets/class_nearby_card.dart';
 import '../widgets/new_on_tlb_card.dart';
 import '../widgets/holiday_special_card.dart';
 import '../widgets/build_skill_card.dart';
-import '../widgets/special_focus_card.dart';
 import '../sections/app_footer.dart';
 import '../widgets/floating_navbar.dart';
 import '../widgets/all_categories_popup.dart';
@@ -63,7 +62,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
     final safeBottom = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           Column(
@@ -129,7 +128,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       // ── Pick Your Pace ────────────────────────────────────
                       const SectionDividerWidget(title: 'Pick Your Pace'),
                       SizedBox(
-                        height: 120,
+                        height: 148,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
@@ -137,33 +136,33 @@ class _ClassesScreenState extends State<ClassesScreen> {
                           itemBuilder: (context, index) {
                             final item = DummyData.pickYourPace[index];
                             return Padding(
-                              padding: const EdgeInsets.only(right: 18),
+                              padding: const EdgeInsets.only(right: 20),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Container(
-                                    width: 72,
-                                    height: 72,
+                                    width: 90,
+                                    height: 90,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       color: const Color(0xFFF0F4FF),
                                       boxShadow: [
                                         BoxShadow(
                                           color: Colors.black.withOpacity(0.07),
-                                          blurRadius: 8,
+                                          blurRadius: 10,
                                           offset: const Offset(0, 3),
                                         ),
                                       ],
                                     ),
                                     child: ClipOval(
                                       child: Padding(
-                                        padding: const EdgeInsets.all(10),
+                                        padding: const EdgeInsets.all(12),
                                         child: Image.asset(
                                           item['image'] as String,
                                           fit: BoxFit.contain,
                                           errorBuilder: (_, __, ___) => const Icon(
                                             Icons.school_outlined,
-                                            size: 32,
+                                            size: 36,
                                             color: AppColors.textSecondary,
                                           ),
                                         ),
@@ -172,7 +171,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                   ),
                                   const SizedBox(height: 8),
                                   SizedBox(
-                                    width: 72,
+                                    width: 90,
                                     child: Text(
                                       item['label'] as String,
                                       textAlign: TextAlign.center,
@@ -290,19 +289,28 @@ class _ClassesScreenState extends State<ClassesScreen> {
 
                       // ── Special Focus ─────────────────────────────────────
                       const SectionDividerWidget(title: 'Special Focus'),
-                      ...List.generate(
-                        DummyData.classesSpecialFocus.length,
-                        (index) {
-                          const colors = [
-                            Color(0xFF7C3AED),
-                            Color(0xFF0284C7),
-                            Color(0xFF059669),
-                          ];
-                          return SpecialFocusCard(
-                            event: DummyData.classesSpecialFocus[index],
-                            accentColor: colors[index % colors.length],
-                          );
-                        },
+                      SizedBox(
+                        height: Responsive.h(context, 430, min: 390),
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.only(left: 16),
+                          itemCount: DummyData.classesSpecialFocus.length,
+                          itemBuilder: (context, index) {
+                            const tagColors = [
+                              Color(0xFFDC2626),
+                              Color(0xFF0284C7),
+                              Color(0xFF059669),
+                            ];
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 14),
+                              child: ClassNearbyCard(
+                                event: DummyData.classesSpecialFocus[index],
+                                buttonLabel: 'Join Class',
+                                tagColor: tagColors[index % tagColors.length],
+                              ),
+                            );
+                          },
+                        ),
                       ),
                       const SizedBox(height: 16),
 

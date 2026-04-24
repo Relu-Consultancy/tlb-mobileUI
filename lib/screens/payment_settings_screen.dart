@@ -7,9 +7,9 @@ class PaymentSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF2F2F7),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF2F2F7),
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
@@ -19,360 +19,274 @@ class PaymentSettingsScreen extends StatelessWidget {
         title: Text(
           'Payment Settings',
           style: GoogleFonts.poppins(
-            fontSize: 16,
+            fontSize: 18,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
         ),
-        centerTitle: true,
       ),
-      body: SafeArea(
-        top: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Saved UPI IDs ──
-              _buildSectionHeader('Saved UPI IDs'),
-              const SizedBox(height: 12),
-              _buildUpiCard(
-                upiId: 'laxman@oksbi',
-                bankName: 'State Bank of India',
-                icon: Icons.account_balance,
-                color: const Color(0xFF1565C0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Greeting banner ──
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 20, 16, 20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(height: 10),
-              _buildUpiCard(
-                upiId: 'laxman@okaxis',
-                bankName: 'Axis Bank',
-                icon: Icons.account_balance,
-                color: const Color(0xFF880E4F),
-              ),
-              const SizedBox(height: 10),
-              _buildAddButton('Add UPI ID'),
-
-              const SizedBox(height: 28),
-
-              // ── Saved Bank Details ──
-              _buildSectionHeader('Saved Bank Details'),
-              const SizedBox(height: 12),
-              _buildBankCard(
-                bankName: 'State Bank of India',
-                accountNumber: '•••• •••• •••• 4521',
-                ifsc: 'SBIN0001234',
-                color: const Color(0xFF1565C0),
-              ),
-              const SizedBox(height: 10),
-              _buildBankCard(
-                bankName: 'HDFC Bank',
-                accountNumber: '•••• •••• •••• 8734',
-                ifsc: 'HDFC0009876',
-                color: const Color(0xFF004D40),
-              ),
-              const SizedBox(height: 10),
-              _buildAddButton('Add Bank Account'),
-
-              const SizedBox(height: 28),
-
-              // ── Transaction History ──
-              _buildSectionHeader('Transaction History'),
-              const SizedBox(height: 12),
-              ..._dummyTransactions.map((t) => _buildTransactionTile(t)),
-
-              const SizedBox(height: 24),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title) {
-    return Text(
-      title,
-      style: GoogleFonts.poppins(
-        fontSize: 16,
-        fontWeight: FontWeight.w700,
-        color: const Color(0xFF1A1A2E),
-      ),
-    );
-  }
-
-  Widget _buildUpiCard({
-    required String upiId,
-    required String bankName,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(0.15)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 22),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  upiId,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1A1A2E),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  bankName,
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(Icons.delete_outline, color: Colors.red.shade300, size: 20),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBankCard({
-    required String bankName,
-    required String accountNumber,
-    required String ifsc,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [color.withOpacity(0.9), color.withOpacity(0.7)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.account_balance, color: Colors.white70, size: 20),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  bankName,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            accountNumber,
-            style: GoogleFonts.spaceMono(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-              letterSpacing: 2,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'IFSC: $ifsc',
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: Colors.white70,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAddButton(String label) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: const Color(0xFFFFC107),
-          style: BorderStyle.solid,
-          width: 1.5,
-        ),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.add_circle_outline, color: Color(0xFFFFC107), size: 20),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFFFFC107),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTransactionTile(Map<String, dynamic> t) {
-    Color statusColor;
-    IconData statusIcon;
-    switch (t['status']) {
-      case 'Success':
-        statusColor = const Color(0xFF4CAF50);
-        statusIcon = Icons.check_circle;
-        break;
-      case 'Failed':
-        statusColor = const Color(0xFFE53935);
-        statusIcon = Icons.cancel;
-        break;
-      default:
-        statusColor = const Color(0xFFFFA726);
-        statusIcon = Icons.access_time;
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8F9FA),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.receipt_long_outlined, color: statusColor, size: 20),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  t['event'] as String,
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1A1A2E),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  t['date'] as String,
-                  style: GoogleFonts.poppins(
-                    fontSize: 11,
-                    color: Colors.grey.shade500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '₹${t['amount']}',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF1A1A2E),
-                ),
-              ),
-              const SizedBox(height: 2),
-              Row(
-                mainAxisSize: MainAxisSize.min,
+              child: Row(
                 children: [
-                  Icon(statusIcon, size: 14, color: statusColor),
-                  const SizedBox(width: 4),
-                  Text(
-                    t['status'] as String,
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: statusColor,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Hi Laxman,',
+                          style: GoogleFonts.poppins(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF1A1A2E),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Manage  and  secure your saved\npayment methods.',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Colors.grey.shade500,
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Image.asset(
+                    'resources- tlb-ui/tlbAppIcon.png',
+                    width: 72,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.account_balance_wallet,
+                      size: 64,
+                      color: Color(0xFFFFB902),
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
-        ],
+            ),
+
+            const SizedBox(height: 20),
+
+            Text(
+              'Saved Method',
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1A1A2E),
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // ── Visa card ──
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1A3A8F),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'VISA',
+                            style: GoogleFonts.poppins(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Visa**** 4578',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF1A1A2E),
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    'Expires 09/29',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 11.5,
+                                      color: Colors.grey.shade500,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFF8E1),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      'Default',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFFFFB902),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.more_horiz, color: Colors.grey),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'UPI',
+                            style: GoogleFonts.poppins(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF1A1A2E),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'UPI: designer@upi',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF1A1A2E),
+                            ),
+                          ),
+                        ),
+                        const Icon(Icons.more_horiz, color: Colors.grey),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            // ── Add New Method ──
+            Material(
+              color: const Color(0xFFFFB902),
+              borderRadius: BorderRadius.circular(28),
+              child: InkWell(
+                onTap: () {},
+                borderRadius: BorderRadius.circular(28),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.add, color: Color(0xFF1A1A2E), size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Add New Method',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF1A1A2E),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // ── Need more help ──
+            Text(
+              'Need more help?',
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1A1A2E),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Our support team is ready to assist you.',
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                color: Colors.grey.shade500,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                leading: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEDF4FF),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.chat_bubble_outline, color: Color(0xFF2563EB), size: 20),
+                ),
+                title: Text(
+                  'Chat with support',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF1A1A2E),
+                  ),
+                ),
+                subtitle: Text(
+                  'We usually reply in minutes',
+                  style: GoogleFonts.poppins(fontSize: 11.5, color: Colors.grey.shade500),
+                ),
+                trailing: const Icon(Icons.chevron_right, color: Color(0xFF2563EB)),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }
-
-  static final List<Map<String, dynamic>> _dummyTransactions = [
-        {
-          'event': 'Halloween Party 2025',
-          'amount': '1,200',
-          'date': 'Feb 28, 2025',
-          'status': 'Success',
-        },
-        {
-          'event': 'Kids Storytelling Day',
-          'amount': '800',
-          'date': 'Feb 25, 2025',
-          'status': 'Success',
-        },
-        {
-          'event': 'World Music Festival',
-          'amount': '2,500',
-          'date': 'Feb 20, 2025',
-          'status': 'Failed',
-        },
-        {
-          'event': 'Art & Craft Workshop',
-          'amount': '600',
-          'date': 'Feb 15, 2025',
-          'status': 'Success',
-        },
-        {
-          'event': 'Summer Dance Camp',
-          'amount': '1,500',
-          'date': 'Feb 10, 2025',
-          'status': 'Pending',
-        },
-      ];
 }

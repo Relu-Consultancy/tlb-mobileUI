@@ -8,11 +8,15 @@ import '../screens/event_detail_screen.dart';
 class ClassNearbyCard extends StatelessWidget {
   final EventModel event;
   final double width;
+  final String buttonLabel;
+  final Color? tagColor;
 
   const ClassNearbyCard({
     super.key,
     required this.event,
     this.width = 310,
+    this.buttonLabel = 'Join Now',
+    this.tagColor,
   });
 
   @override
@@ -58,22 +62,19 @@ class ClassNearbyCard extends StatelessWidget {
                   if ((event.tag ?? '').isNotEmpty)
                     Positioned(
                       bottom: 10,
-                      left: 0,
-                      right: 0,
-                      child: Center(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.58),
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Text(
-                            event.tag!,
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
+                      left: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: tagColor ?? Colors.black.withOpacity(0.58),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Text(
+                          event.tag!,
+                          style: GoogleFonts.poppins(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -219,7 +220,7 @@ class ClassNearbyCard extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
                         child: Text(
-                          'Join Now',
+                          buttonLabel,
                           style: GoogleFonts.poppins(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
