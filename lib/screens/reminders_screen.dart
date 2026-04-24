@@ -79,8 +79,8 @@ class _RemindersScreenState extends State<RemindersScreen> {
                   ),
                 ),
                 Image.asset(
-                  'resources- tlb-ui/tlbAppIcon.png',
-                  width: 72,
+                  'resources- tlb-ui/accounts_page/reminders.png',
+                  width: 80,
                   errorBuilder: (_, __, ___) => const Icon(
                     Icons.notifications_active,
                     size: 64,

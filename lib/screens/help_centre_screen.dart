@@ -57,8 +57,8 @@ class HelpCentreScreen extends StatelessWidget {
                   ),
                 ),
                 Image.asset(
-                  'resources- tlb-ui/tlbAppIcon.png',
-                  width: 72,
+                  'resources- tlb-ui/accounts_page/support.png',
+                  width: 80,
                   errorBuilder: (_, __, ___) => const Icon(
                     Icons.headphones,
                     size: 64,

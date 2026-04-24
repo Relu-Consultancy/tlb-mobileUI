@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
@@ -9,15 +10,14 @@ import '../widgets/section_divider_widget.dart';
 import '../widgets/explore_categories_grid.dart';
 import '../widgets/pick_your_pace_row.dart';
 import '../widgets/event_card_with_rating.dart';
-import '../widgets/featured_event_card.dart';
-import '../widgets/trending_card.dart';
-import '../widgets/horizontal_card_widget.dart';
+import '../widgets/class_nearby_card.dart';
 import '../sections/app_footer.dart';
 import '../widgets/floating_navbar.dart';
+import '../widgets/all_categories_popup.dart';
+import 'event_detail_screen.dart';
 import 'events_screen.dart';
 import 'classes_screen.dart';
 import 'venues_screen.dart';
-import '../widgets/all_categories_popup.dart';
 
 class ProgramsScreen extends StatefulWidget {
   const ProgramsScreen({super.key});
@@ -27,7 +27,7 @@ class ProgramsScreen extends StatefulWidget {
 }
 
 class _ProgramsScreenState extends State<ProgramsScreen> {
-  int _currentNavIndex = 3; // "Programs" tab is index 3
+  int _currentNavIndex = 3;
 
   void _showAllCategoriesPopup(BuildContext context) {
     AllCategoriesPopup.show(context, DummyData.programsSeeAllCategories);
@@ -52,9 +52,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         MaterialPageRoute(builder: (_) => const VenuesScreen()),
       );
     } else if (index != _currentNavIndex) {
-      setState(() {
-        _currentNavIndex = index;
-      });
+      setState(() => _currentNavIndex = index);
     }
   }
 
@@ -71,20 +69,21 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
               const HomeHeader(),
               Expanded(
                 child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.only(bottom: 120 + safeBottom),
+                  physics: const ClampingScrollPhysics(),
                   child: Column(
                     children: [
-                      const SectionDividerWidget(title: ''), // spacing
-                      // AI Bootcamp Spotlight Banner
+                      const SizedBox(height: 16),
                       RepaintBoundary(
                         child: BannerCarousel(
-                          events: DummyData.bannerEvents, // Reuse for layout
-                          height: Responsive.h(context, 380, min: 280),
+                          events: DummyData.programsScreenBanners,
+                          height: Responsive.h(context, 386, min: 286),
+                          showGlow: false,
+                          overlayStyle: true,
+                          ctaText: 'Explore Program',
                         ),
                       ),
 
-                      const SectionDividerWidget(title: "Pave Your Path"),
+                      const SectionDividerWidget(title: 'Pave Your Path'),
                       RepaintBoundary(
                         child: ExploreCategoriesGrid(
                           categories: DummyData.programsCategories,
@@ -92,137 +91,141 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         ),
                       ),
 
-                      const SectionDividerWidget(title: "The Big Leagues"),
+                      // ── The Big Leagues ──
+                      const SectionDividerWidget(title: 'The Big Leagues'),
                       SizedBox(
                         height: Responsive.h(context, 400, min: 360),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.hotPicks.length,
+                          itemBuilder: (context, index) => Padding(
+                            padding: const EdgeInsets.only(right: 16),
+                            child: SizedBox(
+                              width: 220,
+                              child: EventCardWithRating(event: DummyData.hotPicks[index]),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // ── Make Your Weekends Count ──
+                      const SectionDividerWidget(title: 'Make Your Weekends Count'),
+                      SizedBox(
+                        height: 160,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.only(left: 16),
+                          itemCount: DummyData.weekendSpecial.length,
                           itemBuilder: (context, index) {
+                            final e = DummyData.weekendSpecial[index];
                             return Padding(
-                              padding: const EdgeInsets.only(right: 16),
-                              child: SizedBox(
-                                width: 220,
-                                child: EventCardWithRating(
-                                  event: DummyData.hotPicks[index],
-                                ),
+                              padding: const EdgeInsets.only(right: 14),
+                              child: _buildSideBySideCard(
+                                context,
+                                event: e,
+                                scheduleText: 'Sat & Sun, 10:00 AM',
+                                ageText: '8-12 Yrs',
+                                locationText: 'Online',
+                                buttonLabel: 'Book Trail',
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // ── Find Your Fit ──
+                      const SectionDividerWidget(title: 'Find Your Fit'),
+                      PickYourPaceRow(items: DummyData.findYourFit),
+                      const SizedBox(height: 24),
+
+                      // ── Zero to Hero ──
+                      const SectionDividerWidget(title: 'Zero to Hero'),
+                      SizedBox(
+                        height: 160,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.only(left: 16),
+                          itemCount: DummyData.newOnTlb.length,
+                          itemBuilder: (context, index) {
+                            final e = DummyData.newOnTlb[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 14),
+                              child: _buildSideBySideCard(
+                                context,
+                                event: e,
+                                scheduleText: 'Start with basics of programming',
+                                ageText: '8+ Yrs',
+                                locationText: e.venue,
+                                buttonLabel: 'Start Learning',
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      // ── The Holiday Edit ──
+                      const SectionDividerWidget(title: 'The Holiday Edit'),
+                      SizedBox(
+                        height: Responsive.h(context, 430, min: 390),
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.only(left: 16),
+                          itemCount: DummyData.hotPicks.length,
+                          itemBuilder: (context, index) {
+                            const tagColors = [
+                              Color(0xFF7C3AED),
+                              Color(0xFFDC2626),
+                              Color(0xFF059669),
+                            ];
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 14),
+                              child: ClassNearbyCard(
+                                event: DummyData.hotPicks[index],
+                                buttonLabel: 'Join Camp',
+                                tagColor: tagColors[index % tagColors.length],
                               ),
                             );
                           },
                         ),
                       ),
 
-                      const SectionDividerWidget(title: 'Make Your Weekends Count'),
-                      ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: 1,
-                        itemBuilder: (context, index) {
-                          final event = DummyData.weekendSpecial[0];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: HorizontalCardWidget(
-                              imagePath: event.imagePath,
-                              distance: 'Online',
-                              title: 'Weekend Coding Classes',
-                              location: 'Powai',
-                              reviewCount: '3.5k reviews',
-                              description: 'Sat & sun, 10:00 AM',
-                              buttonText: 'Book Trail',
-                              event: event,
-                            ),
-                          );
-                        },
-                      ),
-
-                      const SectionDividerWidget(title: 'Find Your Fit'),
-                      PickYourPaceRow(items: DummyData.findYourFit),
-                      const SizedBox(height: 24),
-
-                      const SectionDividerWidget(title: 'Zero to Hero'),
-                      ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: 1,
-                        itemBuilder: (context, index) {
-                          final event = DummyData.newOnTlb[0];
-                          return HorizontalCardWidget(
-                            imagePath: event.imagePath,
-                            distance: '8+ yrs',
-                            title: 'Beginner Coding for Kids',
-                            location: 'Learn basics of programming',
-                            reviewCount: '3.5k reviews',
-                            description: 'Start with basics of programming',
-                            buttonText: 'Start Leaning',
-                            event: event,
-                          );
-                        },
-                      ),
-
-                      const SectionDividerWidget(title: 'The Holiday Edit'),
+                      // ── For Unique Minds ──
+                      const SectionDividerWidget(title: 'For Unique Minds'),
                       SizedBox(
-                        height: Responsive.h(context, 320, min: 280),
+                        height: Responsive.h(context, 340, min: 300),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.stealers.length,
-                          itemBuilder: (context, index) {
-                            return FeaturedEventCard(event: DummyData.stealers[index]);
-                          },
+                          itemCount: DummyData.classesSpecialFocus.length,
+                          itemBuilder: (context, index) => Padding(
+                            padding: const EdgeInsets.only(right: 14),
+                            child: _buildUniqueMindCard(
+                              context,
+                              event: DummyData.classesSpecialFocus[index],
+                            ),
+                          ),
                         ),
                       ),
 
-                      const SectionDividerWidget(title: 'For Unique Minds'),
-                      ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: 1,
-                        itemBuilder: (context, index) {
-                          final event = DummyData.onlineEvents[0];
-                          return HorizontalCardWidget(
-                            imagePath: event.imagePath,
-                            distance: 'Bandra',
-                            title: 'Art Therapy Classes',
-                            location: 'Creative Healing Studio',
-                            reviewCount: '3.5k reviews',
-                            description: '6-12 Yrs',
-                            buttonText: 'Enquire Now',
-                            event: event,
-                          );
-                        },
-                      ),
-
+                      // ── Level Up Your Profile ──
                       const SectionDividerWidget(title: 'Level Up Your Profile'),
-                      ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: 1,
-                        itemBuilder: (context, index) {
-                          final event = DummyData.categoryEventsExtra[0];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: SizedBox(
-                              height: 240,
-                              child: TrendingCard(
-                                events: [
-                                  EventModel(
-                                    title: 'App development Bootcamp',
-                                    venue: 'Online\nCertificate Included',
-                                    imagePath: event.imagePath,
-                                    rating: 4.8,
-                                    reviewCount: '12-16 Yrs',
-                                    description: 'Build real android/ios apps from scratch',
-                                  )
-                                ],
-                              ),
+                      SizedBox(
+                        height: Responsive.h(context, 380, min: 340),
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.only(left: 16),
+                          itemCount: DummyData.categoryEventsExtra.length,
+                          itemBuilder: (context, index) => Padding(
+                            padding: const EdgeInsets.only(right: 14),
+                            child: _buildLevelUpCard(
+                              context,
+                              event: DummyData.categoryEventsExtra[index],
                             ),
-                          );
-                        },
+                          ),
+                        ),
                       ),
 
                       const SizedBox(height: 40),
@@ -247,6 +250,372 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  // ── Side-by-side card (Weekends + Zero to Hero) ──
+  Widget _buildSideBySideCard(
+    BuildContext context, {
+    required EventModel event,
+    required String scheduleText,
+    required String ageText,
+    required String locationText,
+    required String buttonLabel,
+  }) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+      ),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.80,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
+              child: Image.asset(
+                event.imagePath,
+                width: 120,
+                height: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  width: 120,
+                  color: AppColors.primary.withOpacity(0.15),
+                  child: const Icon(Icons.event, size: 32),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      event.title,
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 5),
+                    _iconRow(Icons.calendar_month_outlined, scheduleText),
+                    const SizedBox(height: 3),
+                    _iconRow(Icons.people_outline, ageText),
+                    const SizedBox(height: 3),
+                    _iconRow(Icons.location_on_outlined, locationText),
+                    const Spacer(),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 30,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.textPrimary,
+                          elevation: 0,
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Text(
+                          buttonLabel,
+                          style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── For Unique Minds card (star badge top-left) ──
+  Widget _buildUniqueMindCard(BuildContext context, {required EventModel event}) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+      ),
+      child: Container(
+        width: 200,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  child: Image.asset(
+                    event.imagePath,
+                    height: 160,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      height: 160,
+                      color: AppColors.primary.withOpacity(0.15),
+                      child: const Icon(Icons.event, size: 40),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFFB902),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.star_rounded, color: Colors.white, size: 18),
+                  ),
+                ),
+              ],
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      event.title,
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 3),
+                    if (event.reviewCount != null)
+                      _iconRow(Icons.people_outline, event.reviewCount!),
+                    const SizedBox(height: 2),
+                    _iconRow(Icons.location_on_outlined, event.venue),
+                    const Spacer(),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 30,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.textPrimary,
+                          elevation: 0,
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Text(
+                          'Enquire Now',
+                          style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Level Up Your Profile card ──
+  Widget _buildLevelUpCard(BuildContext context, {required EventModel event}) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+      ),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.78,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  child: Image.asset(
+                    event.imagePath,
+                    height: 170,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      height: 170,
+                      color: AppColors.primary.withOpacity(0.15),
+                      child: const Icon(Icons.event, size: 40),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 10,
+                  left: 10,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2563EB),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'Portfolio Project : Yes',
+                      style: GoogleFonts.poppins(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            event.title,
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (event.description != null) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              event.description!,
+                              style: GoogleFonts.poppins(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    _iconRow(Icons.location_on_outlined, event.venue.split('\n').first),
+                    const SizedBox(height: 2),
+                    _iconRow(Icons.workspace_premium_outlined, 'Certificate Included'),
+                    const Spacer(),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 32,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.textPrimary,
+                          elevation: 0,
+                          padding: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Text(
+                          'Join Program',
+                          style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _iconRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 12, color: Colors.grey.shade500),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(fontSize: 10.5, color: Colors.grey.shade600),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }

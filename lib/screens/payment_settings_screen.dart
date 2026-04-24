@@ -64,8 +64,8 @@ class PaymentSettingsScreen extends StatelessWidget {
                     ),
                   ),
                   Image.asset(
-                    'resources- tlb-ui/tlbAppIcon.png',
-                    width: 72,
+                    'resources- tlb-ui/accounts_page/payments.png',
+                    width: 80,
                     errorBuilder: (_, __, ___) => const Icon(
                       Icons.account_balance_wallet,
                       size: 64,

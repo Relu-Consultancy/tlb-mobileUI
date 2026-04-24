@@ -13,6 +13,7 @@ const List<NavbarItemData> _navItems = [
   NavbarItemData(label: 'Events', iconPath: 'assets/icons/nav_events.svg'),
   NavbarItemData(label: 'Classes', iconPath: 'assets/icons/nav_classes.svg'),
   NavbarItemData(label: 'Program', iconPath: 'assets/icons/nav_program.svg'),
+  NavbarItemData(label: 'Venues', iconPath: 'assets/icons/nav_spaces.svg'),
 ];
 
 class FloatingNavbar extends StatelessWidget {

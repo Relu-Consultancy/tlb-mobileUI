@@ -273,43 +273,43 @@ class DummyData {
   static const List<Map<String, dynamic>> venuesSeeAllCategories = [
     {
       'label': 'Play & Adventure',
-      'image': 'assets/images/new_home/eventcategory1.png',
-      'gradient': [Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
+      'image': 'resources- tlb-ui/venues_page/play.png',
+      'gradient': <Color>[Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
     },
     {
       'label': 'Sports & Active',
-      'image': 'assets/images/new_home/eventcategory2.png',
-      'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+      'image': 'resources- tlb-ui/venues_page/sports.png',
+      'gradient': <Color>[Color(0xFFFEF9C3), Color(0xFFFEF08A)],
     },
     {
       'label': 'Creative & DIY',
-      'image': 'assets/images/new_home/eventcategory3.png',
-      'gradient': [Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
+      'image': 'resources- tlb-ui/venues_page/creativediy.png',
+      'gradient': <Color>[Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
     },
     {
       'label': 'Party & Celebration',
-      'image': 'assets/images/new_home/eventcategory4.png',
-      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+      'image': 'resources- tlb-ui/venues_page/party.png',
+      'gradient': <Color>[Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
     },
     {
       'label': 'Science & Discovery',
-      'image': 'assets/images/new_home/eventcategory5.png',
-      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+      'image': 'resources- tlb-ui/venues_page/science.png',
+      'gradient': <Color>[Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
     },
     {
       'label': 'Nature & Animals',
-      'image': 'assets/images/new_home/eventcategory1.png',
-      'gradient': [Color(0xFFECFDF5), Color(0xFFD1FAE5)],
+      'image': 'resources- tlb-ui/venues_page/nature.png',
+      'gradient': <Color>[Color(0xFFECFDF5), Color(0xFFD1FAE5)],
     },
     {
       'label': 'Reading & Study',
       'image': 'assets/images/new_home/eventcategory2.png',
-      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+      'gradient': <Color>[Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
     },
     {
       'label': 'Dining & Cafes',
       'image': 'assets/images/new_home/eventcategory3.png',
-      'gradient': [Color(0xFFF5F3FF), Color(0xFFEDE9FE)],
+      'gradient': <Color>[Color(0xFFF5F3FF), Color(0xFFEDE9FE)],
     },
   ];
 
@@ -464,6 +464,96 @@ class DummyData {
       venue: '',
       imagePath: 'assets/images/eventbanner.png',
     ),
+  ];
+
+  static const List<EventModel> programsScreenBanners = [
+    EventModel(
+      title: 'AI Bootcamp for Kids',
+      venue: '',
+      imagePath: 'resources- tlb-ui/program_banner.png',
+      tag: 'PROGRAMS',
+      description: 'Build smart AI projects in 8 weeks(Online+ Offline, Age: 10 – 15 yrs)',
+    ),
+  ];
+
+  // ── Venues screen data ──
+  static const List<EventModel> venuesScreenBanners = [
+    EventModel(
+      title: 'Plan Your Perfect Weekend',
+      venue: '',
+      imagePath: 'resources- tlb-ui/spaces.png',
+      description: 'Discover top rated venues near you with expert instructors',
+    ),
+  ];
+
+  static const List<EventModel> venuesBigDays = [
+    EventModel(title: 'Royal Banquet Hall', venue: 'Powai • 5 km', imagePath: 'assets/images/new_home/hotpics1.jpg', rating: 4.8, reviewCount: '3.5k reviews', tag: 'Birthday'),
+    EventModel(title: 'Fun Zone Play Park', venue: 'Powai • 6 km', imagePath: 'assets/images/new_home/hotpic2.png', rating: 4.7, reviewCount: '2.1k reviews', tag: 'Kids Party'),
+    EventModel(title: 'Grand Events Arena', venue: 'Bandra • 8 km', imagePath: 'assets/images/new_home/hotpic3.png', rating: 4.9, reviewCount: '4.2k reviews', tag: 'Premium'),
+  ];
+
+  static const List<EventModel> venuesWeekendPlan = [
+    EventModel(title: 'Pottery Workshop', venue: 'Sat & Sun • 2 hrs', imagePath: 'assets/images/new_home/weekendspl2.png', rating: 4.8, reviewCount: '3.5k reviews', tag: 'Weekend Only'),
+    EventModel(title: 'Canvas Painting', venue: 'Sat & Sun • 3 hrs', imagePath: 'assets/images/new_home/weekendspl3.png', rating: 4.7, reviewCount: '2.0k reviews', tag: 'Weekend Only'),
+    EventModel(title: 'Pottery Workshop', venue: 'Sat & Sun • 2 hrs', imagePath: 'assets/images/new_home/weekendspl4.png', rating: 4.6, reviewCount: '1.8k reviews', tag: 'Weekend Only'),
+  ];
+
+  static const List<EventModel> venuesCloseToYou = [
+    EventModel(title: 'Play Arena', venue: 'Indoor Play Zone • 3 kms', imagePath: 'assets/images/new_home/hotpic4.png', tag: 'Indoor'),
+    EventModel(title: 'Kids Sports Hub', venue: 'Outdoor Sports • 4 kms', imagePath: 'assets/images/new_home/hotpick5.png', tag: 'Outdoor'),
+    EventModel(title: 'Creative Studio', venue: 'Art Space • 2 kms', imagePath: 'assets/images/new_home/weekendspl1.png', tag: 'Indoor'),
+  ];
+
+  static const List<EventModel> venuesOutAndAbout = [
+    EventModel(title: 'City Zoo', venue: 'Byculla', imagePath: 'assets/images/new_home/hotpics1.jpg'),
+    EventModel(title: 'Water Park', venue: 'Thane', imagePath: 'assets/images/new_home/hotpic2.png'),
+    EventModel(title: 'Lakeside Park', venue: 'Powai', imagePath: 'assets/images/new_home/hotpic3.png'),
+  ];
+
+  static const List<Map<String, dynamic>> venuesGetMoving = [
+    {
+      'sport': 'Football',
+      'image': 'assets/images/new_home/hotpics1.jpg',
+      'gradient': <Color>[Color(0xFF56CFB2), Color(0xFF2BC0B4)],
+      'slotsText': 'Slots Available today',
+      'venues': <Map<String, dynamic>>[
+        {'name': 'Football Turf Arena', 'location': 'Mira road • 10 Kms', 'image': 'assets/images/new_home/hotpic4.png', 'slots': <String>['6:00 PM', '7:00 PM', '8:00 PM']},
+        {'name': 'Football Turf Arena', 'location': 'Vitthalwadi • 10 Kms', 'image': 'assets/images/new_home/hotpick5.png', 'slots': <String>['7:00 PM', '8:00 PM', '9:00 PM']},
+      ],
+    },
+    {
+      'sport': 'Climbing',
+      'image': 'assets/images/new_home/hotpic2.png',
+      'gradient': <Color>[Color(0xFF60A5FA), Color(0xFF3B82F6)],
+      'slotsText': 'Slots Available today',
+      'venues': <Map<String, dynamic>>[
+        {'name': 'Rock Climb Zone', 'location': 'Andheri • 5 Kms', 'image': 'assets/images/new_home/hotpic3.png', 'slots': <String>['10:00 AM', '11:00 AM', '12:00 PM']},
+        {'name': 'Boulder House', 'location': 'Bandra • 7 Kms', 'image': 'assets/images/new_home/weekendspl2.png', 'slots': <String>['2:00 PM', '4:00 PM', '6:00 PM']},
+      ],
+    },
+  ];
+
+  static const List<EventModel> venuesHandsOn = [
+    EventModel(title: 'Art & Craft Studio', venue: 'Bandra • 3 kms', imagePath: 'assets/images/new_home/weekendspl1.png'),
+    EventModel(title: 'DIY Workshop Hub', venue: 'Andheri • 5 kms', imagePath: 'assets/images/new_home/weekendspl2.png'),
+    EventModel(title: 'Pottery Corner', venue: 'Juhu • 4 kms', imagePath: 'assets/images/new_home/weekendspl3.png'),
+  ];
+
+  static const List<EventModel> venuesEasyPocket = [
+    EventModel(title: 'Community Art Cafe', venue: 'Andheri • Budget Friendly', imagePath: 'assets/images/new_home/hotpic4.png', tag: '3 Kms away'),
+    EventModel(title: 'Local Play Zone', venue: 'Borivali • Low Cost', imagePath: 'assets/images/new_home/hotpick5.png', tag: '5 Kms away'),
+    EventModel(title: 'Open Ground Park', venue: 'Malad • Free Entry', imagePath: 'assets/images/new_home/weekendspl4.png', tag: '2 Kms away'),
+  ];
+
+  static const List<EventModel> venuesHeadedMall = [
+    EventModel(title: 'Arcade Gaming Zone', venue: 'Phoenix mall • 5 km', imagePath: 'assets/images/new_home/hotpics1.jpg', rating: 4.8, reviewCount: '3.5k reviews', tag: 'Fun Game', description: '4-12 Yrs'),
+    EventModel(title: 'Soft Play Kingdom', venue: 'R-City mall • 6 km', imagePath: 'assets/images/new_home/hotpic2.png', rating: 4.6, reviewCount: '1.8k reviews', tag: 'Soft Play', description: '2-8 Yrs'),
+    EventModel(title: 'Trampoline World', venue: 'Viviana mall • 9 km', imagePath: 'assets/images/new_home/hotpic3.png', rating: 4.7, reviewCount: '2.3k reviews', tag: 'Active', description: '5-15 Yrs'),
+  ];
+
+  static const List<EventModel> venuesThoughtful = [
+    EventModel(title: 'Sensory Friendly Studio', venue: 'Bandra • 5 km', imagePath: 'assets/images/new_home/specialneeds1.png', rating: 4.8, reviewCount: '3.5k reviews', tag: 'Low noise', description: 'Safe Space'),
+    EventModel(title: 'Inclusive Art Center', venue: 'Bandra • 3 km', imagePath: 'assets/images/new_home/specialneeds2.png', rating: 4.8, reviewCount: '3.5k reviews', tag: 'Certified Instr.'),
   ];
 
   static const List<EventModel> hotPicks = [

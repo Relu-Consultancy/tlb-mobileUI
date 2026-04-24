@@ -1,4 +1,4 @@
-name: tlb_mobile_ui
+﻿name: tlb_mobile_ui
 description: "Event Booking App"
 publish_to: 'none'
 version: 1.0.0+1
@@ -37,4 +37,9 @@ flutter:
     - assets/images/pick_pace/
     - assets/icons/
     - resources- tlb-ui/
+    - resources- tlb-ui/accounts_page/
+    - resources- tlb-ui/venues_page/
+    - resources- tlb-ui/venues_page/yourway/
     - google_fonts/
+
+

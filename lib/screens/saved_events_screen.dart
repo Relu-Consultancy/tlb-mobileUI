@@ -60,10 +60,10 @@ class SavedEventsScreen extends StatelessWidget {
                   ),
                 ),
                 Image.asset(
-                  'resources- tlb-ui/tlbAppIcon.png',
-                  width: 72,
+                  'resources- tlb-ui/accounts_page/wishlist.png',
+                  width: 80,
                   errorBuilder: (_, __, ___) => const Icon(
-                    Icons.favorite,
+                    Icons.favorite_rounded,
                     size: 64,
                     color: Color(0xFFEF4444),
                   ),

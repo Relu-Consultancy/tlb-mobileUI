@@ -58,8 +58,8 @@ class YourReviewsScreen extends StatelessWidget {
                   ),
                 ),
                 Image.asset(
-                  'resources- tlb-ui/tlbAppIcon.png',
-                  width: 72,
+                  'resources- tlb-ui/accounts_page/reviews.png',
+                  width: 80,
                   errorBuilder: (_, __, ___) => const Icon(
                     Icons.star,
                     size: 64,

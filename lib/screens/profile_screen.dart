@@ -174,6 +174,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             _buildMenuItem(
+              imagePath: 'resources- tlb-ui/accounts_page/wishlist.png',
               icon: Icons.favorite_border,
               title: 'Favorite',
               onTap: () => Navigator.push(
@@ -182,6 +183,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             _buildMenuItem(
+              imagePath: 'resources- tlb-ui/accounts_page/payments.png',
               icon: Icons.credit_card_outlined,
               title: 'Payment Settings',
               onTap: () => Navigator.push(
@@ -190,6 +192,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             _buildMenuItem(
+              imagePath: 'resources- tlb-ui/accounts_page/reviews.png',
               icon: Icons.book_outlined,
               title: 'Your Reviews',
               onTap: () => Navigator.push(
@@ -206,6 +209,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             _buildMenuItem(
+              imagePath: 'resources- tlb-ui/accounts_page/reminders.png',
               icon: Icons.alarm,
               title: 'Reminders',
               onTap: () => Navigator.push(
@@ -228,6 +232,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             _buildMenuItem(
+              imagePath: 'resources- tlb-ui/accounts_page/support.png',
               icon: Icons.help_outline,
               title: 'Help',
               onTap: () => Navigator.push(
@@ -291,15 +296,28 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildMenuItem({
-    required IconData icon,
-    Color iconColor = const Color(0xFF424242), // Dark grey
+    IconData? icon,
+    String? imagePath,
+    Color iconColor = const Color(0xFF424242),
     required String title,
     bool hideChevron = false,
     VoidCallback? onTap,
   }) {
+    Widget leadingWidget;
+    if (imagePath != null) {
+      leadingWidget = Image.asset(
+        imagePath,
+        width: 26,
+        height: 26,
+        errorBuilder: (_, __, ___) => Icon(icon ?? Icons.circle, color: iconColor, size: 26),
+      );
+    } else {
+      leadingWidget = Icon(icon ?? Icons.circle, color: iconColor, size: 26);
+    }
+
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-      leading: Icon(icon, color: iconColor, size: 26),
+      leading: leadingWidget,
       title: Text(
         title,
         style: GoogleFonts.poppins(
@@ -310,7 +328,7 @@ class ProfileScreen extends StatelessWidget {
       ),
       trailing: hideChevron
           ? null
-          : const Icon(Icons.chevron_right, color: Color(0xFF2196F3), size: 22), // Blue chevron
+          : const Icon(Icons.chevron_right, color: Color(0xFF2196F3), size: 22),
       onTap: onTap,
     );
   }
