@@ -7,12 +7,14 @@ class ExploreCategoriesGrid extends StatelessWidget {
   final List<Map<String, dynamic>> categories;
   final VoidCallback? onViewAll;
   final ValueChanged<int>? onCategoryTap;
+  final double childAspectRatio;
 
   const ExploreCategoriesGrid({
     super.key,
     required this.categories,
     this.onViewAll,
     this.onCategoryTap,
+    this.childAspectRatio = 0.75,
   });
 
   @override
@@ -30,11 +32,11 @@ class ExploreCategoriesGrid extends StatelessWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: categories.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
-                  childAspectRatio: 0.75, // Taller cards
+                  childAspectRatio: childAspectRatio,
                 ),
                 itemBuilder: (context, index) {
                   final category = categories[index];

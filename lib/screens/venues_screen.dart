@@ -11,6 +11,7 @@ import '../widgets/floating_navbar.dart';
 import 'events_screen.dart';
 import 'classes_screen.dart';
 import 'programs_screen.dart';
+import 'category_venues_screen.dart';
 
 class VenuesScreen extends StatefulWidget {
   const VenuesScreen({super.key});
@@ -280,6 +281,18 @@ class _VenuesScreenState extends State<VenuesScreen> {
       backgroundColor: Colors.transparent,
       builder: (_) => _VenuesCategoriesSheet(
         categories: DummyData.venuesSeeAllCategories,
+        onCategoryTap: (index) {
+          Navigator.pop(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CategoryVenuesScreen(
+                initialCategoryIndex: index
+                    .clamp(0, DummyData.venuesSeeAllCategories.length - 1),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -297,7 +310,16 @@ class _VenuesScreenState extends State<VenuesScreen> {
         itemBuilder: (ctx, i) {
           final c = cats[i];
           final colors = List<Color>.from(c['gradient'] as List);
-          return Padding(
+          return GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => CategoryVenuesScreen(
+                  initialCategoryIndex: i,
+                ),
+              ),
+            ),
+            child: Padding(
             padding: const EdgeInsets.only(right: 18),
             child: SizedBox(
               width: 82,
@@ -362,6 +384,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                 ],
               ),
             ),
+          ),
           );
         },
       ),
@@ -1201,8 +1224,12 @@ class _VenuesScreenState extends State<VenuesScreen> {
 // ── All Categories popup sheet ──
 class _VenuesCategoriesSheet extends StatefulWidget {
   final List<Map<String, dynamic>> categories;
+  final ValueChanged<int>? onCategoryTap;
 
-  const _VenuesCategoriesSheet({required this.categories});
+  const _VenuesCategoriesSheet({
+    required this.categories,
+    this.onCategoryTap,
+  });
 
   @override
   State<_VenuesCategoriesSheet> createState() => _VenuesCategoriesSheetState();
@@ -1315,7 +1342,18 @@ class _VenuesCategoriesSheetState extends State<_VenuesCategoriesSheet> {
                       childAspectRatio: 0.88,
                     ),
                     itemCount: _filtered.length,
-                    itemBuilder: (_, i) => _catTile(_filtered[i]),
+                    itemBuilder: (_, i) {
+                      final cat = _filtered[i];
+                      final originalIndex = widget.categories.indexOf(cat);
+                      return GestureDetector(
+                        onTap: () {
+                          if (originalIndex != -1) {
+                            widget.onCategoryTap?.call(originalIndex);
+                          }
+                        },
+                        child: _catTile(cat),
+                      );
+                    },
                   ),
           ),
         ],

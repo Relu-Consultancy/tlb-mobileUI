@@ -65,30 +65,22 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
     },
   ];
 
-  Map<String, bool> _activeFilters = {
-    'Within 5km': false,
-    'This Weekend': false,
-    'Distance - Near to Far': false,
-    'Age group (5-14)': false,
-    'Popular': false,
-    'Price- Low to High': false,
-  };
-
   void _showFilterBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return FilterBottomSheet(
-          initialFilters: _activeFilters,
-          onApply: (selectedFilters) {
-            setState(() {
-              _activeFilters = selectedFilters;
-            });
-          },
-        );
-      },
+    FilterBottomSheet.show(
+      context,
+      sortOptions: const [
+        'Top Picks',
+        'Distance- Near to Far',
+        'Price- Low to High',
+        'Price- High to Low',
+      ],
+      filterOptions: const [
+        'Within 5km',
+        'This Weekend',
+        'Age group (5-14)',
+        'Popular',
+      ],
+      categoryOptions: _filters.where((f) => f != 'All').toList(),
     );
   }
 

@@ -6,8 +6,13 @@ import '../screens/event_detail_screen.dart';
 
 class NewOnTlbCard extends StatelessWidget {
   final EventModel event;
+  final String buttonLabel;
 
-  const NewOnTlbCard({super.key, required this.event});
+  const NewOnTlbCard({
+    super.key,
+    required this.event,
+    this.buttonLabel = 'Book Now',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +139,7 @@ class NewOnTlbCard extends StatelessWidget {
                                 vertical: 9,
                               ),
                               child: Text(
-                                'Book Now',
+                                buttonLabel,
                                 style: GoogleFonts.poppins(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,

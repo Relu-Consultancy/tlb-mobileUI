@@ -16,7 +16,6 @@ class BookingDetailScreen extends StatelessWidget {
 
     const bottomBarH = 72.0;
     final ticketHPad = screenWidth * 0.045;
-    const ticketVPad = 8.0;
 
     return Scaffold(
       backgroundColor: const Color(0xFFD6E4F7),
@@ -26,39 +25,42 @@ class BookingDetailScreen extends StatelessWidget {
             Column(
               children: [
                 Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      left: ticketHPad,
-                      right: ticketHPad,
-                      top: ticketVPad + 40,
-                      bottom: ticketVPad,
-                    ),
-                    child: LayoutBuilder(
-                      builder: (context, outerBox) {
-                        final ticketW = outerBox.maxWidth;
-                        final ticketH = outerBox.maxHeight;
-                        final topInset = ticketH * 0.032;
-                        final bottomInset = ticketH * 0.050;
-                        final sideInset = ticketW * 0.060;
-
-                        return Stack(
-                          children: [
-                            Positioned.fill(
-                              child: Image.asset(
-                                'assets/images/updated_ticket.png',
-                                fit: BoxFit.fill,
-                              ),
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: ticketHPad, vertical: 24),
+                      child: LayoutBuilder(
+                        builder: (context, outerBox) {
+                          final ticketW = outerBox.maxWidth;
+                          
+                          return IntrinsicHeight(
+                            child: Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: Image.asset(
+                                    'assets/images/updated_ticket.png',
+                                    fit: BoxFit.fill,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    top: ticketW * 0.06,
+                                    bottom: ticketW * 0.10,
+                                    left: ticketW * 0.08,
+                                    right: ticketW * 0.08,
+                                  ),
+                                  child: _BookingBody(booking: booking),
+                                ),
+                              ],
                             ),
-                            Positioned(
-                              top: topInset,
-                              left: sideInset,
-                              right: sideInset,
-                              bottom: bottomInset,
-                              child: _BookingBody(booking: booking),
-                            ),
-                          ],
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -160,20 +162,16 @@ class _BookingBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, box) {
-        final h = box.maxHeight;
-        final event = booking.event;
-        final imageH = (h * 0.19).clamp(100.0, 180.0);
-        final qrSize = (h * 0.17).clamp(95.0, 155.0);
-        final gap = (h * 0.012).clamp(6.0, 12.0);
-        final gapSm = (h * 0.008).clamp(4.0, 8.0);
+    final event = booking.event;
+    final imageH = Responsive.h(context, 120, min: 100);
+    final qrSize = Responsive.w(context, 130, min: 105);
+    final gap = Responsive.h(context, 12, min: 8);
+    final gapSm = Responsive.h(context, 8, min: 5);
 
-        return SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          child: Column(
-            children: [
-              SizedBox(height: gap),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(height: gap),
 
               // Status badge
               Container(
@@ -367,10 +365,7 @@ class _BookingBody extends StatelessWidget {
               ),
               SizedBox(height: gap),
             ],
-          ),
-        );
-      },
-    );
+          );
   }
 
   Color _statusColor(String status) {

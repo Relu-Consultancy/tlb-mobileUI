@@ -6,14 +6,20 @@ import '../core/responsive.dart';
 /// Matches the Classes See All design.
 class AllCategoriesPopup extends StatelessWidget {
   final List<Map<String, dynamic>> categories;
+  final ValueChanged<int>? onCategoryTap;
 
   const AllCategoriesPopup({
     super.key,
     required this.categories,
+    this.onCategoryTap,
   });
 
   /// Show this popup as a modal bottom sheet (tall, draggable).
-  static void show(BuildContext context, List<Map<String, dynamic>> categories) {
+  static void show(
+    BuildContext context,
+    List<Map<String, dynamic>> categories, {
+    ValueChanged<int>? onCategoryTap,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -22,7 +28,10 @@ class AllCategoriesPopup extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(36)),
       ),
-      builder: (_) => AllCategoriesPopup(categories: categories),
+      builder: (_) => AllCategoriesPopup(
+        categories: categories,
+        onCategoryTap: onCategoryTap,
+      ),
     );
   }
 
@@ -151,7 +160,7 @@ class AllCategoriesPopup extends StatelessWidget {
                 return GestureDetector(
                   onTap: () {
                     Navigator.of(context).pop();
-                    // Navigation logic here
+                    onCategoryTap?.call(index);
                   },
                   child: Container(
                     decoration: BoxDecoration(

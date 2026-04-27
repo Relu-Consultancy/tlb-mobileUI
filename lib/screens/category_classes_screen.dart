@@ -5,33 +5,35 @@ import '../core/app_colors.dart';
 import '../data/dummy_data.dart';
 import '../models/event_model.dart';
 import '../widgets/category_event_card.dart';
+import '../widgets/all_categories_popup.dart';
 import '../widgets/filter_bottom_sheet.dart';
 
-class CategoryEventsScreen extends StatefulWidget {
+class CategoryClassesScreen extends StatefulWidget {
   final int initialCategoryIndex;
 
-  const CategoryEventsScreen({
+  const CategoryClassesScreen({
     super.key,
     required this.initialCategoryIndex,
   });
 
   @override
-  State<CategoryEventsScreen> createState() => _CategoryEventsScreenState();
+  State<CategoryClassesScreen> createState() => _CategoryClassesScreenState();
 }
 
-class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
+class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
   late int _selectedCategoryIndex;
   int _selectedFilterIndex = 0;
   final ScrollController _chipScrollController = ScrollController();
   final List<GlobalKey> _chipKeys = List.generate(
-    DummyData.exploreCategories.length,
+    DummyData.classesCategories.length,
     (_) => GlobalKey(),
   );
 
   @override
   void initState() {
     super.initState();
-    _selectedCategoryIndex = widget.initialCategoryIndex;
+    _selectedCategoryIndex = widget.initialCategoryIndex
+        .clamp(0, DummyData.classesCategories.length - 1);
   }
 
   @override
@@ -40,12 +42,28 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
     super.dispose();
   }
 
+  void _showAllCategories() {
+    AllCategoriesPopup.show(
+      context,
+      DummyData.classesSeeAllCategories,
+      onCategoryTap: (index) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CategoryClassesScreen(
+              initialCategoryIndex: index.clamp(0, DummyData.classesCategories.length - 1),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _selectCategory(int index) {
     setState(() {
       _selectedCategoryIndex = index;
       _selectedFilterIndex = 0;
     });
-    // Scroll the selected chip into view after frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final key = _chipKeys[index];
       if (key.currentContext != null) {
@@ -60,7 +78,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
   }
 
   Map<String, dynamic> get _currentCategory =>
-      DummyData.exploreCategories[_selectedCategoryIndex];
+      DummyData.classesCategories[_selectedCategoryIndex];
 
   List<Color> get _currentGradient =>
       (_currentCategory['gradient'] as List<Color>);
@@ -68,10 +86,10 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
   Color get _accentColor => _currentGradient.last;
 
   List<String> get _filters =>
-      DummyData.categorySubFilters[_selectedCategoryIndex];
+      DummyData.classesSubFilters[_selectedCategoryIndex];
 
   List<EventModel> get _filteredEvents {
-    final all = DummyData.categoryEvents[_selectedCategoryIndex];
+    final all = DummyData.classesByCategory[_selectedCategoryIndex];
     if (_selectedFilterIndex == 0) return all;
     final filterTag = _filters[_selectedFilterIndex];
     return all.where((e) => e.tag == filterTag).toList();
@@ -82,6 +100,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
   }
 
   void _showFilterSheet() {
+    // Remove 'All' from sub-filters for the Categories tab
     final cats = _filters.where((f) => f != 'All').toList();
     FilterBottomSheet.show(
       context,
@@ -132,7 +151,6 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Back + Title row
                     Row(
                       children: [
                         GestureDetector(
@@ -181,7 +199,6 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                       ],
                     ),
                     const SizedBox(height: 14),
-                    // Search bar
                     Container(
                       height: 44,
                       decoration: BoxDecoration(
@@ -196,7 +213,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                           Expanded(
                             child: TextField(
                               decoration: InputDecoration(
-                                hintText: 'Search $_categoryTitle events...',
+                                hintText: 'Search $_categoryTitle classes...',
                                 hintStyle: GoogleFonts.poppins(
                                   fontSize: 13,
                                   color: AppColors.textSecondary,
@@ -222,7 +239,6 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
               child: CustomScrollView(
                 physics: const ClampingScrollPhysics(),
                 slivers: [
-                  // Explore other Categories row
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
@@ -238,7 +254,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                           ),
                           const Spacer(),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: _showAllCategories,
                             child: Text(
                               'See All >',
                               style: GoogleFonts.poppins(
@@ -259,9 +275,9 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                         controller: _chipScrollController,
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
-                        itemCount: DummyData.exploreCategories.length,
+                        itemCount: DummyData.classesCategories.length,
                         itemBuilder: (context, index) {
-                          final cat = DummyData.exploreCategories[index];
+                          final cat = DummyData.classesCategories[index];
                           final isSelected = index == _selectedCategoryIndex;
                           final catGradient = cat['gradient'] as List<Color>;
                           return GestureDetector(
@@ -311,7 +327,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                                         cat['image'] as String,
                                         fit: BoxFit.contain,
                                         errorBuilder: (_, __, ___) => const Icon(
-                                          Icons.category,
+                                          Icons.school_outlined,
                                           color: Colors.grey,
                                           size: 28,
                                         ),
@@ -327,7 +343,6 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                     ),
                   ),
 
-                  // Section divider "All [Category Name]"
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(16, 22, 16, 0),
@@ -359,10 +374,9 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                        itemCount: _filters.length + 1, // +1 for Filters button
+                        itemCount: _filters.length + 1,
                         itemBuilder: (context, index) {
                           if (index == 0) {
-                            // Filters pill
                             return GestureDetector(
                               onTap: _showFilterSheet,
                               child: Container(
@@ -420,30 +434,63 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                     ),
                   ),
 
-                  // 2-column event grid
+                  // Results grid
                   const SliverToBoxAdapter(child: SizedBox(height: 14)),
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    sliver: SliverGrid(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final events = _filteredEvents;
-                          if (index >= events.length) return null;
-                          return CategoryEventCard(
-                            event: events[index],
-                            badgeColor: _accentColor.withOpacity(0.9),
-                          );
-                        },
-                        childCount: _filteredEvents.length,
+                  if (_filteredEvents.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Icon(Icons.school_outlined, size: 48, color: _accentColor.withOpacity(0.6)),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No classes in "${_filters[_selectedFilterIndex]}" yet',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Try another filter to see what’s available.',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.poppins(
+                                fontSize: 11.5,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 14,
-                        crossAxisSpacing: 14,
-                        childAspectRatio: 0.58,
+                    )
+                  else
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: SliverGrid(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final events = _filteredEvents;
+                            if (index >= events.length) return null;
+                            return CategoryEventCard(
+                              event: events[index],
+                              badgeColor: _accentColor.withOpacity(0.9),
+                            );
+                          },
+                          childCount: _filteredEvents.length,
+                        ),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 14,
+                          crossAxisSpacing: 14,
+                          childAspectRatio: 0.58,
+                        ),
                       ),
                     ),
-                  ),
                   const SliverToBoxAdapter(child: SizedBox(height: 40)),
                 ],
               ),

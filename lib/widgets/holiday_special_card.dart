@@ -7,11 +7,13 @@ import '../screens/event_detail_screen.dart';
 class HolidaySpecialCard extends StatelessWidget {
   final EventModel event;
   final double width;
+  final String buttonLabel;
 
   const HolidaySpecialCard({
     super.key,
     required this.event,
     this.width = 280,
+    this.buttonLabel = 'Book Now',
   });
 
   @override
@@ -164,7 +166,7 @@ class HolidaySpecialCard extends StatelessWidget {
                               vertical: 7,
                             ),
                             child: Text(
-                              'Book Now',
+                              buttonLabel,
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,

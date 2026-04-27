@@ -5,33 +5,35 @@ import '../core/app_colors.dart';
 import '../data/dummy_data.dart';
 import '../models/event_model.dart';
 import '../widgets/category_event_card.dart';
+import '../widgets/all_categories_popup.dart';
 import '../widgets/filter_bottom_sheet.dart';
 
-class CategoryEventsScreen extends StatefulWidget {
+class CategoryProgramsScreen extends StatefulWidget {
   final int initialCategoryIndex;
 
-  const CategoryEventsScreen({
+  const CategoryProgramsScreen({
     super.key,
     required this.initialCategoryIndex,
   });
 
   @override
-  State<CategoryEventsScreen> createState() => _CategoryEventsScreenState();
+  State<CategoryProgramsScreen> createState() => _CategoryProgramsScreenState();
 }
 
-class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
+class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
   late int _selectedCategoryIndex;
   int _selectedFilterIndex = 0;
   final ScrollController _chipScrollController = ScrollController();
   final List<GlobalKey> _chipKeys = List.generate(
-    DummyData.exploreCategories.length,
+    DummyData.programsCategories.length,
     (_) => GlobalKey(),
   );
 
   @override
   void initState() {
     super.initState();
-    _selectedCategoryIndex = widget.initialCategoryIndex;
+    _selectedCategoryIndex = widget.initialCategoryIndex
+        .clamp(0, DummyData.programsCategories.length - 1);
   }
 
   @override
@@ -40,12 +42,29 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
     super.dispose();
   }
 
+  void _showAllCategories() {
+    AllCategoriesPopup.show(
+      context,
+      DummyData.programsSeeAllCategories,
+      onCategoryTap: (index) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CategoryProgramsScreen(
+              initialCategoryIndex:
+                  index.clamp(0, DummyData.programsCategories.length - 1),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _selectCategory(int index) {
     setState(() {
       _selectedCategoryIndex = index;
       _selectedFilterIndex = 0;
     });
-    // Scroll the selected chip into view after frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final key = _chipKeys[index];
       if (key.currentContext != null) {
@@ -60,7 +79,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
   }
 
   Map<String, dynamic> get _currentCategory =>
-      DummyData.exploreCategories[_selectedCategoryIndex];
+      DummyData.programsCategories[_selectedCategoryIndex];
 
   List<Color> get _currentGradient =>
       (_currentCategory['gradient'] as List<Color>);
@@ -68,10 +87,10 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
   Color get _accentColor => _currentGradient.last;
 
   List<String> get _filters =>
-      DummyData.categorySubFilters[_selectedCategoryIndex];
+      DummyData.programsSubFilters[_selectedCategoryIndex];
 
   List<EventModel> get _filteredEvents {
-    final all = DummyData.categoryEvents[_selectedCategoryIndex];
+    final all = DummyData.programsByCategory[_selectedCategoryIndex];
     if (_selectedFilterIndex == 0) return all;
     final filterTag = _filters[_selectedFilterIndex];
     return all.where((e) => e.tag == filterTag).toList();
@@ -121,10 +140,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    _currentGradient.first,
-                    _accentColor,
-                  ],
+                  colors: [_currentGradient.first, _accentColor],
                 ),
               ),
               child: Padding(
@@ -132,7 +148,6 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Back + Title row
                     Row(
                       children: [
                         GestureDetector(
@@ -181,7 +196,6 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                       ],
                     ),
                     const SizedBox(height: 14),
-                    // Search bar
                     Container(
                       height: 44,
                       decoration: BoxDecoration(
@@ -191,12 +205,13 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                       child: Row(
                         children: [
                           const SizedBox(width: 14),
-                          const Icon(Icons.search_rounded, size: 20, color: AppColors.textSecondary),
+                          const Icon(Icons.search_rounded,
+                              size: 20, color: AppColors.textSecondary),
                           const SizedBox(width: 8),
                           Expanded(
                             child: TextField(
                               decoration: InputDecoration(
-                                hintText: 'Search $_categoryTitle events...',
+                                hintText: 'Search $_categoryTitle programs...',
                                 hintStyle: GoogleFonts.poppins(
                                   fontSize: 13,
                                   color: AppColors.textSecondary,
@@ -205,7 +220,9 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                                 isDense: true,
                                 contentPadding: EdgeInsets.zero,
                               ),
-                              style: GoogleFonts.poppins(fontSize: 13, color: AppColors.textPrimary),
+                              style: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  color: AppColors.textPrimary),
                             ),
                           ),
                           const SizedBox(width: 14),
@@ -222,14 +239,13 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
               child: CustomScrollView(
                 physics: const ClampingScrollPhysics(),
                 slivers: [
-                  // Explore other Categories row
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
                       child: Row(
                         children: [
                           Text(
-                            'Explore other Categories',
+                            'Explore other Programs',
                             style: GoogleFonts.poppins(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -238,7 +254,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                           ),
                           const Spacer(),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: _showAllCategories,
                             child: Text(
                               'See All >',
                               style: GoogleFonts.poppins(
@@ -254,45 +270,55 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                   ),
                   SliverToBoxAdapter(
                     child: SizedBox(
-                      height: 110,
+                      height: 132,
                       child: ListView.builder(
                         controller: _chipScrollController,
                         scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
-                        itemCount: DummyData.exploreCategories.length,
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                        itemCount: DummyData.programsCategories.length,
                         itemBuilder: (context, index) {
-                          final cat = DummyData.exploreCategories[index];
+                          final cat = DummyData.programsCategories[index];
                           final isSelected = index == _selectedCategoryIndex;
-                          final catGradient = cat['gradient'] as List<Color>;
+                          final catGradient =
+                              cat['gradient'] as List<Color>;
                           return GestureDetector(
                             key: _chipKeys[index],
                             onTap: () => _selectCategory(index),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
-                              width: 86,
+                              width: 98,
                               margin: const EdgeInsets.only(right: 10),
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
-                                  colors: [Colors.white, catGradient.last],
+                                  colors: [
+                                    Colors.white,
+                                    catGradient.last,
+                                  ],
                                 ),
                                 borderRadius: BorderRadius.circular(14),
                                 border: isSelected
-                                    ? Border.all(color: catGradient.last, width: 2.5)
-                                    : Border.all(color: Colors.transparent, width: 2.5),
+                                    ? Border.all(
+                                        color: catGradient.last, width: 2.5)
+                                    : Border.all(
+                                        color: Colors.transparent,
+                                        width: 2.5),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: catGradient.last.withOpacity(isSelected ? 0.45 : 0.15),
+                                    color: catGradient.last.withOpacity(
+                                        isSelected ? 0.45 : 0.15),
                                     blurRadius: isSelected ? 10 : 5,
                                     offset: const Offset(0, 3),
                                   ),
                                 ],
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.fromLTRB(6, 7, 6, 6),
+                                padding:
+                                    const EdgeInsets.fromLTRB(6, 6, 6, 5),
                                 child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       (cat['label'] as String),
@@ -301,7 +327,9 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                                       overflow: TextOverflow.ellipsis,
                                       style: GoogleFonts.poppins(
                                         fontSize: 9.5,
-                                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                                        fontWeight: isSelected
+                                            ? FontWeight.w700
+                                            : FontWeight.w600,
                                         height: 1.2,
                                         color: AppColors.textPrimary,
                                       ),
@@ -310,8 +338,9 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                                       child: Image.asset(
                                         cat['image'] as String,
                                         fit: BoxFit.contain,
-                                        errorBuilder: (_, __, ___) => const Icon(
-                                          Icons.category,
+                                        errorBuilder: (_, __, ___) =>
+                                            const Icon(
+                                          Icons.workspace_premium_outlined,
                                           color: Colors.grey,
                                           size: 28,
                                         ),
@@ -327,13 +356,15 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                     ),
                   ),
 
-                  // Section divider "All [Category Name]"
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(16, 22, 16, 0),
                       child: Row(
                         children: [
-                          Container(width: 28, height: 1.5, color: const Color(0xFFFFB902)),
+                          Container(
+                              width: 28,
+                              height: 1.5,
+                              color: const Color(0xFFFFB902)),
                           const SizedBox(width: 10),
                           Text(
                             'All $_categoryTitle',
@@ -345,7 +376,9 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Container(height: 1.5, color: const Color(0xFFFFB902)),
+                            child: Container(
+                                height: 1.5,
+                                color: const Color(0xFFFFB902)),
                           ),
                         ],
                       ),
@@ -358,16 +391,17 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                       height: 42,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                        itemCount: _filters.length + 1, // +1 for Filters button
+                        padding:
+                            const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                        itemCount: _filters.length + 1,
                         itemBuilder: (context, index) {
                           if (index == 0) {
-                            // Filters pill
                             return GestureDetector(
                               onTap: _showFilterSheet,
                               child: Container(
                                 margin: const EdgeInsets.only(right: 8),
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 5),
                                 decoration: BoxDecoration(
                                   color: AppColors.textPrimary,
                                   borderRadius: BorderRadius.circular(20),
@@ -384,33 +418,47 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                                       ),
                                     ),
                                     const SizedBox(width: 4),
-                                    const Icon(Icons.keyboard_arrow_down_rounded, size: 15, color: Colors.white),
+                                    const Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        size: 15,
+                                        color: Colors.white),
                                   ],
                                 ),
                               ),
                             );
                           }
                           final filterIndex = index - 1;
-                          final isActive = filterIndex == _selectedFilterIndex;
+                          final isActive =
+                              filterIndex == _selectedFilterIndex;
                           return GestureDetector(
-                            onTap: () => setState(() => _selectedFilterIndex = filterIndex),
+                            onTap: () => setState(
+                                () => _selectedFilterIndex = filterIndex),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
                               margin: const EdgeInsets.only(right: 8),
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 5),
                               decoration: BoxDecoration(
-                                color: isActive ? const Color(0xFFFFB902) : Colors.white,
+                                color: isActive
+                                    ? const Color(0xFFFFB902)
+                                    : Colors.white,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: isActive ? Colors.transparent : const Color(0xFFE0E0E0),
+                                  color: isActive
+                                      ? Colors.transparent
+                                      : const Color(0xFFE0E0E0),
                                 ),
                               ),
                               child: Text(
                                 _filters[filterIndex],
                                 style: GoogleFonts.poppins(
                                   fontSize: 11.5,
-                                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                                  color: isActive ? AppColors.textPrimary : AppColors.textSecondary,
+                                  fontWeight: isActive
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  color: isActive
+                                      ? AppColors.textPrimary
+                                      : AppColors.textSecondary,
                                 ),
                               ),
                             ),
@@ -420,30 +468,68 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                     ),
                   ),
 
-                  // 2-column event grid
+                  // Results grid
                   const SliverToBoxAdapter(child: SizedBox(height: 14)),
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    sliver: SliverGrid(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final events = _filteredEvents;
-                          if (index >= events.length) return null;
-                          return CategoryEventCard(
-                            event: events[index],
-                            badgeColor: _accentColor.withOpacity(0.9),
-                          );
-                        },
-                        childCount: _filteredEvents.length,
+                  if (_filteredEvents.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Icon(Icons.workspace_premium_outlined,
+                                size: 48,
+                                color: _accentColor.withOpacity(0.6)),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No programs in "${_filters[_selectedFilterIndex]}" yet',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Try another filter to see what\'s available.',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.poppins(
+                                fontSize: 11.5,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 14,
-                        crossAxisSpacing: 14,
-                        childAspectRatio: 0.58,
+                    )
+                  else
+                    SliverPadding(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: SliverGrid(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final events = _filteredEvents;
+                            if (index >= events.length) return null;
+                            return CategoryEventCard(
+                              event: events[index],
+                              badgeColor:
+                                  _accentColor.withOpacity(0.9),
+                            );
+                          },
+                          childCount: _filteredEvents.length,
+                        ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 14,
+                          crossAxisSpacing: 14,
+                          childAspectRatio: 0.58,
+                        ),
                       ),
                     ),
-                  ),
                   const SliverToBoxAdapter(child: SizedBox(height: 40)),
                 ],
               ),

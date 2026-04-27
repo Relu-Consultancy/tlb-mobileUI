@@ -18,6 +18,7 @@ import 'event_detail_screen.dart';
 import 'events_screen.dart';
 import 'classes_screen.dart';
 import 'venues_screen.dart';
+import 'category_programs_screen.dart';
 
 class ProgramsScreen extends StatefulWidget {
   const ProgramsScreen({super.key});
@@ -30,7 +31,21 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
   int _currentNavIndex = 3;
 
   void _showAllCategoriesPopup(BuildContext context) {
-    AllCategoriesPopup.show(context, DummyData.programsSeeAllCategories);
+    AllCategoriesPopup.show(
+      context,
+      DummyData.programsSeeAllCategories,
+      onCategoryTap: (index) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CategoryProgramsScreen(
+              initialCategoryIndex:
+                  index.clamp(0, DummyData.programsCategories.length - 1),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _onNavTapped(int index) {
@@ -86,8 +101,17 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       const SectionDividerWidget(title: 'Pave Your Path'),
                       RepaintBoundary(
                         child: ExploreCategoriesGrid(
-                          categories: DummyData.programsCategories,
+                          categories: DummyData.programsCategories.take(6).toList(),
+                          childAspectRatio: 0.62,
                           onViewAll: () => _showAllCategoriesPopup(context),
+                          onCategoryTap: (index) => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CategoryProgramsScreen(
+                                initialCategoryIndex: index,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
 

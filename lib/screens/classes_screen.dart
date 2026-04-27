@@ -18,7 +18,7 @@ import '../widgets/all_categories_popup.dart';
 import 'events_screen.dart';
 import 'programs_screen.dart';
 import 'venues_screen.dart';
-import 'category_events_screen.dart';
+import 'category_classes_screen.dart';
 
 class ClassesScreen extends StatefulWidget {
   const ClassesScreen({super.key});
@@ -31,7 +31,20 @@ class _ClassesScreenState extends State<ClassesScreen> {
   int _currentNavIndex = 2;
 
   void _showAllCategoriesPopup(BuildContext context) {
-    AllCategoriesPopup.show(context, DummyData.classesSeeAllCategories);
+    AllCategoriesPopup.show(
+      context,
+      DummyData.classesSeeAllCategories,
+      onCategoryTap: (index) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CategoryClassesScreen(
+              initialCategoryIndex: index % DummyData.classesCategories.length,
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _onNavTapped(int index) {
@@ -90,13 +103,13 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       const SectionDividerWidget(title: "Let's Begin Here"),
                       RepaintBoundary(
                         child: ExploreCategoriesGrid(
-                          categories: DummyData.classesCategories,
+                          categories: DummyData.classesCategories.take(6).toList(),
                           onViewAll: () => _showAllCategoriesPopup(context),
                           onCategoryTap: (index) => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => CategoryEventsScreen(
-                                initialCategoryIndex: index % DummyData.exploreCategories.length,
+                              builder: (_) => CategoryClassesScreen(
+                                initialCategoryIndex: index,
                               ),
                             ),
                           ),
@@ -118,6 +131,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                 width: 240,
                                 child: EventCardWithRating(
                                   event: DummyData.classesWhatEveryoneJoining[index],
+                                  buttonLabel: 'Check Availability',
                                 ),
                               ),
                             );
@@ -204,6 +218,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               padding: const EdgeInsets.only(right: 14),
                               child: ClassNearbyCard(
                                 event: DummyData.classesRightAroundYou[index],
+                                buttonLabel: 'Check Availability',
                               ),
                             );
                           },
@@ -225,6 +240,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                 width: MediaQuery.of(context).size.width - 48,
                                 child: NewOnTlbCard(
                                   event: DummyData.classesTopPicks[index],
+                                  buttonLabel: 'Check Availability',
                                 ),
                               ),
                             );
@@ -260,6 +276,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               child: RepaintBoundary(
                                 child: HolidaySpecialCard(
                                   event: DummyData.classesHolidaySpecial[index],
+                                  buttonLabel: 'Check Availability',
                                 ),
                               ),
                             );
@@ -280,7 +297,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               padding: const EdgeInsets.only(right: 14),
                               child: BuildSkillCard(
                                 event: DummyData.classesBuildNewSkills[index],
-                                ctaLabel: 'Start ${DummyData.classesBuildNewSkills[index].tag?.split(' ').first ?? 'Now'}',
+                                ctaLabel: 'Check Availability',
                               ),
                             );
                           },

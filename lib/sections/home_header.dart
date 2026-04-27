@@ -207,6 +207,7 @@ class HomeHeader extends StatelessWidget {
                 'Search...',
                 style: GoogleFonts.poppins(
                   fontSize: 14,
+                  fontWeight: FontWeight.w700,
                   color: const Color(0xFF6B6B6B),
                 ),
               ),

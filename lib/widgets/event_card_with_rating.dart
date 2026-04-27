@@ -10,8 +10,13 @@ import '../screens/event_detail_screen.dart';
 /// Image (with date badge + heart), title, tag pill, age range, rating + count, venue, Book Now.
 class EventCardWithRating extends StatelessWidget {
   final EventModel event;
+  final String buttonLabel;
 
-  const EventCardWithRating({super.key, required this.event});
+  const EventCardWithRating({
+    super.key,
+    required this.event,
+    this.buttonLabel = 'Book Now',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +228,7 @@ class EventCardWithRating extends StatelessWidget {
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
+                          foregroundColor: const Color(0xFF1A1A2E),
                           elevation: 0,
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
@@ -231,7 +236,7 @@ class EventCardWithRating extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          'Book Now',
+                          buttonLabel,
                           style: GoogleFonts.poppins(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,

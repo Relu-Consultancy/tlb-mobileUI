@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/auth_state.dart';
+import '../core/responsive.dart';
 import 'home_screen.dart';
 
 class SignupOtpScreen extends StatefulWidget {
@@ -126,7 +127,7 @@ class _SignupOtpScreenState extends State<SignupOtpScreen> {
               Text(
                 'Verify OTP',
                 style: GoogleFonts.poppins(
-                  fontSize: 24,
+                  fontSize: Responsive.sp(context, 24),
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF1A1A2E),
                 ),
@@ -137,7 +138,7 @@ class _SignupOtpScreenState extends State<SignupOtpScreen> {
               Text(
                 'We have sent a 6-digit verification code to',
                 style: GoogleFonts.poppins(
-                  fontSize: 14,
+                  fontSize: Responsive.sp(context, 14),
                   color: Colors.grey.shade600,
                   height: 1.5,
                 ),
@@ -147,7 +148,7 @@ class _SignupOtpScreenState extends State<SignupOtpScreen> {
               Text(
                 '${widget.phone}\n${widget.email}',
                 style: GoogleFonts.poppins(
-                  fontSize: 14,
+                  fontSize: Responsive.sp(context, 14),
                   fontWeight: FontWeight.w600,
                   color: const Color(0xFF1A1A2E),
                   height: 1.5,
@@ -215,7 +216,7 @@ class _SignupOtpScreenState extends State<SignupOtpScreen> {
               // Verify & Proceed Button
               SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: Responsive.h(context, 52, min: 48),
                 child: ElevatedButton(
                   onPressed: _onVerifyAndProceed,
                   style: ElevatedButton.styleFrom(
@@ -228,7 +229,7 @@ class _SignupOtpScreenState extends State<SignupOtpScreen> {
                   child: Text(
                     'Verify & Proceed',
                     style: GoogleFonts.poppins(
-                      fontSize: 16,
+                      fontSize: Responsive.sp(context, 16),
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF1A1A2E),
                     ),
