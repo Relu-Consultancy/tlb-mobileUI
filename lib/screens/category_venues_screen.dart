@@ -466,7 +466,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                                   horizontal: 14, vertical: 5),
                               decoration: BoxDecoration(
                                 color: isActive
-                                    ? const Color(0xFFFFB902)
+                                    ? const Color(0xFFFFCC00)
                                     : Colors.white,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
@@ -698,7 +698,7 @@ class _VenueCard extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFB902),
+                        backgroundColor: const Color(0xFFFFCC00),
                         foregroundColor: const Color(0xFF1A1A2E),
                         elevation: 0,
                         shape: RoundedRectangleBorder(

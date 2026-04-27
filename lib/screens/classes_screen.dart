@@ -240,7 +240,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                 width: MediaQuery.of(context).size.width - 48,
                                 child: NewOnTlbCard(
                                   event: DummyData.classesTopPicks[index],
-                                  buttonLabel: 'Check Availability',
+                                  buttonLabel: 'Send Enquiry',
                                 ),
                               ),
                             );
@@ -276,7 +276,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               child: RepaintBoundary(
                                 child: HolidaySpecialCard(
                                   event: DummyData.classesHolidaySpecial[index],
-                                  buttonLabel: 'Check Availability',
+                                  buttonLabel: 'Send Enquiry',
                                 ),
                               ),
                             );
@@ -297,7 +297,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               padding: const EdgeInsets.only(right: 14),
                               child: BuildSkillCard(
                                 event: DummyData.classesBuildNewSkills[index],
-                                ctaLabel: 'Check Availability',
+                                ctaLabel: 'Send Enquiry',
                               ),
                             );
                           },

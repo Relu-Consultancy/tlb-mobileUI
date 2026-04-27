@@ -201,7 +201,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                                     const SizedBox(height: 14),
                                     // Pill-shaped yellow CTA
                                     Material(
-                                      color: const Color(0xFFFFB902),
+                                      color: const Color(0xFFFFCC00),
                                       borderRadius: BorderRadius.circular(30),
                                       child: InkWell(
                                         borderRadius: BorderRadius.circular(30),

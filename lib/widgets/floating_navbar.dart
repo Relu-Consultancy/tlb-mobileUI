@@ -35,16 +35,7 @@ class FloatingNavbar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.white, width: 2),
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFE5E7EB),
-            Color(0xFFD1D5DB),
-            Color(0xFF9CA3AF),
-          ],
-          stops: [0.0, 0.7, 1.0],
-        ),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(50),
         boxShadow: [
           BoxShadow(
@@ -83,12 +74,12 @@ class FloatingNavbar extends StatelessWidget {
                     curve: Curves.easeOutCubic,
                     padding: EdgeInsets.symmetric(horizontal: isActive ? 16 : 14, vertical: 12),
                     decoration: BoxDecoration(
-                      color: isActive ? const Color(0xFFFFD580) : Colors.transparent,
+                      color: isActive ? const Color(0xFFFFCC00) : Colors.transparent,
                       border: isActive ? Border.all(color: Colors.white, width: 2) : null,
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: isActive ? [
                         BoxShadow(
-                          color: const Color(0xFFFFD580).withOpacity(0.4),
+                          color: const Color(0xFFFFCC00).withOpacity(0.4),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         )

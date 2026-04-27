@@ -57,7 +57,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                         duration: const Duration(milliseconds: 200),
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
-                          color: active ? const Color(0xFFFFB902) : Colors.transparent,
+                          color: active ? const Color(0xFFFFCC00) : Colors.transparent,
                           borderRadius: BorderRadius.circular(26),
                         ),
                         child: Text(

@@ -413,7 +413,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                               margin: const EdgeInsets.only(right: 8),
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
                               decoration: BoxDecoration(
-                                color: isActive ? const Color(0xFFFFB902) : Colors.white,
+                                color: isActive ? const Color(0xFFFFCC00) : Colors.white,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                   color: isActive ? Colors.transparent : const Color(0xFFE0E0E0),

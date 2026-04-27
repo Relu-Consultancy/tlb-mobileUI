@@ -352,7 +352,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: AppColors.primaryLight,
                           foregroundColor: AppColors.textPrimary,
                           elevation: 0,
                           padding: EdgeInsets.zero,
@@ -464,7 +464,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: AppColors.primaryLight,
                           foregroundColor: AppColors.textPrimary,
                           elevation: 0,
                           padding: EdgeInsets.zero,
@@ -602,7 +602,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: AppColors.primaryLight,
                           foregroundColor: AppColors.textPrimary,
                           elevation: 0,
                           padding: EdgeInsets.zero,

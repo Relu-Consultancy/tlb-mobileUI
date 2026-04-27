@@ -261,7 +261,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                               child: ElevatedButton(
                                 onPressed: _apply,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFFFB902),
+                                  backgroundColor: const Color(0xFFFFCC00),
                                   foregroundColor: const Color(0xFF1A1A2E),
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(

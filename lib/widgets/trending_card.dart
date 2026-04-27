@@ -174,8 +174,8 @@ class _TrendingCardState extends State<TrendingCard> {
                                     );
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primary,
-                                    foregroundColor: Colors.white,
+                                    backgroundColor: AppColors.primaryLight,
+                                    foregroundColor: const Color(0xFF1A1A2E),
                                     minimumSize: const Size(0, 46),
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 20,

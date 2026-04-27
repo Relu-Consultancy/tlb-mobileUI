@@ -4,7 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
 import 'wishlist_button.dart';
+import '../screens/class_detail_screen.dart';
 import '../screens/event_detail_screen.dart';
+import 'inquire_now_sheet.dart';
 
 /// Vertical event card matching the design:
 /// Image (with date badge + heart), title, tag pill, age range, rating + count, venue, Book Now.
@@ -21,10 +23,15 @@ class EventCardWithRating extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
-      ),
+      onTap: () {
+        if (buttonLabel == 'Send Enquiry') {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event, buttonLabel: buttonLabel)));
+        } else if (buttonLabel == 'Check Availability') {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
+        } else {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
+        }
+      },
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.cardBackground,
@@ -220,14 +227,17 @@ class EventCardWithRating extends StatelessWidget {
                       width: double.infinity,
                       height: 32,
                       child: ElevatedButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) =>
-                                  EventDetailScreen(event: event)),
-                        ),
+                        onPressed: () {
+                          if (buttonLabel == 'Send Enquiry') {
+                            showInquireNow(context);
+                          } else if (buttonLabel == 'Check Availability') {
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
+                          } else {
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
+                          }
+                        },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: AppColors.primaryLight,
                           foregroundColor: const Color(0xFF1A1A2E),
                           elevation: 0,
                           padding: EdgeInsets.zero,

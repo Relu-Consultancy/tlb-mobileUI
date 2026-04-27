@@ -69,15 +69,15 @@ class CategoriesGrid extends StatelessWidget {
   BoxDecoration _cardDecoration() {
     return BoxDecoration(
       gradient: LinearGradient(
-        colors: [Colors.white, Colors.grey.shade200],
+        colors: [Colors.grey.shade100, Colors.grey.shade300],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
       ),
       borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: Colors.grey.shade300, width: 0.5),
+      border: Border.all(color: Colors.grey.shade400, width: 0.5),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.04),
+          color: Colors.black.withOpacity(0.06),
           blurRadius: 8,
           offset: const Offset(0, 3),
         ),

@@ -440,7 +440,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                                   horizontal: 14, vertical: 5),
                               decoration: BoxDecoration(
                                 color: isActive
-                                    ? const Color(0xFFFFB902)
+                                    ? const Color(0xFFFFCC00)
                                     : Colors.white,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(

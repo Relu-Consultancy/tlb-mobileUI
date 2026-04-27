@@ -690,7 +690,7 @@ class _PrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFFD014),
+          backgroundColor: const Color(0xFFFFCC00),
           foregroundColor: const Color(0xFF1A1A1A),
           elevation: 0,
           shape: RoundedRectangleBorder(

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
+import '../screens/class_detail_screen.dart';
 import '../screens/event_detail_screen.dart';
+import 'inquire_now_sheet.dart';
 
 class BuildSkillCard extends StatelessWidget {
   final EventModel event;
@@ -17,10 +19,15 @@ class BuildSkillCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
-      ),
+      onTap: () {
+        if (ctaLabel == 'Send Enquiry') {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event, buttonLabel: ctaLabel)));
+        } else if (ctaLabel == 'Check Availability') {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
+        } else {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
+        }
+      },
       child: Container(
         width: 290,
         decoration: BoxDecoration(
@@ -144,14 +151,19 @@ class BuildSkillCard extends StatelessWidget {
 
                       // CTA
                       Material(
-                        color: const Color(0xFFFFB902),
+                        color: const Color(0xFFFFCC00),
                         borderRadius: BorderRadius.circular(22),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(22),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
-                          ),
+                          onTap: () {
+                            if (ctaLabel == 'Send Enquiry') {
+                              showInquireNow(context);
+                            } else if (ctaLabel == 'Check Availability') {
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
+                            } else {
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
+                            }
+                          },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             child: Text(

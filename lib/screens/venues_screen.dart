@@ -442,7 +442,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     child: ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFB902),
+                        backgroundColor: const Color(0xFFFFCC00),
                         foregroundColor: const Color(0xFF1A1A2E),
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -506,7 +506,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     child: ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFB902),
+                        backgroundColor: const Color(0xFFFFCC00),
                         foregroundColor: const Color(0xFF1A1A2E),
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -576,7 +576,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       child: ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFB902),
+                          backgroundColor: const Color(0xFFFFCC00),
                           foregroundColor: const Color(0xFF1A1A2E),
                           elevation: 0,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -797,7 +797,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     child: ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFB902),
+                        backgroundColor: const Color(0xFFFFCC00),
                         foregroundColor: const Color(0xFF1A1A2E),
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
@@ -851,7 +851,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     child: ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFB902),
+                        backgroundColor: const Color(0xFFFFCC00),
                         foregroundColor: const Color(0xFF1A1A2E),
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -923,7 +923,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   child: ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFB902),
+                      backgroundColor: const Color(0xFFFFCC00),
                       foregroundColor: const Color(0xFF1A1A2E),
                       elevation: 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -1002,7 +1002,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       child: ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFB902),
+                          backgroundColor: const Color(0xFFFFCC00),
                           foregroundColor: const Color(0xFF1A1A2E),
                           elevation: 0,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -1194,7 +1194,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     child: ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFB902),
+                        backgroundColor: const Color(0xFFFFCC00),
                         foregroundColor: const Color(0xFF1A1A2E),
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
