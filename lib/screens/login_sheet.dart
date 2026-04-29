@@ -92,19 +92,16 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _onGoogleSignIn() async {
-    // TODO: remove bypass before production
-    AuthState.login(
-      access: 'test_access_token',
-      refresh: 'test_refresh_token',
-      user: {'name': 'Test User', 'email': 'test@google.com'},
-    );
-    showWelcomeBackDialog(context);
-    return;
-
-    // ignore: dead_code
+    setState(() => _loading = true);
     try {
-      final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return; // user cancelled
+      final googleUser = await GoogleSignIn(
+        serverClientId: '690253990877-jqog76u6vcre0a9qbd9d8p0g7o47scue.apps.googleusercontent.com',
+        scopes: ['email', 'profile'],
+      ).signIn();
+      if (googleUser == null) {
+        setState(() => _loading = false);
+        return; // user cancelled
+      }
 
       final googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
@@ -118,15 +115,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (firebaseToken == null) {
         if (!mounted) return;
+        setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Google sign-in failed. Try again.')),
         );
         return;
       }
 
-      setState(() => _loading = true);
-      final result =
-          await AuthService.googleSignIn(firebaseIdToken: firebaseToken);
+      final result = await AuthService.googleSignIn(firebaseIdToken: firebaseToken);
 
       if (!mounted) return;
       setState(() => _loading = false);
@@ -151,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Google sign-in error: $e'),
+          content: Text('Google sign-in error: ${e.toString()}'),
           backgroundColor: const Color(0xFFE53935),
         ),
       );

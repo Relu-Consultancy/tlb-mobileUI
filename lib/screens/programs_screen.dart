@@ -127,7 +127,16 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                             padding: const EdgeInsets.only(right: 16),
                             child: SizedBox(
                               width: 220,
-                              child: EventCardWithRating(event: DummyData.hotPicks[index]),
+                              child: EventCardWithRating(
+                                event: DummyData.hotPicks[index],
+                                buttonLabel: 'Check Availability',
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ProgramDetailScreen(event: DummyData.hotPicks[index]),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -210,6 +219,12 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                 event: DummyData.hotPicks[index],
                                 buttonLabel: 'Check Availability',
                                 tagColor: tagColors[index % tagColors.length],
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ProgramDetailScreen(event: DummyData.hotPicks[index]),
+                                  ),
+                                ),
                               ),
                             );
                           },

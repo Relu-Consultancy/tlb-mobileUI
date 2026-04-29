@@ -1,0 +1,428 @@
+# TLB Mobile UI — Development Graph
+**Project:** The Little Broadways (TLB) — Event Booking App  
+**Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
+**Package:** `com.thelittlebroadway.tlb_mobile_ui`  
+**API Base:** `https://tlb-api.reluconsultancy.in`  
+**Date Generated:** 2026-04-29
+
+---
+
+## 1. Project Architecture
+
+```
+lib/
+├── main.dart                   Entry point — Firebase init, high refresh rate, SplashScreen → HomeScreen
+├── core/                       State, services, utilities
+│   ├── auth_service.dart       HTTP wrappers for all auth API calls (login/signup/logout/Google/OTP)
+│   ├── auth_state.dart         Global ValueNotifier — isLoggedIn, accessToken, refreshToken, userName
+│   ├── app_colors.dart         Centralized color constants (textPrimary, background #FFF8EE, etc.)
+│   ├── app_theme.dart          MaterialApp ThemeData
+│   ├── responsive.dart         Responsive.w / Responsive.h / Responsive.sp helpers
+│   ├── location_state.dart     ValueNotifier for selected city
+│   ├── saved_events_state.dart ValueNotifier<List<EventModel>> for wishlist
+│   ├── booked_events_state.dart ValueNotifier<List<EventModel>> for bookings
+│   └── user_reviews_state.dart ValueNotifier for user reviews
+├── models/
+│   ├── event_model.dart        Core data model — title, venue, price, rating, date, image, etc.
+│   └── category_model.dart     Category model with label, image, color
+├── data/
+│   └── dummy_data.dart         All mock data — events, categories, banners, partners, etc.
+├── screens/                    44 screens (see Section 3)
+├── widgets/                    30+ reusable widgets (see Section 4)
+└── sections/                   17 home-page sections (see Section 5)
+```
+
+---
+
+## 2. Navigation Flow
+
+```
+SplashScreen
+    └── HomeScreen  (Tab: Home)
+        ├── EventsScreen        (Tab: Events)
+        │   ├── CategoryEventsScreen
+        │   │   └── EventDetailScreen → DateTimeSelectionScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
+        │   └── EventDetailScreen (same checkout flow)
+        ├── ClassesScreen       (Tab: Classes)
+        │   ├── ClassDetailScreen → SelectBatchScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
+        │   └── CategoryClassesScreen
+        ├── ProgramsScreen      (Tab: Programs)
+        │   ├── ProgramDetailScreen → SelectProgramBatchScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
+        │   └── CategoryProgramsScreen
+        └── VenuesScreen        (Tab: Venues)
+            ├── VenueDetailScreen → PlanPartyScreen
+            └── CategoryVenuesScreen
+
+HomeScreen (sidebar/action flows)
+    ├── SearchScreen            (filter bottom sheet)
+    ├── NotificationScreen
+    ├── LocationScreen
+    ├── ProfileScreen
+    │   ├── EditProfileScreen
+    │   ├── BookingsScreen → BookingDetailScreen
+    │   ├── SavedEventsScreen
+    │   ├── PaymentSettingsScreen
+    │   ├── YourReviewsScreen
+    │   ├── RemindersScreen
+    │   ├── NotificationScreen
+    │   ├── AccountSettingsScreen → ChangePasswordScreen
+    │   └── HelpCentreScreen
+    └── LoginSheet (bottom sheet)
+        ├── SignupScreen
+        ├── ForgotPasswordScreen
+        └── OTP verification (inline)
+```
+
+---
+
+## 3. Screens (44 total)
+
+### Home & Shell
+| File | Description |
+|------|-------------|
+| `splash_screen.dart` | Logo animation → HomeScreen |
+| `home_screen.dart` | Main scroll page with all home sections + FloatingNavbar |
+
+### Auth
+| File | Description |
+|------|-------------|
+| `login_sheet.dart` | Bottom-sheet login — email/pass, Google (bypassed for dev), OTP. Shows WelcomeBackDialog on success |
+| `signup_screen.dart` | New account creation with OTP verification flow |
+| `forgot_password_screen.dart` | Password reset request |
+| `change_password_screen.dart` | Authenticated password change |
+
+### Main Tab Screens
+| File | Description |
+|------|-------------|
+| `events_screen.dart` | Full events listing — banners, categories grid, trending, weekend, holiday, partners, new-on-TLB, online |
+| `classes_screen.dart` | Classes listing — banners, pick-your-pace, featured, nearby, camp cards |
+| `programs_screen.dart` | Programs listing — banners, categories, unique minds, level-up cards |
+| `venues_screen.dart` | Venues listing — big days, weekend plans, close-to-you, hands-on, easy-pocket, mall, thoughtful cards |
+
+### Detail & Booking Flow
+| File | Description |
+|------|-------------|
+| `event_detail_screen.dart` | Full event detail — hero image, info, gallery, map, reviews, "Book Now" CTA |
+| `class_detail_screen.dart` | Class detail — same layout as event detail, "Check Availability" / "Send Enquiry" CTA. Accepts `onBookTapped` callback |
+| `program_detail_screen.dart` | Thin wrapper around ClassDetailScreen, routes to SelectProgramBatchScreen |
+| `venue_detail_screen.dart` | Venue detail — same layout as event detail, "Plan Event" CTA → PlanPartyScreen |
+| `date_time_selection_screen.dart` | Pick date + time → TicketBookingScreen |
+| `select_batch_screen.dart` | Classes batch selection — 3 dates, 3 batches → TicketBookingScreen |
+| `select_program_batch_screen.dart` | Programs batch selection — 6 dates, Morning/Evening batches with seats chip → TicketBookingScreen |
+| `ticket_booking_screen.dart` | Ticket count + price breakdown → ReviewPayScreen |
+| `review_pay_screen.dart` | Order summary → PaymentScreen |
+| `payment_screen.dart` | Payment method selection |
+| `booking_confirmed_screen.dart` | Success screen with confetti |
+| `seat_reservation_screen.dart` | Interactive seat map |
+| `plan_party_screen.dart` | "Plan Your Kid's Party" — child name, occasion, date/time grid, kids count → Continue |
+
+### Category Screens
+| File | Description |
+|------|-------------|
+| `category_events_screen.dart` | Filtered events by category |
+| `category_classes_screen.dart` | Filtered classes by category |
+| `category_programs_screen.dart` | Filtered programs by category |
+| `category_venues_screen.dart` | Filtered venues by category |
+| `category_detail_screen.dart` | Generic category detail |
+
+### Profile & Account
+| File | Description |
+|------|-------------|
+| `profile_screen.dart` | My Profile — avatar, name, email, Edit Profile button, menu items using profile_section.png sprite |
+| `edit_profile_screen.dart` | Edit name, email, phone, avatar |
+| `bookings_screen.dart` | Booking history list |
+| `booking_detail_screen.dart` | Single booking detail + QR |
+| `saved_events_screen.dart` | Wishlist of saved events |
+| `payment_settings_screen.dart` | Saved cards & payment methods |
+| `your_reviews_screen.dart` | User's posted reviews |
+| `reminders_screen.dart` | Event reminders |
+| `notification_screen.dart` | Notification inbox |
+| `account_settings_screen.dart` | Account settings — language, privacy, delete account |
+| `help_centre_screen.dart` | FAQ + support |
+
+### Utility
+| File | Description |
+|------|-------------|
+| `search_screen.dart` | Search with filter bottom sheet (Age Group, Mode, Location dropdowns, Date chips) |
+| `location_screen.dart` | City selection |
+| `gallery_screen.dart` | Full-screen image gallery |
+| `organizer_profile_screen.dart` | Event organizer detail |
+| `shops_screen.dart` | Merchandise/shops |
+
+---
+
+## 4. Widgets (30+)
+
+| Widget | Purpose |
+|--------|---------|
+| `floating_navbar.dart` | Animated pill navbar — active tab expands with label, gradient scrim above |
+| `banner_carousel.dart` | Auto-scroll image carousel with overlay style |
+| `event_card.dart` / `event_card_with_rating.dart` / `event_card_with_price.dart` | Various event card styles |
+| `class_nearby_card.dart` | Horizontal class card with tag + button |
+| `wishlist_button.dart` | Heart toggle with disperse animation |
+| `explore_categories_grid.dart` | 3-col category icon grid with "View All" |
+| `explore_format_row.dart` | Horizontal format chip row |
+| `holiday_special_card.dart` | Tall gradient card for holiday events |
+| `new_on_tlb_card.dart` | PageView card for new listings |
+| `online_event_card.dart` | Online event card with platform badge |
+| `weekend_event_card.dart` | Compact horizontal weekend card |
+| `partner_portrait_card.dart` | Featured partner portrait card |
+| `section_divider_widget.dart` | Section title with "See All" |
+| `filter_bottom_sheet.dart` | Legacy filter sheet |
+| `all_categories_popup.dart` | Full-screen categories popup |
+| `pick_your_pace_row.dart` | Skill level selector row |
+| `inquire_now_sheet.dart` | "Send Enquiry" bottom sheet with confetti success |
+| `banner_carousel.dart` | Spotlight banner with overlay gradient |
+| `empty_location_widget.dart` | Empty state for no-location screens |
+
+---
+
+## 5. Sections (Home Page, 17 total)
+
+| Section | Content |
+|---------|---------|
+| `home_header.dart` | Gradient header (#FFB219 → white), greeting, location, bell, avatar, search bar |
+| `spotlight_section.dart` | Hero banner carousel |
+| `browse_by_categories_section.dart` | Category icon grid |
+| `trending_now_section.dart` | Horizontal trending cards |
+| `hot_picks_section.dart` | Hot picks card list |
+| `weekend_special_section.dart` | Weekend event chips |
+| `featured_events_section.dart` | Featured event cards |
+| `best_for_week_section.dart` | Best this week cards |
+| `discover_near_you_section.dart` | Location-based cards |
+| `near_you_section.dart` | Proximity-sorted cards |
+| `family_feels_section.dart` | Family events section |
+| `kids_favorites_section.dart` | Kids-specific events |
+| `special_needs_section.dart` | Inclusive/special-needs events |
+| `popular_categories_section.dart` | Popular category pills |
+| `tlb_signature_section.dart` | TLB signature events |
+| `stealers_section.dart` | Deal/discount events |
+| `app_footer.dart` | `resources- tlb-ui/main-footer.png` with 60px top gap |
+
+---
+
+## 6. Core Services & State
+
+### AuthService (`lib/core/auth_service.dart`)
+- All methods have **30-second timeout** (increased from 15s)
+- Typed error handling: `SocketException` → "Cannot reach server", `TimeoutException` → "Request timed out", `HandshakeException` → "SSL error"
+- Endpoints: `/signup/`, `/login/`, `/logout/`, `/password/reset/`, `/password/change/`, `/token/refresh/`, `/customer/google/`
+
+### AuthState (`lib/core/auth_state.dart`)
+- `isLoggedIn` — `ValueNotifier<bool>`
+- `accessToken`, `refreshToken`, `userName` — static fields
+- `login()` / `logout()` — update all fields and notify listeners
+
+### Google Sign-In / Sign-Up (live)
+```
+google-services.json: real credentials for project tlb-events-ababb
+  project_number: 690253990877
+  mobilesdk_app_id: 1:690253990877:android:9b1a0b2a20b65f5f15c434
+  serverClientId: 690253990877-jqog76u6vcre0a9qbd9d8p0g7o47scue.apps.googleusercontent.com
+
+Flow (login_sheet.dart + signup_screen.dart):
+  GoogleSignIn(serverClientId: ..., scopes: ['email','profile']).signIn()
+  → FirebaseAuth.instance.signInWithCredential(GoogleAuthProvider.credential(...))
+  → fbCredential.user.getIdToken()
+  → AuthService.googleSignIn(firebaseIdToken: token)
+  → AuthState.login(access, refresh, user)
+  → showWelcomeBackDialog()  [both login and signup]
+
+API returns is_new_user flag — same endpoint handles both sign-in & sign-up.
+```
+
+---
+
+## 7. Assets & Resources
+
+### Registered in `pubspec.yaml`
+```
+assets/images/          — General images
+assets/images/new_home/ — Home screen assets (profilepic.jpg, map_thumb.png, etc.)
+assets/images/event_subcategories/
+assets/images/explore_formats/
+assets/images/featured_partners/
+assets/images/class_page/
+assets/images/pick_pace/
+assets/icons/           — SVG nav icons (nav_home, nav_events, nav_classes, nav_program, nav_spaces)
+resources- tlb-ui/      — Design assets (main-footer.png, profile_section.png, etc.)
+resources- tlb-ui/accounts_page/    — wishlist.png, payments.png, reviews.png, support.png, reminders.png
+resources- tlb-ui/venues_page/
+resources- tlb-ui/events_page/
+resources- tlb-ui/homescreen-categoryicons/  — events.png, classes.png, programs.png, venues.png
+resources- tlb-ui/venues_page/yourway/
+google_fonts/           — Bundled Poppins font (runtime fetching disabled)
+```
+
+### Key Asset References
+| Asset | Used In |
+|-------|---------|
+| `resources- tlb-ui/main-footer.png` | `app_footer.dart` — full-width footer image |
+| `resources- tlb-ui/profile_section.png` | `profile_screen.dart` — 7-icon sprite sheet |
+| `resources- tlb-ui/homescreen-categoryicons/*.png` | `dummy_data.dart` homeCategories |
+| `assets/images/new_home/profilepic.jpg` | `home_header.dart`, `profile_screen.dart` |
+
+---
+
+## 8. Key UI Implementations
+
+### Floating Navbar with Gradient Scrim
+```
+FloatingNavbar returns a full-width Container with:
+  - LinearGradient: Color(0xFF242424) transparent → Color(0xFF000000) opaque (top→bottom)
+    Creates a dark scrim that frames the pill over scrolling content
+  - padding: top 48 (scrim height above pill) + bottom safeBottom+15 or 30
+  - Pill: white rounded rect, 92% screen width, active tab = yellow #FFCC00 with expand animation
+  - Positioned in each screen at bottom: 0 with Align center wrapper
+```
+
+### Home Header
+```
+Layer 1 (image + gradient mask):
+  ShaderMask(BlendMode.screen) on `resources- tlb-ui/header.jpg` (flipped vertically)
+  Shader: LinearGradient — Color(0xFFFFB219) top → Colors.white bottom
+  BlendMode.screen brightens image: golden tint at top, fades to white at bottom
+  JPG-safe: screen works on RGB channels, no alpha needed
+
+Layer 2 (content):
+  SafeArea → Column → greeting row + search bar
+  Bell icon in semi-transparent white circle (0.45 opacity)
+  Profile avatar: white border (2.5) + shadow
+  Search bar: white pill with shadow, search icon + divider + filter icon
+```
+
+### Profile Screen Icon Sprite
+```
+profile_section.png = 7-icon horizontal sprite
+Extraction: ClipRect + Align(widthFactor: 1/7, alignment: -1 + pos*(2/6))
+Tinted with ColorFilter.mode(color, BlendMode.srcIn)
+Positions: 0=ticket, 1=X, 2=creditcard, 3=book, 4=bell, 5=alarm, 6=gear
+Favorite → Icons.favorite_border | Help → Icons.help_outline | LogOut → Icons.logout (red)
+```
+
+### Welcome Back Dialog (Post-Login)
+```
+login_sheet.dart → showWelcomeBackDialog()
+Purple card (#7C3AED), 👋 emoji, confetti animation (70 particles, gravity)
+"Let's Go!" → Navigator.pushAndRemoveUntil → HomeScreen
+Triggered by both email login and Google sign-in
+```
+
+### Send Enquiry Flow
+```
+ClassDetailScreen "Send Enquiry" button → showInquireNow()
+Bottom sheet with name/phone/message fields
+On submit → _EnquirySuccessDialog with confetti (same particle system)
+```
+
+### Batch Selection Screens
+```
+SelectBatchScreen (Classes):
+  3 dates | 3 batches (time, days, slots, tag) | info card | Continue → TicketBookingScreen
+
+SelectProgramBatchScreen (Programs):
+  6 dates (Sat/Sun wrap) | Morning Batch + Evening Batch | seats-left pink chip
+  Selected = dark filled circle with white check | Continue → TicketBookingScreen
+```
+
+### Plan Party Screen (Venues)
+```
+VenueDetailScreen "Plan Event" → PlanPartyScreen
+Fields: Child Name | Occasion radios | Date grid (6 days) | Time chips | Kids range dropdown
+Validation before Continue | MiniMapPainter for venue map thumbnail
+```
+
+### Filter Bottom Sheet (Search)
+```
+4 sections: Age Group chips (0-3/3-5/6-8/9-12/13-16) | Mode radio (Offline/Hybrid/Online)
+Location dropdowns (City + Area) | Date chips (Today/This Weekend/This Week/Upcoming)
+"Clear All" + "Apply Filters" footer
+```
+
+---
+
+## 9. Booking / Checkout Flow
+
+```
+[Events]  EventDetailScreen  → DateTimeSelectionScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
+[Classes] ClassDetailScreen  → SelectBatchScreen        → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
+[Program] ProgramDetailScreen→ SelectProgramBatchScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
+[Venues]  VenueDetailScreen  → PlanPartyScreen          (TODO: booking confirmation)
+```
+
+---
+
+## 10. Pending / TODO Items
+
+| Item | Location | Note |
+|------|----------|------|
+| ~~Remove Google Sign-In bypass~~ | ✅ Done | Real `google-services.json` written, bypass removed, serverClientId configured |
+| OTP verification real API | `login_sheet.dart:_OTPVerificationScreen._onVerify` | Currently calls `AuthState.login(phone:...)` without JWT |
+| PlanPartyScreen → booking confirmation | `plan_party_screen.dart:_onContinue` | Validated but navigates nowhere |
+| Profile avatar from API | `profile_screen.dart` | Hardcoded "Laxman" + local asset photo |
+| Pull real user data on login | `AuthState` | `userName` populated but email/photo not surfaced to UI |
+| Category icon images build | Run `flutter clean && flutter pub get && flutter run` | Required after pubspec asset changes |
+
+---
+
+## 11. Dependencies
+
+```yaml
+google_fonts: ^6.1.0          # Poppins — bundled, runtime fetch disabled
+smooth_page_indicator: ^1.1.0  # PageView dots
+flutter_rating_bar: ^4.0.1     # Star ratings
+flutter_displaymode: ^0.7.0    # High refresh rate
+video_player: ^2.11.0          # Splash / promo videos
+flutter_svg: ^2.2.4            # Nav icon SVGs
+like_button: ^2.1.0            # Heart animations
+http: ^1.2.0                   # REST API calls
+firebase_core: ^3.8.0          # Firebase init
+firebase_auth: ^5.3.1          # Auth (Google Sign-In)
+google_sign_in: ^6.2.1         # Google OAuth
+```
+
+---
+
+## 12. Development Sessions Summary
+
+### Session 1–3 (Prior)
+- Full home screen with all 17 sections built
+- Floating navbar with animated active tab
+- Event/Class/Venue detail screens
+- Full booking checkout flow (DateTimeSelection → TicketBooking → ReviewPay → Confirmed)
+- Wishlist system with disperse animation
+- Category screens and routing
+- Auth screens (Login, Signup, OTP, Forgot Password)
+- Seat reservation screen
+- Profile sub-screens (8 screens redesigned)
+
+### Session 4 (Current)
+| Change | Files |
+|--------|-------|
+| Welcome Back dialog with confetti after login | `login_sheet.dart` |
+| Filter bottom sheet redesign (Age/Mode/Location/Date) | `search_screen.dart` |
+| Footer replaced with `main-footer.png` across all screens | `app_footer.dart` |
+| `VenueDetailScreen` created (same as EventDetail, "Plan Event" button) | `venue_detail_screen.dart` |
+| `PlanPartyScreen` — kid's party booking UI | `plan_party_screen.dart` |
+| Footer gap fixed (60px before, none after) | `app_footer.dart` |
+| Events + Programs background → white | `events_screen.dart`, `programs_screen.dart` |
+| Auth error messages typed (Socket/Timeout/Handshake) | `auth_service.dart` |
+| All API timeouts increased to 30s | `auth_service.dart` |
+| Home category icons replaced with custom images | `dummy_data.dart`, `pubspec.yaml` |
+| Profile menu icons use `profile_section.png` sprite | `profile_screen.dart` |
+| Google Sign-In bypassed for dev testing | `login_sheet.dart` |
+| Programs batch selection screen (Morning/Evening) | `select_program_batch_screen.dart` |
+| `ProgramDetailScreen` wrapping `ClassDetailScreen` | `program_detail_screen.dart` |
+| `SelectBatchScreen` Continue wired to `TicketBookingScreen` | `select_batch_screen.dart` |
+| Programs screen navigates to `ProgramDetailScreen` | `programs_screen.dart` |
+| `ClassDetailScreen` `onBookTapped` callback added | `class_detail_screen.dart` |
+| FloatingNavbar gradient scrim (transparent → black, 48px above pill) | `floating_navbar.dart` |
+| Home header redesigned: cloud image + gradient overlay, greeting, search bar | `home_header.dart` |
+| Profile screen redesigned to match Figma (centered layout, Material icons) | `profile_screen.dart` |
+| `EventCardWithRating` `onTap` callback added (override navigation per context) | `event_card_with_rating.dart` |
+| `ClassNearbyCard` `onTap` callback added (override navigation per context) | `class_nearby_card.dart` |
+| Programs screen cards wired to `ProgramDetailScreen` via `onTap` override | `programs_screen.dart` |
+| Home header gradient: `ShaderMask(BlendMode.screen)` — golden→white tint on cloud image | `home_header.dart` |
+| Google Sign-In bypass removed, real flow with serverClientId | `login_sheet.dart` |
+| Google Sign-Up implemented with WelcomeBackDialog (consistent with login) | `signup_screen.dart` |
+| Real `google-services.json` written (project 690253990877) | `android/app/google-services.json` |

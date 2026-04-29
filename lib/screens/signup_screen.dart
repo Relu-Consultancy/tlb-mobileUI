@@ -6,7 +6,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../core/auth_service.dart';
 import '../core/auth_state.dart';
 import '../core/responsive.dart';
-import 'home_screen.dart';
 import 'login_sheet.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -92,10 +91,17 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Future<void> _onGoogleSignIn() async {
+  Future<void> _onGoogleSignUp() async {
+    setState(() => _loading = true);
     try {
-      final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return;
+      final googleUser = await GoogleSignIn(
+        serverClientId: '690253990877-jqog76u6vcre0a9qbd9d8p0g7o47scue.apps.googleusercontent.com',
+        scopes: ['email', 'profile'],
+      ).signIn();
+      if (googleUser == null) {
+        setState(() => _loading = false);
+        return; // user cancelled
+      }
 
       final googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
@@ -109,15 +115,14 @@ class _SignupScreenState extends State<SignupScreen> {
 
       if (firebaseToken == null) {
         if (!mounted) return;
+        setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Google sign-in failed. Try again.')),
+          const SnackBar(content: Text('Google sign-up failed. Try again.')),
         );
         return;
       }
 
-      setState(() => _loading = true);
-      final result =
-          await AuthService.googleSignIn(firebaseIdToken: firebaseToken);
+      final result = await AuthService.googleSignIn(firebaseIdToken: firebaseToken);
 
       if (!mounted) return;
       setState(() => _loading = false);
@@ -128,14 +133,11 @@ class _SignupScreenState extends State<SignupScreen> {
           refresh: result['refresh'] as String?,
           user: result['user'] as Map<String, dynamic>?,
         );
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-          (route) => false,
-        );
+        showWelcomeBackDialog(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(result['message'] ?? 'Google sign-in failed'),
+            content: Text(result['message'] ?? 'Google sign-up failed'),
             backgroundColor: const Color(0xFFE53935),
           ),
         );
@@ -145,7 +147,7 @@ class _SignupScreenState extends State<SignupScreen> {
       setState(() => _loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Google sign-in error: $e'),
+          content: Text('Google sign-up error: ${e.toString()}'),
           backgroundColor: const Color(0xFFE53935),
         ),
       );
@@ -348,7 +350,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(height: 24),
 
                   // ── Continue with Google ──────────────────────────────────
-                  _GoogleButton(onTap: _onGoogleSignIn),
+                  _GoogleButton(onTap: _onGoogleSignUp),
 
                   const SizedBox(height: 22),
 

@@ -1,26 +1,44 @@
 {
   "project_info": {
-    "project_number": "000000000000",
+    "project_number": "690253990877",
     "project_id": "tlb-events-ababb",
-    "storage_bucket": "tlb-events-ababb.appspot.com"
+    "storage_bucket": "tlb-events-ababb.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
+        "mobilesdk_app_id": "1:690253990877:android:9b1a0b2a20b65f5f15c434",
         "android_client_info": {
           "package_name": "com.thelittlebroadway.tlb_mobile_ui"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "690253990877-mejov1nq5erdrgipgbsvqct1h7t4hpan.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thelittlebroadway.tlb_mobile_ui",
+            "certificate_hash": "67fbed8072fb434a1f9dc4323862d605ec8c36d8"
+          }
+        },
+        {
+          "client_id": "690253990877-jqog76u6vcre0a9qbd9d8p0g7o47scue.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaPlaceholderReplaceWithRealKeyFromFirebaseConsole"
+          "current_key": "AIzaSyDa3OyUN1qPsC1jfuK6SFIgKtmwvJUoJes"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "690253990877-jqog76u6vcre0a9qbd9d8p0g7o47scue.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

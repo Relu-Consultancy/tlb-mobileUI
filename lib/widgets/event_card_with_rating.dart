@@ -13,18 +13,22 @@ import 'inquire_now_sheet.dart';
 class EventCardWithRating extends StatelessWidget {
   final EventModel event;
   final String buttonLabel;
+  final VoidCallback? onTap;
 
   const EventCardWithRating({
     super.key,
     required this.event,
     this.buttonLabel = 'Book Now',
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (buttonLabel == 'Send Enquiry') {
+        if (onTap != null) {
+          onTap!();
+        } else if (buttonLabel == 'Send Enquiry') {
           Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event, buttonLabel: buttonLabel)));
         } else if (buttonLabel == 'Check Availability') {
           Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
@@ -228,7 +232,9 @@ class EventCardWithRating extends StatelessWidget {
                       height: 32,
                       child: ElevatedButton(
                         onPressed: () {
-                          if (buttonLabel == 'Send Enquiry') {
+                          if (onTap != null) {
+                            onTap!();
+                          } else if (buttonLabel == 'Send Enquiry') {
                             showInquireNow(context);
                           } else if (buttonLabel == 'Check Availability') {
                             Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));

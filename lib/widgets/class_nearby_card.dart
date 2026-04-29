@@ -12,6 +12,7 @@ class ClassNearbyCard extends StatelessWidget {
   final double width;
   final String buttonLabel;
   final Color? tagColor;
+  final VoidCallback? onTap;
 
   const ClassNearbyCard({
     super.key,
@@ -19,13 +20,16 @@ class ClassNearbyCard extends StatelessWidget {
     this.width = 310,
     this.buttonLabel = 'Join Now',
     this.tagColor,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (buttonLabel == 'Send Enquiry') {
+        if (onTap != null) {
+          onTap!();
+        } else if (buttonLabel == 'Send Enquiry') {
           Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event, buttonLabel: buttonLabel)));
         } else if (buttonLabel == 'Check Availability') {
           Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
@@ -221,7 +225,9 @@ class ClassNearbyCard extends StatelessWidget {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(24),
                       onTap: () {
-                        if (buttonLabel == 'Send Enquiry') {
+                        if (onTap != null) {
+                          onTap!();
+                        } else if (buttonLabel == 'Send Enquiry') {
                           showInquireNow(context);
                         } else if (buttonLabel == 'Check Availability') {
                           Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));

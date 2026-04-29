@@ -17,43 +17,46 @@ class HomeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Header background image — no rounded corners, blends into page
-        Positioned.fill(
-          child: Transform.flip(
-            flipY: true, // Clouds at top
-            child: Image.asset(
-              'assets/images/header.jpg',
-              fit: BoxFit.cover,
-              alignment: Alignment.center,
-            ),
-          ),
-        ),
-        // Golden overlay that fades to page background color at the bottom
-        Positioned.fill(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: const [0.0, 0.4, 0.8, 1.0],
-                colors: [
-                  const Color(0xFFFFF3E0).withOpacity(0.95), // Extra light orange/whitish at top (Orange 50)
-                  const Color(0xFFFFB74D).withOpacity(0.85), // Light orange (Orange 300)
-                  const Color(0xFFFFCC80).withOpacity(0.90), // Lighter orange transition (Orange 200)
-                  const Color(0xFFFFF8EE), // Fades beautifully into page background
-                ],
+        // ── Layer 1: Cloud image with screen-blend gradient mask ──────
+        // screen brightens: golden(top)+pixel = warm bright result
+        //                   white(bottom)+pixel = fully white fade
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: ShaderMask(
+            blendMode: BlendMode.screen,
+            shaderCallback: (bounds) => const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFFFFB219), Colors.white],
+            ).createShader(bounds),
+            child: Transform.flip(
+              flipY: true,
+              child: Image.asset(
+                'resources- tlb-ui/header.jpg',
+                width: double.infinity,
+                fit: BoxFit.fitWidth,
+                alignment: Alignment.topCenter,
               ),
             ),
           ),
         ),
+
+        // ── Layer 3: Content ────────────────────────────────────────────
         SafeArea(
           bottom: false,
           child: Padding(
-            padding: EdgeInsets.fromLTRB(Responsive.w(context, 16), Responsive.h(context, 12, min: 8), Responsive.w(context, 16), Responsive.h(context, 24, min: 16)),
+            padding: EdgeInsets.fromLTRB(
+              Responsive.w(context, 16),
+              Responsive.h(context, 14, min: 10),
+              Responsive.w(context, 16),
+              Responsive.h(context, 20, min: 16),
+            ),
             child: Column(
               children: [
                 _buildGreetingRow(context),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 _buildSearchBar(context),
               ],
             ),
@@ -66,7 +69,9 @@ class HomeHeader extends StatelessWidget {
   Widget _buildGreetingRow(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        // Left: greeting + location
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -81,23 +86,23 @@ class HomeHeader extends StatelessWidget {
                     return Text(
                       name,
                       style: GoogleFonts.poppins(
-                        fontSize: Responsive.sp(context, 18),
+                        fontSize: Responsive.sp(context, 20),
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: const Color(0xFF1A1A2E),
                       ),
                     );
                   },
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 6),
                 Image.asset(
                   'assets/images/wave_hand.png',
-                  width: Responsive.w(context, 22),
-                  height: Responsive.w(context, 22),
+                  width: Responsive.w(context, 24),
+                  height: Responsive.w(context, 24),
+                  errorBuilder: (_, __, ___) => const Text('👋', style: TextStyle(fontSize: 20)),
                 ),
               ],
             ),
-            const SizedBox(height: 2),
-            // Location row — tappable
+            const SizedBox(height: 4),
             GestureDetector(
               onTap: () => Navigator.push(
                 context,
@@ -105,72 +110,79 @@ class HomeHeader extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.location_on_outlined,
-                    size: 14,
-                    color: AppColors.textPrimary,
-                  ),
+                  const Icon(Icons.location_on_outlined,
+                      size: 14, color: Color(0xFF1A1A2E)),
                   const SizedBox(width: 3),
                   ValueListenableBuilder<String>(
                     valueListenable: LocationState().selectedCity,
                     builder: (context, city, _) {
+                      final label = city.length > 18
+                          ? '${city.substring(0, 18)}...'
+                          : city;
                       return Text(
-                        city.length > 20 ? '${city.substring(0, 20)}...' : city,
+                        label,
                         style: GoogleFonts.poppins(
-                          fontSize: 11,
+                          fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
+                          color: const Color(0xFF1A1A2E),
                         ),
                       );
                     },
                   ),
                   const SizedBox(width: 2),
-                  const Icon(
-                    Icons.keyboard_arrow_down,
-                    size: 16,
-                    color: AppColors.textPrimary,
-                  ),
+                  const Icon(Icons.keyboard_arrow_down,
+                      size: 16, color: Color(0xFF1A1A2E)),
                 ],
               ),
             ),
           ],
         ),
+
+        // Right: bell + avatar
         Row(
           children: [
-            // Bell icon — Notifications
             GestureDetector(
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const NotificationScreen()),
               ),
               child: Container(
-                padding: const EdgeInsets.all(8),
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.45),
+                  shape: BoxShape.circle,
+                ),
                 child: const Icon(
                   Icons.notifications_outlined,
-                  size: 26,
-                  color: AppColors.textPrimary,
+                  size: 22,
+                  color: Color(0xFF1A1A2E),
                 ),
               ),
             ),
-            const SizedBox(width: 8),
-            // Profile avatar
+            const SizedBox(width: 10),
             GestureDetector(
               onTap: () {
                 if (AuthState.isLoggedIn.value) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                  );
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const ProfileScreen()));
                 } else {
                   showLoginSheet(context);
                 }
               },
               child: Container(
-                width: Responsive.w(context, 34),
-                height: Responsive.w(context, 34),
+                width: Responsive.w(context, 38),
+                height: Responsive.w(context, 38),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
+                  border: Border.all(color: Colors.white, width: 2.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.12),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                   image: const DecorationImage(
                     image: AssetImage('assets/images/new_home/profilepic.jpg'),
                     fit: BoxFit.cover,
@@ -191,29 +203,41 @@ class HomeHeader extends StatelessWidget {
         MaterialPageRoute(builder: (_) => const SearchScreen()),
       ),
       child: Container(
-        height: Responsive.h(context, 48, min: 40),
+        height: Responsive.h(context, 48, min: 42),
         decoration: BoxDecoration(
-          color: const Color(0xFFFCF5E8), // Very light yellow/off-white
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white, width: 2),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.07),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
-            const SizedBox(width: 20),
-            const Icon(Icons.search, color: Color(0xFF1A1A2E), size: 22),
-            const SizedBox(width: 12),
+            const SizedBox(width: 18),
+            const Icon(Icons.search, color: Color(0xFF9E9E9E), size: 22),
+            const SizedBox(width: 10),
             Expanded(
               child: Text(
                 'Search...',
                 style: GoogleFonts.poppins(
                   fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF6B6B6B),
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF9E9E9E),
                 ),
               ),
             ),
-            const Icon(Icons.tune, color: Color(0xFF1A1A2E), size: 22), // Filter icon
-            const SizedBox(width: 20),
+            Container(
+              width: 1,
+              height: 22,
+              color: const Color(0xFFE0E0E0),
+            ),
+            const SizedBox(width: 14),
+            const Icon(Icons.tune_rounded, color: Color(0xFF1A1A2E), size: 20),
+            const SizedBox(width: 18),
           ],
         ),
       ),

@@ -12,7 +12,7 @@ class EmptyLocationWidget extends StatelessWidget {
       width: double.infinity,
       child: Column(
         children: [
-          const SizedBox(height: 32),
+          // No gap at top to attach it to header
 
           // Illustration
           Padding(
