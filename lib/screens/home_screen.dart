@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../core/location_state.dart';
@@ -88,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final safeBottom = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           Column(
@@ -145,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           Positioned(
-            bottom: safeBottom > 0 ? safeBottom + 15 : 30, // 15px above native nav
+            bottom: 0,
             left: 0,
             right: 0,
             child: Align(
@@ -153,6 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: FloatingNavbar(
                 currentIndex: _currentNavIndex,
                 onTap: _onNavTapped,
+                bottomPadding: safeBottom > 0 ? safeBottom + 15 : 30,
               ),
             ),
           ),

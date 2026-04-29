@@ -19,18 +19,20 @@ const List<NavbarItemData> _navItems = [
 class FloatingNavbar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
+  final double bottomPadding;
 
   const FloatingNavbar({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    this.bottomPadding = 30,
   });
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    
-    return Container(
+
+    final pill = Container(
       width: screenWidth * 0.92,
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
       decoration: BoxDecoration(
@@ -125,6 +127,23 @@ class FloatingNavbar extends StatelessWidget {
           ),
         ),
       ),
+    );
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            const Color(0xFF242424).withOpacity(0),
+            const Color(0xFF000000).withOpacity(1.0),
+          ],
+          stops: const [0.0, 1.0],
+        ),
+      ),
+      padding: EdgeInsets.only(top: 48, bottom: bottomPadding),
+      child: Center(child: pill),
     );
   }
 }

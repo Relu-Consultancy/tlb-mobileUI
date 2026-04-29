@@ -70,7 +70,7 @@ class _ShopsScreenState extends State<ShopsScreen> {
             ],
           ),
           Positioned(
-            bottom: safeBottom > 0 ? safeBottom + 15 : 30,
+            bottom: 0,
             left: 0,
             right: 0,
             child: Align(
@@ -78,6 +78,7 @@ class _ShopsScreenState extends State<ShopsScreen> {
               child: FloatingNavbar(
                 currentIndex: _currentNavIndex,
                 onTap: _onNavTapped,
+                bottomPadding: safeBottom > 0 ? safeBottom + 15 : 30,
               ),
             ),
           ),

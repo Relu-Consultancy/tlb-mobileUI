@@ -225,7 +225,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
             ],
           ),
           Positioned(
-            bottom: safeBottom > 0 ? safeBottom + 15 : 30, // 15px above native nav
+            bottom: 0,
             left: 0,
             right: 0,
             child: Align(
@@ -233,6 +233,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
               child: FloatingNavbar(
                 currentIndex: 1, // Treat sub-category as under "Events" root
                 onTap: _onNavTapped,
+                bottomPadding: safeBottom > 0 ? safeBottom + 15 : 30,
               ),
             ),
           ),

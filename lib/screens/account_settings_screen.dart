@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'change_password_screen.dart';
 
 class AccountSettingsScreen extends StatelessWidget {
   const AccountSettingsScreen({super.key});
@@ -117,7 +118,16 @@ class AccountSettingsScreen extends StatelessWidget {
                   const Divider(height: 1, indent: 16, endIndent: 16),
                   _buildRow(icon: Icons.phone_outlined, label: 'Phone Number'),
                   const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildRow(icon: Icons.lock_outline, label: 'Change Password', isLast: true),
+                  _buildRow(
+                    icon: Icons.lock_outline,
+                    label: 'Change Password',
+                    isLast: true,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const ChangePasswordScreen()),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -163,11 +173,12 @@ class AccountSettingsScreen extends StatelessWidget {
     required IconData icon,
     required String label,
     bool isLast = false,
+    VoidCallback? onTap,
   }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {},
+        onTap: onTap ?? () {},
         borderRadius: isLast
             ? const BorderRadius.vertical(bottom: Radius.circular(16))
             : BorderRadius.zero,

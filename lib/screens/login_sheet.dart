@@ -1,10 +1,16 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import '../core/auth_service.dart';
 import '../core/auth_state.dart';
 import '../core/responsive.dart';
+import 'home_screen.dart';
 import 'signup_screen.dart';
+import 'forgot_password_screen.dart';
 
 void showLoginSheet(BuildContext context) {
   Navigator.push(
@@ -28,6 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordMode = false;
   bool _obscurePassword = true;
+  bool _loading = false;
 
   @override
   void dispose() {
@@ -50,30 +57,105 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _onSignInWithPassword() {
-    final phone = _phoneController.text.trim();
+  Future<void> _onSignInWithPassword() async {
+    final email = _phoneController.text.trim();
     final password = _passwordController.text;
-    if (phone.isEmpty || password.isEmpty) {
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter phone/email and password')),
+        const SnackBar(content: Text('Please enter email and password')),
       );
       return;
     }
-    AuthState.login(phone: phone);
-    final messenger = ScaffoldMessenger.of(context);
-    Navigator.popUntil(context, (route) => route.isFirst);
-    messenger.showSnackBar(
-      const SnackBar(content: Text('Signed in successfully!')),
-    );
+
+    setState(() => _loading = true);
+
+    final result = await AuthService.login(email: email, password: password);
+
+    if (!mounted) return;
+    setState(() => _loading = false);
+
+    if (result['success'] == true) {
+      AuthState.login(
+        access: result['access'] as String?,
+        refresh: result['refresh'] as String?,
+        user: result['user'] as Map<String, dynamic>?,
+      );
+      showWelcomeBackDialog(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message'] ?? 'Login failed'),
+          backgroundColor: const Color(0xFFE53935),
+        ),
+      );
+    }
   }
 
-  void _onGoogleSignIn() {
-    AuthState.login(name: 'Google User');
-    final messenger = ScaffoldMessenger.of(context);
-    Navigator.popUntil(context, (route) => route.isFirst);
-    messenger.showSnackBar(
-      const SnackBar(content: Text('Signed in with Google!')),
+  Future<void> _onGoogleSignIn() async {
+    // TODO: remove bypass before production
+    AuthState.login(
+      access: 'test_access_token',
+      refresh: 'test_refresh_token',
+      user: {'name': 'Test User', 'email': 'test@google.com'},
     );
+    showWelcomeBackDialog(context);
+    return;
+
+    // ignore: dead_code
+    try {
+      final googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return; // user cancelled
+
+      final googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final fbCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      final firebaseToken = await fbCredential.user?.getIdToken();
+
+      if (firebaseToken == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Google sign-in failed. Try again.')),
+        );
+        return;
+      }
+
+      setState(() => _loading = true);
+      final result =
+          await AuthService.googleSignIn(firebaseIdToken: firebaseToken);
+
+      if (!mounted) return;
+      setState(() => _loading = false);
+
+      if (result['success'] == true) {
+        AuthState.login(
+          access: result['access'] as String?,
+          refresh: result['refresh'] as String?,
+          user: result['user'] as Map<String, dynamic>?,
+        );
+        showWelcomeBackDialog(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message'] ?? 'Google sign-in failed'),
+            backgroundColor: const Color(0xFFE53935),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Google sign-in error: $e'),
+          backgroundColor: const Color(0xFFE53935),
+        ),
+      );
+    }
   }
 
   @override
@@ -274,6 +356,30 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 6),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const ForgotPasswordScreen()),
+                        ),
+                        style: TextButton.styleFrom(
+                          minimumSize: Size.zero,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 4),
+                        ),
+                        child: Text(
+                          'Forgot Password?',
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF2F80ED),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
 
                   const SizedBox(height: 18),
@@ -281,6 +387,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   // ── Primary button ──────────────────────────────────────
                   _PrimaryButton(
                     label: _isPasswordMode ? 'Sign In' : 'Send OTP',
+                    loading: _loading,
                     onTap: _isPasswordMode ? _onSignInWithPassword : _onSendOTP,
                   ),
 
@@ -432,6 +539,7 @@ class _OTPVerificationScreenState extends State<_OTPVerificationScreen> {
       );
       return;
     }
+    // TODO: replace with real OTP verification API call and pass access/refresh tokens
     AuthState.login(phone: widget.phoneOrEmail);
     final messenger = ScaffoldMessenger.of(context);
     Navigator.popUntil(context, (route) => route.isFirst);
@@ -669,8 +777,13 @@ class _InputField extends StatelessWidget {
 class _PrimaryButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
+  final bool loading;
 
-  const _PrimaryButton({required this.label, required this.onTap});
+  const _PrimaryButton({
+    required this.label,
+    required this.onTap,
+    this.loading = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -688,23 +801,33 @@ class _PrimaryButton extends StatelessWidget {
         ],
       ),
       child: ElevatedButton(
-        onPressed: onTap,
+        onPressed: loading ? null : onTap,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFFFCC00),
           foregroundColor: const Color(0xFF1A1A1A),
+          disabledBackgroundColor: const Color(0xFFFFCC00).withOpacity(0.7),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
           ),
         ),
-        child: Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF1A1A1A),
-          ),
-        ),
+        child: loading
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: Color(0xFF1A1A1A),
+                ),
+              )
+            : Text(
+                label,
+                style: GoogleFonts.poppins(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF1A1A1A),
+                ),
+              ),
       ),
     );
   }
@@ -734,6 +857,215 @@ class _OrDivider extends StatelessWidget {
     );
   }
 }
+
+// ─────────────────────────────────────────────
+// WELCOME BACK DIALOG
+// ─────────────────────────────────────────────
+
+void showWelcomeBackDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => _WelcomeBackDialog(
+      onDone: () => Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      ),
+    ),
+  );
+}
+
+class _WelcomeBackDialog extends StatefulWidget {
+  final VoidCallback onDone;
+  const _WelcomeBackDialog({required this.onDone});
+
+  @override
+  State<_WelcomeBackDialog> createState() => _WelcomeBackDialogState();
+}
+
+class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final List<_WbParticle> _particles;
+
+  static const _kColors = [
+    Color(0xFFFFCC00),
+    Color(0xFFFF6B6B),
+    Color(0xFF4ECDC4),
+    Color(0xFF45B7D1),
+    Color(0xFF96CEB4),
+    Color(0xFFFF9A3C),
+    Color(0xFFA78BFA),
+    Colors.white,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    final rng = Random();
+    _particles = List.generate(70, (_) {
+      final angle = rng.nextDouble() * pi * 2;
+      final speed = rng.nextDouble() * 2.5 + 1.0;
+      return _WbParticle(
+        vx: cos(angle) * speed,
+        vy: sin(angle) * speed - 2.5,
+        size: rng.nextDouble() * 9 + 4,
+        rotation: rng.nextDouble() * pi * 2,
+        rotSpeed: (rng.nextDouble() - 0.5) * 6,
+        color: _kColors[rng.nextInt(_kColors.length)],
+      );
+    });
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 30),
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            padding: const EdgeInsets.fromLTRB(24, 36, 24, 28),
+            decoration: BoxDecoration(
+              color: const Color(0xFF7C3AED),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.18),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: Text('👋', style: TextStyle(fontSize: 58)),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Welcome Back!',
+                  style: GoogleFonts.poppins(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Great to see you again.\nReady to explore?',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: Colors.white.withOpacity(0.82),
+                    height: 1.55,
+                  ),
+                ),
+                const SizedBox(height: 28),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: widget.onDone,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFFCC00),
+                      foregroundColor: const Color(0xFF1A1A2E),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      "Let's Go!",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: AnimatedBuilder(
+                animation: _ctrl,
+                builder: (_, __) => CustomPaint(
+                  painter: _WbConfettiPainter(
+                    progress: _ctrl.value,
+                    particles: _particles,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WbParticle {
+  final double vx, vy, size, rotation, rotSpeed;
+  final Color color;
+  const _WbParticle({
+    required this.vx,
+    required this.vy,
+    required this.size,
+    required this.rotation,
+    required this.rotSpeed,
+    required this.color,
+  });
+}
+
+class _WbConfettiPainter extends CustomPainter {
+  final double progress;
+  final List<_WbParticle> particles;
+
+  _WbConfettiPainter({required this.progress, required this.particles});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final cx = size.width / 2;
+    final cy = size.height / 2;
+    for (final p in particles) {
+      final t = progress;
+      final x = cx + p.vx * t * 160;
+      final y = cy + p.vy * t * 160 + 320 * t * t;
+      final alpha = t < 0.55 ? 1.0 : 1.0 - ((t - 0.55) / 0.45);
+      if (alpha <= 0) continue;
+      final paint = Paint()..color = p.color.withOpacity(alpha.clamp(0.0, 1.0));
+      canvas.save();
+      canvas.translate(x, y);
+      canvas.rotate(p.rotation + t * p.rotSpeed);
+      canvas.drawRect(
+        Rect.fromCenter(center: Offset.zero, width: p.size, height: p.size * 0.45),
+        paint,
+      );
+      canvas.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(_WbConfettiPainter old) => old.progress != progress;
+}
+
+// ─────────────────────────────────────────────
 
 class _GoogleButton extends StatelessWidget {
   final VoidCallback onTap;

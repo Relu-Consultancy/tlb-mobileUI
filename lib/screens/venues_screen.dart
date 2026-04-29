@@ -12,6 +12,7 @@ import 'events_screen.dart';
 import 'classes_screen.dart';
 import 'programs_screen.dart';
 import 'category_venues_screen.dart';
+import 'venue_detail_screen.dart';
 
 class VenuesScreen extends StatefulWidget {
   const VenuesScreen({super.key});
@@ -216,7 +217,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
             ],
           ),
           Positioned(
-            bottom: safeBottom > 0 ? safeBottom + 15 : 30,
+            bottom: 0,
             left: 0,
             right: 0,
             child: Align(
@@ -224,6 +225,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
               child: FloatingNavbar(
                 currentIndex: _currentNavIndex,
                 onTap: _onNavTapped,
+                bottomPadding: safeBottom > 0 ? safeBottom + 15 : 30,
               ),
             ),
           ),
@@ -440,7 +442,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     width: double.infinity,
                     height: 32,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFFCC00),
                         foregroundColor: const Color(0xFF1A1A2E),
@@ -504,7 +506,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     width: double.infinity,
                     height: 30,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFFCC00),
                         foregroundColor: const Color(0xFF1A1A2E),
@@ -512,7 +514,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                         padding: EdgeInsets.zero,
                       ),
-                      child: Text('Start Learning', style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600)),
+                      child: Text('View Details', style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ],
@@ -574,7 +576,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     SizedBox(
                       height: 28,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFFCC00),
                           foregroundColor: const Color(0xFF1A1A2E),
@@ -582,7 +584,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                         ),
-                        child: Text('Direction', style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600)),
+                        child: Text('View Venue', style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ],
@@ -849,7 +851,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   child: SizedBox(
                     height: 28,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFFCC00),
                         foregroundColor: const Color(0xFF1A1A2E),
@@ -857,7 +859,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                         padding: const EdgeInsets.symmetric(horizontal: 14),
                       ),
-                      child: Text('Join Session', style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600)),
+                      child: Text('View Venue', style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ),
@@ -921,7 +923,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   width: double.infinity,
                   height: 28,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFFCC00),
                       foregroundColor: const Color(0xFF1A1A2E),
@@ -1000,7 +1002,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     child: SizedBox(
                       height: 28,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFFCC00),
                           foregroundColor: const Color(0xFF1A1A2E),
@@ -1192,7 +1194,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     width: double.infinity,
                     height: 36,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFFCC00),
                         foregroundColor: const Color(0xFF1A1A2E),

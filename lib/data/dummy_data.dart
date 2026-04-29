@@ -9,19 +9,19 @@ class DummyData {
   static const List<Map<String, dynamic>> homeCategories = [
     {
       'label': 'Events',
-      'image': 'assets/images/new_home/eventcategory1.png',
+      'image': 'resources- tlb-ui/homescreen-categoryicons/events.png',
     },
     {
       'label': 'Classes',
-      'image': 'assets/images/new_home/eventcategory2.png',
+      'image': 'resources- tlb-ui/homescreen-categoryicons/classes.png',
     },
     {
       'label': 'Program',
-      'image': 'assets/images/new_home/eventcategory3.png',
+      'image': 'resources- tlb-ui/homescreen-categoryicons/programs.png',
     },
     {
       'label': 'Venues',
-      'image': 'assets/images/new_home/eventcategory4.png',
+      'image': 'resources- tlb-ui/homescreen-categoryicons/venues.png',
     },
   ];
 

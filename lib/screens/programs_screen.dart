@@ -14,7 +14,7 @@ import '../widgets/class_nearby_card.dart';
 import '../sections/app_footer.dart';
 import '../widgets/floating_navbar.dart';
 import '../widgets/all_categories_popup.dart';
-import 'event_detail_screen.dart';
+import 'program_detail_screen.dart';
 import 'events_screen.dart';
 import 'classes_screen.dart';
 import 'venues_screen.dart';
@@ -76,7 +76,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
     final safeBottom = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           Column(
@@ -151,7 +151,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                 scheduleText: 'Sat & Sun, 10:00 AM',
                                 ageText: '8-12 Yrs',
                                 locationText: 'Online',
-                                buttonLabel: 'Book Trail',
+                                buttonLabel: 'Check Availability',
                               ),
                             );
                           },
@@ -182,7 +182,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                 scheduleText: 'Start with basics of programming',
                                 ageText: '8+ Yrs',
                                 locationText: e.venue,
-                                buttonLabel: 'Start Learning',
+                                buttonLabel: 'Check Availability',
                               ),
                             );
                           },
@@ -208,7 +208,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                               padding: const EdgeInsets.only(right: 14),
                               child: ClassNearbyCard(
                                 event: DummyData.hotPicks[index],
-                                buttonLabel: 'Join Camp',
+                                buttonLabel: 'Check Availability',
                                 tagColor: tagColors[index % tagColors.length],
                               ),
                             );
@@ -261,7 +261,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
             ],
           ),
           Positioned(
-            bottom: safeBottom > 0 ? safeBottom + 15 : 30,
+            bottom: 0,
             left: 0,
             right: 0,
             child: Align(
@@ -269,6 +269,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
               child: FloatingNavbar(
                 currentIndex: _currentNavIndex,
                 onTap: _onNavTapped,
+                bottomPadding: safeBottom > 0 ? safeBottom + 15 : 30,
               ),
             ),
           ),
@@ -289,7 +290,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+        MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
       ),
       child: Container(
         width: MediaQuery.of(context).size.width * 0.80,
@@ -349,7 +350,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       child: ElevatedButton(
                         onPressed: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+                          MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryLight,
@@ -384,7 +385,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+        MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
       ),
       child: Container(
         width: 200,
@@ -461,7 +462,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       child: ElevatedButton(
                         onPressed: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+                          MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryLight,
@@ -473,7 +474,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           ),
                         ),
                         child: Text(
-                          'Enquire Now',
+                          'Check Availability',
                           style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600),
                         ),
                       ),
@@ -493,7 +494,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+        MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
       ),
       child: Container(
         width: MediaQuery.of(context).size.width * 0.78,
@@ -599,7 +600,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       child: ElevatedButton(
                         onPressed: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+                          MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryLight,
@@ -611,7 +612,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           ),
                         ),
                         child: Text(
-                          'Join Program',
+                          'Check Availability',
                           style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
                         ),
                       ),

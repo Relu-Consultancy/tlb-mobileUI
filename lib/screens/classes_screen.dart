@@ -339,7 +339,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
             ],
           ),
           Positioned(
-            bottom: safeBottom > 0 ? safeBottom + 15 : 30,
+            bottom: 0,
             left: 0,
             right: 0,
             child: Align(
@@ -347,6 +347,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
               child: FloatingNavbar(
                 currentIndex: _currentNavIndex,
                 onTap: _onNavTapped,
+                bottomPadding: safeBottom > 0 ? safeBottom + 15 : 30,
               ),
             ),
           ),

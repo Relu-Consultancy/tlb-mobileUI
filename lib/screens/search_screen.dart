@@ -14,12 +14,11 @@ class _SearchScreenState extends State<SearchScreen> {
   int _selectedChip = 0;
 
   // Filter state
-  bool _paidSelected = true;
-  bool _freeSelected = false;
-  bool _trendingOn = false;
-  bool _highlyRatedOn = false;
-  final Set<String> _ageGroupSelected = {'3-5 years'};
-  final Set<String> _dateSelected = {'Today'};
+  String? _selectedMode;
+  String? _selectedCity;
+  String? _selectedArea;
+  final Set<String> _ageGroupSelected = {};
+  final Set<String> _dateSelected = {};
 
   final List<String> _chips = ['Stream', 'Events', 'Plays', 'Sports'];
 
@@ -33,6 +32,18 @@ class _SearchScreenState extends State<SearchScreen> {
     'Haq',
     'AP Dhillon: One Of One Tour - Delhi',
   ];
+
+  static const _ageGroups = [
+    '0-3 years',
+    '3-5 years',
+    '6-8 years',
+    '9-12 years',
+    '13-16 years',
+  ];
+  static const _modes = ['Offline', 'Hybrid', 'Online'];
+  static const _cities = ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Pune'];
+  static const _areas = ['Bandra', 'Juhu', 'Andheri', 'Powai', 'Thane', 'Worli', 'Lower Parel'];
+  static const _dateOptions = ['Today', 'This Weekend', 'This Week', 'Upcoming'];
 
   @override
   void dispose() {
@@ -181,21 +192,32 @@ class _SearchScreenState extends State<SearchScreen> {
       backgroundColor: Colors.transparent,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) {
-          final resultCount = 24; // Could be computed from filters
           return Container(
             constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.85,
+              maxHeight: MediaQuery.of(context).size.height * 0.88,
             ),
             decoration: const BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Drag handle
+                const SizedBox(height: 10),
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
                 // Header
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -208,204 +230,326 @@ class _SearchScreenState extends State<SearchScreen> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {
-                          setModalState(() {
-                            _paidSelected = false;
-                            _freeSelected = false;
-                            _trendingOn = false;
-                            _highlyRatedOn = false;
+                        onTap: () => Navigator.pop(ctx),
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.close, size: 18, color: Color(0xFF1A1A2E)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Divider(height: 1, color: Color(0xFFEEEEEE)),
+
+                        // ── Age Group ──────────────────────────────────────
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Age Group',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF1A1A2E),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: _ageGroups
+                                    .map((label) => _buildFilterChip(
+                                          label: label,
+                                          isSelected: _ageGroupSelected.contains(label),
+                                          onTap: () => setModalState(() {
+                                            if (_ageGroupSelected.contains(label)) {
+                                              _ageGroupSelected.remove(label);
+                                            } else {
+                                              _ageGroupSelected.add(label);
+                                            }
+                                          }),
+                                        ))
+                                    .toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const Divider(height: 1, color: Color(0xFFEEEEEE)),
+
+                        // ── Mode ───────────────────────────────────────────
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Mode',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF1A1A2E),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              ..._modes.map((mode) => _buildRadioOption(
+                                    label: mode,
+                                    isSelected: _selectedMode == mode,
+                                    onTap: () => setModalState(() {
+                                      _selectedMode = _selectedMode == mode ? null : mode;
+                                    }),
+                                  )),
+                            ],
+                          ),
+                        ),
+
+                        const Divider(height: 1, color: Color(0xFFEEEEEE)),
+
+                        // ── Location ───────────────────────────────────────
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Location',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF1A1A2E),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              _buildDropdown(
+                                hint: 'City',
+                                value: _selectedCity,
+                                items: _cities,
+                                onChanged: (v) => setModalState(() {
+                                  _selectedCity = v;
+                                  _selectedArea = null;
+                                }),
+                              ),
+                              const SizedBox(height: 10),
+                              _buildDropdown(
+                                hint: 'Area/Locality',
+                                value: _selectedArea,
+                                items: _areas,
+                                onChanged: (v) => setModalState(() => _selectedArea = v),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const Divider(height: 1, color: Color(0xFFEEEEEE)),
+
+                        // ── Date ───────────────────────────────────────────
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Date',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF1A1A2E),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: _dateOptions
+                                    .map((label) => _buildFilterChip(
+                                          label: label,
+                                          isSelected: _dateSelected.contains(label),
+                                          onTap: () => setModalState(() {
+                                            if (_dateSelected.contains(label)) {
+                                              _dateSelected.remove(label);
+                                            } else {
+                                              _dateSelected.add(label);
+                                            }
+                                          }),
+                                        ))
+                                    .toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Apply + Clear footer
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+                  decoration: BoxDecoration(
+                    border: Border(top: BorderSide(color: Colors.grey.shade200)),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => setModalState(() {
                             _ageGroupSelected.clear();
                             _dateSelected.clear();
-                          });
-                        },
-                        child: Text(
-                          'Clear All',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.blue,
+                            _selectedMode = null;
+                            _selectedCity = null;
+                            _selectedArea = null;
+                          }),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFFE0E0E0)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: Text(
+                            'Clear All',
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF1A1A2E),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFFCC00),
+                            foregroundColor: const Color(0xFF1A1A2E),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            'Apply Filters',
+                            style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, 15),
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Divider(height: 1),
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Availability
-                        Text(
-                          'Availability',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            _buildFilterChip(
-                              label: 'Paid',
-                              isSelected: _paidSelected,
-                              onTap: () {
-                                setModalState(() {
-                                  _paidSelected = !_paidSelected;
-                                  if (_paidSelected) _freeSelected = false;
-                                });
-                              },
-                            ),
-                            const SizedBox(width: 10),
-                            _buildFilterChip(
-                              label: 'Free',
-                              isSelected: _freeSelected,
-                              onTap: () {
-                                setModalState(() {
-                                  _freeSelected = !_freeSelected;
-                                  if (_freeSelected) _paidSelected = false;
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        // Trending
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Trending',
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF1A1A2E),
-                              ),
-                            ),
-                            Switch(
-                              value: _trendingOn,
-                              onChanged: (v) => setModalState(() => _trendingOn = v),
-                              activeTrackColor: const Color(0xFFFFCC00).withOpacity(0.6),
-                              activeThumbColor: const Color(0xFFFFCC00),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        // Highly Rated
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Highly Rated',
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF1A1A2E),
-                              ),
-                            ),
-                            Switch(
-                              value: _highlyRatedOn,
-                              onChanged: (v) => setModalState(() => _highlyRatedOn = v),
-                              activeTrackColor: const Color(0xFFFFCC00).withOpacity(0.6),
-                              activeThumbColor: const Color(0xFFFFCC00),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        // Age Group
-                        Text(
-                          'Age Group',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: ['3-5 years', '6-8 years', '9-12 years', 'Teens (13+)']
-                              .map((label) => _buildFilterChip(
-                                    label: label,
-                                    isSelected: _ageGroupSelected.contains(label),
-                                    onTap: () {
-                                      setModalState(() {
-                                        if (_ageGroupSelected.contains(label)) {
-                                          _ageGroupSelected.remove(label);
-                                        } else {
-                                          _ageGroupSelected.add(label);
-                                        }
-                                      });
-                                    },
-                                  ))
-                              .toList(),
-                        ),
-                        const SizedBox(height: 20),
-                        // Date
-                        Text(
-                          'Date',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: ['Today', 'This Week', 'Weekend', 'Custom']
-                              .map((label) => _buildFilterChip(
-                                    label: label,
-                                    isSelected: _dateSelected.contains(label),
-                                    onTap: () {
-                                      setModalState(() {
-                                        if (_dateSelected.contains(label)) {
-                                          _dateSelected.remove(label);
-                                        } else {
-                                          _dateSelected.add(label);
-                                        }
-                                      });
-                                    },
-                                  ))
-                              .toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                // Show results button
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFCC00),
-                      foregroundColor: const Color(0xFF1A1A2E),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'Show $resultCount results',
-                      style: GoogleFonts.poppins(
-                        fontSize: Responsive.sp(context, 16),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildRadioOption({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 14),
+        child: Row(
+          children: [
+            Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? const Color(0xFF1A1A2E) : Colors.grey.shade400,
+                  width: 2,
+                ),
+              ),
+              child: isSelected
+                  ? Center(
+                      child: Container(
+                        width: 10,
+                        height: 10,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0xFF1A1A2E),
+                        ),
+                      ),
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF1A1A2E),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdown({
+    required String hint,
+    required String? value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          hint: Text(
+            hint,
+            style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey.shade500),
+          ),
+          items: items
+              .map((item) => DropdownMenuItem(
+                    value: item,
+                    child: Text(
+                      item,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: const Color(0xFF1A1A2E),
+                      ),
+                    ),
+                  ))
+              .toList(),
+          onChanged: onChanged,
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF1A1A2E)),
+          dropdownColor: Colors.white,
+          style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF1A1A2E)),
+        ),
       ),
     );
   }
