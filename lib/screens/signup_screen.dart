@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import '../core/auth_service.dart';
-import '../core/auth_state.dart';
+import '../services/auth_service.dart';
+import '../providers/auth_state.dart';
 import '../core/responsive.dart';
-import 'login_sheet.dart';
+import '../widgets/login_sheet.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -94,10 +94,12 @@ class _SignupScreenState extends State<SignupScreen> {
   Future<void> _onGoogleSignUp() async {
     setState(() => _loading = true);
     try {
-      final googleUser = await GoogleSignIn(
+      final googleSignIn = GoogleSignIn(
         serverClientId: '690253990877-jqog76u6vcre0a9qbd9d8p0g7o47scue.apps.googleusercontent.com',
         scopes: ['email', 'profile'],
-      ).signIn();
+      );
+      await googleSignIn.signOut();
+      final googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
         setState(() => _loading = false);
         return; // user cancelled
@@ -244,9 +246,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 20),
-
                   // ── Title ─────────────────────────────────────────────────
                   Text(
                     'Create Account',

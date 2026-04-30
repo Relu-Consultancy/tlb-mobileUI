@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
-import '../core/location_state.dart';
+import '../providers/location_state.dart';
 import '../sections/home_header.dart';
 import '../widgets/banner_carousel.dart';
 import '../widgets/categories_grid.dart';

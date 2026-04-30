@@ -190,6 +190,49 @@ class AuthService {
     }
   }
 
+  // ── Update profile ───────────────────────────────────────────────────────────
+
+  /// PATCH /api/v1/auth/users/me/ — only sends fields that are non-null.
+  /// Returns `{'success': true, 'user': {...}}` on 200.
+  static Future<Map<String, dynamic>> updateProfile({
+    required String accessToken,
+    String? firstName,
+    String? lastName,
+    String? dateOfBirth,
+    String? city,
+    String? state,
+    String? guardianName,
+    String? institutionName,
+    String? institutionType,
+  }) async {
+    try {
+      final uri = Uri.parse('$_base/api/v1/auth/users/me/');
+      final request = http.MultipartRequest('PATCH', uri);
+      request.headers['Authorization'] = 'Bearer $accessToken';
+      request.headers['accept'] = 'application/json';
+
+      if (firstName != null) request.fields['first_name'] = firstName;
+      if (lastName != null) request.fields['last_name'] = lastName;
+      if (dateOfBirth != null) request.fields['date_of_birth'] = dateOfBirth;
+      if (city != null) request.fields['city'] = city;
+      if (state != null) request.fields['state'] = state;
+      if (guardianName != null) request.fields['guardian_name'] = guardianName;
+      if (institutionName != null) request.fields['institution_name'] = institutionName;
+      if (institutionType != null) request.fields['institution_type'] = institutionType;
+
+      final streamed = await request.send().timeout(const Duration(seconds: 30));
+      final res = await http.Response.fromStream(streamed);
+      final data = _decode(res.body);
+
+      if (res.statusCode == 200) {
+        return {'success': true, 'user': data};
+      }
+      return {'success': false, 'message': _extractError(data)};
+    } catch (e) {
+      return {'success': false, 'message': _networkError(e)};
+    }
+  }
+
   // ── Logout ───────────────────────────────────────────────────────────────────
 
   /// Blacklists the refresh token. Returns true on success.
@@ -234,13 +277,11 @@ class AuthService {
 
   /// Extracts the first human-readable error from a DRF response body.
   static String _extractError(Map<String, dynamic> data) {
-    // Try common keys
     for (final key in ['message', 'detail', 'non_field_errors']) {
       final v = data[key];
       if (v is String && v.isNotEmpty) return v;
       if (v is List && v.isNotEmpty) return v.first.toString();
     }
-    // Fall back to first field error
     for (final v in data.values) {
       if (v is String && v.isNotEmpty) return v;
       if (v is List && v.isNotEmpty) return v.first.toString();

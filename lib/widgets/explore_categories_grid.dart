@@ -8,6 +8,10 @@ class ExploreCategoriesGrid extends StatelessWidget {
   final VoidCallback? onViewAll;
   final ValueChanged<int>? onCategoryTap;
   final double childAspectRatio;
+  final bool scrollable;
+  final double visibleRows;
+  /// When provided, skips LayoutBuilder and uses this exact height for the grid container.
+  final double? scrollHeight;
 
   const ExploreCategoriesGrid({
     super.key,
@@ -15,127 +19,191 @@ class ExploreCategoriesGrid extends StatelessWidget {
     this.onViewAll,
     this.onCategoryTap,
     this.childAspectRatio = 0.75,
+    this.scrollable = false,
+    this.visibleRows = 2.3,
+    this.scrollHeight,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 16)),
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.bottomCenter,
-            children: [
-              GridView.builder(
-                padding: const EdgeInsets.only(bottom: 24), // Space for button
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: categories.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: childAspectRatio,
-                ),
-                itemBuilder: (context, index) {
-                  final category = categories[index];
-                  final gradientColors = category['gradient'] as List<Color>;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 16)),
+      child: scrollable ? _buildScrollableGrid() : _buildStaticGrid(context),
+    );
+  }
 
-                  return GestureDetector(
-                    onTap: () => onCategoryTap?.call(index),
-                    child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.white,
-                          gradientColors.last, // vibrant color at bottom
-                        ],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: gradientColors.last.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        )
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            category['label'],
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 11),
-                              fontWeight: FontWeight.w600,
-                              height: 1.2,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          Expanded(
-                            child: Image.asset(
-                              category['image'],
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.category, color: Colors.grey),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  );
-                },
+  Widget _buildScrollableGrid() {
+    const crossAxisCount = 3;
+    const mainAxisSpacing = 12.0;
+    const crossAxisSpacing = 12.0;
+
+    Widget buildStack(double containerHeight) {
+      return Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          SizedBox(
+            height: containerHeight,
+            child: GridView.builder(
+              primary: false,
+              shrinkWrap: false,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 48),
+              itemCount: categories.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                mainAxisSpacing: mainAxisSpacing,
+                crossAxisSpacing: crossAxisSpacing,
+                childAspectRatio: childAspectRatio,
               ),
-              Positioned(
-                bottom: 8,
-                child: GestureDetector(
-                  onTap: () {
-                    if (onViewAll != null) {
-                      onViewAll!();
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'View All',
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.blueAccent,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.arrow_forward, size: 14, color: Colors.blueAccent),
-                      ],
-                    ),
+              itemBuilder: (context, index) => _buildCategoryCard(context, index),
+            ),
+          ),
+          if (onViewAll != null)
+            Positioned(
+              bottom: 10,
+              child: GestureDetector(
+                onTap: onViewAll,
+                child: _viewAllChip(),
+              ),
+            ),
+        ],
+      );
+    }
+
+    // Fixed height path — used when caller knows exact height needed
+    if (scrollHeight != null) {
+      return buildStack(scrollHeight!);
+    }
+
+    // Dynamic height path — derives height from item dimensions
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cellWidth =
+            (constraints.maxWidth - (crossAxisCount - 1) * crossAxisSpacing) /
+                crossAxisCount;
+        final cellHeight = cellWidth / childAspectRatio;
+        final containerHeight = visibleRows * cellHeight +
+            (visibleRows.ceil() - 1) * mainAxisSpacing;
+        return buildStack(containerHeight);
+      },
+    );
+  }
+
+  // Fully expanded non-scrollable grid (used by Events / Classes screens)
+  Widget _buildStaticGrid(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.bottomCenter,
+      children: [
+        GridView.builder(
+          padding: const EdgeInsets.only(bottom: 24),
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: categories.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: childAspectRatio,
+          ),
+          itemBuilder: (context, index) => _buildCategoryCard(context, index),
+        ),
+        if (onViewAll != null)
+          Positioned(
+            bottom: 8,
+            child: GestureDetector(
+              onTap: onViewAll,
+              child: _viewAllChip(),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _viewAllChip() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'View All',
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.blueAccent,
+            ),
+          ),
+          const SizedBox(width: 4),
+          const Icon(Icons.arrow_forward, size: 14, color: Colors.blueAccent),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryCard(BuildContext context, int index) {
+    final category = categories[index];
+    final gradientColors = category['gradient'] as List<Color>;
+
+    return GestureDetector(
+      onTap: () => onCategoryTap?.call(index),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.white, gradientColors.last],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: gradientColors.last.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 10, 8, 6),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                category['label'],
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: Responsive.sp(context, 11),
+                  fontWeight: FontWeight.w600,
+                  height: 1.2,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(6, 6, 6, 2),
+                  child: Image.asset(
+                    category['image'],
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.category, color: Colors.grey),
                   ),
                 ),
               ),
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

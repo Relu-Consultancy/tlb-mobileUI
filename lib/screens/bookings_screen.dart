@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../core/booked_events_state.dart';
+import '../providers/booked_events_state.dart';
 import 'booking_detail_screen.dart';
 
 class BookingsScreen extends StatefulWidget {

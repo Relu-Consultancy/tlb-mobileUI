@@ -132,7 +132,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       // ── Get Moving ──
                       _sectionHeader(context, 'Get Moving', subtitle: 'Active & physical fun'),
                       SizedBox(
-                        height: 390,
+                        height: 420,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -640,7 +640,6 @@ class _VenuesScreenState extends State<VenuesScreen> {
   Widget _buildGetMovingCard(BuildContext context, Map<String, dynamic> data) {
     final venues = (data['venues'] as List).cast<Map<String, dynamic>>();
     final gradientColors = (data['gradient'] as List).cast<Color>();
-    final lightEnd = Color.lerp(gradientColors[0], Colors.white, 0.80)!;
 
     return Container(
       width: MediaQuery.of(context).size.width * 0.86,
@@ -651,164 +650,190 @@ class _VenuesScreenState extends State<VenuesScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // ── Gradient header ──
-          Container(
-            height: 96,
-            padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [gradientColors[0], lightEnd],
-              ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        data['sport'] as String,
-                        style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        data['slotsText'] as String,
-                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.white.withOpacity(0.85)),
-                      ),
-                    ],
-                  ),
+          // ── Gradient header with floating sport image ──
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            child: Container(
+              height: 112,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: gradientColors,
                 ),
-                // Sport image — rounded with shadow
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.18), blurRadius: 10, offset: const Offset(0, 4))],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
+              ),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Sport image — large, top-right, overflowing
+                  Positioned(
+                    top: -12,
+                    right: 8,
                     child: Image.asset(
                       data['image'] as String,
-                      width: 72,
-                      height: 68,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        width: 72, height: 68,
-                        decoration: BoxDecoration(color: gradientColors[0].withOpacity(0.4), borderRadius: BorderRadius.circular(12)),
-                        child: const Icon(Icons.sports, color: Colors.white, size: 36),
+                      width: 118,
+                      height: 118,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Icon(
+                        Icons.sports,
+                        color: Colors.white.withOpacity(0.5),
+                        size: 64,
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-
-          // ── Venue list ──
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ...List.generate(venues.length, (idx) {
-                    final v = venues[idx];
-                    final slots = (v['slots'] as List).cast<String>();
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: idx < venues.length - 1 ? 0 : 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Venue info row
-                          Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Image.asset(
-                                  v['image'] as String,
-                                  width: 48,
-                                  height: 48,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => Container(
-                                    width: 48, height: 48,
-                                    color: Colors.grey.shade200,
-                                    child: const Icon(Icons.place, size: 22, color: Colors.grey),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      v['name'] as String,
-                                      style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Row(children: [
-                                      const Icon(Icons.location_on_outlined, size: 11, color: Colors.grey),
-                                      const SizedBox(width: 2),
-                                      Text(v['location'] as String, style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500)),
-                                    ]),
-                                  ],
-                                ),
-                              ),
-                            ],
+                  // Text — left side
+                  Positioned(
+                    left: 16,
+                    top: 0,
+                    bottom: 0,
+                    right: 120,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          data['sport'] as String,
+                          style: GoogleFonts.poppins(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
                           ),
-                          const SizedBox(height: 8),
-                          // Time slot pills
-                          Row(
-                            children: slots.map((slot) => Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade100,
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: Colors.grey.shade300),
-                                ),
-                                child: Text(
-                                  slot,
-                                  style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E)),
-                                ),
-                              ),
-                            )).toList(),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          data['slotsText'] as String,
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Colors.white.withOpacity(0.88),
                           ),
-                          if (idx < venues.length - 1) ...[
-                            const SizedBox(height: 12),
-                            Divider(color: Colors.grey.shade200, height: 1),
-                            const SizedBox(height: 12),
-                          ],
-                        ],
-                      ),
-                    );
-                  }),
-                  const Spacer(),
-                  // ── View all venues ──
-                  SizedBox(
-                    width: double.infinity,
-                    height: 42,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFCC00),
-                        foregroundColor: const Color(0xFF1A1A2E),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-                      ),
-                      child: Text('View all venues', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700)),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
+            ),
+          ),
+
+          // ── Venue list ──
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...List.generate(venues.length, (idx) {
+                  final v = venues[idx];
+                  final slots = (v['slots'] as List).cast<String>();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Venue info row
+                      Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.asset(
+                              v['image'] as String,
+                              width: 48,
+                              height: 48,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(Icons.place, size: 22, color: Colors.grey),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  v['name'] as String,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF1A1A2E),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 3),
+                                Row(children: [
+                                  const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
+                                  const SizedBox(width: 3),
+                                  Expanded(
+                                    child: Text(
+                                      v['location'] as String,
+                                      style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ]),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      // Time slot pills
+                      Row(
+                        children: slots.map((slot) => Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF5F5F5),
+                              borderRadius: BorderRadius.circular(22),
+                              border: Border.all(color: const Color(0xFFE8E8E8)),
+                            ),
+                            child: Text(
+                              slot,
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF1A1A2E),
+                              ),
+                            ),
+                          ),
+                        )).toList(),
+                      ),
+                      if (idx < venues.length - 1) ...[
+                        const SizedBox(height: 14),
+                        Divider(color: Colors.grey.shade200, height: 1),
+                        const SizedBox(height: 14),
+                      ] else
+                        const SizedBox(height: 16),
+                    ],
+                  );
+                }),
+                // ── View all venues button ──
+                SizedBox(
+                  width: double.infinity,
+                  height: 46,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFFCC00),
+                      foregroundColor: const Color(0xFF1A1A2E),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+                    ),
+                    child: Text(
+                      'View all venues',
+                      style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

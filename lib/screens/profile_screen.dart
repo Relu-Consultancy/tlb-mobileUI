@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../core/auth_service.dart';
-import '../core/auth_state.dart';
+import '../services/auth_service.dart';
+import '../providers/auth_state.dart';
 import '../core/responsive.dart';
-import '../core/saved_events_state.dart';
-import '../core/booked_events_state.dart';
+import '../providers/saved_events_state.dart';
+import '../providers/booked_events_state.dart';
 import 'bookings_screen.dart';
 import 'saved_events_screen.dart';
 import 'help_centre_screen.dart';
@@ -16,11 +16,52 @@ import 'notification_screen.dart';
 import 'reminders_screen.dart';
 import 'home_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  double _calculateCompletion() {
+    final profile = AuthState.userData?['profile'] as Map<String, dynamic>?;
+    int filled = 0;
+    const totalFields = 8;
+    if (profile != null) {
+      if ((profile['first_name'] as String?)?.isNotEmpty == true) filled++;
+      if ((profile['last_name'] as String?)?.isNotEmpty == true) filled++;
+      if ((profile['date_of_birth'] as String?)?.isNotEmpty == true) filled++;
+      if ((profile['city'] as String?)?.isNotEmpty == true) filled++;
+      if ((profile['state'] as String?)?.isNotEmpty == true) filled++;
+      if ((profile['guardian_name'] as String?)?.isNotEmpty == true) filled++;
+      if ((profile['institution_name'] as String?)?.isNotEmpty == true) filled++;
+      if ((profile['institution_type'] as String?)?.isNotEmpty == true) filled++;
+    }
+    return filled / totalFields;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final profile = AuthState.userData?['profile'] as Map<String, dynamic>?;
+    final userName = AuthState.userName.value ?? 'User';
+    final userEmail = AuthState.userEmail ?? 'No email provided';
+    
+    String avatarUrl;
+    final rawAvatar = profile?['avatar_url'] as String?;
+    if (rawAvatar != null && rawAvatar.isNotEmpty) {
+      avatarUrl = rawAvatar;
+    } else {
+      final initials = Uri.encodeComponent(
+        ((profile?['first_name'] as String? ?? '').isNotEmpty
+            ? profile!['first_name'] as String
+            : AuthState.userEmail?.substring(0, 1).toUpperCase() ?? 'U'),
+      );
+      avatarUrl = 'https://ui-avatars.com/api/?name=$initials&background=FFCC00&color=1A1A2E&size=200';
+    }
+
+    final completion = _calculateCompletion();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -59,8 +100,8 @@ class ProfileScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.grey.shade300, width: 3),
-                          image: const DecorationImage(
-                            image: AssetImage('assets/images/new_home/profilepic.jpg'),
+                          image: DecorationImage(
+                            image: NetworkImage(avatarUrl),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -85,7 +126,7 @@ class ProfileScreen extends StatelessWidget {
 
                   // Name
                   Text(
-                    'Laxman',
+                    userName,
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -96,7 +137,7 @@ class ProfileScreen extends StatelessWidget {
 
                   // Email
                   Text(
-                    'Laxmanartist@yahoo.com',
+                    userEmail,
                     style: GoogleFonts.poppins(
                       fontSize: 13,
                       color: Colors.grey.shade500,
@@ -112,7 +153,7 @@ class ProfileScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                             builder: (_) => const EditProfileScreen()),
-                      ),
+                      ).then((_) => setState(() {})),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF0A1F11),
                         foregroundColor: Colors.white,
@@ -126,6 +167,47 @@ class ProfileScreen extends StatelessWidget {
                         style: GoogleFonts.poppins(
                             fontSize: 13, fontWeight: FontWeight.w500),
                       ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Profile Completion Progress
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Profile Completion',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            Text(
+                              '${(completion * 100).toInt()}%',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF1A1A2E),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: completion,
+                            backgroundColor: Colors.grey.shade200,
+                            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFCC00)),
+                            minHeight: 6,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

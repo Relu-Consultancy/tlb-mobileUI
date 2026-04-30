@@ -101,8 +101,10 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       const SectionDividerWidget(title: 'Pave Your Path'),
                       RepaintBoundary(
                         child: ExploreCategoriesGrid(
-                          categories: DummyData.programsCategories.take(6).toList(),
+                          categories: DummyData.programsCategories,
                           childAspectRatio: 0.62,
+                          scrollable: true,
+                          visibleRows: 2.3,
                           onViewAll: () => _showAllCategoriesPopup(context),
                           onCategoryTap: (index) => Navigator.push(
                             context,

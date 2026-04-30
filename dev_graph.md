@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Date Generated:** 2026-04-29
+**Last Updated:** 2026-04-30 (Session 5)
 
 ---
 
@@ -11,25 +11,30 @@
 
 ```
 lib/
-├── main.dart                   Entry point — Firebase init, high refresh rate, SplashScreen → HomeScreen
-├── core/                       State, services, utilities
-│   ├── auth_service.dart       HTTP wrappers for all auth API calls (login/signup/logout/Google/OTP)
-│   ├── auth_state.dart         Global ValueNotifier — isLoggedIn, accessToken, refreshToken, userName
-│   ├── app_colors.dart         Centralized color constants (textPrimary, background #FFF8EE, etc.)
-│   ├── app_theme.dart          MaterialApp ThemeData
-│   ├── responsive.dart         Responsive.w / Responsive.h / Responsive.sp helpers
-│   ├── location_state.dart     ValueNotifier for selected city
-│   ├── saved_events_state.dart ValueNotifier<List<EventModel>> for wishlist
-│   ├── booked_events_state.dart ValueNotifier<List<EventModel>> for bookings
-│   └── user_reviews_state.dart ValueNotifier for user reviews
+├── main.dart                      Entry point — Firebase init, tryRestoreSession(), SplashScreen → HomeScreen
+├── core/                          Config/constants only
+│   ├── app_colors.dart            Centralized color constants
+│   ├── app_theme.dart             MaterialApp ThemeData
+│   └── responsive.dart            Responsive.w / Responsive.h / Responsive.sp helpers
+├── services/                      API + secure storage
+│   ├── auth_service.dart          HTTP wrappers — login/signup/logout/Google/OTP/refresh/updateProfile
+│   └── token_storage.dart         FlutterSecureStorage wrapper — saveTokens/loadTokens/clearTokens
+├── providers/                     Global ValueNotifier state
+│   ├── auth_state.dart            isLoggedIn (ValueNotifier<bool>), avatarUrl (ValueNotifier<String?>),
+│   │                              userName (ValueNotifier<String?>) — all reactive
+│   │                              + tryRestoreSession(), isProfileComplete, updateUserProfile()
+│   ├── location_state.dart        ValueNotifier for selected city
+│   ├── saved_events_state.dart    ValueNotifier<List<EventModel>> for wishlist
+│   ├── booked_events_state.dart   ValueNotifier<List<EventModel>> for bookings
+│   └── user_reviews_state.dart    ValueNotifier for user reviews
 ├── models/
-│   ├── event_model.dart        Core data model — title, venue, price, rating, date, image, etc.
-│   └── category_model.dart     Category model with label, image, color
+│   ├── event_model.dart           Core data model — title, venue, price, rating, date, image, etc.
+│   └── category_model.dart        Category model with label, image, color
 ├── data/
-│   └── dummy_data.dart         All mock data — events, categories, banners, partners, etc.
-├── screens/                    44 screens (see Section 3)
-├── widgets/                    30+ reusable widgets (see Section 4)
-└── sections/                   17 home-page sections (see Section 5)
+│   └── dummy_data.dart            All mock data — events, categories, banners, partners, etc.
+├── screens/                       44 screens (see Section 3)
+├── widgets/                       30+ reusable widgets incl. login_sheet.dart (see Section 4)
+└── sections/                      17 home-page sections (see Section 5)
 ```
 
 ---
@@ -86,7 +91,7 @@ HomeScreen (sidebar/action flows)
 ### Auth
 | File | Description |
 |------|-------------|
-| `login_sheet.dart` | Bottom-sheet login — email/pass, Google (bypassed for dev), OTP. Shows WelcomeBackDialog on success |
+| `widgets/login_sheet.dart` | Full-screen login — email/pass, Google, OTP. WelcomeBackDialog → routes to EditProfileScreen if profile incomplete, else HomeScreen |
 | `signup_screen.dart` | New account creation with OTP verification flow |
 | `forgot_password_screen.dart` | Password reset request |
 | `change_password_screen.dart` | Authenticated password change |
@@ -112,7 +117,7 @@ HomeScreen (sidebar/action flows)
 | `ticket_booking_screen.dart` | Ticket count + price breakdown → ReviewPayScreen |
 | `review_pay_screen.dart` | Order summary → PaymentScreen |
 | `payment_screen.dart` | Payment method selection |
-| `booking_confirmed_screen.dart` | Success screen with confetti |
+| `booking_confirmed_screen.dart` | Booking success — animated teaser flip → ticket card with full-width image, notch cut + dashed divider (CustomPainter), QR, Share/Download actions |
 | `seat_reservation_screen.dart` | Interactive seat map |
 | `plan_party_screen.dart` | "Plan Your Kid's Party" — child name, occasion, date/time grid, kids count → Continue |
 
@@ -129,7 +134,7 @@ HomeScreen (sidebar/action flows)
 | File | Description |
 |------|-------------|
 | `profile_screen.dart` | My Profile — avatar, name, email, Edit Profile button, menu items using profile_section.png sprite |
-| `edit_profile_screen.dart` | Edit name, email, phone, avatar |
+| `edit_profile_screen.dart` | Edit profile — first/last name, DOB, city, state, guardian, institution. Pre-fills from AuthState. Calls PATCH /api/v1/auth/users/me/. `isOnboarding` mode for post-signup flow |
 | `bookings_screen.dart` | Booking history list |
 | `booking_detail_screen.dart` | Single booking detail + QR |
 | `saved_events_screen.dart` | Wishlist of saved events |
@@ -147,7 +152,7 @@ HomeScreen (sidebar/action flows)
 | `location_screen.dart` | City selection |
 | `gallery_screen.dart` | Full-screen image gallery |
 | `organizer_profile_screen.dart` | Event organizer detail |
-| `shops_screen.dart` | Merchandise/shops |
+| ~~`shops_screen.dart`~~ | ~~Merchandise/shops~~ — **deleted** (dead screen) |
 
 ---
 
@@ -160,7 +165,7 @@ HomeScreen (sidebar/action flows)
 | `event_card.dart` / `event_card_with_rating.dart` / `event_card_with_price.dart` | Various event card styles |
 | `class_nearby_card.dart` | Horizontal class card with tag + button |
 | `wishlist_button.dart` | Heart toggle with disperse animation |
-| `explore_categories_grid.dart` | 3-col category icon grid with "View All" |
+| `explore_categories_grid.dart` | 3-col category icon grid. `scrollable: true` + `visibleRows` = fixed-height inner scroll with "View All" chip overlaid at bottom |
 | `explore_format_row.dart` | Horizontal format chip row |
 | `holiday_special_card.dart` | Tall gradient card for holiday events |
 | `new_on_tlb_card.dart` | PageView card for new listings |
@@ -181,7 +186,7 @@ HomeScreen (sidebar/action flows)
 
 | Section | Content |
 |---------|---------|
-| `home_header.dart` | Gradient header (#FFB219 → white), greeting, location, bell, avatar, search bar |
+| `home_header.dart` | Gradient header (#FFB219 → white), first-name greeting (ValueListenableBuilder on `userName`), location, alert icon, avatar (ValueListenableBuilder on `avatarUrl`), search bar |
 | `spotlight_section.dart` | Hero banner carousel |
 | `browse_by_categories_section.dart` | Category icon grid |
 | `trending_now_section.dart` | Horizontal trending cards |
@@ -203,15 +208,27 @@ HomeScreen (sidebar/action flows)
 
 ## 6. Core Services & State
 
-### AuthService (`lib/core/auth_service.dart`)
-- All methods have **30-second timeout** (increased from 15s)
+### AuthService (`lib/services/auth_service.dart`)
+- All methods have **30-second timeout**
 - Typed error handling: `SocketException` → "Cannot reach server", `TimeoutException` → "Request timed out", `HandshakeException` → "SSL error"
-- Endpoints: `/signup/`, `/login/`, `/logout/`, `/password/reset/`, `/password/change/`, `/token/refresh/`, `/customer/google/`
+- Endpoints: `/signup/`, `/login/`, `/logout/`, `/password/reset/`, `/password/change/`, `/token/refresh/`, `/customer/google/`, `/users/me/` (PATCH)
+- `updateProfile()` — `MultipartRequest('PATCH')`, sends only non-null customer fields
 
-### AuthState (`lib/core/auth_state.dart`)
+### TokenStorage (`lib/services/token_storage.dart`)
+- Wraps `FlutterSecureStorage`
+- Keys: `tlb_access_token`, `tlb_refresh_token`, `tlb_user_json`
+- `saveTokens(access, refresh, userJson)` / `loadTokens()` / `clearTokens()`
+
+### AuthState (`lib/providers/auth_state.dart`)
 - `isLoggedIn` — `ValueNotifier<bool>`
-- `accessToken`, `refreshToken`, `userName` — static fields
-- `login()` / `logout()` — update all fields and notify listeners
+- `avatarUrl` — `ValueNotifier<String?>` — updated in login / updateUserProfile / logout
+- `userName` — `ValueNotifier<String?>` — updated in login / updateUserProfile / logout; null = not logged in
+- `accessToken`, `refreshToken`, `userEmail`, `userPhone`, `userData` — plain static fields
+- `login()` — sets all fields, fires notifiers, calls `TokenStorage.saveTokens()` as background save
+- `logout()` — clears all fields, fires notifiers to null, calls `TokenStorage.clearTokens()`
+- `tryRestoreSession()` — loads stored refresh → calls `refreshToken()` → re-logs in; returns bool
+- `isProfileComplete` — getter; true if `profile.first_name` is non-empty
+- `updateUserProfile(updatedUser)` — syncs API response into state, fires `userName` + `avatarUrl` notifiers, re-saves tokens
 
 ### Google Sign-In / Sign-Up (live)
 ```
@@ -227,8 +244,12 @@ Flow (login_sheet.dart + signup_screen.dart):
   → AuthService.googleSignIn(firebaseIdToken: token)
   → AuthState.login(access, refresh, user)
   → showWelcomeBackDialog()  [both login and signup]
+     onDone: AuthState.isProfileComplete?
+       true  → HomeScreen
+       false → EditProfileScreen(isOnboarding: true)
 
 API returns is_new_user flag — same endpoint handles both sign-in & sign-up.
+google-services.json includes SHA-1 debug fingerprint: 67:FB:ED:80:72:FB:43:4A:1F:9D:C4:32:38:62:D6:05:EC:8C:36:D8
 ```
 
 ---
@@ -286,9 +307,47 @@ Layer 1 (image + gradient mask):
 
 Layer 2 (content):
   SafeArea → Column → greeting row + search bar
-  Bell icon in semi-transparent white circle (0.45 opacity)
-  Profile avatar: white border (2.5) + shadow
-  Search bar: white pill with shadow, search icon + divider + filter icon
+
+Greeting row layout:
+  Row(crossAxisAlignment: center)
+    └── Expanded(Column)               ← bounds left side so icons are never pushed out
+          ├── Row(Flexible(Text) + wave image)
+          │     Text listens to AuthState.userName (ValueListenableBuilder<String?>)
+          │     null → "Hello There" | non-null → "Hello <firstName>" (.split(' ').first)
+          │     maxLines: 1, overflow: TextOverflow.ellipsis
+          └── GestureDetector → LocationScreen (city label, max 18 chars)
+    └── SizedBox(width: 8)
+    └── Row(bell + avatar)
+          Bell: resources- tlb-ui/alert.png in white circle (0.55 opacity, amber shadow)
+          Avatar: ValueListenableBuilder<String?> on AuthState.avatarUrl
+            non-null → NetworkImage(url) | null → AssetImage(profilepic.jpg)
+
+Search bar: white pill with shadow, search icon + divider + filter icon
+```
+
+### Booking Confirmed Screen
+```
+Structure: _ClickHereTeaser (flip animation) → _TicketScreen
+
+_HeaderSection:
+  Balloon background (assets/images/booking_back.png) + bottom fade gradient
+  White-ringed checkmark: outer Container(66×66, white circle, green shadow)
+                          inner Container(50×50, Color(0xFF34C759), check icon)
+  "Booking Confirmed!" (dark blue #1A3A8F, bold 20sp)
+  "Booking ID: XXXX" (grey 12sp)
+
+_TicketCard (Container + ClipRRect — no PNG overlay):
+  ┌─ AspectRatio(16/9) Image.asset  — full-width, zero padding, top corners via ClipRRect
+  ├─ Padding(18,16,18,20) _TicketContent
+  │     event title | location + Map button | date + time (2-col)
+  ├─ SizedBox(height:28) CustomPaint(_TicketNotchPainter)
+  │     Draws 2 semicircles (radius 13) at x=0 and x=width in Color(0xFFD6E4F7)
+  │     → appears as notch cuts against scaffold background
+  │     Dashed line (gap 4, dash 6, color #DEDEDE) between notches
+  └─ Padding(18,18,18,26) QR section
+        "Scan QR Code" label + Container(border+radius) + CustomPaint(_QRCodePainter)
+
+_ActionButtons: white bar (top shadow) with Share + Download tiles (Color(0xFFF5F6FA), radius 14)
 ```
 
 ### Profile Screen Icon Sprite
@@ -304,8 +363,41 @@ Favorite → Icons.favorite_border | Help → Icons.help_outline | LogOut → Ic
 ```
 login_sheet.dart → showWelcomeBackDialog()
 Purple card (#7C3AED), 👋 emoji, confetti animation (70 particles, gravity)
-"Let's Go!" → Navigator.pushAndRemoveUntil → HomeScreen
-Triggered by both email login and Google sign-in
+"Let's Go!" → checks AuthState.isProfileComplete:
+  complete   → Navigator.pushAndRemoveUntil → HomeScreen
+  incomplete → Navigator.pushAndRemoveUntil → EditProfileScreen(isOnboarding: true)
+Triggered by both email/password login and Google sign-in/sign-up
+```
+
+### Edit Profile — Onboarding Mode
+```
+EditProfileScreen(isOnboarding: true):
+  - Title: "Complete Your Profile"
+  - PopScope(canPop: false) — Android back blocked
+  - "Skip" action in AppBar → HomeScreen
+  - "Save & Continue" → PATCH /api/v1/auth/users/me/ → AuthState.updateUserProfile() → HomeScreen
+  - Avatar URL cached once in initState (_avatarUrl) — not rebuilt on keystroke
+
+EditProfileScreen(isOnboarding: false):  [normal edit from ProfileScreen]
+  - Title: "Edit Profile", back button works
+  - "Update Profile" → same API → pops back to ProfileScreen
+
+Fields (customer type): first_name, last_name, date_of_birth, city, state,
+                        guardian_name, institution_name, institution_type
+```
+
+### Subcategory Grid — Scrollable with Overlay Button
+```
+ExploreCategoriesGrid(scrollable: true, visibleRows: 2.3):
+  LayoutBuilder computes container height = visibleRows * cellHeight + spacing
+  GridView with ClampingScrollPhysics scrolls independently of page
+  Stack + Positioned(bottom: 10) overlays "View All →" chip
+  Image padding: EdgeInsets.fromLTRB(6,6,6,2) inside each card
+
+Applied to:
+  programs_screen.dart  — all 11 programsCategories,  visibleRows: 2.3
+  events_screen.dart    — all 6  exploreCategories,    visibleRows: 2.0
+  classes_screen.dart   — all 11 classesCategories,    visibleRows: 2.3
 ```
 
 ### Send Enquiry Flow
@@ -354,14 +446,22 @@ Location dropdowns (City + Area) | Date chips (Today/This Weekend/This Week/Upco
 
 ## 10. Pending / TODO Items
 
-| Item | Location | Note |
-|------|----------|------|
-| ~~Remove Google Sign-In bypass~~ | ✅ Done | Real `google-services.json` written, bypass removed, serverClientId configured |
-| OTP verification real API | `login_sheet.dart:_OTPVerificationScreen._onVerify` | Currently calls `AuthState.login(phone:...)` without JWT |
-| PlanPartyScreen → booking confirmation | `plan_party_screen.dart:_onContinue` | Validated but navigates nowhere |
-| Profile avatar from API | `profile_screen.dart` | Hardcoded "Laxman" + local asset photo |
-| Pull real user data on login | `AuthState` | `userName` populated but email/photo not surfaced to UI |
-| Category icon images build | Run `flutter clean && flutter pub get && flutter run` | Required after pubspec asset changes |
+| Item | Location | Status |
+|------|----------|--------|
+| ~~Google Sign-In bypass removed~~ | `login_sheet.dart` | ✅ Done — real flow, serverClientId, SHA-1 registered |
+| ~~Persistent login / token refresh~~ | `auth_state.dart`, `token_storage.dart`, `main.dart` | ✅ Done |
+| ~~Google account picker always shown~~ | `login_sheet.dart`, `signup_screen.dart` | ✅ Done — signOut() before signIn() |
+| ~~Project structure reorganized~~ | `services/`, `providers/`, `widgets/` | ✅ Done |
+| ~~UpdateProfile API integrated~~ | `edit_profile_screen.dart`, `auth_service.dart` | ✅ Done |
+| ~~Profile completion check post-login~~ | `login_sheet.dart:showWelcomeBackDialog` | ✅ Done |
+| ~~Home header greeting reactive~~ | `home_header.dart`, `auth_state.dart` | ✅ Done — `userName` promoted to `ValueNotifier<String?>`, header listens directly |
+| ~~Home header name overflow / layout break~~ | `home_header.dart` | ✅ Done — first name only, `Expanded` + ellipsis |
+| ~~Booking Confirmed screen redesigned~~ | `booking_confirmed_screen.dart` | ✅ Done — white-ring badge, full-width image, CustomPainter notch+dash |
+| OTP verification real API | `login_sheet.dart:_OTPVerificationScreen._onVerify` | ❌ Pending — calls `AuthState.login(phone:...)` without JWT |
+| PlanPartyScreen → booking confirmation | `plan_party_screen.dart:_onContinue` | ❌ Pending — validated but navigates nowhere |
+| Profile screen reactive to name/avatar changes | `profile_screen.dart` | ❌ Pending — reads `AuthState.userName.value` but no `ValueListenableBuilder`; won't update on profile edit without navigate-back rebuild |
+| Profile avatar upload | `edit_profile_screen.dart` | ❌ Pending — camera icon decorative only, no upload handler |
+| Startup profile completion check | `main.dart` | ❌ Pending — `tryRestoreSession()` restores session but does NOT redirect incomplete profiles |
 
 ---
 
@@ -426,3 +526,25 @@ google_sign_in: ^6.2.1         # Google OAuth
 | Google Sign-In bypass removed, real flow with serverClientId | `login_sheet.dart` |
 | Google Sign-Up implemented with WelcomeBackDialog (consistent with login) | `signup_screen.dart` |
 | Real `google-services.json` written (project 690253990877) | `android/app/google-services.json` |
+
+### Session 5 (Current)
+| Change | Files |
+|--------|-------|
+| `AuthState.userName` promoted to `ValueNotifier<String?>` (was plain `String?`) | `auth_state.dart` |
+| All `userName =` writes updated to `userName.value =` (login, logout, updateUserProfile) | `auth_state.dart` |
+| Home header greeting listens to `AuthState.userName` notifier — updates reactively on login, profile edit, logout, all screens | `home_header.dart` |
+| Home header shows first name only — `userName.value.split(' ').first`; `maxLines:1` + `ellipsis` | `home_header.dart` |
+| Home header layout fixed — left Column wrapped in `Expanded`, prevents long names pushing icons | `home_header.dart` |
+| `profile_screen.dart` updated to read `AuthState.userName.value` | `profile_screen.dart` |
+| `BookingConfirmedScreen` UI redesigned to match reference | `booking_confirmed_screen.dart` |
+| → Header: white-ring green badge (outer 66px white circle + inner 50px green circle + green shadow) | `booking_confirmed_screen.dart` |
+| → Added white tint overlay (`Colors.white` at 50% opacity) on balloon background | `booking_confirmed_screen.dart` |
+| → Ticket card replaced with `_TicketShapePainter` `CustomPainter` for solid white fill, notch cutouts, and dashed divider | `booking_confirmed_screen.dart` |
+| → Event image: full-width at card top, zero padding, top corners via parent `ClipRRect` | `booking_confirmed_screen.dart` |
+| → QR section moved from `_TicketContent` into `_TicketCard` | `booking_confirmed_screen.dart` |
+| → `_TicketContent` reduced to title + location row + date/time columns only | `booking_confirmed_screen.dart` |
+| `BookingDetailScreen` UI redesigned to use exact same ticket design | `booking_detail_screen.dart` |
+| → Header: added status badge, "Booking Details" title, and booking ID | `booking_detail_screen.dart` |
+| → Replaced PNG ticket with `_TicketShapePainter` `CustomPainter` | `booking_detail_screen.dart` |
+| → Matched layout structure: full-width image, details, notch area, QR code | `booking_detail_screen.dart` |
+| → Applied consistent Share/Download action bar styling | `booking_detail_screen.dart` |

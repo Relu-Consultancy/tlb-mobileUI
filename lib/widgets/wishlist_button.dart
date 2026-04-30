@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
-import '../core/saved_events_state.dart';
+import '../providers/saved_events_state.dart';
 import '../models/event_model.dart';
-import '../core/auth_state.dart';
-import '../screens/login_sheet.dart';
+import '../providers/auth_state.dart';
+import 'login_sheet.dart';
 
 /// Reusable wishlist (like / save) button used on event cards and detail pages.
 ///

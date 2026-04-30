@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../core/auth_service.dart';
-import '../core/auth_state.dart';
-import 'login_sheet.dart';
+import '../services/auth_service.dart';
+import '../providers/auth_state.dart';
+import '../widgets/login_sheet.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});

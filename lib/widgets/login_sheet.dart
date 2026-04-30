@@ -5,12 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import '../core/auth_service.dart';
-import '../core/auth_state.dart';
+import '../services/auth_service.dart';
+import '../providers/auth_state.dart';
 import '../core/responsive.dart';
-import 'home_screen.dart';
-import 'signup_screen.dart';
-import 'forgot_password_screen.dart';
+import '../screens/home_screen.dart';
+import '../screens/signup_screen.dart';
+import '../screens/forgot_password_screen.dart';
+import '../screens/edit_profile_screen.dart';
 
 void showLoginSheet(BuildContext context) {
   Navigator.push(
@@ -94,10 +95,12 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _onGoogleSignIn() async {
     setState(() => _loading = true);
     try {
-      final googleUser = await GoogleSignIn(
+      final googleSignIn = GoogleSignIn(
         serverClientId: '690253990877-jqog76u6vcre0a9qbd9d8p0g7o47scue.apps.googleusercontent.com',
         scopes: ['email', 'profile'],
-      ).signIn();
+      );
+      await googleSignIn.signOut();
+      final googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
         setState(() => _loading = false);
         return; // user cancelled
@@ -863,10 +866,21 @@ void showWelcomeBackDialog(BuildContext context) {
     context: context,
     barrierDismissible: false,
     builder: (_) => _WelcomeBackDialog(
-      onDone: () => Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-        (route) => false,
-      ),
+      onDone: () {
+        if (!AuthState.isProfileComplete) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (_) => const EditProfileScreen(isOnboarding: true),
+            ),
+            (route) => false,
+          );
+        } else {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const HomeScreen()),
+            (route) => false,
+          );
+        }
+      },
     ),
   );
 }

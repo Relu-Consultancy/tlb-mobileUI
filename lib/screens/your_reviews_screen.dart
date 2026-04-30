@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../core/user_reviews_state.dart';
+import '../providers/user_reviews_state.dart';
 
 class YourReviewsScreen extends StatelessWidget {
   const YourReviewsScreen({super.key});

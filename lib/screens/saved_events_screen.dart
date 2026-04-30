@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../core/saved_events_state.dart';
+import '../providers/saved_events_state.dart';
 import '../models/event_model.dart';
 import 'event_detail_screen.dart';
 

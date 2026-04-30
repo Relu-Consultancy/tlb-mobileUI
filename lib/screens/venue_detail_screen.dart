@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../core/auth_state.dart';
+import '../providers/auth_state.dart';
 import '../core/responsive.dart';
 import '../widgets/wishlist_button.dart';
-import '../core/user_reviews_state.dart';
+import '../providers/user_reviews_state.dart';
 import '../models/event_model.dart';
-import 'login_sheet.dart';
+import '../widgets/login_sheet.dart';
 import 'plan_party_screen.dart';
 import 'gallery_screen.dart';
 import 'organizer_profile_screen.dart';

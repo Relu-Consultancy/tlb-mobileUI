@@ -103,7 +103,9 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       const SectionDividerWidget(title: "Let's Begin Here"),
                       RepaintBoundary(
                         child: ExploreCategoriesGrid(
-                          categories: DummyData.classesCategories.take(6).toList(),
+                          categories: DummyData.classesCategories,
+                          scrollable: true,
+                          visibleRows: 2.3,
                           onViewAll: () => _showAllCategoriesPopup(context),
                           onCategoryTap: (index) => Navigator.push(
                             context,

@@ -104,6 +104,9 @@ class _EventsScreenState extends State<EventsScreen> {
                       RepaintBoundary(
                         child: ExploreCategoriesGrid(
                           categories: DummyData.exploreCategories,
+                          scrollable: true,
+                          scrollHeight: 260,
+                          childAspectRatio: 0.8,
                           onViewAll: () => _showAllCategoriesPopup(context),
                           onCategoryTap: (index) => Navigator.push(
                             context,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../core/location_state.dart';
+import '../providers/location_state.dart';
 import '../core/app_colors.dart';
 
 class LocationScreen extends StatefulWidget {

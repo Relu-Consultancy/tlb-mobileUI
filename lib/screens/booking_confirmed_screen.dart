@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
-import '../core/booked_events_state.dart';
+import '../providers/booked_events_state.dart';
 import '../models/event_model.dart';
 import 'event_detail_screen.dart';
 
@@ -285,7 +285,7 @@ class _HeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final headerH = safeTop + 210.0;
+    final headerH = safeTop + 240.0;
 
     return SizedBox(
       width: double.infinity,
@@ -303,12 +303,19 @@ class _HeaderSection extends StatelessWidget {
             ),
           ),
 
-          // Bottom fade to blend into app background
+          // White tint overlay — washes out the balloons so text is readable
+          Positioned.fill(
+            child: Container(
+              color: Colors.white.withOpacity(0.50),
+            ),
+          ),
+
+          // Bottom fade to blend into scaffold background
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
-            height: 80,
+            height: 90,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -325,22 +332,39 @@ class _HeaderSection extends StatelessWidget {
 
           // Confirmation content – checkmark + title + booking ID
           Positioned(
-            top: safeTop + 16,
+            top: safeTop + 20,
             left: 0,
             right: 0,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Green success badge
+                // ── White-ringed green success badge ──
                 Container(
-                  width: 52,
-                  height: 52,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF34C759),
+                  width: 66,
+                  height: 66,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
                     shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF34C759).withOpacity(0.28),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  child: const Icon(Icons.check_rounded,
-                      color: Colors.white, size: 30),
+                  child: Center(
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF34C759),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.check_rounded,
+                          color: Colors.white, size: 28),
+                    ),
+                  ),
                 ),
 
                 const SizedBox(height: 14),
@@ -387,46 +411,51 @@ class _TicketCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final w = constraints.maxWidth;
+    final qrSize = Responsive.w(context, 140, min: 114);
 
-      return IntrinsicHeight(
-        child: Stack(
+    return Stack(
+      children: [
+        // ── Layer 1: White ticket shape (CustomPainter) ──
+        // Draws the full ticket body, notch cutouts, and dashed divider.
+        // The painter is sized by the Column content via Positioned.fill.
+        Positioned.fill(
+          child: CustomPaint(
+            painter: _TicketShapePainter(
+              bgColor: const Color(0xFFD6E4F7),
+            ),
+          ),
+        ),
+
+        // ── Layer 2: Content on top ──
+        Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // ── White fill behind the transparent ticket shape ──
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.10),
-                      blurRadius: 20,
-                      offset: const Offset(0, 6),
+            // ── Event image: rounded top matching ticket shape ──
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Image.asset(
+                    event.imagePath,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: Colors.grey.shade200,
+                      child: const Icon(Icons.event,
+                          size: 40, color: Colors.grey),
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
 
-            // ── Ticket shape (transparent bg, notches + dashes baked in) ──
-            Positioned.fill(
-              child: Image.asset(
-                'assets/images/updated_ticket-removebg-preview.png',
-                fit: BoxFit.fill,
-                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-              ),
-            ),
-
-            // ── Ticket content ──
+            // ── Event details: title + location + date/time ──
             Padding(
-              padding: EdgeInsets.fromLTRB(
-                w * 0.07,
-                w * 0.05,
-                w * 0.07,
-                w * 0.08,
-              ),
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
               child: _TicketContent(
                 event: event,
                 bookingId: bookingId,
@@ -434,14 +463,47 @@ class _TicketCard extends StatelessWidget {
                 selectedTime: selectedTime,
               ),
             ),
+
+            // ── Notch area spacer (painter draws the notches + dashed line here) ──
+            const SizedBox(height: 28),
+
+            // ── QR code section ──
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 4, 18, 26),
+              child: Column(
+                children: [
+                  Text(
+                    'Scan QR Code',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF1A1A2E),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Container(
+                    width: qrSize,
+                    height: qrSize,
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border:
+                          Border.all(color: Colors.grey.shade200, width: 1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: CustomPaint(painter: _QRCodePainter()),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
-      );
-    });
+      ],
+    );
   }
 }
 
-// ── Ticket content (details + QR) ────────────────────────────────────────────
+// ── Ticket content: title + location + date/time ─────────────────────────────
 
 class _TicketContent extends StatelessWidget {
   final EventModel event;
@@ -458,30 +520,10 @@ class _TicketContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final qrSize = Responsive.w(context, 136, min: 110);
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── Event image ──
-        ClipRRect(
-          borderRadius: BorderRadius.circular(14),
-          child: AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Image.asset(
-              event.imagePath,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                color: Colors.grey.shade200,
-                child: const Icon(Icons.event, size: 40, color: Colors.grey),
-              ),
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
         // ── Event title ──
         Text(
           event.title,
@@ -600,41 +642,6 @@ class _TicketContent extends StatelessWidget {
             ),
           ],
         ),
-
-        // ── Spacer to push QR below the ticket's baked-in dashed divider ──
-        const SizedBox(height: 32),
-
-        // ── QR section ──
-        Center(
-          child: Column(
-            children: [
-              Text(
-                'Scan QR Code',
-                style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF1A1A2E),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                width: qrSize,
-                height: qrSize,
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border:
-                      Border.all(color: Colors.grey.shade200, width: 1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: CustomPaint(
-                  painter: _QRCodePainter(),
-                ),
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        ),
       ],
     );
   }
@@ -663,7 +670,6 @@ class _ActionButtons extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Share button
           Expanded(
             child: _ActionBtn(
               icon: Icons.share_outlined,
@@ -672,7 +678,6 @@ class _ActionButtons extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 14),
-          // Download button
           Expanded(
             child: _ActionBtn(
               icon: Icons.download_outlined,
@@ -729,6 +734,82 @@ class _ActionBtn extends StatelessWidget {
 
 // ── Painters ─────────────────────────────────────────────────────────────────
 
+/// Draws the full ticket shape: white rounded rect with semicircle notch
+/// cutouts on left/right edges + a dashed divider between them.
+/// [bgColor] is painted into the notch circles so they match the scaffold.
+class _TicketShapePainter extends CustomPainter {
+  final Color bgColor;
+  const _TicketShapePainter({required this.bgColor});
+
+  static const _radius = 22.0;
+  static const _notchR = 14.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // ── 1. Ticket body path (rounded rect) ──
+    final bodyRRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      const Radius.circular(_radius),
+    );
+
+    // Notch center Y — aligned with the 28px spacer between details and QR.
+    // We approximate it at roughly 65% of the total card height.
+    final notchY = size.height * 0.645;
+
+    // ── 2. Shadow (draw before clipping) ──
+    final shadowPath = Path()..addRRect(bodyRRect);
+    canvas.drawShadow(shadowPath, Colors.black.withOpacity(0.25), 12, true);
+
+    // ── 3. White fill with notch cutouts ──
+    // We draw the rounded rect, then subtract (punch out) the two semicircles.
+    final bodyPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    // Save, clip to body minus notches, then fill
+    canvas.save();
+
+    final clipPath = Path()..addRRect(bodyRRect);
+    // Subtract left notch
+    clipPath.addOval(Rect.fromCircle(
+      center: Offset(0, notchY),
+      radius: _notchR,
+    ));
+    // Subtract right notch
+    clipPath.addOval(Rect.fromCircle(
+      center: Offset(size.width, notchY),
+      radius: _notchR,
+    ));
+    clipPath.fillType = PathFillType.evenOdd;
+
+    canvas.clipPath(clipPath);
+    canvas.drawRRect(bodyRRect, bodyPaint);
+    canvas.restore();
+
+    // ── 4. Dashed line between notches ──
+    final dashPaint = Paint()
+      ..color = const Color(0xFFDEDEDE)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    double x = _notchR + 8;
+    const dashLen = 6.0, gap = 4.0;
+    final endX = size.width - _notchR - 8;
+    while (x < endX) {
+      canvas.drawLine(
+        Offset(x, notchY),
+        Offset((x + dashLen).clamp(0.0, endX), notchY),
+        dashPaint,
+      );
+      x += dashLen + gap;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _TicketShapePainter old) =>
+      old.bgColor != bgColor;
+}
+
 class _QRCodePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -751,7 +832,9 @@ class _QRCodePainter extends CustomPainter {
       for (int c = 0; c < cols; c++) {
         if ((r < 8 && c < 8) ||
             (r < 8 && c >= cols - 8) ||
-            (r >= rows - 8 && c < 8)) { continue; }
+            (r >= rows - 8 && c < 8)) {
+          continue;
+        }
         if (rand.nextBool()) {
           canvas.drawRect(
             Rect.fromLTWH(c * cell, r * cell, cell - 1, cell - 1),
