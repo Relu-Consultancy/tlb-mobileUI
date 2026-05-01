@@ -1,0 +1,11 @@
+﻿00:00 +0: loading E:/tlb-mobileUI/test/screens/event_detail_screen_test.dart
+00:00 +0: E:/tlb-mobileUI/test/screens/event_detail_screen_test.dart: EventDetailScreen Tests renders all event details correctly
+00:01 +1: E:/tlb-mobileUI/test/screens/ticket_booking_screen_test.dart: TicketBookingScreen Tests renders screen and subtotal updates when tickets are added
+00:02 +2: E:/tlb-mobileUI/test/screens/ticket_booking_screen_test.dart: TicketBookingScreen Tests renders screen and subtotal updates when tickets are added
+00:02 +3: E:/tlb-mobileUI/test/screens/booking_confirmed_screen_test.dart: BookingConfirmedScreen Tests renders teaser initially, reveals ticket on tap
+00:02 +4: E:/tlb-mobileUI/test/screens/event_detail_screen_test.dart: EventDetailScreen Tests shows login sheet when Book Now is tapped while logged out
+00:02 +5: E:/tlb-mobileUI/test/screens/event_detail_screen_test.dart: EventDetailScreen Tests shows login sheet when Book Now is tapped while logged out
+00:02 +6: E:/tlb-mobileUI/test/screens/ticket_booking_screen_test.dart: TicketBookingScreen Tests Proceed to Pay is disabled if form is incomplete
+00:03 +7: E:/tlb-mobileUI/test/screens/event_detail_screen_test.dart: EventDetailScreen Tests navigates to DateTimeSelectionScreen when Book Now is tapped while logged in
+00:03 +8: E:/tlb-mobileUI/test/screens/ticket_booking_screen_test.dart: TicketBookingScreen Tests Proceed to Pay enables when form is completely filled
+00:04 +9: All tests passed!
