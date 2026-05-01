@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../providers/auth_state.dart';
 
 class HelpCentreScreen extends StatelessWidget {
   const HelpCentreScreen({super.key});
@@ -39,7 +40,7 @@ class HelpCentreScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Hi Laxman,',
+                        'Hi ${AuthState.firstName},',
                         style: GoogleFonts.poppins(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,

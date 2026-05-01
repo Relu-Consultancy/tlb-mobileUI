@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:showcaseview/showcaseview.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../providers/location_state.dart';
@@ -16,6 +17,9 @@ import '../sections/discover_near_you_section.dart';
 import '../sections/family_feels_section.dart';
 import '../sections/app_footer.dart';
 import '../widgets/floating_navbar.dart';
+import '../helpers/walkthrough_keys.dart';
+import '../services/walkthrough_service.dart';
+import '../widgets/walkthrough_intro_overlay.dart';
 import 'events_screen.dart';
 import 'classes_screen.dart';
 import 'programs_screen.dart';
@@ -29,6 +33,43 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool _shouldShowIntro = false;
+
+  @override
+  void initState() {
+    super.initState();
+    ShowcaseView.register();
+    _checkAndStartWalkthrough();
+  }
+
+  @override
+  void dispose() {
+    ShowcaseView.get().unregister();
+    super.dispose();
+  }
+
+  Future<void> _checkAndStartWalkthrough() async {
+    final isNew = await WalkthroughService.isNewUser();
+    if (!isNew || !mounted) return;
+    await WalkthroughService.markWalkthroughComplete();
+    setState(() => _shouldShowIntro = true);
+  }
+
+  Future<void> _launchWalkthrough() async {
+    await showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      barrierLabel: '',
+      barrierColor: Colors.transparent,
+      transitionDuration: Duration.zero,
+      pageBuilder: (ctx, _, __) => WalkthroughIntroOverlay(
+        onNext: () => Navigator.of(ctx).pop(),
+      ),
+    );
+    if (!mounted) return;
+    ShowcaseView.get().startShowCase(WalkthroughKeys.orderedKeys);
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -86,6 +127,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final safeBottom = MediaQuery.of(context).padding.bottom;
 
+    if (_shouldShowIntro) {
+      _shouldShowIntro = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _launchWalkthrough();
+      });
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -93,7 +141,10 @@ class _HomeScreenState extends State<HomeScreen> {
           Column(
             children: [
               // Fixed header at top
-              const HomeHeader(),
+              HomeHeader(
+                profileShowcaseConfig: kProfileShowcaseConfig,
+                locationShowcaseConfig: kLocationShowcaseConfig,
+              ),
 
               // Scrollable feed or Empty State
               Expanded(
@@ -153,6 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 currentIndex: _currentNavIndex,
                 onTap: _onNavTapped,
                 bottomPadding: safeBottom > 0 ? safeBottom + 15 : 30,
+                showcaseConfigs: kNavShowcaseConfigs,
               ),
             ),
           ),

@@ -92,35 +92,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 children: [
                   // Avatar with camera badge
-                  Stack(
-                    children: [
-                      Container(
-                        width: 90,
-                        height: 90,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.grey.shade300, width: 3),
-                          image: DecorationImage(
-                            image: NetworkImage(avatarUrl),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
+                  GestureDetector(
+                    onTap: () => _showAvatarOptions(context, avatarUrl),
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: 90,
+                          height: 90,
                           decoration: BoxDecoration(
-                            color: Colors.white,
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.grey.shade300, width: 1.5),
+                            border: Border.all(color: Colors.grey.shade300, width: 3),
+                            image: DecorationImage(
+                              image: NetworkImage(avatarUrl),
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                          child: const Icon(Icons.camera_alt_outlined,
-                              size: 15, color: Color(0xFF555555)),
                         ),
-                      ),
-                    ],
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.grey.shade300, width: 1.5),
+                            ),
+                            child: const Icon(Icons.camera_alt_outlined,
+                                size: 15, color: Color(0xFF555555)),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 14),
 
@@ -370,6 +373,107 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     fontSize: 14)),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showAvatarOptions(BuildContext context, String avatarUrl) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 10),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.account_circle_outlined, color: Color(0xFF1A1A2E)),
+                title: Text(
+                  'View Profile Picture',
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF1A1A2E),
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _viewAvatar(context, avatarUrl);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt_outlined, color: Color(0xFF1A1A2E)),
+                title: Text(
+                  'Change Profile Picture',
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF1A1A2E),
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const EditProfileScreen()),
+                  ).then((_) => setState(() {}));
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _viewAvatar(BuildContext context, String avatarUrl) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(20),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.network(
+                avatarUrl,
+                fit: BoxFit.contain,
+              ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: GestureDetector(
+                onTap: () => Navigator.pop(ctx),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.close, color: Colors.white, size: 20),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/user_reviews_state.dart';
+import '../providers/auth_state.dart';
 
 class YourReviewsScreen extends StatelessWidget {
   const YourReviewsScreen({super.key});
@@ -40,7 +41,7 @@ class YourReviewsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Hi Laxman,',
+                        'Hi ${AuthState.firstName},',
                         style: GoogleFonts.poppins(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,

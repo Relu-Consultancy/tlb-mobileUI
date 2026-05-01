@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../providers/auth_state.dart';
 import 'change_password_screen.dart';
 
 class AccountSettingsScreen extends StatelessWidget {
@@ -39,81 +40,88 @@ class AccountSettingsScreen extends StatelessWidget {
               child: Column(
                 children: [
                   // Personal Info row
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Stack(
+                  ValueListenableBuilder<String?>(
+                    valueListenable: AuthState.avatarUrl,
+                    builder: (context, url, _) {
+                      final email = AuthState.userEmail ?? 'No email provided';
+                      final profile = AuthState.userData?['profile'] as Map<String, dynamic>?;
+                      final String imageUrl;
+                      if (url != null && url.isNotEmpty) {
+                        imageUrl = url;
+                      } else {
+                        final initial = Uri.encodeComponent(
+                          (profile?['first_name'] as String? ?? '').isNotEmpty
+                              ? profile!['first_name'] as String
+                              : (AuthState.userEmail?.substring(0, 1).toUpperCase() ?? 'U'),
+                        );
+                        imageUrl =
+                            'https://ui-avatars.com/api/?name=$initial&background=FFCC00&color=1A1A2E&size=200';
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
                           children: [
-                            CircleAvatar(
-                              radius: 32,
-                              backgroundColor: Colors.grey.shade200,
-                              backgroundImage: const AssetImage(
-                                'resources- tlb-ui/tlbAppIcon.png',
-                              ),
-                              onBackgroundImageError: (_, __) {},
-                              child: ClipOval(
-                                child: Image.asset(
-                                  'resources- tlb-ui/tlbAppIcon.png',
-                                  width: 64,
-                                  height: 64,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => Icon(
-                                    Icons.person,
-                                    size: 32,
-                                    color: Colors.grey.shade400,
+                            Stack(
+                              children: [
+                                CircleAvatar(
+                                  radius: 32,
+                                  backgroundColor: Colors.grey.shade200,
+                                  backgroundImage: NetworkImage(imageUrl),
+                                  onBackgroundImageError: (_, __) {},
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    width: 22,
+                                    height: 22,
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFF1A1A2E),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.camera_alt, size: 12, color: Colors.white),
                                   ),
                                 ),
+                              ],
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Personal',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 11,
+                                      color: Colors.grey.shade500,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Personal Info',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF1A1A2E),
+                                    ),
+                                  ),
+                                  Text(
+                                    email,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade500,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
                             ),
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: Container(
-                                width: 22,
-                                height: 22,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF1A1A2E),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.camera_alt, size: 12, color: Colors.white),
-                              ),
-                            ),
+                            const Icon(Icons.chevron_right, color: Color(0xFF2563EB)),
                           ],
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Personal',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  color: Colors.grey.shade500,
-                                ),
-                              ),
-                              Text(
-                                'Personal Info',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF1A1A2E),
-                                ),
-                              ),
-                              Text(
-                                'Laxmanartist@yahoo.com',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(Icons.chevron_right, color: Color(0xFF2563EB)),
-                      ],
-                    ),
+                      );
+                    },
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 16),
                   _buildRow(icon: Icons.phone_outlined, label: 'Phone Number'),

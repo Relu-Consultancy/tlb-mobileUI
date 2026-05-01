@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import '../core/responsive.dart';
 import '../providers/auth_state.dart';
 import '../services/auth_service.dart';
@@ -25,9 +27,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   String? _institutionType;
   DateTime? _dateOfBirth;
+  String? _avatarUrl;
+  File? _selectedAvatar;
   bool _loading = false;
-  // Computed once in initState — avoids re-fetching external avatar on every keystroke
-  late final String? _avatarUrl;
 
   static const _institutionTypes = [
     ('school', 'School'),
@@ -108,6 +110,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (picked != null) setState(() => _dateOfBirth = picked);
   }
 
+  Future<void> _pickAvatar() async {
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(source: ImageSource.gallery);
+      if (picked != null) {
+        setState(() => _selectedAvatar = File(picked.path));
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to pick image.')),
+      );
+    }
+  }
+
   Future<void> _onSave() async {
     final firstName = _firstNameCtrl.text.trim();
     if (firstName.isEmpty) {
@@ -129,6 +146,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     final result = await AuthService.updateProfile(
       accessToken: token,
+      avatarFile: _selectedAvatar,
       firstName: firstName.isNotEmpty ? firstName : null,
       lastName: _lastNameCtrl.text.trim().isNotEmpty ? _lastNameCtrl.text.trim() : null,
       dateOfBirth: _dateOfBirth != null ? _isoDate(_dateOfBirth!) : null,
@@ -258,7 +276,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         shape: BoxShape.circle,
                         color: Colors.grey.shade200,
                         image: DecorationImage(
-                          image: NetworkImage(_avatarUrl ?? 'https://ui-avatars.com/api/?name=U&background=FFCC00&color=1A1A2E&size=200'),
+                          image: _selectedAvatar != null
+                              ? FileImage(_selectedAvatar!) as ImageProvider
+                              : NetworkImage(_avatarUrl ?? 'https://ui-avatars.com/api/?name=U&background=FFCC00&color=1A1A2E&size=200'),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -266,20 +286,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     Positioned(
                       bottom: 0,
                       right: 4,
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.grey.shade300, width: 1.5),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 4,
-                            ),
-                          ],
+                      child: GestureDetector(
+                        onTap: _pickAvatar,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.grey.shade300, width: 1.5),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 4,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(Icons.edit_outlined, size: 16, color: Color(0xFF424242)),
                         ),
-                        child: const Icon(Icons.edit_outlined, size: 16, color: Color(0xFF424242)),
                       ),
                     ),
                   ],

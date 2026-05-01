@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../services/auth_service.dart';
+import '../services/walkthrough_service.dart';
 import '../providers/auth_state.dart';
 import '../core/responsive.dart';
 import '../widgets/login_sheet.dart';
@@ -16,6 +17,8 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _contactController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -26,20 +29,31 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _contactController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _onSendOTP() async {
-    final contact = _contactController.text.trim();
+  Future<void> _onSignUp() async {
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final email = _contactController.text.trim();
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
-    if (contact.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (firstName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
+        const SnackBar(content: Text('First name is required')),
+      );
+      return;
+    }
+
+    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all required fields')),
       );
       return;
     }
@@ -55,7 +69,9 @@ class _SignupScreenState extends State<SignupScreen> {
     });
 
     final result = await AuthService.signup(
-      email: contact,
+      firstName: firstName,
+      lastName: lastName.isEmpty ? null : lastName,
+      email: email,
       password: password,
       passwordConfirm: confirmPassword,
     );
@@ -64,7 +80,8 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _loading = false);
 
     if (result['success'] == true) {
-      _showEmailVerificationDialog(contact);
+      await WalkthroughService.markAsNewUser();
+      _showEmailVerificationDialog(email);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -135,6 +152,10 @@ class _SignupScreenState extends State<SignupScreen> {
           refresh: result['refresh'] as String?,
           user: result['user'] as Map<String, dynamic>?,
         );
+        if (result['is_new_user'] == true) {
+          await WalkthroughService.markAsNewUser();
+        }
+        if (!mounted) return;
         showWelcomeBackDialog(context);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -270,8 +291,22 @@ class _SignupScreenState extends State<SignupScreen> {
 
                   // ── Input fields ──────────────────────────────────────────
                   _InputField(
+                    controller: _firstNameController,
+                    hint: 'First Name *',
+                    icon: Icons.person_outline_rounded,
+                    keyboardType: TextInputType.name,
+                  ),
+                  const SizedBox(height: 14),
+                  _InputField(
+                    controller: _lastNameController,
+                    hint: 'Last Name (optional)',
+                    icon: Icons.person_outline_rounded,
+                    keyboardType: TextInputType.name,
+                  ),
+                  const SizedBox(height: 14),
+                  _InputField(
                     controller: _contactController,
-                    hint: 'Phone Number / Email',
+                    hint: 'Email',
                     icon: Icons.mail_outline_rounded,
                     keyboardType: TextInputType.emailAddress,
                   ),
@@ -335,11 +370,11 @@ class _SignupScreenState extends State<SignupScreen> {
 
                   const SizedBox(height: 22),
 
-                  // ── Send OTP button ───────────────────────────────────────
+                  // ── Sign up button ────────────────────────────────────────
                   _PrimaryButton(
-                    label: 'Send OTP',
+                    label: 'Create Account',
                     loading: _loading,
-                    onTap: _onSendOTP,
+                    onTap: _onSignUp,
                   ),
 
                   const SizedBox(height: 24),

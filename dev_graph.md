@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-04-30 (Session 5)
+**Last Updated:** 2026-05-01 (Session 7)
 
 ---
 
@@ -18,11 +18,15 @@ lib/
 │   └── responsive.dart            Responsive.w / Responsive.h / Responsive.sp helpers
 ├── services/                      API + secure storage
 │   ├── auth_service.dart          HTTP wrappers — login/signup/logout/Google/OTP/refresh/updateProfile
-│   └── token_storage.dart         FlutterSecureStorage wrapper — saveTokens/loadTokens/clearTokens
+│   ├── token_storage.dart         FlutterSecureStorage wrapper — saveTokens/loadTokens/clearTokens
+│   └── walkthrough_service.dart   SharedPreferences flag — markAsNewUser / isNewUser / markWalkthroughComplete
+├── helpers/
+│   └── walkthrough_keys.dart      All GlobalKeys + ShowcaseNavConfig / ShowcaseProfileConfig structs + pre-built config instances
 ├── providers/                     Global ValueNotifier state
 │   ├── auth_state.dart            isLoggedIn (ValueNotifier<bool>), avatarUrl (ValueNotifier<String?>),
 │   │                              userName (ValueNotifier<String?>) — all reactive
 │   │                              + tryRestoreSession(), isProfileComplete, updateUserProfile()
+│   │                              + firstName (static getter — first word of userName, fallback "User")
 │   ├── location_state.dart        ValueNotifier for selected city
 │   ├── saved_events_state.dart    ValueNotifier<List<EventModel>> for wishlist
 │   ├── booked_events_state.dart   ValueNotifier<List<EventModel>> for bookings
@@ -33,7 +37,7 @@ lib/
 ├── data/
 │   └── dummy_data.dart            All mock data — events, categories, banners, partners, etc.
 ├── screens/                       44 screens (see Section 3)
-├── widgets/                       30+ reusable widgets incl. login_sheet.dart (see Section 4)
+├── widgets/                       30+ reusable widgets incl. login_sheet.dart, walkthrough_intro_overlay.dart (see Section 4)
 └── sections/                      17 home-page sections (see Section 5)
 ```
 
@@ -93,7 +97,7 @@ HomeScreen (sidebar/action flows)
 |------|-------------|
 | `widgets/login_sheet.dart` | Full-screen login — email/pass, Google, OTP. WelcomeBackDialog → routes to EditProfileScreen if profile incomplete, else HomeScreen |
 | `signup_screen.dart` | New account creation with OTP verification flow |
-| `forgot_password_screen.dart` | Password reset request |
+| `forgot_password_screen.dart` | 3-step OTP password reset wizard — Step 0: email entry → "Send OTP"; Step 1: 6-box OTP verification with resend link; Step 2: new+confirm password fields → success dialog with confetti |
 | `change_password_screen.dart` | Authenticated password change |
 
 ### Main Tab Screens
@@ -142,7 +146,7 @@ HomeScreen (sidebar/action flows)
 | `your_reviews_screen.dart` | User's posted reviews |
 | `reminders_screen.dart` | Event reminders |
 | `notification_screen.dart` | Notification inbox |
-| `account_settings_screen.dart` | Account settings — language, privacy, delete account |
+| `account_settings_screen.dart` | Account settings — avatar + email from `AuthState` (live `ValueListenableBuilder`), phone, change password, privacy, delete account |
 | `help_centre_screen.dart` | FAQ + support |
 
 ### Utility
@@ -179,6 +183,7 @@ HomeScreen (sidebar/action flows)
 | `inquire_now_sheet.dart` | "Send Enquiry" bottom sheet with confetti success |
 | `banner_carousel.dart` | Spotlight banner with overlay gradient |
 | `empty_location_widget.dart` | Empty state for no-location screens |
+| `walkthrough_intro_overlay.dart` | Full-screen animated welcome card — fade+scale entrance (380ms), repeating icon pulse glow, "Let's Go" dismiss triggers showcase start |
 
 ---
 
@@ -211,8 +216,12 @@ HomeScreen (sidebar/action flows)
 ### AuthService (`lib/services/auth_service.dart`)
 - All methods have **30-second timeout**
 - Typed error handling: `SocketException` → "Cannot reach server", `TimeoutException` → "Request timed out", `HandshakeException` → "SSL error"
-- Endpoints: `/signup/`, `/login/`, `/logout/`, `/password/reset/`, `/password/change/`, `/token/refresh/`, `/customer/google/`, `/users/me/` (PATCH)
+- Endpoints: `/signup/`, `/login/`, `/logout/`, `/password/change/`, `/token/refresh/`, `/customer/google/`, `/users/me/` (PATCH)
 - `updateProfile()` — `MultipartRequest('PATCH')`, sends only non-null customer fields
+- **Password reset (3-step OTP flow):**
+  - `forgotPassword(email)` — POST `/api/v1/auth/customer/password/reset/request/` body `{"identifier": email}` → `{"message": "..."}`
+  - `verifyResetOtp(identifier, code)` — POST `/api/v1/auth/customer/password/reset/verify-otp/` → `{"reset_token": "..."}`
+  - `confirmPasswordReset(resetToken, newPassword, newPasswordConfirm)` — POST `/api/v1/auth/customer/password/reset/confirm/` → `{"message": "..."}`
 
 ### TokenStorage (`lib/services/token_storage.dart`)
 - Wraps `FlutterSecureStorage`
@@ -229,6 +238,20 @@ HomeScreen (sidebar/action flows)
 - `tryRestoreSession()` — loads stored refresh → calls `refreshToken()` → re-logs in; returns bool
 - `isProfileComplete` — getter; true if `profile.first_name` is non-empty
 - `updateUserProfile(updatedUser)` — syncs API response into state, fires `userName` + `avatarUrl` notifiers, re-saves tokens
+- `firstName` — static getter; first word of `userName.value`, fallback `"User"`. Use for `"Hi $firstName,"` greetings everywhere.
+
+### WalkthroughService (`lib/services/walkthrough_service.dart`)
+- Key: `tlb_is_new_user` (SharedPreferences)
+- `markAsNewUser()` — sets flag `true`; called immediately after email or Google signup success
+- `isNewUser()` — returns stored bool, false if unset
+- `markWalkthroughComplete()` — sets flag `false`; called before tour starts (so force-quit mid-tour does not repeat it)
+
+### WalkthroughKeys (`lib/helpers/walkthrough_keys.dart`)
+- GlobalKeys: `locationRow`, `navHome`, `navEvents`, `navClasses`, `navPrograms`, `navVenues`, `profileAvatar`
+- `orderedKeys` list: `[locationRow, navHome, navEvents, navClasses, navPrograms, navVenues, profileAvatar]`
+- Config structs: `ShowcaseNavConfig(showcaseKey, title, description)`, `ShowcaseProfileConfig(showcaseKey, title, description)`
+- Pre-built instances: `kNavShowcaseConfigs` (Map<int, ShowcaseNavConfig> keyed by navbar index 0–4), `kLocationShowcaseConfig`, `kProfileShowcaseConfig`
+- Map keyed by index allows Events (index 1) to be included or excluded without changing loop logic
 
 ### Google Sign-In / Sign-Up (live)
 ```
@@ -424,11 +447,120 @@ Fields: Child Name | Occasion radios | Date grid (6 days) | Time chips | Kids ra
 Validation before Continue | MiniMapPainter for venue map thumbnail
 ```
 
+### Forgot Password — 3-Step OTP Wizard
+```
+Single StatefulWidget (_ForgotPasswordScreenState) with shared state:
+  _step: int (0/1/2) — controls which sub-widget is displayed
+  _identifier: String — email captured at step 0, passed to step 1+2 API calls
+  _resetToken: String — from verifyResetOtp response, passed to step 3 API call
+  _loading: bool — disables button and shows CircularProgressIndicator
+
+Back button logic:
+  step 0 → Navigator.pop()  (exit screen)
+  step 1 → _step--          (back to email)
+  step 2 → _step--          (back to OTP)
+
+Step 0 — Email:
+  Email TextField (Color(0xFFF5F5F5), radius 26) → "Send OTP" button (yellow pill)
+  On success: _identifier = email, _step = 1
+
+Step 1 — OTP:
+  6 individual TextEditingController + FocusNode pairs
+  FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(1)
+  Box: Color(0xFFF5F5F5) fill, BorderRadius.circular(12)
+  Focused border: Color(0xFFFFD014) 2px
+  Auto-advance on digit input (i < 5 → focus[i+1])
+  Auto-retreat on backspace via Focus.onKeyEvent (empty field + backspace → focus[i-1])
+  Resend OTP: TextButton → re-calls forgotPassword(), shows SnackBar
+  "Verify OTP" → verifyResetOtp() → _resetToken = result['reset_token'], _step = 2
+
+Step 2 — New Password:
+  New Password + Confirm Password fields (same grey pill style, eye-toggle suffix)
+  Client validation: both non-empty, passwords match (else SnackBar)
+  "Set New Password" → confirmPasswordReset() → _PasswordResetSuccessDialog
+
+Success dialog (_PasswordResetSuccessDialog):
+  Blue card (Color(0xFF1D4ED8)) + confetti animation (55 particles, _ConfettiPainter)
+  Icon: Icons.check_circle_rounded (white, size 38)
+  Title: "Password Reset!"
+  Body: "Your password has been successfully reset. You can now log in."
+  Button: "Back to Login" → pops dialog → pops forgot screen
+```
+
 ### Filter Bottom Sheet (Search)
 ```
 4 sections: Age Group chips (0-3/3-5/6-8/9-12/13-16) | Mode radio (Offline/Hybrid/Online)
 Location dropdowns (City + Area) | Date chips (Today/This Weekend/This Week/Upcoming)
 "Clear All" + "Apply Filters" footer
+```
+
+### Onboarding Walkthrough (New-User Tour)
+```
+Package: showcaseview ^5.0.2 (controller-based v5 API — no ShowCaseWidget tree wrapper)
+Trigger: WalkthroughService.isNewUser() checked in HomeScreen.initState()
+Flag is marked complete BEFORE the tour starts (force-quit mid-tour won't repeat it)
+
+7-step flow:
+  [Intro]  WalkthroughIntroOverlay — full-screen welcome dialog
+              showGeneralDialog(barrierColor: transparent, transitionDuration: Duration.zero)
+              Overlay owns its own AnimationController: fade+scale card entrance (380ms, easeOutCubic)
+              _IconBadge owns a repeating AnimationController: pulse glow (1400ms, repeat/reverse)
+              "Let's Go" → _ctrl.reverse().then → Navigator.pop → ShowcaseView.get().startShowCase(keys)
+  [Step 1] Location chip in HomeHeader — key: locationRow
+              onTargetClick: opens LocationScreen; .then(() => ShowcaseView.get().next())
+  [Step 2] Navbar Home tab (index 0) — key: navHome
+  [Step 3] Navbar Events tab (index 1) — key: navEvents
+  [Step 4] Navbar Classes tab (index 2) — key: navClasses
+  [Step 5] Navbar Programs tab (index 3) — key: navPrograms
+  [Step 6] Navbar Venues tab (index 4) — key: navVenues
+  [Step 7] Profile avatar in HomeHeader — key: profileAvatar
+
+Showcase styling (all steps):
+  tooltipBackgroundColor: Color(0xFF1A1A2E) | textColor: Colors.white
+  overlayOpacity: 0.78 | scaleAnimationDuration: 350ms | movingAnimationDuration: 350ms
+  targetPadding: EdgeInsets.all(6) for navbar, EdgeInsets.all(8) for profile avatar
+
+FloatingNavbar integration:
+  Optional param: Map<int, ShowcaseNavConfig>? showcaseConfigs
+  null (default) → no Showcase wrapping; existing call sites unaffected
+  non-null → each index that has a config entry is wrapped in Showcase
+
+HomeHeader integration:
+  Optional params: ShowcaseProfileConfig? profileShowcaseConfig, ShowcaseProfileConfig? locationShowcaseConfig
+  Location row extracted to _buildLocationRow(); conditionally wrapped in Showcase with onTargetClick
+  Profile avatar conditionally wrapped in Showcase
+
+Signup flag wiring:
+  Email signup: WalkthroughService.markAsNewUser() called on result['success'] == true, before dialog
+  Google signup: markAsNewUser() called only when result['is_new_user'] == true
+```
+
+### Subcategory Grid — Per-Item Image Inset
+```
+dummy_data.dart programsCategories entries can carry an optional 'imageInset': double key.
+explore_categories_grid.dart reads it:
+  final imageInset = (category['imageInset'] as double?) ?? 6.0;
+  padding: EdgeInsets.fromLTRB(imageInset, imageInset, imageInset, 2)
+Default 6.0 for all cards. Set to 0.0 for "Future Tech & AI" and "Design & Innovation"
+to give their images ~12px more space per side within the fixed card area.
+```
+
+### Profile Sub-Screen Greeting
+```
+All 5 profile sub-screens use AuthState.firstName (static getter) for the "Hi X," greeting:
+  saved_events_screen.dart | your_reviews_screen.dart | help_centre_screen.dart
+  payment_settings_screen.dart | reminders_screen.dart
+Pattern: 'Hi ${AuthState.firstName},'
+AuthState.firstName = userName.value.trim().split(' ').first, fallback "User"
+```
+
+### Account Settings — Live User Data
+```
+account_settings_screen.dart Personal Info row uses ValueListenableBuilder<String?> on AuthState.avatarUrl:
+  Avatar: NetworkImage(AuthState.avatarUrl) if non-null/non-empty
+          else initials via https://ui-avatars.com/api/?name=X&background=FFCC00&color=1A1A2E&size=200
+  Email: AuthState.userEmail ?? 'No email provided' (maxLines:1, ellipsis)
+Reacts to profile edits without requiring screen re-navigation.
 ```
 
 ---
@@ -457,6 +589,9 @@ Location dropdowns (City + Area) | Date chips (Today/This Weekend/This Week/Upco
 | ~~Home header greeting reactive~~ | `home_header.dart`, `auth_state.dart` | ✅ Done — `userName` promoted to `ValueNotifier<String?>`, header listens directly |
 | ~~Home header name overflow / layout break~~ | `home_header.dart` | ✅ Done — first name only, `Expanded` + ellipsis |
 | ~~Booking Confirmed screen redesigned~~ | `booking_confirmed_screen.dart` | ✅ Done — white-ring badge, full-width image, CustomPainter notch+dash |
+| ~~Onboarding walkthrough (new-user tour)~~ | `home_screen.dart`, `floating_navbar.dart`, `home_header.dart`, `walkthrough_service.dart`, `walkthrough_keys.dart`, `walkthrough_intro_overlay.dart` | ✅ Done — 7-step showcaseview tour with animated intro overlay |
+| ~~Hardcoded username in profile sub-screens~~ | `saved_events_screen.dart`, `your_reviews_screen.dart`, `help_centre_screen.dart`, `payment_settings_screen.dart`, `reminders_screen.dart` | ✅ Done — `AuthState.firstName` getter |
+| ~~Hardcoded avatar + email in AccountSettingsScreen~~ | `account_settings_screen.dart` | ✅ Done — live `ValueListenableBuilder` on `AuthState.avatarUrl` + `AuthState.userEmail` |
 | OTP verification real API | `login_sheet.dart:_OTPVerificationScreen._onVerify` | ❌ Pending — calls `AuthState.login(phone:...)` without JWT |
 | PlanPartyScreen → booking confirmation | `plan_party_screen.dart:_onContinue` | ❌ Pending — validated but navigates nowhere |
 | Profile screen reactive to name/avatar changes | `profile_screen.dart` | ❌ Pending — reads `AuthState.userName.value` but no `ValueListenableBuilder`; won't update on profile edit without navigate-back rebuild |
@@ -479,6 +614,8 @@ http: ^1.2.0                   # REST API calls
 firebase_core: ^3.8.0          # Firebase init
 firebase_auth: ^5.3.1          # Auth (Google Sign-In)
 google_sign_in: ^6.2.1         # Google OAuth
+showcaseview: ^5.0.2           # Onboarding walkthrough (controller-based v5)
+shared_preferences: ^2.5.5     # Non-sensitive UX flag storage (isNewUser walkthrough flag)
 ```
 
 ---
@@ -548,3 +685,35 @@ google_sign_in: ^6.2.1         # Google OAuth
 | → Replaced PNG ticket with `_TicketShapePainter` `CustomPainter` | `booking_detail_screen.dart` |
 | → Matched layout structure: full-width image, details, notch area, QR code | `booking_detail_screen.dart` |
 | → Applied consistent Share/Download action bar styling | `booking_detail_screen.dart` |
+
+### Session 6 (Current)
+| Change | Files |
+|--------|-------|
+| `forgotPassword()` — endpoint changed to `/api/v1/auth/customer/password/reset/request/`, body key changed from `email` to `identifier` | `auth_service.dart` |
+| `verifyResetOtp(identifier, code)` added — POST `/api/v1/auth/customer/password/reset/verify-otp/`, returns `reset_token` | `auth_service.dart` |
+| `confirmPasswordReset(resetToken, newPassword, newPasswordConfirm)` added — POST `/api/v1/auth/customer/password/reset/confirm/` | `auth_service.dart` |
+| `ForgotPasswordScreen` fully rewritten as a 3-step wizard (`_step` 0/1/2) in one `StatefulWidget` | `forgot_password_screen.dart` |
+| → Step 0: email entry + "Send OTP" button (was "Send Reset Link") — no more email-sent dialog | `forgot_password_screen.dart` |
+| → Step 1: 6-box OTP (auto-advance/retreat, yellow focused border), "Resend OTP" link, "Verify OTP" button | `forgot_password_screen.dart` |
+| → Step 2: New + Confirm password fields with eye-toggle, client-side match validation, "Set New Password" button | `forgot_password_screen.dart` |
+| → `_ResetEmailSentDialog` replaced with `_PasswordResetSuccessDialog` (check icon, "Password Reset!" title, "Back to Login" button) | `forgot_password_screen.dart` |
+| → `_Particle` + `_ConfettiPainter` classes retained, reused in success dialog | `forgot_password_screen.dart` |
+| → Back button navigates step 1→0, step 2→1, step 0→exits screen | `forgot_password_screen.dart` |
+| → Success dialog "Back to Login" correctly navigates back to login sheet (single pop) | `forgot_password_screen.dart` |
+
+### Session 7 (Current)
+| Change | Files |
+|--------|-------|
+| `WalkthroughService` — SharedPreferences-backed `tlb_is_new_user` flag; `markAsNewUser` / `isNewUser` / `markWalkthroughComplete` | `lib/services/walkthrough_service.dart` (NEW) |
+| `WalkthroughKeys` — 7 GlobalKeys + `ShowcaseNavConfig` / `ShowcaseProfileConfig` structs + pre-built config instances (`kNavShowcaseConfigs`, `kLocationShowcaseConfig`, `kProfileShowcaseConfig`) | `lib/helpers/walkthrough_keys.dart` (NEW) |
+| `WalkthroughIntroOverlay` — animated full-screen welcome card; `AnimationController` for fade+scale entrance (380ms); `_IconBadge` with repeating pulse glow (1400ms); "Let's Go" reverse-animates then pops | `lib/widgets/walkthrough_intro_overlay.dart` (NEW) |
+| `HomeScreen` — `ShowcaseView.register/unregister`; `_checkAndStartWalkthrough()` reads `isNewUser` flag; `_launchWalkthrough()` shows intro overlay via `showGeneralDialog`, then calls `startShowCase(orderedKeys)` | `home_screen.dart` |
+| `FloatingNavbar` — optional `showcaseConfigs: Map<int, ShowcaseNavConfig>?`; null = no change (all current call sites); non-null = wraps matching tab indices in `Showcase` with dark tooltip styling | `floating_navbar.dart` |
+| `HomeHeader` — optional `locationShowcaseConfig` + `profileShowcaseConfig` params; location chip wrapped in `Showcase` with `onTargetClick` → opens `LocationScreen` then `ShowcaseView.get().next()` | `home_header.dart` |
+| `SignupScreen` — `WalkthroughService.markAsNewUser()` called on email signup success; called on Google signup only when `result['is_new_user'] == true` | `signup_screen.dart` |
+| Events navbar tab (index 1) added to walkthrough — was previously absent from `kNavShowcaseConfigs`, causing the step to be silently skipped | `walkthrough_keys.dart` |
+| Showcase styling applied to all steps: `tooltipBackgroundColor: Color(0xFF1A1A2E)`, white text, `overlayOpacity: 0.78`, `scaleAnimationDuration: 350ms`, `movingAnimationDuration: 350ms` | `floating_navbar.dart`, `home_header.dart` |
+| Programs subcategory grid — per-item `imageInset` double in category data; default `6.0`; set to `0.0` for "Future Tech & AI" and "Design & Innovation" for larger images | `dummy_data.dart`, `explore_categories_grid.dart` |
+| `AuthState.firstName` static getter — first word of `userName.value`, fallback `"User"` | `auth_state.dart` |
+| Hardcoded `"Hi Laxman,"` replaced with `"Hi ${AuthState.firstName},"` across all 5 profile sub-screens | `saved_events_screen.dart`, `your_reviews_screen.dart`, `help_centre_screen.dart`, `payment_settings_screen.dart`, `reminders_screen.dart` |
+| `AccountSettingsScreen` Personal Info row — avatar replaced with `NetworkImage(AuthState.avatarUrl)` + initials URL fallback; email replaced with `AuthState.userEmail`; wrapped in `ValueListenableBuilder<String?>` for live reactivity | `account_settings_screen.dart` |

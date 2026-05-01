@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:showcaseview/showcaseview.dart';
 import '../core/responsive.dart';
 import '../providers/auth_state.dart';
 import '../screens/search_screen.dart';
@@ -8,9 +9,17 @@ import '../screens/profile_screen.dart';
 import '../screens/location_screen.dart';
 import '../widgets/login_sheet.dart';
 import '../providers/location_state.dart';
+import '../helpers/walkthrough_keys.dart';
 
 class HomeHeader extends StatelessWidget {
-  const HomeHeader({super.key});
+  final ShowcaseProfileConfig? profileShowcaseConfig;
+  final ShowcaseProfileConfig? locationShowcaseConfig;
+
+  const HomeHeader({
+    super.key,
+    this.profileShowcaseConfig,
+    this.locationShowcaseConfig,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +63,11 @@ class HomeHeader extends StatelessWidget {
             ),
             child: Column(
               children: [
-                _buildGreetingRow(context),
+                _buildGreetingRow(
+                  context,
+                  profileShowcaseConfig: profileShowcaseConfig,
+                  locationShowcaseConfig: locationShowcaseConfig,
+                ),
                 const SizedBox(height: 16),
                 _buildSearchBar(context),
               ],
@@ -65,7 +78,11 @@ class HomeHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildGreetingRow(BuildContext context) {
+  Widget _buildGreetingRow(
+    BuildContext context, {
+    ShowcaseProfileConfig? profileShowcaseConfig,
+    ShowcaseProfileConfig? locationShowcaseConfig,
+  }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -106,38 +123,7 @@ class HomeHeader extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 4),
-              GestureDetector(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LocationScreen()),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.location_on_outlined,
-                        size: 14, color: Color(0xFF1A1A2E)),
-                    const SizedBox(width: 3),
-                    ValueListenableBuilder<String>(
-                      valueListenable: LocationState().selectedCity,
-                      builder: (context, city, _) {
-                        final label = city.length > 18
-                            ? '${city.substring(0, 18)}...'
-                            : city;
-                        return Text(
-                          label,
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 2),
-                    const Icon(Icons.keyboard_arrow_down,
-                        size: 16, color: Color(0xFF1A1A2E)),
-                  ],
-                ),
-              ),
+              _buildLocationRow(context, locationShowcaseConfig),
             ],
           ),
         ),
@@ -179,7 +165,7 @@ class HomeHeader extends StatelessWidget {
             ValueListenableBuilder<String?>(
               valueListenable: AuthState.avatarUrl,
               builder: (context, url, _) {
-                return GestureDetector(
+                final avatarGesture = GestureDetector(
                   onTap: () {
                     if (AuthState.isLoggedIn.value) {
                       Navigator.push(context,
@@ -210,11 +196,87 @@ class HomeHeader extends StatelessWidget {
                     ),
                   ),
                 );
+
+                if (profileShowcaseConfig == null) return avatarGesture;
+
+                return Showcase(
+                  key: profileShowcaseConfig.showcaseKey,
+                  title: profileShowcaseConfig.title,
+                  description: profileShowcaseConfig.description,
+                  overlayOpacity: 0.78,
+                  tooltipBackgroundColor: const Color(0xFF1A1A2E),
+                  textColor: Colors.white,
+                  scaleAnimationDuration: const Duration(milliseconds: 350),
+                  scaleAnimationCurve: Curves.easeInOut,
+                  movingAnimationDuration: const Duration(milliseconds: 350),
+                  targetPadding: const EdgeInsets.all(8),
+                  child: avatarGesture,
+                );
               },
             ),
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildLocationRow(
+    BuildContext context,
+    ShowcaseProfileConfig? locationShowcaseConfig,
+  ) {
+    final locationRow = GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const LocationScreen()),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.location_on_outlined,
+              size: 14, color: Color(0xFF1A1A2E)),
+          const SizedBox(width: 3),
+          ValueListenableBuilder<String>(
+            valueListenable: LocationState().selectedCity,
+            builder: (context, city, _) {
+              final label =
+                  city.length > 18 ? '${city.substring(0, 18)}...' : city;
+              return Text(
+                label,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF1A1A2E),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 2),
+          const Icon(Icons.keyboard_arrow_down,
+              size: 16, color: Color(0xFF1A1A2E)),
+        ],
+      ),
+    );
+
+    if (locationShowcaseConfig == null) return locationRow;
+
+    return Showcase(
+      key: locationShowcaseConfig.showcaseKey,
+      title: locationShowcaseConfig.title,
+      description: locationShowcaseConfig.description,
+      overlayOpacity: 0.78,
+      tooltipBackgroundColor: const Color(0xFF1A1A2E),
+      textColor: Colors.white,
+      scaleAnimationDuration: const Duration(milliseconds: 350),
+      scaleAnimationCurve: Curves.easeInOut,
+      movingAnimationDuration: const Duration(milliseconds: 350),
+      targetPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      // Tapping the location chip opens LocationScreen; tour advances on pop
+      onTargetClick: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const LocationScreen()),
+        ).then((_) => ShowcaseView.get().next());
+      },
+      child: locationRow,
     );
   }
 

@@ -190,11 +190,13 @@ class DummyData {
       'label': 'Future Tech & AI',
       'image': "resources- tlb-ui/events_page/futuretech'.png",
       'gradient': [Color(0xFFDCFCE7), Color(0xFFBBF7D0)],
+      'imageInset': 0.0,
     },
     {
       'label': 'Design &\nInnovation',
       'image': 'resources- tlb-ui/events_page/design.png',
       'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+      'imageInset': 0.0,
     },
     {
       'label': 'Leadership &\nEntrepreneurship',

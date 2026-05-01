@@ -16,9 +16,11 @@ class AuthService {
 
   /// Returns `{'success': true}` on 201 or `{'success': false, 'message': '...'}`.
   static Future<Map<String, dynamic>> signup({
+    required String firstName,
     required String email,
     required String password,
     required String passwordConfirm,
+    String? lastName,
   }) async {
     try {
       final res = await http
@@ -26,6 +28,8 @@ class AuthService {
             Uri.parse('$_base/api/v1/auth/customer/email/signup/'),
             headers: _headers,
             body: jsonEncode({
+              'first_name': firstName,
+              'last_name': lastName ?? '',
               'email': email,
               'password': password,
               'password_confirm': passwordConfirm,
@@ -74,18 +78,71 @@ class AuthService {
     }
   }
 
-  // ── Forgot password (reset request) ─────────────────────────────────────────
+  // ── Forgot password — 3-step OTP flow ───────────────────────────────────────
 
-  /// Sends a password-reset link to [email]. Returns `{'success': true}` on 200.
+  /// Step 1: Sends OTP to [email]. Returns `{'success': true}` on 200.
   static Future<Map<String, dynamic>> forgotPassword({
     required String email,
   }) async {
     try {
       final res = await http
           .post(
-            Uri.parse('$_base/api/v1/auth/password/reset/request/'),
+            Uri.parse('$_base/api/v1/auth/customer/password/reset/request/'),
             headers: _headers,
-            body: jsonEncode({'email': email}),
+            body: jsonEncode({'identifier': email}),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      final data = _decode(res.body);
+      if (res.statusCode == 200) {
+        return {'success': true, 'message': data['message'] ?? ''};
+      }
+      return {'success': false, 'message': _extractError(data)};
+    } catch (e) {
+      return {'success': false, 'message': _networkError(e)};
+    }
+  }
+
+  /// Step 2: Verifies OTP. Returns `{'success': true, 'reset_token': '...'}` on 200.
+  static Future<Map<String, dynamic>> verifyResetOtp({
+    required String identifier,
+    required String code,
+  }) async {
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$_base/api/v1/auth/customer/password/reset/verify-otp/'),
+            headers: _headers,
+            body: jsonEncode({'identifier': identifier, 'code': code}),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      final data = _decode(res.body);
+      if (res.statusCode == 200) {
+        return {'success': true, 'reset_token': data['reset_token'] ?? ''};
+      }
+      return {'success': false, 'message': _extractError(data)};
+    } catch (e) {
+      return {'success': false, 'message': _networkError(e)};
+    }
+  }
+
+  /// Step 3: Sets new password using reset_token. Returns `{'success': true}` on 200.
+  static Future<Map<String, dynamic>> confirmPasswordReset({
+    required String resetToken,
+    required String newPassword,
+    required String newPasswordConfirm,
+  }) async {
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$_base/api/v1/auth/customer/password/reset/confirm/'),
+            headers: _headers,
+            body: jsonEncode({
+              'reset_token': resetToken,
+              'new_password': newPassword,
+              'new_password_confirm': newPasswordConfirm,
+            }),
           )
           .timeout(const Duration(seconds: 30));
 
@@ -196,6 +253,7 @@ class AuthService {
   /// Returns `{'success': true, 'user': {...}}` on 200.
   static Future<Map<String, dynamic>> updateProfile({
     required String accessToken,
+    File? avatarFile,
     String? firstName,
     String? lastName,
     String? dateOfBirth,
@@ -219,6 +277,12 @@ class AuthService {
       if (guardianName != null) request.fields['guardian_name'] = guardianName;
       if (institutionName != null) request.fields['institution_name'] = institutionName;
       if (institutionType != null) request.fields['institution_type'] = institutionType;
+
+      if (avatarFile != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('avatar', avatarFile.path),
+        );
+      }
 
       final streamed = await request.send().timeout(const Duration(seconds: 30));
       final res = await http.Response.fromStream(streamed);

@@ -43,6 +43,14 @@ class AuthState {
     }
   }
 
+  /// First word of the stored full name, falling back to "User".
+  /// Use this wherever a greeting like "Hi $firstName" is needed.
+  static String get firstName {
+    final name = userName.value;
+    if (name == null || name.trim().isEmpty) return 'User';
+    return name.trim().split(' ').first;
+  }
+
   /// True when the user has at least filled in their first name.
   static bool get isProfileComplete {
     final profile = userData?['profile'] as Map<String, dynamic>?;

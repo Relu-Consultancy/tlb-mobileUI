@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../providers/auth_state.dart';
 
 class PaymentSettingsScreen extends StatelessWidget {
   const PaymentSettingsScreen({super.key});
@@ -44,7 +45,7 @@ class PaymentSettingsScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Hi Laxman,',
+                          'Hi ${AuthState.firstName},',
                           style: GoogleFonts.poppins(
                             fontSize: 20,
                             fontWeight: FontWeight.w800,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/saved_events_state.dart';
+import '../providers/auth_state.dart';
 import '../models/event_model.dart';
 import 'event_detail_screen.dart';
 
@@ -42,7 +43,7 @@ class SavedEventsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Hi Laxman,',
+                        'Hi ${AuthState.firstName},',
                         style: GoogleFonts.poppins(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,

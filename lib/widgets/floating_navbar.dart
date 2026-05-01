@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:showcaseview/showcaseview.dart';
+import '../helpers/walkthrough_keys.dart';
 
 class NavbarItemData {
   final String label;
@@ -20,12 +22,14 @@ class FloatingNavbar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
   final double bottomPadding;
+  final Map<int, ShowcaseNavConfig>? showcaseConfigs;
 
   const FloatingNavbar({
     super.key,
     required this.currentIndex,
     required this.onTap,
     this.bottomPadding = 30,
+    this.showcaseConfigs,
   });
 
   @override
@@ -66,7 +70,7 @@ class FloatingNavbar extends StatelessWidget {
               final item = _navItems[index];
               final isActive = index == currentIndex;
 
-              return Padding(
+              final navItemWidget = Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 2.0),
                 child: GestureDetector(
                   onTap: () => onTap(index),
@@ -122,6 +126,23 @@ class FloatingNavbar extends StatelessWidget {
                     ),
                   ),
                 ),
+              );
+
+              final config = showcaseConfigs?[index];
+              if (config == null) return navItemWidget;
+
+              return Showcase(
+                key: config.showcaseKey,
+                title: config.title,
+                description: config.description,
+                overlayOpacity: 0.78,
+                tooltipBackgroundColor: const Color(0xFF1A1A2E),
+                textColor: Colors.white,
+                scaleAnimationDuration: const Duration(milliseconds: 350),
+                scaleAnimationCurve: Curves.easeInOut,
+                movingAnimationDuration: const Duration(milliseconds: 350),
+                targetPadding: const EdgeInsets.all(6),
+                child: navItemWidget,
               );
             }),
           ),
