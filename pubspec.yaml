@@ -16,6 +16,15 @@ dependencies:
   flutter_displaymode: ^0.7.0
   video_player: ^2.11.0
   flutter_svg: ^2.2.4
+  like_button: ^2.1.0
+  http: ^1.2.0
+  firebase_core: ^3.8.0
+  firebase_auth: ^5.3.1
+  google_sign_in: ^6.2.1
+  flutter_secure_storage: ^9.2.2
+  image_picker: ^1.2.2
+  showcaseview: ^5.0.2
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:
@@ -29,6 +38,18 @@ flutter:
   assets:
     - assets/images/
     - assets/images/new_home/
+    - assets/images/event_subcategories/
+    - assets/images/explore_formats/
+    - assets/images/featured_partners/
+    - assets/images/class_page/
+    - assets/images/pick_pace/
     - assets/icons/
     - resources- tlb-ui/
+    - resources- tlb-ui/accounts_page/
+    - resources- tlb-ui/venues_page/
+    - resources- tlb-ui/venues_page/yourway/
+    - resources- tlb-ui/events_page/
+    - resources- tlb-ui/homescreen-categoryicons/
     - google_fonts/
+
+

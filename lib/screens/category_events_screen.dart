@@ -1,24 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../core/responsive.dart';
-import '../core/saved_events_state.dart';
-import '../sections/home_header.dart';
-import '../models/event_model.dart';
-import '../sections/browse_by_categories_section.dart';
-import '../sections/discover_near_you_section.dart';
-import '../sections/family_feels_section.dart';
-import '../sections/tlb_signature_section.dart';
-import '../sections/app_footer.dart';
+import '../core/app_colors.dart';
 import '../data/dummy_data.dart';
-import '../widgets/floating_navbar.dart';
-import 'event_detail_screen.dart';
+import '../models/event_model.dart';
+import '../widgets/category_event_card.dart';
+import '../widgets/filter_bottom_sheet.dart';
 
 class CategoryEventsScreen extends StatefulWidget {
-  final String initialCategory;
+  final int initialCategoryIndex;
 
   const CategoryEventsScreen({
     super.key,
-    required this.initialCategory,
+    required this.initialCategoryIndex,
   });
 
   @override
@@ -26,333 +20,436 @@ class CategoryEventsScreen extends StatefulWidget {
 }
 
 class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
-  late String _selectedCategory;
-
-  final List<String> _categories = [
-    'Home', // To navigate back
-    'Events',
-    'Classes',
-    'Program',
-    'Spaces',
-    'Shop',
-  ];
-
-  /// Maps incoming category names (e.g. from PopularCategoriesSection) to a
-  /// matching tab in this screen. Unknown names fall back to 'Events'.
-  static String _mapCategoryToTab(String input) {
-    final normalized = input.toLowerCase().trim();
-    const mapping = {
-      'creative arts': 'Classes',
-      'creative art': 'Classes',        // Browse category
-      'play & adventure': 'Events',
-      'play &\nadventure': 'Events',
-      'events': 'Events',
-      'classes': 'Classes',
-      'program': 'Program',
-      'spaces': 'Spaces',
-      'shop': 'Shop',
-      'home': 'Home',
-      'family time': 'Program',         // Browse category
-      'seasonal special': 'Events',     // Browse category
-      'science & stem': 'Classes',      // Browse category
-      'health & wellness': 'Spaces',    // Browse category
-    };
-    return mapping[normalized] ?? 'Events';
-  }
-
-  /// Pre-built category → events map (avoids re-creating lists on every build).
-  static final Map<String, List<EventModel>> _categoryEvents = {
-    'Events': [...DummyData.categoryEventsExtra, ...DummyData.weekendSpecial],
-    'Classes': [...DummyData.hotPicks, ...DummyData.familyFeels],
-    'Program': [...DummyData.tlbSignature, ...DummyData.weekendSpecial],
-    'Spaces': [...DummyData.discoverNearYou, ...DummyData.familyFeels],
-    'Shop': [...DummyData.stealers, ...DummyData.specialNeeds],
-  };
-
-  List<EventModel> _getEventsForCategory(String category) {
-    return _categoryEvents[category] ?? DummyData.categoryEventsExtra;
-  }
+  late int _selectedCategoryIndex;
+  int _selectedFilterIndex = 0;
+  final ScrollController _chipScrollController = ScrollController();
+  final List<GlobalKey> _chipKeys = List.generate(
+    DummyData.exploreCategories.length,
+    (_) => GlobalKey(),
+  );
 
   @override
   void initState() {
     super.initState();
-    _selectedCategory = _mapCategoryToTab(widget.initialCategory);
+    _selectedCategoryIndex = widget.initialCategoryIndex;
   }
 
-  int get _currentNavIndex {
-    final idx = _categories.indexOf(_selectedCategory);
-    return idx >= 0 ? idx : 1; // Default to Events if not found
+  @override
+  void dispose() {
+    _chipScrollController.dispose();
+    super.dispose();
   }
 
-  void _onNavTapped(int index) {
-    if (index == 0) {
-      Navigator.popUntil(context, (route) => route.isFirst);
-      return;
-    }
+  void _selectCategory(int index) {
     setState(() {
-      _selectedCategory = _categories[index];
+      _selectedCategoryIndex = index;
+      _selectedFilterIndex = 0;
     });
+    // Scroll the selected chip into view after frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final key = _chipKeys[index];
+      if (key.currentContext != null) {
+        Scrollable.ensureVisible(
+          key.currentContext!,
+          alignment: 0.3,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  Map<String, dynamic> get _currentCategory =>
+      DummyData.exploreCategories[_selectedCategoryIndex];
+
+  List<Color> get _currentGradient =>
+      (_currentCategory['gradient'] as List<Color>);
+
+  Color get _accentColor => _currentGradient.last;
+
+  List<String> get _filters =>
+      DummyData.categorySubFilters[_selectedCategoryIndex];
+
+  List<EventModel> get _filteredEvents {
+    final all = DummyData.categoryEvents[_selectedCategoryIndex];
+    if (_selectedFilterIndex == 0) return all;
+    final filterTag = _filters[_selectedFilterIndex];
+    return all.where((e) => e.tag == filterTag).toList();
+  }
+
+  String get _categoryTitle {
+    return (_currentCategory['label'] as String).replaceAll('\n', ' ');
+  }
+
+  void _showFilterSheet() {
+    final cats = _filters.where((f) => f != 'All').toList();
+    FilterBottomSheet.show(
+      context,
+      sortOptions: const [
+        'Top Picks',
+        'Distance- Near to Far',
+        'Price- Low to High',
+        'Price- High to Low',
+      ],
+      filterOptions: const [
+        'Weekly Classes',
+        'Monthly Classes',
+        'Term Courses',
+        'Bootcamp',
+        'Certification Course',
+        'Trial Class',
+        'Holiday Camp',
+      ],
+      categoryOptions: cats,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final safeBottom = MediaQuery.of(context).padding.bottom;
+    final safeTop = MediaQuery.of(context).padding.top;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFFFF8EE),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              // Reuse Home Header exactly as is
-              const HomeHeader(),
-
-              // Main Scrollable Content
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: 120 + safeBottom), // clear navbar
-                    child: Column(
-                      children: [
-                        // Events List
-                        Builder(
-                          builder: (context) {
-                            final events = _getEventsForCategory(_selectedCategory);
-                            return ListView.builder(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: events.length,
-                              itemBuilder: (context, index) {
-                                return _buildEventCard(events[index]);
-                              },
-                            );
-                          },
-                        ),
-                        
-                        // Browse by Categories
-                        const BrowseByCategoriesSection(),
-                        const SizedBox(height: 24),
-
-                        // Discover Near You
-                        const RepaintBoundary(child: DiscoverNearYouSection()),
-                        const SizedBox(height: 16),
-
-                        // Family Feels
-                        const RepaintBoundary(child: FamilyFeelsSection()),
-                        const SizedBox(height: 16),
-
-                        // TLB Signature
-                        const RepaintBoundary(child: TlbSignatureSection()),
-                        const SizedBox(height: 16),
-
-                        // AppFooter
-                        const AppFooter(),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Positioned(
-            bottom: safeBottom > 0 ? safeBottom + 15 : 30, // 15px above native nav
-            left: 0,
-            right: 0,
-            child: Align(
-              alignment: Alignment.center,
-              child: FloatingNavbar(
-                currentIndex: _currentNavIndex,
-                onTap: _onNavTapped,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Start of _buildEventCard
-
-  Widget _buildEventCard(EventModel event) {
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
-      ),
-      child: Container(
-      margin: const EdgeInsets.only(bottom: 24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image Area
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                child: Image.asset(
-                  event.imagePath,
-                  height: Responsive.h(context, 220, min: 160),
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      height: Responsive.h(context, 220, min: 160),
-                      color: Colors.grey.shade300,
-                      child: const Center(child: Icon(Icons.image, size: 50, color: Colors.grey)),
-                    );
-                  },
-                ),
-              ),
-              // Heart icon - adds to Favorites
-              Positioned(
-                top: 16,
-                right: 16,
-                child: GestureDetector(
-                  onTap: () => SavedEventsState.toggle(event, context),
-                  child: ValueListenableBuilder<List<EventModel>>(
-                    valueListenable: SavedEventsState.savedEvents,
-                    builder: (context, _, __) {
-                      final isSaved = SavedEventsState.isSaved(event);
-                      return Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          isSaved ? Icons.favorite : Icons.favorite_border,
-                          size: 20,
-                          color: isSaved ? const Color(0xFFFFB902) : const Color(0xFF1A1A2E),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-          
-          // Details Area
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  event.title,
-                  style: GoogleFonts.poppins(
-                    fontSize: Responsive.sp(context, 17),
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1A1A2E),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Tags
-                Row(
-                  children: [
-                    if (event.tag != null) Flexible(child: _buildPill(event.tag!)),
-                    const SizedBox(width: 8),
-                    if (event.description != null) Flexible(child: _buildPill(event.description!)),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF7F7F7),
+        body: Column(
+          children: [
+            // ── Gradient Header ──────────────────────────────────────────
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    _currentGradient.first,
+                    _accentColor,
                   ],
                 ),
-                const SizedBox(height: 20),
-                // Bottom row: Program type, Price, View Details button
-                Row(
+              ),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16, safeTop + 12, 16, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            event.venue.toUpperCase(),
-                            style: GoogleFonts.poppins(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade600,
+                    // Back + Title row
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.5),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              size: 16,
+                              color: AppColors.textPrimary,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '₹${event.price?.toInt() ?? 0}',
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            _categoryTitle,
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 17),
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFF1A1A2E),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {},
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.5),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.tune_rounded,
+                              size: 18,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    // Search bar
+                    Container(
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.75),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: Row(
+                        children: [
+                          const SizedBox(width: 14),
+                          const Icon(Icons.search_rounded, size: 20, color: AppColors.textSecondary),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Search $_categoryTitle events...',
+                                hintStyle: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  color: AppColors.textSecondary,
+                                ),
+                                border: InputBorder.none,
+                                isDense: true,
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                              style: GoogleFonts.poppins(fontSize: 13, color: AppColors.textPrimary),
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // ── Scrollable Body ──────────────────────────────────────────
+            Expanded(
+              child: CustomScrollView(
+                physics: const ClampingScrollPhysics(),
+                slivers: [
+                  // Explore other Categories row
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+                      child: Row(
+                        children: [
+                          Text(
+                            'Explore other Categories',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const Spacer(),
+                          GestureDetector(
+                            onTap: () {},
+                            child: Text(
+                              'See All >',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF5B5BD6),
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(
-                      height: 40,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => EventDetailScreen(event: event),
+                  ),
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 110,
+                      child: ListView.builder(
+                        controller: _chipScrollController,
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+                        itemCount: DummyData.exploreCategories.length,
+                        itemBuilder: (context, index) {
+                          final cat = DummyData.exploreCategories[index];
+                          final isSelected = index == _selectedCategoryIndex;
+                          final catGradient = cat['gradient'] as List<Color>;
+                          return GestureDetector(
+                            key: _chipKeys[index],
+                            onTap: () => _selectCategory(index),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              width: 86,
+                              margin: const EdgeInsets.only(right: 10),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [Colors.white, catGradient.last],
+                                ),
+                                borderRadius: BorderRadius.circular(14),
+                                border: isSelected
+                                    ? Border.all(color: catGradient.last, width: 2.5)
+                                    : Border.all(color: Colors.transparent, width: 2.5),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: catGradient.last.withOpacity(isSelected ? 0.45 : 0.15),
+                                    blurRadius: isSelected ? 10 : 5,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(6, 7, 6, 6),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      (cat['label'] as String),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 9.5,
+                                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                                        height: 1.2,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Image.asset(
+                                        cat['image'] as String,
+                                        fit: BoxFit.contain,
+                                        errorBuilder: (_, __, ___) => const Icon(
+                                          Icons.category,
+                                          color: Colors.grey,
+                                          size: 28,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           );
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFCC00),
-                          foregroundColor: const Color(0xFF1A1A2E),
-                          elevation: 0,
-                          minimumSize: const Size(0, 46),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                        ),
-                        child: Text(
-                          'View Details',
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 13),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      ),
-    );
-  }
+                  ),
 
-  Widget _buildPill(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF0F0F0),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: GoogleFonts.poppins(
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          color: const Color(0xFF6B6B6B),
+                  // Section divider "All [Category Name]"
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 22, 16, 0),
+                      child: Row(
+                        children: [
+                          Container(width: 28, height: 1.5, color: const Color(0xFFFFB902)),
+                          const SizedBox(width: 10),
+                          Text(
+                            'All $_categoryTitle',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Container(height: 1.5, color: const Color(0xFFFFB902)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Filter chips row
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 42,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                        itemCount: _filters.length + 1, // +1 for Filters button
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
+                            // Filters pill
+                            return GestureDetector(
+                              onTap: _showFilterSheet,
+                              child: Container(
+                                margin: const EdgeInsets.only(right: 8),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: AppColors.textPrimary,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Filters',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    const Icon(Icons.keyboard_arrow_down_rounded, size: 15, color: Colors.white),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+                          final filterIndex = index - 1;
+                          final isActive = filterIndex == _selectedFilterIndex;
+                          return GestureDetector(
+                            onTap: () => setState(() => _selectedFilterIndex = filterIndex),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              margin: const EdgeInsets.only(right: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: isActive ? const Color(0xFFFFCC00) : Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: isActive ? Colors.transparent : const Color(0xFFE0E0E0),
+                                ),
+                              ),
+                              child: Text(
+                                _filters[filterIndex],
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11.5,
+                                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                                  color: isActive ? AppColors.textPrimary : AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+
+                  // 2-column event grid
+                  const SliverToBoxAdapter(child: SizedBox(height: 14)),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: SliverGrid(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final events = _filteredEvents;
+                          if (index >= events.length) return null;
+                          return CategoryEventCard(
+                            event: events[index],
+                            badgeColor: _accentColor.withOpacity(0.9),
+                          );
+                        },
+                        childCount: _filteredEvents.length,
+                      ),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 14,
+                        crossAxisSpacing: 14,
+                        childAspectRatio: 0.58,
+                      ),
+                    ),
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 40)),
+                ],
+              ),
+            ),
+          ],
         ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
       ),
     );
   }

@@ -8,7 +8,7 @@ import '../widgets/category_detail/explore_categories_widget.dart';
 import '../widgets/category_detail/horizontal_filter_chips.dart';
 import '../widgets/category_detail/category_grid_event_card.dart';
 import '../widgets/floating_navbar.dart';
-import 'category_events_screen.dart';
+import 'events_screen.dart';
 
 class CategoryDetailScreen extends StatefulWidget {
   final String title;
@@ -65,30 +65,22 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
     },
   ];
 
-  Map<String, bool> _activeFilters = {
-    'Within 5km': false,
-    'This Weekend': false,
-    'Distance - Near to Far': false,
-    'Age group (5-14)': false,
-    'Popular': false,
-    'Price- Low to High': false,
-  };
-
   void _showFilterBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return FilterBottomSheet(
-          initialFilters: _activeFilters,
-          onApply: (selectedFilters) {
-            setState(() {
-              _activeFilters = selectedFilters;
-            });
-          },
-        );
-      },
+    FilterBottomSheet.show(
+      context,
+      sortOptions: const [
+        'Top Picks',
+        'Distance- Near to Far',
+        'Price- Low to High',
+        'Price- High to Low',
+      ],
+      filterOptions: const [
+        'Within 5km',
+        'This Weekend',
+        'Age group (5-14)',
+        'Popular',
+      ],
+      categoryOptions: _filters.where((f) => f != 'All').toList(),
     );
   }
 
@@ -103,7 +95,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) => const CategoryEventsScreen(initialCategory: 'Events'),
+          builder: (context) => const EventsScreen(),
         ),
         (route) => route.isFirst,
       );
@@ -233,7 +225,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
             ],
           ),
           Positioned(
-            bottom: safeBottom > 0 ? safeBottom + 15 : 30, // 15px above native nav
+            bottom: 0,
             left: 0,
             right: 0,
             child: Align(
@@ -241,6 +233,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
               child: FloatingNavbar(
                 currentIndex: 1, // Treat sub-category as under "Events" root
                 onTap: _onNavTapped,
+                bottomPadding: safeBottom > 0 ? safeBottom + 15 : 30,
               ),
             ),
           ),

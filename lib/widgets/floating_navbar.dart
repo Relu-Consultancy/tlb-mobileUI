@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:showcaseview/showcaseview.dart';
+import '../helpers/walkthrough_keys.dart';
 
 class NavbarItemData {
   final String label;
@@ -13,39 +15,33 @@ const List<NavbarItemData> _navItems = [
   NavbarItemData(label: 'Events', iconPath: 'assets/icons/nav_events.svg'),
   NavbarItemData(label: 'Classes', iconPath: 'assets/icons/nav_classes.svg'),
   NavbarItemData(label: 'Program', iconPath: 'assets/icons/nav_program.svg'),
-  NavbarItemData(label: 'Spaces', iconPath: 'assets/icons/nav_spaces.svg'),
-  NavbarItemData(label: 'Shop', iconPath: 'assets/icons/nav_shop.svg'),
+  NavbarItemData(label: 'Venues', iconPath: 'assets/icons/nav_spaces.svg'),
 ];
 
 class FloatingNavbar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
+  final double bottomPadding;
+  final Map<int, ShowcaseNavConfig>? showcaseConfigs;
 
   const FloatingNavbar({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    this.bottomPadding = 30,
+    this.showcaseConfigs,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Utilize MediaQuery to ensure responsive max widths.
     final screenWidth = MediaQuery.of(context).size.width;
-    
-    return Container(
+
+    final pill = Container(
       width: screenWidth * 0.92,
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFE5E7EB), // Metallic grey light
-            Color(0xFFD1D5DB), // Metallic grey slightly darker
-            Color(0xFF9CA3AF), // Subdued shade at the very bottom
-          ],
-          stops: [0.0, 0.7, 1.0],
-        ),
+        border: Border.all(color: Colors.white, width: 2),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(50),
         boxShadow: [
           BoxShadow(
@@ -57,55 +53,118 @@ class FloatingNavbar extends StatelessWidget {
             color: Colors.white.withOpacity(0.8),
             blurRadius: 4,
             offset: const Offset(0, -2),
-          ), // subtle inner rim highlight
+          ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: List.generate(_navItems.length, (index) {
-          final item = _navItems[index];
-          final isActive = index == currentIndex;
+      clipBehavior: Clip.antiAlias,
+      child: SingleChildScrollView(
+        clipBehavior: Clip.none,
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minWidth: screenWidth * 0.92 - 12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(_navItems.length, (index) {
+              final item = _navItems[index];
+              final isActive = index == currentIndex;
 
-          return Flexible(
-            flex: 1, // All take equal space now
-            child: GestureDetector(
-              onTap: () => onTap(index),
-              behavior: HitTestBehavior.opaque,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutCubic,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                decoration: BoxDecoration(
-                  color: isActive ? const Color(0xFFFFD580) : Colors.transparent,
-                  borderRadius: BorderRadius.circular(30),
-                  boxShadow: isActive ? [
-                    BoxShadow(
-                      color: const Color(0xFFFFD580).withOpacity(0.4),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    )
-                  ] : null,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SvgPicture.asset(
-                      item.iconPath,
-                      width: 22,
-                      height: 22,
-                      colorFilter: const ColorFilter.mode(
-                        Color(0xFF1E293B), // Dark slate/metallic
-                        BlendMode.srcIn,
-                      ),
+              final navItemWidget = Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                child: GestureDetector(
+                  onTap: () => onTap(index),
+                  behavior: HitTestBehavior.opaque,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOutCubic,
+                    padding: EdgeInsets.symmetric(horizontal: isActive ? 16 : 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isActive ? const Color(0xFFFFCC00) : Colors.transparent,
+                      border: isActive ? Border.all(color: Colors.white, width: 2) : null,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: isActive ? [
+                        BoxShadow(
+                          color: const Color(0xFFFFCC00).withOpacity(0.4),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        )
+                      ] : null,
                     ),
-                  ],
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          item.iconPath,
+                          width: 22,
+                          height: 22,
+                          colorFilter: const ColorFilter.mode(
+                            Color(0xFF1E293B),
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOutCubic,
+                          alignment: Alignment.centerLeft,
+                          child: isActive
+                              ? Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: Text(
+                                    item.label,
+                                    style: const TextStyle(
+                                      color: Color(0xFF1E293B),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          );
-        }),
+              );
+
+              final config = showcaseConfigs?[index];
+              if (config == null) return navItemWidget;
+
+              return Showcase(
+                key: config.showcaseKey,
+                title: config.title,
+                description: config.description,
+                overlayOpacity: 0.78,
+                tooltipBackgroundColor: const Color(0xFF1A1A2E),
+                textColor: Colors.white,
+                scaleAnimationDuration: const Duration(milliseconds: 350),
+                scaleAnimationCurve: Curves.easeInOut,
+                movingAnimationDuration: const Duration(milliseconds: 350),
+                targetPadding: const EdgeInsets.all(6),
+                child: navItemWidget,
+              );
+            }),
+          ),
+        ),
       ),
+    );
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            const Color(0xFF242424).withOpacity(0),
+            const Color(0xFF000000).withOpacity(1.0),
+          ],
+          stops: const [0.0, 1.0],
+        ),
+      ),
+      padding: EdgeInsets.only(top: 48, bottom: bottomPadding),
+      child: Center(child: pill),
     );
   }
 }

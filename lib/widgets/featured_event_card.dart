@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
-import '../core/saved_events_state.dart';
 import '../models/event_model.dart';
+import 'wishlist_button.dart';
 import '../screens/event_detail_screen.dart';
 
 class FeaturedEventCard extends StatelessWidget {
@@ -88,26 +88,10 @@ class FeaturedEventCard extends StatelessWidget {
               Positioned(
                 top: 8,
                 left: 8,
-                child: ValueListenableBuilder<List<EventModel>>(
-                  valueListenable: SavedEventsState.savedEvents,
-                  builder: (context, _, __) {
-                    final isSaved = SavedEventsState.isSaved(event);
-                    return GestureDetector(
-                      onTap: () => SavedEventsState.toggle(event, context),
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.35),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          isSaved ? Icons.bookmark : Icons.bookmark_border,
-                          size: 18,
-                          color: isSaved ? const Color(0xFFFFB902) : Colors.white,
-                        ),
-                      ),
-                    );
-                  },
+                child: WishlistButton(
+                  event: event,
+                  containerSize: 32,
+                  iconType: WishlistIconType.bookmark,
                 ),
               ),
             ],

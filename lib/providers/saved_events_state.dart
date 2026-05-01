@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/event_model.dart';
 import 'auth_state.dart';
-import '../screens/login_sheet.dart';
+import '../widgets/login_sheet.dart';
 
 /// Global saved events state using ValueNotifier
 class SavedEventsState {

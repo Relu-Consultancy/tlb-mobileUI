@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../core/app_colors.dart';
+import 'package:showcaseview/showcaseview.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
-import '../core/location_state.dart';
+import '../providers/location_state.dart';
 import '../sections/home_header.dart';
 import '../widgets/banner_carousel.dart';
 import '../widgets/categories_grid.dart';
@@ -17,7 +17,13 @@ import '../sections/discover_near_you_section.dart';
 import '../sections/family_feels_section.dart';
 import '../sections/app_footer.dart';
 import '../widgets/floating_navbar.dart';
-import 'category_events_screen.dart';
+import '../helpers/walkthrough_keys.dart';
+import '../services/walkthrough_service.dart';
+import '../widgets/walkthrough_intro_overlay.dart';
+import 'events_screen.dart';
+import 'classes_screen.dart';
+import 'programs_screen.dart';
+import 'venues_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,6 +33,43 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool _shouldShowIntro = false;
+
+  @override
+  void initState() {
+    super.initState();
+    ShowcaseView.register();
+    _checkAndStartWalkthrough();
+  }
+
+  @override
+  void dispose() {
+    ShowcaseView.get().unregister();
+    super.dispose();
+  }
+
+  Future<void> _checkAndStartWalkthrough() async {
+    final isNew = await WalkthroughService.isNewUser();
+    if (!isNew || !mounted) return;
+    await WalkthroughService.markWalkthroughComplete();
+    setState(() => _shouldShowIntro = true);
+  }
+
+  Future<void> _launchWalkthrough() async {
+    await showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      barrierLabel: '',
+      barrierColor: Colors.transparent,
+      transitionDuration: Duration.zero,
+      pageBuilder: (ctx, _, __) => WalkthroughIntroOverlay(
+        onNext: () => Navigator.of(ctx).pop(),
+      ),
+    );
+    if (!mounted) return;
+    ShowcaseView.get().startShowCase(WalkthroughKeys.orderedKeys);
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -49,7 +92,28 @@ class _HomeScreenState extends State<HomeScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const CategoryEventsScreen(initialCategory: 'Events'),
+          builder: (context) => const EventsScreen(),
+        ),
+      );
+    } else if (index == 2) { // Classes
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ClassesScreen(),
+        ),
+      );
+    } else if (index == 3) { // Program
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ProgramsScreen(),
+        ),
+      );
+    } else if (index == 4) { // Venues
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const VenuesScreen(),
         ),
       );
     } else {
@@ -63,14 +127,24 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final safeBottom = MediaQuery.of(context).padding.bottom;
 
+    if (_shouldShowIntro) {
+      _shouldShowIntro = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _launchWalkthrough();
+      });
+    }
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           Column(
             children: [
               // Fixed header at top
-              const HomeHeader(),
+              HomeHeader(
+                profileShowcaseConfig: kProfileShowcaseConfig,
+                locationShowcaseConfig: kLocationShowcaseConfig,
+              ),
 
               // Scrollable feed or Empty State
               Expanded(
@@ -80,10 +154,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (!LocationState().isLocationSupported(city)) {
                       return const EmptyLocationWidget();
                     }
-                    return SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      child: Padding(
-                        padding: EdgeInsets.only(bottom: 120 + safeBottom), // clear navbar
+                      return SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -91,8 +163,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SectionDividerWidget(title: 'Spotlight'),
                             RepaintBoundary(
                               child: BannerCarousel(
-                                events: DummyData.bannerEvents, 
-                                height: Responsive.h(context, 380, min: 280),
+                                events: DummyData.bannerEvents,
+                                height: Responsive.h(context, 386, min: 286),
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -116,7 +188,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             const AppFooter(),
                           ],
                         ),
-                      ),
                     );
                   },
                 ),
@@ -124,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           Positioned(
-            bottom: safeBottom > 0 ? safeBottom + 15 : 30, // 15px above native nav
+            bottom: 0,
             left: 0,
             right: 0,
             child: Align(
@@ -132,6 +203,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: FloatingNavbar(
                 currentIndex: _currentNavIndex,
                 onTap: _onNavTapped,
+                bottomPadding: safeBottom > 0 ? safeBottom + 15 : 30,
+                showcaseConfigs: kNavShowcaseConfigs,
               ),
             ),
           ),

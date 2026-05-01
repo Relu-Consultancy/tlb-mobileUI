@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import '../core/saved_events_state.dart';
-import '../models/event_model.dart';
+import '../widgets/wishlist_button.dart';
 import '../widgets/section_divider_widget.dart';
 import '../data/dummy_data.dart';
 import '../screens/event_detail_screen.dart';
@@ -56,6 +55,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
           height: Responsive.h(context, 420, min: 350),
           child: PageView.builder(
             controller: _pageController,
+            clipBehavior: Clip.hardEdge,
             itemCount: DummyData.weekendSpecial.length,
             itemBuilder: (context, index) {
               final event = DummyData.weekendSpecial[index];
@@ -121,49 +121,24 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                         color: const Color(0xFF1A1A2E),
                                       ),
                                     ),
+                                    const SizedBox(height: 2),
                                     Text(
                                       'mar 16',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w500,
-                                        color: const Color(0xFFDE7104),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFF0066CC), // Blue color from design
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
                             ),
-                          // Heart icon (top-right) - adds to Favorites
+                          // Heart icon (top-right)
                           Positioned(
                             top: 12,
                             right: 12,
-                            child: GestureDetector(
-                              onTap: () => SavedEventsState.toggle(event, context),
-                              child: ValueListenableBuilder<List<EventModel>>(
-                                valueListenable: SavedEventsState.savedEvents,
-                                builder: (context, _, __) {
-                                  final isSaved = SavedEventsState.isSaved(event);
-                                  return Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.9),
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.1),
-                                          blurRadius: 6,
-                                        ),
-                                      ],
-                                    ),
-                                    child: Icon(
-                                      isSaved ? Icons.favorite : Icons.favorite_border,
-                                      size: 20,
-                                      color: isSaved ? const Color(0xFFFFB902) : const Color(0xFF1A1A2E),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
+                            child: WishlistButton(event: event, showShadow: true),
                           ),
                         ],
                       ),
@@ -171,9 +146,10 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                       // Content below image
                       Expanded(
                         child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                          padding: const EdgeInsets.all(16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
                                 event.title,
@@ -185,64 +161,71 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 6),
-                              // Stars + review count
                               Row(
-                                children: [
-                                  Row(
-                                    children: List.generate(
-                                      5,
-                                      (i) => const Icon(
-                                        Icons.star,
-                                        size: 14,
-                                        color: Colors.amber,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Flexible(
-                                    child: Text(
-                                      event.reviewCount ?? '3.5k reviews',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const Spacer(),
-                              // Location + View Details button
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Expanded(
-                                    child: Row(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(
-                                          Icons.location_on_outlined,
-                                          size: 14,
-                                          color: Colors.grey,
+                                        // Stars + review count
+                                        Row(
+                                          children: [
+                                            Row(
+                                              children: List.generate(
+                                                5,
+                                                (i) => const Icon(
+                                                  Icons.star,
+                                                  size: 14,
+                                                  color: Colors.amber,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Flexible(
+                                              child: Text(
+                                                event.reviewCount ?? '3.5k reviews',
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 12,
+                                                  color: Colors.grey,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        const SizedBox(width: 4),
-                                        Expanded(
-                                          child: Text(
-                                            event.venue,
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 12,
+                                        const SizedBox(height: 8),
+                                        // Location
+                                        Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.location_on_outlined,
+                                              size: 14,
                                               color: Colors.grey,
                                             ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                event.venue,
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: const Color(0xFF4A4A68),
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
                                   ),
+                                  const SizedBox(width: 8),
+                                  // View Details button on the right
                                   SizedBox(
-                                    height: Responsive.h(context, 44, min: 38),
+                                    height: Responsive.h(context, 38, min: 34),
                                     child: ElevatedButton(
                                       onPressed: () {
                                         Navigator.push(
@@ -253,24 +236,20 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                         );
                                       },
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            const Color(0xFFFFCC00),
-                                        foregroundColor:
-                                            const Color(0xFF1A1A2E),
+                                        backgroundColor: const Color(0xFFFFCC00),
+                                        foregroundColor: const Color(0xFF1A1A2E),
                                         elevation: 0,
-                                        minimumSize: const Size(0, 46),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20),
+                                          borderRadius: BorderRadius.circular(20),
                                         ),
                                         padding: const EdgeInsets.symmetric(
-                                          horizontal: 20,
+                                          horizontal: 16,
                                         ),
                                       ),
                                       child: Text(
                                         'View Details',
                                         style: GoogleFonts.poppins(
-                                          fontSize: Responsive.sp(context, 13),
+                                          fontSize: Responsive.sp(context, 12),
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),

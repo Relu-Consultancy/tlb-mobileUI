@@ -462,7 +462,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFB902),
+                      backgroundColor: const Color(0xFFFFCC00),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),

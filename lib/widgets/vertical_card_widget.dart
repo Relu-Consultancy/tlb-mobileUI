@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
-import '../core/saved_events_state.dart';
 import '../models/event_model.dart';
+import 'wishlist_button.dart';
 
 class VerticalCardWidget extends StatelessWidget {
   final String imagePath;
@@ -52,6 +52,7 @@ class VerticalCardWidget extends StatelessWidget {
         children: [
           // Image Area
           Stack(
+            clipBehavior: Clip.hardEdge,
             children: [
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
@@ -66,27 +67,7 @@ class VerticalCardWidget extends StatelessWidget {
                 Positioned(
                   top: 8,
                   right: 8,
-                  child: GestureDetector(
-                    onTap: () => SavedEventsState.toggle(event!, context),
-                    child: ValueListenableBuilder<List<EventModel>>(
-                      valueListenable: SavedEventsState.savedEvents,
-                      builder: (context, _, __) {
-                        final isSaved = SavedEventsState.isSaved(event!);
-                        return Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.35),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            isSaved ? Icons.favorite : Icons.favorite_border,
-                            size: 18,
-                            color: isSaved ? const Color(0xFFFFB902) : Colors.white,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                  child: WishlistButton(event: event!, containerSize: 32),
                 ),
               if (badgeText != null)
                 Positioned(

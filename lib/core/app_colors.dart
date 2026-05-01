@@ -5,7 +5,7 @@ class AppColors {
 
   // Primary palette
   static const Color primary = Color(0xFFF5A623);
-  static const Color primaryLight = Color(0xFFFFCC02);
+  static const Color primaryLight = Color(0xFFFFCC00);
   static const Color primaryDark = Color(0xFFE8961E);
   static const Color amber = Color(0xFFFFB800);
 
@@ -43,7 +43,7 @@ class AppColors {
   static const Color divider = Color(0xFFE5E7EB);
   static const Color searchBarBg = Color(0xFFFFF8EE);
   static const Color searchBarBorder = Color(0xFFE8C547);
-  static const Color bookNowBg = Color(0xFFF5A623);
+  static const Color bookNowBg = Color(0xFFFFCC00);
   static const Color tagProgram = Color(0xFFF48FB1);
   static const Color tagFeatured = Color(0xFFEF5350);
 }

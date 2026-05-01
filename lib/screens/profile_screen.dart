@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../core/auth_state.dart';
+import '../services/auth_service.dart';
+import '../providers/auth_state.dart';
 import '../core/responsive.dart';
-import '../core/saved_events_state.dart';
-import '../core/booked_events_state.dart';
+import '../providers/saved_events_state.dart';
+import '../providers/booked_events_state.dart';
 import 'bookings_screen.dart';
 import 'saved_events_screen.dart';
 import 'help_centre_screen.dart';
@@ -15,43 +16,68 @@ import 'notification_screen.dart';
 import 'reminders_screen.dart';
 import 'home_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  double _calculateCompletion() {
+    final profile = AuthState.userData?['profile'] as Map<String, dynamic>?;
+    int filled = 0;
+    const totalFields = 8;
+    if (profile != null) {
+      if ((profile['first_name'] as String?)?.isNotEmpty == true) filled++;
+      if ((profile['last_name'] as String?)?.isNotEmpty == true) filled++;
+      if ((profile['date_of_birth'] as String?)?.isNotEmpty == true) filled++;
+      if ((profile['city'] as String?)?.isNotEmpty == true) filled++;
+      if ((profile['state'] as String?)?.isNotEmpty == true) filled++;
+      if ((profile['guardian_name'] as String?)?.isNotEmpty == true) filled++;
+      if ((profile['institution_name'] as String?)?.isNotEmpty == true) filled++;
+      if ((profile['institution_type'] as String?)?.isNotEmpty == true) filled++;
+    }
+    return filled / totalFields;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final profile = AuthState.userData?['profile'] as Map<String, dynamic>?;
+    final userName = AuthState.userName.value ?? 'User';
+    final userEmail = AuthState.userEmail ?? 'No email provided';
+    
+    String avatarUrl;
+    final rawAvatar = profile?['avatar_url'] as String?;
+    if (rawAvatar != null && rawAvatar.isNotEmpty) {
+      avatarUrl = rawAvatar;
+    } else {
+      final initials = Uri.encodeComponent(
+        ((profile?['first_name'] as String? ?? '').isNotEmpty
+            ? profile!['first_name'] as String
+            : AuthState.userEmail?.substring(0, 1).toUpperCase() ?? 'U'),
+      );
+      avatarUrl = 'https://ui-avatars.com/api/?name=$initials&background=FFCC00&color=1A1A2E&size=200';
+    }
+
+    final completion = _calculateCompletion();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  spreadRadius: 1,
-                ),
-              ],
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E), size: 20),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E), size: 22),
+          onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: Text(
           'My Profile',
           style: GoogleFonts.poppins(
-            fontSize: Responsive.sp(context, 18),
-            fontWeight: FontWeight.bold,
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -60,97 +86,128 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 20),
-            // Profile Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
+
+            // ── Profile header (centered layout matching Figma) ────────────
+            Center(
+              child: Column(
                 children: [
-                  // Avatar
-                  Stack(
-                    children: [
-                      Container(
-                        width: Responsive.w(context, 80, min: 60),
-                        height: Responsive.w(context, 80, min: 60),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey.shade200,
-                          image: const DecorationImage(
-                            image: NetworkImage(
-                              'https://ui-avatars.com/api/?name=Laxman&background=random&size=200',
-                            ), // Placeholder avatar
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.grey.shade300, width: 1),
-                          ),
-                          child: const Icon(
-                            Icons.camera_alt_outlined,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 20),
-                  // Info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  // Avatar with camera badge
+                  GestureDetector(
+                    onTap: () => _showAvatarOptions(context, avatarUrl),
+                    child: Stack(
                       children: [
-                        Text(
-                          'Laxman',
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 18),
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Laxmanartist@yahoo.com',
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            color: Colors.grey.shade600,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          height: 36,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const EditProfileScreen()),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0A1F11), // Dark greenish black
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(horizontal: 24),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
+                        Container(
+                          width: 90,
+                          height: 90,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.grey.shade300, width: 3),
+                            image: DecorationImage(
+                              image: NetworkImage(avatarUrl),
+                              fit: BoxFit.cover,
                             ),
-                            child: Text(
-                              'Edit Profile',
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.grey.shade300, width: 1.5),
+                            ),
+                            child: const Icon(Icons.camera_alt_outlined,
+                                size: 15, color: Color(0xFF555555)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Name
+                  Text(
+                    userName,
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF1A1A2E),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+
+                  // Email
+                  Text(
+                    userEmail,
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Edit Profile button (dark rounded pill)
+                  SizedBox(
+                    height: 36,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const EditProfileScreen()),
+                      ).then((_) => setState(() {})),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0A1F11),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 28),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20)),
+                      ),
+                      child: Text(
+                        'Edit Profile',
+                        style: GoogleFonts.poppins(
+                            fontSize: 13, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Profile Completion Progress
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Profile Completion',
                               style: GoogleFonts.poppins(
-                                fontSize: 13,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade600,
                               ),
                             ),
+                            Text(
+                              '${(completion * 100).toInt()}%',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF1A1A2E),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: completion,
+                            backgroundColor: Colors.grey.shade200,
+                            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFCC00)),
+                            minHeight: 6,
                           ),
                         ),
                       ],
@@ -159,93 +216,119 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
-            const SizedBox(height: 30),
-            const Divider(height: 1, color: Color(0xFFEEEEEE), indent: 20, endIndent: 20),
-            const SizedBox(height: 10),
 
-            // Top Menu Block
-            _buildMenuItem(
-              icon: Icons.confirmation_num_outlined,
-              title: 'All Bookings',
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const BookingsScreen()),
-              ),
+            const SizedBox(height: 24),
+            const Divider(height: 1, color: Color(0xFFF0F0F0), indent: 20, endIndent: 20),
+            const SizedBox(height: 4),
+
+            // ── Top menu block ──────────────────────────────────────────────
+            _item(
+              icon: Icons.confirmation_number_outlined,
+              label: 'All Booking',
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const BookingsScreen())),
             ),
-            _buildMenuItem(
-              icon: Icons.favorite_border,
-              title: 'Favorite',
+            _item(
+              icon: Icons.favorite_border_rounded,
+              label: 'Favorite',
               onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SavedEventsScreen()),
-              ),
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const SavedEventsScreen())),
             ),
-            _buildMenuItem(
+            _item(
               icon: Icons.credit_card_outlined,
-              title: 'Payment Settings',
+              label: 'Payment Settings',
               onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const PaymentSettingsScreen()),
-              ),
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const PaymentSettingsScreen())),
             ),
-            _buildMenuItem(
-              icon: Icons.book_outlined,
-              title: 'Your Reviews',
+            _item(
+              icon: Icons.description_outlined,
+              label: 'Your Reviews',
               onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const YourReviewsScreen()),
-              ),
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const YourReviewsScreen())),
             ),
-            _buildMenuItem(
-              icon: Icons.notifications_none,
-              title: 'Notifications',
+            _item(
+              icon: Icons.notifications_none_rounded,
+              label: 'Notifications',
               onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const NotificationScreen()),
-              ),
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const NotificationScreen())),
             ),
-            _buildMenuItem(
-              icon: Icons.alarm,
-              title: 'Reminders',
+            _item(
+              icon: Icons.alarm_outlined,
+              label: 'Reminders',
               onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const RemindersScreen()),
-              ),
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const RemindersScreen())),
             ),
 
-            const SizedBox(height: 10),
-            const Divider(height: 1, color: Color(0xFFEEEEEE), indent: 20, endIndent: 20),
-            const SizedBox(height: 10),
+            const SizedBox(height: 4),
+            const Divider(height: 1, color: Color(0xFFF0F0F0), indent: 20, endIndent: 20),
+            const SizedBox(height: 4),
 
-            // Bottom Menu Block
-            _buildMenuItem(
+            // ── Bottom menu block ───────────────────────────────────────────
+            _item(
               icon: Icons.settings_outlined,
-              title: 'Account Settings',
+              label: 'Account Settings',
               onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AccountSettingsScreen()),
-              ),
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const AccountSettingsScreen())),
             ),
-            _buildMenuItem(
-              icon: Icons.help_outline,
-              title: 'Help',
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const HelpCentreScreen()),
-              ),
+            _item(
+              icon: Icons.help_outline_rounded,
+              label: 'Help',
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const HelpCentreScreen())),
             ),
-            _buildMenuItem(
-              icon: Icons.logout,
+            _item(
+              icon: Icons.logout_rounded,
+              label: 'Log Out',
               iconColor: const Color(0xFFE53935),
-              title: 'Log Out',
+              labelColor: const Color(0xFFE53935),
               hideChevron: true,
               onTap: () => _showLogoutDialog(context),
             ),
+
             const SizedBox(height: 40),
           ],
         ),
       ),
+    );
+  }
+
+  // ── helpers ──────────────────────────────────────────────────────────────
+
+  Widget _item({
+    required IconData icon,
+    required String label,
+    Color iconColor = const Color(0xFF555555),
+    Color labelColor = const Color(0xFF2D2D2D),
+    bool hideChevron = false,
+    VoidCallback? onTap,
+  }) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+      leading: Icon(icon, size: 24, color: iconColor),
+      title: Text(
+        label,
+        style: GoogleFonts.poppins(
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+          color: labelColor,
+        ),
+      ),
+      trailing: hideChevron
+          ? null
+          : const Icon(Icons.chevron_right, color: Color(0xFF2196F3), size: 22),
+      onTap: onTap,
     );
   }
 
@@ -254,14 +337,13 @@ class ProfileScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Log Out',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: Responsive.sp(context, 17)),
-        ),
-        content: Text(
-          'Are you sure you want to log out?',
-          style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey.shade700),
-        ),
+        title: Text('Log Out',
+            style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+                fontSize: Responsive.sp(context, 17))),
+        content: Text('Are you sure you want to log out?',
+            style: GoogleFonts.poppins(
+                fontSize: 14, color: Colors.grey.shade700)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -269,11 +351,16 @@ class ProfileScreen extends StatelessWidget {
                 style: GoogleFonts.poppins(color: Colors.grey, fontSize: 14)),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(ctx);
+              final refresh = AuthState.refreshToken;
+              if (refresh != null) {
+                await AuthService.logout(refresh: refresh);
+              }
               AuthState.logout();
               SavedEventsState.savedEvents.value = [];
               BookedEventsState.bookings.value = [];
+              if (!context.mounted) return;
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (_) => const HomeScreen()),
                 (route) => false,
@@ -290,28 +377,104 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuItem({
-    required IconData icon,
-    Color iconColor = const Color(0xFF424242), // Dark grey
-    required String title,
-    bool hideChevron = false,
-    VoidCallback? onTap,
-  }) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-      leading: Icon(icon, color: iconColor, size: 26),
-      title: Text(
-        title,
-        style: GoogleFonts.poppins(
-          fontSize: 15,
-          fontWeight: FontWeight.w500,
-          color: const Color(0xFF424242),
+  void _showAvatarOptions(BuildContext context, String avatarUrl) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 10),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.account_circle_outlined, color: Color(0xFF1A1A2E)),
+                title: Text(
+                  'View Profile Picture',
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF1A1A2E),
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _viewAvatar(context, avatarUrl);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.camera_alt_outlined, color: Color(0xFF1A1A2E)),
+                title: Text(
+                  'Change Profile Picture',
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF1A1A2E),
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const EditProfileScreen()),
+                  ).then((_) => setState(() {}));
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _viewAvatar(BuildContext context, String avatarUrl) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(20),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.network(
+                avatarUrl,
+                fit: BoxFit.contain,
+              ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: GestureDetector(
+                onTap: () => Navigator.pop(ctx),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.close, color: Colors.white, size: 20),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
-      trailing: hideChevron
-          ? null
-          : const Icon(Icons.chevron_right, color: Color(0xFF2196F3), size: 22), // Blue chevron
-      onTap: onTap,
     );
   }
 }

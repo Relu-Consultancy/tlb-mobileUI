@@ -1,54 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class NotificationScreen extends StatelessWidget {
+class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
 
-  static final List<Map<String, dynamic>> _notifications = [
+  @override
+  State<NotificationScreen> createState() => _NotificationScreenState();
+}
+
+class _NotificationScreenState extends State<NotificationScreen> {
+  final List<Map<String, dynamic>> _today = [
     {
-      'icon': Icons.local_offer_outlined,
-      'title': 'Special Offer!',
-      'subtitle': 'Get 20% off on all events this weekend. Use code TLB20.',
-      'time': '2 hours ago',
-      'color': const Color(0xFFFFC107),
+      'image': 'resources- tlb-ui/tlbAppIcon.png',
+      'bgColor': const Color(0xFFFFEDD5),
+      'title': 'Limited Time Cashback',
+      'subtitle': 'Get upto ',
+      'highlight': '₹100',
+      'subtitleEnd': ' cashback on selected venues',
+      'time': '11:00 AM',
+      'isNew': true,
     },
     {
-      'icon': Icons.event_available,
-      'title': 'Booking Confirmed',
-      'subtitle': 'Your booking for Halloween Party has been confirmed.',
-      'time': '1 day ago',
-      'color': const Color(0xFF4CAF50),
-    },
-    {
-      'icon': Icons.campaign_outlined,
-      'title': 'New Event Near You',
-      'subtitle': 'World Storytelling Day is happening at Embassy Int. Riding School.',
-      'time': '2 days ago',
-      'color': const Color(0xFF2196F3),
-    },
-    {
-      'icon': Icons.star_outline,
-      'title': 'Rate Your Experience',
-      'subtitle': 'How was the Kids Party event? Share your feedback.',
-      'time': '3 days ago',
-      'color': const Color(0xFFFF9800),
-    },
-    {
-      'icon': Icons.card_giftcard,
-      'title': 'Referral Bonus',
-      'subtitle': 'You earned ₹100 for referring a friend. Keep sharing!',
-      'time': '5 days ago',
-      'color': const Color(0xFF9C27B0),
+      'image': 'resources- tlb-ui/tlbAppIcon.png',
+      'bgColor': const Color(0xFFDCF5E4),
+      'title': 'Classes Rescheduled',
+      'subtitle': 'Quick Heads Up! Your Robotics Batch is Now 6–8 PM On Friday, May 12th',
+      'highlight': '',
+      'subtitleEnd': '',
+      'time': '08:00 AM',
+      'isNew': true,
     },
   ];
 
+  final List<Map<String, dynamic>> _yesterday = [
+    {
+      'image': 'resources- tlb-ui/tlbAppIcon.png',
+      'bgColor': const Color(0xFFFFF3CD),
+      'title': "Don't Miss  Weekend250!",
+      'subtitle': 'Flat ',
+      'highlight': '₹250',
+      'subtitleEnd': ' Off Weekend Bookings Valid Sat & Sun Only',
+      'time': '11:00 AM',
+      'isNew': false,
+    },
+    {
+      'image': 'resources- tlb-ui/tlbAppIcon.png',
+      'bgColor': const Color(0xFFE8F5FD),
+      'title': 'Inclusive Space Added',
+      'subtitle': 'New Sensory – Friendly Venues: Inclusive Bakery At Matunga!',
+      'highlight': '',
+      'subtitleEnd': '',
+      'time': '09:00 AM',
+      'isNew': false,
+    },
+  ];
+
+  int get _newCount => _today.where((n) => n['isNew'] == true).length;
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF2F2F7),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF2F2F7),
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
@@ -58,77 +72,186 @@ class NotificationScreen extends StatelessWidget {
         title: Text(
           'Notifications',
           style: GoogleFonts.poppins(
-            fontSize: 16,
+            fontSize: 18,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
         ),
-        centerTitle: true,
-      ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: _notifications.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          final n = _notifications[index];
-          return Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(14),
+        actions: [
+          TextButton(
+            onPressed: () => setState(() {
+              for (final n in _today) { n['isNew'] = false; }
+            }),
+            child: Text(
+              'Mark All as Read',
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFFFFB902),
+              ),
             ),
-            child: Row(
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 4),
+            // Summary line
+            RichText(
+              text: TextSpan(
+                style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600),
+                children: [
+                  const TextSpan(text: 'You have '),
+                  TextSpan(
+                    text: '$_newCount Notifications',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFFFFB902),
+                    ),
+                  ),
+                  const TextSpan(text: ' today.'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            _buildSectionLabel('Today'),
+            const SizedBox(height: 10),
+            ..._today.map((n) => _buildNotifCard(n)),
+
+            const SizedBox(height: 20),
+            _buildSectionLabel('Yesterday'),
+            const SizedBox(height: 10),
+            ..._yesterday.map((n) => _buildNotifCard(n)),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionLabel(String label) {
+    return Text(
+      label,
+      style: GoogleFonts.poppins(
+        fontSize: 14,
+        fontWeight: FontWeight.w700,
+        color: const Color(0xFF1A1A2E),
+      ),
+    );
+  }
+
+  Widget _buildNotifCard(Map<String, dynamic> n) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Icon container
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: n['bgColor'] as Color,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                n['image'] as String,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Icon(
+                  Icons.notifications_outlined,
+                  color: Colors.grey.shade500,
+                  size: 22,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: (n['color'] as Color).withOpacity(0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    n['icon'] as IconData,
-                    color: n['color'] as Color,
-                    size: 22,
+                Text(
+                  n['title'] as String,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1A1A2E),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        n['title'] as String,
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF1A1A2E),
-                        ),
+                const SizedBox(height: 3),
+                if ((n['highlight'] as String).isNotEmpty)
+                  RichText(
+                    text: TextSpan(
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                        height: 1.4,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        n['subtitle'] as String,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
-                          height: 1.4,
+                      children: [
+                        TextSpan(text: n['subtitle'] as String),
+                        TextSpan(
+                          text: n['highlight'] as String,
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFFFFB902),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        n['time'] as String,
-                        style: GoogleFonts.poppins(
-                          fontSize: 11,
-                          color: Colors.grey.shade400,
-                        ),
-                      ),
-                    ],
+                        TextSpan(text: n['subtitleEnd'] as String),
+                      ],
+                    ),
+                  )
+                else
+                  Text(
+                    n['subtitle'] as String,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                      height: 1.4,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                const SizedBox(height: 5),
+                Text(
+                  n['time'] as String,
+                  style: GoogleFonts.poppins(
+                    fontSize: 11,
+                    color: Colors.grey.shade400,
                   ),
                 ),
               ],
             ),
-          );
-        },
+          ),
+          if (n['isNew'] == true)
+            Container(
+              width: 8,
+              height: 8,
+              decoration: const BoxDecoration(
+                color: Color(0xFFFFB902),
+                shape: BoxShape.circle,
+              ),
+            ),
+        ],
       ),
     );
   }
