@@ -1,0 +1,11 @@
+﻿00:00 +0: loading E:/tlb-mobileUI/test/screens/account_settings_screen_test.dart
+00:00 +0: E:/tlb-mobileUI/test/screens/account_settings_screen_test.dart: AccountSettingsScreen Tests renders account settings correctly
+00:01 +1: E:/tlb-mobileUI/test/screens/change_password_screen_test.dart: ChangePasswordScreen Tests shows error when passwords do not match
+00:01 +2: E:/tlb-mobileUI/test/screens/change_password_screen_test.dart: ChangePasswordScreen Tests shows error when passwords do not match
+00:02 +3: E:/tlb-mobileUI/test/screens/change_password_screen_test.dart: ChangePasswordScreen Tests shows error when passwords do not match
+00:02 +4: E:/tlb-mobileUI/test/screens/change_password_screen_test.dart: ChangePasswordScreen Tests shows error when passwords do not match
+00:02 +5: E:/tlb-mobileUI/test/screens/edit_profile_screen_test.dart: EditProfileScreen Tests pre-fills fields from AuthState
+00:02 +6: E:/tlb-mobileUI/test/screens/edit_profile_screen_test.dart: EditProfileScreen Tests pre-fills fields from AuthState
+00:03 +7: E:/tlb-mobileUI/test/screens/edit_profile_screen_test.dart: EditProfileScreen Tests pre-fills fields from AuthState
+00:03 +8: E:/tlb-mobileUI/test/screens/edit_profile_screen_test.dart: EditProfileScreen Tests shows error if first name is empty on save
+00:03 +9: All tests passed!

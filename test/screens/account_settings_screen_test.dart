@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail_image_network/mocktail_image_network.dart';
 import 'package:tlb_mobile_ui/providers/auth_state.dart';
 import 'package:tlb_mobile_ui/screens/account_settings_screen.dart';
+import 'package:tlb_mobile_ui/screens/change_password_screen.dart';
 
 import '../helpers/test_setup.dart';
 
@@ -52,6 +53,17 @@ void main() {
 
         // UI should rebuild and still have the avatar
         expect(find.byType(CircleAvatar), findsOneWidget);
+      });
+    });
+
+    testWidgets('navigates to ChangePasswordScreen when tapped', (WidgetTester tester) async {
+      await mockNetworkImages(() async {
+        await pumpTLBApp(tester, const AccountSettingsScreen());
+
+        await tester.tap(find.text('Change Password'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ChangePasswordScreen), findsOneWidget);
       });
     });
   });
