@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -81,6 +83,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
     if (result['success'] == true) {
       await WalkthroughService.markAsNewUser();
+      if (!mounted) return;
       _showEmailVerificationDialog(email);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -168,9 +171,14 @@ class _SignupScreenState extends State<SignupScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _loading = false);
+      final msg = e is SocketException
+          ? 'No internet connection. Please check and try again.'
+          : e is TimeoutException
+              ? 'Connection timed out. Please try again.'
+              : 'Google sign-up failed. Please try again.';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Google sign-up error: ${e.toString()}'),
+          content: Text(msg),
           backgroundColor: const Color(0xFFE53935),
         ),
       );
@@ -385,7 +393,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(height: 24),
 
                   // ── Continue with Google ──────────────────────────────────
-                  _GoogleButton(onTap: _onGoogleSignUp),
+                  _GoogleButton(onTap: _loading ? null : _onGoogleSignUp),
 
                   const SizedBox(height: 22),
 
@@ -799,7 +807,7 @@ class _OrDivider extends StatelessWidget {
 }
 
 class _GoogleButton extends StatelessWidget {
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   const _GoogleButton({required this.onTap});
 
   @override

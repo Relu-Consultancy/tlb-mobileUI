@@ -43,4 +43,11 @@ class Responsive {
     final v = width(context) * fraction;
     return v > max ? max : v;
   }
+
+  /// Consistent horizontal screen padding (5 % of screen width, min 16 px).
+  static double hPad(BuildContext context) =>
+      (width(context) * 0.05).clamp(16.0, 24.0);
+
+  /// True for phones narrower than 360 dp (e.g. Galaxy A01, older Androids).
+  static bool isSmallPhone(BuildContext context) => width(context) < 360;
 }

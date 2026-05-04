@@ -156,6 +156,7 @@ class ExploreCategoriesGrid extends StatelessWidget {
     final category = categories[index];
     final gradientColors = category['gradient'] as List<Color>;
     final imageInset = (category['imageInset'] as double?) ?? 6.0;
+    final imageScale = (category['imageScale'] as double?) ?? 1.0;
 
     return GestureDetector(
       onTap: () => onCategoryTap?.call(index),
@@ -193,11 +194,18 @@ class ExploreCategoriesGrid extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(imageInset, imageInset, imageInset, 2),
-                  child: Image.asset(
-                    category['image'],
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.category, color: Colors.grey),
+                  child: ClipRect(
+                    child: Transform.scale(
+                      scale: imageScale,
+                      alignment: Alignment.bottomCenter,
+                      child: Image.asset(
+                        category['image'],
+                        fit: BoxFit.contain,
+                        alignment: Alignment.bottomCenter,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.category, color: Colors.grey),
+                      ),
+                    ),
                   ),
                 ),
               ),

@@ -38,6 +38,16 @@ class TLBApp extends StatelessWidget {
       title: 'TLB',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      // Clamp OS text-scaling to 1.0 so system "Large Text" settings
+      // cannot overflow fixed-height layouts across all 44 screens.
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: const TextScaler.linear(1.0),
+          ),
+          child: child!,
+        );
+      },
       home: const SplashScreen(nextScreen: HomeScreen()),
     );
   }

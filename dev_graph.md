@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-01 (Session 7)
+**Last Updated:** 2026-05-04 (Session 8)
 
 ---
 
@@ -717,3 +717,11 @@ shared_preferences: ^2.5.5     # Non-sensitive UX flag storage (isNewUser walkth
 | `AuthState.firstName` static getter — first word of `userName.value`, fallback `"User"` | `auth_state.dart` |
 | Hardcoded `"Hi Laxman,"` replaced with `"Hi ${AuthState.firstName},"` across all 5 profile sub-screens | `saved_events_screen.dart`, `your_reviews_screen.dart`, `help_centre_screen.dart`, `payment_settings_screen.dart`, `reminders_screen.dart` |
 | `AccountSettingsScreen` Personal Info row — avatar replaced with `NetworkImage(AuthState.avatarUrl)` + initials URL fallback; email replaced with `AuthState.userEmail`; wrapped in `ValueListenableBuilder<String?>` for live reactivity | `account_settings_screen.dart` |
+
+### Session 8 (Current)
+| Change | Files |
+|--------|-------|
+| Category screen tint container: switched from `color:` to `decoration: BoxDecoration(color: ..., borderRadius: BorderRadius.circular(16))`, opacity raised 0.10 → 0.15, padding changed to `symmetric(vertical: 12)` — fixes invisible tint on pastel accent colors | `category_events_screen.dart`, `category_classes_screen.dart`, `category_programs_screen.dart`, `category_venues_screen.dart` |
+| Category card active scale: 1.08 → 1.12; `AnimatedScale` curve changed `easeOutCubic` → `easeInOut` for stronger, symmetric enlargement feedback | `category_events_screen.dart`, `category_classes_screen.dart`, `category_programs_screen.dart`, `category_venues_screen.dart` |
+| `SignupScreen` network fixes: added `dart:async` + `dart:io` imports; `if (!mounted) return` guard after `await markAsNewUser()` in `_onSignUp`; `_onGoogleSignUp` catch now maps `SocketException` / `TimeoutException` to friendly user-facing strings instead of raw `e.toString()`; `_GoogleButton.onTap` type widened to `VoidCallback?`; call site passes `null` when `_loading` is true to prevent concurrent signup requests | `signup_screen.dart` |
+| Walkthrough intro overlay title corrected: "The Long Broadway" → "The Little Broadway" | `walkthrough_intro_overlay.dart` |

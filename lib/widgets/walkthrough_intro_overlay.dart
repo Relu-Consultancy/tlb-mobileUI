@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 
 class WalkthroughIntroOverlay extends StatefulWidget {
   final VoidCallback onNext;
@@ -55,8 +56,15 @@ class _WalkthroughIntroOverlayState extends State<WalkthroughIntroOverlay>
               child: ScaleTransition(
                 scale: _scale,
                 child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 28),
-                  padding: const EdgeInsets.fromLTRB(28, 36, 28, 24),
+                  margin: EdgeInsets.symmetric(
+                    horizontal: Responsive.w(context, 28, min: 20),
+                  ),
+                  padding: EdgeInsets.fromLTRB(
+                    Responsive.w(context, 28, min: 20),
+                    Responsive.h(context, 36, min: 28),
+                    Responsive.w(context, 28, min: 20),
+                    Responsive.h(context, 24, min: 18),
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF1A1A2E),
                     borderRadius: BorderRadius.circular(24),
@@ -79,9 +87,9 @@ class _WalkthroughIntroOverlayState extends State<WalkthroughIntroOverlay>
                       _IconBadge(),
                       const SizedBox(height: 26),
                       Text(
-                        'Welcome to\nThe Long Broadway',
+                        'Welcome to\nThe Little Broadway',
                         style: GoogleFonts.poppins(
-                          fontSize: 22,
+                          fontSize: Responsive.sp(context, 22),
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
                           height: 1.3,
@@ -94,7 +102,7 @@ class _WalkthroughIntroOverlayState extends State<WalkthroughIntroOverlay>
                         'explore events, join classes, participate in programs, '
                         'and find amazing venues around you.',
                         style: GoogleFonts.poppins(
-                          fontSize: 13.5,
+                          fontSize: Responsive.sp(context, 13.5),
                           color: Colors.white.withOpacity(0.72),
                           height: 1.65,
                         ),
@@ -117,7 +125,7 @@ class _WalkthroughIntroOverlayState extends State<WalkthroughIntroOverlay>
                           child: Text(
                             "Let's Go  →",
                             style: GoogleFonts.poppins(
-                              fontSize: 15,
+                              fontSize: Responsive.sp(context, 15),
                               fontWeight: FontWeight.w700,
                               color: const Color(0xFF1A1A2E),
                             ),
