@@ -30,8 +30,17 @@ class SpotlightSection extends StatelessWidget {
                 event: DummyData.spotlightEvents[index],
                 width: Responsive.cardWidth(context, fraction: 0.66, max: 260),
                 imageHeight: 210,
+                showBoxShadow: false,
               );
             },
+          ),
+        ),
+        const SizedBox(height: 6),
+        Center(
+          child: Image.asset(
+            'resources- tlb-ui/shadow_underneath.png',
+            width: Responsive.cardWidth(context, fraction: 0.66, max: 260),
+            fit: BoxFit.contain,
           ),
         ),
       ],

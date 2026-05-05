@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:async';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import '../providers/location_state.dart';
 import '../core/app_colors.dart';
 
@@ -12,14 +15,15 @@ class LocationScreen extends StatefulWidget {
 
 class _LocationScreenState extends State<LocationScreen> {
   final TextEditingController _searchController = TextEditingController();
+  bool _isLoadingLocation = false;
 
   final List<Map<String, dynamic>> _popularCities = [
     {'name': 'Delhi NCR', 'icon': Icons.account_balance, 'image': 'assets/images/new_home/india-gate.png'},
     {'name': 'Mumbai', 'icon': Icons.apartment, 'image': 'assets/images/new_home/gateway.png'},
     {'name': 'Hyderabad', 'icon': Icons.location_city, 'image': 'assets/images/new_home/charminar.png'},
-    {'name': 'Kolkata', 'icon': Icons.museum},
-    {'name': 'Pune', 'icon': Icons.villa},
-    {'name': 'Bengaluru', 'icon': Icons.account_balance},
+    {'name': 'Kolkata', 'icon': Icons.museum, 'image': 'location_screen_resources/kolkata.png'},
+    {'name': 'Pune', 'icon': Icons.villa, 'image': 'location_screen_resources/pune.png'},
+    {'name': 'Bengaluru', 'icon': Icons.account_balance, 'image': 'location_screen_resources/bangalore.png'},
   ];
 
   final List<String> _allCities = [
@@ -30,16 +34,26 @@ class _LocationScreenState extends State<LocationScreen> {
     'Amritsar',
     'Bengaluru',
     'Bhopal',
+    'Chandigarh',
     'Chennai',
+    'Coimbatore',
     'Delhi NCR',
     'Goa',
+    'Guwahati',
     'Hyderabad',
+    'Indore',
     'Jaipur',
+    'Kanpur',
     'Kochi',
     'Kolkata',
     'Lucknow',
     'Mumbai',
+    'Nagpur',
+    'Patna',
     'Pune',
+    'Surat',
+    'Vadodara',
+    'Visakhapatnam',
   ];
 
   @override
@@ -51,6 +65,106 @@ class _LocationScreenState extends State<LocationScreen> {
   void _selectCity(String city) {
     LocationState().setCity(city);
     Navigator.pop(context);
+  }
+
+  Future<void> _fetchCurrentLocation() async {
+    setState(() => _isLoadingLocation = true);
+
+    try {
+      // Check if location services are enabled
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Location services are disabled. Please enable GPS.')),
+        );
+        return;
+      }
+
+      // Check / request permission — triggers the Android permission dialog
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location permission denied.')),
+          );
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (!mounted) return;
+        final opened = await Geolocator.openAppSettings();
+        if (!opened && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please enable location permission from app settings.')),
+          );
+        }
+        return;
+      }
+
+      // Fetch position with a 15-second timeout to avoid infinite loading
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium),
+      ).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () => throw TimeoutException('GPS timed out'),
+      );
+
+      final placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      ).timeout(const Duration(seconds: 10));
+
+      if (placemarks.isNotEmpty && mounted) {
+        final p = placemarks.first;
+        final rawCity = p.locality ?? p.subAdministrativeArea ?? p.administrativeArea ?? '';
+        final matched = _matchToKnownCity(rawCity);
+        _selectCity(matched ?? rawCity);
+      }
+    } on TimeoutException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Location request timed out. Please try again.')),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not determine your location. Please try again.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoadingLocation = false);
+    }
+  }
+
+  /// Tries to map a raw geocoded city name to a known city in the app's list.
+  String? _matchToKnownCity(String raw) {
+    final lower = raw.toLowerCase().trim();
+    if (lower.isEmpty) return null;
+
+    // Delhi region special case
+    if (['delhi', 'new delhi', 'gurugram', 'gurgaon', 'noida', 'faridabad', 'ghaziabad']
+        .any((k) => lower.contains(k))) {
+      return 'Delhi NCR';
+    }
+
+    // Exact match (case-insensitive)
+    for (final city in _allCities) {
+      if (city.toLowerCase() == lower) return city;
+    }
+
+    // Substring match
+    for (final city in _allCities) {
+      if (lower.contains(city.toLowerCase()) || city.toLowerCase().contains(lower)) {
+        return city;
+      }
+    }
+
+    return null;
   }
 
   @override
@@ -124,10 +238,19 @@ class _LocationScreenState extends State<LocationScreen> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton.icon(
-                onPressed: () => _selectCity('Sonipat'), // Dummy current location
-                icon: const Icon(Icons.my_location, color: Color(0xFF1A1A2E), size: 20),
+                onPressed: _isLoadingLocation ? null : _fetchCurrentLocation,
+                icon: _isLoadingLocation
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1A1A2E)),
+                        ),
+                      )
+                    : const Icon(Icons.my_location, color: Color(0xFF1A1A2E), size: 20),
                 label: Text(
-                  'Use current location',
+                  _isLoadingLocation ? 'Fetching location...' : 'Use current location',
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -135,7 +258,7 @@ class _LocationScreenState extends State<LocationScreen> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryLight, // #FFCC02 Bright Yellow
+                  backgroundColor: AppColors.primaryLight,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -164,7 +287,7 @@ class _LocationScreenState extends State<LocationScreen> {
                 crossAxisCount: 3,
                 mainAxisSpacing: 12,
                 crossAxisSpacing: 12,
-                childAspectRatio: 0.9, // Slightly taller cards
+                childAspectRatio: 0.78,
               ),
               itemCount: _popularCities.length,
               itemBuilder: (context, index) {
@@ -182,20 +305,20 @@ class _LocationScreenState extends State<LocationScreen> {
                         if (city.containsKey('image'))
                           Image.asset(
                             city['image'] as String,
-                            color: const Color(0xFFE0A000), // Dark yellow
-                            height: 42,
+                            color: const Color(0xFFE0A000),
+                            height: 58,
                           )
                         else
                           Icon(
                             city['icon'] as IconData,
-                            color: const Color(0xFFE0A000), // Match the dark yellow
-                            size: 42,
+                            color: const Color(0xFFE0A000),
+                            size: 58,
                           ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 14),
                         Text(
                           city['name'] as String,
                           style: GoogleFonts.poppins(
-                            fontSize: 11,
+                            fontSize: 13,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF1A1A2E),
                           ),

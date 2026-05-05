@@ -43,18 +43,7 @@ class FloatingNavbar extends StatelessWidget {
         border: Border.all(color: Colors.white, width: 2),
         color: Colors.white,
         borderRadius: BorderRadius.circular(50),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-          BoxShadow(
-            color: Colors.white.withOpacity(0.8),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
-          ),
-        ],
+        boxShadow: const [],
       ),
       clipBehavior: Clip.antiAlias,
       child: SingleChildScrollView(
@@ -83,13 +72,7 @@ class FloatingNavbar extends StatelessWidget {
                       color: isActive ? const Color(0xFFFFCC00) : Colors.transparent,
                       border: isActive ? Border.all(color: Colors.white, width: 2) : null,
                       borderRadius: BorderRadius.circular(30),
-                      boxShadow: isActive ? [
-                        BoxShadow(
-                          color: const Color(0xFFFFCC00).withOpacity(0.4),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        )
-                      ] : null,
+                      boxShadow: null,
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,

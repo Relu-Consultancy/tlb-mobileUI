@@ -500,6 +500,21 @@ class DummyData {
       venue: 'Easy & fun recipes for tiny hands!',
       imagePath: 'assets/images/new_home/spotlight_banner.jpeg',
     ),
+    EventModel(
+      title: 'World Book Day',
+      venue: 'Celebrate the joy of reading together!',
+      imagePath: 'resources- tlb-ui/worldbookday.png',
+    ),
+    EventModel(
+      title: 'Spotlight',
+      venue: 'Discover what\'s trending near you',
+      imagePath: 'resources- tlb-ui/spot.jpg',
+    ),
+    EventModel(
+      title: 'Halloween Fiesta',
+      venue: 'Spooky fun for the whole family!',
+      imagePath: 'resources- tlb-ui/hallowween.jpg',
+    ),
   ];
 
   static const List<EventModel> classesScreenBanners = [

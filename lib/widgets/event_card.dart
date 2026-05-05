@@ -9,12 +9,14 @@ class EventCard extends StatelessWidget {
   final EventModel event;
   final double width;
   final double imageHeight;
+  final bool showBoxShadow;
 
   const EventCard({
     super.key,
     required this.event,
     this.width = 260,
     this.imageHeight = 200,
+    this.showBoxShadow = true,
   });
 
   @override
@@ -29,13 +31,15 @@ class EventCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.cardBackground,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: showBoxShadow
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

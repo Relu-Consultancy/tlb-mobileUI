@@ -51,7 +51,7 @@ class HomeHeader extends StatelessWidget {
           ),
         ),
 
-        // ── Layer 3: Content ────────────────────────────────────────────
+        // ── Layer 2: Content ────────────────────────────────────────────
         SafeArea(
           bottom: false,
           child: Padding(

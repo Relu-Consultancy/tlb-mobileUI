@@ -83,13 +83,32 @@ class _EventsScreenState extends State<EventsScreen> {
         children: [
           Column(
             children: [
-              const HomeHeader(),
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFFFFF5E0),
+                      Color(0xFFFFF5E0),
+                      Color(0xFFFFFAF0),
+                      Colors.white,
+                    ],
+                    stops: [0.0, 0.55, 0.80, 1.0],
+                  ),
+                ),
+                child: const Column(
+                  children: [
+                    HomeHeader(),
+                    SizedBox(height: 16),
+                  ],
+                ),
+              ),
               Expanded(
                 child: SingleChildScrollView(
                   physics: const ClampingScrollPhysics(),
                   child: Column(
                     children: [
-                      const SizedBox(height: 16),
                       // Spotlight Banner — overlay style (rounded, gradient, title + CTA)
                       RepaintBoundary(
                         child: BannerCarousel(
