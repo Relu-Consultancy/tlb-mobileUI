@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/responsive.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
 
@@ -36,7 +37,7 @@ class SpecialFocusCard extends StatelessWidget {
           ],
         ),
         child: SizedBox(
-          height: 155,
+          height: Responsive.h(context, 155, min: 130),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -162,11 +163,11 @@ class SpecialFocusCard extends StatelessWidget {
                 borderRadius: const BorderRadius.horizontal(right: Radius.circular(20)),
                 child: Image.asset(
                   event.imagePath,
-                  width: 120,
+                  width: Responsive.w(context, 120, min: 96),
                   height: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
-                    width: 120,
+                    width: Responsive.w(context, 120, min: 96),
                     color: accentColor.withOpacity(0.12),
                     child: Icon(Icons.favorite_border_rounded, size: 40, color: accentColor),
                   ),

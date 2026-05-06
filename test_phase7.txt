@@ -1,0 +1,288 @@
+﻿00:00 +0: loading E:/tlb-mobileUI/test/screens/class_detail_screen_test.dart
+00:00 +0: E:/tlb-mobileUI/test/screens/class_detail_screen_test.dart: ClassDetailScreen Tests renders event details correctly
+00:02 +1: E:/tlb-mobileUI/test/screens/class_detail_screen_test.dart: ClassDetailScreen Tests renders event details correctly
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 2 widgets with text "Test Venue": [
+            Text("Test Venue", inherit: true, color: Color(alpha: 1.0000, red: 0.1020, green:
+0.1020, blue: 0.1804, colorSpace: ColorSpace.sRGB), family: Poppins_regular, familyFallback:
+[Poppins], size: 13.0, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+            Text("Test Venue", inherit: true, color: Color(alpha: 1.0000, red: 1.0000, green:
+1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), family: Poppins_500, familyFallback: [Poppins],
+size: 13.0, weight: 500, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+          ]>
+   Which: is too many
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (file:///E:/tlb-mobileUI/test/screens/class_detail_screen_test.dart:24:9)
+<asynchronous suspension>
+#5      main.<anonymous closure>.<anonymous closure> (file:///E:/tlb-mobileUI/test/screens/class_detail_screen_test.dart:20:7)
+<asynchronous suspension>
+#6      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///E:/tlb-mobileUI/test/screens/class_detail_screen_test.dart line 24
+The test description was:
+  renders event details correctly
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:03 +1 -1: E:/tlb-mobileUI/test/screens/venue_detail_screen_test.dart: VenueDetailScreen Tests renders venue details correctly
+00:03 +1 -1: E:/tlb-mobileUI/test/screens/class_detail_screen_test.dart: ClassDetailScreen Tests renders event details correctly [E]
+  Test failed. See exception logs above.
+  The test description was: renders event details correctly
+  
+00:03 +2 -1: E:/tlb-mobileUI/test/screens/venue_detail_screen_test.dart: VenueDetailScreen Tests renders venue details correctly
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 2 widgets with text "Magic Land": [
+            Text("Magic Land", inherit: true, color: Color(alpha: 1.0000, red: 0.1020, green:
+0.1020, blue: 0.1804, colorSpace: ColorSpace.sRGB), family: Poppins_regular, familyFallback:
+[Poppins], size: 13.0, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+            Text("Magic Land", inherit: true, color: Color(alpha: 1.0000, red: 1.0000, green:
+1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB), family: Poppins_500, familyFallback: [Poppins],
+size: 13.0, weight: 500, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+          ]>
+   Which: is too many
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (file:///E:/tlb-mobileUI/test/screens/venue_detail_screen_test.dart:25:9)
+<asynchronous suspension>
+#5      main.<anonymous closure>.<anonymous closure> (file:///E:/tlb-mobileUI/test/screens/venue_detail_screen_test.dart:21:7)
+<asynchronous suspension>
+#6      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///E:/tlb-mobileUI/test/screens/venue_detail_screen_test.dart line 25
+The test description was:
+  renders venue details correctly
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:04 +2 -2: E:/tlb-mobileUI/test/screens/category_events_screen_test.dart: CategoryEventsScreen Tests renders category title and events
+00:04 +2 -2: E:/tlb-mobileUI/test/screens/venue_detail_screen_test.dart: VenueDetailScreen Tests renders venue details correctly [E]
+  Test failed. See exception logs above.
+  The test description was: renders venue details correctly
+  
+00:05 +2 -2: E:/tlb-mobileUI/test/screens/category_events_screen_test.dart: CategoryEventsScreen Tests renders category title and events
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 2 widgets with text "Arts & Crafts": [
+            Text("Arts & Crafts", inherit: true, color: Color(alpha: 1.0000, red: 0.1020, green:
+0.1020, blue: 0.1804, colorSpace: ColorSpace.sRGB), family: Poppins_700, familyFallback: [Poppins],
+size: 18.0, weight: 700, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+            Text("Arts & Crafts", inherit: true, color: Color(alpha: 1.0000, red: 0.1020, green:
+0.1020, blue: 0.1804, colorSpace: ColorSpace.sRGB), family: Poppins_700, familyFallback: [Poppins],
+size: 9.5, weight: 700, height: 1.2x, textAlign: center, overflow: ellipsis, maxLines: 2,
+dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+          ]>
+   Which: is too many
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (file:///E:/tlb-mobileUI/test/screens/category_events_screen_test.dart:17:9)
+<asynchronous suspension>
+#5      main.<anonymous closure>.<anonymous closure> (file:///E:/tlb-mobileUI/test/screens/category_events_screen_test.dart:12:7)
+<asynchronous suspension>
+#6      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///E:/tlb-mobileUI/test/screens/category_events_screen_test.dart line 17
+The test description was:
+  renders category title and events
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:05 +2 -3: E:/tlb-mobileUI/test/screens/category_programs_screen_test.dart: CategoryProgramsScreen Tests renders category title and programs
+00:05 +2 -3: E:/tlb-mobileUI/test/screens/category_events_screen_test.dart: CategoryEventsScreen Tests renders category title and events [E]
+  Test failed. See exception logs above.
+  The test description was: renders category title and events
+  
+00:05 +2 -3: E:/tlb-mobileUI/test/screens/category_programs_screen_test.dart: CategoryProgramsScreen Tests renders category title and programs
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 2 widgets with text "Future Tech & AI": [
+            Text("Future Tech & AI", inherit: true, color: Color(alpha: 1.0000, red: 0.1020, green:
+0.1020, blue: 0.1804, colorSpace: ColorSpace.sRGB), family: Poppins_700, familyFallback: [Poppins],
+size: 18.0, weight: 700, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+            Text("Future Tech & AI", inherit: true, color: Color(alpha: 1.0000, red: 0.1020, green:
+0.1020, blue: 0.1804, colorSpace: ColorSpace.sRGB), family: Poppins_700, familyFallback: [Poppins],
+size: 9.5, weight: 700, height: 1.2x, textAlign: center, overflow: ellipsis, maxLines: 2,
+dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+          ]>
+   Which: is too many
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (file:///E:/tlb-mobileUI/test/screens/category_programs_screen_test.dart:17:9)
+<asynchronous suspension>
+#5      main.<anonymous closure>.<anonymous closure> (file:///E:/tlb-mobileUI/test/screens/category_programs_screen_test.dart:12:7)
+<asynchronous suspension>
+#6      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///E:/tlb-mobileUI/test/screens/category_programs_screen_test.dart line 17
+The test description was:
+  renders category title and programs
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:05 +2 -4: E:/tlb-mobileUI/test/screens/category_venues_screen_test.dart: CategoryVenuesScreen Tests renders category title and venues
+00:05 +2 -4: E:/tlb-mobileUI/test/screens/category_programs_screen_test.dart: CategoryProgramsScreen Tests renders category title and programs [E]
+  Test failed. See exception logs above.
+  The test description was: renders category title and programs
+  
+00:06 +2 -4: E:/tlb-mobileUI/test/screens/venue_detail_screen_test.dart: VenueDetailScreen Tests shows login sheet when Plan Event is tapped and not logged in
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: at least one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "Login": []>
+   Which: means none were found but some were expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (file:///E:/tlb-mobileUI/test/screens/venue_detail_screen_test.dart:41:9)
+<asynchronous suspension>
+#5      main.<anonymous closure>.<anonymous closure> (file:///E:/tlb-mobileUI/test/screens/venue_detail_screen_test.dart:34:7)
+<asynchronous suspension>
+#6      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///E:/tlb-mobileUI/test/screens/venue_detail_screen_test.dart line 41
+The test description was:
+  shows login sheet when Plan Event is tapped and not logged in
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:06 +2 -5: E:/tlb-mobileUI/test/screens/category_venues_screen_test.dart: CategoryVenuesScreen Tests renders category title and venues
+00:06 +2 -5: E:/tlb-mobileUI/test/screens/venue_detail_screen_test.dart: VenueDetailScreen Tests shows login sheet when Plan Event is tapped and not logged in [E]
+  Test failed. See exception logs above.
+  The test description was: shows login sheet when Plan Event is tapped and not logged in
+  
+00:06 +2 -5: E:/tlb-mobileUI/test/screens/category_venues_screen_test.dart: CategoryVenuesScreen Tests renders category title and venues
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 2 widgets with text "Play & Adventure": [
+            Text("Play & Adventure", inherit: true, color: Color(alpha: 1.0000, red: 0.1020, green:
+0.1020, blue: 0.1804, colorSpace: ColorSpace.sRGB), family: Poppins_700, familyFallback: [Poppins],
+size: 18.0, weight: 700, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+            Text("Play & Adventure", inherit: true, color: Color(alpha: 1.0000, red: 0.1020, green:
+0.1020, blue: 0.1804, colorSpace: ColorSpace.sRGB), family: Poppins_700, familyFallback: [Poppins],
+size: 9.5, weight: 700, height: 1.2x, textAlign: center, overflow: ellipsis, maxLines: 2,
+dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+          ]>
+   Which: is too many
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (file:///E:/tlb-mobileUI/test/screens/category_venues_screen_test.dart:17:9)
+<asynchronous suspension>
+#5      main.<anonymous closure>.<anonymous closure> (file:///E:/tlb-mobileUI/test/screens/category_venues_screen_test.dart:12:7)
+<asynchronous suspension>
+#6      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///E:/tlb-mobileUI/test/screens/category_venues_screen_test.dart line 17
+The test description was:
+  renders category title and venues
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:06 +2 -6: E:/tlb-mobileUI/test/screens/category_events_screen_test.dart: CategoryEventsScreen Tests switching category updates the UI
+00:06 +2 -6: E:/tlb-mobileUI/test/screens/category_venues_screen_test.dart: CategoryVenuesScreen Tests renders category title and venues [E]
+  Test failed. See exception logs above.
+  The test description was: renders category title and venues
+  
+00:06 +2 -6: E:/tlb-mobileUI/test/screens/category_events_screen_test.dart: CategoryEventsScreen Tests switching category updates the UI
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 2 widgets with text "Performing Arts": [
+            Text("Performing Arts", inherit: true, color: Color(alpha: 1.0000, red: 0.1020, green:
+0.1020, blue: 0.1804, colorSpace: ColorSpace.sRGB), family: Poppins_700, familyFallback: [Poppins],
+size: 18.0, weight: 700, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+            Text("Performing Arts", inherit: true, color: Color(alpha: 1.0000, red: 0.1020, green:
+0.1020, blue: 0.1804, colorSpace: ColorSpace.sRGB), family: Poppins_700, familyFallback: [Poppins],
+size: 9.5, weight: 700, height: 1.2x, textAlign: center, overflow: ellipsis, maxLines: 2,
+dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+          ]>
+   Which: is too many
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (file:///E:/tlb-mobileUI/test/screens/category_events_screen_test.dart:37:9)
+<asynchronous suspension>
+#5      main.<anonymous closure>.<anonymous closure> (file:///E:/tlb-mobileUI/test/screens/category_events_screen_test.dart:28:7)
+<asynchronous suspension>
+#6      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///E:/tlb-mobileUI/test/screens/category_events_screen_test.dart line 37
+The test description was:
+  switching category updates the UI
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:06 +2 -7: E:/tlb-mobileUI/test/screens/category_programs_screen_test.dart: CategoryProgramsScreen Tests switching category updates the UI
+00:06 +2 -7: E:/tlb-mobileUI/test/screens/category_events_screen_test.dart: CategoryEventsScreen Tests switching category updates the UI [E]
+  Test failed. See exception logs above.
+  The test description was: switching category updates the UI
+  
+00:06 +3 -7: E:/tlb-mobileUI/test/screens/category_venues_screen_test.dart: CategoryVenuesScreen Tests switching category updates the UI
+ΓòÉΓòÉΓòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Γò₧ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 2 widgets with text "Sports & Active": [
+            Text("Sports & Active", inherit: true, color: Color(alpha: 1.0000, red: 0.1020, green:
+0.1020, blue: 0.1804, colorSpace: ColorSpace.sRGB), family: Poppins_700, familyFallback: [Poppins],
+size: 18.0, weight: 700, dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+            Text("Sports & Active", inherit: true, color: Color(alpha: 1.0000, red: 0.1020, green:
+0.1020, blue: 0.1804, colorSpace: ColorSpace.sRGB), family: Poppins_700, familyFallback: [Poppins],
+size: 9.5, weight: 700, height: 1.2x, textAlign: center, overflow: ellipsis, maxLines: 2,
+dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery]),
+          ]>
+   Which: is too many
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (file:///E:/tlb-mobileUI/test/screens/category_venues_screen_test.dart:35:9)
+<asynchronous suspension>
+#5      main.<anonymous closure>.<anonymous closure> (file:///E:/tlb-mobileUI/test/screens/category_venues_screen_test.dart:26:7)
+<asynchronous suspension>
+#6      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///E:/tlb-mobileUI/test/screens/category_venues_screen_test.dart line 35
+The test description was:
+  switching category updates the UI
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+00:08 +3 -8: E:/tlb-mobileUI/test/screens/category_venues_screen_test.dart: CategoryVenuesScreen Tests switching category updates the UI [E]
+  Test failed. See exception logs above.
+  The test description was: switching category updates the UI
+  
+00:08 +3 -8: Some tests failed.

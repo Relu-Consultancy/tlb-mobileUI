@@ -25,7 +25,7 @@ class TlbSignatureSection extends StatelessWidget {
             itemBuilder: (context, index) {
               final event = DummyData.tlbSignature[index];
               return Container(
-                width: Responsive.cardWidth(context, fraction: 0.72, max: 280),
+                width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,

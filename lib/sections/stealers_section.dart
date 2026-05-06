@@ -24,7 +24,7 @@ class StealersSection extends StatelessWidget {
             itemBuilder: (context, index) {
               final event = DummyData.stealers[index];
               return Container(
-                width: Responsive.cardWidth(context, fraction: 0.64, max: 250),
+                width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,

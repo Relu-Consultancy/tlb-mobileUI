@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-04 (Session 8)
+**Last Updated:** 2026-05-05 (Session 9)
 
 ---
 
@@ -153,7 +153,7 @@ HomeScreen (sidebar/action flows)
 | File | Description |
 |------|-------------|
 | `search_screen.dart` | Search with filter bottom sheet (Age Group, Mode, Location dropdowns, Date chips) |
-| `location_screen.dart` | City selection |
+| `location_screen.dart` | City selection — popular cities grid (6 cards with images), all metro cities list (alphabetical), real GPS detection via `geolocator` + `geocoding`, Android runtime permission flow, `_matchToKnownCity()` fuzzy matching with Delhi NCR special-case |
 | `gallery_screen.dart` | Full-screen image gallery |
 | `organizer_profile_screen.dart` | Event organizer detail |
 | ~~`shops_screen.dart`~~ | ~~Merchandise/shops~~ — **deleted** (dead screen) |
@@ -295,6 +295,7 @@ resources- tlb-ui/venues_page/
 resources- tlb-ui/events_page/
 resources- tlb-ui/homescreen-categoryicons/  — events.png, classes.png, programs.png, venues.png
 resources- tlb-ui/venues_page/yourway/
+location_screen_resources/  — City images: delhi.png, mumbai.png, hyderabad.png, kolkata.png, pune.png, bangalore.png
 google_fonts/           — Bundled Poppins font (runtime fetching disabled)
 ```
 
@@ -616,6 +617,8 @@ firebase_auth: ^5.3.1          # Auth (Google Sign-In)
 google_sign_in: ^6.2.1         # Google OAuth
 showcaseview: ^5.0.2           # Onboarding walkthrough (controller-based v5)
 shared_preferences: ^2.5.5     # Non-sensitive UX flag storage (isNewUser walkthrough flag)
+geolocator: ^13.0.4            # GPS permission flow + getCurrentPosition()
+geocoding: ^3.0.0              # placemarkFromCoordinates() — lat/lng → city name
 ```
 
 ---
@@ -725,3 +728,27 @@ shared_preferences: ^2.5.5     # Non-sensitive UX flag storage (isNewUser walkth
 | Category card active scale: 1.08 → 1.12; `AnimatedScale` curve changed `easeOutCubic` → `easeInOut` for stronger, symmetric enlargement feedback | `category_events_screen.dart`, `category_classes_screen.dart`, `category_programs_screen.dart`, `category_venues_screen.dart` |
 | `SignupScreen` network fixes: added `dart:async` + `dart:io` imports; `if (!mounted) return` guard after `await markAsNewUser()` in `_onSignUp`; `_onGoogleSignUp` catch now maps `SocketException` / `TimeoutException` to friendly user-facing strings instead of raw `e.toString()`; `_GoogleButton.onTap` type widened to `VoidCallback?`; call site passes `null` when `_loading` is true to prevent concurrent signup requests | `signup_screen.dart` |
 | Walkthrough intro overlay title corrected: "The Long Broadway" → "The Little Broadway" | `walkthrough_intro_overlay.dart` |
+
+### Session 9 (Current)
+| Change | Files |
+|--------|-------|
+| `SectionDividerWidget` decorative line width extended: 70 → 110px for visual emphasis | `lib/widgets/section_divider_widget.dart` |
+| Spotlight `SectionDividerWidget` moved out of fixed gradient container into `SingleChildScrollView` — title now scrolls with content instead of being pinned to header | `lib/screens/home_screen.dart` |
+| Banner carousel `height` + `fixedCardWidth` replaced with `Responsive.h` / `Responsive.w` calls | `lib/screens/home_screen.dart` |
+| 10 metro cities added to `_allCities` list (alphabetical): Chandigarh, Coimbatore, Guwahati, Indore, Kanpur, Nagpur, Patna, Surat, Vadodara, Visakhapatnam | `lib/screens/location_screen.dart` |
+| Real GPS location detection added: `geolocator` permission flow (`checkPermission` → `requestPermission` → `openAppSettings`), `getCurrentPosition` with 15s timeout, `geocoding` reverse geocoding with 10s timeout | `lib/screens/location_screen.dart` |
+| GPS loading spinner fixed: `_isLoadingLocation` set to `true` at function entry (not mid-flow), both `getCurrentPosition` and `placemarkFromCoordinates` wrapped with `.timeout()`, `TimeoutException` caught separately, `finally` block always resets flag | `lib/screens/location_screen.dart` |
+| `_matchToKnownCity()` added: handles Delhi NCR alias set (New Delhi, Gurugram, Noida, etc.) then exact match then substring match against `_allCities` | `lib/screens/location_screen.dart` |
+| Android permissions added: `ACCESS_FINE_LOCATION` + `ACCESS_COARSE_LOCATION` | `android/app/src/main/AndroidManifest.xml` |
+| Popular cities cards updated: Kolkata → `kolkata.png`, Pune → `pune.png`, Bengaluru → `bangalore.png`; `childAspectRatio` 0.9 → 0.78; image height 42 → 58; font size 11 → 13; gap 12 → 14 | `lib/screens/location_screen.dart` |
+| `location_screen_resources/` registered as asset directory | `pubspec.yaml` |
+| Responsive refactor across 9 files — hardcoded px replaced with `Responsive` utility calls; no visual design changes; `textScaler: 1.0` clamp in `main.dart` already covers font scaling | multiple files (see below) |
+| → `home_screen.dart`: `Responsive.h(context, 421.0)` + `Responsive.w(context, 329.27)` for banner | `lib/screens/home_screen.dart` |
+| → `build_skill_card.dart`: card `width: 290` → `Responsive.w(context, 290, min: 240)`, image `width: 120` → `Responsive.w(context, 120, min: 96)` | `lib/widgets/build_skill_card.dart` |
+| → `new_on_tlb_card.dart`: image `width: 120` → `Responsive.w(context, 120, min: 96)` | `lib/widgets/new_on_tlb_card.dart` |
+| → `special_focus_card.dart`: `SizedBox(height: 155)` → `Responsive.h(context, 155, min: 130)`, image `width: 120` → `Responsive.w(context, 120, min: 96)` | `lib/widgets/special_focus_card.dart` |
+| → `categories_grid.dart`: category card `height: 110` → `Responsive.h(context, 110, min: 95)` | `lib/widgets/categories_grid.dart` |
+| → `event_card_with_rating.dart`: button `height: 32` → `Responsive.h(context, 32, min: 28)` | `lib/widgets/event_card_with_rating.dart` |
+| → `family_feels_section.dart`: button `height: 36` → `Responsive.h(context, 36, min: 32)` | `lib/sections/family_feels_section.dart` |
+| → `events_screen.dart`: `SizedBox(width: 240)` → `Responsive.cardWidth(context, fraction: 0.62, max: 240)` | `lib/screens/events_screen.dart` |
+| → `programs_screen.dart`: `width: 220` → `Responsive.cardWidth(context, fraction: 0.56, max: 220)`; `height: 160` × 2 → `Responsive.h(context, 160, min: 140)` | `lib/screens/programs_screen.dart` |

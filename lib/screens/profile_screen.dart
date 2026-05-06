@@ -43,19 +43,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return ValueListenableBuilder<String?>(
+      valueListenable: AuthState.userName,
+      builder: (context, _, __) => _buildScaffold(context),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context) {
     final profile = AuthState.userData?['profile'] as Map<String, dynamic>?;
     final userName = AuthState.userName.value ?? 'User';
     final userEmail = AuthState.userEmail ?? 'No email provided';
-    
+
     String avatarUrl;
     final rawAvatar = profile?['avatar_url'] as String?;
     if (rawAvatar != null && rawAvatar.isNotEmpty) {
       avatarUrl = rawAvatar;
     } else {
+      final firstChar = AuthState.userEmail?.isNotEmpty == true
+          ? AuthState.userEmail!.substring(0, 1).toUpperCase()
+          : 'U';
       final initials = Uri.encodeComponent(
         ((profile?['first_name'] as String? ?? '').isNotEmpty
             ? profile!['first_name'] as String
-            : AuthState.userEmail?.substring(0, 1).toUpperCase() ?? 'U'),
+            : firstChar),
       );
       avatarUrl = 'https://ui-avatars.com/api/?name=$initials&background=FFCC00&color=1A1A2E&size=200';
     }
@@ -102,9 +112,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.grey.shade300, width: 3),
-                            image: DecorationImage(
-                              image: NetworkImage(avatarUrl),
+                          ),
+                          child: ClipOval(
+                            child: Image.network(
+                              avatarUrl,
                               fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Image.asset(
+                                'assets/images/new_home/profilepic.jpg',
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                         ),
@@ -455,6 +471,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Image.network(
                 avatarUrl,
                 fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => Image.asset(
+                  'assets/images/new_home/profilepic.jpg',
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
             Positioned(

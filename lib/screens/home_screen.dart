@@ -187,8 +187,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             RepaintBoundary(
                               child: BannerCarousel(
                                 events: DummyData.bannerEvents,
-                                height: 421.0,
-                                fixedCardWidth: 329.27,
+                                height: Responsive.h(context, 421.0),
+                                fixedCardWidth: Responsive.w(context, 355.0),
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -204,9 +204,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             const RepaintBoundary(child: DiscoverNearYouSection()),
                             const RepaintBoundary(child: FamilyFeelsSection()),
                             
-                            const RepaintBoundary(child: TlbSignatureSection()),
                             const RepaintBoundary(child: SpecialNeedsSection()),
                             const RepaintBoundary(child: StealersSection()),
+                            const RepaintBoundary(child: TlbSignatureSection()),
 
                             // AppFooter with upward gradient
                             const AppFooter(),

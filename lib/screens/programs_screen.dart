@@ -147,7 +147,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           itemBuilder: (context, index) => Padding(
                             padding: const EdgeInsets.only(right: 16),
                             child: SizedBox(
-                              width: 220,
+                              width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
                               child: EventCardWithRating(
                                 event: DummyData.hotPicks[index],
                                 buttonLabel: 'Check Availability',
@@ -166,7 +166,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       // ── Make Your Weekends Count ──
                       const SectionDividerWidget(title: 'Make Your Weekends Count'),
                       SizedBox(
-                        height: 160,
+                        height: Responsive.h(context, 160, min: 140),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -197,7 +197,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       // ── Zero to Hero ──
                       const SectionDividerWidget(title: 'Zero to Hero'),
                       SizedBox(
-                        height: 160,
+                        height: Responsive.h(context, 160, min: 140),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -238,6 +238,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                               padding: const EdgeInsets.only(right: 14),
                               child: ClassNearbyCard(
                                 event: DummyData.hotPicks[index],
+                                width: Responsive.cardWidth(context, fraction: 0.88, max: 360),
                                 buttonLabel: 'Check Availability',
                                 tagColor: tagColors[index % tagColors.length],
                                 onTap: () => Navigator.push(
@@ -329,7 +330,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
       ),
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.80,
+        width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -424,7 +425,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
       ),
       child: Container(
-        width: 200,
+        width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -533,7 +534,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
       ),
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.78,
+        width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),

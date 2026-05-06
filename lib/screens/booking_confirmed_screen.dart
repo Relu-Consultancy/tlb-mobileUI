@@ -65,6 +65,7 @@ class _BookingConfirmedScreenState extends State<BookingConfirmedScreen>
   void _onReveal() {
     if (_revealed) return;
     _animCtrl.forward().then((_) {
+      if (!mounted) return;
       setState(() => _revealed = true);
     });
   }

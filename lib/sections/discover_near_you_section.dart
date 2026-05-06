@@ -25,7 +25,7 @@ class DiscoverNearYouSection extends StatelessWidget {
             itemBuilder: (context, index) {
               final event = DummyData.discoverNearYou[index];
               return Container(
-                width: Responsive.cardWidth(context, fraction: 0.70, max: 280),
+                width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,

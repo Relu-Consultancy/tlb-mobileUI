@@ -187,12 +187,21 @@ class HomeHeader extends StatelessWidget {
                           offset: const Offset(0, 2),
                         ),
                       ],
-                      image: DecorationImage(
-                        image: (url != null && url.isNotEmpty)
-                            ? NetworkImage(url) as ImageProvider
-                            : const AssetImage('assets/images/new_home/profilepic.jpg'),
-                        fit: BoxFit.cover,
-                      ),
+                    ),
+                    child: ClipOval(
+                      child: (url != null && url.isNotEmpty)
+                          ? Image.network(
+                              url,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Image.asset(
+                                'assets/images/new_home/profilepic.jpg',
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : Image.asset(
+                              'assets/images/new_home/profilepic.jpg',
+                              fit: BoxFit.cover,
+                            ),
                     ),
                   ),
                 );

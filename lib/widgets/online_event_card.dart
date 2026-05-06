@@ -104,11 +104,15 @@ class OnlineEventCard extends StatelessWidget {
                           color: AppColors.textSecondary,
                         ),
                         const SizedBox(width: 6),
-                        Text(
-                          event.description!,
-                          style: GoogleFonts.poppins(
-                            fontSize: 11.5,
-                            color: AppColors.textSecondary,
+                        Flexible(
+                          child: Text(
+                            event.description!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.poppins(
+                              fontSize: 11.5,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
                         ),
                       ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../screens/events_screen.dart';
 import '../screens/classes_screen.dart';
@@ -87,7 +88,7 @@ class CategoriesGrid extends StatelessWidget {
 
   Widget _buildCategoryCard(BuildContext context, Map<String, dynamic> cat) {
     return Container(
-      height: 110,
+      height: Responsive.h(context, 110, min: 95),
       decoration: _cardDecoration(),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

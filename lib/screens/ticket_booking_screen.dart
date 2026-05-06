@@ -576,17 +576,17 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
 
   Widget _buildBillRow(String label, String value) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style:
-              GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600),
+        Expanded(
+          child: Text(
+            label,
+            style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600),
+          ),
         ),
+        const SizedBox(width: 8),
         Text(
           value,
-          style: GoogleFonts.poppins(
-              fontSize: 13, color: const Color(0xFF1A1A2E)),
+          style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF1A1A2E)),
         ),
       ],
     );

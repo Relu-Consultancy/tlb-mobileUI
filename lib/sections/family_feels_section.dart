@@ -25,7 +25,7 @@ class FamilyFeelsSection extends StatelessWidget {
             itemBuilder: (context, index) {
               final event = DummyData.familyFeels[index];
               return Container(
-                width: Responsive.cardWidth(context, fraction: 0.88, max: 350),
+                width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -133,7 +133,7 @@ class FamilyFeelsSection extends StatelessWidget {
                             // Button row
                             SizedBox(
                               width: double.infinity,
-                              height: 36,
+                              height: Responsive.h(context, 36, min: 32),
                               child: ElevatedButton(
                                 onPressed: () {
                                   Navigator.push(

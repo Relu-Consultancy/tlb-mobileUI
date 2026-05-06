@@ -29,6 +29,19 @@ class ClassesScreen extends StatefulWidget {
 
 class _ClassesScreenState extends State<ClassesScreen> {
   int _currentNavIndex = 2;
+  late final PageController _topPicksController;
+
+  @override
+  void initState() {
+    super.initState();
+    _topPicksController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _topPicksController.dispose();
+    super.dispose();
+  }
 
   void _showAllCategoriesPopup(BuildContext context) {
     AllCategoriesPopup.show(
@@ -270,7 +283,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       const SizedBox(height: 8),
                       Center(
                         child: SmoothPageIndicator(
-                          controller: PageController(),
+                          controller: _topPicksController,
                           count: DummyData.classesTopPicks.length,
                           effect: const WormEffect(
                             dotHeight: 7,

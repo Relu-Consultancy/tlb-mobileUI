@@ -514,6 +514,7 @@ class _OTPVerificationScreenState extends State<_OTPVerificationScreen> {
     _resendSeconds = 30;
     _resendTimer?.cancel();
     _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) { timer.cancel(); return; }
       if (_resendSeconds <= 0) {
         timer.cancel();
       } else {

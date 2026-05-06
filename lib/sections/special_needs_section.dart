@@ -28,7 +28,7 @@ class SpecialNeedsSection extends StatelessWidget {
               final modelIndex = index % DummyData.specialNeeds.length;
               final event = DummyData.specialNeeds[modelIndex];
               return Container(
-                width: Responsive.cardWidth(context, fraction: 0.85, max: 340),
+                width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,

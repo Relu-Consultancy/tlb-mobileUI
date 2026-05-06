@@ -16,7 +16,7 @@ class WeekendSpecialSection extends StatefulWidget {
 }
 
 class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
-  final PageController _pageController = PageController(viewportFraction: 0.88);
+  final PageController _pageController = PageController(viewportFraction: 0.92);
   Timer? _autoSlideTimer;
 
   @override

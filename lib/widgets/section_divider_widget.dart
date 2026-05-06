@@ -11,9 +11,8 @@ class SectionDividerWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildLine(isLeft: true),
+          Expanded(child: _buildLine(isLeft: true)),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
@@ -25,7 +24,7 @@ class SectionDividerWidget extends StatelessWidget {
               ),
             ),
           ),
-          _buildLine(isLeft: false),
+          Expanded(child: _buildLine(isLeft: false)),
         ],
       ),
     );
@@ -33,8 +32,7 @@ class SectionDividerWidget extends StatelessWidget {
 
   Widget _buildLine({required bool isLeft}) {
     return Container(
-      width: 110,
-      height: 1.5,
+      height: 1,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isLeft

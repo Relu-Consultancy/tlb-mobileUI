@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/responsive.dart';
 import '../models/event_model.dart';
 import '../screens/class_detail_screen.dart';
 import '../screens/event_detail_screen.dart';
@@ -29,7 +30,7 @@ class BuildSkillCard extends StatelessWidget {
         }
       },
       child: Container(
-        width: 290,
+        width: Responsive.w(context, 290, min: 240),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
@@ -49,11 +50,11 @@ class BuildSkillCard extends StatelessWidget {
                 borderRadius: const BorderRadius.horizontal(left: Radius.circular(18)),
                 child: Image.asset(
                   event.imagePath,
-                  width: 120,
+                  width: Responsive.w(context, 120, min: 96),
                   height: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
-                    width: 120,
+                    width: Responsive.w(context, 120, min: 96),
                     color: AppColors.primary.withOpacity(0.15),
                     child: const Icon(Icons.school_outlined, size: 40, color: AppColors.textSecondary),
                   ),

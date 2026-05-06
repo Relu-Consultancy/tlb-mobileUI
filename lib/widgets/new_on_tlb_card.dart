@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/responsive.dart';
 import '../models/event_model.dart';
 import '../screens/class_detail_screen.dart';
 import '../screens/event_detail_screen.dart';
@@ -49,11 +50,11 @@ class NewOnTlbCard extends StatelessWidget {
                 ),
                 child: Image.asset(
                   event.imagePath,
-                  width: 120,
+                  width: Responsive.w(context, 120, min: 96),
                   height: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
-                    width: 120,
+                    width: Responsive.w(context, 120, min: 96),
                     color: AppColors.primary.withOpacity(0.2),
                     child: const Icon(Icons.event, size: 40),
                   ),
@@ -104,11 +105,15 @@ class NewOnTlbCard extends StatelessWidget {
                           children: [
                             const Icon(Icons.star, size: 13, color: Color(0xFFFFB902)),
                             const SizedBox(width: 4),
-                            Text(
-                              event.reviewCount!,
-                              style: GoogleFonts.poppins(
-                                fontSize: 11.5,
-                                color: AppColors.textSecondary,
+                            Flexible(
+                              child: Text(
+                                event.reviewCount!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11.5,
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                             ),
                           ],

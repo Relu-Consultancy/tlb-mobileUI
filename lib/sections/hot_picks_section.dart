@@ -25,7 +25,7 @@ class HotPicksSection extends StatelessWidget {
             itemBuilder: (context, index) {
               final event = DummyData.hotPicks[index];
               return Container(
-                width: Responsive.cardWidth(context, fraction: 0.65, max: 260),
+                width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -131,9 +131,13 @@ class HotPicksSection extends StatelessWidget {
                                       ),
                                     ),
                                     const SizedBox(width: 6),
-                                    Text(
-                                      event.reviewCount ?? '3.5k reviews',
-                                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                                    Flexible(
+                                      child: Text(
+                                        event.reviewCount ?? '3.5k reviews',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                                      ),
                                     ),
                                   ],
                                 ),

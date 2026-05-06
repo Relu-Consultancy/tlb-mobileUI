@@ -111,12 +111,14 @@ class ReviewPayScreen extends StatelessWidget {
                       children: [
                         const Icon(Icons.calendar_month_outlined, color: Color(0xFFFFC107), size: 20),
                         const SizedBox(width: 12),
-                        Text(
-                          '$selectedDate • $selectedTime',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF1A1A2E),
+                        Expanded(
+                          child: Text(
+                            '$selectedDate • $selectedTime',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF1A1A2E),
+                            ),
                           ),
                         ),
                       ],

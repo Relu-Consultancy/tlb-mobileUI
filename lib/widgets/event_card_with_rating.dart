@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/responsive.dart';
 import '../models/event_model.dart';
 import 'wishlist_button.dart';
 import '../screens/class_detail_screen.dart';
@@ -229,7 +230,7 @@ class EventCardWithRating extends StatelessWidget {
                     // Book Now button
                     SizedBox(
                       width: double.infinity,
-                      height: 32,
+                      height: Responsive.h(context, 32, min: 28),
                       child: ElevatedButton(
                         onPressed: () {
                           if (onTap != null) {

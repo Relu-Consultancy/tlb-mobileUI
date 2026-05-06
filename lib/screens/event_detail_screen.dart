@@ -136,11 +136,15 @@ class EventDetailScreen extends StatelessWidget {
                           ),
                           const Icon(Icons.star_half, color: Colors.amber, size: 18),
                           const SizedBox(width: 8),
-                          Text(
-                            event.reviewCount ?? '(124 reviews)',
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              color: Colors.grey.shade600,
+                          Flexible(
+                            child: Text(
+                              event.reviewCount ?? '(124 reviews)',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: Colors.grey.shade600,
+                              ),
                             ),
                           ),
                         ],

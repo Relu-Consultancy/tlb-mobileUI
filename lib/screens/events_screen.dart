@@ -32,7 +32,7 @@ class EventsScreen extends StatefulWidget {
 
 class _EventsScreenState extends State<EventsScreen> {
   int _currentNavIndex = 1; // "Events" tab is index 1
-  final PageController _newOnTlbController = PageController();
+  final PageController _newOnTlbController = PageController(viewportFraction: 0.92);
 
   void _showAllCategoriesPopup(BuildContext context) {
     AllCategoriesPopup.show(context, DummyData.allCategories);
@@ -147,7 +147,7 @@ class _EventsScreenState extends State<EventsScreen> {
                             return Padding(
                               padding: const EdgeInsets.only(right: 16),
                               child: SizedBox(
-                                width: 240,
+                                width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
                                 child: EventCardWithRating(
                                   event: DummyData.hotPicks[index],
                                 ),
@@ -173,6 +173,7 @@ class _EventsScreenState extends State<EventsScreen> {
                               padding: const EdgeInsets.only(right: 14),
                               child: WeekendEventCard(
                                 event: DummyData.weekendSpecial[index],
+                                width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
                               ),
                             );
                           },
@@ -192,6 +193,7 @@ class _EventsScreenState extends State<EventsScreen> {
                               child: RepaintBoundary(
                                 child: HolidaySpecialCard(
                                   event: DummyData.holidaySpecials[index],
+                                  width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
                                 ),
                               ),
                             );
@@ -207,7 +209,10 @@ class _EventsScreenState extends State<EventsScreen> {
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.featuredPartners.length,
                           itemBuilder: (context, index) {
-                            return PartnerPortraitCard(event: DummyData.featuredPartners[index]);
+                            return PartnerPortraitCard(
+                              event: DummyData.featuredPartners[index],
+                              width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+                            );
                           },
                         ),
                       ),
@@ -220,7 +225,7 @@ class _EventsScreenState extends State<EventsScreen> {
                           itemCount: DummyData.newOnTlb.length,
                           itemBuilder: (context, index) {
                             return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              padding: const EdgeInsets.symmetric(horizontal: 6),
                               child: NewOnTlbCard(
                                 event: DummyData.newOnTlb[index],
                               ),
@@ -255,6 +260,7 @@ class _EventsScreenState extends State<EventsScreen> {
                               padding: const EdgeInsets.only(right: 14),
                               child: OnlineEventCard(
                                 event: DummyData.onlineEvents[index],
+                                width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
                               ),
                             );
                           },
