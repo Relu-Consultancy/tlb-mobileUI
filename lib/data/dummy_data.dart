@@ -627,14 +627,14 @@ class DummyData {
 
   // ── Venues subcategory screen data ──
   static const List<List<String>> venuesSubFilters = [
-    ['All', 'Indoor', 'Outdoor', 'Water Play', 'Adventure'],       // Play & Adventure
-    ['All', 'Football', 'Cricket', 'Swimming', 'Cycling'],         // Sports & Active
-    ['All', 'Pottery', 'Painting', 'Craft', 'Workshops'],          // Creative & DIY
-    ['All', 'Birthday', 'Private', 'Group', 'Premium'],            // Party & Celebration
-    ['All', 'Labs', 'Robotics', 'Museum', 'Planetarium'],          // Science & Discovery
-    ['All', 'Zoo', 'Farms', 'Parks', 'Aquarium'],                  // Nature & Animals
-    ['All', 'Library', 'Tutoring', 'Olympiad', 'Study Cafe'],      // Reading & Study
-    ['All', 'Cafes', 'Kids Menu', 'Play Cafes', 'Events'],         // Dining & Cafes
+    ['All', 'Soft Play', 'Trampoline Parks', 'Ninja Courses', 'Climbing Walls', 'Arcade & Tag', 'VR & Simulation', 'Escape Rooms', 'Sensory Play'],          // Play & Adventure
+    ['All', 'Turf Sports', 'Racket Sports', 'Swimming', 'Combat Arts', 'Gymnastics & Yoga', 'Skating', 'Archery & Bowling', 'Adaptive Sports'],               // Sports & Active
+    ['All', 'Art & Painting', 'Pottery Cafes', 'Maker Spaces', 'Baking Studios', 'Music & Media', 'Therapeutic Art'],                                         // Creative & DIY
+    ['All', 'Banquet Halls', 'Rooftop Venues', 'Private Cinemas', 'Party Suites', 'Garden Spaces'],                                                           // Party & Celebration
+    ['All', 'Kids\' Museums', 'STEM Labs', 'Planetariums', 'Tech Exhibits', 'Nature Museums', 'Experience Centers'],                                           // Science & Discovery
+    ['All', 'Petting Zoos', 'Organic Farms', 'Botanic Gardens', 'Stables', 'Bird Parks', 'Therapy Farms', 'Farm Stay'],                                       // Nature & Animals
+    ['All', 'Libraries', 'Book Cafes', 'Study Pods', 'Comic Lounges', 'Story Centers'],                                                                       // Reading & Study
+    ['All', 'Play Cafes', 'Character Dining', 'Board Game Cafes', 'Kids\' Bistros', 'Culinary Cafes'],                                                        // Dining & Cafes
   ];
 
   static const List<List<EventModel>> venuesByCategory = [
@@ -949,12 +949,12 @@ class DummyData {
 
   // Sub-filters per explore category (index matches exploreCategories)
   static const List<List<String>> categorySubFilters = [
-    ['All', 'Painting', 'Drawing', 'DIY', 'Pottery', 'Origami'],          // Arts & Crafts
-    ['All', 'Dance', 'Music', 'Theater', 'Drama', 'Singing'],              // Performing Arts
-    ['All', 'Robotics', 'Coding', 'Science', 'Math', 'Engineering'],       // STEM & Innovation
-    ['All', 'Football', 'Cricket', 'Swimming', 'Yoga', 'Gymnastics'],      // Sports & Fitness
-    ['All', 'English', 'Hindi', 'French', 'Storytelling', 'Public Speaking'], // Languages
-    ['All', 'Cooking', 'Leadership', 'Finance', 'Social Skills', 'Mindfulness'], // Life Skills
+    ['All', 'Painting', 'Drawing', 'DIY Craft', 'Pottery & Clay', 'Origami', 'Calligraphy', 'Creative Design'], // Arts & Crafts
+    ['All', 'Dance', 'Music', 'Singing', 'Instrumental', 'Theatre / Drama', 'Acting'], // Performing Arts
+    ['All', 'Robotics', 'Coding', 'Artificial Intelligence', 'Electronics', 'Science Experiments', 'Astronomy', 'Engineering Activities'], // STEM & Innovation
+    ['All', 'Football', 'Cricket', 'Tennis', 'Basketball', 'Martial Arts', 'Yoga', 'Gymnastics', 'Athletics'], // Sports & Fitness
+    ['All', 'Public Speaking', 'Debate', 'Creative Writing', 'Content Creation', 'Story Writing', 'English Communication', 'Foreign Languages'], // Languages & Communication
+    ['All', 'Leadership', 'Entrepreneurship', 'Financial Literacy', 'Personality Development', 'Critical Thinking', 'Problem Solving'], // Life Skills
   ];
 
   // Events per explore category (index matches exploreCategories)
@@ -1434,17 +1434,17 @@ class DummyData {
 
   // Sub-filters per Classes category (index matches classesCategories)
   static const List<List<String>> classesSubFilters = [
-    ['All', 'Math', 'Science', 'English', 'Olympiad', 'Reading'],                  // Academic
-    ['All', 'Painting', 'Drawing', 'Pottery', 'DIY Craft', 'Sculpting'],            // Creative Arts
-    ['All', 'Coding', 'Robotics', 'AI', '3D Printing', 'Electronics'],              // Tech & Innovation
-    ['All', 'Dance', 'Music', 'Theater', 'Singing', 'Drama'],                       // Performing Arts
-    ['All', 'Swimming', 'Yoga', 'Football', 'Cricket', 'Martial Arts'],             // Sports & Fitness
-    ['All', 'Public Speaking', 'Debate', 'Storytelling', 'Phonics', 'Elocution'],   // Speech & Communication
-    ['All', 'Life Skills', 'Leadership', 'Finance', 'Mindfulness', 'Social Skills'], // Life Skills & Personality Dev
-    ['All', 'Photography', 'Video Editing', 'Animation', 'Podcasting', 'Design'],   // Creative Media
-    ['All', 'Gardening', 'Nature Art', 'Bird Watching', 'Hiking', 'Eco Science'],   // Outdoor & Nature Learning
-    ['All', 'Baking', 'Cooking', 'Pastry', 'Nutrition', 'Food Science'],             // Culinary
-    ['All', 'Chess', 'Puzzles', 'Memory Games', 'Logic', 'Math Games'],              // Brain Boosters
+    ['All', 'School Subjects', 'Olympiad Preparation', 'Entrance Exam Preparation', 'Homework Support'],                                                                                    // Academic
+    ['All', 'Painting', 'Pottery', 'Sketching', 'Clay Modelling', 'DIY Crafts', 'Origami', 'Sculpture', 'Calligraphy', 'Fashion Designing', 'Textile Art', 'Resin Art'],                   // Creative Arts
+    ['All', 'Coding', 'Robotics', 'Artificial Intelligence', 'Game Development', 'App Development', 'Web Development', 'Electronics', 'UI / UX Design', 'Cybersecurity'],                  // Tech & Innovation
+    ['All', 'Dance', 'Singing / Vocal Music', 'Instrument Learning', 'Theatre / Acting'],                                                                                                  // Performing Arts
+    ['All', 'Football', 'Cricket', 'Basketball', 'Chess', 'Yoga', 'Martial Arts', 'Gymnastics', 'Skating', 'Pickle Ball', 'Golf', 'Hockey', 'Badminton', 'Tennis', 'Swimming'],            // Sports & Fitness
+    ['All', 'Public Speaking', 'Debate', 'Storytelling', 'Creative Writing', 'Spoken English', 'Foreign Languages', 'Indian Languages', 'Phonics'],                                        // Speech & Communication
+    ['All', 'Personality Development', 'Entrepreneurship', 'Financial Literacy', 'Emotional Intelligence'],                                                                                 // Life Skills & Personality Development
+    ['All', 'Photography', 'Video Creation', 'Graphic Design', 'Content Creation', 'Podcasting', 'Animation'],                                                                             // Creative Media
+    ['All', 'Gardening', 'Nature Exploration', 'Environmental Education', 'Adventure Skills', 'Wildlife Learning'],                                                                         // Outdoor & Nature Learning
+    ['All', 'Cooking', 'Baking', 'Food Presentation & Styling'],                                                                                                                           // Culinary
+    ['All', 'Abacus', 'Vedic Maths', 'Memory Skills', 'Problem Solving', 'Rubix Cube'],                                                                                                    // Brain Boosters
   ];
 
   // Classes per Classes category (index matches classesCategories)
@@ -2135,17 +2135,17 @@ class DummyData {
 
   // ── Programs sub-filters (index matches programsCategories) ──────────────
   static const List<List<String>> programsSubFilters = [
-    ['All', 'Coding', 'AI', 'Robotics', 'Cybersecurity', 'Data Science'],            // 0: Future Tech & AI
-    ['All', 'UI/UX', 'Graphic Design', '3D Design', 'Architecture', 'Product'],      // 1: Design & Innovation
-    ['All', 'Startups', 'Public Speaking', 'Finance', 'Marketing', 'Team Building'], // 2: Leadership
-    ['All', 'Photography', 'Video', 'Podcasting', 'Writing', 'Social Media'],        // 3: Media & Content
-    ['All', 'Theater', 'Dance', 'Music', 'Stand-up', 'Musical'],                     // 4: Stage Arts
-    ['All', 'Football', 'Cricket', 'Swimming', 'Athletics', 'Martial Arts'],         // 5: Active Sports
-    ['All', 'Olympiad', 'JEE Prep', 'NEET Prep', 'SAT', 'Scholarship'],              // 6: Academics
-    ['All', 'Chess', 'Logic', 'Puzzles', 'Data', 'Problem Solving'],                 // 7: Analytical Thinking
-    ['All', 'English', 'Hindi', 'French', 'Debate', 'Creative Writing'],             // 8: Language & Comm
-    ['All', 'Baking', 'Cooking', 'Pastry', 'Barista', 'Food Science'],               // 9: Culinary
-    ['All', 'Etiquette', 'Confidence', 'Interview', 'Style', 'Mindfulness'],         // 10: Grooming
+    ['All', 'Coding & Programming', 'Robotics & Automation', 'Artificial Intelligence (AI)', 'Game Development', 'App Development', 'Electronics & IoT'],                                  // 0: Future Tech & AI
+    ['All', 'Visual Arts', 'Craft & DIY Creations', 'Fashion & Textile Design', 'Graphic & Digital Design', 'Design Thinking & Innovation'],                                               // 1: Design & Innovation
+    ['All', 'Entrepreneurship & Startups', 'Financial Literacy', 'Leadership & Confidence', 'Business & Marketing Basics', 'Problem Solving & Decision Making'],                           // 2: Leadership & Entrepreneurship
+    ['All', 'Animation', 'Video Creation & Editing', 'Filmmaking', 'Content Creation', 'Photography', 'Journalism & Mass Communication'],                                                  // 3: Media & Content Creation
+    ['All', 'Dance', 'Music (Vocal & Instrumental)', 'Theatre & Acting', 'Stage Performance'],                                                                                             // 4: Stage Arts & Performance
+    ['All', 'Sports Coaching', 'Fitness & Strength Training', 'Yoga & Mindfulness', 'Adventure & Outdoor Programs', 'Motorsports Training'],                                               // 5: Active Sports & Training
+    ['All', 'Subject-Focused Programs', 'Olympiad Preparation', 'Entrance Exam Preparation', 'Smart Study Skills'],                                                                        // 6: Academics & Competitive Prep
+    ['All', 'Abacus', 'Vedic Maths', 'Logical Reasoning', 'Problem Solving', 'Memory & Focus Development'],                                                                               // 7: Analytical Thinking
+    ['All', 'Spoken English', 'Public Speaking', 'Debate & Communication Skills', 'Creative Writing', 'Foreign Languages', 'Indian Languages'],                                            // 8: Language & Communication
+    ['All', 'Cooking & Baking', 'Culinary Arts', 'Chef Programs', 'Hospitality & Hotel Management', 'Food Presentation & Service Skills'],                                                 // 9: Culinary & Hospitality
+    ['All', 'Personal Grooming', 'Etiquette & Manners', 'Personality Development', 'Confidence Building', 'Personal Styling'],                                                             // 10: Grooming & Personality Development
   ];
 
   // ── Programs per category (index matches programsCategories) ─────────────

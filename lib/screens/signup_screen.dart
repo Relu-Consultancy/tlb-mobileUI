@@ -41,7 +41,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
   Future<void> _onSignUp() async {
     final firstName = _firstNameController.text.trim();
-    final lastName = _lastNameController.text.trim();
     final email = _contactController.text.trim();
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
@@ -70,13 +69,7 @@ class _SignupScreenState extends State<SignupScreen> {
       _loading = true;
     });
 
-    final result = await AuthService.signup(
-      firstName: firstName,
-      lastName: lastName.isEmpty ? null : lastName,
-      email: email,
-      password: password,
-      passwordConfirm: confirmPassword,
-    );
+    final result = await AuthService.requestOtp(identifier: email);
 
     if (!mounted) return;
     setState(() => _loading = false);

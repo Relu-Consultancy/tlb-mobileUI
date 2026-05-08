@@ -49,26 +49,27 @@ class CategoryScreenHeader extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Back arrow + title
-            Row(
+            // Back arrow + centered title
+            Stack(
+              alignment: Alignment.center,
               children: [
-                GestureDetector(
-                  onTap: onBack,
-                  child: const Icon(
-                    Icons.arrow_back,
-                    size: 22,
-                    color: Color(0xFF1A1A2E),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: GestureDetector(
+                    onTap: onBack,
+                    child: const Icon(
+                      Icons.arrow_back,
+                      size: 22,
+                      color: Color(0xFF1A1A2E),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: GoogleFonts.poppins(
-                      fontSize: Responsive.sp(context, 18),
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF1A1A2E),
-                    ),
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 18),
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1A1A2E),
                   ),
                 ),
               ],

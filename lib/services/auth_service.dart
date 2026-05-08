@@ -12,34 +12,31 @@ class AuthService {
     'accept': 'application/json',
   };
 
-  // ── Signup ──────────────────────────────────────────────────────────────────
+  // ── OTP Login / Signup ───────────────────────────────────────────────────────
 
-  /// Returns `{'success': true}` on 201 or `{'success': false, 'message': '...'}`.
-  static Future<Map<String, dynamic>> signup({
-    required String firstName,
-    required String email,
-    required String password,
-    required String passwordConfirm,
-    String? lastName,
+  /// Step 1: Sends a 6-digit OTP to [identifier] (email).
+  /// Returns `{'success': true}` on 200, `{'success': false, 'message': ...}` otherwise.
+  static Future<Map<String, dynamic>> requestOtp({
+    required String identifier,
   }) async {
     try {
       final res = await http
           .post(
-            Uri.parse('$_base/api/v1/auth/customer/email/signup/'),
+            Uri.parse('$_base/api/v1/auth/request-otp/'),
             headers: _headers,
             body: jsonEncode({
-              'first_name': firstName,
-              'last_name': lastName ?? '',
-              'email': email,
-              'password': password,
-              'password_confirm': passwordConfirm,
+              'identifier': identifier,
+              'identifier_type': 'email',
             }),
           )
           .timeout(const Duration(seconds: 30));
 
       final data = _decode(res.body);
-      if (res.statusCode == 201) {
-        return {'success': true, 'message': data['message'] ?? ''};
+      if (res.statusCode == 200) {
+        return {'success': true, 'message': data['message'] ?? 'OTP sent'};
+      }
+      if (res.statusCode == 429) {
+        return {'success': false, 'message': 'Too many requests. Please wait before trying again.'};
       }
       return {'success': false, 'message': _extractError(data)};
     } catch (e) {
@@ -47,19 +44,22 @@ class AuthService {
     }
   }
 
-  // ── Login ────────────────────────────────────────────────────────────────────
-
-  /// Returns `{'success': true, 'access': ..., 'refresh': ..., 'user': {...}}` on 200.
-  static Future<Map<String, dynamic>> login({
-    required String email,
-    required String password,
+  /// Step 2: Verifies OTP. Creates account automatically if email is not registered.
+  /// Returns `{'success': true, 'access': ..., 'refresh': ..., 'is_new_user': bool, 'user': {...}}` on 200.
+  static Future<Map<String, dynamic>> verifyOtp({
+    required String identifier,
+    required String otp,
   }) async {
     try {
       final res = await http
           .post(
-            Uri.parse('$_base/api/v1/auth/customer/email/login/'),
+            Uri.parse('$_base/api/v1/auth/verify-otp/'),
             headers: _headers,
-            body: jsonEncode({'email': email, 'password': password}),
+            body: jsonEncode({
+              'identifier': identifier,
+              'otp': otp,
+              'role': 'customer',
+            }),
           )
           .timeout(const Duration(seconds: 30));
 
@@ -69,8 +69,18 @@ class AuthService {
           'success': true,
           'access': data['access'],
           'refresh': data['refresh'],
+          'is_new_user': data['is_new_user'] ?? false,
           'user': data['user'],
         };
+      }
+      if (res.statusCode == 400) {
+        final code = data['code'] ?? '';
+        if (code == 'OTP_INVALID') return {'success': false, 'message': 'Incorrect OTP. Please try again.'};
+        if (code == 'OTP_EXPIRED') return {'success': false, 'message': 'OTP has expired. Please request a new one.'};
+        if (code == 'USER_ROLE_MISMATCH') return {'success': false, 'message': 'Account type mismatch.'};
+      }
+      if (res.statusCode == 429) {
+        return {'success': false, 'message': 'Too many attempts. Please try again later.'};
       }
       return {'success': false, 'message': _extractError(data)};
     } catch (e) {
@@ -231,9 +241,9 @@ class AuthService {
     try {
       final res = await http
           .post(
-            Uri.parse('$_base/api/v1/auth/token/refresh/'),
+            Uri.parse('$_base/api/v1/auth/refresh-token/'),
             headers: _headers,
-            body: jsonEncode({'refresh': refresh}),
+            body: jsonEncode({'refresh_token': refresh}),
           )
           .timeout(const Duration(seconds: 30));
 
@@ -247,49 +257,67 @@ class AuthService {
     }
   }
 
-  // ── Update profile ───────────────────────────────────────────────────────────
+  // ── Customer Profile ─────────────────────────────────────────────────────────
 
-  /// PATCH /api/v1/auth/users/me/ — only sends fields that are non-null.
-  /// Returns `{'success': true, 'user': {...}}` on 200.
-  static Future<Map<String, dynamic>> updateProfile({
+  /// GET /api/v1/customer/profile/ — returns profile with `is_completed` flag.
+  static Future<Map<String, dynamic>> getProfile({
     required String accessToken,
-    File? avatarFile,
-    String? firstName,
-    String? lastName,
-    String? dateOfBirth,
-    String? city,
-    String? state,
-    String? guardianName,
-    String? institutionName,
-    String? institutionType,
   }) async {
     try {
-      final uri = Uri.parse('$_base/api/v1/auth/users/me/');
-      final request = http.MultipartRequest('PATCH', uri);
-      request.headers['Authorization'] = 'Bearer $accessToken';
-      request.headers['accept'] = 'application/json';
+      final res = await http
+          .get(
+            Uri.parse('$_base/api/v1/customer/profile/'),
+            headers: {
+              ..._headers,
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 30));
 
-      if (firstName != null) request.fields['first_name'] = firstName;
-      if (lastName != null) request.fields['last_name'] = lastName;
-      if (dateOfBirth != null) request.fields['date_of_birth'] = dateOfBirth;
-      if (city != null) request.fields['city'] = city;
-      if (state != null) request.fields['state'] = state;
-      if (guardianName != null) request.fields['guardian_name'] = guardianName;
-      if (institutionName != null) request.fields['institution_name'] = institutionName;
-      if (institutionType != null) request.fields['institution_type'] = institutionType;
-
-      if (avatarFile != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath('avatar', avatarFile.path),
-        );
-      }
-
-      final streamed = await request.send().timeout(const Duration(seconds: 30));
-      final res = await http.Response.fromStream(streamed);
       final data = _decode(res.body);
-
       if (res.statusCode == 200) {
-        return {'success': true, 'user': data};
+        return {'success': true, 'profile': data};
+      }
+      return {'success': false, 'message': _extractError(data)};
+    } catch (e) {
+      return {'success': false, 'message': _networkError(e)};
+    }
+  }
+
+  /// PATCH /api/v1/customer/profile/ — partial update, only sends non-null fields.
+  /// Returns `{'success': true, 'profile': {...}}` on 200.
+  static Future<Map<String, dynamic>> updateProfile({
+    required String accessToken,
+    String? firstName,
+    String? lastName,
+    String? phoneNumber,
+    String? gender,
+    String? birthdate,
+    String? region,
+  }) async {
+    try {
+      final body = <String, dynamic>{};
+      if (firstName != null) body['first_name'] = firstName;
+      if (lastName != null) body['last_name'] = lastName;
+      if (phoneNumber != null) body['phone_number'] = phoneNumber;
+      if (gender != null) body['gender'] = gender;
+      if (birthdate != null) body['birthdate'] = birthdate;
+      if (region != null) body['region'] = region;
+
+      final res = await http
+          .patch(
+            Uri.parse('$_base/api/v1/customer/profile/'),
+            headers: {
+              ..._headers,
+              'Authorization': 'Bearer $accessToken',
+            },
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      final data = _decode(res.body);
+      if (res.statusCode == 200) {
+        return {'success': true, 'profile': data};
       }
       return {'success': false, 'message': _extractError(data)};
     } catch (e) {
@@ -306,7 +334,7 @@ class AuthService {
           .post(
             Uri.parse('$_base/api/v1/auth/logout/'),
             headers: _headers,
-            body: jsonEncode({'refresh': refresh}),
+            body: jsonEncode({'refresh_token': refresh}),
           )
           .timeout(const Duration(seconds: 30));
       return res.statusCode == 200;

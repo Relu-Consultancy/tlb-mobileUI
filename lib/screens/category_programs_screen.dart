@@ -132,7 +132,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF7F7F7),
+        backgroundColor: Colors.white,
         body: Column(
           children: [
             // ── Header ──────────────────────────────────────────────────
@@ -276,10 +276,9 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                       padding: const EdgeInsets.fromLTRB(16, 22, 16, 0),
                       child: Row(
                         children: [
-                          Container(
-                              width: 28,
-                              height: 1.5,
-                              color: const Color(0xFFFFB902)),
+                          Expanded(
+                            child: Container(height: 1.5, color: const Color(0xFFFFB902)),
+                          ),
                           const SizedBox(width: 10),
                           Text(
                             'All $_categoryTitle',
@@ -291,9 +290,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Container(
-                                height: 1.5,
-                                color: const Color(0xFFFFB902)),
+                            child: Container(height: 1.5, color: const Color(0xFFFFB902)),
                           ),
                         ],
                       ),

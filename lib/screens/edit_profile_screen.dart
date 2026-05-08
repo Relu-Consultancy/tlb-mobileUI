@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import '../core/responsive.dart';
 import '../providers/auth_state.dart';
 import '../services/auth_service.dart';
@@ -20,22 +18,18 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _firstNameCtrl = TextEditingController();
   final _lastNameCtrl = TextEditingController();
-  final _cityCtrl = TextEditingController();
-  final _stateCtrl = TextEditingController();
-  final _guardianNameCtrl = TextEditingController();
-  final _institutionNameCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
+  final _regionCtrl = TextEditingController();
 
-  String? _institutionType;
-  DateTime? _dateOfBirth;
-  String? _avatarUrl;
-  File? _selectedAvatar;
+  String? _gender;
+  DateTime? _birthdate;
   bool _loading = false;
 
-  static const _institutionTypes = [
-    ('school', 'School'),
-    ('college', 'College'),
-    ('university', 'University'),
+  static const _genders = [
+    ('male', 'Male'),
+    ('female', 'Female'),
     ('other', 'Other'),
+    ('prefer_not_to_say', 'Prefer not to say'),
   ];
 
   @override
@@ -46,34 +40,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _prefillFromAuthState() {
     final profile = AuthState.userData?['profile'] as Map<String, dynamic>?;
-    // Cache avatar URL once so build() never re-fetches on keystroke
-    final rawAvatar = profile?['avatar_url'] as String?;
-    if (rawAvatar != null && rawAvatar.isNotEmpty) {
-      _avatarUrl = rawAvatar;
-    } else {
-      final initials = Uri.encodeComponent(
-        ((profile?['first_name'] as String? ?? '').isNotEmpty
-            ? profile!['first_name'] as String
-            : AuthState.userEmail?.substring(0, 1).toUpperCase() ?? 'U'),
-      );
-      _avatarUrl = 'https://ui-avatars.com/api/?name=$initials&background=FFCC00&color=1A1A2E&size=200';
-    }
     if (profile == null) return;
     _firstNameCtrl.text = profile['first_name'] as String? ?? '';
     _lastNameCtrl.text = profile['last_name'] as String? ?? '';
-    _cityCtrl.text = profile['city'] as String? ?? '';
-    _stateCtrl.text = profile['state'] as String? ?? '';
-    _guardianNameCtrl.text = profile['guardian_name'] as String? ?? '';
-    _institutionNameCtrl.text = profile['institution_name'] as String? ?? '';
-    final it = profile['institution_type'] as String?;
-    if (it != null && _institutionTypes.any((e) => e.$1 == it)) {
-      _institutionType = it;
-    }
-    final dob = profile['date_of_birth'] as String?;
-    if (dob != null && dob.isNotEmpty) {
-      try {
-        _dateOfBirth = DateTime.parse(dob);
-      } catch (_) {}
+    _phoneCtrl.text = profile['phone_number'] as String? ?? '';
+    _regionCtrl.text = profile['region'] as String? ?? '';
+    final g = profile['gender'] as String?;
+    if (g != null && _genders.any((e) => e.$1 == g)) _gender = g;
+    final bd = profile['birthdate'] as String?;
+    if (bd != null && bd.isNotEmpty) {
+      try { _birthdate = DateTime.parse(bd); } catch (_) {}
     }
   }
 
@@ -81,10 +57,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void dispose() {
     _firstNameCtrl.dispose();
     _lastNameCtrl.dispose();
-    _cityCtrl.dispose();
-    _stateCtrl.dispose();
-    _guardianNameCtrl.dispose();
-    _institutionNameCtrl.dispose();
+    _phoneCtrl.dispose();
+    _regionCtrl.dispose();
     super.dispose();
   }
 
@@ -97,7 +71,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _dateOfBirth ?? DateTime(2000),
+      initialDate: _birthdate ?? DateTime(2000),
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
       builder: (context, child) => Theme(
@@ -107,22 +81,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         child: child!,
       ),
     );
-    if (picked != null) setState(() => _dateOfBirth = picked);
-  }
-
-  Future<void> _pickAvatar() async {
-    try {
-      final picker = ImagePicker();
-      final picked = await picker.pickImage(source: ImageSource.gallery);
-      if (picked != null) {
-        setState(() => _selectedAvatar = File(picked.path));
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to pick image.')),
-      );
-    }
+    if (picked != null) setState(() => _birthdate = picked);
   }
 
   Future<void> _onSave() async {
@@ -146,22 +105,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     final result = await AuthService.updateProfile(
       accessToken: token,
-      avatarFile: _selectedAvatar,
-      firstName: firstName.isNotEmpty ? firstName : null,
+      firstName: firstName,
       lastName: _lastNameCtrl.text.trim().isNotEmpty ? _lastNameCtrl.text.trim() : null,
-      dateOfBirth: _dateOfBirth != null ? _isoDate(_dateOfBirth!) : null,
-      city: _cityCtrl.text.trim().isNotEmpty ? _cityCtrl.text.trim() : null,
-      state: _stateCtrl.text.trim().isNotEmpty ? _stateCtrl.text.trim() : null,
-      guardianName: _guardianNameCtrl.text.trim().isNotEmpty ? _guardianNameCtrl.text.trim() : null,
-      institutionName: _institutionNameCtrl.text.trim().isNotEmpty ? _institutionNameCtrl.text.trim() : null,
-      institutionType: _institutionType,
+      phoneNumber: _phoneCtrl.text.trim().isNotEmpty ? _phoneCtrl.text.trim() : null,
+      gender: _gender,
+      birthdate: _birthdate != null ? _isoDate(_birthdate!) : null,
+      region: _regionCtrl.text.trim().isNotEmpty ? _regionCtrl.text.trim() : null,
     );
 
     if (!mounted) return;
     setState(() => _loading = false);
 
     if (result['success'] == true) {
-      AuthState.updateUserProfile(result['user'] as Map<String, dynamic>);
+      AuthState.updateProfileData(result['profile'] as Map<String, dynamic>);
       if (widget.isOnboarding) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -265,51 +221,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 const SizedBox(height: 20),
               ],
 
-              // ── Avatar ──
-              Center(
-                child: Stack(
-                  children: [
-                    Container(
-                      width: Responsive.w(context, 90, min: 70),
-                      height: Responsive.w(context, 90, min: 70),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.grey.shade200,
-                        image: DecorationImage(
-                          image: _selectedAvatar != null
-                              ? FileImage(_selectedAvatar!) as ImageProvider
-                              : NetworkImage(_avatarUrl ?? 'https://ui-avatars.com/api/?name=U&background=FFCC00&color=1A1A2E&size=200'),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 4,
-                      child: GestureDetector(
-                        onTap: _pickAvatar,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.grey.shade300, width: 1.5),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 4,
-                              ),
-                            ],
-                          ),
-                          child: const Icon(Icons.edit_outlined, size: 16, color: Color(0xFF424242)),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 28),
-
               // ── Basic Info ──
               _buildSection(
                 title: 'Basic Information',
@@ -339,62 +250,29 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   const SizedBox(height: 16),
 
+                  _buildLabel('Phone Number'),
+                  _buildTextField(
+                    controller: _phoneCtrl,
+                    hint: 'e.g. 9876543210',
+                    keyboardType: TextInputType.phone,
+                  ),
+                  const SizedBox(height: 16),
+
+                  _buildLabel('Gender'),
+                  _buildDropdown(
+                    value: _gender,
+                    hint: 'Select gender',
+                    items: _genders.map((e) => DropdownMenuItem(value: e.$1, child: Text(e.$2))).toList(),
+                    onChanged: (v) => setState(() => _gender = v),
+                  ),
+                  const SizedBox(height: 16),
+
                   _buildLabel('Date of Birth'),
                   _buildDateField(),
                   const SizedBox(height: 16),
 
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel('City'),
-                            _buildTextField(controller: _cityCtrl, hint: 'e.g. Mumbai'),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel('State'),
-                            _buildTextField(controller: _stateCtrl, hint: 'e.g. Maharashtra'),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // ── Education ──
-              _buildSection(
-                title: 'Education',
-                children: [
-                  _buildLabel('Institution Name'),
-                  _buildTextField(controller: _institutionNameCtrl, hint: 'School / College name'),
-                  const SizedBox(height: 16),
-
-                  _buildLabel('Institution Type'),
-                  _buildDropdown(
-                    value: _institutionType,
-                    hint: 'Select type',
-                    items: _institutionTypes.map((e) => DropdownMenuItem(value: e.$1, child: Text(e.$2))).toList(),
-                    onChanged: (v) => setState(() => _institutionType = v),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // ── Guardian ──
-              _buildSection(
-                title: 'Guardian Details',
-                children: [
-                  _buildLabel('Guardian Name'),
-                  _buildTextField(controller: _guardianNameCtrl, hint: 'Parent / Guardian name'),
+                  _buildLabel('Region / City'),
+                  _buildTextField(controller: _regionCtrl, hint: 'e.g. Mumbai'),
                 ],
               ),
               const SizedBox(height: 30),
@@ -520,10 +398,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           children: [
             Expanded(
               child: Text(
-                _dateOfBirth != null ? _formatDate(_dateOfBirth!) : 'Select date of birth',
+                _birthdate != null ? _formatDate(_birthdate!) : 'Select date of birth',
                 style: GoogleFonts.poppins(
                   fontSize: 13,
-                  color: _dateOfBirth != null ? const Color(0xFF424242) : Colors.grey.shade400,
+                  color: _birthdate != null ? const Color(0xFF424242) : Colors.grey.shade400,
                 ),
               ),
             ),

@@ -51,14 +51,30 @@ class AuthState {
     return name.trim().split(' ').first;
   }
 
-  /// True when the user has at least filled in their first name.
+  /// True when the profile `is_completed` flag is set, or first_name is non-empty as fallback.
   static bool get isProfileComplete {
     final profile = userData?['profile'] as Map<String, dynamic>?;
-    final firstName = profile?['first_name'] as String? ?? '';
-    return firstName.isNotEmpty;
+    if (profile?['is_completed'] == true) return true;
+    return (profile?['first_name'] as String? ?? '').isNotEmpty;
   }
 
-  /// Call after a successful updateProfile API response to sync local state.
+  /// Call after a successful PATCH /customer/profile/ response to sync local state.
+  /// Accepts the profile object returned directly by the profile API.
+  static void updateProfileData(Map<String, dynamic> profile) {
+    userData ??= {};
+    userData!['profile'] = profile;
+    final first = profile['first_name'] as String? ?? '';
+    final last = profile['last_name'] as String? ?? '';
+    final fullName = '$first $last'.trim();
+    if (fullName.isNotEmpty) userName.value = fullName;
+    if (accessToken != null && refreshToken != null) {
+      TokenStorage.saveTokens(
+        accessToken!, refreshToken!, jsonEncode(userData),
+      ).catchError((_) {});
+    }
+  }
+
+  /// Legacy: call after a successful updateProfile API response to sync local state.
   static void updateUserProfile(Map<String, dynamic> updatedUser) {
     userData = updatedUser;
     final profile = updatedUser['profile'] as Map<String, dynamic>?;

@@ -9,9 +9,8 @@ import '../services/auth_service.dart';
 import '../providers/auth_state.dart';
 import '../core/responsive.dart';
 import '../screens/home_screen.dart';
-import '../screens/signup_screen.dart';
-import '../screens/forgot_password_screen.dart';
 import '../screens/edit_profile_screen.dart';
+import '../services/walkthrough_service.dart';
 
 void showLoginSheet(BuildContext context) {
   Navigator.push(
@@ -31,61 +30,36 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  bool _isPasswordMode = false;
-  bool _obscurePassword = true;
+  final TextEditingController _emailController = TextEditingController();
   bool _loading = false;
 
   @override
   void dispose() {
-    _phoneController.dispose();
-    _passwordController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
-  void _onSendOTP() {
-    final phone = _phoneController.text.trim();
-    if (phone.isEmpty) {
+  Future<void> _onSendOTP() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter phone number or email')),
+        const SnackBar(content: Text('Please enter your email address')),
       );
       return;
     }
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => _OTPVerificationScreen(phoneOrEmail: phone)),
-    );
-  }
-
-  Future<void> _onSignInWithPassword() async {
-    final email = _phoneController.text.trim();
-    final password = _passwordController.text;
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter email and password')),
-      );
-      return;
-    }
-
     setState(() => _loading = true);
-
-    final result = await AuthService.login(email: email, password: password);
-
+    final result = await AuthService.requestOtp(identifier: email);
     if (!mounted) return;
     setState(() => _loading = false);
-
     if (result['success'] == true) {
-      AuthState.login(
-        access: result['access'] as String?,
-        refresh: result['refresh'] as String?,
-        user: result['user'] as Map<String, dynamic>?,
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => _OTPVerificationScreen(identifier: email)),
       );
-      showWelcomeBackDialog(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] ?? 'Login failed'),
+          content: Text(result['message'] ?? 'Failed to send OTP'),
           backgroundColor: const Color(0xFFE53935),
         ),
       );
@@ -136,7 +110,19 @@ class _LoginScreenState extends State<LoginScreen> {
           refresh: result['refresh'] as String?,
           user: result['user'] as Map<String, dynamic>?,
         );
-        showWelcomeBackDialog(context);
+        final isNew = result['is_new_user'] == true;
+        if (isNew) {
+          await WalkthroughService.markAsNewUser();
+          if (!mounted) return;
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (_) => const EditProfileScreen(isOnboarding: true),
+            ),
+            (route) => false,
+          );
+        } else {
+          showWelcomeBackDialog(context);
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -329,88 +315,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 28),
 
-                  // ── Phone / Email input ─────────────────────────────────
+                  // ── Email input ─────────────────────────────────────────
                   _InputField(
-                    controller: _phoneController,
-                    hint: 'Phone Number / Email',
+                    controller: _emailController,
+                    hint: 'Email Address',
                     icon: Icons.mail_outline_rounded,
                     keyboardType: TextInputType.emailAddress,
                   ),
-
-                  if (_isPasswordMode) ...[
-                    const SizedBox(height: 14),
-                    _InputField(
-                      controller: _passwordController,
-                      hint: 'Password',
-                      icon: Icons.lock_outline_rounded,
-                      obscureText: _obscurePassword,
-                      suffix: GestureDetector(
-                        onTap: () => setState(() => _obscurePassword = !_obscurePassword),
-                        child: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          size: 20,
-                          color: const Color(0xFFAFAFAF),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const ForgotPasswordScreen()),
-                        ),
-                        style: TextButton.styleFrom(
-                          minimumSize: Size.zero,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 4, vertical: 4),
-                        ),
-                        child: Text(
-                          'Forgot Password?',
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF2F80ED),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
 
                   const SizedBox(height: 18),
 
                   // ── Primary button ──────────────────────────────────────
                   _PrimaryButton(
-                    label: _isPasswordMode ? 'Sign In' : 'Send OTP',
+                    label: 'Send OTP',
                     loading: _loading,
-                    onTap: _isPasswordMode ? _onSignInWithPassword : _onSendOTP,
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  // ── Toggle mode link ────────────────────────────────────
-                  TextButton(
-                    onPressed: () => setState(() {
-                      _isPasswordMode = !_isPasswordMode;
-                      _passwordController.clear();
-                      _obscurePassword = true;
-                    }),
-                    style: TextButton.styleFrom(
-                      minimumSize: Size.zero,
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    ),
-                    child: Text(
-                      _isPasswordMode ? 'Use OTP instead' : 'Sign in with Password',
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF5B5BD6),
-                      ),
-                    ),
+                    onTap: _onSendOTP,
                   ),
 
                   const SizedBox(height: 14),
@@ -444,28 +363,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 18),
 
-                  // ── Don't have an account? ──────────────────────────────
+                  // ── New user prompt ─────────────────────────────────────
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Don't have an account? ",
+                        "New here? ",
                         style: GoogleFonts.poppins(
                           fontSize: 13.5,
                           color: const Color(0xFF9E9E9E),
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {
-                          // push (not pushReplacement) so Login stays in stack
-                          // — this lets the "Log In" button on Signup pop back here
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const SignupScreen()),
-                          );
-                        },
+                        onTap: _onSendOTP,
                         child: Text(
-                          'Sign Up',
+                          'Sign Up with OTP',
                           style: GoogleFonts.poppins(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w700,
@@ -489,8 +401,8 @@ class _LoginScreenState extends State<LoginScreen> {
 // OTP VERIFICATION SCREEN
 // ─────────────────────────────────────────────
 class _OTPVerificationScreen extends StatefulWidget {
-  final String phoneOrEmail;
-  const _OTPVerificationScreen({required this.phoneOrEmail});
+  final String identifier;
+  const _OTPVerificationScreen({required this.identifier});
 
   @override
   State<_OTPVerificationScreen> createState() => _OTPVerificationScreenState();
@@ -503,6 +415,7 @@ class _OTPVerificationScreenState extends State<_OTPVerificationScreen> {
 
   int _resendSeconds = 30;
   Timer? _resendTimer;
+  bool _loading = false;
 
   @override
   void initState() {
@@ -531,7 +444,7 @@ class _OTPVerificationScreenState extends State<_OTPVerificationScreen> {
     super.dispose();
   }
 
-  void _onVerify() {
+  Future<void> _onVerify() async {
     final otp = _otpControllers.map((c) => c.text).join();
     if (otp.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -539,12 +452,56 @@ class _OTPVerificationScreenState extends State<_OTPVerificationScreen> {
       );
       return;
     }
-    // TODO: replace with real OTP verification API call and pass access/refresh tokens
-    AuthState.login(phone: widget.phoneOrEmail);
-    final messenger = ScaffoldMessenger.of(context);
-    Navigator.popUntil(context, (route) => route.isFirst);
-    messenger.showSnackBar(
-      const SnackBar(content: Text('OTP Verified! Logged in successfully.')),
+    setState(() => _loading = true);
+    final result = await AuthService.verifyOtp(
+      identifier: widget.identifier,
+      otp: otp,
+    );
+    if (!mounted) return;
+    setState(() => _loading = false);
+
+    if (result['success'] == true) {
+      AuthState.login(
+        access: result['access'] as String?,
+        refresh: result['refresh'] as String?,
+        user: result['user'] as Map<String, dynamic>?,
+      );
+      final isNew = result['is_new_user'] == true;
+      if (isNew) {
+        await WalkthroughService.markAsNewUser();
+        if (!mounted) return;
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) => const EditProfileScreen(isOnboarding: true),
+          ),
+          (route) => false,
+        );
+      } else {
+        showWelcomeBackDialog(context);
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message'] ?? 'Verification failed. Please try again.'),
+          backgroundColor: const Color(0xFFE53935),
+        ),
+      );
+    }
+  }
+
+  Future<void> _onResendOtp() async {
+    _startResendTimer();
+    final result = await AuthService.requestOtp(identifier: widget.identifier);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          result['success'] == true
+              ? 'OTP resent to ${widget.identifier}'
+              : (result['message'] ?? 'Failed to resend OTP'),
+        ),
+        backgroundColor: result['success'] == true ? null : const Color(0xFFE53935),
+      ),
     );
   }
 
@@ -639,7 +596,7 @@ class _OTPVerificationScreenState extends State<_OTPVerificationScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Enter the 6-digit code sent to\n${widget.phoneOrEmail}',
+                    'Enter the 6-digit code sent to\n${widget.identifier}',
                     style: GoogleFonts.poppins(
                         fontSize: 13, color: const Color(0xFF9E9E9E)),
                     textAlign: TextAlign.center,
@@ -692,7 +649,7 @@ class _OTPVerificationScreenState extends State<_OTPVerificationScreen> {
                     );
                   }),
                   const SizedBox(height: 32),
-                  _PrimaryButton(label: 'Verify & Continue', onTap: _onVerify),
+                  _PrimaryButton(label: 'Verify & Continue', loading: _loading, onTap: _onVerify),
                   const SizedBox(height: 24),
                   if (_resendSeconds > 0)
                     Text(
@@ -702,7 +659,7 @@ class _OTPVerificationScreenState extends State<_OTPVerificationScreen> {
                     )
                   else
                     TextButton(
-                      onPressed: _startResendTimer,
+                      onPressed: _onResendOtp,
                       child: Text(
                         'Resend OTP',
                         style: GoogleFonts.poppins(
@@ -730,16 +687,12 @@ class _InputField extends StatelessWidget {
   final String hint;
   final IconData icon;
   final TextInputType? keyboardType;
-  final bool obscureText;
-  final Widget? suffix;
 
   const _InputField({
     required this.controller,
     required this.hint,
     required this.icon,
     this.keyboardType,
-    this.obscureText = false,
-    this.suffix,
   });
 
   @override
@@ -753,7 +706,6 @@ class _InputField extends StatelessWidget {
         controller: controller,
         keyboardType: keyboardType,
         textCapitalization: TextCapitalization.none,
-        obscureText: obscureText,
         style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFF1A1A1A)),
         decoration: InputDecoration(
           prefixIcon: Padding(
@@ -764,10 +716,6 @@ class _InputField extends StatelessWidget {
           hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFFB8B8B8)),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 8), vertical: Responsive.h(context, 16)),
-          suffixIcon: suffix == null
-              ? null
-              : Padding(padding: const EdgeInsets.only(right: 14), child: suffix),
-          suffixIconConstraints: const BoxConstraints(minWidth: 24, minHeight: 24),
         ),
       ),
     );
@@ -868,19 +816,10 @@ void showWelcomeBackDialog(BuildContext context) {
     barrierDismissible: false,
     builder: (_) => _WelcomeBackDialog(
       onDone: () {
-        if (!AuthState.isProfileComplete) {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (_) => const EditProfileScreen(isOnboarding: true),
-            ),
-            (route) => false,
-          );
-        } else {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
-            (route) => false,
-          );
-        }
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          (route) => false,
+        );
       },
     ),
   );

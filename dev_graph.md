@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-05 (Session 9)
+**Last Updated:** 2026-05-08 (Session 12)
 
 ---
 
@@ -138,7 +138,7 @@ HomeScreen (sidebar/action flows)
 | File | Description |
 |------|-------------|
 | `profile_screen.dart` | My Profile — avatar, name, email, Edit Profile button, menu items using profile_section.png sprite |
-| `edit_profile_screen.dart` | Edit profile — first/last name, DOB, city, state, guardian, institution. Pre-fills from AuthState. Calls PATCH /api/v1/auth/users/me/. `isOnboarding` mode for post-signup flow |
+| `edit_profile_screen.dart` | Edit profile — first/last name, phone, gender, birthdate, region. Pre-fills from AuthState. Calls PATCH /api/v1/customer/profile/. `isOnboarding` mode for new-user post-signup flow (no back, Skip action) |
 | `bookings_screen.dart` | Booking history list |
 | `booking_detail_screen.dart` | Single booking detail + QR |
 | `saved_events_screen.dart` | Wishlist of saved events |
@@ -216,12 +216,20 @@ HomeScreen (sidebar/action flows)
 ### AuthService (`lib/services/auth_service.dart`)
 - All methods have **30-second timeout**
 - Typed error handling: `SocketException` → "Cannot reach server", `TimeoutException` → "Request timed out", `HandshakeException` → "SSL error"
-- Endpoints: `/signup/`, `/login/`, `/logout/`, `/password/change/`, `/token/refresh/`, `/customer/google/`, `/users/me/` (PATCH)
-- `updateProfile()` — `MultipartRequest('PATCH')`, sends only non-null customer fields
+- **OTP Login / Signup (unified flow):**
+  - `requestOtp(identifier)` — POST `/api/v1/auth/request-otp/` body `{"identifier": email, "identifier_type": "email"}` → OTP sent to email
+  - `verifyOtp(identifier, otp)` — POST `/api/v1/auth/verify-otp/` body `{"identifier", "otp", "role": "customer"}` → `{"access", "refresh", "is_new_user", "user"}`. Creates account automatically if email not registered. Handles `OTP_INVALID`, `OTP_EXPIRED`, `USER_ROLE_MISMATCH`, `OTP_LOCKED` error codes.
+- `logout(refresh)` — POST `/api/v1/auth/logout/` body `{"refresh_token": refresh}`
+- `refreshToken(refresh)` — POST `/api/v1/auth/refresh-token/` body `{"refresh_token": refresh}`
+- `googleSignIn(firebaseIdToken)` — POST `/api/v1/auth/customer/google/` → `{"access", "refresh", "is_new_user", "user"}`
+- `getProfile(accessToken)` — GET `/api/v1/customer/profile/` → `{"success", "profile": {..., "is_completed": bool}}`
+- `updateProfile(accessToken, firstName, lastName, phoneNumber, gender, birthdate, region)` — PATCH `/api/v1/customer/profile/` (JSON body, partial — only non-null fields sent) → `{"success", "profile": {...}}`
+- `changePassword()` — POST `/api/v1/auth/password/change/` (requires Bearer token)
 - **Password reset (3-step OTP flow):**
-  - `forgotPassword(email)` — POST `/api/v1/auth/customer/password/reset/request/` body `{"identifier": email}` → `{"message": "..."}`
-  - `verifyResetOtp(identifier, code)` — POST `/api/v1/auth/customer/password/reset/verify-otp/` → `{"reset_token": "..."}`
-  - `confirmPasswordReset(resetToken, newPassword, newPasswordConfirm)` — POST `/api/v1/auth/customer/password/reset/confirm/` → `{"message": "..."}`
+  - `forgotPassword(email)` — POST `/api/v1/auth/customer/password/reset/request/`
+  - `verifyResetOtp(identifier, code)` — POST `/api/v1/auth/customer/password/reset/verify-otp/` → `{"reset_token"}`
+  - `confirmPasswordReset(resetToken, newPassword, newPasswordConfirm)` — POST `/api/v1/auth/customer/password/reset/confirm/`
+- ~~`signup()`~~ / ~~`login()`~~ — removed (password-based auth dropped)
 
 ### TokenStorage (`lib/services/token_storage.dart`)
 - Wraps `FlutterSecureStorage`
@@ -593,10 +601,10 @@ Reacts to profile edits without requiring screen re-navigation.
 | ~~Onboarding walkthrough (new-user tour)~~ | `home_screen.dart`, `floating_navbar.dart`, `home_header.dart`, `walkthrough_service.dart`, `walkthrough_keys.dart`, `walkthrough_intro_overlay.dart` | ✅ Done — 7-step showcaseview tour with animated intro overlay |
 | ~~Hardcoded username in profile sub-screens~~ | `saved_events_screen.dart`, `your_reviews_screen.dart`, `help_centre_screen.dart`, `payment_settings_screen.dart`, `reminders_screen.dart` | ✅ Done — `AuthState.firstName` getter |
 | ~~Hardcoded avatar + email in AccountSettingsScreen~~ | `account_settings_screen.dart` | ✅ Done — live `ValueListenableBuilder` on `AuthState.avatarUrl` + `AuthState.userEmail` |
-| OTP verification real API | `login_sheet.dart:_OTPVerificationScreen._onVerify` | ❌ Pending — calls `AuthState.login(phone:...)` without JWT |
+| ~~OTP verification real API~~ | `login_sheet.dart:_OTPVerificationScreen._onVerify` | ✅ Done — real `verifyOtp()` call; new user → EditProfileScreen, existing → WelcomeBackDialog |
 | PlanPartyScreen → booking confirmation | `plan_party_screen.dart:_onContinue` | ❌ Pending — validated but navigates nowhere |
 | Profile screen reactive to name/avatar changes | `profile_screen.dart` | ❌ Pending — reads `AuthState.userName.value` but no `ValueListenableBuilder`; won't update on profile edit without navigate-back rebuild |
-| Profile avatar upload | `edit_profile_screen.dart` | ❌ Pending — camera icon decorative only, no upload handler |
+| Profile avatar upload | `edit_profile_screen.dart` | ❌ Pending — removed from profile form (new API has no avatar field); needs separate endpoint when available |
 | Startup profile completion check | `main.dart` | ❌ Pending — `tryRestoreSession()` restores session but does NOT redirect incomplete profiles |
 
 ---
@@ -729,7 +737,7 @@ geocoding: ^3.0.0              # placemarkFromCoordinates() — lat/lng → city
 | `SignupScreen` network fixes: added `dart:async` + `dart:io` imports; `if (!mounted) return` guard after `await markAsNewUser()` in `_onSignUp`; `_onGoogleSignUp` catch now maps `SocketException` / `TimeoutException` to friendly user-facing strings instead of raw `e.toString()`; `_GoogleButton.onTap` type widened to `VoidCallback?`; call site passes `null` when `_loading` is true to prevent concurrent signup requests | `signup_screen.dart` |
 | Walkthrough intro overlay title corrected: "The Long Broadway" → "The Little Broadway" | `walkthrough_intro_overlay.dart` |
 
-### Session 9 (Current)
+### Session 9
 | Change | Files |
 |--------|-------|
 | `SectionDividerWidget` decorative line width extended: 70 → 110px for visual emphasis | `lib/widgets/section_divider_widget.dart` |
@@ -752,3 +760,51 @@ geocoding: ^3.0.0              # placemarkFromCoordinates() — lat/lng → city
 | → `family_feels_section.dart`: button `height: 36` → `Responsive.h(context, 36, min: 32)` | `lib/sections/family_feels_section.dart` |
 | → `events_screen.dart`: `SizedBox(width: 240)` → `Responsive.cardWidth(context, fraction: 0.62, max: 240)` | `lib/screens/events_screen.dart` |
 | → `programs_screen.dart`: `width: 220` → `Responsive.cardWidth(context, fraction: 0.56, max: 220)`; `height: 160` × 2 → `Responsive.h(context, 160, min: 140)` | `lib/screens/programs_screen.dart` |
+
+### Session 10
+| Change | Files |
+|--------|-------|
+| `CategoryScreenHeader` AppBar title centered — replaced `Row(backArrow + Expanded(Text))` with `Stack(Align(left: backArrow) + Center(Text))` so title is truly centered on screen regardless of arrow width | `lib/widgets/category_screen_header.dart` |
+| "All [Category]" section divider centered — fixed left line from fixed `width: 28` to `Expanded`, matching the right line; applies to all four category screens | `lib/screens/category_events_screen.dart`, `lib/screens/category_classes_screen.dart`, `lib/screens/category_programs_screen.dart`, `lib/screens/category_venues_screen.dart` |
+| `categorySubFilters` (Events) fully replaced — Arts & Crafts: 8 subs; Performing Arts: 6 subs; STEM & Innovation: 7 subs; Sports & Fitness: 8 subs; Languages & Communication: 7 subs; Life Skills: 6 subs | `lib/data/dummy_data.dart` |
+| `classesSubFilters` fully replaced — 11 categories with accurate subcategories: Academic (4), Creative Arts (11), Tech & Innovation (9), Performing Arts (4), Sports & Fitness (14), Speech & Communication (8), Life Skills & Personality Dev (4), Creative Media (6), Outdoor & Nature Learning (5), Culinary (3), Brain Boosters (5) | `lib/data/dummy_data.dart` |
+| `programsSubFilters` fully replaced — 11 categories: Future Tech & AI (6), Design & Innovation (5), Leadership & Entrepreneurship (5), Media & Content Creation (6), Stage Arts & Performance (4), Active Sports & Training (5), Academics & Competitive Prep (4), Analytical Thinking (5), Language & Communication (6), Culinary & Hospitality (5), Grooming & Personality Development (5) | `lib/data/dummy_data.dart` |
+| `venuesSubFilters` fully replaced — 8 categories: Play & Adventure (8), Sports & Active (8), Creative & DIY (6), Party & Celebration (5), Science & Discovery (6), Nature & Animals (7), Reading & Study (5), Dining & Cafes (5) | `lib/data/dummy_data.dart` |
+| Scaffold background changed to `Colors.white` on all 4 category screens | `lib/screens/category_events_screen.dart`, `category_classes_screen.dart`, `category_programs_screen.dart`, `category_venues_screen.dart` |
+
+### Session 11
+| Change | Files |
+|--------|-------|
+| Password-based auth removed — `signup()` and `login()` methods deleted; old endpoints `/customer/email/signup/` and `/customer/email/login/` gone | `lib/services/auth_service.dart` |
+| `requestOtp(identifier)` added — POST `/api/v1/auth/request-otp/`, sends OTP to email | `lib/services/auth_service.dart` |
+| `verifyOtp(identifier, otp)` added — POST `/api/v1/auth/verify-otp/`, handles login + signup in one call; returns `access`, `refresh`, `is_new_user`, `user`; structured error handling for `OTP_INVALID`, `OTP_EXPIRED`, `USER_ROLE_MISMATCH`, rate limits | `lib/services/auth_service.dart` |
+| `logout()` body key updated: `'refresh'` → `'refresh_token'` | `lib/services/auth_service.dart` |
+| `refreshToken()` endpoint updated: `/api/v1/auth/token/refresh/` → `/api/v1/auth/refresh-token/`; body key: `'refresh'` → `'refresh_token'` | `lib/services/auth_service.dart` |
+| `LoginScreen` password mode removed — deleted `_passwordController`, `_isPasswordMode`, `_obscurePassword`, `_onSignInWithPassword()`, password field, toggle button, forgot password link | `lib/widgets/login_sheet.dart` |
+| `LoginScreen` OTP flow wired — `_onSendOTP()` now async, calls `requestOtp()`, navigates to `_OTPVerificationScreen(identifier: email)` on success | `lib/widgets/login_sheet.dart` |
+| `_OTPVerificationScreen` real API wired — `_onVerify()` calls `verifyOtp()`; `is_new_user == true` → `markAsNewUser()` + `EditProfileScreen(isOnboarding: true)`; existing user → `showWelcomeBackDialog()` | `lib/widgets/login_sheet.dart` |
+| `_OTPVerificationScreen` resend wired — `_onResendOtp()` calls `requestOtp()` with snackbar feedback | `lib/widgets/login_sheet.dart` |
+| "Don't have an account? Sign Up" → "New here? Sign Up with OTP" — taps `_onSendOTP()` (same flow, no `SignupScreen` navigation) | `lib/widgets/login_sheet.dart` |
+| `SignupScreen` removed from navigation flow (dead code); fixed compile error by replacing `AuthService.signup()` call with `AuthService.requestOtp()` | `lib/screens/signup_screen.dart` |
+| `_InputField` widget simplified — removed unused `obscureText` and `suffix` params | `lib/widgets/login_sheet.dart` |
+
+### Session 12 (Current)
+| Change | Files |
+|--------|-------|
+| **Root fix: "Complete Your Profile" no longer shown to existing users** — removed `AuthState.isProfileComplete` check from `showWelcomeBackDialog()`; `onDone` now always navigates to `HomeScreen`; profile completion prompt is exclusively controlled by `is_new_user` flag from API | `lib/widgets/login_sheet.dart` |
+| Google sign-in routing fixed — `_onGoogleSignIn()` now mirrors OTP flow: `is_new_user == true` → `markAsNewUser()` + `EditProfileScreen(isOnboarding: true)`; existing user → `showWelcomeBackDialog()` | `lib/widgets/login_sheet.dart` |
+| `getProfile(accessToken)` added — GET `/api/v1/customer/profile/`, returns profile with `is_completed` flag | `lib/services/auth_service.dart` |
+| `updateProfile()` rewritten — endpoint changed from `PATCH /api/v1/auth/users/me/` to `PATCH /api/v1/customer/profile/`; MultipartRequest removed (now JSON body); fields updated to `first_name`, `last_name`, `phone_number`, `gender`, `birthdate`, `region`; returns `{'success', 'profile'}` | `lib/services/auth_service.dart` |
+| `AuthState.updateProfileData(profile)` added — accepts profile object directly from profile API and merges into `userData`; fires `userName` notifier | `lib/providers/auth_state.dart` |
+| `AuthState.isProfileComplete` updated — checks `is_completed` flag from new API first, falls back to `first_name` non-empty check | `lib/providers/auth_state.dart` |
+| `EditProfileScreen` fields updated — removed: city, state, guardian_name, institution_name, institution_type, avatar upload, Education section, Guardian Details section; added: phone_number, gender dropdown (male/female/other/prefer_not_to_say), region; renamed `dateOfBirth` → `birthdate` | `lib/screens/edit_profile_screen.dart` |
+| `EditProfileScreen` save wired to new API — calls `AuthService.updateProfile()` with new fields → `AuthState.updateProfileData(result['profile'])` | `lib/screens/edit_profile_screen.dart` |
+| `dart:io` and `image_picker` imports removed from EditProfileScreen (no longer needed without avatar upload) | `lib/screens/edit_profile_screen.dart` |
+| Change | Files |
+|--------|-------|
+| `CategoryScreenHeader` AppBar title centered — replaced `Row(backArrow + Expanded(Text))` with `Stack(Align(left: backArrow) + Center(Text))` so title is truly centered on screen regardless of arrow width | `lib/widgets/category_screen_header.dart` |
+| "All [Category]" section divider centered — fixed left line from fixed `width: 28` to `Expanded`, matching the right line; applies to all four category screens | `lib/screens/category_events_screen.dart`, `lib/screens/category_classes_screen.dart`, `lib/screens/category_programs_screen.dart`, `lib/screens/category_venues_screen.dart` |
+| `categorySubFilters` (Events) fully replaced — Arts & Crafts: 8 subs; Performing Arts: 6 subs; STEM & Innovation: 7 subs; Sports & Fitness: 8 subs; Languages & Communication: 7 subs; Life Skills: 6 subs | `lib/data/dummy_data.dart` |
+| `classesSubFilters` fully replaced — 11 categories with accurate subcategories: Academic (4), Creative Arts (11), Tech & Innovation (9), Performing Arts (4), Sports & Fitness (14), Speech & Communication (8), Life Skills & Personality Dev (4), Creative Media (6), Outdoor & Nature Learning (5), Culinary (3), Brain Boosters (5) | `lib/data/dummy_data.dart` |
+| `programsSubFilters` fully replaced — 11 categories: Future Tech & AI (6), Design & Innovation (5), Leadership & Entrepreneurship (5), Media & Content Creation (6), Stage Arts & Performance (4), Active Sports & Training (5), Academics & Competitive Prep (4), Analytical Thinking (5), Language & Communication (6), Culinary & Hospitality (5), Grooming & Personality Development (5) | `lib/data/dummy_data.dart` |
+| `venuesSubFilters` fully replaced — 8 categories: Play & Adventure (8), Sports & Active (8), Creative & DIY (6), Party & Celebration (5), Science & Discovery (6), Nature & Animals (7), Reading & Study (5), Dining & Cafes (5) | `lib/data/dummy_data.dart` |
