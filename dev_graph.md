@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-08 (Session 12)
+**Last Updated:** 2026-05-08 (Session 13)
 
 ---
 
@@ -544,6 +544,44 @@ Signup flag wiring:
   Google signup: markAsNewUser() called only when result['is_new_user'] == true
 ```
 
+### "Explore the Stage" Category Grid (Home Screen)
+```
+CategoriesGrid (lib/widgets/categories_grid.dart):
+
+Section header:
+  Row — Expanded(_buildLine isLeft:true) + Text("Explore the Stage") + Expanded(_buildLine isLeft:false)
+  Lines: gradient Container(height:1.2) — transparent → Color(0xFFCFAD6A) (left) / reverse (right)
+  Title: Poppins 15sp w700, Color(0xFF5A5A5A)
+  Padding: horizontal 16, vertical 20
+
+Grid:
+  Padding(horizontal: 16) → LayoutBuilder → GridView.builder(shrinkWrap:true, NeverScrollableScrollPhysics)
+  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2, crossAxisSpacing:14, mainAxisSpacing:14)
+  childAspectRatio: computed = cellWidth / Responsive.h(context, 178, min:158)
+  cellWidth = (constraints.maxWidth - 14) / 2
+
+Card (_buildCategoryCard):
+  Stack(fit: StackFit.expand)               ← tight constraints → card fills grid cell exactly
+    Container(decoration: BoxDecoration(
+      gradient: LinearGradient topCenter→bottomCenter
+        Color(0xFFF0E6D0) [0.0] → Color(0xFFF0E6D0) [0.58] → Colors.white [1.0]
+      borderRadius: 20
+      boxShadow: left(-4,0) + right(4,0) + top(0,-2) — no bottom shadow → seamless bottom blend
+    ))
+      Column: Expanded(Image.asset) + Text(label, 14sp w700) + SizedBox(3) + Padding(bottom:14)(Text subtitle, 11sp grey)
+    Positioned.fill → CustomPaint(_ThreeSidedBorderPainter)
+
+_ThreeSidedBorderPainter:
+  Draws Path: moveTo(0,h) → lineTo(0,r) → arcToPoint(r,0) → lineTo(w-r,0) → arcToPoint(w,r) → lineTo(w,h)
+  Omits bottom edge — card gradient is white at bottom, matching page → fully seamless
+
+homeCategories data (dummy_data.dart):
+  {label: 'Events',   subtitle: 'Join The Fun',     image: '.../events.png'}
+  {label: 'Classes',  subtitle: 'Build Your Skill',  image: '.../classes.png'}
+  {label: 'Programs', subtitle: 'Master The Craft',  image: '.../programs.png'}
+  {label: 'Venues',   subtitle: 'Find Your Space',   image: '.../venues.png'}
+```
+
 ### Subcategory Grid — Per-Item Image Inset
 ```
 dummy_data.dart programsCategories entries can carry an optional 'imageInset': double key.
@@ -800,11 +838,13 @@ geocoding: ^3.0.0              # placemarkFromCoordinates() — lat/lng → city
 | `EditProfileScreen` fields updated — removed: city, state, guardian_name, institution_name, institution_type, avatar upload, Education section, Guardian Details section; added: phone_number, gender dropdown (male/female/other/prefer_not_to_say), region; renamed `dateOfBirth` → `birthdate` | `lib/screens/edit_profile_screen.dart` |
 | `EditProfileScreen` save wired to new API — calls `AuthService.updateProfile()` with new fields → `AuthState.updateProfileData(result['profile'])` | `lib/screens/edit_profile_screen.dart` |
 | `dart:io` and `image_picker` imports removed from EditProfileScreen (no longer needed without avatar upload) | `lib/screens/edit_profile_screen.dart` |
+
+### Session 13
 | Change | Files |
 |--------|-------|
-| `CategoryScreenHeader` AppBar title centered — replaced `Row(backArrow + Expanded(Text))` with `Stack(Align(left: backArrow) + Center(Text))` so title is truly centered on screen regardless of arrow width | `lib/widgets/category_screen_header.dart` |
-| "All [Category]" section divider centered — fixed left line from fixed `width: 28` to `Expanded`, matching the right line; applies to all four category screens | `lib/screens/category_events_screen.dart`, `lib/screens/category_classes_screen.dart`, `lib/screens/category_programs_screen.dart`, `lib/screens/category_venues_screen.dart` |
-| `categorySubFilters` (Events) fully replaced — Arts & Crafts: 8 subs; Performing Arts: 6 subs; STEM & Innovation: 7 subs; Sports & Fitness: 8 subs; Languages & Communication: 7 subs; Life Skills: 6 subs | `lib/data/dummy_data.dart` |
-| `classesSubFilters` fully replaced — 11 categories with accurate subcategories: Academic (4), Creative Arts (11), Tech & Innovation (9), Performing Arts (4), Sports & Fitness (14), Speech & Communication (8), Life Skills & Personality Dev (4), Creative Media (6), Outdoor & Nature Learning (5), Culinary (3), Brain Boosters (5) | `lib/data/dummy_data.dart` |
-| `programsSubFilters` fully replaced — 11 categories: Future Tech & AI (6), Design & Innovation (5), Leadership & Entrepreneurship (5), Media & Content Creation (6), Stage Arts & Performance (4), Active Sports & Training (5), Academics & Competitive Prep (4), Analytical Thinking (5), Language & Communication (6), Culinary & Hospitality (5), Grooming & Personality Development (5) | `lib/data/dummy_data.dart` |
-| `venuesSubFilters` fully replaced — 8 categories: Play & Adventure (8), Sports & Active (8), Creative & DIY (6), Party & Celebration (5), Science & Discovery (6), Nature & Animals (7), Reading & Study (5), Dining & Cafes (5) | `lib/data/dummy_data.dart` |
+| `homeCategories` updated — added `subtitle` field per entry: Events → "Join The Fun", Classes → "Build Your Skill", Programs → "Master The Craft", Venues → "Find Your Space"; fixed label `'Program'` → `'Programs'` | `lib/data/dummy_data.dart` |
+| `CategoriesGrid` fully redesigned — new "Explore the Stage" section title with gold gradient lines (same pattern as `SectionDividerWidget`); 2×2 card layout with warm cream (`#F0E6D0`) gradient fading to white; subtitle text below category name; 3-sided border (left/top/right only) via `_ThreeSidedBorderPainter` (`CustomPainter`) so bottom blends seamlessly into white page; side-only `BoxShadow` (left + right offsets, no bottom) | `lib/widgets/categories_grid.dart` |
+| Grid layout switched from `Column + Row` to `GridView.builder` — `LayoutBuilder` computes `childAspectRatio = cellWidth / cardHeight` at runtime, ensuring cards fill available width symmetrically with no right-side gap | `lib/widgets/categories_grid.dart` |
+| `Stack(fit: StackFit.expand)` used inside card — replaces `StackFit.loose`; passes tight cell constraints down to the `Container` so card fills the grid cell width exactly (fixes right-side gap bug) | `lib/widgets/categories_grid.dart` |
+| Fixed `height:` removed from card `Container` — grid cell dimensions (via `childAspectRatio`) drive sizing; `Expanded` inside the card `Column` takes remaining height for the image | `lib/widgets/categories_grid.dart` |
+| `SizedBox(height: 24)` before `CategoriesGrid` removed from `HomeScreen` — grid now includes its own top padding via the section title `Padding(vertical: 20)` | `lib/screens/home_screen.dart` |

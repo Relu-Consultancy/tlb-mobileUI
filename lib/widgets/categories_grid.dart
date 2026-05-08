@@ -19,7 +19,7 @@ class CategoriesGrid extends StatelessWidget {
       case 'Classes':
         screen = const ClassesScreen();
         break;
-      case 'Program':
+      case 'Programs':
         screen = const ProgramsScreen();
         break;
       case 'Venues':
@@ -34,92 +34,208 @@ class CategoriesGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categories = DummyData.homeCategories;
-    final topRow = categories.sublist(0, 2);
-    final bottomRow = categories.sublist(2, 4);
+    const double hPadding = 16;
+    const double hSpacing = 14;
+    const double vSpacing = 14;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        children: [
-          _buildRow(context, topRow),
-          const SizedBox(height: 12),
-          _buildRow(context, bottomRow),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRow(BuildContext context, List<Map<String, dynamic>> items) {
-    return Row(
-      children: items.asMap().entries.map((entry) {
-        final index = entry.key;
-        final cat = entry.value;
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(right: index < items.length - 1 ? 12 : 0),
-            child: GestureDetector(
-              onTap: () => _navigateTo(context, cat['label']),
-              child: _buildCategoryCard(context, cat),
-            ),
+    return Column(
+      children: [
+        // ── "Explore the Stage" title with gradient lines ──
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: hPadding, vertical: 20),
+          child: Row(
+            children: [
+              Expanded(child: _buildLine(isLeft: true)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Text(
+                  'Explore the Stage',
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF5A5A5A),
+                  ),
+                ),
+              ),
+              Expanded(child: _buildLine(isLeft: false)),
+            ],
           ),
-        );
-      }).toList(),
-    );
-  }
-
-  BoxDecoration _cardDecoration() {
-    return BoxDecoration(
-      gradient: LinearGradient(
-        colors: [Colors.grey.shade100, Colors.grey.shade300],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-      ),
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: Colors.grey.shade400, width: 0.5),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.06),
-          blurRadius: 8,
-          offset: const Offset(0, 3),
         ),
+
+        // ── 2×2 card grid — LayoutBuilder computes exact cell aspect ratio ──
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: hPadding),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final cellWidth = (constraints.maxWidth - hSpacing) / 2;
+              final cardHeight = Responsive.h(context, 178, min: 158);
+              final aspectRatio = cellWidth / cardHeight;
+
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: hSpacing,
+                  mainAxisSpacing: vSpacing,
+                  childAspectRatio: aspectRatio,
+                ),
+                itemCount: categories.length,
+                itemBuilder: (context, index) {
+                  final cat = categories[index];
+                  return GestureDetector(
+                    onTap: () => _navigateTo(context, cat['label']),
+                    child: _buildCategoryCard(cat),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+
+        const SizedBox(height: 12),
       ],
     );
   }
 
-  Widget _buildCategoryCard(BuildContext context, Map<String, dynamic> cat) {
+  Widget _buildLine({required bool isLeft}) {
     return Container(
-      height: Responsive.h(context, 110, min: 95),
-      decoration: _cardDecoration(),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
-              child: Image.asset(
-                cat['image'],
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => const Icon(
-                  Icons.category_outlined,
-                  size: 36,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Text(
-              cat['label'],
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF1A1A2E),
-              ),
-            ),
-          ),
-        ],
+      height: 1.2,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isLeft
+              ? [Colors.transparent, const Color(0xFFCFAD6A)]
+              : [const Color(0xFFCFAD6A), Colors.transparent],
+        ),
       ),
     );
   }
+
+  Widget _buildCategoryCard(Map<String, dynamic> cat) {
+    const double cardRadius = 20;
+    // StackFit.expand forces the Container to fill the grid cell tightly,
+    // so no fixed width/height is needed — the cell dimensions drive sizing.
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFF0E6D0),
+                Color(0xFFF0E6D0),
+                Colors.white,
+              ],
+              stops: [0.0, 0.58, 1.0],
+            ),
+            borderRadius: BorderRadius.circular(cardRadius),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.07),
+                blurRadius: 10,
+                spreadRadius: -4,
+                offset: const Offset(-4, 0),
+              ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.07),
+                blurRadius: 10,
+                spreadRadius: -4,
+                offset: const Offset(4, 0),
+              ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 6,
+                spreadRadius: -3,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 12, 10, 4),
+                  child: Image.asset(
+                    cat['image'],
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.category_outlined,
+                      size: 48,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
+              Text(
+                cat['label'],
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF1A1A2E),
+                ),
+              ),
+              const SizedBox(height: 3),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: Text(
+                  cat['subtitle'] ?? '',
+                  style: GoogleFonts.poppins(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFF9E9E9E),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // 3-sided border — left, top, right only; bottom open so gradient blends into page.
+        Positioned.fill(
+          child: CustomPaint(
+            painter: _ThreeSidedBorderPainter(
+              color: const Color(0xFFD8C9A8),
+              radius: cardRadius,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Paints a rounded-rectangle border on left, top, and right sides only.
+class _ThreeSidedBorderPainter extends CustomPainter {
+  final Color color;
+  final double radius;
+
+  const _ThreeSidedBorderPainter({required this.color, required this.radius});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..strokeCap = StrokeCap.butt;
+
+    final r = radius;
+    final path = Path()
+      ..moveTo(0, size.height)
+      ..lineTo(0, r)
+      ..arcToPoint(Offset(r, 0), radius: Radius.circular(r), clockwise: true)
+      ..lineTo(size.width - r, 0)
+      ..arcToPoint(Offset(size.width, r), radius: Radius.circular(r), clockwise: true)
+      ..lineTo(size.width, size.height);
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_ThreeSidedBorderPainter old) =>
+      old.color != color || old.radius != radius;
 }

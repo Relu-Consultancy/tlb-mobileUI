@@ -5,22 +5,25 @@ import '../models/category_model.dart';
 class DummyData {
   DummyData._();
 
-  // New Categories Array mapped to 3D icons
   static const List<Map<String, dynamic>> homeCategories = [
     {
       'label': 'Events',
+      'subtitle': 'Join The Fun',
       'image': 'resources- tlb-ui/homescreen-categoryicons/events.png',
     },
     {
       'label': 'Classes',
+      'subtitle': 'Build Your Skill',
       'image': 'resources- tlb-ui/homescreen-categoryicons/classes.png',
     },
     {
-      'label': 'Program',
+      'label': 'Programs',
+      'subtitle': 'Master The Craft',
       'image': 'resources- tlb-ui/homescreen-categoryicons/programs.png',
     },
     {
       'label': 'Venues',
+      'subtitle': 'Find Your Space',
       'image': 'resources- tlb-ui/homescreen-categoryicons/venues.png',
     },
   ];

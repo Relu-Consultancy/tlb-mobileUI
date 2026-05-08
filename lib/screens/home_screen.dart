@@ -191,12 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 fixedCardWidth: Responsive.w(context, 355.0),
                               ),
                             ),
-                            const SizedBox(height: 24),
-                            
-                            // Categories Grid (3x2 layout)
                             const RepaintBoundary(child: CategoriesGrid()),
-                            
-                            const SizedBox(height: 8),
                             
                             // Sections
                             const RepaintBoundary(child: HotPicksSection()),
