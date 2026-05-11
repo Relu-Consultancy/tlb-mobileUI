@@ -2,18 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
-import '../data/dummy_data.dart';
+import '../models/api_event_model.dart';
 import '../models/event_model.dart';
+import '../services/events_listing_service.dart';
 import '../widgets/category_event_card.dart';
 import '../widgets/category_screen_header.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/subcategory_empty_state.dart';
 
 class CategoryEventsScreen extends StatefulWidget {
+  final List<Map<String, dynamic>> categories;
   final int initialCategoryIndex;
 
   const CategoryEventsScreen({
     super.key,
+    required this.categories,
     required this.initialCategoryIndex,
   });
 
@@ -25,15 +28,18 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
   late int _selectedCategoryIndex;
   int _selectedFilterIndex = 0;
   final ScrollController _chipScrollController = ScrollController();
-  final List<GlobalKey> _chipKeys = List.generate(
-    DummyData.exploreCategories.length,
-    (_) => GlobalKey(),
-  );
+  late List<GlobalKey> _chipKeys;
+
+  List<ApiEvent> _apiEvents = [];
+  bool _isLoadingEvents = true;
+  String? _fetchError;
 
   @override
   void initState() {
     super.initState();
-    _selectedCategoryIndex = widget.initialCategoryIndex;
+    _selectedCategoryIndex = widget.initialCategoryIndex.clamp(0, widget.categories.length - 1);
+    _chipKeys = List.generate(widget.categories.length, (_) => GlobalKey());
+    _fetchEvents();
   }
 
   @override
@@ -42,12 +48,49 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
     super.dispose();
   }
 
+  Future<void> _fetchEvents({String? subcategory}) async {
+    setState(() {
+      _isLoadingEvents = true;
+      _fetchError = null;
+    });
+    try {
+      final page = await EventsListingService.fetchEvents(
+        category: _categoryTitle,
+        subcategory: subcategory,
+        pageSize: 50,
+      );
+      if (!mounted) return;
+      setState(() {
+        _apiEvents = page.results;
+        _isLoadingEvents = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      setState(() {
+        _apiEvents = [];
+        _isLoadingEvents = false;
+        _fetchError = msg;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Events: $msg'),
+          backgroundColor: const Color(0xFF1A1A2E),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
+  }
+
   void _selectCategory(int index) {
     setState(() {
       _selectedCategoryIndex = index;
       _selectedFilterIndex = 0;
     });
-    // Scroll the selected chip into view after frame
+    _fetchEvents(subcategory: null);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final key = _chipKeys[index];
       if (key.currentContext != null) {
@@ -62,25 +105,32 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
   }
 
   Map<String, dynamic> get _currentCategory =>
-      DummyData.exploreCategories[_selectedCategoryIndex];
+      widget.categories[_selectedCategoryIndex];
 
   List<Color> get _currentGradient =>
       (_currentCategory['gradient'] as List<Color>);
 
   Color get _accentColor => _currentGradient.last;
 
-  List<String> get _filters =>
-      DummyData.categorySubFilters[_selectedCategoryIndex];
-
-  List<EventModel> get _filteredEvents {
-    final all = DummyData.categoryEvents[_selectedCategoryIndex];
-    if (_selectedFilterIndex == 0) return all;
-    final filterTag = _filters[_selectedFilterIndex];
-    return all.where((e) => e.tag == filterTag).toList();
+  List<String> get _filters {
+    final subs = (_currentCategory['subcategories'] as List?)?.cast<String>() ?? [];
+    return ['All', ...subs];
   }
 
-  String get _categoryTitle {
-    return (_currentCategory['label'] as String).replaceAll('\n', ' ');
+  List<ApiEvent> get _filteredEvents => _apiEvents;
+
+  String get _categoryTitle =>
+      (_currentCategory['label'] as String).replaceAll('\n', ' ');
+
+  EventModel _toEventModel(ApiEvent event) {
+    return EventModel(
+      id: event.id,
+      title: event.title,
+      venue: event.city,
+      imagePath: event.coverUrl ?? '',
+      tag: event.subcategory?.name,
+      price: event.priceFrom != null ? double.tryParse(event.priceFrom!) : null,
+    );
   }
 
   void _showFilterSheet() {
@@ -130,7 +180,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
               child: CustomScrollView(
                 physics: const ClampingScrollPhysics(),
                 slivers: [
-                  // Explore other Categories row + tinted background
+                  // Explore other Categories row
                   SliverToBoxAdapter(
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
@@ -176,9 +226,9 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                               controller: _chipScrollController,
                               scrollDirection: Axis.horizontal,
                               padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
-                              itemCount: DummyData.exploreCategories.length,
+                              itemCount: widget.categories.length,
                               itemBuilder: (context, index) {
-                                final cat = DummyData.exploreCategories[index];
+                                final cat = widget.categories[index];
                                 final isSelected = index == _selectedCategoryIndex;
                                 final catGradient = cat['gradient'] as List<Color>;
                                 return AnimatedScale(
@@ -216,7 +266,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
-                                              (cat['label'] as String),
+                                              cat['label'] as String,
                                               textAlign: TextAlign.center,
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
@@ -258,9 +308,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                       padding: const EdgeInsets.fromLTRB(16, 22, 16, 0),
                       child: Row(
                         children: [
-                          Expanded(
-                            child: Container(height: 1.5, color: const Color(0xFFFFB902)),
-                          ),
+                          Expanded(child: Container(height: 1.5, color: const Color(0xFFFFB902))),
                           const SizedBox(width: 10),
                           Text(
                             'All $_categoryTitle',
@@ -271,9 +319,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                             ),
                           ),
                           const SizedBox(width: 10),
-                          Expanded(
-                            child: Container(height: 1.5, color: const Color(0xFFFFB902)),
-                          ),
+                          Expanded(child: Container(height: 1.5, color: const Color(0xFFFFB902))),
                         ],
                       ),
                     ),
@@ -286,10 +332,9 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                        itemCount: _filters.length + 1, // +1 for Filters button
+                        itemCount: _filters.length + 1,
                         itemBuilder: (context, index) {
                           if (index == 0) {
-                            // Filters pill
                             return GestureDetector(
                               onTap: _showFilterSheet,
                               child: Container(
@@ -320,7 +365,11 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                           final filterIndex = index - 1;
                           final isActive = filterIndex == _selectedFilterIndex;
                           return GestureDetector(
-                            onTap: () => setState(() => _selectedFilterIndex = filterIndex),
+                            onTap: () {
+                            setState(() => _selectedFilterIndex = filterIndex);
+                            final sub = filterIndex == 0 ? null : _filters[filterIndex];
+                            _fetchEvents(subcategory: sub);
+                          },
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
                               margin: const EdgeInsets.only(right: 8),
@@ -347,9 +396,19 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                     ),
                   ),
 
-                  // 2-column event grid
+                  // Event grid
                   const SliverToBoxAdapter(child: SizedBox(height: 14)),
-                  if (_filteredEvents.isEmpty)
+                  if (_isLoadingEvents)
+                    const SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF1A1A2E),
+                          strokeWidth: 2.5,
+                        ),
+                      ),
+                    )
+                  else if (_filteredEvents.isEmpty)
                     SliverFillRemaining(
                       hasScrollBody: false,
                       child: SubcategoryEmptyState(
@@ -365,7 +424,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                             final events = _filteredEvents;
                             if (index >= events.length) return null;
                             return CategoryEventCard(
-                              event: events[index],
+                              event: _toEventModel(events[index]),
                               badgeColor: _accentColor.withOpacity(0.9),
                             );
                           },

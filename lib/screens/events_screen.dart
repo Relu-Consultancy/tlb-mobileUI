@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
+import '../models/api_category_model.dart';
 import '../sections/home_header.dart';
+import '../services/events_listing_service.dart';
 import '../widgets/banner_carousel.dart';
 import '../widgets/section_divider_widget.dart';
 import '../widgets/explore_categories_grid.dart';
@@ -23,6 +25,57 @@ import 'venues_screen.dart';
 import '../widgets/all_categories_popup.dart';
 import 'category_events_screen.dart';
 
+// Slug → local asset + gradient palette.
+// New API categories that don't yet have dedicated assets fall back to a
+// visually distinct colour + the closest existing image.
+final _categoryAssets = <String, Map<String, dynamic>>{
+  'arts-crafts': {
+    'image': 'assets/images/event_subcategories/artcraft.png',
+    'gradient': <Color>[const Color(0xFFE8E0FF), const Color(0xFFD4BFFF)],
+  },
+  'performing-arts': {
+    'image': 'assets/images/event_subcategories/performarts.png',
+    'gradient': <Color>[const Color(0xFFFFE0E0), const Color(0xFFFFB3B3)],
+  },
+  'stem-innovation': {
+    'image': 'assets/images/event_subcategories/stem.png',
+    'gradient': <Color>[const Color(0xFFFFF0D4), const Color(0xFFFFDB99)],
+  },
+  'sports-fitness': {
+    'image': 'assets/images/event_subcategories/sports.png',
+    'gradient': <Color>[const Color(0xFFFFF8D4), const Color(0xFFFFEDA1)],
+  },
+  'languages-communication': {
+    'image': 'assets/images/event_subcategories/lang.png',
+    'gradient': <Color>[const Color(0xFFFFE8E0), const Color(0xFFFFC2AD)],
+  },
+  'life-skills': {
+    'image': 'assets/images/event_subcategories/lifeskills.png',
+    'gradient': <Color>[const Color(0xFFE0F0FF), const Color(0xFFADD4FF)],
+  },
+  'mind-strategy-games': {
+    'image': 'assets/images/event_subcategories/lifeskills.png',
+    'gradient': <Color>[const Color(0xFFE8F5E9), const Color(0xFFA5D6A7)],
+  },
+  'edutainment-experiences': {
+    'image': 'assets/images/event_subcategories/performarts.png',
+    'gradient': <Color>[const Color(0xFFFCE4EC), const Color(0xFFF48FB1)],
+  },
+  'nature-outdoors': {
+    'image': 'assets/images/event_subcategories/sports.png',
+    'gradient': <Color>[const Color(0xFFE8F5E0), const Color(0xFFA5D6A0)],
+  },
+  'festivals-celebrations': {
+    'image': 'assets/images/event_subcategories/artcraft.png',
+    'gradient': <Color>[const Color(0xFFFFF8E1), const Color(0xFFFFCC80)],
+  },
+};
+
+final _defaultCategoryAsset = <String, dynamic>{
+  'image': 'assets/images/event_subcategories/artcraft.png',
+  'gradient': <Color>[const Color(0xFFE8E0FF), const Color(0xFFD4BFFF)],
+};
+
 class EventsScreen extends StatefulWidget {
   const EventsScreen({super.key});
 
@@ -31,8 +84,68 @@ class EventsScreen extends StatefulWidget {
 }
 
 class _EventsScreenState extends State<EventsScreen> {
-  int _currentNavIndex = 1; // "Events" tab is index 1
+  int _currentNavIndex = 1;
   final PageController _newOnTlbController = PageController(viewportFraction: 0.92);
+
+  // ── Explore by Categories (live API) ────────────────────────────────────
+  List<Map<String, dynamic>>? _gridCategories;
+  bool _isCategoriesLoading = true;
+  String? _categoriesError;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final apiCats = await EventsListingService.fetchCategories();
+      if (!mounted) return;
+      setState(() {
+        _gridCategories = _toGridFormat(apiCats);
+        _isCategoriesLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _categoriesError = e.toString().replaceFirst('Exception: ', '');
+        _isCategoriesLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_categoriesError!),
+          backgroundColor: const Color(0xFF1A1A2E),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  /// Transforms the API category list into the Map format that
+  /// [ExploreCategoriesGrid] already understands.
+  List<Map<String, dynamic>> _toGridFormat(List<ApiCategory> cats) {
+    return cats.map((cat) {
+      final assets = _categoryAssets[cat.slug] ?? _defaultCategoryAsset;
+      return <String, dynamic>{
+        'label': _formatLabel(cat.name),
+        'image': assets['image'] as String,
+        'gradient': assets['gradient'] as List<Color>,
+        'slug': cat.slug,
+        'id': cat.id,
+        'subcategories': cat.subcategories.map((s) => s.name).toList(),
+      };
+    }).toList();
+  }
+
+  /// Inserts a line-break after " & " so long category names wrap neatly
+  /// inside the compact grid cards (mirrors the dummy-data convention).
+  String _formatLabel(String name) => name.replaceAll(' & ', ' &\n');
+
+  // ────────────────────────────────────────────────────────────────────────
 
   void _showAllCategoriesPopup(BuildContext context) {
     AllCategoriesPopup.show(context, DummyData.allCategories);
@@ -46,31 +159,100 @@ class _EventsScreenState extends State<EventsScreen> {
 
   void _onNavTapped(int index) {
     if (index == 0) {
-      // Home
       Navigator.popUntil(context, (route) => route.isFirst);
     } else if (index == 2) {
-      // Classes
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const ClassesScreen()),
       );
     } else if (index == 3) {
-      // Programs
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const ProgramsScreen()),
       );
     } else if (index == 4) {
-      // Venues
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const VenuesScreen()),
       );
     } else if (index != _currentNavIndex) {
-      setState(() {
-        _currentNavIndex = index;
-      });
+      setState(() => _currentNavIndex = index);
     }
+  }
+
+  // ── Error state for categories grid ─────────────────────────────────────
+  Widget _buildCategoriesError() {
+    return SizedBox(
+      height: 140,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.wifi_off_rounded, size: 32, color: Color(0xFFB0B0B0)),
+            const SizedBox(height: 8),
+            Text(
+              'Could not load categories',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 10),
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  _isCategoriesLoading = true;
+                  _categoriesError = null;
+                });
+                _loadCategories();
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A1A2E),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'Retry',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Loading shimmer for the categories grid ──────────────────────────────
+  Widget _buildCategoriesShimmer() {
+    return SizedBox(
+      height: 260,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: GridView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            childAspectRatio: 0.8,
+          ),
+          itemCount: 6,
+          itemBuilder: (_, __) => Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFEEEEEE),
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -109,7 +291,7 @@ class _EventsScreenState extends State<EventsScreen> {
                   physics: const ClampingScrollPhysics(),
                   child: Column(
                     children: [
-                      // Spotlight Banner — overlay style (rounded, gradient, title + CTA)
+                      // Spotlight Banner
                       RepaintBoundary(
                         child: BannerCarousel(
                           events: DummyData.eventsScreenBanners,
@@ -118,27 +300,38 @@ class _EventsScreenState extends State<EventsScreen> {
                           overlayStyle: true,
                         ),
                       ),
-                      
+
+                      // ── Explore by Categories (live API) ──────────────
                       const SectionDividerWidget(title: 'Explore by Categories'),
-                      RepaintBoundary(
-                        child: ExploreCategoriesGrid(
-                          categories: DummyData.exploreCategories,
-                          scrollable: true,
-                          scrollHeight: 260,
-                          childAspectRatio: 0.8,
-                          onViewAll: () => _showAllCategoriesPopup(context),
-                          onCategoryTap: (index) => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => CategoryEventsScreen(initialCategoryIndex: index),
-                            ),
+                      if (_isCategoriesLoading)
+                        _buildCategoriesShimmer()
+                      else if (_categoriesError != null)
+                        _buildCategoriesError()
+                      else
+                        RepaintBoundary(
+                          child: ExploreCategoriesGrid(
+                            categories: _gridCategories!,
+                            scrollable: true,
+                            scrollHeight: 260,
+                            childAspectRatio: 0.8,
+                            onViewAll: () => _showAllCategoriesPopup(context),
+                            onCategoryTap: (index) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => CategoryEventsScreen(
+                                    categories: _gridCategories!,
+                                    initialCategoryIndex: index,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ),
-                      ),
 
                       const SectionDividerWidget(title: 'Trending Events'),
                       SizedBox(
-                        height: Responsive.h(context, 380, min: 340),
+                        height: Responsive.h(context, 420, min: 400),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -182,7 +375,7 @@ class _EventsScreenState extends State<EventsScreen> {
 
                       const SectionDividerWidget(title: 'Holiday Special'),
                       SizedBox(
-                        height: Responsive.h(context, 400, min: 360),
+                        height: Responsive.h(context, 460, min: 430),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -203,7 +396,7 @@ class _EventsScreenState extends State<EventsScreen> {
 
                       const SectionDividerWidget(title: 'Featured Partners'),
                       SizedBox(
-                        height: Responsive.h(context, 470, min: 430),
+                        height: Responsive.h(context, 540, min: 520),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -226,9 +419,7 @@ class _EventsScreenState extends State<EventsScreen> {
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 6),
-                              child: NewOnTlbCard(
-                                event: DummyData.newOnTlb[index],
-                              ),
+                              child: NewOnTlbCard(event: DummyData.newOnTlb[index]),
                             );
                           },
                         ),
@@ -250,7 +441,7 @@ class _EventsScreenState extends State<EventsScreen> {
 
                       const SectionDividerWidget(title: 'Online Events'),
                       SizedBox(
-                        height: Responsive.h(context, 300, min: 270),
+                        height: Responsive.h(context, 370, min: 340),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),

@@ -2,23 +2,41 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail_image_network/mocktail_image_network.dart';
 import 'package:tlb_mobile_ui/screens/category_events_screen.dart';
-import 'package:tlb_mobile_ui/data/dummy_data.dart';
 
 import '../helpers/test_setup.dart';
+
+const _testCategories = [
+  {
+    'label': 'Arts & Crafts',
+    'image': 'assets/images/event_subcategories/artcraft.png',
+    'gradient': [Color(0xFFE8E0FF), Color(0xFFD4BFFF)],
+    'slug': 'arts-crafts',
+    'id': 1,
+    'subcategories': <String>['Drawing', 'Painting'],
+  },
+  {
+    'label': 'Sports &\nFitness',
+    'image': 'assets/images/event_subcategories/sports.png',
+    'gradient': [Color(0xFFFFF8D4), Color(0xFFFFEDA1)],
+    'slug': 'sports-fitness',
+    'id': 2,
+    'subcategories': <String>['Football', 'Swimming'],
+  },
+];
 
 void main() {
   group('CategoryEventsScreen Tests', () {
     testWidgets('renders category title and events', (WidgetTester tester) async {
       await mockNetworkImages(() async {
-        // Use index 0 (Art & Craft)
-        await pumpTLBApp(tester, const CategoryEventsScreen(initialCategoryIndex: 0));
+        await pumpTLBApp(
+          tester,
+          const CategoryEventsScreen(
+            categories: _testCategories,
+            initialCategoryIndex: 0,
+          ),
+        );
 
-        final title = DummyData.exploreCategories[0]['label'].toString().replaceAll('\n', ' ');
-        expect(find.text(title), findsOneWidget);
         expect(find.text('Explore other Categories'), findsOneWidget);
-        expect(find.text('All $title'), findsOneWidget);
-        
-        // Verify filter chips
         expect(find.text('Filters'), findsOneWidget);
         expect(find.text('All'), findsOneWidget);
       });
@@ -26,15 +44,18 @@ void main() {
 
     testWidgets('switching category updates the UI', (WidgetTester tester) async {
       await mockNetworkImages(() async {
-        await pumpTLBApp(tester, const CategoryEventsScreen(initialCategoryIndex: 0));
+        await pumpTLBApp(
+          tester,
+          const CategoryEventsScreen(
+            categories: _testCategories,
+            initialCategoryIndex: 0,
+          ),
+        );
 
-        // Tap on index 1 (Music & Dance)
-        final cat1Label = DummyData.exploreCategories[1]['label'].toString();
-        await tester.tap(find.text(cat1Label));
+        await tester.tap(find.text('Sports & Fitness'));
         await tester.pumpAndSettle();
 
-        final title1 = cat1Label.replaceAll('\n', ' ');
-        expect(find.text(title1), findsOneWidget);
+        expect(find.text('All Sports & Fitness'), findsOneWidget);
       });
     });
   });

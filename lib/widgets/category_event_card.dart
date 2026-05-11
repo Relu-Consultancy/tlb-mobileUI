@@ -43,14 +43,23 @@ class CategoryEventCard extends StatelessWidget {
                 children: [
                   AspectRatio(
                     aspectRatio: 1.05,
-                    child: Image.asset(
-                      event.imagePath,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        color: AppColors.primary.withOpacity(0.15),
-                        child: const Icon(Icons.event, size: 36, color: AppColors.textSecondary),
-                      ),
-                    ),
+                    child: event.imagePath.startsWith('http')
+                        ? Image.network(
+                            event.imagePath,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              color: AppColors.primary.withOpacity(0.15),
+                              child: const Icon(Icons.event, size: 36, color: AppColors.textSecondary),
+                            ),
+                          )
+                        : Image.asset(
+                            event.imagePath,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              color: AppColors.primary.withOpacity(0.15),
+                              child: const Icon(Icons.event, size: 36, color: AppColors.textSecondary),
+                            ),
+                          ),
                   ),
                   if ((event.tag ?? '').isNotEmpty)
                     Positioned(

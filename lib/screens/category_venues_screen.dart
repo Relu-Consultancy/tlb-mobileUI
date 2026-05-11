@@ -3,10 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../data/dummy_data.dart';
+import '../models/api_category_model.dart';
+import '../models/api_venue_model.dart';
 import '../models/event_model.dart';
+import '../services/events_listing_service.dart';
 import '../widgets/category_screen_header.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/subcategory_empty_state.dart';
+import 'venue_detail_screen.dart';
 
 class CategoryVenuesScreen extends StatefulWidget {
   final int initialCategoryIndex;
@@ -29,12 +33,90 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
     (_) => GlobalKey(),
   );
 
+  List<ApiCategory>? _apiCategories;
+  List<ApiVenue> _apiVenues = [];
+  bool _isLoadingVenues = false;
+  String? _fetchError;
+
   @override
   void initState() {
     super.initState();
     _selectedCategoryIndex = widget.initialCategoryIndex
         .clamp(0, DummyData.venuesSeeAllCategories.length - 1);
+    _loadApiCategoriesThenFetch();
   }
+
+  Future<void> _loadApiCategoriesThenFetch() async {
+    try {
+      final cats = await EventsListingService.fetchVenueCategories();
+      if (!mounted) return;
+      _apiCategories = cats;
+    } catch (_) {
+      // Categories metadata endpoint may not be live yet — proceed without it.
+    }
+    _fetchVenues();
+  }
+
+  int? _matchedCategoryId() {
+    if (_apiCategories == null || _apiCategories!.isEmpty) return null;
+    final label = _categoryTitle.toLowerCase();
+    for (final cat in _apiCategories!) {
+      final name = cat.name.toLowerCase();
+      if (name == label) return cat.id;
+    }
+    for (final cat in _apiCategories!) {
+      final name = cat.name.toLowerCase();
+      final words = label.split(' ').where((w) => w.length > 3);
+      if (words.any((w) => name.contains(w))) return cat.id;
+    }
+    return null;
+  }
+
+  Future<void> _fetchVenues() async {
+    setState(() {
+      _isLoadingVenues = true;
+      _fetchError = null;
+    });
+    try {
+      final page = await EventsListingService.fetchVenues(
+        categoryId: _matchedCategoryId(),
+        pageSize: 50,
+      );
+      if (!mounted) return;
+      setState(() {
+        _apiVenues = page.results;
+        _isLoadingVenues = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      setState(() {
+        _apiVenues = [];
+        _isLoadingVenues = false;
+        _fetchError = msg;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Venues: $msg'),
+          backgroundColor: const Color(0xFF1A1A2E),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
+  }
+
+  EventModel _toEventModel(ApiVenue venue) => EventModel(
+        id: venue.id,
+        title: venue.title,
+        venue: [venue.area, venue.city]
+            .where((s) => s != null && s.isNotEmpty)
+            .join(', '),
+        imagePath: venue.cover ?? '',
+        tag: venue.category.name.isNotEmpty ? venue.category.name : null,
+      );
 
   @override
   void dispose() {
@@ -70,6 +152,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
       _selectedCategoryIndex = index;
       _selectedFilterIndex = 0;
     });
+    _fetchVenues();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final key = _chipKeys[index];
       if (key.currentContext != null) {
@@ -403,9 +486,19 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                     ),
                   ),
 
-                  // ── Venue cards grid ──
+                  // ── Venue cards grid (API) ──
                   const SliverToBoxAdapter(child: SizedBox(height: 14)),
-                  if (_filteredVenues.isEmpty)
+                  if (_isLoadingVenues)
+                    const SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF1A1A2E),
+                          strokeWidth: 2.5,
+                        ),
+                      ),
+                    )
+                  else if (_apiVenues.isEmpty)
                     SliverFillRemaining(
                       hasScrollBody: false,
                       child: SubcategoryEmptyState(
@@ -418,14 +511,22 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                       sliver: SliverGrid(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            final venues = _filteredVenues;
-                            if (index >= venues.length) return null;
-                            return _VenueCard(
-                              event: venues[index],
+                            if (index >= _apiVenues.length) return null;
+                            final venue = _apiVenues[index];
+                            return _ApiVenueCard(
+                              venue: venue,
                               accentColor: _accentColor,
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => VenueDetailScreen(
+                                    event: _toEventModel(venue),
+                                  ),
+                                ),
+                              ),
                             );
                           },
-                          childCount: _filteredVenues.length,
+                          childCount: _apiVenues.length,
                         ),
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
@@ -447,7 +548,160 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
   }
 }
 
-// ── Venue card widget ────────────────────────────────────────────────────────
+// ── API Venue card (network image) ───────────────────────────────────────────
+class _ApiVenueCard extends StatelessWidget {
+  final ApiVenue venue;
+  final Color accentColor;
+  final VoidCallback onTap;
+
+  const _ApiVenueCard({
+    required this.venue,
+    required this.accentColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final location = [venue.area, venue.city]
+        .where((s) => s != null && s.isNotEmpty)
+        .join(', ');
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.07),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(16)),
+                  child: SizedBox(
+                    height: 120,
+                    width: double.infinity,
+                    child: (venue.cover?.isNotEmpty == true)
+                        ? Image.network(
+                            venue.cover!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              height: 120,
+                              color: Colors.grey.shade200,
+                              child: const Icon(Icons.place,
+                                  size: 36, color: Colors.grey),
+                            ),
+                          )
+                        : Container(
+                            height: 120,
+                            color: Colors.grey.shade200,
+                            child: const Icon(Icons.place,
+                                size: 36, color: Colors.grey),
+                          ),
+                  ),
+                ),
+                if (venue.category.name.isNotEmpty)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: accentColor.withOpacity(0.92),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        venue.category.name,
+                        style: GoogleFonts.poppins(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(10, 9, 10, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      venue.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.poppins(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF1A1A2E),
+                      ),
+                    ),
+                    if (location.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on_outlined,
+                              size: 11, color: Colors.grey),
+                          const SizedBox(width: 3),
+                          Expanded(
+                            child: Text(
+                              location,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.poppins(
+                                  fontSize: 10.5,
+                                  color: Colors.grey.shade500),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    const Spacer(),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 30,
+                      child: ElevatedButton(
+                        onPressed: onTap,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFFCC00),
+                          foregroundColor: const Color(0xFF1A1A2E),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)),
+                          padding: EdgeInsets.zero,
+                        ),
+                        child: Text(
+                          'Book Now',
+                          style: GoogleFonts.poppins(
+                              fontSize: 11.5, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Dummy venue card widget (kept for reference) ─────────────────────────────
 class _VenueCard extends StatelessWidget {
   final EventModel event;
   final Color accentColor;
