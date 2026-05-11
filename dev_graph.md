@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-08 (Session 13)
+**Last Updated:** 2026-05-11 (Session 14)
 
 ---
 
@@ -33,7 +33,14 @@ lib/
 │   └── user_reviews_state.dart    ValueNotifier for user reviews
 ├── models/
 │   ├── event_model.dart           Core data model — title, venue, price, rating, date, image, etc.
-│   └── category_model.dart        Category model with label, image, color
+│   ├── category_model.dart        Category model with label, image, color
+│   ├── api_category_model.dart    API-backed category — id, name, slug, sortOrder, subcategories
+│   ├── api_event_model.dart       API models: ApiEvent (list), ApiEventDetail (full), ApiEventsPage
+│   └── api_venue_model.dart       API models: ApiVenue (list), ApiVenueDetail (full), ApiVenuesPage,
+│                                  ApiVenueCategory, ApiVenueMedia, ApiVenuePackage,
+│                                  ApiVenueAvailability, ApiVenueOrganizer
+├── services/
+│   └── events_listing_service.dart  REST calls for events + venues listing APIs (see Section 6)
 ├── data/
 │   └── dummy_data.dart            All mock data — events, categories, banners, partners, etc.
 ├── screens/                       44 screens (see Section 3)
@@ -106,15 +113,15 @@ HomeScreen (sidebar/action flows)
 | `events_screen.dart` | Full events listing — banners, categories grid, trending, weekend, holiday, partners, new-on-TLB, online |
 | `classes_screen.dart` | Classes listing — banners, pick-your-pace, featured, nearby, camp cards |
 | `programs_screen.dart` | Programs listing — banners, categories, unique minds, level-up cards |
-| `venues_screen.dart` | Venues listing — big days, weekend plans, close-to-you, hands-on, easy-pocket, mall, thoughtful cards |
+| `venues_screen.dart` | Venues listing — 9 dummy sections: big days, weekend plans, close-to-you, out & about, get moving, hands-on, easy pocket, mall, thoughtful. All sections retain dummy data. |
 
 ### Detail & Booking Flow
 | File | Description |
 |------|-------------|
-| `event_detail_screen.dart` | Full event detail — hero image, info, gallery, map, reviews, "Book Now" CTA |
+| `event_detail_screen.dart` | Full event detail — StatefulWidget; fetches `GET /api/v1/listings/events/{id}/` when `event.id` is non-empty; falls back to dummy `EventModel` fields for non-API cards. Shows hero, info, availability, gallery, map, reviews, "Book Now" CTA |
 | `class_detail_screen.dart` | Class detail — same layout as event detail, "Check Availability" / "Send Enquiry" CTA. Accepts `onBookTapped` callback |
 | `program_detail_screen.dart` | Thin wrapper around ClassDetailScreen, routes to SelectProgramBatchScreen |
-| `venue_detail_screen.dart` | Venue detail — same layout as event detail, "Plan Event" CTA → PlanPartyScreen |
+| `venue_detail_screen.dart` | Venue detail — StatefulWidget; fetches `GET /api/v1/listings/venues/{id}/` when `event.id` is non-empty; falls back to dummy `EventModel` fields. Shows cover, category tag, availability slot, About, Things to Know, Packages, Gallery, Location map, Organizer. "Plan Event" CTA → PlanPartyScreen |
 | `date_time_selection_screen.dart` | Pick date + time → TicketBookingScreen |
 | `select_batch_screen.dart` | Classes batch selection — 3 dates, 3 batches → TicketBookingScreen |
 | `select_program_batch_screen.dart` | Programs batch selection — 6 dates, Morning/Evening batches with seats chip → TicketBookingScreen |
@@ -128,10 +135,10 @@ HomeScreen (sidebar/action flows)
 ### Category Screens
 | File | Description |
 |------|-------------|
-| `category_events_screen.dart` | Filtered events by category |
+| `category_events_screen.dart` | Filtered events by category — fetches `GET /api/v1/listings/events/` with category slug; shows API cards (network image, navigates to EventDetailScreen with real `id`); falls back to SubcategoryEmptyState |
 | `category_classes_screen.dart` | Filtered classes by category |
 | `category_programs_screen.dart` | Filtered programs by category |
-| `category_venues_screen.dart` | Filtered venues by category |
+| `category_venues_screen.dart` | Filtered venues by category — fetches `GET /api/v1/listings/venues/` with matched `category_id`; name-matched from venue categories metadata; shows API cards (network image, navigates to VenueDetailScreen with real `id`); falls back to SubcategoryEmptyState |
 | `category_detail_screen.dart` | Generic category detail |
 
 ### Profile & Account
@@ -212,6 +219,30 @@ HomeScreen (sidebar/action flows)
 ---
 
 ## 6. Core Services & State
+
+### EventsListingService (`lib/services/events_listing_service.dart`)
+- Base URL: `https://tlb-api.reluconsultancy.in` · 30-second timeout · no auth token required
+- All methods throw typed `Exception` messages for `SocketException` and `TimeoutException`
+- **`fetchCategories()`** — GET `/api/v1/listings/events/metadata/categories/` → `List<ApiCategory>`
+- **`fetchEvents({category, subcategory, format, mode, ageGroup, city, area, datePreset, priceType, page, pageSize})`** — GET `/api/v1/listings/events/` → `ApiEventsPage`
+- **`fetchEventDetail(listingId)`** — GET `/api/v1/listings/events/{id}/` → `ApiEventDetail`
+- **`fetchVenueCategories()`** — GET `/api/v1/listings/venues/metadata/categories/` → `List<ApiCategory>` *(backend not yet live — callers catch silently)*
+- **`fetchVenues({categoryId, city, area, locationType, isFeatured, isTopRated, isNewThisWeek, page, pageSize})`** — GET `/api/v1/listings/venues/` → `ApiVenuesPage`
+- **`fetchVenueDetail(listingId)`** — GET `/api/v1/listings/venues/{id}/` → `ApiVenueDetail`
+
+### API Models
+**`ApiCategory`** — `id, name, slug, sortOrder, subcategories: List<ApiSubcategory>`  
+**`ApiEvent`** (list) — `id, title, category, subcategory, city, area, cover, isFeatured, startDate, endDate, mode, ageGroup`  
+**`ApiEventDetail`** (extends ApiEvent) — adds `description, address, locationType, minAge, maxAge, price, priceType, media, schedules, organizer`  
+**`ApiVenue`** (list) — `id, title, category, city, area, cover, isFeatured, isNewThisWeek, isTopRated, distanceKm`  
+**`ApiVenueDetail`** (extends ApiVenue) — adds `description, subcategory, locationType, address, minAge, maxAge, minCapacity, maxCapacity, media, packages, availability, organizer`  
+**`ApiVenuePackage`** — `id, name, price (double — parsed from "2500.00" string), description, durationMinutes, maxGuests`  
+**`ApiVenueAvailability`** — `id, date ("2026-06-14"), startTime ("10:00:00"), endTime ("13:00:00"), note`
+
+### API ↔ UI Gating Pattern
+`EventDetailScreen` and `VenueDetailScreen` accept `EventModel event` (legacy wrapper).  
+`event.id.isNotEmpty` → fetch from API in `initState`; `event.id == ''` → show dummy `EventModel` fields without any network call.  
+Dummy cards from `venues_screen.dart` / `events_screen.dart` pass `id = ''`, so they display gracefully without API.
 
 ### AuthService (`lib/services/auth_service.dart`)
 - All methods have **30-second timeout**
@@ -640,10 +671,15 @@ Reacts to profile edits without requiring screen re-navigation.
 | ~~Hardcoded username in profile sub-screens~~ | `saved_events_screen.dart`, `your_reviews_screen.dart`, `help_centre_screen.dart`, `payment_settings_screen.dart`, `reminders_screen.dart` | ✅ Done — `AuthState.firstName` getter |
 | ~~Hardcoded avatar + email in AccountSettingsScreen~~ | `account_settings_screen.dart` | ✅ Done — live `ValueListenableBuilder` on `AuthState.avatarUrl` + `AuthState.userEmail` |
 | ~~OTP verification real API~~ | `login_sheet.dart:_OTPVerificationScreen._onVerify` | ✅ Done — real `verifyOtp()` call; new user → EditProfileScreen, existing → WelcomeBackDialog |
+| ~~CategoryEventsScreen API fetch~~ | `category_events_screen.dart` | ✅ Done — fetches live events by category slug; name-matched from metadata API |
+| ~~CategoryVenuesScreen API fetch~~ | `category_venues_screen.dart` | ✅ Done — fetches live venues by category_id; name-matched from venue metadata API |
+| ~~EventDetailScreen real data~~ | `event_detail_screen.dart` | ✅ Done — StatefulWidget; `event.id.isNotEmpty` gates API fetch; dummy cards still work |
+| ~~VenueDetailScreen real data~~ | `venue_detail_screen.dart` | ✅ Done — StatefulWidget; fetches detail including packages, availability, gallery, organizer |
 | PlanPartyScreen → booking confirmation | `plan_party_screen.dart:_onContinue` | ❌ Pending — validated but navigates nowhere |
 | Profile screen reactive to name/avatar changes | `profile_screen.dart` | ❌ Pending — reads `AuthState.userName.value` but no `ValueListenableBuilder`; won't update on profile edit without navigate-back rebuild |
 | Profile avatar upload | `edit_profile_screen.dart` | ❌ Pending — removed from profile form (new API has no avatar field); needs separate endpoint when available |
 | Startup profile completion check | `main.dart` | ❌ Pending — `tryRestoreSession()` restores session but does NOT redirect incomplete profiles |
+| Venue metadata categories endpoint | backend | ❌ Pending — `GET /api/v1/listings/venues/metadata/categories/` not yet live; `fetchVenueCategories()` catch is silent so category filter falls back to fetching all venues |
 
 ---
 
@@ -848,3 +884,16 @@ geocoding: ^3.0.0              # placemarkFromCoordinates() — lat/lng → city
 | `Stack(fit: StackFit.expand)` used inside card — replaces `StackFit.loose`; passes tight cell constraints down to the `Container` so card fills the grid cell width exactly (fixes right-side gap bug) | `lib/widgets/categories_grid.dart` |
 | Fixed `height:` removed from card `Container` — grid cell dimensions (via `childAspectRatio`) drive sizing; `Expanded` inside the card `Column` takes remaining height for the image | `lib/widgets/categories_grid.dart` |
 | `SizedBox(height: 24)` before `CategoriesGrid` removed from `HomeScreen` — grid now includes its own top padding via the section title `Padding(vertical: 20)` | `lib/screens/home_screen.dart` |
+
+### Session 14
+| Change | Files |
+|--------|-------|
+| `ApiCategory`, `ApiSubcategory` models added — id, name, slug, sortOrder, subcategories | `lib/models/api_category_model.dart` (NEW) |
+| `ApiEvent`, `ApiEventDetail`, `ApiEventsPage` models added — list + detail shapes from events API | `lib/models/api_event_model.dart` (NEW) |
+| `ApiVenue`, `ApiVenueDetail`, `ApiVenuesPage`, `ApiVenueCategory`, `ApiVenueMedia`, `ApiVenuePackage`, `ApiVenueAvailability`, `ApiVenueOrganizer` models added | `lib/models/api_venue_model.dart` (NEW) |
+| `EventsListingService` added — 6 methods covering events + venues listing and detail endpoints with 30s timeout and typed error handling | `lib/services/events_listing_service.dart` (NEW) |
+| `CategoryEventsScreen` wired to live API — `initState` fetches categories then events by matched slug; `_ApiEventCard` shows network cover, navigates to `EventDetailScreen` with real `id`; `SubcategoryEmptyState` shown when no results | `lib/screens/category_events_screen.dart` |
+| `CategoryVenuesScreen` wired to live API — fetches venue categories (silently ignored if endpoint not live), matches category label by name to resolve `category_id`, fetches venues; `_ApiVenueCard` with network image navigates to `VenueDetailScreen` with real `id` | `lib/screens/category_venues_screen.dart` |
+| `EventDetailScreen` rewritten as `StatefulWidget` — `event.id.isNotEmpty` gates `fetchEventDetail()` in `initState`; loading spinner + retry error state; renders cover (network/asset), availability, About, gallery, location, organizer; dummy `event.id == ''` cards still display without API call | `lib/screens/event_detail_screen.dart` |
+| `VenueDetailScreen` rewritten as `StatefulWidget` — same gating pattern as EventDetailScreen; new Packages section (`_buildPackageCard`) with name, description, duration_minutes, max_guests, price; first availability slot formatted as "Day, Mon DD, HH:MM AM – HH:MM PM"; Things to Know (age group, capacity, venue type); Gallery uses `galleryMedia` (non-cover media); Organizer section hidden when null; bottom bar shows lowest package price | `lib/screens/venue_detail_screen.dart` |
+| `venues_screen.dart` kept fully intact — all 9 dummy sections unchanged; only `CategoryVenuesScreen` fetches live data | `lib/screens/venues_screen.dart` |
