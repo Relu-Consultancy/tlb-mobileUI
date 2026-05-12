@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/app_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
@@ -6,7 +7,9 @@ import '../data/dummy_data.dart';
 import '../models/api_category_model.dart';
 import '../models/api_venue_model.dart';
 import '../models/event_model.dart';
+import '../providers/location_state.dart';
 import '../services/events_listing_service.dart';
+import '../widgets/category_event_card.dart';
 import '../widgets/category_screen_header.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/subcategory_empty_state.dart';
@@ -80,6 +83,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
     try {
       final page = await EventsListingService.fetchVenues(
         categoryId: _matchedCategoryId(),
+        city: LocationState().selectedCity.value,
         pageSize: 50,
       );
       if (!mounted) return;
@@ -491,12 +495,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                   if (_isLoadingVenues)
                     const SliverFillRemaining(
                       hasScrollBody: false,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFF1A1A2E),
-                          strokeWidth: 2.5,
-                        ),
-                      ),
+                      child: AppLoader(),
                     )
                   else if (_apiVenues.isEmpty)
                     SliverFillRemaining(
@@ -513,15 +512,14 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                           (context, index) {
                             if (index >= _apiVenues.length) return null;
                             final venue = _apiVenues[index];
-                            return _ApiVenueCard(
-                              venue: venue,
-                              accentColor: _accentColor,
+                            final em = _toEventModel(venue);
+                            return CategoryEventCard(
+                              event: em,
+                              badgeColor: _accentColor.withOpacity(0.9),
                               onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => VenueDetailScreen(
-                                    event: _toEventModel(venue),
-                                  ),
+                                  builder: (_) => VenueDetailScreen(event: em),
                                 ),
                               ),
                             );
@@ -533,7 +531,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                           crossAxisCount: 2,
                           mainAxisSpacing: 14,
                           crossAxisSpacing: 14,
-                          childAspectRatio: 0.72,
+                          childAspectRatio: 0.62,
                         ),
                       ),
                     ),
@@ -548,316 +546,6 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
   }
 }
 
-// ── API Venue card (network image) ───────────────────────────────────────────
-class _ApiVenueCard extends StatelessWidget {
-  final ApiVenue venue;
-  final Color accentColor;
-  final VoidCallback onTap;
-
-  const _ApiVenueCard({
-    required this.venue,
-    required this.accentColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final location = [venue.area, venue.city]
-        .where((s) => s != null && s.isNotEmpty)
-        .join(', ');
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.07),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(16)),
-                  child: SizedBox(
-                    height: 120,
-                    width: double.infinity,
-                    child: (venue.cover?.isNotEmpty == true)
-                        ? Image.network(
-                            venue.cover!,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              height: 120,
-                              color: Colors.grey.shade200,
-                              child: const Icon(Icons.place,
-                                  size: 36, color: Colors.grey),
-                            ),
-                          )
-                        : Container(
-                            height: 120,
-                            color: Colors.grey.shade200,
-                            child: const Icon(Icons.place,
-                                size: 36, color: Colors.grey),
-                          ),
-                  ),
-                ),
-                if (venue.category.name.isNotEmpty)
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: accentColor.withOpacity(0.92),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        venue.category.name,
-                        style: GoogleFonts.poppins(
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 9, 10, 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      venue.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.poppins(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1A1A2E),
-                      ),
-                    ),
-                    if (location.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          const Icon(Icons.location_on_outlined,
-                              size: 11, color: Colors.grey),
-                          const SizedBox(width: 3),
-                          Expanded(
-                            child: Text(
-                              location,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.poppins(
-                                  fontSize: 10.5,
-                                  color: Colors.grey.shade500),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                    const Spacer(),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 30,
-                      child: ElevatedButton(
-                        onPressed: onTap,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFCC00),
-                          foregroundColor: const Color(0xFF1A1A2E),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20)),
-                          padding: EdgeInsets.zero,
-                        ),
-                        child: Text(
-                          'Book Now',
-                          style: GoogleFonts.poppins(
-                              fontSize: 11.5, fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Dummy venue card widget (kept for reference) ─────────────────────────────
-class _VenueCard extends StatelessWidget {
-  final EventModel event;
-  final Color accentColor;
-
-  const _VenueCard({required this.event, required this.accentColor});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.07),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image with tag overlay
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(16)),
-                child: Image.asset(
-                  event.imagePath,
-                  height: 120,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                      Container(height: 120, color: Colors.grey.shade200),
-                ),
-              ),
-              if (event.tag != null)
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: accentColor.withOpacity(0.92),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      event.tag!,
-                      style: GoogleFonts.poppins(
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          // Content
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 9, 10, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    event.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.poppins(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF1A1A2E),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on_outlined,
-                          size: 11, color: Colors.grey),
-                      const SizedBox(width: 3),
-                      Expanded(
-                        child: Text(
-                          event.venue,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                              fontSize: 10.5,
-                              color: Colors.grey.shade500),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (event.rating != null) ...[
-                    const SizedBox(height: 3),
-                    Row(
-                      children: [
-                        const Icon(Icons.star_rounded,
-                            size: 12, color: Color(0xFFFFB902)),
-                        const SizedBox(width: 3),
-                        Text(
-                          '${event.rating}',
-                          style: GoogleFonts.poppins(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                        ),
-                        const SizedBox(width: 3),
-                        Expanded(
-                          child: Text(
-                            '(${event.reviewCount})',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.poppins(
-                                fontSize: 10,
-                                color: Colors.grey.shade500),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                  const Spacer(),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 30,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFCC00),
-                        foregroundColor: const Color(0xFF1A1A2E),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20)),
-                        padding: EdgeInsets.zero,
-                      ),
-                      child: Text(
-                        'Book Now',
-                        style: GoogleFonts.poppins(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ── All Categories bottom sheet ──────────────────────────────────────────────
 class _VenuesAllCategoriesSheet extends StatefulWidget {

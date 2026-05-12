@@ -44,5 +44,12 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- Allow url_launcher to query https URLs (Android 11+ package visibility) -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
+        <!-- Allow querying Google Maps specifically -->
+        <package android:name="com.google.android.apps.maps"/>
     </queries>
 </manifest>

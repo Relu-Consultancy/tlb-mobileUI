@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-11 (Session 14)
+**Last Updated:** 2026-05-12 (Session 16)
 
 ---
 
@@ -44,8 +44,8 @@ lib/
 ├── data/
 │   └── dummy_data.dart            All mock data — events, categories, banners, partners, etc.
 ├── screens/                       44 screens (see Section 3)
-├── widgets/                       30+ reusable widgets incl. login_sheet.dart, walkthrough_intro_overlay.dart (see Section 4)
-└── sections/                      17 home-page sections (see Section 5)
+├── widgets/                       25+ reusable widgets incl. login_sheet.dart, walkthrough_intro_overlay.dart (see Section 4)
+└── sections/                      9 home-page sections (see Section 5)
 ```
 
 ---
@@ -138,8 +138,8 @@ HomeScreen (sidebar/action flows)
 | `category_events_screen.dart` | Filtered events by category — fetches `GET /api/v1/listings/events/` with category slug; shows API cards (network image, navigates to EventDetailScreen with real `id`); falls back to SubcategoryEmptyState |
 | `category_classes_screen.dart` | Filtered classes by category |
 | `category_programs_screen.dart` | Filtered programs by category |
-| `category_venues_screen.dart` | Filtered venues by category — fetches `GET /api/v1/listings/venues/` with matched `category_id`; name-matched from venue categories metadata; shows API cards (network image, navigates to VenueDetailScreen with real `id`); falls back to SubcategoryEmptyState |
-| `category_detail_screen.dart` | Generic category detail |
+| `category_venues_screen.dart` | Filtered venues by category — fetches `GET /api/v1/listings/venues/` with matched `category_id`; name-matched from venue categories metadata; uses flat `CategoryEventCard` (navigates to VenueDetailScreen); falls back to SubcategoryEmptyState |
+| ~~`category_detail_screen.dart`~~ | ~~Generic category detail~~ — **deleted** (replaced by CategoryEventsScreen/CategoryVenuesScreen) |
 
 ### Profile & Account
 | File | Description |
@@ -191,30 +191,26 @@ HomeScreen (sidebar/action flows)
 | `banner_carousel.dart` | Spotlight banner with overlay gradient |
 | `empty_location_widget.dart` | Empty state for no-location screens |
 | `walkthrough_intro_overlay.dart` | Full-screen animated welcome card — fade+scale entrance (380ms), repeating icon pulse glow, "Let's Go" dismiss triggers showcase start |
+| `category_event_card.dart` | Flat grid card for category screens (no container/shadow) — 12px rounded image, subcategory badge, title, 📍 venue, ⭐ reviewCount row, `Description –` body up to 3 lines (no price); accepts `onTap` callback override; used by CategoryEvents/Classes/Programs/VenuesScreen |
+| `app_loader.dart` | Premium branded loading animation (bouncing dots). Uses `AppLoader.useCustomLoader` static flag for fallback to default `CircularProgressIndicator`. Contains `AppLoader()` (fullscreen) and `AppLoaderInline()` (buttons/spinners). |
 
 ---
 
-## 5. Sections (Home Page, 17 total)
+## 5. Sections (Home Page, 9 active)
 
 | Section | Content |
 |---------|---------|
 | `home_header.dart` | Gradient header (#FFB219 → white), first-name greeting (ValueListenableBuilder on `userName`), location, alert icon, avatar (ValueListenableBuilder on `avatarUrl`), search bar |
-| `spotlight_section.dart` | Hero banner carousel |
-| `browse_by_categories_section.dart` | Category icon grid |
-| `trending_now_section.dart` | Horizontal trending cards |
 | `hot_picks_section.dart` | Hot picks card list |
 | `weekend_special_section.dart` | Weekend event chips |
-| `featured_events_section.dart` | Featured event cards |
-| `best_for_week_section.dart` | Best this week cards |
 | `discover_near_you_section.dart` | Location-based cards |
-| `near_you_section.dart` | Proximity-sorted cards |
 | `family_feels_section.dart` | Family events section |
-| `kids_favorites_section.dart` | Kids-specific events |
 | `special_needs_section.dart` | Inclusive/special-needs events |
-| `popular_categories_section.dart` | Popular category pills |
-| `tlb_signature_section.dart` | TLB signature events |
 | `stealers_section.dart` | Deal/discount events |
+| `tlb_signature_section.dart` | TLB signature events |
 | `app_footer.dart` | `resources- tlb-ui/main-footer.png` with 60px top gap |
+
+> Spotlight is rendered inline in `home_screen.dart` via `BannerCarousel`. The "Explore the Stage" category grid is `widgets/categories_grid.dart` (also inline).
 
 ---
 
@@ -701,6 +697,8 @@ showcaseview: ^5.0.2           # Onboarding walkthrough (controller-based v5)
 shared_preferences: ^2.5.5     # Non-sensitive UX flag storage (isNewUser walkthrough flag)
 geolocator: ^13.0.4            # GPS permission flow + getCurrentPosition()
 geocoding: ^3.0.0              # placemarkFromCoordinates() — lat/lng → city name
+url_launcher: ^6.3.2           # External URL / deep-link launching
+# image_picker removed — avatar upload pending separate endpoint
 ```
 
 ---
@@ -897,3 +895,25 @@ geocoding: ^3.0.0              # placemarkFromCoordinates() — lat/lng → city
 | `EventDetailScreen` rewritten as `StatefulWidget` — `event.id.isNotEmpty` gates `fetchEventDetail()` in `initState`; loading spinner + retry error state; renders cover (network/asset), availability, About, gallery, location, organizer; dummy `event.id == ''` cards still display without API call | `lib/screens/event_detail_screen.dart` |
 | `VenueDetailScreen` rewritten as `StatefulWidget` — same gating pattern as EventDetailScreen; new Packages section (`_buildPackageCard`) with name, description, duration_minutes, max_guests, price; first availability slot formatted as "Day, Mon DD, HH:MM AM – HH:MM PM"; Things to Know (age group, capacity, venue type); Gallery uses `galleryMedia` (non-cover media); Organizer section hidden when null; bottom bar shows lowest package price | `lib/screens/venue_detail_screen.dart` |
 | `venues_screen.dart` kept fully intact — all 9 dummy sections unchanged; only `CategoryVenuesScreen` fetches live data | `lib/screens/venues_screen.dart` |
+
+### Session 15
+| Change | Files |
+|--------|-------|
+| Dead code audit — 18 orphaned files deleted | (see below) |
+| Deleted 8 unused home sections no longer rendered in `home_screen.dart`: `browse_by_categories_section`, `spotlight_section`, `trending_now_section`, `popular_categories_section`, `featured_events_section`, `best_for_week_section`, `kids_favorites_section`, `near_you_section` | `lib/sections/` |
+| `section_header.dart` deleted — only used by the 8 dead sections above | `lib/widgets/section_header.dart` |
+| Legacy category detail flow deleted — entire `widgets/category_detail/` subdirectory (4 files), `screens/category_detail_screen.dart`, `widgets/category_card.dart`; only callers were the dead sections | multiple |
+| `widgets/horizontal_card_widget.dart` + `widgets/vertical_card_widget.dart` deleted — defined but never imported anywhere | `lib/widgets/` |
+| `image_picker: ^1.2.2` removed from `pubspec.yaml` — was left over after avatar upload was removed in Session 12 | `pubspec.yaml` |
+| `CategoryEventCard` redesigned to match `event_subcategory.png` reference — removed location pin icon (venue is now plain text); rating numeric removed, replaced with `⭐ reviewCount` only (row hidden when null); description now uses `RichText` with bold `Description:` label prefix; `category_venues_screen.dart` unaffected (uses its own inline `_ApiVenueCard`) | `lib/widgets/category_event_card.dart` |
+
+### Session 16
+| Change | Files |
+|--------|-------|
+| `CategoryEventCard` further refined — card container/shadow removed (flat layout, image direct on page); `ClipRRect(radius: 12)` on image only; location icon re-added (`Icons.location_on`, size 13, low opacity); info padding `fromLTRB(2,8,2,0)`; description changed to `Description – {text}` (em dash); `maxLines` raised to 3; `onTap` optional callback added for navigation override | `lib/widgets/category_event_card.dart` |
+| `url_launcher: ^6.3.2` added to `pubspec.yaml` | `pubspec.yaml` |
+| `AppLoader` widget created — pure-Flutter staggered bouncing-dots animation in TLB golden/amber palette. `AppLoader()` = full-screen variant; `AppLoaderInline()` = compact button/spinner variant. `AppLoader.useCustomLoader` static bool flag: `true` (default) = custom dots; `false` = falls back to standard `CircularProgressIndicator` globally | `lib/widgets/app_loader.dart` (NEW) |
+| Full-screen loaders replaced with `AppLoader()` — loading slivers in category screens; initial screen spinners in detail screens | `lib/screens/category_events_screen.dart`, `category_venues_screen.dart`, `event_detail_screen.dart`, `venue_detail_screen.dart` |
+| Payment processing dialog loader replaced with `AppLoader()` | `lib/screens/payment_screen.dart` |
+| Button/inline loaders replaced with `AppLoaderInline()` across all auth + profile screens | `lib/widgets/login_sheet.dart`, `lib/screens/signup_screen.dart`, `forgot_password_screen.dart`, `edit_profile_screen.dart`, `change_password_screen.dart` |
+| "Fetching location…" button spinner replaced with `AppLoaderInline()` | `lib/screens/location_screen.dart` |

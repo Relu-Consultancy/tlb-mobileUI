@@ -1,5 +1,8 @@
 import 'dart:math';
+import '../widgets/app_loader.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../providers/location_state.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../models/api_event_model.dart';
@@ -137,11 +140,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Scaffold(
+      return const Scaffold(
         backgroundColor: Colors.white,
-        body: const Center(
-          child: CircularProgressIndicator(color: Color(0xFF1A1A2E), strokeWidth: 2.5),
-        ),
+        body: AppLoader(),
       );
     }
 
@@ -466,7 +467,31 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 SizedBox(
                                   height: Responsive.h(context, 44, min: 38),
                                   child: ElevatedButton.icon(
-                                    onPressed: () {},
+                                    onPressed: () async {
+                                      if (!AuthState.isLoggedIn.value) {
+                                        showLoginSheet(context);
+                                        return;
+                                      }
+                                      if (LocationState().selectedCity.value == 'Bhopal City') {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Please set your current location')),
+                                          );
+                                        }
+                                        return;
+                                      }
+                                      final destination = Uri.encodeComponent(_locationText);
+                                      final url = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$destination');
+                                      try {
+                                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                                      } catch (_) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Could not open map.')),
+                                          );
+                                        }
+                                      }
+                                    },
                                     icon: const Icon(Icons.directions, size: 16),
                                     label: Text(
                                       'Get Direction',

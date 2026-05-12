@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/app_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
@@ -192,7 +193,7 @@ class PaymentScreen extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+      builder: (_) => const Center(child: AppLoader(message: 'Processing payment...')),
     );
 
     Future.delayed(const Duration(seconds: 2), () {

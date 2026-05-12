@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import '../widgets/app_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/api_event_model.dart';
 import '../models/event_model.dart';
+import '../providers/location_state.dart';
 import '../services/events_listing_service.dart';
 import '../widgets/category_event_card.dart';
 import '../widgets/category_screen_header.dart';
@@ -57,6 +59,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
       final page = await EventsListingService.fetchEvents(
         category: _categoryTitle,
         subcategory: subcategory,
+        city: LocationState().selectedCity.value,
         pageSize: 50,
       );
       if (!mounted) return;
@@ -401,12 +404,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                   if (_isLoadingEvents)
                     const SliverFillRemaining(
                       hasScrollBody: false,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFF1A1A2E),
-                          strokeWidth: 2.5,
-                        ),
-                      ),
+                      child: AppLoader(),
                     )
                   else if (_filteredEvents.isEmpty)
                     SliverFillRemaining(
@@ -434,7 +432,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                           crossAxisCount: 2,
                           mainAxisSpacing: 14,
                           crossAxisSpacing: 14,
-                          childAspectRatio: 0.58,
+                          childAspectRatio: 0.62,
                         ),
                       ),
                     ),

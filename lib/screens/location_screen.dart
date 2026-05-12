@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/app_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
@@ -240,14 +241,7 @@ class _LocationScreenState extends State<LocationScreen> {
               child: ElevatedButton.icon(
                 onPressed: _isLoadingLocation ? null : _fetchCurrentLocation,
                 icon: _isLoadingLocation
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1A1A2E)),
-                        ),
-                      )
+                    ? const AppLoaderInline(dotSize: 6, spacing: 3, color: Color(0xFF1A1A2E))
                     : const Icon(Icons.my_location, color: Color(0xFF1A1A2E), size: 20),
                 label: Text(
                   _isLoadingLocation ? 'Fetching location...' : 'Use current location',

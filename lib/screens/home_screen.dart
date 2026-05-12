@@ -141,33 +141,28 @@ class _HomeScreenState extends State<HomeScreen> {
           Column(
             children: [
               // ── Unified header + Spotlight title on one gradient background ──
-              ValueListenableBuilder<String>(
-                valueListenable: LocationState().selectedCity,
-                builder: (context, city, _) {
-                  return Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Color(0xFFFFF5E0),
-                          Color(0xFFFFF5E0),
-                          Color(0xFFFFFAF0),
-                          Colors.white,
-                        ],
-                        stops: [0.0, 0.55, 0.80, 1.0],
-                      ),
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFFFFF5E0),
+                      Color(0xFFFFF5E0),
+                      Color(0xFFFFFAF0),
+                      Colors.white,
+                    ],
+                    stops: [0.0, 0.55, 0.80, 1.0],
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    HomeHeader(
+                      profileShowcaseConfig: kProfileShowcaseConfig,
+                      locationShowcaseConfig: kLocationShowcaseConfig,
                     ),
-                    child: Column(
-                      children: [
-                        HomeHeader(
-                          profileShowcaseConfig: kProfileShowcaseConfig,
-                          locationShowcaseConfig: kLocationShowcaseConfig,
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                  ],
+                ),
               ),
 
               // Scrollable feed or Empty State

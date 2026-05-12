@@ -10,8 +10,9 @@ class EmptyLocationWidget extends StatelessWidget {
     return Container(
       color: Colors.white,
       width: double.infinity,
-      child: Column(
-        children: [
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
           // No gap at top to attach it to header
 
           // Illustration
@@ -79,6 +80,7 @@ class EmptyLocationWidget extends StatelessWidget {
           ),
           const SizedBox(height: 40),
         ],
+        ),
       ),
     );
   }

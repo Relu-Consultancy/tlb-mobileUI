@@ -106,25 +106,21 @@ class AuthState {
 
   /// On app start: exchange stored refresh token for a fresh access token.
   /// Returns true if session was restored, false if re-login is needed.
+  /// Falls back to cached tokens when the network is unavailable so the
+  /// user isn't forced to re-login every cold start on flaky connections.
   static Future<bool> tryRestoreSession() async {
     try {
       final stored = await TokenStorage.loadTokens();
       final refresh = stored['refresh'];
-      if (refresh == null || refresh.isEmpty) return false;
+      final cachedAccess = stored['access'];
 
-      final result = await AuthService.refreshToken(refresh: refresh);
-      if (result['success'] != true) {
-        await TokenStorage.clearTokens();
+      // Nothing stored at all — fresh install or explicit logout.
+      if ((refresh == null || refresh.isEmpty) &&
+          (cachedAccess == null || cachedAccess.isEmpty)) {
         return false;
       }
 
-      final newAccess = result['access'] as String?;
-      final newRefresh = result['refresh'] as String? ?? refresh;
-      if (newAccess == null) {
-        await TokenStorage.clearTokens();
-        return false;
-      }
-
+      // Parse cached user data once (used in both paths below).
       Map<String, dynamic>? user;
       final userJson = stored['user_json'];
       if (userJson != null && userJson.isNotEmpty) {
@@ -133,10 +129,47 @@ class AuthState {
         } catch (_) {}
       }
 
-      login(access: newAccess, refresh: newRefresh, user: user);
-      return true;
+      // Try to exchange the refresh token for a fresh access token.
+      if (refresh != null && refresh.isNotEmpty) {
+        try {
+          final result = await AuthService.refreshToken(refresh: refresh);
+          if (result['success'] == true) {
+            final newAccess = result['access'] as String?;
+            final newRefresh = result['refresh'] as String? ?? refresh;
+            if (newAccess != null) {
+              login(access: newAccess, refresh: newRefresh, user: user);
+              return true;
+            }
+          }
+          // Server explicitly rejected the token — clear and require re-login.
+          // (Don't fall through to cache path for rejected tokens.)
+          final message = (result['message'] ?? '').toString().toLowerCase();
+          debugPrint('AuthService.refreshToken message: $message');
+          if (message.contains('invalid') || message.contains('expired') || message.contains('blacklisted')) {
+            debugPrint('Token rejected by server. Clearing tokens.');
+            await TokenStorage.clearTokens();
+            return false;
+          }
+        } catch (e) {
+          debugPrint('AuthService.refreshToken threw: $e');
+          // Network error — fall through to cached restore below.
+        }
+      }
+
+      // Fallback: restore session from cached tokens so the user stays
+      // logged in even when the network is unavailable at startup.
+      if (cachedAccess != null && cachedAccess.isNotEmpty) {
+        login(
+          access: cachedAccess,
+          refresh: refresh,
+          user: user,
+        );
+        return true;
+      }
+
+      return false;
     } catch (_) {
-      await TokenStorage.clearTokens();
+      // Catastrophic error — don't clear tokens, just skip restore.
       return false;
     }
   }

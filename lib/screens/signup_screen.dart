@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../widgets/app_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -751,14 +752,7 @@ class _PrimaryButton extends StatelessWidget {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         ),
         child: loading
-            ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: Color(0xFF1A1A1A),
-                ),
-              )
+            ? const AppLoaderInline(dotSize: 7, spacing: 4, color: Color(0xFF1A1A2E))
             : Text(
                 label,
                 style: GoogleFonts.poppins(

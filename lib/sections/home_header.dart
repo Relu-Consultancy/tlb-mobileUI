@@ -24,14 +24,12 @@ class HomeHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
+      clipBehavior: Clip.hardEdge,
       children: [
         // ── Layer 1: Cloud image with screen-blend gradient mask ──────
         // screen brightens: golden(top)+pixel = warm bright result
         //                   white(bottom)+pixel = fully white fade
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
+        Positioned.fill(
           child: ShaderMask(
             blendMode: BlendMode.screen,
             shaderCallback: (bounds) => const LinearGradient(

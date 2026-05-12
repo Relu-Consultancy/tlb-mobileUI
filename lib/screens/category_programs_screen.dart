@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../data/dummy_data.dart';
 import '../models/event_model.dart';
+import '../providers/location_state.dart';
 import '../widgets/category_event_card.dart';
 import '../widgets/all_categories_popup.dart';
 import '../widgets/category_screen_header.dart';
@@ -92,7 +93,9 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
       DummyData.programsSubFilters[_selectedCategoryIndex];
 
   List<EventModel> get _filteredEvents {
-    final all = DummyData.programsByCategory[_selectedCategoryIndex];
+    List<EventModel> all = DummyData.programsByCategory[_selectedCategoryIndex];
+    final city = LocationState().selectedCity.value;
+    all = all.where((e) => e.venue.toLowerCase().contains(city.toLowerCase())).toList();
     if (_selectedFilterIndex == 0) return all;
     final filterTag = _filters[_selectedFilterIndex];
     return all.where((e) => e.tag == filterTag).toList();
@@ -411,7 +414,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                           crossAxisCount: 2,
                           mainAxisSpacing: 14,
                           crossAxisSpacing: 14,
-                          childAspectRatio: 0.58,
+                          childAspectRatio: 0.55,
                         ),
                       ),
                     ),

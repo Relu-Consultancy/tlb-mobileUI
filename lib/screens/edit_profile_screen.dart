@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/app_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../providers/auth_state.dart';
@@ -291,14 +292,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
                   ),
                   child: _loading
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: Color(0xFF1A1A2E),
-                          ),
-                        )
+                      ? const AppLoaderInline(dotSize: 7, spacing: 4, color: Color(0xFF1A1A2E))
                       : Text(
                           widget.isOnboarding ? 'Save & Continue' : 'Update Profile',
                           style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600),
