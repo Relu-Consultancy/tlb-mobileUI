@@ -55,6 +55,8 @@ flutter:
     - resources- tlb-ui/venues_page/yourway/
     - resources- tlb-ui/events_page/
     - resources- tlb-ui/homescreen-categoryicons/
+    - resources- tlb-ui/event_page_subcategoryicons/
+    - resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/
     - google_fonts/
 
 

@@ -63,39 +63,42 @@ class DummyData {
 
   static const List<Map<String, dynamic>> exploreFormats = [
     {
-      'label': 'WORKSHOP',
-      'image': 'assets/images/explore_formats/Workshops.png',
-      'color': Color(0xFF3D2817), // Warm dark brown — matches yellow workshop badge
+      'label': 'Workshop',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/Workshops.png',
+      'formatSlug': 'workshop',
+      'accentColor': Color(0xFF3D2817),
     },
     {
-      'label': 'CAMP',
-      'image': 'assets/images/explore_formats/camp.png',
-      'color': Color(0xFF38BDF8), // Bright sky blue — matches CAMP's cyan lettering
+      'label': 'Camp',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/camp.png',
+      'formatSlug': 'camp',
+      'accentColor': Color(0xFF1A9ED4),
     },
     {
-      'label': 'COMPETITION',
-      'image': 'assets/images/explore_formats/competition.png',
-      'color': Color(0xFFFFCA28), // Golden yellow — matches warmer gold badge tone
+      'label': 'Competition',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/competition.png',
+      'formatSlug': 'competition',
+      'accentColor': Color(0xFFD4A800),
     },
     {
-      'label': 'MASTERCLASS',
-      'image': 'assets/images/explore_formats/masterclass.png',
-      'color': Color(0xFF111111), // Near-black
+      'label': 'MasterClass',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/masterclass.png',
+      'formatSlug': 'masterclass',
+      'accentColor': Color(0xFF1A1A2E),
+      'scale': 1.42,
+      'invertColors': true,
     },
     {
-      'label': 'PERFORMANCE',
-      'image': 'assets/images/explore_formats/performance.png',
-      'color': Color(0xFFEC407A), // Softer rose — matches pink badge
+      'label': 'Showcase Performance',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/shocase.png',
+      'formatSlug': 'showcase_performance',
+      'accentColor': Color(0xFF0D8DAA),
     },
     {
-      'label': 'SHOWCASE',
-      'image': 'assets/images/explore_formats/shocase.png',
-      'color': Color(0xFF66BB6A), // Softer green
-    },
-    {
-      'label': 'DEMO',
-      'image': 'assets/images/explore_formats/demo.png',
-      'color': Color(0xFFFF8A3D), // Softer orange
+      'label': 'Demo',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/demo.png',
+      'formatSlug': 'demo',
+      'accentColor': Color(0xFF0E2B44),
     },
   ];
 

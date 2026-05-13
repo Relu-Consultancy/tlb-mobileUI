@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-12 (Session 16)
+**Last Updated:** 2026-05-13 (Session 17)
 
 ---
 
@@ -43,7 +43,7 @@ lib/
 │   └── events_listing_service.dart  REST calls for events + venues listing APIs (see Section 6)
 ├── data/
 │   └── dummy_data.dart            All mock data — events, categories, banners, partners, etc.
-├── screens/                       44 screens (see Section 3)
+├── screens/                       45 screens (see Section 3)
 ├── widgets/                       25+ reusable widgets incl. login_sheet.dart, walkthrough_intro_overlay.dart (see Section 4)
 └── sections/                      9 home-page sections (see Section 5)
 ```
@@ -58,6 +58,7 @@ SplashScreen
         ├── EventsScreen        (Tab: Events)
         │   ├── CategoryEventsScreen
         │   │   └── EventDetailScreen → DateTimeSelectionScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
+        │   ├── FormatEventsScreen (format circle tap → filtered events by format slug)
         │   └── EventDetailScreen (same checkout flow)
         ├── ClassesScreen       (Tab: Classes)
         │   ├── ClassDetailScreen → SelectBatchScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
@@ -136,6 +137,7 @@ HomeScreen (sidebar/action flows)
 | File | Description |
 |------|-------------|
 | `category_events_screen.dart` | Filtered events by category — fetches `GET /api/v1/listings/events/` with category slug; shows API cards (network image, navigates to EventDetailScreen with real `id`); falls back to SubcategoryEmptyState |
+| `format_events_screen.dart` | Filtered events by format — animated gradient header that transitions color per selected format; horizontal format circle selector row (6 circles, animated selection ring); fetches `GET /api/v1/listings/events/?format=slug`; grid of `CategoryEventCard`; `SubcategoryEmptyState` when no results; error snackbar with friendly message |
 | `category_classes_screen.dart` | Filtered classes by category |
 | `category_programs_screen.dart` | Filtered programs by category |
 | `category_venues_screen.dart` | Filtered venues by category — fetches `GET /api/v1/listings/venues/` with matched `category_id`; name-matched from venue categories metadata; uses flat `CategoryEventCard` (navigates to VenueDetailScreen); falls back to SubcategoryEmptyState |
@@ -177,7 +179,7 @@ HomeScreen (sidebar/action flows)
 | `class_nearby_card.dart` | Horizontal class card with tag + button |
 | `wishlist_button.dart` | Heart toggle with disperse animation |
 | `explore_categories_grid.dart` | 3-col category icon grid. `scrollable: true` + `visibleRows` = fixed-height inner scroll with "View All" chip overlaid at bottom |
-| `explore_format_row.dart` | Horizontal format chip row |
+| `explore_format_row.dart` | Horizontal format circles row — 6 pre-designed circle images from `Explore_by_format/`; `onFormatTap(index)` callback; `ColorFilter.matrix` inversion for MasterClass; `Transform.scale` per-entry zoom; `ClipOval + BoxFit.cover` |
 | `holiday_special_card.dart` | Tall gradient card for holiday events |
 | `new_on_tlb_card.dart` | PageView card for new listings |
 | `online_event_card.dart` | Online event card with platform badge |
@@ -220,10 +222,10 @@ HomeScreen (sidebar/action flows)
 - Base URL: `https://tlb-api.reluconsultancy.in` · 30-second timeout · no auth token required
 - All methods throw typed `Exception` messages for `SocketException` and `TimeoutException`
 - **`fetchCategories()`** — GET `/api/v1/listings/events/metadata/categories/` → `List<ApiCategory>`
-- **`fetchEvents({category, subcategory, format, mode, ageGroup, city, area, datePreset, priceType, page, pageSize})`** — GET `/api/v1/listings/events/` → `ApiEventsPage`
+- **`fetchEvents({category, subcategory, format, mode, ageGroup, city, area, datePreset, priceType, page, pageSize})`** — GET `/api/v1/listings/events/` → `ApiEventsPage`; 404 treated as empty page (not error); nested `body['error']` Map `{code, message}` is extracted to readable string
 - **`fetchEventDetail(listingId)`** — GET `/api/v1/listings/events/{id}/` → `ApiEventDetail`
 - **`fetchVenueCategories()`** — GET `/api/v1/listings/venues/metadata/categories/` → `List<ApiCategory>` *(backend not yet live — callers catch silently)*
-- **`fetchVenues({categoryId, city, area, locationType, isFeatured, isTopRated, isNewThisWeek, page, pageSize})`** — GET `/api/v1/listings/venues/` → `ApiVenuesPage`
+- **`fetchVenues({categoryId, city, area, locationType, isFeatured, isTopRated, isNewThisWeek, page, pageSize})`** — GET `/api/v1/listings/venues/` → `ApiVenuesPage`; same 404 + nested error handling as `fetchEvents`
 - **`fetchVenueDetail(listingId)`** — GET `/api/v1/listings/venues/{id}/` → `ApiVenueDetail`
 
 ### API Models
@@ -328,6 +330,8 @@ resources- tlb-ui/      — Design assets (main-footer.png, profile_section.png,
 resources- tlb-ui/accounts_page/    — wishlist.png, payments.png, reviews.png, support.png, reminders.png
 resources- tlb-ui/venues_page/
 resources- tlb-ui/events_page/
+resources- tlb-ui/event_page_subcategoryicons/          — 3D character icons per category
+resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/  — pre-designed circle images: Workshops.png, camp.png, competition.png, masterclass.png, shocase.png, demo.png
 resources- tlb-ui/homescreen-categoryicons/  — events.png, classes.png, programs.png, venues.png
 resources- tlb-ui/venues_page/yourway/
 location_screen_resources/  — City images: delhi.png, mumbai.png, hyderabad.png, kolkata.png, pune.png, bangalore.png
@@ -917,3 +921,15 @@ url_launcher: ^6.3.2           # External URL / deep-link launching
 | Payment processing dialog loader replaced with `AppLoader()` | `lib/screens/payment_screen.dart` |
 | Button/inline loaders replaced with `AppLoaderInline()` across all auth + profile screens | `lib/widgets/login_sheet.dart`, `lib/screens/signup_screen.dart`, `forgot_password_screen.dart`, `edit_profile_screen.dart`, `change_password_screen.dart` |
 | "Fetching location…" button spinner replaced with `AppLoaderInline()` | `lib/screens/location_screen.dart` |
+
+### Session 17
+| Change | Files |
+|--------|-------|
+| `exploreFormats` data updated — 6 entries with pre-designed circle images from `resources-tlb-ui/event_page_subcategoryicons/Explore_by_format/`; each entry has `label`, `image`, `formatSlug`, `accentColor`; MasterClass adds `scale: 1.42` + `invertColors: true` | `lib/data/dummy_data.dart` |
+| `ExploreFormatRow` rewritten — uses `asMap().entries.map()` to carry index; `ClipOval + BoxFit.cover` on 84×84 circles; per-entry `Transform.scale` zoom; `ColorFilter.matrix` inversion for MasterClass (white→black bg); `onFormatTap(index)` callback wired to navigation | `lib/widgets/explore_format_row.dart` |
+| `FormatEventsScreen` created — animated gradient header transitions `accentColor` per selected format (350ms `AnimatedContainer`); horizontal format circles selector row reuses same render logic with animated selection ring (white border + scale); fetches `EventsListingService.fetchEvents(format: slug, city: ..., pageSize: 50)`; `_toEventModel()` maps API fields to `EventModel` (`city • dateLabel` venue, subcategory/category tag, ageGroup description, priceFrom price); 2-col `SliverGrid` of `CategoryEventCard`; `SubcategoryEmptyState` on empty; `AppLoader` on loading | `lib/screens/format_events_screen.dart` (NEW) |
+| `EventsScreen` wired — `ExploreFormatRow.onFormatTap` navigates to `FormatEventsScreen(initialFormatIndex: index)` via `MaterialPageRoute` | `lib/screens/events_screen.dart` |
+| `pubspec.yaml` assets updated — added `resources-tlb-ui/event_page_subcategoryicons/` and `resources-tlb-ui/event_page_subcategoryicons/Explore_by_format/` | `pubspec.yaml` |
+| Compile error fixed — `ExploreFormatRow` was using `.map((format)` with no index access; changed to `.asMap().entries.map((entry)` with `final int index = entry.key; final format = entry.value` | `lib/widgets/explore_format_row.dart` |
+| API error snackbar fixed — raw `{code: ERROR, message: Not found.}` string no longer shown; `fetchEvents` now returns empty `ApiEventsPage` on HTTP 404; `body['error']` nested Map is properly extracted: `rawErr is Map ? rawErr['message'] : rawErr.toString()` | `lib/services/events_listing_service.dart` |
+| Same nested error extraction applied to `fetchVenues` | `lib/services/events_listing_service.dart` |

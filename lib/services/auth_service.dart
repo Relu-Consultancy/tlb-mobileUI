@@ -31,14 +31,15 @@ class AuthService {
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
-        return {'success': true, 'message': data['message'] ?? 'OTP sent'};
+        final inner = _inner(body);
+        return {'success': true, 'message': inner?['message'] ?? 'OTP sent'};
       }
       if (res.statusCode == 429) {
         return {'success': false, 'message': 'Too many requests. Please wait before trying again.'};
       }
-      return {'success': false, 'message': _extractError(data)};
+      return {'success': false, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -63,18 +64,20 @@ class AuthService {
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
+        final inner = _inner(body) ?? body;
         return {
           'success': true,
-          'access': data['access'],
-          'refresh': data['refresh'],
-          'is_new_user': data['is_new_user'] ?? false,
-          'user': data['user'],
+          'access': inner['access'],
+          'refresh': inner['refresh'],
+          'is_new_user': inner['is_new_user'] ?? false,
+          'user': inner['user'],
         };
       }
       if (res.statusCode == 400) {
-        final code = data['code'] ?? '';
+        final inner = _inner(body) ?? body;
+        final code = (body['error'] as Map<String, dynamic>?)?['code'] ?? inner['code'] ?? '';
         if (code == 'OTP_INVALID') return {'success': false, 'message': 'Incorrect OTP. Please try again.'};
         if (code == 'OTP_EXPIRED') return {'success': false, 'message': 'OTP has expired. Please request a new one.'};
         if (code == 'USER_ROLE_MISMATCH') return {'success': false, 'message': 'Account type mismatch.'};
@@ -82,7 +85,7 @@ class AuthService {
       if (res.statusCode == 429) {
         return {'success': false, 'message': 'Too many attempts. Please try again later.'};
       }
-      return {'success': false, 'message': _extractError(data)};
+      return {'success': false, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -103,11 +106,11 @@ class AuthService {
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
-        return {'success': true, 'message': data['message'] ?? ''};
+        return {'success': true, 'message': _inner(body)?['message'] ?? ''};
       }
-      return {'success': false, 'message': _extractError(data)};
+      return {'success': false, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -127,11 +130,11 @@ class AuthService {
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
-        return {'success': true, 'reset_token': data['reset_token'] ?? ''};
+        return {'success': true, 'reset_token': _inner(body)?['reset_token'] ?? ''};
       }
-      return {'success': false, 'message': _extractError(data)};
+      return {'success': false, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -156,11 +159,11 @@ class AuthService {
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
-        return {'success': true, 'message': data['message'] ?? ''};
+        return {'success': true, 'message': _inner(body)?['message'] ?? ''};
       }
-      return {'success': false, 'message': _extractError(data)};
+      return {'success': false, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -181,17 +184,18 @@ class AuthService {
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
+        final inner = _inner(body) ?? body;
         return {
           'success': true,
-          'access': data['access'],
-          'refresh': data['refresh'],
-          'is_new_user': data['is_new_user'] ?? false,
-          'user': data['user'],
+          'access': inner['access'],
+          'refresh': inner['refresh'],
+          'is_new_user': inner['is_new_user'] ?? false,
+          'user': inner['user'],
         };
       }
-      return {'success': false, 'message': _extractError(data)};
+      return {'success': false, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -222,11 +226,11 @@ class AuthService {
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
-        return {'success': true, 'message': data['message'] ?? 'Password changed successfully.'};
+        return {'success': true, 'message': _inner(body)?['message'] ?? 'Password changed successfully.'};
       }
-      return {'success': false, 'message': _extractError(data)};
+      return {'success': false, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -247,11 +251,12 @@ class AuthService {
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
-        return {'success': true, 'access': data['access'], 'refresh': data['refresh']};
+        final inner = _inner(body) ?? body;
+        return {'success': true, 'access': inner['access'], 'refresh': inner['refresh']};
       }
-      return {'success': false, 'message': _extractError(data)};
+      return {'success': false, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -274,11 +279,11 @@ class AuthService {
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
-        return {'success': true, 'profile': data};
+        return {'success': true, 'profile': _inner(body) ?? body};
       }
-      return {'success': false, 'message': _extractError(data)};
+      return {'success': false, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -296,13 +301,13 @@ class AuthService {
     String? region,
   }) async {
     try {
-      final body = <String, dynamic>{};
-      if (firstName != null) body['first_name'] = firstName;
-      if (lastName != null) body['last_name'] = lastName;
-      if (phoneNumber != null) body['phone_number'] = phoneNumber;
-      if (gender != null) body['gender'] = gender;
-      if (birthdate != null) body['birthdate'] = birthdate;
-      if (region != null) body['region'] = region;
+      final reqBody = <String, dynamic>{};
+      if (firstName != null) reqBody['first_name'] = firstName;
+      if (lastName != null) reqBody['last_name'] = lastName;
+      if (phoneNumber != null) reqBody['phone_number'] = phoneNumber;
+      if (gender != null) reqBody['gender'] = gender;
+      if (birthdate != null) reqBody['birthdate'] = birthdate;
+      if (region != null) reqBody['region'] = region;
 
       final res = await http
           .patch(
@@ -311,15 +316,15 @@ class AuthService {
               ..._headers,
               'Authorization': 'Bearer $accessToken',
             },
-            body: jsonEncode(body),
+            body: jsonEncode(reqBody),
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
-        return {'success': true, 'profile': data};
+        return {'success': true, 'profile': _inner(body) ?? body};
       }
-      return {'success': false, 'message': _extractError(data)};
+      return {'success': false, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -353,6 +358,13 @@ class AuthService {
     }
   }
 
+  /// Unwraps the `{"success":..., "data": {...}, "error":...}` envelope.
+  /// Returns the inner `data` map, or null if it is absent/not a map.
+  static Map<String, dynamic>? _inner(Map<String, dynamic> body) {
+    final d = body['data'];
+    return d is Map<String, dynamic> ? d : null;
+  }
+
   /// Converts a caught exception into a user-readable message.
   static String _networkError(Object e) {
     if (e is SocketException) {
@@ -367,14 +379,18 @@ class AuthService {
     return 'Network error: ${e.runtimeType}: $e';
   }
 
-  /// Extracts the first human-readable error from a DRF response body.
-  static String _extractError(Map<String, dynamic> data) {
-    for (final key in ['message', 'detail', 'non_field_errors']) {
-      final v = data[key];
-      if (v is String && v.isNotEmpty) return v;
-      if (v is List && v.isNotEmpty) return v.first.toString();
+  /// Extracts the first human-readable error from a TLB API response body.
+  /// Handles the `{"error": {"code": "...", "message": "..."}}` envelope.
+  static String _extractError(Map<String, dynamic> body) {
+    // TLB envelope: error is a nested map with a 'message' key
+    final error = body['error'];
+    if (error is Map) {
+      final msg = error['message'] as String?;
+      if (msg != null && msg.isNotEmpty) return msg;
     }
-    for (final v in data.values) {
+    // Flat formats (DRF default): 'detail', 'message', 'non_field_errors'
+    for (final key in ['message', 'detail', 'non_field_errors']) {
+      final v = body[key];
       if (v is String && v.isNotEmpty) return v;
       if (v is List && v.isNotEmpty) return v.first.toString();
     }

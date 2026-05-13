@@ -13,6 +13,7 @@ import '../widgets/event_card_with_rating.dart';
 
 import '../widgets/holiday_special_card.dart';
 import '../widgets/new_on_tlb_card.dart';
+import 'format_events_screen.dart';
 import '../widgets/online_event_card.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -351,7 +352,18 @@ class _EventsScreenState extends State<EventsScreen> {
                       ),
 
                       const SectionDividerWidget(title: 'Explore by Format'),
-                      const RepaintBoundary(child: ExploreFormatRow()),
+                      RepaintBoundary(
+                        child: ExploreFormatRow(
+                          onFormatTap: (index) => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => FormatEventsScreen(
+                                initialFormatIndex: index,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 24),
 
                       const SectionDividerWidget(title: 'Happening This Weekend'),

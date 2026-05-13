@@ -78,11 +78,22 @@ class EventsListingService {
           .get(uri, headers: {'Accept': 'application/json'})
           .timeout(_timeout);
 
+      // 404 on the listing endpoint means no events match the filter — treat as empty
+      if (res.statusCode == 404) {
+        return ApiEventsPage(count: 0, page: page, pageSize: pageSize, results: []);
+      }
+
       final body = jsonDecode(res.body) as Map<String, dynamic>;
       if (body['success'] == true) {
         return ApiEventsPage.fromJson(body['data'] as Map<String, dynamic>);
       }
-      throw Exception(body['error'] ?? 'Failed to load events');
+
+      // API error may be a nested Map { code, message } or a plain string
+      final rawErr = body['error'];
+      final errMsg = rawErr is Map
+          ? (rawErr['message'] as String? ?? 'Failed to load events')
+          : (rawErr?.toString() ?? 'Failed to load events');
+      throw Exception(errMsg);
     } on SocketException {
       throw Exception('Cannot reach server. Check your connection.');
     } on TimeoutException {
@@ -174,11 +185,20 @@ class EventsListingService {
           .get(uri, headers: {'Accept': 'application/json'})
           .timeout(_timeout);
 
+      if (res.statusCode == 404) {
+        return ApiVenuesPage(count: 0, page: page, pageSize: pageSize, results: []);
+      }
+
       final body = jsonDecode(res.body) as Map<String, dynamic>;
       if (body['success'] == true) {
         return ApiVenuesPage.fromJson(body['data'] as Map<String, dynamic>);
       }
-      throw Exception(body['error'] ?? 'Failed to load venues');
+
+      final rawErr = body['error'];
+      final errMsg = rawErr is Map
+          ? (rawErr['message'] as String? ?? 'Failed to load venues')
+          : (rawErr?.toString() ?? 'Failed to load venues');
+      throw Exception(errMsg);
     } on SocketException {
       throw Exception('Cannot reach server. Check your connection.');
     } on TimeoutException {

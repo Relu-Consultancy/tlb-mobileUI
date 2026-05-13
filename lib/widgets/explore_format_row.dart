@@ -2,7 +2,16 @@ import 'package:flutter/material.dart';
 import '../data/dummy_data.dart';
 
 class ExploreFormatRow extends StatelessWidget {
-  const ExploreFormatRow({super.key});
+  final void Function(int index)? onFormatTap;
+
+  const ExploreFormatRow({super.key, this.onFormatTap});
+
+  static const _invertMatrix = <double>[
+    -1,  0,  0, 0, 255,
+     0, -1,  0, 0, 255,
+     0,  0, -1, 0, 255,
+     0,  0,  0, 1,   0,
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -11,36 +20,42 @@ class ExploreFormatRow extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
-        children: DummyData.exploreFormats.map((format) {
-          return Padding(
-            padding: const EdgeInsets.only(right: 14),
-            child: Container(
-              width: 84,
-              height: 84,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: format['color'],
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.12),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              // Clip image to the circle so wide text badges can't overflow
-              child: ClipOval(
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Image.asset(
-                    format['image'],
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const Icon(
-                      Icons.category,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+        children: DummyData.exploreFormats.asMap().entries.map((entry) {
+          final int index = entry.key;
+          final Map<String, dynamic> format = entry.value;
+          final double scale = (format['scale'] as double?) ?? 1.0;
+          final bool invert = format['invertColors'] == true;
+
+          Widget img = Image.asset(
+            format['image'],
+            width: 84,
+            height: 84,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Container(
+              color: Colors.grey.shade200,
+              child: const Icon(Icons.category, color: Colors.grey),
+            ),
+          );
+
+          if (invert) {
+            img = ColorFiltered(
+              colorFilter: const ColorFilter.matrix(_invertMatrix),
+              child: img,
+            );
+          }
+
+          if (scale != 1.0) {
+            img = Transform.scale(scale: scale, child: img);
+          }
+
+          return GestureDetector(
+            onTap: () => onFormatTap?.call(index),
+            child: Padding(
+              padding: const EdgeInsets.only(right: 14),
+              child: SizedBox(
+                width: 84,
+                height: 84,
+                child: ClipOval(child: img),
               ),
             ),
           );
