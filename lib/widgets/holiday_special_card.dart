@@ -163,7 +163,7 @@ class HolidaySpecialCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(22),
                           onTap: () {
                             if (buttonLabel == 'Send Enquiry') {
-                              showInquireNow(context);
+                              showInquireNow(context, listingId: event.id);
                             } else if (buttonLabel == 'Check Availability') {
                               Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
                             } else {

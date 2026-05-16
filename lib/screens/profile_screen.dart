@@ -5,6 +5,7 @@ import '../providers/auth_state.dart';
 import '../core/responsive.dart';
 import '../providers/saved_events_state.dart';
 import '../providers/booked_events_state.dart';
+import '../providers/user_reviews_state.dart';
 import 'bookings_screen.dart';
 import 'saved_events_screen.dart';
 import 'help_centre_screen.dart';
@@ -376,6 +377,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               AuthState.logout();
               SavedEventsState.savedEvents.value = [];
               BookedEventsState.bookings.value = [];
+              UserReviewsState.clear();
               if (!context.mounted) return;
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (_) => const HomeScreen()),

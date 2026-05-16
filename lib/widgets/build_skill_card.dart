@@ -158,7 +158,7 @@ class BuildSkillCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(22),
                           onTap: () {
                             if (ctaLabel == 'Send Enquiry') {
-                              showInquireNow(context);
+                              showInquireNow(context, listingId: event.id);
                             } else if (ctaLabel == 'Check Availability') {
                               Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
                             } else {

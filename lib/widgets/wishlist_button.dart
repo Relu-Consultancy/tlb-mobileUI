@@ -83,11 +83,8 @@ class WishlistButton extends StatelessWidget {
                       dotPrimaryColor: Colors.red,
                       dotSecondaryColor: Colors.redAccent,
                     ),
-                    onTap: (bool isLiked) async {
-                      if (!isLoggedIn) return isLiked;
-                      final success = SavedEventsState.toggle(event, context);
-                      return success ? !isLiked : isLiked;
-                    },
+                    onTap: (bool isLiked) =>
+                        SavedEventsState.toggle(event, context),
                     likeBuilder: (bool isLiked) {
                       return Icon(
                         isLiked ? iconType.filled : iconType.outlined,

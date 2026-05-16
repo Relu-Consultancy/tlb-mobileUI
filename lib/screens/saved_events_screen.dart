@@ -42,13 +42,18 @@ class SavedEventsScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Hi ${AuthState.firstName},',
-                        style: GoogleFonts.poppins(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF1A1A2E),
-                        ),
+                      ValueListenableBuilder<String?>(
+                        valueListenable: AuthState.userName,
+                        builder: (context, _, __) {
+                          return Text(
+                            'Hi ${AuthState.firstName},',
+                            style: GoogleFonts.poppins(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFF1A1A2E),
+                            ),
+                          );
+                        },
                       ),
                       Text(
                         'Here are your saved activities.',
@@ -166,18 +171,31 @@ class _SavedRow extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.asset(
-                  event.imagePath,
-                  width: 56,
-                  height: 48,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    width: 56,
-                    height: 48,
-                    color: Colors.grey.shade200,
-                    child: const Icon(Icons.event, color: Colors.grey),
-                  ),
-                ),
+                child: event.imagePath.startsWith('http')
+                    ? Image.network(
+                        event.imagePath,
+                        width: 56,
+                        height: 48,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          width: 56,
+                          height: 48,
+                          color: Colors.grey.shade200,
+                          child: const Icon(Icons.event, color: Colors.grey),
+                        ),
+                      )
+                    : Image.asset(
+                        event.imagePath,
+                        width: 56,
+                        height: 48,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          width: 56,
+                          height: 48,
+                          color: Colors.grey.shade200,
+                          child: const Icon(Icons.event, color: Colors.grey),
+                        ),
+                      ),
               ),
               const SizedBox(width: 14),
               Expanded(

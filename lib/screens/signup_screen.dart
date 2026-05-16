@@ -9,6 +9,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../services/auth_service.dart';
 import '../services/walkthrough_service.dart';
 import '../providers/auth_state.dart';
+import '../providers/saved_events_state.dart';
 import '../core/responsive.dart';
 import '../widgets/login_sheet.dart';
 
@@ -149,6 +150,7 @@ class _SignupScreenState extends State<SignupScreen> {
           refresh: result['refresh'] as String?,
           user: result['user'] as Map<String, dynamic>?,
         );
+        SavedEventsState.loadFromApi(); // fire-and-forget
         if (result['is_new_user'] == true) {
           await WalkthroughService.markAsNewUser();
         }

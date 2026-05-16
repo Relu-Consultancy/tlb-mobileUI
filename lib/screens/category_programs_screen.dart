@@ -10,6 +10,10 @@ import '../widgets/all_categories_popup.dart';
 import '../widgets/category_screen_header.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/subcategory_empty_state.dart';
+import '../models/api_program_model.dart';
+import '../services/programs_listing_service.dart';
+import '../widgets/app_loader.dart';
+import 'program_detail_screen.dart';
 
 class CategoryProgramsScreen extends StatefulWidget {
   final int initialCategoryIndex;
@@ -27,16 +31,22 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
   late int _selectedCategoryIndex;
   int _selectedFilterIndex = 0;
   final ScrollController _chipScrollController = ScrollController();
-  final List<GlobalKey> _chipKeys = List.generate(
-    DummyData.programsCategories.length,
-    (_) => GlobalKey(),
-  );
+  late List<GlobalKey> _chipKeys;
+
+  List<ApiProgram> _apiPrograms = [];
+  bool _isLoadingPrograms = true;
+  String? _fetchError;
 
   @override
   void initState() {
     super.initState();
     _selectedCategoryIndex = widget.initialCategoryIndex
         .clamp(0, DummyData.programsCategories.length - 1);
+    _chipKeys = List.generate(
+      DummyData.programsCategories.length,
+      (_) => GlobalKey(),
+    );
+    _fetchPrograms();
   }
 
   @override
@@ -63,11 +73,50 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
     );
   }
 
+  Future<void> _fetchPrograms({String? subcategory}) async {
+    setState(() {
+      _isLoadingPrograms = true;
+      _fetchError = null;
+    });
+    try {
+      final page = await ProgramsListingService.fetchPrograms(
+        category: _categoryTitle,
+        subcategory: subcategory, // Note: the backend uses subcategory_id, but we'll map or send title based on backend behavior
+        city: LocationState().selectedCity.value,
+        pageSize: 50,
+      );
+      if (!mounted) return;
+      setState(() {
+        _apiPrograms = page.results;
+        _isLoadingPrograms = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      setState(() {
+        _apiPrograms = [];
+        _isLoadingPrograms = false;
+        _fetchError = msg;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Programs: $msg'),
+          backgroundColor: const Color(0xFF1A1A2E),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
+  }
+
   void _selectCategory(int index) {
     setState(() {
       _selectedCategoryIndex = index;
       _selectedFilterIndex = 0;
     });
+    _fetchPrograms();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final key = _chipKeys[index];
       if (key.currentContext != null) {
@@ -92,13 +141,19 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
   List<String> get _filters =>
       DummyData.programsSubFilters[_selectedCategoryIndex];
 
-  List<EventModel> get _filteredEvents {
-    List<EventModel> all = DummyData.programsByCategory[_selectedCategoryIndex];
-    final city = LocationState().selectedCity.value;
-    all = all.where((e) => e.venue.toLowerCase().contains(city.toLowerCase())).toList();
-    if (_selectedFilterIndex == 0) return all;
-    final filterTag = _filters[_selectedFilterIndex];
-    return all.where((e) => e.tag == filterTag).toList();
+  List<ApiProgram> get _filteredPrograms => _apiPrograms;
+
+  EventModel _toEventModel(ApiProgram prg) {
+    return EventModel(
+      id: prg.id,
+      title: prg.title,
+      venue: prg.city ?? prg.category?.name ?? 'Multiple',
+      imagePath: prg.cover ?? '',
+      tag: prg.category?.name,
+      rating: prg.averageRating,
+      reviewCount: prg.totalReviews > 0 ? '${prg.averageRating} (${prg.totalReviews})' : null,
+      description: prg.shortDescription,
+    );
   }
 
   String get _categoryTitle {
@@ -346,8 +401,14 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                           final isActive =
                               filterIndex == _selectedFilterIndex;
                           return GestureDetector(
-                            onTap: () => setState(
-                                () => _selectedFilterIndex = filterIndex),
+                            onTap: () {
+                              setState(() => _selectedFilterIndex = filterIndex);
+                              if (filterIndex == 0) {
+                                _fetchPrograms(subcategory: null);
+                              } else {
+                                _fetchPrograms(subcategory: _filters[filterIndex]);
+                              }
+                            },
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
                               margin: const EdgeInsets.only(right: 8),
@@ -385,7 +446,17 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
 
                   // Results grid
                   const SliverToBoxAdapter(child: SizedBox(height: 14)),
-                  if (_filteredEvents.isEmpty)
+                  if (_isLoadingPrograms)
+                    const SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 40),
+                          child: AppLoader(),
+                        ),
+                      ),
+                    )
+                  else if (_filteredPrograms.isEmpty)
                     SliverFillRemaining(
                       hasScrollBody: false,
                       child: SubcategoryEmptyState(
@@ -394,23 +465,26 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                     )
                   else
                     SliverPadding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       sliver: SliverGrid(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            final events = _filteredEvents;
-                            if (index >= events.length) return null;
+                            final prg = _filteredPrograms[index];
+                            final eventModel = _toEventModel(prg);
                             return CategoryEventCard(
-                              event: events[index],
-                              badgeColor:
-                                  _accentColor.withOpacity(0.9),
+                              event: eventModel,
+                              badgeColor: _accentColor.withOpacity(0.9),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: eventModel)),
+                                );
+                              },
                             );
                           },
-                          childCount: _filteredEvents.length,
+                          childCount: _filteredPrograms.length,
                         ),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           mainAxisSpacing: 14,
                           crossAxisSpacing: 14,

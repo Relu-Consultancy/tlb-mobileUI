@@ -228,7 +228,7 @@ class ClassNearbyCard extends StatelessWidget {
                         if (onTap != null) {
                           onTap!();
                         } else if (buttonLabel == 'Send Enquiry') {
-                          showInquireNow(context);
+                          showInquireNow(context, listingId: event.id);
                         } else if (buttonLabel == 'Check Availability') {
                           Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
                         } else {

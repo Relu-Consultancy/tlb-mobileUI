@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../services/auth_service.dart';
 import '../providers/auth_state.dart';
+import '../providers/saved_events_state.dart';
 import '../core/responsive.dart';
 import '../screens/home_screen.dart';
 import '../screens/edit_profile_screen.dart';
@@ -111,6 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
           refresh: result['refresh'] as String?,
           user: result['user'] as Map<String, dynamic>?,
         );
+        SavedEventsState.loadFromApi(); // fire-and-forget
         final isNew = result['is_new_user'] == true;
         if (isNew) {
           await WalkthroughService.markAsNewUser();
@@ -467,6 +469,7 @@ class _OTPVerificationScreenState extends State<_OTPVerificationScreen> {
         refresh: result['refresh'] as String?,
         user: result['user'] as Map<String, dynamic>?,
       );
+      SavedEventsState.loadFromApi(); // fire-and-forget
       final isNew = result['is_new_user'] == true;
       if (isNew) {
         await WalkthroughService.markAsNewUser();

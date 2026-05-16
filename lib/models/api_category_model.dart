@@ -33,11 +33,12 @@ class ApiCategory {
 
   factory ApiCategory.fromJson(Map<String, dynamic> json) => ApiCategory(
         id: json['id'] as int,
-        slug: json['slug'] as String,
+        slug: (json['slug'] as String?) ?? '',
         name: json['name'] as String,
-        sortOrder: json['sort_order'] as int,
-        subcategories: (json['subcategories'] as List)
-            .map((s) => ApiSubcategory.fromJson(s as Map<String, dynamic>))
-            .toList(),
+        sortOrder: (json['sort_order'] as int?) ?? 0,
+        subcategories: (json['subcategories'] as List?)
+                ?.map((s) => ApiSubcategory.fromJson(s as Map<String, dynamic>))
+                .toList() ??
+            [],
       );
 }

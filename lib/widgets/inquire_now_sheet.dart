@@ -1,19 +1,23 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../services/classes_listing_service.dart';
+import '../services/programs_listing_service.dart';
 
-void showInquireNow(BuildContext context) {
+void showInquireNow(BuildContext context, {required String listingId, bool isProgram = false}) {
   showDialog(
     context: context,
     barrierDismissible: true,
-    builder: (_) => const _InquireNowDialog(),
+    builder: (_) => _InquireNowDialog(listingId: listingId, isProgram: isProgram),
   );
 }
 
 // ── Enquiry form dialog ────────────────────────────────────────────────────
 
 class _InquireNowDialog extends StatefulWidget {
-  const _InquireNowDialog();
+  final String listingId;
+  final bool isProgram;
+  const _InquireNowDialog({required this.listingId, this.isProgram = false});
 
   @override
   State<_InquireNowDialog> createState() => _InquireNowDialogState();
@@ -27,6 +31,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
   final _message = TextEditingController();
   String? _selectedAge;
   int _msgLen = 0;
+  bool _isSubmitting = false;
 
   static const _ages = ['4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'];
 
@@ -40,22 +45,57 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
+    final messageText = _message.text.trim();
     if (_childName.text.trim().isEmpty ||
         _selectedAge == null ||
         _mobile.text.trim().isEmpty ||
-        _parentName.text.trim().isEmpty) {
+        _parentName.text.trim().isEmpty ||
+        (widget.isProgram && messageText.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all required fields.')),
+        SnackBar(content: Text('Please fill all required fields${widget.isProgram ? ' including message' : ''}.')),
       );
       return;
     }
-    Navigator.pop(context);
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const _EnquirySuccessDialog(),
-    );
+
+    setState(() => _isSubmitting = true);
+    try {
+      if (widget.isProgram) {
+        await ProgramsListingService.submitEnquiry(
+          listingId: widget.listingId,
+          studentName: _childName.text.trim(),
+          mobile: _mobile.text.trim(),
+          parentName: _parentName.text.trim(),
+          studentAge: int.tryParse(_selectedAge!) ?? 0,
+          message: messageText,
+          area: _locality.text.trim(),
+        );
+      } else {
+        await ClassesListingService.submitEnquiry(
+          listingId: widget.listingId,
+          studentName: _childName.text.trim(),
+          mobile: _mobile.text.trim(),
+          parentName: _parentName.text.trim(),
+          studentAge: int.tryParse(_selectedAge!),
+          message: messageText,
+          area: _locality.text.trim(),
+        );
+      }
+
+      if (!mounted) return;
+      Navigator.pop(context);
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const _EnquirySuccessDialog(),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+      );
+    }
   }
 
   @override
@@ -187,17 +227,27 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
-                onPressed: _submit,
+                onPressed: _isSubmitting ? null : _submit,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFFCC00),
                   foregroundColor: const Color(0xFF1A1A2E),
+                  disabledBackgroundColor: const Color(0xFFFFCC00).withOpacity(0.5),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   elevation: 0,
                 ),
-                child: Text(
-                  'Send Enquiry',
-                  style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700),
-                ),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1A1A2E)),
+                        ),
+                      )
+                    : Text(
+                        'Send Enquiry',
+                        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700),
+                      ),
               ),
             ),
           ],

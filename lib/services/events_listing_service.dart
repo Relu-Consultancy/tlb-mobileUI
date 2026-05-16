@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/api_category_model.dart';
 import '../models/api_event_model.dart';
+import '../models/api_provider_model.dart';
 import '../models/api_venue_model.dart';
 
 class EventsListingService {
@@ -198,6 +199,44 @@ class EventsListingService {
       final errMsg = rawErr is Map
           ? (rawErr['message'] as String? ?? 'Failed to load venues')
           : (rawErr?.toString() ?? 'Failed to load venues');
+      throw Exception(errMsg);
+    } on SocketException {
+      throw Exception('Cannot reach server. Check your connection.');
+    } on TimeoutException {
+      throw Exception('Request timed out. Please try again.');
+    }
+  }
+
+  // ── Provider ──────────────────────────────────────────────────────────────
+
+  /// Returns the public partner profile for the provider who owns [listingId].
+  /// Response may arrive as a direct object or wrapped in `{"success", "data"}`.
+  static Future<ApiProvider> fetchProvider(String listingId) async {
+    try {
+      final res = await http
+          .get(
+            Uri.parse('$_base/api/v1/listings/$listingId/provider/'),
+            headers: {'Accept': 'application/json'},
+          )
+          .timeout(_timeout);
+
+      if (res.statusCode == 404) throw Exception('Provider not found');
+
+      final body = jsonDecode(res.body);
+
+      // Envelope: { "success": true, "data": {...} }
+      if (body is Map<String, dynamic> && body['success'] == true) {
+        return ApiProvider.fromJson(body['data'] as Map<String, dynamic>);
+      }
+      // Direct object (no envelope)
+      if (body is Map<String, dynamic> && body.containsKey('id')) {
+        return ApiProvider.fromJson(body);
+      }
+
+      final rawErr = (body is Map) ? body['error'] : null;
+      final errMsg = rawErr is Map
+          ? (rawErr['message'] as String? ?? 'Failed to load provider')
+          : (rawErr?.toString() ?? 'Failed to load provider');
       throw Exception(errMsg);
     } on SocketException {
       throw Exception('Cannot reach server. Check your connection.');

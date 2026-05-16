@@ -44,13 +44,18 @@ class PaymentSettingsScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Hi ${AuthState.firstName},',
-                          style: GoogleFonts.poppins(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            color: const Color(0xFF1A1A2E),
-                          ),
+                        ValueListenableBuilder<String?>(
+                          valueListenable: AuthState.userName,
+                          builder: (context, _, __) {
+                            return Text(
+                              'Hi ${AuthState.firstName},',
+                              style: GoogleFonts.poppins(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                color: const Color(0xFF1A1A2E),
+                              ),
+                            );
+                          },
                         ),
                         const SizedBox(height: 4),
                         Text(

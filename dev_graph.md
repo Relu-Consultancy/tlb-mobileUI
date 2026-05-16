@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-13 (Session 17)
+**Last Updated:** 2026-05-16 (Session 22)
 
 ---
 
@@ -31,11 +31,16 @@ lib/
 │   ├── saved_events_state.dart    ValueNotifier<List<EventModel>> for wishlist
 │   ├── booked_events_state.dart   ValueNotifier<List<EventModel>> for bookings
 │   └── user_reviews_state.dart    ValueNotifier for user reviews
+├── services/
+│   ├── wishlist_service.dart      fetchWishlist / add / remove — REST calls to /api/v1/wishlist/
+│   └── review_service.dart        fetchReviews / createReview / updateReview / deleteReview — /api/v1/listings/{id}/reviews/ + /api/v1/reviews/{id}/
 ├── models/
 │   ├── event_model.dart           Core data model — title, venue, price, rating, date, image, etc.
 │   ├── category_model.dart        Category model with label, image, color
 │   ├── api_category_model.dart    API-backed category — id, name, slug, sortOrder, subcategories
 │   ├── api_event_model.dart       API models: ApiEvent (list), ApiEventDetail (full), ApiEventsPage
+│   ├── api_provider_model.dart    ApiProvider — id, name, bio, logoUrl, totalListings, averageRating, totalReviews, experienceYears
+│   ├── api_review_model.dart      ApiReviewMedia, ApiReview, ApiReviewPage (nested reviews.results pagination)
 │   └── api_venue_model.dart       API models: ApiVenue (list), ApiVenueDetail (full), ApiVenuesPage,
 │                                  ApiVenueCategory, ApiVenueMedia, ApiVenuePackage,
 │                                  ApiVenueAvailability, ApiVenueOrganizer
@@ -227,6 +232,7 @@ HomeScreen (sidebar/action flows)
 - **`fetchVenueCategories()`** — GET `/api/v1/listings/venues/metadata/categories/` → `List<ApiCategory>` *(backend not yet live — callers catch silently)*
 - **`fetchVenues({categoryId, city, area, locationType, isFeatured, isTopRated, isNewThisWeek, page, pageSize})`** — GET `/api/v1/listings/venues/` → `ApiVenuesPage`; same 404 + nested error handling as `fetchEvents`
 - **`fetchVenueDetail(listingId)`** — GET `/api/v1/listings/venues/{id}/` → `ApiVenueDetail`
+- **`fetchProvider(listingId)`** — GET `/api/v1/listings/{id}/provider/` → `ApiProvider`; handles both direct object and `{success, data}` envelope; Redis-cached on backend
 
 ### API Models
 **`ApiCategory`** — `id, name, slug, sortOrder, subcategories: List<ApiSubcategory>`  
@@ -245,6 +251,7 @@ Dummy cards from `venues_screen.dart` / `events_screen.dart` pass `id = ''`, so 
 ### AuthService (`lib/services/auth_service.dart`)
 - All methods have **30-second timeout**
 - Typed error handling: `SocketException` → "Cannot reach server", `TimeoutException` → "Request timed out", `HandshakeException` → "SSL error"
+- **Response envelope:** All TLB API responses use `{"success": bool, "data": {...}, "error": {"code": "...", "message": "..."}}`. `_inner(body)` unwraps `body['data']`. `_extractError(body)` reads `body['error']['message']` first, then falls back to flat DRF keys.
 - **OTP Login / Signup (unified flow):**
   - `requestOtp(identifier)` — POST `/api/v1/auth/request-otp/` body `{"identifier": email, "identifier_type": "email"}` → OTP sent to email
   - `verifyOtp(identifier, otp)` — POST `/api/v1/auth/verify-otp/` body `{"identifier", "otp", "role": "customer"}` → `{"access", "refresh", "is_new_user", "user"}`. Creates account automatically if email not registered. Handles `OTP_INVALID`, `OTP_EXPIRED`, `USER_ROLE_MISMATCH`, `OTP_LOCKED` error codes.
@@ -933,3 +940,63 @@ url_launcher: ^6.3.2           # External URL / deep-link launching
 | Compile error fixed — `ExploreFormatRow` was using `.map((format)` with no index access; changed to `.asMap().entries.map((entry)` with `final int index = entry.key; final format = entry.value` | `lib/widgets/explore_format_row.dart` |
 | API error snackbar fixed — raw `{code: ERROR, message: Not found.}` string no longer shown; `fetchEvents` now returns empty `ApiEventsPage` on HTTP 404; `body['error']` nested Map is properly extracted: `rawErr is Map ? rawErr['message'] : rawErr.toString()` | `lib/services/events_listing_service.dart` |
 | Same nested error extraction applied to `fetchVenues` | `lib/services/events_listing_service.dart` |
+
+### Session 18
+| Change | Files |
+|--------|-------|
+| **Critical auth fix — API envelope parsing** — all TLB auth APIs return `{"success", "data": {...}, "error": {"code", "message"}}` but service was reading top-level keys (e.g. `data['access']`) instead of inner payload (`data['data']['access']`), causing `accessToken` to always be `null` after every login → "Session expired" error on every profile save | `lib/services/auth_service.dart` |
+| Added `_inner(body)` helper — extracts `body['data']` as `Map<String, dynamic>?`; used by all methods to unwrap the envelope before reading fields | `lib/services/auth_service.dart` |
+| `_extractError` fixed — now reads `body['error']['message']` first (TLB nested format), then falls back to flat DRF fields (`message`, `detail`, `non_field_errors`) | `lib/services/auth_service.dart` |
+| `verifyOtp` fixed — `access`, `refresh`, `is_new_user`, `user` now read from `_inner(body)`; OTP error codes read from `body['error']['code']` | `lib/services/auth_service.dart` |
+| `googleSignIn` fixed — tokens and user now read from `_inner(body)` | `lib/services/auth_service.dart` |
+| `refreshToken` fixed — new access/refresh tokens now correctly extracted; session restore now works | `lib/services/auth_service.dart` |
+| `getProfile` / `updateProfile` fixed — now return `_inner(body)` as profile data instead of the full envelope | `lib/services/auth_service.dart` |
+| `forgotPassword` / `verifyResetOtp` / `confirmPasswordReset` / `changePassword` fixed — `message` and `reset_token` fields now read from `_inner(body)` | `lib/services/auth_service.dart` |
+| `FormatEventsScreen` fetch fixed — backend `?format=` query parameter not yet implemented (returns 404 for any value); changed to fetch all events (`pageSize: 100`) and filter client-side by both `e.format == slug` and `e.city.toLowerCase() == userCity.toLowerCase()` | `lib/screens/format_events_screen.dart` |
+| `FormatEventsScreen` description field removed — cards were showing "Description – 6-8 years" (age group data); `description: null` now passed in `_toEventModel()` | `lib/screens/format_events_screen.dart` |
+
+### Session 21 (Current)
+| Change | Files |
+|--------|-------|
+| `WishlistService` added — `fetchWishlist` (GET /api/v1/wishlist/), `add` (POST /api/v1/wishlist/add/ — handles 200/201/400), `remove` (DELETE /api/v1/wishlist/remove/{id}/); all require `Authorization: Bearer {token}`; handles direct array + `{success,data}` envelope | `lib/services/wishlist_service.dart` (NEW) |
+| `SavedEventsState` upgraded — `loadFromApi()` fetches server wishlist, builds `EventModel` list (id=listing_id, imagePath=cover_url, venue=city, tag=listing_type), replaces local state; `toggle()` made async `Future<bool>`; optimistic UI: update immediately, call API, revert + snackbar on failure; `clear()` method added | `lib/providers/saved_events_state.dart` |
+| `WishlistButton.onTap` simplified — now `(isLiked) => SavedEventsState.toggle(event, context)` (returns Future<bool> directly to LikeButton) | `lib/widgets/wishlist_button.dart` |
+| `SavedEventsScreen` — thumbnail image loading fixed to use `Image.network` when `imagePath.startsWith('http')` (API-loaded wishlist items have cover URLs) | `lib/screens/saved_events_screen.dart` |
+| `main.dart` — calls `SavedEventsState.loadFromApi()` fire-and-forget after successful `tryRestoreSession()` | `lib/main.dart` |
+| `login_sheet.dart` — calls `SavedEventsState.loadFromApi()` fire-and-forget after `AuthState.login()` in both Google sign-in and OTP verify flows | `lib/widgets/login_sheet.dart` |
+| `signup_screen.dart` — same loadFromApi call after Google sign-up login | `lib/screens/signup_screen.dart` |
+
+### Session 22
+| Change | Files |
+|--------|-------|
+| `ApiReviewMedia`, `ApiReview`, `ApiReviewPage` models added — `ApiReviewPage` contains nested `reviews.results` list, `average_rating`, `total_reviews`, `rating_breakdown`, `has_next` | `lib/models/api_review_model.dart` (NEW) |
+| `ReviewService` added — `fetchReviews(listingId)` GET public, `createReview(token, listingId, rating, comment)` POST (returns ApiReview), `updateReview(token, reviewId, rating, comment)` PATCH, `deleteReview(token, reviewId)` DELETE; handles both `{success, data}` envelope and flat responses | `lib/services/review_service.dart` (NEW) |
+| `review_sheet.dart` added — `showReviewSheet()` fetches and displays all reviews with average rating summary; Write button (if logged in) opens `showWriteReviewSheet()`; `showWriteReviewSheet()` handles both create and edit (pass `existing: ApiReview` for edit mode); submit shows spinner, calls service, updates `UserReviewsState`, dismisses with SnackBar | `lib/widgets/review_sheet.dart` (NEW) |
+| `UserReviewsState` rewritten as static-only class — removed singleton pattern and dummy data; `reviewsNotifier` is now `static ValueNotifier`; added `static updateReview(reviewId, changes)` and `static removeReview(reviewId)`; reviews now include `reviewId` int and `listingId` String fields | `lib/providers/user_reviews_state.dart` |
+| `YourReviewsScreen` wired — Edit button opens `showWriteReviewSheet()` in edit mode (constructs `ApiReview` from stored map fields); Delete button calls `ReviewService.deleteReview()` then `UserReviewsState.removeReview()`; thumbnail loading uses `Image.network` for HTTP URLs, `Image.asset` for bundled images | `lib/screens/your_reviews_screen.dart` |
+| All 4 detail screens — replaced `if (_detail == null)` dummy review section with `if (_hasApiId)` real "View all reviews" banner; removed `_reviews` static lists, `_showAddReviewBottomSheet`, `_showReviewsBottomSheet`, and `_buildReviewCard` dead helpers; replaced with `showReviewSheet()` call; reviews now shown for all API-backed listings | `lib/screens/event_detail_screen.dart`, `class_detail_screen.dart`, `program_detail_screen.dart`, `venue_detail_screen.dart` |
+| `program_detail_screen.dart` — removed pre-existing unused imports: `api_class_model.dart`, `classes_listing_service.dart`, `select_batch_screen.dart` | `lib/screens/program_detail_screen.dart` |
+| `profile_screen.dart` — added `UserReviewsState.clear()` to logout flow (alongside existing `SavedEventsState` and `BookedEventsState` clears) | `lib/screens/profile_screen.dart` |
+
+### Session 20
+| Change | Files |
+|--------|-------|
+| `ApiProvider` model added — `id, name, bio, logoUrl, totalListings, averageRating, totalReviews, experienceYears` | `lib/models/api_provider_model.dart` (NEW) |
+| `EventsListingService.fetchProvider(listingId)` added — GET `/api/v1/listings/{id}/provider/`; handles direct + envelope response formats | `lib/services/events_listing_service.dart` |
+| `OrganizerProfileScreen` rewritten as `StatefulWidget` — accepts `listingId, initialName?, initialLogoUrl?`; fetches provider on load; shows `AppLoader` while loading; non-fatal error banner with Retry; stats row uses real `totalListings/averageRating/experienceYears`; `totalReviews` shown as review count under name; star icon in rating stat; upcoming events remain dummy (no provider-filter API) | `lib/screens/organizer_profile_screen.dart` |
+| All 4 detail screens — organizer card wrapped in `GestureDetector` (whole card tappable); inner avatar `GestureDetector` removed; navigation target changed to `OrganizerProfileScreen(listingId: widget.event.id, initialName:, initialLogoUrl:)` | `lib/screens/event_detail_screen.dart`, `class_detail_screen.dart`, `program_detail_screen.dart`, `venue_detail_screen.dart` |
+
+### Session 19
+| Change | Files |
+|--------|-------|
+| ClassDetailScreen fully rewritten as StatefulWidget � event.id.isNotEmpty gates etchClassDetail() in initState; handles loading and network errors gracefully; dynamic rendering of gallery, organizer info, policies, and batches; falls back to dummy cards if id == \x27\x27 | lib/screens/class_detail_screen.dart |
+| Enquiry workflow integrated � \x22Send Enquiry\x22 uses API-fetched listingId; calls ClassesListingService.submitEnquiry() | lib/screens/class_detail_screen.dart |
+| inquire_now_sheet.dart UI mapped to pass the dynamically fetched listingId from the class detail screen instead of falling back to default values | lib/widgets/inquire_now_sheet.dart |
+| Gallery section redesigned � _buildGallery slider uses API media (excluding cover photo); fallback to repeated cover if no gallery images available | lib/screens/class_detail_screen.dart |
+| Organizer avatar dynamic � _buildOrganizerAvatar pulls logoUrl from API; falls back to letter-initial avatar if missing | lib/screens/class_detail_screen.dart |
+| Terms & Policies updated � added Cancellation and Refund policy sections from API; falls back to default static terms | lib/screens/class_detail_screen.dart |
+| Location map fixed � Container closure and nesting issues resolved; added launchUrl for directions via Google Maps | lib/screens/class_detail_screen.dart |
+| ProgramDetailScreen fully rewritten as StatefulWidget � integrated ProgramsListingService.fetchProgramDetail; dynamic mapping for age group, capacity, total hours, module count, and multi-batch schedule; gallery wired to GalleryScreen | lib/screens/program_detail_screen.dart |
+| ProgramsListingService.submitEnquiry fixed � endpoint updated to /enquiries/; field contactNumber renamed to mobile; added rea field to match backend spec | lib/services/programs_listing_service.dart |
+| Program enquiry integration � InquireNowSheet updated to pass mobile and rea when submitting for programs | lib/widgets/inquire_now_sheet.dart |
+| Profile Reactivity � Wrapped greetings in SavedEventsScreen, YourReviewsScreen, HelpCentreScreen, PaymentSettingsScreen, and RemindersScreen with ValueListenableBuilder to reflect AuthState.userName changes in real-time | Multiple profile sub-screens |

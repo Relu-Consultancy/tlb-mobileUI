@@ -4,12 +4,16 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../data/dummy_data.dart';
 import '../models/event_model.dart';
+import '../models/api_class_model.dart';
 import '../providers/location_state.dart';
+import '../services/classes_listing_service.dart';
 import '../widgets/category_event_card.dart';
 import '../widgets/all_categories_popup.dart';
 import '../widgets/category_screen_header.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/subcategory_empty_state.dart';
+import '../widgets/app_loader.dart';
+import 'class_detail_screen.dart';
 
 class CategoryClassesScreen extends StatefulWidget {
   final int initialCategoryIndex;
@@ -27,22 +31,66 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
   late int _selectedCategoryIndex;
   int _selectedFilterIndex = 0;
   final ScrollController _chipScrollController = ScrollController();
-  final List<GlobalKey> _chipKeys = List.generate(
-    DummyData.classesCategories.length,
-    (_) => GlobalKey(),
-  );
+  late List<GlobalKey> _chipKeys;
+
+  List<ApiClass> _apiClasses = [];
+  bool _isLoadingClasses = true;
+  String? _fetchError;
 
   @override
   void initState() {
     super.initState();
     _selectedCategoryIndex = widget.initialCategoryIndex
         .clamp(0, DummyData.classesCategories.length - 1);
+    _chipKeys = List.generate(
+      DummyData.classesCategories.length,
+      (_) => GlobalKey(),
+    );
+    _fetchClasses();
   }
 
   @override
   void dispose() {
     _chipScrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _fetchClasses({String? subcategory}) async {
+    setState(() {
+      _isLoadingClasses = true;
+      _fetchError = null;
+    });
+    try {
+      final page = await ClassesListingService.fetchClasses(
+        category: _categoryTitle,
+        subcategory: subcategory,
+        city: LocationState().selectedCity.value,
+        pageSize: 50,
+      );
+      if (!mounted) return;
+      setState(() {
+        _apiClasses = page.results;
+        _isLoadingClasses = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      setState(() {
+        _apiClasses = [];
+        _isLoadingClasses = false;
+        _fetchError = msg;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Classes: $msg'),
+          backgroundColor: const Color(0xFF1A1A2E),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
   }
 
   void _showAllCategories() {
@@ -67,6 +115,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
       _selectedCategoryIndex = index;
       _selectedFilterIndex = 0;
     });
+    _fetchClasses(subcategory: null);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final key = _chipKeys[index];
       if (key.currentContext != null) {
@@ -91,21 +140,26 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
   List<String> get _filters =>
       DummyData.classesSubFilters[_selectedCategoryIndex];
 
-  List<EventModel> get _filteredEvents {
-    List<EventModel> all = DummyData.classesByCategory[_selectedCategoryIndex];
-    final city = LocationState().selectedCity.value;
-    all = all.where((e) => e.venue.toLowerCase().contains(city.toLowerCase())).toList();
-    if (_selectedFilterIndex == 0) return all;
-    final filterTag = _filters[_selectedFilterIndex];
-    return all.where((e) => e.tag == filterTag).toList();
-  }
+  List<ApiClass> get _filteredClasses => _apiClasses;
 
   String get _categoryTitle {
     return (_currentCategory['label'] as String).replaceAll('\n', ' ');
   }
 
+  EventModel _toEventModel(ApiClass cls) {
+    return EventModel(
+      id: cls.id,
+      title: cls.title,
+      venue: cls.category.name, // Usually city, but classes might have organizer in another field. We'll use category or city for now.
+      imagePath: cls.coverUrl ?? '',
+      tag: cls.category.name,
+      rating: cls.averageRating,
+      reviewCount: cls.totalReviews > 0 ? '${cls.averageRating} (${cls.totalReviews})' : null,
+      description: cls.shortDescription,
+    );
+  }
+
   void _showFilterSheet() {
-    // Remove 'All' from sub-filters for the Categories tab
     final cats = _filters.where((f) => f != 'All').toList();
     FilterBottomSheet.show(
       context,
@@ -340,7 +394,11 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                           final filterIndex = index - 1;
                           final isActive = filterIndex == _selectedFilterIndex;
                           return GestureDetector(
-                            onTap: () => setState(() => _selectedFilterIndex = filterIndex),
+                            onTap: () {
+                              setState(() => _selectedFilterIndex = filterIndex);
+                              final sub = filterIndex == 0 ? null : _filters[filterIndex];
+                              _fetchClasses(subcategory: sub);
+                            },
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
                               margin: const EdgeInsets.only(right: 8),
@@ -369,7 +427,12 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
 
                   // Results grid
                   const SliverToBoxAdapter(child: SizedBox(height: 14)),
-                  if (_filteredEvents.isEmpty)
+                  if (_isLoadingClasses)
+                    const SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: AppLoader(),
+                    )
+                  else if (_filteredClasses.isEmpty)
                     SliverFillRemaining(
                       hasScrollBody: false,
                       child: SubcategoryEmptyState(
@@ -382,20 +445,29 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                       sliver: SliverGrid(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            final events = _filteredEvents;
-                            if (index >= events.length) return null;
+                            final classes = _filteredClasses;
+                            if (index >= classes.length) return null;
+                            final eventModel = _toEventModel(classes[index]);
                             return CategoryEventCard(
-                              event: events[index],
+                              event: eventModel,
                               badgeColor: _accentColor.withOpacity(0.9),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ClassDetailScreen(event: eventModel),
+                                  ),
+                                );
+                              },
                             );
                           },
-                          childCount: _filteredEvents.length,
+                          childCount: _filteredClasses.length,
                         ),
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           mainAxisSpacing: 14,
                           crossAxisSpacing: 14,
-                          childAspectRatio: 0.55,
+                          childAspectRatio: 0.62,
                         ),
                       ),
                     ),
