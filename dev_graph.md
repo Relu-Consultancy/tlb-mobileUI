@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-16 (Session 22)
+**Last Updated:** 2026-05-18 (Session 26)
 
 ---
 
@@ -709,7 +709,7 @@ shared_preferences: ^2.5.5     # Non-sensitive UX flag storage (isNewUser walkth
 geolocator: ^13.0.4            # GPS permission flow + getCurrentPosition()
 geocoding: ^3.0.0              # placemarkFromCoordinates() — lat/lng → city name
 url_launcher: ^6.3.2           # External URL / deep-link launching
-# image_picker removed — avatar upload pending separate endpoint
+image_picker: ^1.2.2         # Review media upload (re-added in Session 24)
 ```
 
 ---
@@ -977,6 +977,81 @@ url_launcher: ^6.3.2           # External URL / deep-link launching
 | All 4 detail screens — replaced `if (_detail == null)` dummy review section with `if (_hasApiId)` real "View all reviews" banner; removed `_reviews` static lists, `_showAddReviewBottomSheet`, `_showReviewsBottomSheet`, and `_buildReviewCard` dead helpers; replaced with `showReviewSheet()` call; reviews now shown for all API-backed listings | `lib/screens/event_detail_screen.dart`, `class_detail_screen.dart`, `program_detail_screen.dart`, `venue_detail_screen.dart` |
 | `program_detail_screen.dart` — removed pre-existing unused imports: `api_class_model.dart`, `classes_listing_service.dart`, `select_batch_screen.dart` | `lib/screens/program_detail_screen.dart` |
 | `profile_screen.dart` — added `UserReviewsState.clear()` to logout flow (alongside existing `SavedEventsState` and `BookedEventsState` clears) | `lib/screens/profile_screen.dart` |
+
+### Session 24
+| Change | Files |
+|--------|-------|
+| `image_picker: ^1.2.2` re-added to `pubspec.yaml` — needed for review photo upload | `pubspec.yaml` |
+| `ReviewService` fully rewritten — added `fetchMyReview(token, listingId)` (GET `/api/v1/listings/{id}/my-review/`); `createReview` + `updateReview` upgraded to `MultipartRequest` (supports `images: List<File>`); `updateReview` adds `remove_media_ids` repeated fields via `MultipartFile.fromBytes`; `uploadMedia` (POST `/api/v1/reviews/{id}/media/`) + `deleteMedia` (DELETE `/api/v1/reviews/{id}/media/{mediaId}/`) added | `lib/services/review_service.dart` |
+| `fetchReviews` extended — now accepts `pageSize`, `ordering`, `rating` query params (page 1 default, 10 per page, `-created_at` ordering) | `lib/services/review_service.dart` |
+| `review_sheet.dart` fully rewritten with 4 major features: | `lib/widgets/review_sheet.dart` |
+| → **Rating breakdown bars** — `_ReviewListSheet` now shows a large avg number + 5/4/3/2/1 star `LinearProgressIndicator` bars from `ratingBreakdown` data; inline section has the same breakdown card | `lib/widgets/review_sheet.dart` |
+| → **Media thumbnails** — `_ReviewTile` shows a horizontal `ListView` of 72×72 `Image.network` thumbnails from `review.media`; hidden when empty | `lib/widgets/review_sheet.dart` |
+| → **Pagination** — `_ReviewListSheetState` accumulates pages in `_allReviews`; "Load more" button fetches `_currentPage + 1` and appends; `_loadingMore` spinner replaces button while fetching | `lib/widgets/review_sheet.dart` |
+| → **Image picker** — `_WriteReviewSheet` has "Add Photos (optional)" section: horizontal `ListView` of 80×80 thumbnails (existing media + new picks), X button per image, "Add" button (hidden at 5 total); `ImagePicker.pickMultiImage(limit: remaining)` picks up to 5 total; edit mode shows existing API media with separate `_removeMediaIds` tracking | `lib/widgets/review_sheet.dart` |
+| → **Comment made optional** — removed "Please write a review first" validation from `_WriteReviewSheet._submit()`; rating alone is sufficient | `lib/widgets/review_sheet.dart` |
+| → **`buildReviewInlineSection()` exported** — stateless function that renders: section header with "See All >" link; rating summary card with breakdown bars (when `total > 0`); up to 3 preview `_ReviewTile`s; "Write a Review" amber button (always visible, auth guard inside tap); "Be the first to review!" fallback (no reviews); accepts `reviewPage`, `isLoading`, `onRefresh` callback | `lib/widgets/review_sheet.dart` |
+| All 4 detail screens updated — `_reviewPage: ApiReviewPage?` + `_reviewLoading: bool` state added; `_fetchReviews()` fetches page 1 with `pageSize: 3`; `initState` calls both `_fetchDetail()` and `_fetchReviews()` in parallel; "View all reviews" button block replaced with `buildReviewInlineSection(...)` call | `lib/screens/event_detail_screen.dart`, `class_detail_screen.dart`, `program_detail_screen.dart`, `venue_detail_screen.dart` |
+| `VenueDetailScreen` — `if (widget.event.id.isNotEmpty)` check refactored to `_hasApiId` getter (matches pattern of other 3 screens) | `lib/screens/venue_detail_screen.dart` |
+| **Login guard** — `_openWriteReviewWithGuard()` private helper checks `AuthState.accessToken`; null → `showLoginSheet(context)` (Navigator.push to LoginScreen); logged in → `showWriteReviewSheet()`; called by the "Write a Review" button in `buildReviewInlineSection` and the edit button in `_ReviewListSheet` | `lib/widgets/review_sheet.dart` |
+| **Auto-detect existing review** — `_WriteReviewSheet.initState` calls `_checkExistingReview()` when `widget.existing == null`; if `fetchMyReview` returns a review, switches to edit mode automatically; shows "Loading..." title + `AppLoaderInline` while checking; blue info banner when editing auto-detected review | `lib/widgets/review_sheet.dart` |
+| **Video support** — separate "Videos (optional)" section in write sheet; `ImagePicker.pickVideo(source: ImageSource.gallery)` adds to `_newVideos: List<XFile>`; max 2 total videos (existing + new); `_newVideoThumb` + `_existingVideoThumb` helpers; video play-icon placeholder in `_ReviewTile`; `createReview` and `updateReview` in `ReviewService` accept `List<File> videos`/`newVideos` | `lib/widgets/review_sheet.dart`, `lib/services/review_service.dart` |
+| **`remove_media_ids[]` field name fixed** — `updateReview` sends each ID via `MultipartFile.fromBytes('remove_media_ids[]', ...)` repeated parts (was `remove_media_ids`) | `lib/services/review_service.dart` |
+| **Test suite updated** — TC_RS_001 and TC_RS_002 updated to drive through `buildReviewInlineSection` (not `showWriteReviewSheet` directly); TC_RS_001 verifies login screen appears; TC_RS_002 verifies `BottomSheet` absent | `test/widgets/review_sheet_test.dart` |
+| All tests pass (105 total) — no regressions | test suite |
+
+### Session 25
+| Change | Files |
+|--------|-------|
+| **Token key mismatch fixed** — `AuthService.verifyOtp`, `googleSignIn`, and `refreshToken` all extracted `inner['access']` / `inner['refresh']` but the API envelope uses `access_token` / `refresh_token`; fixed to `inner['access_token'] ?? inner['access']` and `inner['refresh_token'] ?? inner['refresh']` (dual-key for safety); root cause of "have to login each time I reopen the app" | `lib/services/auth_service.dart` |
+| **Edit profile prefill fixed** — `EditProfileScreen.initState` now calls `_fetchAndPrefill()` which GETs `/api/v1/customer/profile/`, calls `AuthState.updateProfileData(profile)`, then re-runs `_prefillFromAuthState()`; form always shows latest API data; save button + loader disabled while fetching | `lib/screens/edit_profile_screen.dart` |
+| All tests pass (105 total) — no regressions | test suite |
+
+### Session 26
+| Change | Files |
+|--------|-------|
+| **`ApiReview` extended** — added `listingId`, `listingTitle`, `listingImage` nullable fields (parsed from `listing` sub-object in customer reviews API response); `copyWith()` method added for non-destructive field overrides | `lib/models/api_review_model.dart` |
+| **`ReviewService.fetchMyReviews`** — `GET /api/v1/customer/reviews/`; auth required; handles both flat list and `{success, data: [...]}` + paginated `{results: [...]}` response shapes | `lib/services/review_service.dart` |
+| **`ReviewService.fetchReviewMedia`** — `GET /api/v1/reviews/<review_id>/media/`; auth required; returns `List<ApiReviewMedia>`; handles flat list and `{data: [...]}` envelope | `lib/services/review_service.dart` |
+| **`UserReviewsState` rewritten** — now typed `ValueNotifier<List<ApiReview>>`; `loadFromApi()` fetches all user reviews then enriches each with media in parallel via `fetchReviewMedia` if `review.media.isEmpty`; `upsert(ApiReview)` replaces `addReview(map)` + `updateReview(id, map)`; `isLoaded` getter; `remove`/`clear` unchanged in API | `lib/providers/user_reviews_state.dart` |
+| **`review_sheet.dart` `_submit()` updated** — both create and update paths now call `UserReviewsState.upsert(review.copyWith(listingId, listingTitle, listingImage))` preserving listing context from `widget` properties | `lib/widgets/review_sheet.dart` |
+| **`YourReviewsScreen` rewritten** — `StatefulWidget`; `initState` calls `UserReviewsState.loadFromApi()`; shows `AppLoaderInline` while loading; pull-to-refresh; error + retry state; `_ReviewCard` uses `ApiReview` fields (listing image via `Image.network`, title, formatted date, star row, comment, horizontal media thumbnail strip with video play-icon placeholder, Edit/Delete actions) | `lib/screens/your_reviews_screen.dart` |
+| All tests pass (105 total) — no regressions | test suite |
+
+### Session 23 — Architecture Audit & Test Expansion
+| Change | Files |
+|--------|-------|
+| **Architecture audit** — full scan: 42 screens, 32 widgets, 8 services, 5 providers, 9 models | (audit only) |
+| `AppColors` extended — 7 new constants: `dividerGold`, `indigo`, `lightGray`, `bookingBlue`, `successGreen`, `starAmber`, `inputFill` | `lib/core/app_colors.dart` |
+| `AppSpacing` created — 12 semantic spacing constants (xs/sm/md/base/lg/xl/xxl/xxxl/section + aliases) | `lib/core/app_spacing.dart` (NEW) |
+| `AppSnackBar` created — `show()`, `error()`, `success()` helpers for consistent snackbar styling across 23 files | `lib/core/app_snackbar.dart` (NEW) |
+| `AppTheme` hardcoded `Color(0xFF1A1A2E)` replaced with `AppColors.textPrimary` | `lib/core/app_theme.dart` |
+| `SectionDividerWidget` — `Color(0xFFE4CD89)` → `AppColors.dividerGold`; `Color(0xFF6B6B6B)` → `AppColors.textSecondary` | `lib/widgets/section_divider_widget.dart` |
+| `SubcategoryEmptyState` — all 3 hardcoded colors replaced with `AppColors` constants | `lib/widgets/subcategory_empty_state.dart` |
+| `review_sheet.dart` — both `CircularProgressIndicator` instances replaced with `AppLoader`/`AppLoaderInline`; all hardcoded colors → `AppColors` | `lib/widgets/review_sheet.dart` |
+| `section_header_test.dart` deleted — referenced widget deleted in Session 15; was a compile-breaking dead test | `test/widgets/section_header_test.dart` |
+| 36 new tests added across 5 test files; all pass | `test/widgets/` × 4, `test/screens/format_events_screen_test.dart` |
+| → `app_loader_test.dart` — 9 tests: custom/fallback toggle, inline/fullscreen, rapid pump | `test/widgets/app_loader_test.dart` (NEW) |
+| → `section_divider_widget_test.dart` — 5 tests: title, line structure, long title, empty string | `test/widgets/section_divider_widget_test.dart` (NEW) |
+| → `subcategory_empty_state_test.dart` — 8 tests: UI elements, snackbar, callbacks, narrow/tablet screens | `test/widgets/subcategory_empty_state_test.dart` (NEW) |
+| → `category_event_card_test.dart` — 10 tests: title/venue/tag/description/reviewCount, tap callbacks, overflow, network image | `test/widgets/category_event_card_test.dart` (NEW) |
+| → `review_sheet_test.dart` — 4 tests: auth guard snackbar, AppLoader integration (both flag states) | `test/widgets/review_sheet_test.dart` (NEW) |
+| → `format_events_screen_test.dart` — 9 tests: render, format switching, header transition, overflow, empty state | `test/screens/format_events_screen_test.dart` (NEW) |
+
+**Pre-existing failing tests (11) confirmed not caused by this session:**  
+`category_events_screen_test`, `category_programs_screen_test`, `class_detail_screen_test` (×2), `edit_profile_screen_test`, `event_detail_screen_test` (×3), `program_detail_screen_test`, `venue_detail_screen_test` — all require live API mocks not yet set up.
+
+### Session 27
+| Change | Files |
+|--------|-------|
+| **`_extractError()` hardened** — previous cast `error['message'] as String?` threw `TypeError` when DRF returns validation errors as `{"message": {"phone_number": [...]}}` (a Map, not a String); replaced with `is String` / `is Map` / `is List` guards; added `_flattenValidationMap()` helper that picks the first field's first error string | `lib/services/auth_service.dart` |
+| **Country code picker added to Edit Profile** — phone field split into prefix button + digits field; 29-country list as Dart 3 record tuples `(String dialCode, String flag, String name)`; `_showCountryPicker()` bottom sheet with live search filter (62% screen height); prefill auto-detects dial code by longest-prefix match and strips it from stored number; save composes E.164: `dialCode + digits` | `lib/screens/edit_profile_screen.dart` |
+| **`ApiReview` persistence serialisation** — `toJson()` added (round-trips `id`, `customer`, `rating`, `comment`, `media`, `created_at`, `listingId`, `listingTitle`, `listingImage`); `ApiReviewMedia.toJson()` added (`id`, `media_type`, `file`) | `lib/models/api_review_model.dart` |
+| **`UserReviewsState` SharedPreferences persistence** — `_persist()` serialises the review list to `user_reviews_v1` key; `_loadFromStorage()` deserialises on startup; `upsert()`, `remove()`, and `clear()` all made `async` and call `_persist()`; reviews now survive app restarts | `lib/providers/user_reviews_state.dart` |
+| **Edit profile test updated** — phone assertion changed from `find.widgetWithText(TextField, '+91 9876543210')` (single field) to `find.text('+91')` + `find.widgetWithText(TextField, '9876543210')` (split prefix button + digits field) | `test/screens/edit_profile_screen_test.dart` |
+| **Root-cause fix: no "list my reviews" API endpoint exists** — `GET /api/v1/customer/reviews/` and `GET /api/v1/reviews/` both return 404; confirmed from API docs: only per-listing (`/listings/{id}/reviews/`) and per-review-ID (`/reviews/{id}/`) routes exist | investigation |
+| **`ReviewService.fetchMyReviews()` removed** — dead method that tried both 404 endpoints; callers updated | `lib/services/review_service.dart` |
+| **`UserReviewsState.loadFromApi()` reworked** — now loads exclusively from SharedPreferences, then for each stored review calls `ReviewService.fetchReviewMedia(token, id)` to refresh media via `GET /api/v1/reviews/{id}/media/`; never throws; reviews only appear after being created/edited via the app | `lib/providers/user_reviews_state.dart` |
 
 ### Session 20
 | Change | Files |
