@@ -43,6 +43,9 @@ class AuthState {
     }
   }
 
+  /// UUID of the authenticated customer — used to detect review ownership.
+  static String? get userId => userData?['id'] as String?;
+
   /// First word of the stored full name, falling back to "User".
   /// Use this wherever a greeting like "Hi $firstName" is needed.
   static String get firstName {
