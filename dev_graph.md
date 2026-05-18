@@ -15,6 +15,8 @@ lib/
 ├── core/                          Config/constants only
 │   ├── app_colors.dart            Centralized color constants
 │   ├── app_theme.dart             MaterialApp ThemeData
+│   ├── app_snackbar.dart          AppSnackBar.show/error/success helpers
+│   ├── app_spacing.dart           AppSpacing semantic spacing constants
 │   └── responsive.dart            Responsive.w / Responsive.h / Responsive.sp helpers
 ├── services/                      API + secure storage
 │   ├── auth_service.dart          HTTP wrappers — login/signup/logout/Google/OTP/refresh/updateProfile
@@ -48,7 +50,7 @@ lib/
 │   └── events_listing_service.dart  REST calls for events + venues listing APIs (see Section 6)
 ├── data/
 │   └── dummy_data.dart            All mock data — events, categories, banners, partners, etc.
-├── screens/                       45 screens (see Section 3)
+├── screens/                       46 screens (see Section 3)
 ├── widgets/                       25+ reusable widgets incl. login_sheet.dart, walkthrough_intro_overlay.dart (see Section 4)
 └── sections/                      9 home-page sections (see Section 5)
 ```
@@ -91,13 +93,14 @@ HomeScreen (sidebar/action flows)
     │   └── HelpCentreScreen
     └── LoginSheet (bottom sheet)
         ├── SignupScreen
+        │   └── OtpVerificationScreen → EditProfileScreen(isOnboarding: true) [new user] | HomeScreen [existing]
         ├── ForgotPasswordScreen
-        └── OTP verification (inline)
+        └── OtpVerificationScreen → WelcomeBackDialog [existing] | EditProfileScreen(isOnboarding: true) [new user]
 ```
 
 ---
 
-## 3. Screens (44 total)
+## 3. Screens (46 total)
 
 ### Home & Shell
 | File | Description |
@@ -108,8 +111,9 @@ HomeScreen (sidebar/action flows)
 ### Auth
 | File | Description |
 |------|-------------|
-| `widgets/login_sheet.dart` | Full-screen login — email/pass, Google, OTP. WelcomeBackDialog → routes to EditProfileScreen if profile incomplete, else HomeScreen |
-| `signup_screen.dart` | New account creation with OTP verification flow |
+| `widgets/login_sheet.dart` | Full-screen login — email OTP + Google (Firebase Auth). "Signup" link → SignupScreen. OTP verify → `OtpVerificationScreen(onExistingUser: showWelcomeBackDialog)`. WelcomeBackDialog always → HomeScreen |
+| `signup_screen.dart` | Email-only OTP signup — email field → `OtpVerificationScreen`; Google sign-up via Firebase Auth. "Log In" link → `Navigator.pop()`. No password fields |
+| `otp_verification_screen.dart` | Shared 6-box OTP screen — accepts `identifier` (email) + `onExistingUser` callback; new user → `markAsNewUser()` + `EditProfileScreen(isOnboarding: true)`; existing user → calls callback |
 | `forgot_password_screen.dart` | 3-step OTP password reset wizard — Step 0: email entry → "Send OTP"; Step 1: 6-box OTP verification with resend link; Step 2: new+confirm password fields → success dialog with confetti |
 | `change_password_screen.dart` | Authenticated password change |
 
@@ -166,7 +170,7 @@ HomeScreen (sidebar/action flows)
 ### Utility
 | File | Description |
 |------|-------------|
-| `search_screen.dart` | Search with filter bottom sheet (Age Group, Mode, Location dropdowns, Date chips) |
+| `search_screen.dart` | Real-time search across all 4 entity types — 500ms debounced input fires parallel API calls to events, classes, programs, venues with `search=` param; unified result list with color-coded type badges (Event/Class/Program/Venue) and cover thumbnails; entity filter chips (All/Events/Classes/Programs/Venues); filter bottom sheet (Age Group, Mode, Location, Date) retained; idle/loading/no-results states |
 | `location_screen.dart` | City selection — popular cities grid (6 cards with images), all metro cities list (alphabetical), real GPS detection via `geolocator` + `geocoding`, Android runtime permission flow, `_matchToKnownCity()` fuzzy matching with Delhi NCR special-case |
 | `gallery_screen.dart` | Full-screen image gallery |
 | `organizer_profile_screen.dart` | Event organizer detail |
@@ -227,10 +231,10 @@ HomeScreen (sidebar/action flows)
 - Base URL: `https://tlb-api.reluconsultancy.in` · 30-second timeout · no auth token required
 - All methods throw typed `Exception` messages for `SocketException` and `TimeoutException`
 - **`fetchCategories()`** — GET `/api/v1/listings/events/metadata/categories/` → `List<ApiCategory>`
-- **`fetchEvents({category, subcategory, format, mode, ageGroup, city, area, datePreset, priceType, page, pageSize})`** — GET `/api/v1/listings/events/` → `ApiEventsPage`; 404 treated as empty page (not error); nested `body['error']` Map `{code, message}` is extracted to readable string
+- **`fetchEvents({category, subcategory, format, mode, ageGroup, city, area, datePreset, priceType, search, page, pageSize})`** — GET `/api/v1/listings/events/` → `ApiEventsPage`; 404 treated as empty page (not error); nested `body['error']` Map `{code, message}` is extracted to readable string; `search` maps to `?search=` query param
 - **`fetchEventDetail(listingId)`** — GET `/api/v1/listings/events/{id}/` → `ApiEventDetail`
 - **`fetchVenueCategories()`** — GET `/api/v1/listings/venues/metadata/categories/` → `List<ApiCategory>` *(backend not yet live — callers catch silently)*
-- **`fetchVenues({categoryId, city, area, locationType, isFeatured, isTopRated, isNewThisWeek, page, pageSize})`** — GET `/api/v1/listings/venues/` → `ApiVenuesPage`; same 404 + nested error handling as `fetchEvents`
+- **`fetchVenues({categoryId, city, area, locationType, isFeatured, isTopRated, isNewThisWeek, search, page, pageSize})`** — GET `/api/v1/listings/venues/` → `ApiVenuesPage`; same 404 + nested error handling as `fetchEvents`; `search` maps to `?search=` query param
 - **`fetchVenueDetail(listingId)`** — GET `/api/v1/listings/venues/{id}/` → `ApiVenueDetail`
 - **`fetchProvider(listingId)`** — GET `/api/v1/listings/{id}/provider/` → `ApiProvider`; handles both direct object and `{success, data}` envelope; Redis-cached on backend
 
@@ -305,17 +309,19 @@ google-services.json: real credentials for project tlb-events-ababb
   serverClientId: 690253990877-jqog76u6vcre0a9qbd9d8p0g7o47scue.apps.googleusercontent.com
 
 Flow (login_sheet.dart + signup_screen.dart):
-  GoogleSignIn(serverClientId: ..., scopes: ['email','profile']).signIn()
+  GoogleSignIn(scopes: ['email','profile']).signOut()  ← force account picker
+  GoogleSignIn(scopes: ['email','profile']).signIn()
+  → googleUser.authentication (accessToken + idToken)
   → FirebaseAuth.instance.signInWithCredential(GoogleAuthProvider.credential(...))
-  → fbCredential.user.getIdToken()
-  → AuthService.googleSignIn(firebaseIdToken: token)
+  → fbCredential.user.getIdToken()  ← Firebase ID token (NOT raw Google token)
+  → AuthService.googleSignIn(idToken: firebaseToken)
+  → POST /api/v1/auth/google-login/ body {"id_token": firebaseToken}
   → AuthState.login(access, refresh, user)
-  → showWelcomeBackDialog()  [both login and signup]
-     onDone: AuthState.isProfileComplete?
-       true  → HomeScreen
-       false → EditProfileScreen(isOnboarding: true)
+  → is_new_user == true  → markAsNewUser() + EditProfileScreen(isOnboarding: true)
+     is_new_user == false → showWelcomeBackDialog() [login] | HomeScreen [signup]
 
 API returns is_new_user flag — same endpoint handles both sign-in & sign-up.
+Backend expects Firebase ID token, not raw Google token. serverClientId not needed.
 google-services.json includes SHA-1 debug fingerprint: 67:FB:ED:80:72:FB:43:4A:1F:9D:C4:32:38:62:D6:05:EC:8C:36:D8
 ```
 
@@ -1095,3 +1101,9 @@ image_picker: ^1.2.2         # Review media upload (re-added in Session 24)
 | **`OtpVerificationScreen` extracted** — new public screen `lib/screens/otp_verification_screen.dart`; moved from private `_OTPVerificationScreen` in login_sheet; accepts `identifier` + `onExistingUser: void Function(BuildContext)?` callback; new user → `markAsNewUser()` + `EditProfileScreen(isOnboarding: true)`; existing user → calls `onExistingUser`; login passes `showWelcomeBackDialog`, signup passes `Navigator.pushAndRemoveUntil(HomeScreen)` | `lib/screens/otp_verification_screen.dart` (NEW) |
 | **`SignupScreen` refactored to email-only OTP** — removed firstName, lastName, password, confirmPassword fields; removed wrong `_EmailVerificationDialog` (was showing "verification link" for OTP flow); now: email field → "Send OTP" → navigates to `OtpVerificationScreen`; Google sign-up also uses Firebase Auth; "Log In" link uses `Navigator.pop()` | `lib/screens/signup_screen.dart` |
 | **Onboarding flow preserved** — new user OTP and Google paths both call `WalkthroughService.markAsNewUser()` before navigating to `EditProfileScreen(isOnboarding: true)` → `HomeScreen` triggers walkthrough; existing users bypass all onboarding | `lib/screens/otp_verification_screen.dart`, `lib/screens/signup_screen.dart`, `lib/widgets/login_sheet.dart` |
+| **Circular import broken** — `signup_screen.dart` no longer imports `login_sheet.dart`; `otp_verification_screen.dart` no longer imports `home_screen.dart`; chain `home_screen → home_header → login_sheet → signup_screen → otp_verification_screen` is now one-way | `lib/screens/otp_verification_screen.dart`, `lib/screens/signup_screen.dart` |
+| **`search` param added to all 4 listing services** — `fetchEvents`, `fetchVenues`, `fetchClasses`, `fetchPrograms` each accept `String? search`; maps to `'search'` query param when non-empty | `lib/services/events_listing_service.dart`, `lib/services/classes_listing_service.dart`, `lib/services/programs_listing_service.dart` |
+| **`SearchScreen` rewritten** — removed all mock data (Bollywood trending list, wrong chips); chips replaced with `['All', 'Events', 'Classes', 'Programs', 'Venues']` filter tabs; `_onSearchChanged` debounced 500ms fires `_doSearch(q)` which runs all 4 service calls in parallel; unified `_SearchItem` model holds type, `EventModel` (for navigation), title, subtitle, coverUrl; `_filteredResults` applies chip filter client-side | `lib/screens/search_screen.dart` |
+| **Search result tiles** — `ListTile` with 56×56 cover thumbnail (`ClipRRect` radius 10, network image with placeholder fallback), color-coded type badge (`Event` indigo / `Class` purple / `Program` green / `Venue` red), subtitle (category or city), arrow trailing icon; tap navigates to correct detail screen (`EventDetailScreen` / `ClassDetailScreen` / `ProgramDetailScreen` / `VenueDetailScreen`) using same `EventModel` conversion as category screens | `lib/screens/search_screen.dart` |
+| **Search states** — idle (empty query): centered search icon + "Find events, classes, programs & venues" prompt; loading: `CircularProgressIndicator(color: 0xFFFFCC00)`; no results: `search_off` icon + "No results for…" message; clear button (`Icons.close`) in search field when text is present | `lib/screens/search_screen.dart` |
+| **Filter bottom sheet retained** — Age Group chips, Mode radio, City/Area dropdowns, Date chips all kept; filter state stored (`_selectedMode`, `_selectedCity`, `_selectedArea`, `_ageGroupSelected`, `_dateSelected`) but not yet wired to API calls | `lib/screens/search_screen.dart` |
