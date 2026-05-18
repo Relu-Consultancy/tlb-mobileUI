@@ -4,7 +4,6 @@ import '../widgets/app_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../services/auth_service.dart';
 import '../providers/auth_state.dart';
@@ -83,16 +82,9 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+      final idToken = googleAuth.idToken;
 
-      final fbCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
-      final firebaseToken = await fbCredential.user?.getIdToken();
-
-      if (firebaseToken == null) {
+      if (idToken == null) {
         if (!mounted) return;
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -101,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      final result = await AuthService.googleSignIn(firebaseIdToken: firebaseToken);
+      final result = await AuthService.googleSignIn(idToken: idToken);
 
       if (!mounted) return;
       setState(() => _loading = false);

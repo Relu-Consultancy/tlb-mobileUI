@@ -69,8 +69,8 @@ class AuthService {
         final inner = _inner(body) ?? body;
         return {
           'success': true,
-          'access': inner['access'],
-          'refresh': inner['refresh'],
+          'access': inner['access_token'] ?? inner['access'],
+          'refresh': inner['refresh_token'] ?? inner['refresh'],
           'is_new_user': inner['is_new_user'] ?? false,
           'user': inner['user'],
         };
@@ -171,16 +171,16 @@ class AuthService {
 
   // ── Google sign-in ───────────────────────────────────────────────────────────
 
-  /// Exchanges a Firebase ID token for TLB JWT tokens.
+  /// Exchanges a Google ID token (from Google Sign-In SDK) for TLB JWT tokens.
   static Future<Map<String, dynamic>> googleSignIn({
-    required String firebaseIdToken,
+    required String idToken,
   }) async {
     try {
       final res = await http
           .post(
-            Uri.parse('$_base/api/v1/auth/customer/google/'),
+            Uri.parse('$_base/api/v1/auth/google-login/'),
             headers: _headers,
-            body: jsonEncode({'firebase_id_token': firebaseIdToken}),
+            body: jsonEncode({'id_token': idToken}),
           )
           .timeout(const Duration(seconds: 30));
 
@@ -189,8 +189,8 @@ class AuthService {
         final inner = _inner(body) ?? body;
         return {
           'success': true,
-          'access': inner['access'],
-          'refresh': inner['refresh'],
+          'access': inner['access_token'] ?? inner['access'],
+          'refresh': inner['refresh_token'] ?? inner['refresh'],
           'is_new_user': inner['is_new_user'] ?? false,
           'user': inner['user'],
         };
@@ -254,7 +254,11 @@ class AuthService {
       final body = _decode(res.body);
       if (res.statusCode == 200) {
         final inner = _inner(body) ?? body;
-        return {'success': true, 'access': inner['access'], 'refresh': inner['refresh']};
+        return {
+          'success': true,
+          'access': inner['access_token'] ?? inner['access'],
+          'refresh': inner['refresh_token'] ?? inner['refresh'],
+        };
       }
       return {'success': false, 'message': _extractError(body)};
     } catch (e) {
@@ -380,20 +384,35 @@ class AuthService {
   }
 
   /// Extracts the first human-readable error from a TLB API response body.
-  /// Handles the `{"error": {"code": "...", "message": "..."}}` envelope.
+  /// Handles flat strings, lists, and DRF-style validation dicts without casting.
   static String _extractError(Map<String, dynamic> body) {
-    // TLB envelope: error is a nested map with a 'message' key
+    // TLB envelope: {"error": {"code": "...", "message": "..." | {...} | [...]}}
     final error = body['error'];
     if (error is Map) {
-      final msg = error['message'] as String?;
-      if (msg != null && msg.isNotEmpty) return msg;
+      final msg = error['message'];
+      if (msg is String && msg.isNotEmpty) return msg;
+      if (msg is Map && msg.isNotEmpty) return _flattenValidationMap(msg);
+      if (msg is List && msg.isNotEmpty) return msg.first.toString();
     }
-    // Flat formats (DRF default): 'detail', 'message', 'non_field_errors'
-    for (final key in ['message', 'detail', 'non_field_errors']) {
+    // DRF flat formats: 'detail', 'message', 'non_field_errors', or field-keyed dicts
+    for (final key in ['detail', 'message', 'non_field_errors']) {
       final v = body[key];
       if (v is String && v.isNotEmpty) return v;
       if (v is List && v.isNotEmpty) return v.first.toString();
     }
+    // DRF validation dict at root — e.g. {"phone_number": ["Enter a valid phone number."]}
+    for (final entry in body.entries) {
+      final v = entry.value;
+      if (v is List && v.isNotEmpty) return '${entry.key}: ${v.first}';
+      if (v is String && v.isNotEmpty) return '${entry.key}: $v';
+    }
     return 'Something went wrong. Please try again.';
+  }
+
+  static String _flattenValidationMap(Map map) {
+    final entry = map.entries.first;
+    final val = entry.value;
+    if (val is List && val.isNotEmpty) return '${entry.key}: ${val.first}';
+    return '${entry.key}: $val';
   }
 }
