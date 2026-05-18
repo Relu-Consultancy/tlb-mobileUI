@@ -1053,6 +1053,16 @@ image_picker: ^1.2.2         # Review media upload (re-added in Session 24)
 | **`ReviewService.fetchMyReviews()` removed** — dead method that tried both 404 endpoints; callers updated | `lib/services/review_service.dart` |
 | **`UserReviewsState.loadFromApi()` reworked** — now loads exclusively from SharedPreferences, then for each stored review calls `ReviewService.fetchReviewMedia(token, id)` to refresh media via `GET /api/v1/reviews/{id}/media/`; never throws; reviews only appear after being created/edited via the app | `lib/providers/user_reviews_state.dart` |
 
+### Session 28
+| Change | Files |
+|--------|-------|
+| **`AuthState.userId` getter added** — reads `userData?['id'] as String?`; returns the customer UUID used to detect whether the logged-in user owns a given review | `lib/providers/auth_state.dart` |
+| **`_ReviewTile` updated with owner actions** — accepts optional `onEdit: VoidCallback?` and `onDelete: VoidCallback?`; when provided, renders an amber pencil icon button and a red trash icon button in the top-right of the tile header (next to name/date); non-owners see no action buttons | `lib/widgets/review_sheet.dart` |
+| **`_confirmDeleteReview` helper added** — top-level function shared by inline section and list sheet; shows a confirmation `AlertDialog`, calls `DELETE /api/v1/reviews/{id}/` via `ReviewService.deleteReview()`, removes from `UserReviewsState`, fires `onSuccess` callback; error shown via `SnackBar` | `lib/widgets/review_sheet.dart` |
+| **`buildReviewInlineSection` ownership check** — for each preview `_ReviewTile`, checks `AuthState.userId == r.customerId`; owners receive `onEdit` (opens `showWriteReviewSheet` pre-filled with the existing review, then calls `onRefresh`) and `onDelete` (calls `_confirmDeleteReview`, then `onRefresh`) | `lib/widgets/review_sheet.dart` |
+| **`_ReviewListSheet` ownership check** — same `AuthState.userId == r.customerId` check per tile; `onEdit` pops the sheet then opens the write sheet pre-filled; `onDelete` calls `_confirmDeleteReview` with an `onSuccess` that removes the row from `_allReviews` and decrements `_totalReviews` without a full re-fetch | `lib/widgets/review_sheet.dart` |
+| All tests pass (4 review sheet tests, no regressions) | test suite |
+
 ### Session 20
 | Change | Files |
 |--------|-------|
