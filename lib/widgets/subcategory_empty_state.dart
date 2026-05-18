@@ -61,7 +61,7 @@ class SubcategoryEmptyState extends StatelessWidget {
                       "You'll be notified when it's available!",
                       style: GoogleFonts.poppins(fontSize: 13),
                     ),
-                    backgroundColor: const Color(0xFF1A1A2E),
+                    backgroundColor: AppColors.textPrimary,
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -70,7 +70,7 @@ class SubcategoryEmptyState extends StatelessWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFCC00),
+                backgroundColor: AppColors.primaryLight,
                 foregroundColor: AppColors.textPrimary,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 14),
@@ -95,9 +95,9 @@ class SubcategoryEmptyState extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 12.5),
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF5B5BD6),
+                color: AppColors.indigo,
                 decoration: TextDecoration.underline,
-                decorationColor: const Color(0xFF5B5BD6),
+                decorationColor: AppColors.indigo,
               ),
             ),
           ),

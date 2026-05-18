@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail_image_network/mocktail_image_network.dart';
 import 'package:tlb_mobile_ui/screens/venue_detail_screen.dart';
@@ -8,7 +7,9 @@ import 'package:tlb_mobile_ui/providers/auth_state.dart';
 import '../helpers/test_setup.dart';
 
 void main() {
+  // id: '' → dummy mode, no API call
   final testEvent = EventModel(
+    id: '',
     title: 'Test Venue Detail',
     imagePath: 'assets/images/test.png',
     venue: 'Magic Land',
@@ -22,23 +23,25 @@ void main() {
         await pumpTLBApp(tester, VenueDetailScreen(event: testEvent));
 
         expect(find.text('Test Venue Detail'), findsOneWidget);
-        expect(find.text('Magic Land'), findsOneWidget);
+        // Venue name may appear in multiple places (header, info row, etc.)
+        expect(find.text('Magic Land'), findsWidgets);
         expect(find.text('Adventure'), findsOneWidget);
-        expect(find.textContaining('350'), findsOneWidget);
+        // Bottom bar: RichText '₹350' + '/' → use findRichText to match collapsed text
+        expect(find.text('₹350/', findRichText: true), findsOneWidget);
         expect(find.text('Plan Event'), findsOneWidget);
       });
     });
 
     testWidgets('shows login sheet when Plan Event is tapped and not logged in', (WidgetTester tester) async {
-      AuthState.isLoggedIn.value = false;
       await mockNetworkImages(() async {
+        AuthState.isLoggedIn.value = false;
         await pumpTLBApp(tester, VenueDetailScreen(event: testEvent));
 
         await tester.tap(find.text('Plan Event'));
         await tester.pumpAndSettle();
 
-        // Check for login sheet content (assuming it has "Login" text or similar)
-        expect(find.text('Login'), findsWidgets);
+        // Login sheet title shown by showLoginSheet()
+        expect(find.text("Let's Get Started!"), findsOneWidget);
       });
     });
   });

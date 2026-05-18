@@ -377,7 +377,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               AuthState.logout();
               SavedEventsState.savedEvents.value = [];
               BookedEventsState.bookings.value = [];
-              UserReviewsState.clear();
+              await UserReviewsState.clear();
               if (!context.mounted) return;
               Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (_) => const HomeScreen()),

@@ -25,6 +25,41 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? _gender;
   DateTime? _birthdate;
   bool _loading = false;
+  bool _fetchingProfile = false;
+
+  // Country code picker state — defaults to India
+  (String, String, String) _selectedCountry = _countryCodes[0];
+
+  static const _countryCodes = [
+    ('+91',  '🇮🇳', 'India'),
+    ('+1',   '🇺🇸', 'United States'),
+    ('+1',   '🇨🇦', 'Canada'),
+    ('+44',  '🇬🇧', 'United Kingdom'),
+    ('+971', '🇦🇪', 'United Arab Emirates'),
+    ('+65',  '🇸🇬', 'Singapore'),
+    ('+61',  '🇦🇺', 'Australia'),
+    ('+60',  '🇲🇾', 'Malaysia'),
+    ('+966', '🇸🇦', 'Saudi Arabia'),
+    ('+974', '🇶🇦', 'Qatar'),
+    ('+973', '🇧🇭', 'Bahrain'),
+    ('+968', '🇴🇲', 'Oman'),
+    ('+92',  '🇵🇰', 'Pakistan'),
+    ('+880', '🇧🇩', 'Bangladesh'),
+    ('+94',  '🇱🇰', 'Sri Lanka'),
+    ('+977', '🇳🇵', 'Nepal'),
+    ('+49',  '🇩🇪', 'Germany'),
+    ('+33',  '🇫🇷', 'France'),
+    ('+39',  '🇮🇹', 'Italy'),
+    ('+34',  '🇪🇸', 'Spain'),
+    ('+81',  '🇯🇵', 'Japan'),
+    ('+82',  '🇰🇷', 'South Korea'),
+    ('+86',  '🇨🇳', 'China'),
+    ('+55',  '🇧🇷', 'Brazil'),
+    ('+27',  '🇿🇦', 'South Africa'),
+    ('+234', '🇳🇬', 'Nigeria'),
+    ('+254', '🇰🇪', 'Kenya'),
+    ('+20',  '🇪🇬', 'Egypt'),
+  ];
 
   static const _genders = [
     ('male', 'Male'),
@@ -37,6 +72,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void initState() {
     super.initState();
     _prefillFromAuthState();
+    _fetchAndPrefill();
+  }
+
+  Future<void> _fetchAndPrefill() async {
+    final token = AuthState.accessToken;
+    if (token == null) return;
+    setState(() => _fetchingProfile = true);
+    try {
+      final result = await AuthService.getProfile(accessToken: token);
+      if (!mounted) return;
+      if (result['success'] == true) {
+        final profile = result['profile'] as Map<String, dynamic>;
+        AuthState.updateProfileData(profile);
+        _prefillFromAuthState();
+      }
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _fetchingProfile = false);
+    }
   }
 
   void _prefillFromAuthState() {
@@ -44,7 +98,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (profile == null) return;
     _firstNameCtrl.text = profile['first_name'] as String? ?? '';
     _lastNameCtrl.text = profile['last_name'] as String? ?? '';
-    _phoneCtrl.text = profile['phone_number'] as String? ?? '';
+    final raw = profile['phone_number'] as String? ?? '';
+    if (raw.startsWith('+')) {
+      // Match longest dial code first so '+1' doesn't shadow '+1xxx' variants
+      final sorted = [..._countryCodes]..sort((a, b) => b.$1.length.compareTo(a.$1.length));
+      bool found = false;
+      for (final c in sorted) {
+        if (raw.startsWith(c.$1)) {
+          _selectedCountry = _countryCodes.firstWhere(
+            (x) => x.$1 == c.$1 && x.$2 == c.$2,
+            orElse: () => c,
+          );
+          _phoneCtrl.text = raw.substring(c.$1.length).trim();
+          found = true;
+          break;
+        }
+      }
+      if (!found) _phoneCtrl.text = raw;
+    } else {
+      _phoneCtrl.text = raw;
+    }
     _regionCtrl.text = profile['region'] as String? ?? '';
     final g = profile['gender'] as String?;
     if (g != null && _genders.any((e) => e.$1 == g)) _gender = g;
@@ -108,7 +181,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       accessToken: token,
       firstName: firstName,
       lastName: _lastNameCtrl.text.trim().isNotEmpty ? _lastNameCtrl.text.trim() : null,
-      phoneNumber: _phoneCtrl.text.trim().isNotEmpty ? _phoneCtrl.text.trim() : null,
+      phoneNumber: _phoneCtrl.text.trim().isNotEmpty
+          ? '${_selectedCountry.$1}${_phoneCtrl.text.trim().replaceAll(RegExp(r'[\s\-()]'), '')}'
+          : null,
       gender: _gender,
       birthdate: _birthdate != null ? _isoDate(_birthdate!) : null,
       region: _regionCtrl.text.trim().isNotEmpty ? _regionCtrl.text.trim() : null,
@@ -252,11 +327,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   const SizedBox(height: 16),
 
                   _buildLabel('Phone Number'),
-                  _buildTextField(
-                    controller: _phoneCtrl,
-                    hint: 'e.g. 9876543210',
-                    keyboardType: TextInputType.phone,
-                  ),
+                  _buildPhoneField(),
                   const SizedBox(height: 16),
 
                   _buildLabel('Gender'),
@@ -283,7 +354,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 width: double.infinity,
                 height: Responsive.h(context, 50, min: 44),
                 child: ElevatedButton(
-                  onPressed: _loading ? null : _onSave,
+                  onPressed: (_loading || _fetchingProfile) ? null : _onSave,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFFCC00),
                     foregroundColor: const Color(0xFF1A1A2E),
@@ -291,7 +362,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
                   ),
-                  child: _loading
+                  child: (_loading || _fetchingProfile)
                       ? const AppLoaderInline(dotSize: 7, spacing: 4, color: Color(0xFF1A1A2E))
                       : Text(
                           widget.isOnboarding ? 'Save & Continue' : 'Update Profile',
@@ -347,6 +418,151 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildPhoneField() {
+    final h = Responsive.h(context, 46, min: 40);
+    return Container(
+      height: h,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Row(
+        children: [
+          // Country code prefix — tappable
+          GestureDetector(
+            onTap: _showCountryPicker,
+            child: Container(
+              height: h,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                border: Border(right: BorderSide(color: Colors.grey.shade300)),
+                borderRadius: const BorderRadius.horizontal(left: Radius.circular(10)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(_selectedCountry.$2, style: const TextStyle(fontSize: 18)),
+                  const SizedBox(width: 4),
+                  Text(
+                    _selectedCountry.$1,
+                    style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF424242)),
+                  ),
+                  const SizedBox(width: 2),
+                  Icon(Icons.keyboard_arrow_down, size: 16, color: Colors.grey.shade500),
+                ],
+              ),
+            ),
+          ),
+          // Phone number input
+          Expanded(
+            child: TextField(
+              controller: _phoneCtrl,
+              keyboardType: TextInputType.phone,
+              style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF424242)),
+              decoration: InputDecoration(
+                hintText: 'Phone number',
+                hintStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade400),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showCountryPicker() async {
+    final searchCtrl = TextEditingController();
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) {
+          final query = searchCtrl.text.toLowerCase();
+          final filtered = _countryCodes
+              .where((c) => c.$3.toLowerCase().contains(query) || c.$1.contains(query))
+              .toList();
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+            child: SizedBox(
+              height: MediaQuery.of(ctx).size.height * 0.62,
+              child: Column(
+                children: [
+                  // Drag handle
+                  Container(
+                    width: 40, height: 4,
+                    margin: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    child: TextField(
+                      controller: searchCtrl,
+                      autofocus: true,
+                      onChanged: (_) => setLocal(() {}),
+                      style: GoogleFonts.poppins(fontSize: 14),
+                      decoration: InputDecoration(
+                        hintText: 'Search country or code...',
+                        hintStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade400),
+                        prefixIcon: const Icon(Icons.search, size: 20),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: Color(0xFFFFCC00), width: 1.5),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: filtered.length,
+                      itemBuilder: (_, i) {
+                        final c = filtered[i];
+                        final isSelected = c.$1 == _selectedCountry.$1 && c.$2 == _selectedCountry.$2;
+                        return ListTile(
+                          dense: true,
+                          leading: Text(c.$2, style: const TextStyle(fontSize: 22)),
+                          title: Text(c.$3, style: GoogleFonts.poppins(fontSize: 14)),
+                          trailing: Text(
+                            c.$1,
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              color: isSelected ? const Color(0xFFDE7104) : Colors.grey.shade600,
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                            ),
+                          ),
+                          selected: isSelected,
+                          selectedTileColor: const Color(0xFFFFF8E1),
+                          onTap: () {
+                            setState(() => _selectedCountry = c);
+                            Navigator.pop(ctx);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    searchCtrl.dispose();
   }
 
   Widget _buildTextField({

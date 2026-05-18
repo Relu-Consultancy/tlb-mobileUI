@@ -46,4 +46,13 @@ class AppColors {
   static const Color bookNowBg = Color(0xFFFFCC00);
   static const Color tagProgram = Color(0xFFF48FB1);
   static const Color tagFeatured = Color(0xFFEF5350);
+
+  // Extended palette — fills gaps found across screens
+  static const Color dividerGold = Color(0xFFE4CD89);      // section divider lines
+  static const Color indigo = Color(0xFF5B5BD6);           // links / underlines
+  static const Color lightGray = Color(0xFFF2F2F7);        // iOS surface color
+  static const Color bookingBlue = Color(0xFF1A3A8F);      // booking confirmation header
+  static const Color successGreen = Color(0xFF34C759);     // booking confirmed badge
+  static const Color starAmber = Color(0xFFFFB902);        // star/rating amber
+  static const Color inputFill = Color(0xFFF8F9FA);        // text-field fill (review sheet)
 }

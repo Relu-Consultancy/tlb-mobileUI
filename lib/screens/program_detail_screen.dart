@@ -10,6 +10,8 @@ import '../widgets/review_sheet.dart';
 import '../models/event_model.dart';
 import '../models/api_program_model.dart';
 import '../services/programs_listing_service.dart';
+import '../services/review_service.dart';
+import '../models/api_review_model.dart';
 import '../widgets/app_loader.dart';
 import 'gallery_screen.dart';
 import 'organizer_profile_screen.dart';
@@ -36,12 +38,30 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
   bool _isLoading = false;
   String? _error;
 
+  ApiReviewPage? _reviewPage;
+  bool _reviewLoading = false;
+
   bool get _hasApiId => widget.event.id.isNotEmpty;
 
   @override
   void initState() {
     super.initState();
-    if (_hasApiId) _fetchDetail();
+    if (_hasApiId) {
+      _fetchDetail();
+      _fetchReviews();
+    }
+  }
+
+  Future<void> _fetchReviews() async {
+    setState(() => _reviewLoading = true);
+    try {
+      final page = await ReviewService.fetchReviews(widget.event.id, pageSize: 3);
+      if (!mounted) return;
+      setState(() { _reviewPage = page; _reviewLoading = false; });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _reviewLoading = false);
+    }
   }
 
   Future<void> _fetchDetail() async {
@@ -816,40 +836,17 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
 
                     // Reviews
                     if (_hasApiId) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('Reviews', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
-                            GestureDetector(
-                              onTap: () => showReviewSheet(context, listingId: widget.event.id, listingTitle: _title, listingImage: _coverUrl),
-                              child: Text('See All >', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6))),
-                            ),
-                          ],
-                        ),
-                      ),
                       const SizedBox(height: 8),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: GestureDetector(
-                          onTap: () => showReviewSheet(context, listingId: widget.event.id, listingTitle: _title, listingImage: _coverUrl),
-                          child: Container(
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.star_rounded, color: Color(0xFFFFB902), size: 20),
-                                const SizedBox(width: 8),
-                                Text('View all reviews', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
-                                const Spacer(),
-                                const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
-                              ],
-                            ),
-                          ),
-                        ),
+                      buildReviewInlineSection(
+                        context,
+                        listingId: widget.event.id,
+                        listingTitle: _title,
+                        listingImage: _coverUrl,
+                        reviewPage: _reviewPage,
+                        isLoading: _reviewLoading,
+                        onRefresh: _fetchReviews,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
                     ],
 
                     const SizedBox(height: 100),

@@ -10,6 +10,12 @@ class ApiReviewMedia {
         mediaType: (json['media_type'] as String?) ?? '',
         file: (json['file'] as String?) ?? '',
       );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'media_type': mediaType,
+        'file': file,
+      };
 }
 
 class ApiReview {
@@ -21,6 +27,11 @@ class ApiReview {
   final List<ApiReviewMedia> media;
   final DateTime createdAt;
 
+  // Listing context — populated when fetched from customer/reviews/ or set manually after creation
+  final String? listingId;
+  final String? listingTitle;
+  final String? listingImage;
+
   const ApiReview({
     required this.id,
     required this.customerId,
@@ -29,10 +40,50 @@ class ApiReview {
     required this.comment,
     required this.media,
     required this.createdAt,
+    this.listingId,
+    this.listingTitle,
+    this.listingImage,
   });
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'customer': {'id': customerId, 'name': customerName},
+        'rating': rating,
+        'comment': comment,
+        'media': media.map((m) => m.toJson()).toList(),
+        'created_at': createdAt.toIso8601String(),
+        if (listingId != null) 'listing_id': listingId,
+        if (listingTitle != null || listingImage != null)
+          'listing': {
+            if (listingTitle != null) 'title': listingTitle,
+            if (listingImage != null) 'cover_url': listingImage,
+          },
+      };
+
+  ApiReview copyWith({
+    List<ApiReviewMedia>? media,
+    String? listingId,
+    String? listingTitle,
+    String? listingImage,
+    int? rating,
+    String? comment,
+  }) =>
+      ApiReview(
+        id: id,
+        customerId: customerId,
+        customerName: customerName,
+        rating: rating ?? this.rating,
+        comment: comment ?? this.comment,
+        createdAt: createdAt,
+        media: media ?? this.media,
+        listingId: listingId ?? this.listingId,
+        listingTitle: listingTitle ?? this.listingTitle,
+        listingImage: listingImage ?? this.listingImage,
+      );
 
   factory ApiReview.fromJson(Map<String, dynamic> json) {
     final customer = json['customer'] as Map<String, dynamic>? ?? {};
+    final listing = json['listing'] as Map<String, dynamic>?;
     return ApiReview(
       id: (json['id'] as num).toInt(),
       customerId: (customer['id'] as String?) ?? '',
@@ -43,6 +94,9 @@ class ApiReview {
           .map((m) => ApiReviewMedia.fromJson(m as Map<String, dynamic>))
           .toList(),
       createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+      listingId: (json['listing_id'] as String?) ?? listing?['id']?.toString(),
+      listingTitle: listing?['title'] as String?,
+      listingImage: listing?['cover_url'] as String? ?? listing?['image'] as String?,
     );
   }
 }

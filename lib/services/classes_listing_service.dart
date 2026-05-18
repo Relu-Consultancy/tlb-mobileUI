@@ -64,6 +64,7 @@ class ClassesListingService {
     String? area,
     String? format,
     String? mode,
+    String? search,
     int page = 1,
     int pageSize = 10,
   }) async {
@@ -77,6 +78,7 @@ class ClassesListingService {
         if (area != null) 'area': area,
         if (format != null) 'format': format,
         if (mode != null) 'mode': mode,
+        if (search != null && search.isNotEmpty) 'search': search,
       };
 
       final uri = Uri.parse('$_base/api/v1/listings/classes/')

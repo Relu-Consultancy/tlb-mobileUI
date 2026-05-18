@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-18 (Session 26)
+**Last Updated:** 2026-05-18 (Session 29)
 
 ---
 
@@ -1084,4 +1084,14 @@ image_picker: ^1.2.2         # Review media upload (re-added in Session 24)
 | ProgramDetailScreen fully rewritten as StatefulWidget � integrated ProgramsListingService.fetchProgramDetail; dynamic mapping for age group, capacity, total hours, module count, and multi-batch schedule; gallery wired to GalleryScreen | lib/screens/program_detail_screen.dart |
 | ProgramsListingService.submitEnquiry fixed � endpoint updated to /enquiries/; field contactNumber renamed to mobile; added rea field to match backend spec | lib/services/programs_listing_service.dart |
 | Program enquiry integration � InquireNowSheet updated to pass mobile and rea when submitting for programs | lib/widgets/inquire_now_sheet.dart |
-| Profile Reactivity � Wrapped greetings in SavedEventsScreen, YourReviewsScreen, HelpCentreScreen, PaymentSettingsScreen, and RemindersScreen with ValueListenableBuilder to reflect AuthState.userName changes in real-time | Multiple profile sub-screens |
+| Profile Reactivity — Wrapped greetings in SavedEventsScreen, YourReviewsScreen, HelpCentreScreen, PaymentSettingsScreen, and RemindersScreen with ValueListenableBuilder to reflect AuthState.userName changes in real-time | Multiple profile sub-screens |
+
+### Session 29
+| Change | Files |
+|--------|-------|
+| **Google Sign-In fixed** — restored Firebase Auth flow: `GoogleSignIn.signIn()` → `FirebaseAuth.signInWithCredential(GoogleAuthProvider.credential(accessToken, idToken))` → `fbUser.getIdToken()` → `AuthService.googleSignIn(idToken: firebaseToken)`; removed `serverClientId` (not needed with Firebase); added `debugPrint` for exact error logging; `_googleErrorMessage()` helper maps `SocketException`, `TimeoutException`, and known error strings to friendly messages | `lib/widgets/login_sheet.dart`, `lib/screens/signup_screen.dart` |
+| **"Sign Up with OTP" → "Signup"** — login screen signup link text changed; tap now navigates to `SignupScreen` instead of re-calling `_onSendOTP` | `lib/widgets/login_sheet.dart` |
+| **`_GoogleButton` made nullable** — `VoidCallback?` type; login and signup pass `_loading ? null : _onGoogleSignIn` to prevent double-tapping | `lib/widgets/login_sheet.dart`, `lib/screens/signup_screen.dart` |
+| **`OtpVerificationScreen` extracted** — new public screen `lib/screens/otp_verification_screen.dart`; moved from private `_OTPVerificationScreen` in login_sheet; accepts `identifier` + `onExistingUser: void Function(BuildContext)?` callback; new user → `markAsNewUser()` + `EditProfileScreen(isOnboarding: true)`; existing user → calls `onExistingUser`; login passes `showWelcomeBackDialog`, signup passes `Navigator.pushAndRemoveUntil(HomeScreen)` | `lib/screens/otp_verification_screen.dart` (NEW) |
+| **`SignupScreen` refactored to email-only OTP** — removed firstName, lastName, password, confirmPassword fields; removed wrong `_EmailVerificationDialog` (was showing "verification link" for OTP flow); now: email field → "Send OTP" → navigates to `OtpVerificationScreen`; Google sign-up also uses Firebase Auth; "Log In" link uses `Navigator.pop()` | `lib/screens/signup_screen.dart` |
+| **Onboarding flow preserved** — new user OTP and Google paths both call `WalkthroughService.markAsNewUser()` before navigating to `EditProfileScreen(isOnboarding: true)` → `HomeScreen` triggers walkthrough; existing users bypass all onboarding | `lib/screens/otp_verification_screen.dart`, `lib/screens/signup_screen.dart`, `lib/widgets/login_sheet.dart` |

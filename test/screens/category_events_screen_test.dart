@@ -15,6 +15,7 @@ const _testCategories = [
     'subcategories': <String>['Drawing', 'Painting'],
   },
   {
+    // Newline in label matches actual chip rendering — tap must use exact string
     'label': 'Sports &\nFitness',
     'image': 'assets/images/event_subcategories/sports.png',
     'gradient': [Color(0xFFFFF8D4), Color(0xFFFFEDA1)],
@@ -42,7 +43,7 @@ void main() {
       });
     });
 
-    testWidgets('switching category updates the UI', (WidgetTester tester) async {
+    testWidgets('switching category updates the header title', (WidgetTester tester) async {
       await mockNetworkImages(() async {
         await pumpTLBApp(
           tester,
@@ -52,10 +53,12 @@ void main() {
           ),
         );
 
-        await tester.tap(find.text('Sports & Fitness'));
+        // Chip renders raw label with newline — must match exactly
+        await tester.tap(find.text('Sports &\nFitness'));
         await tester.pumpAndSettle();
 
-        expect(find.text('All Sports & Fitness'), findsOneWidget);
+        // CategoryScreenHeader shows _categoryTitle = label.replaceAll('\n', ' ')
+        expect(find.text('Sports & Fitness'), findsOneWidget);
       });
     });
   });

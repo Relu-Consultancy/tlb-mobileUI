@@ -79,6 +79,7 @@ class ProgramsListingService {
     bool? isTopRated,
     double? lat,
     double? lng,
+    String? search,
   }) async {
     try {
       final params = <String, String>{
@@ -100,6 +101,7 @@ class ProgramsListingService {
         if (isTopRated != null) 'is_top_rated': isTopRated.toString(),
         if (lat != null) 'lat': lat.toString(),
         if (lng != null) 'lng': lng.toString(),
+        if (search != null && search.isNotEmpty) 'search': search,
       };
 
       final uri = Uri.parse('$_base/api/v1/listings/programs/').replace(queryParameters: params);

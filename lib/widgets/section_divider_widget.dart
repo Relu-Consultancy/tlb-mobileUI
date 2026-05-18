@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/app_colors.dart';
 
 class SectionDividerWidget extends StatelessWidget {
   final String title;
@@ -20,7 +21,7 @@ class SectionDividerWidget extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF6B6B6B),
+                color: AppColors.textSecondary,
               ),
             ),
           ),
@@ -36,8 +37,8 @@ class SectionDividerWidget extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isLeft
-              ? [Colors.transparent, const Color(0xFFE4CD89)]
-              : [const Color(0xFFE4CD89), Colors.transparent],
+              ? [Colors.transparent, AppColors.dividerGold]
+              : [AppColors.dividerGold, Colors.transparent],
         ),
       ),
     );

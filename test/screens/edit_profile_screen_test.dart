@@ -9,12 +9,13 @@ import '../helpers/test_setup.dart';
 void main() {
   group('EditProfileScreen Tests', () {
     setUp(() {
+      // Session 12: fields changed to first_name, last_name, phone_number, region
       AuthState.userData = {
         'profile': {
           'first_name': 'John',
           'last_name': 'Doe',
-          'city': 'Mumbai',
-          'state': 'Maharashtra',
+          'phone_number': '+91 9876543210',
+          'region': 'Maharashtra',
         }
       };
     });
@@ -25,18 +26,20 @@ void main() {
 
         expect(find.widgetWithText(TextField, 'John'), findsOneWidget);
         expect(find.widgetWithText(TextField, 'Doe'), findsOneWidget);
-        expect(find.widgetWithText(TextField, 'Mumbai'), findsOneWidget);
+        // Country code is shown in the prefix button (not a TextField);
+        // the phone TextField receives only the local digits.
+        expect(find.text('+91'), findsOneWidget);
+        expect(find.widgetWithText(TextField, '9876543210'), findsOneWidget);
         expect(find.widgetWithText(TextField, 'Maharashtra'), findsOneWidget);
       });
     });
 
-    testWidgets('shows error if first name is empty on save', (WidgetTester tester) async {
+    testWidgets('shows error snackbar if first name is empty on save', (WidgetTester tester) async {
       await mockNetworkImages(() async {
         await pumpTLBApp(tester, const EditProfileScreen());
 
-        // Clear first name
         await tester.enterText(find.widgetWithText(TextField, 'John'), '');
-        
+
         final saveBtn = find.text('Update Profile');
         await tester.ensureVisible(saveBtn);
         await tester.tap(saveBtn);

@@ -1,16 +1,18 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 import 'package:flutter/material.dart';
-import '../widgets/app_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import '../services/auth_service.dart';
 import '../services/walkthrough_service.dart';
 import '../providers/auth_state.dart';
 import '../providers/saved_events_state.dart';
 import '../core/responsive.dart';
-import '../widgets/login_sheet.dart';
+import '../widgets/app_loader.dart';
+import '../screens/otp_verification_screen.dart';
+import '../screens/edit_profile_screen.dart';
+import '../screens/home_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -20,118 +22,93 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _contactController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
-  String? _passwordError;
+  final _emailController = TextEditingController();
   bool _loading = false;
 
   @override
   void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _contactController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
-  Future<void> _onSignUp() async {
-    final firstName = _firstNameController.text.trim();
-    final email = _contactController.text.trim();
-    final password = _passwordController.text;
-    final confirmPassword = _confirmPasswordController.text;
-
-    if (firstName.isEmpty) {
+  Future<void> _onSendOTP() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('First name is required')),
+        const SnackBar(content: Text('Please enter your email address')),
       );
       return;
     }
-
-    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all required fields')),
-      );
-      return;
-    }
-
-    if (password != confirmPassword) {
-      setState(() => _passwordError = 'Passwords do not match');
-      return;
-    }
-
-    setState(() {
-      _passwordError = null;
-      _loading = true;
-    });
-
+    setState(() => _loading = true);
     final result = await AuthService.requestOtp(identifier: email);
-
     if (!mounted) return;
     setState(() => _loading = false);
 
     if (result['success'] == true) {
-      await WalkthroughService.markAsNewUser();
-      if (!mounted) return;
-      _showEmailVerificationDialog(email);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => OtpVerificationScreen(
+            identifier: email,
+            // For existing users who land here: navigate to HomeScreen directly.
+            // New users are handled inside OtpVerificationScreen (→ EditProfileScreen).
+            onExistingUser: (ctx) => Navigator.of(ctx).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+              (route) => false,
+            ),
+          ),
+        ),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] ?? 'Signup failed'),
+          content: Text(result['message'] ?? 'Failed to send OTP'),
           backgroundColor: const Color(0xFFE53935),
         ),
       );
     }
   }
 
-  void _showEmailVerificationDialog(String email) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => _EmailVerificationDialog(
-        email: email,
-        onOkay: () {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const LoginScreen()),
-            (route) => false,
-          );
-        },
-      ),
-    );
-  }
-
   Future<void> _onGoogleSignUp() async {
     setState(() => _loading = true);
     try {
-      final googleSignIn = GoogleSignIn(
-        serverClientId: '690253990877-jqog76u6vcre0a9qbd9d8p0g7o47scue.apps.googleusercontent.com',
-        scopes: ['email', 'profile'],
-      );
+      // Force the account picker every time
+      final googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
       await googleSignIn.signOut();
       final googleUser = await googleSignIn.signIn();
+
       if (googleUser == null) {
+        if (!mounted) return;
         setState(() => _loading = false);
-        return; // user cancelled
+        return; // User cancelled
       }
 
+      // Get Google credentials
       final googleAuth = await googleUser.authentication;
-      final idToken = googleAuth.idToken;
 
-      if (idToken == null) {
+      // Sign into Firebase to get a Firebase ID token for the backend
+      final credential = fb.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      final fbCredential =
+          await fb.FirebaseAuth.instance.signInWithCredential(credential);
+      final firebaseIdToken = await fbCredential.user?.getIdToken();
+
+      if (firebaseIdToken == null) {
         if (!mounted) return;
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Google sign-up failed. Try again.')),
+          const SnackBar(
+            content: Text('Google authentication failed. Please try again.'),
+            backgroundColor: Color(0xFFE53935),
+          ),
         );
         return;
       }
 
-      final result = await AuthService.googleSignIn(idToken: idToken);
+      debugPrint('[Google Signup] Firebase ID token obtained, calling API...');
+      final result = await AuthService.googleSignIn(idToken: firebaseIdToken);
 
       if (!mounted) return;
       setState(() => _loading = false);
@@ -142,23 +119,39 @@ class _SignupScreenState extends State<SignupScreen> {
           refresh: result['refresh'] as String?,
           user: result['user'] as Map<String, dynamic>?,
         );
-        SavedEventsState.loadFromApi(); // fire-and-forget
-        if (result['is_new_user'] == true) {
+        SavedEventsState.loadFromApi();
+
+        final isNew = result['is_new_user'] == true;
+        if (isNew) {
           await WalkthroughService.markAsNewUser();
+          if (!mounted) return;
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (_) => const EditProfileScreen(isOnboarding: true),
+            ),
+            (route) => false,
+          );
+        } else {
+          // Existing user signed in via Google on signup screen — take them home
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const HomeScreen()),
+            (route) => false,
+          );
         }
-        if (!mounted) return;
-        showWelcomeBackDialog(context);
       } else {
+        debugPrint('[Google Signup] API error: ${result['message']}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(result['message'] ?? 'Google sign-up failed'),
+            content: Text(result['message'] ??
+                'Google sign-up failed. Please try again.'),
             backgroundColor: const Color(0xFFE53935),
           ),
         );
       }
-    } catch (e) {
+    } catch (e, stack) {
       if (!mounted) return;
       setState(() => _loading = false);
+      debugPrint('[Google Signup] Exception: $e\n$stack');
       final msg = e is SocketException
           ? 'No internet connection. Please check and try again.'
           : e is TimeoutException
@@ -263,7 +256,9 @@ class _SignupScreenState extends State<SignupScreen> {
                       ],
                     ),
                   ),
+
                   const SizedBox(height: 20),
+
                   // ── Title ─────────────────────────────────────────────────
                   Text(
                     'Create Account',
@@ -285,92 +280,21 @@ class _SignupScreenState extends State<SignupScreen> {
 
                   const SizedBox(height: 26),
 
-                  // ── Input fields ──────────────────────────────────────────
+                  // ── Email input ───────────────────────────────────────────
                   _InputField(
-                    controller: _firstNameController,
-                    hint: 'First Name *',
-                    icon: Icons.person_outline_rounded,
-                    keyboardType: TextInputType.name,
-                  ),
-                  const SizedBox(height: 14),
-                  _InputField(
-                    controller: _lastNameController,
-                    hint: 'Last Name (optional)',
-                    icon: Icons.person_outline_rounded,
-                    keyboardType: TextInputType.name,
-                  ),
-                  const SizedBox(height: 14),
-                  _InputField(
-                    controller: _contactController,
-                    hint: 'Email',
+                    controller: _emailController,
+                    hint: 'Email Address',
                     icon: Icons.mail_outline_rounded,
                     keyboardType: TextInputType.emailAddress,
                   ),
-                  const SizedBox(height: 14),
-                  _InputField(
-                    controller: _passwordController,
-                    hint: 'Create Password',
-                    icon: Icons.lock_outline_rounded,
-                    obscureText: _obscurePassword,
-                    suffix: GestureDetector(
-                      onTap: () =>
-                          setState(() => _obscurePassword = !_obscurePassword),
-                      child: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                        size: 20,
-                        color: const Color(0xFFAFAFAF),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  _InputField(
-                    controller: _confirmPasswordController,
-                    hint: 'Confirm Password',
-                    icon: Icons.lock_outline_rounded,
-                    obscureText: _obscureConfirmPassword,
-                    hasError: _passwordError != null,
-                    suffix: GestureDetector(
-                      onTap: () => setState(
-                          () => _obscureConfirmPassword = !_obscureConfirmPassword),
-                      child: Icon(
-                        _obscureConfirmPassword
-                            ? Icons.visibility_off_outlined
-                            : Icons.visibility_outlined,
-                        size: 20,
-                        color: const Color(0xFFAFAFAF),
-                      ),
-                    ),
-                  ),
-                  if (_passwordError != null) ...[
-                    const SizedBox(height: 6),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.error_outline_rounded,
-                              size: 14, color: Color(0xFFE53935)),
-                          const SizedBox(width: 5),
-                          Text(
-                            _passwordError!,
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              color: const Color(0xFFE53935),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
 
                   const SizedBox(height: 22),
 
-                  // ── Sign up button ────────────────────────────────────────
+                  // ── Send OTP button ───────────────────────────────────────
                   _PrimaryButton(
-                    label: 'Create Account',
+                    label: 'Send OTP',
                     loading: _loading,
-                    onTap: _onSignUp,
+                    onTap: _onSendOTP,
                   ),
 
                   const SizedBox(height: 24),
@@ -397,17 +321,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {
-                          if (Navigator.canPop(context)) {
-                            Navigator.pop(context);
-                          } else {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => const LoginScreen()),
-                            );
-                          }
-                        },
+                        onTap: () => Navigator.pop(context),
                         child: Text(
                           'Log In',
                           style: GoogleFonts.poppins(
@@ -431,219 +345,6 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 }
 
-// ── Email verification success dialog ────────────────────────────────────────
-
-class _EmailVerificationDialog extends StatefulWidget {
-  final String email;
-  final VoidCallback onOkay;
-
-  const _EmailVerificationDialog({required this.email, required this.onOkay});
-
-  @override
-  State<_EmailVerificationDialog> createState() =>
-      _EmailVerificationDialogState();
-}
-
-class _EmailVerificationDialogState extends State<_EmailVerificationDialog>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl;
-  late final List<_Particle> _particles;
-
-  @override
-  void initState() {
-    super.initState();
-    final rng = Random();
-    _particles = List.generate(60, (_) => _Particle(rng));
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2400),
-    )..forward();
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 28),
-      child: AnimatedBuilder(
-        animation: _ctrl,
-        builder: (_, __) => Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.topCenter,
-          children: [
-            // Confetti layer
-            Positioned.fill(
-              child: CustomPaint(
-                painter: _ConfettiPainter(_ctrl.value, _particles),
-              ),
-            ),
-
-            // Card
-            Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF1D4ED8),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Email icon circle
-                  Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.mark_email_read_rounded,
-                      color: Colors.white,
-                      size: 38,
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  Text(
-                    'Verify Your Email',
-                    style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  Text(
-                    "We've sent a verification link to",
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      color: Colors.white.withOpacity(0.8),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    widget.email,
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Click the link in your inbox to\nactivate your account.',
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      color: Colors.white.withOpacity(0.8),
-                      height: 1.5,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  // Okay button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        widget.onOkay();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFCC00),
-                        foregroundColor: const Color(0xFF1A1A2E),
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      child: Text(
-                        'Okay, Got it!',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Confetti ──────────────────────────────────────────────────────────────────
-
-class _Particle {
-  final double vx, vy, size, rotation, rotSpeed;
-  final Color color;
-
-  _Particle(Random rng)
-      : vx = (rng.nextDouble() - 0.5) * 2.8,
-        vy = -(rng.nextDouble() * 2.2 + 0.6),
-        size = rng.nextDouble() * 8 + 4,
-        rotation = rng.nextDouble() * 2 * pi,
-        rotSpeed = (rng.nextDouble() - 0.5) * 6,
-        color = [
-          const Color(0xFFFFCC00),
-          const Color(0xFF60A5FA),
-          const Color(0xFF34D399),
-          const Color(0xFFF472B6),
-          const Color(0xFFA78BFA),
-          Colors.white,
-        ][rng.nextInt(6)];
-}
-
-class _ConfettiPainter extends CustomPainter {
-  final double progress;
-  final List<_Particle> particles;
-
-  _ConfettiPainter(this.progress, this.particles);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cx = size.width / 2;
-    final cy = size.height * 0.35;
-
-    for (final p in particles) {
-      final t = progress;
-      final x = cx + p.vx * t * 180;
-      final y = cy + p.vy * t * 180 + 340 * t * t;
-      final alpha = t > 0.55 ? (1.0 - (t - 0.55) / 0.45).clamp(0.0, 1.0) : 1.0;
-
-      canvas.save();
-      canvas.translate(x, y);
-      canvas.rotate(p.rotation + p.rotSpeed * t);
-      canvas.drawRect(
-        Rect.fromCenter(center: Offset.zero, width: p.size, height: p.size * 0.5),
-        Paint()..color = p.color.withOpacity(alpha),
-      );
-      canvas.restore();
-    }
-  }
-
-  @override
-  bool shouldRepaint(_ConfettiPainter old) => old.progress != progress;
-}
-
 // ── Shared UI widgets ─────────────────────────────────────────────────────────
 
 class _InputField extends StatelessWidget {
@@ -651,34 +352,24 @@ class _InputField extends StatelessWidget {
   final String hint;
   final IconData icon;
   final TextInputType? keyboardType;
-  final bool obscureText;
-  final bool hasError;
-  final Widget? suffix;
 
   const _InputField({
     required this.controller,
     required this.hint,
     required this.icon,
     this.keyboardType,
-    this.obscureText = false,
-    this.hasError = false,
-    this.suffix,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: hasError ? const Color(0xFFFFF0F0) : const Color(0xFFF5F5F5),
+        color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(26),
-        border: hasError
-            ? Border.all(color: const Color(0xFFE53935), width: 1.2)
-            : null,
       ),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
-        obscureText: obscureText,
         style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 14),
             color: const Color(0xFF1A1A1A)),
@@ -697,12 +388,6 @@ class _InputField extends StatelessWidget {
           contentPadding: EdgeInsets.symmetric(
               horizontal: Responsive.w(context, 8),
               vertical: Responsive.h(context, 16)),
-          suffixIcon: suffix == null
-              ? null
-              : Padding(
-                  padding: const EdgeInsets.only(right: 14), child: suffix),
-          suffixIconConstraints:
-              const BoxConstraints(minWidth: 24, minHeight: 24),
         ),
       ),
     );
@@ -746,7 +431,8 @@ class _PrimaryButton extends StatelessWidget {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         ),
         child: loading
-            ? const AppLoaderInline(dotSize: 7, spacing: 4, color: Color(0xFF1A1A2E))
+            ? const AppLoaderInline(
+                dotSize: 7, spacing: 4, color: Color(0xFF1A1A2E))
             : Text(
                 label,
                 style: GoogleFonts.poppins(
@@ -832,3 +518,4 @@ class _GoogleButton extends StatelessWidget {
     );
   }
 }
+

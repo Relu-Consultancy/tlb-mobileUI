@@ -54,6 +54,7 @@ class EventsListingService {
     String? area,
     String? datePreset,
     String? priceType,
+    String? search,
     int page = 1,
     int pageSize = 10,
   }) async {
@@ -70,6 +71,7 @@ class EventsListingService {
         if (area != null) 'area': area,
         if (datePreset != null) 'date_preset': datePreset,
         if (priceType != null) 'price_type': priceType,
+        if (search != null && search.isNotEmpty) 'search': search,
       };
 
       final uri = Uri.parse('$_base/api/v1/listings/events/')
@@ -163,6 +165,7 @@ class EventsListingService {
     bool? isFeatured,
     bool? isTopRated,
     bool? isNewThisWeek,
+    String? search,
     int page = 1,
     int pageSize = 50,
   }) async {
@@ -177,6 +180,7 @@ class EventsListingService {
         if (isFeatured == true) 'is_featured': 'true',
         if (isTopRated == true) 'is_top_rated': 'true',
         if (isNewThisWeek == true) 'is_new_this_week': 'true',
+        if (search != null && search.isNotEmpty) 'search': search,
       };
 
       final uri = Uri.parse('$_base/api/v1/listings/venues/')
