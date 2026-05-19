@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/classes_listing_service.dart';
 import '../services/programs_listing_service.dart';
@@ -121,7 +122,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
                       Text(
                         'Inquire Now',
                         style: GoogleFonts.poppins(
-                          fontSize: 18,
+                          fontSize: Responsive.sp(context, 18),
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF1A1A2E),
                         ),
@@ -129,7 +130,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
                       const SizedBox(height: 2),
                       Text(
                         "Fill your Details and we'll get back to you shortly",
-                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500),
+                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500),
                       ),
                     ],
                   ),
@@ -160,7 +161,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
             Row(
               children: [
                 Expanded(
-                  child: _ageDropdown(
+                  child: _ageDropdown(context,
                     value: _selectedAge,
                     onChanged: (v) => setState(() => _selectedAge = v),
                     ages: _ages,
@@ -196,10 +197,10 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
                   maxLength: 300,
                   buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null,
                   onChanged: (v) => setState(() => _msgLen = v.length),
-                  style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF1A1A2E)),
+                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF1A1A2E)),
                   decoration: InputDecoration(
                     hintText: 'Ask anything...trail class? feess? timing?',
-                    hintStyle: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade400),
+                    hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade400),
                     filled: true,
                     fillColor: const Color(0xFFF5F5F5),
                     border: OutlineInputBorder(
@@ -214,7 +215,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
                   right: 14,
                   child: Text(
                     '$_msgLen/300',
-                    style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade400),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade400),
                   ),
                 ),
               ],
@@ -246,7 +247,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
                       )
                     : Text(
                         'Send Enquiry',
-                        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700),
+                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700),
                       ),
               ),
             ),
@@ -265,17 +266,17 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
           TextSpan(children: [
             TextSpan(
               text: label,
-              style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
             ),
             if (required)
               TextSpan(
                 text: '*',
-                style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.red),
+                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w700, color: Colors.red),
               ),
             if (optional)
               TextSpan(
                 text: ' (Optional)',
-                style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500),
+                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500),
               ),
           ]),
         ),
@@ -287,10 +288,10 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
-      style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF1A1A2E)),
+      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF1A1A2E)),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade400),
+        hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
         filled: true,
         fillColor: const Color(0xFFF5F5F5),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
@@ -300,7 +301,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
   }
 }
 
-Widget _ageDropdown({
+Widget _ageDropdown(BuildContext context, {
   required String? value,
   required void Function(String?) onChanged,
   required List<String> ages,
@@ -316,12 +317,12 @@ Widget _ageDropdown({
         value: value,
         hint: Text(
           'Select age*',
-          style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade400),
+          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
         ),
         items: ages
             .map((age) => DropdownMenuItem(
                   value: age,
-                  child: Text(age, style: GoogleFonts.poppins(fontSize: 13)),
+                  child: Text(age, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13))),
                 ))
             .toList(),
         onChanged: onChanged,
@@ -412,15 +413,15 @@ class _EnquirySuccessDialogState extends State<_EnquirySuccessDialog>
                     color: Colors.black.withOpacity(0.18),
                     shape: BoxShape.circle,
                   ),
-                  child: const Center(
-                    child: Text('🎊', style: TextStyle(fontSize: 58)),
+                  child: Center(
+                    child: Text('🎊', style: TextStyle(fontSize: Responsive.sp(context, 58))),
                   ),
                 ),
                 const SizedBox(height: 24),
                 Text(
                   'Enquiry Submitted',
                   style: GoogleFonts.poppins(
-                    fontSize: 20,
+                    fontSize: Responsive.sp(context, 20),
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
                   ),
@@ -430,7 +431,7 @@ class _EnquirySuccessDialogState extends State<_EnquirySuccessDialog>
                   'Our team will be in touch with\nyou soon.',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    fontSize: 13,
+                    fontSize: Responsive.sp(context, 13),
                     color: Colors.white.withOpacity(0.82),
                     height: 1.55,
                   ),
@@ -449,7 +450,7 @@ class _EnquirySuccessDialogState extends State<_EnquirySuccessDialog>
                     ),
                     child: Text(
                       'Okay, Got it!',
-                      style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700),
+                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700),
                     ),
                   ),
                 ),

@@ -135,6 +135,7 @@ class ApiClassDetail extends ApiClass {
   final String? cancellationPolicy;
   final String? refundPolicy;
   final List<Map<String, String>> faqs;
+  final String bookingType;
   final List<ApiClassBatch> batches;
   final List<ApiClassMedia> media;
 
@@ -164,6 +165,7 @@ class ApiClassDetail extends ApiClass {
     this.cancellationPolicy,
     this.refundPolicy,
     required this.faqs,
+    required this.bookingType,
     required this.batches,
     required this.media,
   });
@@ -215,6 +217,7 @@ class ApiClassDetail extends ApiClass {
                   })
               .toList() ??
           [],
+      bookingType: (service['booking_type'] as String?) ?? 'enquiry',
       batches: (service['batches'] as List?)
               ?.map((e) => ApiClassBatch.fromJson(e as Map<String, dynamic>))
               .toList() ??

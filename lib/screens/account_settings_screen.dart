@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_state.dart';
 import 'change_password_screen.dart';
@@ -21,7 +22,7 @@ class AccountSettingsScreen extends StatelessWidget {
         title: Text(
           'Account Settings',
           style: GoogleFonts.poppins(
-            fontSize: 18,
+            fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
@@ -93,14 +94,14 @@ class AccountSettingsScreen extends StatelessWidget {
                                   Text(
                                     'Personal',
                                     style: GoogleFonts.poppins(
-                                      fontSize: 11,
+                                      fontSize: Responsive.sp(context, 11),
                                       color: Colors.grey.shade500,
                                     ),
                                   ),
                                   Text(
                                     'Personal Info',
                                     style: GoogleFonts.poppins(
-                                      fontSize: 15,
+                                      fontSize: Responsive.sp(context, 15),
                                       fontWeight: FontWeight.w700,
                                       color: const Color(0xFF1A1A2E),
                                     ),
@@ -108,7 +109,7 @@ class AccountSettingsScreen extends StatelessWidget {
                                   Text(
                                     email,
                                     style: GoogleFonts.poppins(
-                                      fontSize: 12,
+                                      fontSize: Responsive.sp(context, 12),
                                       color: Colors.grey.shade500,
                                     ),
                                     maxLines: 1,
@@ -124,9 +125,9 @@ class AccountSettingsScreen extends StatelessWidget {
                     },
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildRow(icon: Icons.phone_outlined, label: 'Phone Number'),
+                  _buildRow(context, icon: Icons.phone_outlined, label: 'Phone Number'),
                   const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildRow(
+                  _buildRow(context,
                     icon: Icons.lock_outline,
                     label: 'Change Password',
                     isLast: true,
@@ -156,16 +157,16 @@ class AccountSettingsScreen extends StatelessWidget {
                     child: Text(
                       'Privacy',
                       style: GoogleFonts.poppins(
-                        fontSize: 13,
+                        fontSize: Responsive.sp(context, 13),
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF1A1A2E),
                       ),
                     ),
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildRow(icon: Icons.settings_outlined, label: 'Manage Permissions'),
+                  _buildRow(context, icon: Icons.settings_outlined, label: 'Manage Permissions'),
                   const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildRow(icon: Icons.delete_outline, label: 'Delete Account', isLast: true),
+                  _buildRow(context, icon: Icons.delete_outline, label: 'Delete Account', isLast: true),
                 ],
               ),
             ),
@@ -177,7 +178,7 @@ class AccountSettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRow({
+  Widget _buildRow(BuildContext context, {
     required IconData icon,
     required String label,
     bool isLast = false,
@@ -200,7 +201,7 @@ class AccountSettingsScreen extends StatelessWidget {
                 child: Text(
                   label,
                   style: GoogleFonts.poppins(
-                    fontSize: 14.5,
+                    fontSize: Responsive.sp(context, 14.5),
                     fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E),
                   ),

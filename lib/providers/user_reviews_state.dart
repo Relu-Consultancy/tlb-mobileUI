@@ -35,26 +35,24 @@ class UserReviewsState {
 
   // ── Public API ───────────────────────────────────────────────────────────────
 
-  /// Loads reviews from local storage, then refreshes media for each review
-  /// via `GET /api/v1/reviews/{review_id}/media/`.
-  /// Never throws — callers always get a result.
+  /// Fetches the authenticated customer's reviews from
+  /// `GET /api/v1/customer/reviews/` and caches them locally.
+  /// Falls back to local cache if the API is unreachable or the user
+  /// is not logged in. Never throws.
   static Future<void> loadFromApi() async {
-    await _loadFromStorage();
     final token = AuthState.accessToken;
-    if (token == null || reviewsNotifier.value.isEmpty) return;
+    if (token == null) {
+      await _loadFromStorage();
+      return;
+    }
     try {
-      final enriched = await Future.wait(reviewsNotifier.value.map((r) async {
-        try {
-          final media = await ReviewService.fetchReviewMedia(token, r.id);
-          return media.isNotEmpty ? r.copyWith(media: media) : r;
-        } catch (_) {
-          return r;
-        }
-      }));
-      reviewsNotifier.value = List.unmodifiable(enriched);
+      final reviews = await ReviewService.fetchCustomerReviews(token);
+      reviewsNotifier.value = List.unmodifiable(reviews);
       _loaded = true;
       await _persist();
-    } catch (_) {}
+    } catch (_) {
+      if (!_loaded) await _loadFromStorage();
+    }
   }
 
   static bool get isLoaded => _loaded;

@@ -15,6 +15,7 @@ import '../models/api_review_model.dart';
 import '../widgets/app_loader.dart';
 import 'gallery_screen.dart';
 import 'organizer_profile_screen.dart';
+import 'select_batch_screen.dart';
 import '../widgets/inquire_now_sheet.dart';
 
 class ClassDetailScreen extends StatefulWidget {
@@ -86,6 +87,10 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
     imagePath: _coverUrl,
     tag: _tag.isNotEmpty ? _tag : null,
     price: widget.event.price,
+    rating: _detail?.averageRating ?? widget.event.rating,
+    reviewCount: _detail != null && _detail!.totalReviews > 0
+        ? '(${_detail!.totalReviews} reviews)'
+        : widget.event.reviewCount,
   );
 
   @override
@@ -134,7 +139,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
         body: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
           const Icon(Icons.wifi_off_rounded, size: 48, color: Colors.grey),
           const SizedBox(height: 16),
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 32), child: Text(_error!, textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey.shade600))),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 32), child: Text(_error!, textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: Colors.grey.shade600))),
           const SizedBox(height: 20),
           ElevatedButton(onPressed: _fetchDetail, style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1A1A2E), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12)), child: Text('Retry', style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w600))),
         ])),
@@ -226,7 +231,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                         child: Text(
                           _tag,
                           style: GoogleFonts.poppins(
-                            fontSize: 12,
+                            fontSize: Responsive.sp(context, 12),
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
@@ -268,7 +273,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                           Text(
                             _ratingText,
                             style: GoogleFonts.poppins(
-                              fontSize: 13,
+                              fontSize: Responsive.sp(context, 13),
                               color: Colors.grey.shade600,
                             ),
                           ),
@@ -299,7 +304,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                             child: Text(
                               _locationText,
                               style: GoogleFonts.poppins(
-                                fontSize: 13,
+                                fontSize: Responsive.sp(context, 13),
                                 color: const Color(0xFF1A1A2E),
                               ),
                             ),
@@ -328,7 +333,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                             child: Text(
                               _scheduleText,
                               style: GoogleFonts.poppins(
-                                fontSize: 13,
+                                fontSize: Responsive.sp(context, 13),
                                 color: const Color(0xFF1A1A2E),
                               ),
                             ),
@@ -354,7 +359,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                             Text(
                               'About Class',
                               style: GoogleFonts.poppins(
-                                fontSize: 16,
+                                fontSize: Responsive.sp(context, 16),
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFF1A1A2E),
                               ),
@@ -363,7 +368,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                             Text(
                               _description!,
                               style: GoogleFonts.poppins(
-                                fontSize: 13,
+                                fontSize: Responsive.sp(context, 13),
                                 color: Colors.grey.shade600,
                                 height: 1.5,
                               ),
@@ -380,7 +385,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                       child: Text(
                         'Things to Know',
                         style: GoogleFonts.poppins(
-                          fontSize: 16,
+                          fontSize: Responsive.sp(context, 16),
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF1A1A2E),
                         ),
@@ -422,10 +427,10 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Gallery', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                          Text('Gallery', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                           GestureDetector(
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => GalleryScreen(event: _eventForSheets))),
-                            child: Text('See All >', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6))),
+                            child: Text('See All >', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6))),
                           ),
                         ],
                       ),
@@ -433,7 +438,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                     const SizedBox(height: 4),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('Sneak peek into what awaits you!', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500)),
+                      child: Text('Sneak peek into what awaits you!', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
                     ),
                     const SizedBox(height: 12),
                     _buildGallery(context),
@@ -447,7 +452,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                       child: Text(
                         'Location',
                         style: GoogleFonts.poppins(
-                          fontSize: 16,
+                          fontSize: Responsive.sp(context, 16),
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF1A1A2E),
                         ),
@@ -496,14 +501,14 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                               children: [
                                 Text(
                                   _locationText,
-                                  style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.white),
+                                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: Colors.white),
                                 ),
                                 if ((_detail?.address ?? '').isNotEmpty) ...[
                                   const SizedBox(height: 2),
-                                  Text(_detail!.address!, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFFFFCC00))),
+                                  Text(_detail!.address!, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: const Color(0xFFFFCC00))),
                                 ] else ...[
                                   const SizedBox(height: 4),
-                                  Text('Free parking available on-site', style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFFFFCC00))),
+                                  Text('Free parking available on-site', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: const Color(0xFFFFCC00))),
                                 ],
                                 const SizedBox(height: 8),
                                 SizedBox(
@@ -607,7 +612,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                                   Text(
                                     'ORGANIZED BY',
                                     style: GoogleFonts.poppins(
-                                      fontSize: 10,
+                                      fontSize: Responsive.sp(context, 10),
                                       fontWeight: FontWeight.w600,
                                       color: const Color(0xFFF5A623),
                                       letterSpacing: 0.5,
@@ -616,7 +621,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                                   const SizedBox(height: 2),
                                   Text(
                                     _detail?.organizer?.businessName ?? 'Fun Event Co.',
-                                    style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
+                                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
                                   ),
                                 ],
                               ),
@@ -631,7 +636,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                               child: Text(
                                 'Follow',
                                 style: GoogleFonts.poppins(
-                                  fontSize: 13,
+                                  fontSize: Responsive.sp(context, 13),
                                   fontWeight: FontWeight.w600,
                                   color: Colors.grey.shade600,
                                 ),
@@ -663,7 +668,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                               child: Text(
                                 'Terms & Conditions',
                                 style: GoogleFonts.poppins(
-                                  fontSize: 14,
+                                  fontSize: Responsive.sp(context, 14),
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xFF1A1A2E),
                                 ),
@@ -691,7 +696,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                       ),
                     ],
 
-                    const SizedBox(height: 100),
+                    SizedBox(height: Responsive.h(context, 100)),
                   ],
                 ),
               ),
@@ -715,25 +720,48 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                     RichText(
                       text: TextSpan(children: [
                         TextSpan(text: '₹${widget.event.price!.toStringAsFixed(0)}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 20), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
-                        TextSpan(text: '/mo', style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey)),
+                        TextSpan(text: '/mo', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey)),
                       ]),
                     ),
                   if (widget.event.price != null) const Spacer(),
                   Expanded(
                     flex: 2,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        showInquireNow(context, listingId: _detail?.id ?? widget.event.id);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFCC00),
-                        foregroundColor: const Color(0xFF1A1A2E),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        elevation: 0,
-                      ),
-                      child: Text('Send Enquiry', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700)),
-                    ),
+                    child: Builder(builder: (context) {
+                      final isDirectBooking =
+                          _detail?.bookingType == 'direct_booking';
+                      return ElevatedButton(
+                        onPressed: () {
+                          if (isDirectBooking) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => SelectBatchScreen(
+                                  event: _eventForSheets,
+                                  batches: _detail?.batches ?? [],
+                                ),
+                              ),
+                            );
+                          } else {
+                            showInquireNow(context,
+                                listingId: _detail?.id ?? widget.event.id);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFFCC00),
+                          foregroundColor: const Color(0xFF1A1A2E),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28)),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          isDirectBooking ? 'Check Availability' : 'Send Enquiry',
+                          style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, 15),
+                              fontWeight: FontWeight.w700),
+                        ),
+                      );
+                    }),
                   ),
                 ],
               ),
@@ -786,23 +814,23 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (_detail?.cancellationPolicy != null && _detail!.cancellationPolicy!.isNotEmpty) ...[
-                      Text('Cancellation Policy', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                      Text('Cancellation Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                       const SizedBox(height: 10),
-                      Text(_detail!.cancellationPolicy!, style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700, height: 1.5)),
+                      Text(_detail!.cancellationPolicy!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
                       const SizedBox(height: 20),
                     ],
                     if (_detail?.refundPolicy != null && _detail!.refundPolicy!.isNotEmpty) ...[
-                      Text('Refund Policy', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                      Text('Refund Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                       const SizedBox(height: 10),
-                      Text(_detail!.refundPolicy!, style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700, height: 1.5)),
+                      Text(_detail!.refundPolicy!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
                       const SizedBox(height: 20),
                     ],
-                    Text('Attendance & Participation', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                    Text('Attendance & Participation', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                     const SizedBox(height: 10),
                     _buildTermsBullet('Regular Attendance:', 'Students are expected to attend all scheduled sessions. Frequent absences may result in loss of the enrolled slot.'),
                     _buildTermsBullet('Make-up Sessions:', 'Make-up sessions are subject to availability and must be requested at least 24 hours in advance.'),
                     const SizedBox(height: 20),
-                    Text('Safety & Conduct', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                    Text('Safety & Conduct', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                     const SizedBox(height: 10),
                     _buildTermsBullet('Appropriate Attire:', 'Students must wear appropriate clothing and footwear as specified for each class type.'),
                     _buildTermsBullet('Respectful Conduct:', 'All participants must treat instructors and fellow students with respect at all times.'),
@@ -822,9 +850,9 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+          Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
           const SizedBox(height: 4),
-          Text(text, style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700, height: 1.5)),
+          Text(text, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
         ],
       ),
     );
@@ -837,9 +865,9 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
         children: [
           Icon(icon, size: 20, color: Colors.grey.shade600),
           const SizedBox(width: 12),
-          Text(label, style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600)),
+          Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600)),
           const Spacer(),
-          Text(value, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+          Text(value, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
         ],
       ),
     );
@@ -906,7 +934,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
       child: Center(
         child: Text(
           name.isNotEmpty ? name[0].toUpperCase() : 'O',
-          style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 20), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
         ),
       ),
     );

@@ -51,7 +51,7 @@ class CategoriesGrid extends StatelessWidget {
                 child: Text(
                   'Explore the Stage',
                   style: GoogleFonts.poppins(
-                    fontSize: 15,
+                    fontSize: Responsive.sp(context, 15),
                     fontWeight: FontWeight.w700,
                     color: const Color(0xFF5A5A5A),
                   ),
@@ -86,7 +86,7 @@ class CategoriesGrid extends StatelessWidget {
                   final cat = categories[index];
                   return GestureDetector(
                     onTap: () => _navigateTo(context, cat['label']),
-                    child: _buildCategoryCard(cat),
+                    child: _buildCategoryCard(context, cat),
                   );
                 },
               );
@@ -112,7 +112,7 @@ class CategoriesGrid extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryCard(Map<String, dynamic> cat) {
+  Widget _buildCategoryCard(BuildContext context, Map<String, dynamic> cat) {
     const double cardRadius = 20;
     // StackFit.expand forces the Container to fill the grid cell tightly,
     // so no fixed width/height is needed — the cell dimensions drive sizing.
@@ -173,7 +173,7 @@ class CategoriesGrid extends StatelessWidget {
               Text(
                 cat['label'],
                 style: GoogleFonts.poppins(
-                  fontSize: 14,
+                  fontSize: Responsive.sp(context, 14),
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF1A1A2E),
                 ),
@@ -184,7 +184,7 @@ class CategoriesGrid extends StatelessWidget {
                 child: Text(
                   cat['subtitle'] ?? '',
                   style: GoogleFonts.poppins(
-                    fontSize: 11,
+                    fontSize: Responsive.sp(context, 11),
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF9E9E9E),
                   ),

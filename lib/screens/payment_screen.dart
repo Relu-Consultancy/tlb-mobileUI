@@ -60,7 +60,7 @@ class PaymentScreen extends StatelessWidget {
                 Text(
                   'Amount Payable',
                   style: GoogleFonts.poppins(
-                    fontSize: 14,
+                    fontSize: Responsive.sp(context, 14),
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF1A1A2E),
                   ),
@@ -86,7 +86,7 @@ class PaymentScreen extends StatelessWidget {
                   const SizedBox(height: 8),
 
                   // ── Preferred Payments ──
-                  _buildSectionHeader('PREFERRED PAYMENTS'),
+                  _buildSectionHeader(context, 'PREFERRED PAYMENTS'),
                   _buildPaymentTile(context,
                     icon: Icons.shield_outlined,
                     iconColor: const Color(0xFF6366F1),
@@ -103,7 +103,7 @@ class PaymentScreen extends StatelessWidget {
                   const SizedBox(height: 8),
 
                   // ── Other Payment Options ──
-                  _buildSectionHeader('OTHER PAYMENT OPTIONS'),
+                  _buildSectionHeader(context, 'OTHER PAYMENT OPTIONS'),
                   _buildPaymentTile(context,
                     icon: Icons.account_balance_wallet_outlined,
                     iconColor: const Color(0xFF4CAF50),
@@ -171,7 +171,7 @@ class PaymentScreen extends StatelessWidget {
                         Text(
                           'Secure Payment',
                           style: GoogleFonts.poppins(
-                            fontSize: 11,
+                            fontSize: Responsive.sp(context, 11),
                             color: Colors.grey.shade400,
                           ),
                         ),
@@ -212,7 +212,7 @@ class PaymentScreen extends StatelessWidget {
     });
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(BuildContext context, String title) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
@@ -220,7 +220,7 @@ class PaymentScreen extends StatelessWidget {
       child: Text(
         title,
         style: GoogleFonts.poppins(
-          fontSize: 12,
+          fontSize: Responsive.sp(context, 12),
           fontWeight: FontWeight.w600,
           color: Colors.grey.shade600,
           letterSpacing: 0.5,
@@ -261,7 +261,7 @@ class PaymentScreen extends StatelessWidget {
                   Text(
                     title,
                     style: GoogleFonts.poppins(
-                      fontSize: 14,
+                      fontSize: Responsive.sp(context, 14),
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF1A1A2E),
                     ),
@@ -271,7 +271,7 @@ class PaymentScreen extends StatelessWidget {
                           Text(
                             subtitle,
                             style: GoogleFonts.poppins(
-                              fontSize: 11,
+                              fontSize: Responsive.sp(context, 11),
                               color: Colors.grey.shade500,
                             ),
                           )

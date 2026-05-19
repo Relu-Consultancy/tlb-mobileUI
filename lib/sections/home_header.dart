@@ -116,7 +116,7 @@ class HomeHeader extends StatelessWidget {
                     'assets/images/wave_hand.png',
                     width: Responsive.w(context, 24),
                     height: Responsive.w(context, 24),
-                    errorBuilder: (_, __, ___) => const Text('👋', style: TextStyle(fontSize: 20)),
+                    errorBuilder: (_, __, ___) => Text('👋', style: TextStyle(fontSize: Responsive.sp(context, 20))),
                   ),
                 ],
               ),
@@ -249,7 +249,7 @@ class HomeHeader extends StatelessWidget {
               return Text(
                 label,
                 style: GoogleFonts.poppins(
-                  fontSize: 12,
+                  fontSize: Responsive.sp(context, 12),
                   fontWeight: FontWeight.w500,
                   color: const Color(0xFF1A1A2E),
                 ),
@@ -315,7 +315,7 @@ class HomeHeader extends StatelessWidget {
               child: Text(
                 'Search...',
                 style: GoogleFonts.poppins(
-                  fontSize: 14,
+                  fontSize: Responsive.sp(context, 14),
                   fontWeight: FontWeight.w500,
                   color: const Color(0xFF9E9E9E),
                 ),

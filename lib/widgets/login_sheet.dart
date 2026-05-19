@@ -233,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Text(
                         'Skip',
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: Responsive.sp(context, 14),
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF2F80ED),
                         ),
@@ -400,7 +400,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Text(
                       'Continue as Event Partner',
                       style: GoogleFonts.poppins(
-                        fontSize: 14,
+                        fontSize: Responsive.sp(context, 14),
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFFE6A800),
                       ),
@@ -416,7 +416,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         "New here? ",
                         style: GoogleFonts.poppins(
-                          fontSize: 13.5,
+                          fontSize: Responsive.sp(context, 13.5),
                           color: const Color(0xFF9E9E9E),
                         ),
                       ),
@@ -429,7 +429,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Text(
                           'Signup',
                           style: GoogleFonts.poppins(
-                            fontSize: 13.5,
+                            fontSize: Responsive.sp(context, 13.5),
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF1A1A1A),
                           ),
@@ -542,7 +542,7 @@ class _PrimaryButton extends StatelessWidget {
             : Text(
                 label,
                 style: GoogleFonts.poppins(
-                  fontSize: 15,
+                  fontSize: Responsive.sp(context, 15),
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF1A1A1A),
                 ),
@@ -566,7 +566,7 @@ class _OrDivider extends StatelessWidget {
           child: Text(
             'OR',
             style: GoogleFonts.poppins(
-              fontSize: 12,
+              fontSize: Responsive.sp(context, 12),
               fontWeight: FontWeight.w500,
               color: const Color(0xFFBBBBBB),
             ),
@@ -675,15 +675,15 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
                     color: Colors.black.withOpacity(0.18),
                     shape: BoxShape.circle,
                   ),
-                  child: const Center(
-                    child: Text('👋', style: TextStyle(fontSize: 58)),
+                  child: Center(
+                    child: Text('👋', style: TextStyle(fontSize: Responsive.sp(context, 58))),
                   ),
                 ),
                 const SizedBox(height: 24),
                 Text(
                   'Welcome Back!',
                   style: GoogleFonts.poppins(
-                    fontSize: 22,
+                    fontSize: Responsive.sp(context, 22),
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
                   ),
@@ -693,7 +693,7 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
                   'Great to see you again.\nReady to explore?',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    fontSize: 13,
+                    fontSize: Responsive.sp(context, 13),
                     color: Colors.white.withOpacity(0.82),
                     height: 1.55,
                   ),
@@ -715,7 +715,7 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
                     child: Text(
                       "Let's Go!",
                       style: GoogleFonts.poppins(
-                        fontSize: 16,
+                        fontSize: Responsive.sp(context, 16),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -815,7 +815,7 @@ class _GoogleButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/images/google_logo.png',
+              'resources- tlb-ui/google.png',
               width: 20,
               height: 20,
               errorBuilder: (_, __, ___) => const Icon(
@@ -828,7 +828,7 @@ class _GoogleButton extends StatelessWidget {
             Text(
               'Continue with Google',
               style: GoogleFonts.poppins(
-                fontSize: 14.5,
+                fontSize: Responsive.sp(context, 14.5),
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF3C3C3C),
               ),

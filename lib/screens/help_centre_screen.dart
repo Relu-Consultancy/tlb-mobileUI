@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_state.dart';
 
@@ -20,7 +21,7 @@ class HelpCentreScreen extends StatelessWidget {
         title: Text(
           'Help',
           style: GoogleFonts.poppins(
-            fontSize: 18,
+            fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
@@ -45,7 +46,7 @@ class HelpCentreScreen extends StatelessWidget {
                           return Text(
                             'Hi ${AuthState.firstName},',
                             style: GoogleFonts.poppins(
-                              fontSize: 22,
+                              fontSize: Responsive.sp(context, 22),
                               fontWeight: FontWeight.w800,
                               color: const Color(0xFF1A1A2E),
                             ),
@@ -55,7 +56,7 @@ class HelpCentreScreen extends StatelessWidget {
                       Text(
                         'How can we help you today?',
                         style: GoogleFonts.poppins(
-                          fontSize: 13,
+                          fontSize: Responsive.sp(context, 13),
                           color: Colors.grey.shade500,
                         ),
                       ),
@@ -93,7 +94,7 @@ class HelpCentreScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: 'Search for help...',
                   hintStyle: GoogleFonts.poppins(
-                    fontSize: 13,
+                    fontSize: Responsive.sp(context, 13),
                     color: Colors.grey.shade400,
                   ),
                   prefixIcon: const Icon(Icons.search, color: Colors.grey, size: 20),
@@ -108,7 +109,7 @@ class HelpCentreScreen extends StatelessWidget {
             Text(
               'Common Topics',
               style: GoogleFonts.poppins(
-                fontSize: 14,
+                fontSize: Responsive.sp(context, 14),
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF1A1A2E),
               ),
@@ -123,7 +124,7 @@ class HelpCentreScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _buildTopic(
+                  _buildTopic(context,
                     icon: Icons.calendar_today_outlined,
                     iconBg: const Color(0xFFEDF4FF),
                     iconColor: const Color(0xFF2563EB),
@@ -132,7 +133,7 @@ class HelpCentreScreen extends StatelessWidget {
                     isFirst: true,
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildTopic(
+                  _buildTopic(context,
                     icon: Icons.credit_card_outlined,
                     iconBg: const Color(0xFFF0FDF4),
                     iconColor: const Color(0xFF16A34A),
@@ -140,7 +141,7 @@ class HelpCentreScreen extends StatelessWidget {
                     subtitle: 'Payment failed or not reflected?',
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildTopic(
+                  _buildTopic(context,
                     icon: Icons.swap_horiz_rounded,
                     iconBg: const Color(0xFFF0FDF4),
                     iconColor: const Color(0xFF059669),
@@ -157,7 +158,7 @@ class HelpCentreScreen extends StatelessWidget {
             Text(
               'Need more help?',
               style: GoogleFonts.poppins(
-                fontSize: 14,
+                fontSize: Responsive.sp(context, 14),
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF1A1A2E),
               ),
@@ -166,7 +167,7 @@ class HelpCentreScreen extends StatelessWidget {
             Text(
               'Our support team is ready to assist you.',
               style: GoogleFonts.poppins(
-                fontSize: 12,
+                fontSize: Responsive.sp(context, 12),
                 color: Colors.grey.shade500,
               ),
             ),
@@ -192,14 +193,14 @@ class HelpCentreScreen extends StatelessWidget {
                 title: Text(
                   'Chat with support',
                   style: GoogleFonts.poppins(
-                    fontSize: 14,
+                    fontSize: Responsive.sp(context, 14),
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF1A1A2E),
                   ),
                 ),
                 subtitle: Text(
                   'We usually reply in minutes',
-                  style: GoogleFonts.poppins(fontSize: 11.5, color: Colors.grey.shade500),
+                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: Colors.grey.shade500),
                 ),
                 trailing: const Icon(Icons.chevron_right, color: Color(0xFF2563EB)),
               ),
@@ -227,14 +228,14 @@ class HelpCentreScreen extends StatelessWidget {
                 title: Text(
                   'Support Hours',
                   style: GoogleFonts.poppins(
-                    fontSize: 14,
+                    fontSize: Responsive.sp(context, 14),
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF1A1A2E),
                   ),
                 ),
                 subtitle: Text(
                   'Mon – Sun | 9:00 AM – 9:00 PM',
-                  style: GoogleFonts.poppins(fontSize: 11.5, color: Colors.grey.shade600),
+                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: Colors.grey.shade600),
                 ),
                 trailing: const Icon(Icons.chevron_right, color: Color(0xFF2563EB)),
               ),
@@ -247,7 +248,7 @@ class HelpCentreScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTopic({
+  Widget _buildTopic(BuildContext context, {
     required IconData icon,
     required Color iconBg,
     required Color iconColor,
@@ -282,14 +283,14 @@ class HelpCentreScreen extends StatelessWidget {
                     Text(
                       title,
                       style: GoogleFonts.poppins(
-                        fontSize: 14,
+                        fontSize: Responsive.sp(context, 14),
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF1A1A2E),
                       ),
                     ),
                     Text(
                       subtitle,
-                      style: GoogleFonts.poppins(fontSize: 11.5, color: Colors.grey.shade500),
+                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: Colors.grey.shade500),
                     ),
                   ],
                 ),

@@ -184,7 +184,7 @@ class _EventsScreenState extends State<EventsScreen> {
   // ── Error state for categories grid ─────────────────────────────────────
   Widget _buildCategoriesError() {
     return SizedBox(
-      height: 140,
+      height: Responsive.h(context, 140),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -194,7 +194,7 @@ class _EventsScreenState extends State<EventsScreen> {
             Text(
               'Could not load categories',
               style: TextStyle(
-                fontSize: 13,
+                fontSize: Responsive.sp(context, 13),
                 color: Colors.grey.shade600,
                 fontWeight: FontWeight.w500,
               ),
@@ -214,11 +214,11 @@ class _EventsScreenState extends State<EventsScreen> {
                   color: const Color(0xFF1A1A2E),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
+                child: Text(
                   'Retry',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 12,
+                    fontSize: Responsive.sp(context, 12),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -233,7 +233,7 @@ class _EventsScreenState extends State<EventsScreen> {
   // ── Loading shimmer for the categories grid ──────────────────────────────
   Widget _buildCategoriesShimmer() {
     return SizedBox(
-      height: 260,
+      height: Responsive.h(context, 260),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: GridView.builder(

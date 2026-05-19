@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-18 (Session 29)
+**Last Updated:** 2026-05-19 (Session 31)
 
 ---
 
@@ -129,11 +129,11 @@ HomeScreen (sidebar/action flows)
 | File | Description |
 |------|-------------|
 | `event_detail_screen.dart` | Full event detail — StatefulWidget; fetches `GET /api/v1/listings/events/{id}/` when `event.id` is non-empty; falls back to dummy `EventModel` fields for non-API cards. Shows hero, info, availability, gallery, map, reviews, "Book Now" CTA |
-| `class_detail_screen.dart` | Class detail — same layout as event detail, "Check Availability" / "Send Enquiry" CTA. Accepts `onBookTapped` callback |
+| `class_detail_screen.dart` | Class detail — same layout as event detail. CTA is conditional: `booking_type == 'direct_booking'` → "Check Availability" → `SelectBatchScreen`; otherwise → "Send Enquiry" → `showInquireNow()`. Accepts `onBookTapped` callback |
 | `program_detail_screen.dart` | Thin wrapper around ClassDetailScreen, routes to SelectProgramBatchScreen |
 | `venue_detail_screen.dart` | Venue detail — StatefulWidget; fetches `GET /api/v1/listings/venues/{id}/` when `event.id` is non-empty; falls back to dummy `EventModel` fields. Shows cover, category tag, availability slot, About, Things to Know, Packages, Gallery, Location map, Organizer. "Plan Event" CTA → PlanPartyScreen |
 | `date_time_selection_screen.dart` | Pick date + time → TicketBookingScreen |
-| `select_batch_screen.dart` | Classes batch selection — 3 dates, 3 batches → TicketBookingScreen |
+| `select_batch_screen.dart` | Classes batch selection — real `List<ApiClassBatch>` data; date chips computed from batch days pattern (next 5 upcoming dates); selecting a batch refreshes dates; batch card shows time range, days, name tag → Continue → TicketBookingScreen |
 | `select_program_batch_screen.dart` | Programs batch selection — 6 dates, Morning/Evening batches with seats chip → TicketBookingScreen |
 | `ticket_booking_screen.dart` | Ticket count + price breakdown → ReviewPayScreen |
 | `review_pay_screen.dart` | Order summary → PaymentScreen |
@@ -485,8 +485,15 @@ On submit → _EnquirySuccessDialog with confetti (same particle system)
 
 ### Batch Selection Screens
 ```
-SelectBatchScreen (Classes):
-  3 dates | 3 batches (time, days, slots, tag) | info card | Continue → TicketBookingScreen
+SelectBatchScreen (Classes) — real API data:
+  Constructor: EventModel event + List<ApiClassBatch> batches
+  Date chips: _nextDates(batch) computes next 5 upcoming dates whose weekday matches batch.days
+              (batch.days uses "mon"/"tue"/... → mapped to DateTime.weekday 1–7)
+              Selecting a different batch refreshes both dates and resets _dateIdx = 0
+  Batch cards: time range (_fmt12h: "13:00:00" → "1 PM"), days (_dayLabel: "Sat, Su"),
+               batch.name as tag pill with 5-color palette (teal/purple/green/amber/rose)
+  "Batch starting from" card: shows _dates[_dateIdx] or "TBA" when no batches
+  Continue → TicketBookingScreen(event, selectedDate, selectedTime)
 
 SelectProgramBatchScreen (Programs):
   6 dates (Sat/Sun wrap) | Morning Batch + Evening Batch | seats-left pink chip
@@ -1107,3 +1114,22 @@ image_picker: ^1.2.2         # Review media upload (re-added in Session 24)
 | **Search result tiles** — `ListTile` with 56×56 cover thumbnail (`ClipRRect` radius 10, network image with placeholder fallback), color-coded type badge (`Event` indigo / `Class` purple / `Program` green / `Venue` red), subtitle (category or city), arrow trailing icon; tap navigates to correct detail screen (`EventDetailScreen` / `ClassDetailScreen` / `ProgramDetailScreen` / `VenueDetailScreen`) using same `EventModel` conversion as category screens | `lib/screens/search_screen.dart` |
 | **Search states** — idle (empty query): centered search icon + "Find events, classes, programs & venues" prompt; loading: `CircularProgressIndicator(color: 0xFFFFCC00)`; no results: `search_off` icon + "No results for…" message; clear button (`Icons.close`) in search field when text is present | `lib/screens/search_screen.dart` |
 | **Filter bottom sheet retained** — Age Group chips, Mode radio, City/Area dropdowns, Date chips all kept; filter state stored (`_selectedMode`, `_selectedCity`, `_selectedArea`, `_ageGroupSelected`, `_dateSelected`) but not yet wired to API calls | `lib/screens/search_screen.dart` |
+
+### Session 30
+| Change | Files |
+|--------|-------|
+| **Search client-side filter added** — backend ignores the `?search=` param and returns unrelated results (e.g. "Jaat mela" for "Advanced AI"); after receiving all 4 API responses, results are now filtered client-side: only items whose `title` or `subtitle` contains the query (case-insensitive) are kept; API still receives `search=` so backend improvements will take effect automatically | `lib/screens/search_screen.dart` |
+| **NotificationScreen mock data removed** — all 4 dummy notification cards (`_today` + `_yesterday` lists) deleted; "Mark All as Read" action removed; body replaced with empty state: `notifications_off_outlined` icon + "No Notifications Yet" heading + subtitle copy | `lib/screens/notification_screen.dart` |
+| **13 compile errors fixed** (from prior-session bulk `Responsive.sp` replacement) — `const` removed from 4 `Text`/`Center` widgets containing non-const `Responsive.sp()` calls; `BuildContext context` added as first positional param to 7 helper methods on `StatelessWidget` subclasses and one top-level function; `_viewAllChip()` in `explore_categories_grid.dart` reverted `fontSize` to literal `12` (closure scope has no `context`) | `lib/screens/events_screen.dart`, `lib/sections/home_header.dart`, `lib/widgets/inquire_now_sheet.dart`, `lib/widgets/login_sheet.dart`, `lib/screens/account_settings_screen.dart`, `lib/screens/help_centre_screen.dart`, `lib/screens/payment_screen.dart`, `lib/widgets/categories_grid.dart`, `lib/widgets/explore_categories_grid.dart` |
+| **`GET /api/v1/customer/reviews/` confirmed live** — Session 27 investigation concluded the endpoint was 404; re-tested and confirmed live; Session 27 entries corrected below | `lib/services/review_service.dart` |
+| **`ReviewService.fetchCustomerReviews()` added** — `GET /api/v1/customer/reviews/`; auth required; handles all response shapes (direct list, `body['data'] is List`, paginated `body['data']['results']`); returns `List<ApiReview>` | `lib/services/review_service.dart` |
+| **`UserReviewsState.loadFromApi()` wired to real API** — previously read exclusively from SharedPreferences (Session 27 interim workaround); now calls `fetchCustomerReviews(token)` first, updates notifier and persists; falls back to cache on error or when not logged in | `lib/providers/user_reviews_state.dart` |
+| **`YourReviewsScreen` empty bug fixed** — API returns `{"success":true,"data":{"count":N,"results":[...]}}` but parser was reading `body['results']` (null) and `body['data'] is List` (false — it's a Map); added third case: `body['data'] is Map` → reads `data['results']`; screen now populates correctly | `lib/services/review_service.dart` |
+
+### Session 31
+| Change | Files |
+|--------|-------|
+| **`bookingType` added to `ApiClassDetail`** — new `final String bookingType` field; parsed from `service['booking_type']`; defaults to `'enquiry'` when absent | `lib/models/api_class_model.dart` |
+| **`SelectBatchScreen` rewritten with real API data** — constructor signature changed from `EventModel event` only to `EventModel event + List<ApiClassBatch> batches`; removed hardcoded `_kBatches` / `_kDates` constants; `_nextDates(batch, {count: 5})` computes upcoming calendar dates whose weekday matches `batch.days` (day-name → `DateTime.weekday` map); selecting a batch calls `_refreshDates()` which recomputes dates and resets date index; batch cards show `_fmt12h` time range (`"13:00:00"` → `"1 PM"`), 3-char day labels, `batch.name` as tag with 5-color teal/purple/green/amber/rose palette; "Batch starting from" reflects selected date chip | `lib/screens/select_batch_screen.dart` |
+| **`ClassDetailScreen` CTA gated on `booking_type`** — bottom bar `Builder` checks `_detail?.bookingType == 'direct_booking'`; direct booking → "Check Availability" → `Navigator.push(SelectBatchScreen(event: _eventForSheets, batches: _detail?.batches ?? []))`; enquiry → "Send Enquiry" → `showInquireNow()` | `lib/screens/class_detail_screen.dart` |
+| **`_eventForSheets` enriched** — `rating` and `reviewCount` now populated from `_detail.averageRating` / `_detail.totalReviews` so the venue card in `SelectBatchScreen` displays live star and review count | `lib/screens/class_detail_screen.dart` |

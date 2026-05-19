@@ -158,6 +158,44 @@ class ReviewService {
     throw Exception(errMsg);
   }
 
+  // Customer reviews — GET /api/v1/customer/reviews/
+  static Future<List<ApiReview>> fetchCustomerReviews(
+    String accessToken, {
+    int page = 1,
+    int pageSize = 50,
+    String ordering = 'newest',
+  }) async {
+    final uri = Uri.parse('$_base/api/v1/customer/reviews/').replace(
+      queryParameters: {
+        'page': '$page',
+        'page_size': '$pageSize',
+        'ordering': ordering,
+      },
+    );
+    final res = await http.get(uri, headers: _authHeaders(accessToken)).timeout(_timeout);
+    if (res.statusCode == 401) throw Exception('Session expired. Please log in again.');
+    if (res.statusCode != 200) throw Exception('Failed to load your reviews (${res.statusCode})');
+    final body = jsonDecode(res.body);
+    List? items;
+    if (body is List) {
+      items = body;
+    } else if (body is Map<String, dynamic>) {
+      final inner = body['data'];
+      if (inner is List) {
+        items = inner;
+      } else if (inner is Map<String, dynamic>) {
+        // {"success":true,"data":{"results":[...]}}
+        items = inner['results'] as List?;
+      } else {
+        // {"results":[...]}
+        items = body['results'] as List?;
+      }
+    }
+    return (items ?? [])
+        .map((j) => ApiReview.fromJson(j as Map<String, dynamic>))
+        .toList();
+  }
+
   // 7.4 Delete review
   static Future<void> deleteReview(String accessToken, int reviewId) async {
     final uri = Uri.parse('$_base/api/v1/reviews/$reviewId/');
