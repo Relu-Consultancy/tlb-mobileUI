@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import '../widgets/app_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
@@ -123,7 +124,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               Text(
                 'Password Changed!',
                 style: GoogleFonts.poppins(
-                  fontSize: 18,
+                  fontSize: Responsive.sp(context, 18),
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF1A1A2E),
                 ),
@@ -132,7 +133,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               Text(
                 'Your password has been updated\nsuccessfully.',
                 style: GoogleFonts.poppins(
-                  fontSize: 13,
+                  fontSize: Responsive.sp(context, 13),
                   color: Colors.grey.shade600,
                   height: 1.5,
                 ),
@@ -158,7 +159,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   child: Text(
                     'Done',
                     style: GoogleFonts.poppins(
-                      fontSize: 14,
+                      fontSize: Responsive.sp(context, 14),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -186,7 +187,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         title: Text(
           'Change Password',
           style: GoogleFonts.poppins(
-            fontSize: 18,
+            fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
@@ -214,7 +215,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     child: Text(
                       'Password must be at least 8 characters long.',
                       style: GoogleFonts.poppins(
-                        fontSize: 12,
+                        fontSize: Responsive.sp(context, 12),
                         color: const Color(0xFF1D4ED8),
                       ),
                     ),
@@ -273,7 +274,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           Text(
                             _confirmError!,
                             style: GoogleFonts.poppins(
-                              fontSize: 12,
+                              fontSize: Responsive.sp(context, 12),
                               color: const Color(0xFFE53935),
                             ),
                           ),
@@ -308,7 +309,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     : Text(
                         'Update Password',
                         style: GoogleFonts.poppins(
-                          fontSize: 15,
+                          fontSize: Responsive.sp(context, 15),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -348,7 +349,7 @@ class _PasswordField extends StatelessWidget {
         Text(
           label,
           style: GoogleFonts.poppins(
-            fontSize: 12.5,
+            fontSize: Responsive.sp(context, 12.5),
             fontWeight: FontWeight.w600,
             color: const Color(0xFF6B7280),
           ),
@@ -369,13 +370,13 @@ class _PasswordField extends StatelessWidget {
             controller: controller,
             obscureText: obscure,
             style: GoogleFonts.poppins(
-              fontSize: 14,
+              fontSize: Responsive.sp(context, 14),
               color: const Color(0xFF1A1A2E),
             ),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.poppins(
-                fontSize: 14,
+                fontSize: Responsive.sp(context, 14),
                 color: const Color(0xFFB8B8B8),
               ),
               prefixIcon: const Icon(Icons.lock_outline_rounded,

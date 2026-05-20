@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
@@ -65,7 +66,7 @@ class OnlineEventCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
-                            fontSize: 14.5,
+                            fontSize: Responsive.sp(context, 14.5),
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
                           ),
@@ -85,7 +86,7 @@ class OnlineEventCard extends StatelessWidget {
                           child: Text(
                             event.tag!,
                             style: GoogleFonts.poppins(
-                              fontSize: 10.5,
+                              fontSize: Responsive.sp(context, 10.5),
                               fontWeight: FontWeight.w600,
                               color: const Color(0xFF0284C7),
                             ),
@@ -110,7 +111,7 @@ class OnlineEventCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
-                              fontSize: 11.5,
+                              fontSize: Responsive.sp(context, 11.5),
                               color: AppColors.textSecondary,
                             ),
                           ),
@@ -132,7 +133,7 @@ class OnlineEventCard extends StatelessWidget {
                           child: Text(
                             event.eventDate!,
                             style: GoogleFonts.poppins(
-                              fontSize: 11.5,
+                              fontSize: Responsive.sp(context, 11.5),
                               color: AppColors.textSecondary,
                             ),
                           ),
@@ -156,7 +157,7 @@ class OnlineEventCard extends StatelessWidget {
                               child: Text(
                                 'View Event',
                                 style: GoogleFonts.poppins(
-                                  fontSize: 12,
+                                  fontSize: Responsive.sp(context, 12),
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.textPrimary,
                                 ),

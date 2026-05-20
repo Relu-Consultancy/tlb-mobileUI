@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../widgets/app_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 import '../services/auth_service.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -220,7 +221,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           'Forgot Password?',
           style: GoogleFonts.poppins(
-            fontSize: 22,
+            fontSize: Responsive.sp(context, 22),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A1A),
           ),
@@ -229,7 +230,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           "Enter your registered email and we'll\nsend you a verification code.",
           style: GoogleFonts.poppins(
-            fontSize: 13,
+            fontSize: Responsive.sp(context, 13),
             color: const Color(0xFF9E9E9E),
             height: 1.5,
           ),
@@ -260,7 +261,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           'Enter OTP',
           style: GoogleFonts.poppins(
-            fontSize: 22,
+            fontSize: Responsive.sp(context, 22),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A1A),
           ),
@@ -269,7 +270,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           "We've sent a 6-digit code to",
           style: GoogleFonts.poppins(
-            fontSize: 13,
+            fontSize: Responsive.sp(context, 13),
             color: const Color(0xFF9E9E9E),
             height: 1.5,
           ),
@@ -278,7 +279,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           _identifier,
           style: GoogleFonts.poppins(
-            fontSize: 13,
+            fontSize: Responsive.sp(context, 13),
             fontWeight: FontWeight.w600,
             color: const Color(0xFF1A1A1A),
           ),
@@ -292,7 +293,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           child: Text(
             'Resend OTP',
             style: GoogleFonts.poppins(
-              fontSize: 13,
+              fontSize: Responsive.sp(context, 13),
               fontWeight: FontWeight.w600,
               color: const Color(0xFF3B82F6),
             ),
@@ -319,7 +320,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           'Set New Password',
           style: GoogleFonts.poppins(
-            fontSize: 22,
+            fontSize: Responsive.sp(context, 22),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A1A),
           ),
@@ -328,7 +329,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           'Choose a strong new password',
           style: GoogleFonts.poppins(
-            fontSize: 13,
+            fontSize: Responsive.sp(context, 13),
             color: const Color(0xFF9E9E9E),
           ),
           textAlign: TextAlign.center,
@@ -361,15 +362,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   // ── Shared sub-widgets ──────────────────────────────────────────────────────
 
   Widget _illustration(IconData icon) {
+    final ctx = context;
     return SizedBox(
-      width: 140,
-      height: 140,
+      width: Responsive.w(ctx, 140),
+      height: Responsive.h(ctx, 140),
       child: Stack(
         alignment: Alignment.center,
         children: [
           Container(
-            width: 120,
-            height: 120,
+            width: Responsive.w(ctx, 120),
+            height: Responsive.h(ctx, 120),
             decoration: const BoxDecoration(
               color: Color(0xFFFDE8EC),
               shape: BoxShape.circle,
@@ -433,13 +435,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       child: TextField(
         controller: _emailCtrl,
         keyboardType: TextInputType.emailAddress,
-        style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF1A1A1A)),
+        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFF1A1A1A)),
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.mail_outline_rounded,
               size: 20, color: Color(0xFFAFAFAF)),
           hintText: 'Enter your email',
           hintStyle:
-              GoogleFonts.poppins(fontSize: 14, color: const Color(0xFFB8B8B8)),
+              GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFFB8B8B8)),
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
@@ -477,7 +479,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 LengthLimitingTextInputFormatter(1),
               ],
               style: GoogleFonts.poppins(
-                fontSize: 20,
+                fontSize: Responsive.sp(context, 20),
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF1A1A1A),
               ),
@@ -523,7 +525,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         controller: controller,
         obscureText: obscure,
         keyboardType: TextInputType.visiblePassword,
-        style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF1A1A1A)),
+        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFF1A1A1A)),
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.lock_outline_rounded,
               size: 20, color: Color(0xFFAFAFAF)),
@@ -537,7 +539,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
           hintText: hint,
           hintStyle:
-              GoogleFonts.poppins(fontSize: 14, color: const Color(0xFFB8B8B8)),
+              GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFFB8B8B8)),
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
@@ -580,7 +582,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             : Text(
                 label,
                 style: GoogleFonts.poppins(
-                  fontSize: 15,
+                  fontSize: Responsive.sp(context, 15),
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF1A1A1A),
                 ),
@@ -595,13 +597,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       child: RichText(
         text: TextSpan(
           style: GoogleFonts.poppins(
-              fontSize: 13, color: const Color(0xFF9E9E9E)),
+              fontSize: Responsive.sp(context, 13), color: const Color(0xFF9E9E9E)),
           children: [
             const TextSpan(text: 'Remember your password? '),
             TextSpan(
               text: 'Log In',
               style: GoogleFonts.poppins(
-                fontSize: 13,
+                fontSize: Responsive.sp(context, 13),
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF1A1A1A),
               ),
@@ -690,7 +692,7 @@ class _PasswordResetSuccessDialogState
                   Text(
                     'Password Reset!',
                     style: GoogleFonts.poppins(
-                      fontSize: 20,
+                      fontSize: Responsive.sp(context, 20),
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
                     ),
@@ -700,7 +702,7 @@ class _PasswordResetSuccessDialogState
                   Text(
                     'Your password has been successfully\nreset. You can now log in.',
                     style: GoogleFonts.poppins(
-                      fontSize: 13,
+                      fontSize: Responsive.sp(context, 13),
                       color: Colors.white.withOpacity(0.8),
                       height: 1.5,
                     ),
@@ -726,7 +728,7 @@ class _PasswordResetSuccessDialogState
                       child: Text(
                         'Back to Login',
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: Responsive.sp(context, 14),
                           fontWeight: FontWeight.w700,
                         ),
                       ),

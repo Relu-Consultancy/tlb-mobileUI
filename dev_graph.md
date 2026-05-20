@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-19 (Session 31)
+**Last Updated:** 2026-05-20 (Session 35)
 
 ---
 
@@ -129,12 +129,12 @@ HomeScreen (sidebar/action flows)
 | File | Description |
 |------|-------------|
 | `event_detail_screen.dart` | Full event detail — StatefulWidget; fetches `GET /api/v1/listings/events/{id}/` when `event.id` is non-empty; falls back to dummy `EventModel` fields for non-API cards. Shows hero, info, availability, gallery, map, reviews, "Book Now" CTA |
-| `class_detail_screen.dart` | Class detail — same layout as event detail. CTA is conditional: `booking_type == 'direct_booking'` → "Check Availability" → `SelectBatchScreen`; otherwise → "Send Enquiry" → `showInquireNow()`. Accepts `onBookTapped` callback |
-| `program_detail_screen.dart` | Thin wrapper around ClassDetailScreen, routes to SelectProgramBatchScreen |
+| `class_detail_screen.dart` | Class detail — StatefulWidget; fetches `GET /api/v1/listings/classes/{id}/`. CTA gated on `booking_type`: `direct_booking` → "Check Availability" → `SelectBatchScreen(batches)`; otherwise → "Send Enquiry" → `showInquireNow()` |
+| `program_detail_screen.dart` | Program detail — StatefulWidget; fetches `GET /api/v1/listings/programs/{id}/`. CTA gated on `_detail?.bookingType`: `direct_booking` → "Check Availability" → `SelectProgramBatchScreen(batches)`; otherwise → "Enquire Now" → `showInquireNow()`. Shows hero, schedule, Things to Know, gallery, map, organizer, reviews |
 | `venue_detail_screen.dart` | Venue detail — StatefulWidget; fetches `GET /api/v1/listings/venues/{id}/` when `event.id` is non-empty; falls back to dummy `EventModel` fields. Shows cover, category tag, availability slot, About, Things to Know, Packages, Gallery, Location map, Organizer. "Plan Event" CTA → PlanPartyScreen |
 | `date_time_selection_screen.dart` | Pick date + time → TicketBookingScreen |
 | `select_batch_screen.dart` | Classes batch selection — real `List<ApiClassBatch>` data; date chips computed from batch days pattern (next 5 upcoming dates); selecting a batch refreshes dates; batch card shows time range, days, name tag → Continue → TicketBookingScreen |
-| `select_program_batch_screen.dart` | Programs batch selection — 6 dates, Morning/Evening batches with seats chip → TicketBookingScreen |
+| `select_program_batch_screen.dart` | Programs batch selection — real `List<ApiProgramBatch>` data; same pattern as `SelectBatchScreen`; `daysOfWeek` handles both full ("monday") and short ("mon") day names; nullable `startTime`/`endTime` ("Time TBA" fallback); `totalSeats` chip when non-null; name tag with 5-color palette → Continue → TicketBookingScreen |
 | `ticket_booking_screen.dart` | Ticket count + price breakdown → ReviewPayScreen |
 | `review_pay_screen.dart` | Order summary → PaymentScreen |
 | `payment_screen.dart` | Payment method selection |
@@ -148,7 +148,7 @@ HomeScreen (sidebar/action flows)
 | `category_events_screen.dart` | Filtered events by category — fetches `GET /api/v1/listings/events/` with category slug; shows API cards (network image, navigates to EventDetailScreen with real `id`); falls back to SubcategoryEmptyState |
 | `format_events_screen.dart` | Filtered events by format — animated gradient header that transitions color per selected format; horizontal format circle selector row (6 circles, animated selection ring); fetches `GET /api/v1/listings/events/?format=slug`; grid of `CategoryEventCard`; `SubcategoryEmptyState` when no results; error snackbar with friendly message |
 | `category_classes_screen.dart` | Filtered classes by category |
-| `category_programs_screen.dart` | Filtered programs by category |
+| `category_programs_screen.dart` | Filtered programs by category — fetches program categories from `/api/v1/listings/programs/metadata/categories/` on init; resolves `category_id` (int) by normalized name match; passes `categoryId`/`subcategoryId` integers to `fetchPrograms()`; subcategory filter chips come from API `ApiSubcategory` objects (real IDs), falls back to dummy strings if metadata unavailable |
 | `category_venues_screen.dart` | Filtered venues by category — fetches `GET /api/v1/listings/venues/` with matched `category_id`; name-matched from venue categories metadata; uses flat `CategoryEventCard` (navigates to VenueDetailScreen); falls back to SubcategoryEmptyState |
 | ~~`category_detail_screen.dart`~~ | ~~Generic category detail~~ — **deleted** (replaced by CategoryEventsScreen/CategoryVenuesScreen) |
 
@@ -245,12 +245,15 @@ HomeScreen (sidebar/action flows)
 **`ApiVenue`** (list) — `id, title, category, city, area, cover, isFeatured, isNewThisWeek, isTopRated, distanceKm`  
 **`ApiVenueDetail`** (extends ApiVenue) — adds `description, subcategory, locationType, address, minAge, maxAge, minCapacity, maxCapacity, media, packages, availability, organizer`  
 **`ApiVenuePackage`** — `id, name, price (double — parsed from "2500.00" string), description, durationMinutes, maxGuests`  
-**`ApiVenueAvailability`** — `id, date ("2026-06-14"), startTime ("10:00:00"), endTime ("13:00:00"), note`
+**`ApiVenueAvailability`** — `id, date ("2026-06-14"), startTime ("10:00:00"), endTime ("13:00:00"), note`  
+**`ApiProgramDetail`** (extends ApiProgram) — adds `description, area, address, maxCapacity, totalHours, moduleCount, bookingType (String — "enquiry" | "direct_booking"), subcategory, tags, batches, faqs, media, organizer`  
+**`ApiProgramBatch`** — `id, name, startDate?, endDate?, startTime?, endTime?, fee?, totalSeats?, isActive, daysOfWeek: List<String>`
 
 ### API ↔ UI Gating Pattern
-`EventDetailScreen` and `VenueDetailScreen` accept `EventModel event` (legacy wrapper).  
+All 4 detail screens (`EventDetailScreen`, `ClassDetailScreen`, `ProgramDetailScreen`, `VenueDetailScreen`) accept `EventModel event` (legacy wrapper).  
 `event.id.isNotEmpty` → fetch from API in `initState`; `event.id == ''` → show dummy `EventModel` fields without any network call.  
-Dummy cards from `venues_screen.dart` / `events_screen.dart` pass `id = ''`, so they display gracefully without API.
+Dummy cards from listing screens pass `id = ''`, so they display gracefully without API.  
+CTA gating: `ClassDetailScreen` and `ProgramDetailScreen` check `_detail?.bookingType == 'direct_booking'` to show "Check Availability" (→ batch selection) vs "Send Enquiry"/"Enquire Now" (→ enquiry popup).
 
 ### AuthService (`lib/services/auth_service.dart`)
 - All methods have **30-second timeout**
@@ -495,9 +498,16 @@ SelectBatchScreen (Classes) — real API data:
   "Batch starting from" card: shows _dates[_dateIdx] or "TBA" when no batches
   Continue → TicketBookingScreen(event, selectedDate, selectedTime)
 
-SelectProgramBatchScreen (Programs):
-  6 dates (Sat/Sun wrap) | Morning Batch + Evening Batch | seats-left pink chip
-  Selected = dark filled circle with white check | Continue → TicketBookingScreen
+SelectProgramBatchScreen (Programs) — real API data:
+  Constructor: EventModel event + List<ApiProgramBatch> batches
+  Date chips: _nextDates(batch) computes next 5 upcoming dates from batch.daysOfWeek
+              (handles full names "monday" and short "mon" via first-3-chars truncation)
+              Selecting a different batch refreshes both dates and resets _dateIdx = 0
+  Batch cards: _timeRange() handles nullable startTime/endTime ("Time TBA" when absent)
+               _dayLabel() from daysOfWeek | batch.name as tag pill (5-color palette)
+               totalSeats shown as red seats chip when non-null (API field)
+  "Batch starting from" card: shows _dates[_dateIdx] or "TBA" when no batches
+  Continue → TicketBookingScreen(event, selectedDate, selectedTime)
 ```
 
 ### Plan Party Screen (Venues)
@@ -666,10 +676,11 @@ Reacts to profile edits without requiring screen re-navigation.
 ## 9. Booking / Checkout Flow
 
 ```
-[Events]  EventDetailScreen  → DateTimeSelectionScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
-[Classes] ClassDetailScreen  → SelectBatchScreen        → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
-[Program] ProgramDetailScreen→ SelectProgramBatchScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
-[Venues]  VenueDetailScreen  → PlanPartyScreen          (TODO: booking confirmation)
+[Events]  EventDetailScreen   → DateTimeSelectionScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
+[Classes] ClassDetailScreen   → SelectBatchScreen        → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
+[Program] ProgramDetailScreen → SelectProgramBatchScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
+[Venues]  VenueDetailScreen   → SeatReservationScreen(slotId, guestCount)      → ReviewPayScreen → BookingConfirmedScreen
+          VenueDetailScreen   → PlanPartyScreen          (party enquiry only — no booking confirmation)
 ```
 
 ---
@@ -695,11 +706,16 @@ Reacts to profile edits without requiring screen re-navigation.
 | ~~CategoryVenuesScreen API fetch~~ | `category_venues_screen.dart` | ✅ Done — fetches live venues by category_id; name-matched from venue metadata API |
 | ~~EventDetailScreen real data~~ | `event_detail_screen.dart` | ✅ Done — StatefulWidget; `event.id.isNotEmpty` gates API fetch; dummy cards still work |
 | ~~VenueDetailScreen real data~~ | `venue_detail_screen.dart` | ✅ Done — StatefulWidget; fetches detail including packages, availability, gallery, organizer |
+| ~~ProgramDetailScreen booking_type CTA~~ | `program_detail_screen.dart` | ✅ Done — `direct_booking` → "Check Availability" → `SelectProgramBatchScreen`; otherwise → "Enquire Now" → `showInquireNow()` |
+| ~~SelectProgramBatchScreen real batch data~~ | `select_program_batch_screen.dart` | ✅ Done — accepts `List<ApiProgramBatch>`; real date computation from `daysOfWeek`; nullable time handling |
+| ~~CategoryProgramsScreen API category filter~~ | `category_programs_screen.dart` | ✅ Done — fetches metadata, resolves `category_id` + `subcategory_id` integers; subcategory chips from API |
+| ~~Set real Razorpay key~~ | `lib/core/app_config.dart` | ✅ Done (Session 35) — `rzp_test_SpYAGfwgdidCZq` |
 | PlanPartyScreen → booking confirmation | `plan_party_screen.dart:_onContinue` | ❌ Pending — validated but navigates nowhere |
 | Profile screen reactive to name/avatar changes | `profile_screen.dart` | ❌ Pending — reads `AuthState.userName.value` but no `ValueListenableBuilder`; won't update on profile edit without navigate-back rebuild |
 | Profile avatar upload | `edit_profile_screen.dart` | ❌ Pending — removed from profile form (new API has no avatar field); needs separate endpoint when available |
 | Startup profile completion check | `main.dart` | ❌ Pending — `tryRestoreSession()` restores session but does NOT redirect incomplete profiles |
 | Venue metadata categories endpoint | backend | ❌ Pending — `GET /api/v1/listings/venues/metadata/categories/` not yet live; `fetchVenueCategories()` catch is silent so category filter falls back to fetching all venues |
+| **Backend Razorpay SDK missing** | backend server | ❌ Pending — `POST /api/v1/bookings/initiate/` returns `PAYMENT_GATEWAY_NOT_CONFIGURED`; backend needs `pip install razorpay`, `razorpay` in `requirements.txt`, and `RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET` env vars set; mobile app is correct |
 
 ---
 
@@ -723,6 +739,7 @@ geolocator: ^13.0.4            # GPS permission flow + getCurrentPosition()
 geocoding: ^3.0.0              # placemarkFromCoordinates() — lat/lng → city name
 url_launcher: ^6.3.2           # External URL / deep-link launching
 image_picker: ^1.2.2         # Review media upload (re-added in Session 24)
+razorpay_flutter: ^1.4.5     # Razorpay payment gateway SDK (added Session 34)
 ```
 
 ---
@@ -1126,6 +1143,16 @@ image_picker: ^1.2.2         # Review media upload (re-added in Session 24)
 | **`UserReviewsState.loadFromApi()` wired to real API** — previously read exclusively from SharedPreferences (Session 27 interim workaround); now calls `fetchCustomerReviews(token)` first, updates notifier and persists; falls back to cache on error or when not logged in | `lib/providers/user_reviews_state.dart` |
 | **`YourReviewsScreen` empty bug fixed** — API returns `{"success":true,"data":{"count":N,"results":[...]}}` but parser was reading `body['results']` (null) and `body['data'] is List` (false — it's a Map); added third case: `body['data'] is Map` → reads `data['results']`; screen now populates correctly | `lib/services/review_service.dart` |
 
+### Session 32
+| Change | Files |
+|--------|-------|
+| **CategoryProgramsScreen API category filter fixed** — root cause: `fetchPrograms(category: string)` was silently ignored by backend (API only accepts `category_id: int`); fix: fetch program categories from `/api/v1/listings/programs/metadata/categories/` on init, resolve `category_id` by normalized name match (handles truncated dummy labels like "Grooming & Personality Dev" → id 22), pass `categoryId`/`subcategoryId` integers to all fetch calls | `lib/screens/category_programs_screen.dart` |
+| **API subcategories replace dummy filter chips** — `_currentSubcategories: List<ApiSubcategory>` populated from matched API category; filter chips built from API subcategory names+IDs when available (falls back to dummy strings if metadata unavailable); tapping a subcategory chip passes `subcategoryId` (integer) to `fetchPrograms()` | `lib/screens/category_programs_screen.dart` |
+| **`bookingType` added to `ApiProgramDetail`** — new `final String bookingType` field; parsed from `json['booking_type']` first, then `service['booking_type']` fallback; defaults to `'enquiry'` when absent | `lib/models/api_program_model.dart` |
+| **`SelectProgramBatchScreen` rewritten with real API data** — constructor signature changed to `EventModel event + List<ApiProgramBatch> batches`; removed all hardcoded `_kProgramBatches`/`_kProgramDates` constants; `_nextDates(batch)` computes next 5 upcoming dates whose weekday matches `batch.daysOfWeek` (handles full names e.g. "monday" and short "mon" via first-3-chars truncation); batch cards show `_fmt12h` time range, day labels, `batch.name` as color-tagged pill; `batch.totalSeats` shown as red seats chip when non-null; "Batch starting from" reflects selected date chip; selecting batch refreshes dates | `lib/screens/select_program_batch_screen.dart` |
+| **`ProgramDetailScreen` CTA gated on `booking_type`** — removed `buttonLabel`/`onBookTapped` constructor params (all call sites only passed `event:`); `_isDirectBooking` getter checks `_detail?.bookingType == 'direct_booking'`; direct booking → "Check Availability" → `Navigator.push(SelectProgramBatchScreen(event: _eventForSheets, batches: _detail?.batches ?? []))`; enquiry → "Enquire Now" → `showInquireNow()` | `lib/screens/program_detail_screen.dart` |
+| **`_eventForSheets` enriched** — `rating` and `reviewCount` now populated from `_detail.averageRating` / `_detail.totalReviews` so the venue card in `SelectProgramBatchScreen` shows live star and review count | `lib/screens/program_detail_screen.dart` |
+
 ### Session 31
 | Change | Files |
 |--------|-------|
@@ -1133,3 +1160,99 @@ image_picker: ^1.2.2         # Review media upload (re-added in Session 24)
 | **`SelectBatchScreen` rewritten with real API data** — constructor signature changed from `EventModel event` only to `EventModel event + List<ApiClassBatch> batches`; removed hardcoded `_kBatches` / `_kDates` constants; `_nextDates(batch, {count: 5})` computes upcoming calendar dates whose weekday matches `batch.days` (day-name → `DateTime.weekday` map); selecting a batch calls `_refreshDates()` which recomputes dates and resets date index; batch cards show `_fmt12h` time range (`"13:00:00"` → `"1 PM"`), 3-char day labels, `batch.name` as tag with 5-color teal/purple/green/amber/rose palette; "Batch starting from" reflects selected date chip | `lib/screens/select_batch_screen.dart` |
 | **`ClassDetailScreen` CTA gated on `booking_type`** — bottom bar `Builder` checks `_detail?.bookingType == 'direct_booking'`; direct booking → "Check Availability" → `Navigator.push(SelectBatchScreen(event: _eventForSheets, batches: _detail?.batches ?? []))`; enquiry → "Send Enquiry" → `showInquireNow()` | `lib/screens/class_detail_screen.dart` |
 | **`_eventForSheets` enriched** — `rating` and `reviewCount` now populated from `_detail.averageRating` / `_detail.totalReviews` so the venue card in `SelectBatchScreen` displays live star and review count | `lib/screens/class_detail_screen.dart` |
+
+### Session 33
+| Change | Files |
+|--------|-------|
+| **"Explore by Categories" always visible** — removed `_isCategoriesLoading`, `_categoriesError`, `_buildCategoriesShimmer()`, `_buildCategoriesError()`; `_gridCategories` now initialised immediately with `_buildFallbackCategories()` (maps `DummyData.exploreCategories` + `_kFallbackSlugs`); `_loadCategories()` silently replaces with live API data on success, keeps fallback on error; section is never blank | `lib/screens/events_screen.dart` |
+| **Events booking flow wired end-to-end** — `EventDetailScreen` "Book Now" now navigates to `DateTimeSelectionScreen(event: _eventForSheets, apiTickets: _detail?.tickets, eventDateTime: _detail?.startDatetime, eventEndDateTime: _detail?.endDatetime)` | `lib/screens/event_detail_screen.dart` |
+| **`_eventForSheets` enriched with date/time** — `eventDate` and `eventTime` now populated from `_detail.startDatetime.toLocal()` (formatted) so downstream screens receive correct local-time strings even when API data is available | `lib/screens/event_detail_screen.dart` |
+| **`DateTimeSelectionScreen` updated** — new constructor params: `apiTickets: List<ApiEventTicket>?`, `eventDateTime: DateTime?`, `eventEndDateTime: DateTime?`; added `_fmtDate` and `_fmtTime` static helpers; `initState` rewritten: when `eventDateTime` is non-null shows a single real date chip and a single time-range chip (`_fmtTime(start) – _fmtTime(end)`) from `.toLocal()` values; falls back to 6 generated chips when no API datetime provided; `apiTickets` forwarded to `TicketBookingScreen` | `lib/screens/date_time_selection_screen.dart` |
+| **UTC → local timezone fix** — all datetime values from the API are UTC; fixed by calling `.toLocal()` before any `_formatDate`/`_formatTime`/`_fmtDate`/`_fmtTime` call in both `EventDetailScreen` and `DateTimeSelectionScreen`; resolves "4:30 AM" showing instead of "10:00 AM IST" | `lib/screens/event_detail_screen.dart`, `lib/screens/date_time_selection_screen.dart` |
+| **`TicketBookingScreen` accepts real ticket data** — new constructor param `apiTickets: List<ApiEventTicket>?`; `_tickets` changed to `late`; `_initTickets()` builds list from API data (`name`, `price`, `count: 0`, `available: availableQuantity`) when available; falls back to 3 hardcoded dummy tiers using `event.price` as base | `lib/screens/ticket_booking_screen.dart` |
+| **Dynamic "spots left" count** — hardcoded `"Only 5 spots left"` replaced with `_totalAvailableSpots` getter (sums `availableQuantity` across all API ticket maps); shown only when `_tickets` contains `'available'` key (API path); hidden for dummy-data path | `lib/screens/ticket_booking_screen.dart` |
+| **Offers section removed** — entire `_buildOffersSection()` method and its call in `build()` deleted from `TicketBookingScreen` | `lib/screens/ticket_booking_screen.dart` |
+| **Network image fix in checkout** — event image in `_buildEventInfoCard` now checks `event.imagePath.startsWith('http')` and uses `Image.network` for API URLs; falls back to `Image.asset` for local bundled paths | `lib/screens/ticket_booking_screen.dart` |
+
+### Session 34
+| Change | Files |
+|--------|-------|
+| **`razorpay_flutter 1.4.5` added** | `pubspec.yaml` |
+| **`AppConfig` created** — `razorpayKeyId` constant (replace `'rzp_test_YOUR_KEY_HERE'` with real key before testing) | `lib/core/app_config.dart` (NEW) |
+| **`ApiBookingModel` created** — `BookingLineItem` (ticketId + quantity), `BookingAttendee` (name, age, phone, email), `BookingInitiateResponse` (bookingId, bookingReference, razorpayOrderId, amount, currency, holdExpiresAt), `BookingConfirmResponse` (id, bookingReference, status, listingTitle, totalAmount, paymentStatus) | `lib/models/api_booking_model.dart` (NEW) |
+| **`BookingService` created** — `initiateBooking(token, listingId, bookingType, lineItems, attendees, batchId, quantity, slotId, packageId, ...)` → POST `/api/v1/bookings/initiate/`; `verifyPayment(token, bookingId, razorpayPaymentId, razorpayOrderId, razorpaySignature)` → POST `/api/v1/bookings/{id}/verify-payment/`; 30s timeout; typed Socket/Timeout error messages; `_unwrap()` + `_extractError()` helpers | `lib/services/booking_service.dart` (NEW) |
+| **`TicketBookingScreen` updated** — new params `bookingType: String = 'event'` and `batchId: int?`; `ticketId` key added to `_tickets` maps when initialised from API data; "Proceed to Pay" now passes `lineItems`, `attendee`, `bookingType`, `batchId` to `ReviewPayScreen` | `lib/screens/ticket_booking_screen.dart` |
+| **`ReviewPayScreen` rewritten as `StatefulWidget` with Razorpay** — new params: `lineItems`, `attendee`, `bookingType`, `batchId`; `_onProceedToPay()` calls `BookingService.initiateBooking()` then opens `Razorpay.open(options)` with `order_id`/`amount`/`currency` from API; `_handlePaymentSuccess()` shows confirming loader then calls `BookingService.verifyPayment()` → navigates to `BookingConfirmedScreen` with real `bookingReference`; `_handlePaymentError()` shows error snackbar; verification failure shows support dialog with booking reference; `Razorpay.clear()` in `dispose()`; PaymentScreen is now bypassed | `lib/screens/review_pay_screen.dart` |
+| **`BookingConfirmedScreen` updated** — new optional param `bookingReference: String?`; when provided (real payment), used as `_bookingId` instead of `BookingEntry.generateId()`; shown in ticket card and booking history | `lib/screens/booking_confirmed_screen.dart` |
+| **`SelectBatchScreen` updated** — passes `bookingType: 'class'` and `batchId: batches[_batchIdx].id` to `TicketBookingScreen` | `lib/screens/select_batch_screen.dart` |
+| **`SelectProgramBatchScreen` updated** — passes `bookingType: 'program'` and `batchId: batches[_batchIdx].id` to `TicketBookingScreen` | `lib/screens/select_program_batch_screen.dart` |
+| **`SeatReservationScreen` fixed** — `ReviewPayScreen` call updated to include `lineItems: []` and `attendee: {}` to satisfy new required params | `lib/screens/seat_reservation_screen.dart` |
+
+#### Booking Flow (Post-Session 34)
+```
+[Events]  EventDetailScreen
+  → DateTimeSelectionScreen (real date/time from API)
+  → TicketBookingScreen (real tickets; bookingType='event')
+  → ReviewPayScreen
+      ├── _onProceedToPay(): POST /api/v1/bookings/initiate/ → BookingInitiateResponse
+      ├── Razorpay.open(order_id, amount_in_paise, ...)
+      ├── On success: POST /api/v1/bookings/{id}/verify-payment/ → BookingConfirmResponse
+      └── Navigate → BookingConfirmedScreen(bookingReference: confirmed.bookingReference)
+
+[Classes]  ClassDetailScreen → SelectBatchScreen (batchId threaded)
+  → TicketBookingScreen(bookingType='class', batchId=X)
+  → ReviewPayScreen → same Razorpay flow, POST with batch_id + quantity
+
+[Programs] ProgramDetailScreen → SelectProgramBatchScreen (batchId threaded)
+  → TicketBookingScreen(bookingType='program', batchId=X)
+  → ReviewPayScreen → same Razorpay flow
+
+IMPORTANT: Replace AppConfig.razorpayKeyId with real Razorpay key before live use.
+```
+
+### Session 35
+| Change | Files |
+|--------|-------|
+| **Real Razorpay key set** — `AppConfig.razorpayKeyId` updated from placeholder `'rzp_test_YOUR_KEY_HERE'` to `'rzp_test_SpYAGfwgdidCZq'` | `lib/core/app_config.dart` |
+| **Backend SDK error diagnosed (not a mobile fix)** — `POST /api/v1/bookings/initiate/` returns `{"success":false,"error":{"code":"PAYMENT_GATEWAY_NOT_CONFIGURED","message":"Razorpay SDK is not installed. Add razorpay to requirements.txt."}}` — this is a **server-side Python error**; the Django backend is missing the `razorpay` pip package; Flutter `razorpay_flutter` is correctly installed in the app; **fix required on backend**: `pip install razorpay`, add `razorpay` to `requirements.txt`, set `RAZORPAY_KEY_ID` + `RAZORPAY_KEY_SECRET` env vars on the server | backend (not mobile) |
+| **API spec compliance audit — 5 bugs found and fixed** | (see below) |
+| **`_handlePaymentSuccess` status guard added** — after `BookingService.verifyPayment()` returns, now checks `confirmed.status == 'confirmed' && confirmed.paymentStatus == 'paid'` before navigating to `BookingConfirmedScreen`; API spec requires both conditions; if either fails the recovery dialog is shown instead of a false booking confirmation | `lib/screens/review_pay_screen.dart` |
+| **`BookingInitiateResponse.holdExpiresAt` made nullable** — field changed from `final DateTime holdExpiresAt` to `final DateTime? holdExpiresAt`; `fromJson` now uses `DateTime.tryParse` with null guard; prevents a hard cast-error crash when the API omits or sends a malformed `hold_expires_at` value | `lib/models/api_booking_model.dart` |
+| **`BookingAttendee.extraData` added** — new optional `Map<String, dynamic>? extraData` field; serialised as `'extra_data'` in `toJson()` when non-null; matches `extra_data: {}` field in API attendee object spec | `lib/models/api_booking_model.dart` |
+| **`ReviewPayScreen` venue booking support** — added 4 new optional params: `slotId: int?`, `packageId: int?`, `guestCount: int?`, `specialRequests: String?`; all forwarded to `BookingService.initiateBooking()` for `booking_type: 'venue'` bookings; `slot_id` is required by the API for venues | `lib/screens/review_pay_screen.dart` |
+| **`_onProceedToPay` per-type branching** — replaced single attendee-replication block with explicit branches: `'event'` → builds `lineItems` from ticket maps + replicates attendee for total qty; `'class'`/`'program'` → sends `batch_id` + `quantity` + attendees only if form data present; `'venue'` → sends `slot_id`/`guest_count`/`special_requests`, attendees optional (only sent if name provided) | `lib/screens/review_pay_screen.dart` |
+| **`SeatReservationScreen` venue booking wired** — added constructor params `slotId: int?`, `guestCount: int?`, `specialRequests: String?`; `ReviewPayScreen` call now passes `bookingType: 'venue'`, `slotId: widget.slotId`, `guestCount: widget.guestCount ?? _selectedSeats.length`, `specialRequests: widget.specialRequests` | `lib/screens/seat_reservation_screen.dart` |
+| All 107 tests pass — no regressions | test suite |
+
+#### Booking Flow (Post-Session 35 — Unified Razorpay Service)
+```
+[Events]  EventDetailScreen
+  → DateTimeSelectionScreen (real date/time from API)
+  → TicketBookingScreen (real API tickets; bookingType='event')
+  → ReviewPayScreen._onProceedToPay():
+      lineItems = [{ticket_id, quantity}]          ← from API ticket maps
+      attendees = [qty copies of form data]
+      POST /api/v1/bookings/initiate/ → { booking_id, razorpay_order_id, amount }
+      Razorpay.open(order_id, amount_in_paise)
+      On success: POST /api/v1/bookings/{id}/verify-payment/
+        → check status=='confirmed' && payment_status=='paid'
+        → BookingConfirmedScreen(bookingReference)
+
+[Classes] ClassDetailScreen → SelectBatchScreen(batches)
+  → TicketBookingScreen(bookingType='class', batchId=X)
+  → ReviewPayScreen._onProceedToPay():
+      batch_id=X, quantity=N, attendees=[N copies of form data]
+      → same Razorpay flow
+
+[Programs] ProgramDetailScreen → SelectProgramBatchScreen(batches)
+  → TicketBookingScreen(bookingType='program', batchId=X)
+  → ReviewPayScreen._onProceedToPay():
+      batch_id=X, quantity=N, attendees=[N copies of form data]
+      → same Razorpay flow
+
+[Venues] VenueDetailScreen → SeatReservationScreen(slotId, guestCount, specialRequests)
+  → ReviewPayScreen._onProceedToPay():
+      booking_type='venue', slot_id=X, guest_count=N
+      attendees=[] (optional — only sent if name provided)
+      → same Razorpay flow
+```

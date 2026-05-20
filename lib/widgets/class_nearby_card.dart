@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
@@ -83,7 +84,7 @@ class ClassNearbyCard extends StatelessWidget {
                         child: Text(
                           event.tag!,
                           style: GoogleFonts.poppins(
-                            fontSize: 11.5,
+                            fontSize: Responsive.sp(context, 11.5),
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
@@ -110,7 +111,7 @@ class ClassNearbyCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
-                            fontSize: 15,
+                            fontSize: Responsive.sp(context, 15),
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
                             height: 1.2,
@@ -133,7 +134,7 @@ class ClassNearbyCard extends StatelessWidget {
                               Text(
                                 event.reviewCount!,
                                 style: GoogleFonts.poppins(
-                                  fontSize: 11,
+                                  fontSize: Responsive.sp(context, 11),
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xFF0284C7),
                                 ),
@@ -157,7 +158,7 @@ class ClassNearbyCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
-                            fontSize: 11.5,
+                            fontSize: Responsive.sp(context, 11.5),
                             color: AppColors.textSecondary,
                           ),
                         ),
@@ -181,7 +182,7 @@ class ClassNearbyCard extends StatelessWidget {
                         Text(
                           event.rating!.toStringAsFixed(1),
                           style: GoogleFonts.poppins(
-                            fontSize: 11.5,
+                            fontSize: Responsive.sp(context, 11.5),
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
                           ),
@@ -200,7 +201,7 @@ class ClassNearbyCard extends StatelessWidget {
                           TextSpan(
                             text: 'Description – ',
                             style: GoogleFonts.poppins(
-                              fontSize: 11.5,
+                              fontSize: Responsive.sp(context, 11.5),
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
                             ),
@@ -208,7 +209,7 @@ class ClassNearbyCard extends StatelessWidget {
                           TextSpan(
                             text: event.description!,
                             style: GoogleFonts.poppins(
-                              fontSize: 11.5,
+                              fontSize: Responsive.sp(context, 11.5),
                               color: AppColors.textSecondary,
                             ),
                           ),
@@ -240,7 +241,7 @@ class ClassNearbyCard extends StatelessWidget {
                         child: Text(
                           buttonLabel,
                           style: GoogleFonts.poppins(
-                            fontSize: 13,
+                            fontSize: Responsive.sp(context, 13),
                             fontWeight: FontWeight.w600,
                             color: const Color(0xFF1A1A2E),
                           ),

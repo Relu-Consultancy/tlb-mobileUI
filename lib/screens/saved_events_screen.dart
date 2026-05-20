@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/saved_events_state.dart';
 import '../providers/auth_state.dart';
@@ -23,7 +24,7 @@ class SavedEventsScreen extends StatelessWidget {
         title: Text(
           'Favorites',
           style: GoogleFonts.poppins(
-            fontSize: 18,
+            fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
@@ -48,7 +49,7 @@ class SavedEventsScreen extends StatelessWidget {
                           return Text(
                             'Hi ${AuthState.firstName},',
                             style: GoogleFonts.poppins(
-                              fontSize: 22,
+                              fontSize: Responsive.sp(context, 22),
                               fontWeight: FontWeight.w800,
                               color: const Color(0xFF1A1A2E),
                             ),
@@ -58,7 +59,7 @@ class SavedEventsScreen extends StatelessWidget {
                       Text(
                         'Here are your saved activities.',
                         style: GoogleFonts.poppins(
-                          fontSize: 13,
+                          fontSize: Responsive.sp(context, 13),
                           color: Colors.grey.shade500,
                         ),
                       ),
@@ -82,7 +83,7 @@ class SavedEventsScreen extends StatelessWidget {
             Text(
               'Saved Activities',
               style: GoogleFonts.poppins(
-                fontSize: 14,
+                fontSize: Responsive.sp(context, 14),
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF1A1A2E),
               ),
@@ -103,7 +104,7 @@ class SavedEventsScreen extends StatelessWidget {
                           Text(
                             'No saved activities yet',
                             style: GoogleFonts.poppins(
-                              fontSize: 15,
+                              fontSize: Responsive.sp(context, 15),
                               color: Colors.grey.shade400,
                             ),
                           ),
@@ -111,7 +112,7 @@ class SavedEventsScreen extends StatelessWidget {
                           Text(
                             'Tap the heart icon on any event to save it',
                             style: GoogleFonts.poppins(
-                              fontSize: 12,
+                              fontSize: Responsive.sp(context, 12),
                               color: Colors.grey.shade400,
                             ),
                             textAlign: TextAlign.center,
@@ -202,7 +203,7 @@ class _SavedRow extends StatelessWidget {
                 child: Text(
                   event.title,
                   style: GoogleFonts.poppins(
-                    fontSize: 14,
+                    fontSize: Responsive.sp(context, 14),
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF1A1A2E),
                   ),

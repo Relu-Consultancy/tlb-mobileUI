@@ -91,7 +91,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       // ── For the Big Days ──
                       _sectionHeader(context, 'For the Big Days', subtitle: 'Premium celebration & Events'),
                       SizedBox(
-                        height: 298,
+                        height: Responsive.h(context, 298),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -121,7 +121,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       // ── Close to You ──
                       _sectionHeader(context, 'Close to You', subtitle: 'Top venues near your location'),
                       SizedBox(
-                        height: 256,
+                        height: Responsive.h(context, 256),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -151,7 +151,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       // ── Get Moving ──
                       _sectionHeader(context, 'Get Moving', subtitle: 'Active & physical fun'),
                       SizedBox(
-                        height: 420,
+                        height: Responsive.h(context, 420),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -215,7 +215,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       // ── Thoughtful Spaces ──
                       _sectionHeader(context, 'Thoughtful Spaces'),
                       SizedBox(
-                        height: 340,
+                        height: Responsive.h(context, 340),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -266,11 +266,11 @@ class _VenuesScreenState extends State<VenuesScreen> {
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
                 ),
                 if (subtitle != null) ...[
                   const SizedBox(height: 2),
-                  Text(subtitle, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500)),
+                  Text(subtitle, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
                 ],
               ],
             ),
@@ -285,7 +285,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('See All', style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF2563EB), fontWeight: FontWeight.w600)),
+                Text('See All', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF2563EB), fontWeight: FontWeight.w600)),
                 const Icon(Icons.chevron_right, size: 16, color: Color(0xFF2563EB)),
               ],
             ),
@@ -397,7 +397,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   const SizedBox(height: 7),
                   Text(
                     c['label'] as String,
-                    style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E)),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 10), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E)),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -426,8 +426,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: Image.asset(event.imagePath, height: 140, width: double.infinity, fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(height: 140, color: Colors.grey.shade200)),
+            child: Image.asset(event.imagePath, height: Responsive.h(context, 140), width: double.infinity, fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 140), color: Colors.grey.shade200)),
           ),
           Expanded(
             child: Padding(
@@ -442,19 +442,19 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       _tagPill('Premium', const Color(0xFFF0FDF4), const Color(0xFF16A34A)),
                     ]),
                   const SizedBox(height: 6),
-                  Text(event.title, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 4),
                   Row(children: [
                     const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
                     const SizedBox(width: 3),
-                    Text(event.venue, style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500)),
+                    Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500)),
                   ]),
                   const SizedBox(height: 3),
                   if (event.rating != null)
                     Row(children: [
                       const Icon(Icons.star_rounded, size: 13, color: Color(0xFFFFB902)),
                       const SizedBox(width: 3),
-                      Text('${event.rating}(${event.reviewCount})', style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500)),
+                      Text('${event.rating}(${event.reviewCount})', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500)),
                     ]),
                   const Spacer(),
                   SizedBox(
@@ -469,7 +469,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                         padding: EdgeInsets.zero,
                       ),
-                      child: Text('Book Now', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600)),
+                      child: Text('Book Now', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ],
@@ -494,8 +494,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
-            child: Image.asset(event.imagePath, width: 125, height: double.infinity, fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(width: 125, color: Colors.grey.shade200)),
+            child: Image.asset(event.imagePath, width: Responsive.cardWidth(context, fraction: 0.33), height: double.infinity, fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(width: Responsive.cardWidth(context, fraction: 0.33), color: Colors.grey.shade200)),
           ),
           Expanded(
             child: Padding(
@@ -506,19 +506,19 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   if (event.tag != null)
                     _tagPill(event.tag!, const Color(0xFFDCFCE7), const Color(0xFF16A34A)),
                   const SizedBox(height: 6),
-                  Text(event.title, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)), maxLines: 2, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 5),
                   Row(children: [
                     const Icon(Icons.calendar_month_outlined, size: 12, color: Colors.grey),
                     const SizedBox(width: 4),
-                    Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                    Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500), maxLines: 1, overflow: TextOverflow.ellipsis)),
                   ]),
                   const SizedBox(height: 3),
                   if (event.rating != null)
                     Row(children: [
                       const Icon(Icons.star_rounded, size: 13, color: Color(0xFFFFB902)),
                       const SizedBox(width: 3),
-                      Text('${event.rating}(${event.reviewCount})', style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500)),
+                      Text('${event.rating}(${event.reviewCount})', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500)),
                     ]),
                   const Spacer(),
                   SizedBox(
@@ -533,7 +533,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                         padding: EdgeInsets.zero,
                       ),
-                      child: Text('View Details', style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600)),
+                      child: Text('View Details', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ],
@@ -561,8 +561,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
             children: [
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                child: Image.asset(event.imagePath, height: 140, width: double.infinity, fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(height: 140, color: Colors.grey.shade200)),
+                child: Image.asset(event.imagePath, height: Responsive.h(context, 140), width: double.infinity, fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 140), color: Colors.grey.shade200)),
               ),
               if (event.tag != null)
                 Positioned(
@@ -576,12 +576,12 @@ class _VenuesScreenState extends State<VenuesScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(event.title, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 4),
                 Row(children: [
                   const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
                   const SizedBox(width: 3),
-                  Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                  Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500), maxLines: 1, overflow: TextOverflow.ellipsis)),
                 ]),
                 const SizedBox(height: 10),
                 Row(
@@ -590,7 +590,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     Row(children: [
                       const Icon(Icons.circle, size: 8, color: Color(0xFF16A34A)),
                       const SizedBox(width: 4),
-                      Text('Open', style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFF16A34A), fontWeight: FontWeight.w500)),
+                      Text('Open', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: const Color(0xFF16A34A), fontWeight: FontWeight.w500)),
                     ]),
                     SizedBox(
                       height: 28,
@@ -603,7 +603,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                         ),
-                        child: Text('View Venue', style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600)),
+                        child: Text('View Venue', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ],
@@ -644,8 +644,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(event.title, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis),
-                  Text(event.venue, style: GoogleFonts.poppins(fontSize: 12, color: Colors.white70)),
+                  Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w700, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.white70)),
                 ],
               ),
             ),
@@ -675,7 +675,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             child: Container(
-              height: 112,
+              height: Responsive.h(context, 112),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
@@ -715,7 +715,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         Text(
                           data['sport'] as String,
                           style: GoogleFonts.poppins(
-                            fontSize: 22,
+                            fontSize: Responsive.sp(context, 22),
                             fontWeight: FontWeight.w800,
                             color: Colors.white,
                           ),
@@ -724,7 +724,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         Text(
                           data['slotsText'] as String,
                           style: GoogleFonts.poppins(
-                            fontSize: 12,
+                            fontSize: Responsive.sp(context, 12),
                             color: Colors.white.withOpacity(0.88),
                           ),
                         ),
@@ -777,7 +777,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                                 Text(
                                   v['name'] as String,
                                   style: GoogleFonts.poppins(
-                                    fontSize: 13,
+                                    fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w700,
                                     color: const Color(0xFF1A1A2E),
                                   ),
@@ -791,7 +791,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                                   Expanded(
                                     child: Text(
                                       v['location'] as String,
-                                      style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500),
+                                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -817,7 +817,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                             child: Text(
                               slot,
                               style: GoogleFonts.poppins(
-                                fontSize: 12,
+                                fontSize: Responsive.sp(context, 12),
                                 fontWeight: FontWeight.w500,
                                 color: const Color(0xFF1A1A2E),
                               ),
@@ -848,7 +848,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     ),
                     child: Text(
                       'View all venues',
-                      style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700),
+                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w700),
                     ),
                   ),
                 ),
@@ -874,20 +874,20 @@ class _VenuesScreenState extends State<VenuesScreen> {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: Image.asset(event.imagePath, height: 148, width: double.infinity, fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(height: 148, color: Colors.grey.shade200)),
+            child: Image.asset(event.imagePath, height: Responsive.h(context, 148), width: double.infinity, fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 148), color: Colors.grey.shade200)),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(event.title, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 3),
                 Row(children: [
                   const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
                   const SizedBox(width: 3),
-                  Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                  Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500), maxLines: 1, overflow: TextOverflow.ellipsis)),
                 ]),
                 const SizedBox(height: 10),
                 Align(
@@ -903,7 +903,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                         padding: const EdgeInsets.symmetric(horizontal: 14),
                       ),
-                      child: Text('View Venue', style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600)),
+                      child: Text('View Venue', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ),
@@ -931,8 +931,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
             children: [
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                child: Image.asset(event.imagePath, height: 130, width: double.infinity, fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(height: 130, color: Colors.grey.shade200)),
+                child: Image.asset(event.imagePath, height: Responsive.h(context, 130), width: double.infinity, fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 130), color: Colors.grey.shade200)),
               ),
               if (event.tag != null)
                 Positioned(
@@ -944,7 +944,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         color: Colors.black.withOpacity(0.55),
                         borderRadius: BorderRadius.circular(0),
                       ),
-                      child: Text(event.tag!, style: GoogleFonts.poppins(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w500)),
+                      child: Text(event.tag!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.white, fontWeight: FontWeight.w500)),
                     ),
                   ),
                 ),
@@ -955,12 +955,12 @@ class _VenuesScreenState extends State<VenuesScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(event.title, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 3),
                 Row(children: [
                   const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
                   const SizedBox(width: 3),
-                  Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                  Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500), maxLines: 1, overflow: TextOverflow.ellipsis)),
                 ]),
                 const SizedBox(height: 10),
                 SizedBox(
@@ -975,7 +975,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       padding: EdgeInsets.zero,
                     ),
-                    child: Text('Visit', style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600)),
+                    child: Text('Visit', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), fontWeight: FontWeight.w600)),
                   ),
                 ),
               ],
@@ -1000,8 +1000,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: Image.asset(event.imagePath, height: 130, width: double.infinity, fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(height: 130, color: Colors.grey.shade200)),
+            child: Image.asset(event.imagePath, height: Responsive.h(context, 130), width: double.infinity, fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 130), color: Colors.grey.shade200)),
           ),
           Expanded(
             child: Padding(
@@ -1017,13 +1017,13 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     ]),
                   const SizedBox(height: 6),
                   Row(children: [
-                    Expanded(child: Text(event.title, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                    Expanded(child: Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis)),
                     if (event.description != null) ...[
                       const SizedBox(width: 6),
                       Row(children: [
                         const Icon(Icons.people_outline, size: 12, color: Colors.grey),
                         const SizedBox(width: 2),
-                        Text(event.description!, style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey.shade500)),
+                        Text(event.description!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 10), color: Colors.grey.shade500)),
                       ]),
                     ],
                   ]),
@@ -1032,13 +1032,13 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     Row(children: [
                       const Icon(Icons.star_rounded, size: 12, color: Color(0xFFFFB902)),
                       const SizedBox(width: 3),
-                      Text('${event.rating}(${event.reviewCount})', style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500)),
+                      Text('${event.rating}(${event.reviewCount})', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500)),
                     ]),
                   const SizedBox(height: 3),
                   Row(children: [
                     const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
                     const SizedBox(width: 3),
-                    Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                    Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500), maxLines: 1, overflow: TextOverflow.ellipsis)),
                   ]),
                   const Spacer(),
                   Align(
@@ -1054,7 +1054,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                         ),
-                        child: Text('Visit', style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600)),
+                        child: Text('Visit', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ),
@@ -1126,7 +1126,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
             padding: const EdgeInsets.only(bottom: 10, left: 6, right: 6),
             child: Text(
               label,
-              style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600, color: textColor),
+              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), fontWeight: FontWeight.w600, color: textColor),
               textAlign: TextAlign.center,
               maxLines: 2,
             ),
@@ -1195,7 +1195,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                                 ),
                                 child: Text(
                                   tag,
-                                  style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.white),
+                                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 10), fontWeight: FontWeight.w600, color: Colors.white),
                                 ),
                               ),
                             ))
@@ -1213,7 +1213,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                 children: [
                   Text(
                     event.title,
-                    style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1221,7 +1221,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   Row(children: [
                     const Icon(Icons.location_on_outlined, size: 13, color: Colors.grey),
                     const SizedBox(width: 3),
-                    Text(event.venue, style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500)),
+                    Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500)),
                   ]),
                   const SizedBox(height: 4),
                   if (event.rating != null)
@@ -1230,7 +1230,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       const SizedBox(width: 3),
                       Text(
                         '${event.rating}(${event.reviewCount})',
-                        style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500),
+                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500),
                       ),
                     ]),
                   const Spacer(),
@@ -1245,7 +1245,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       ),
-                      child: Text('View Details', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600)),
+                      child: Text('View Details', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ],
@@ -1262,7 +1262,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(12)),
-      child: Text(label, style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, color: textColor)),
+      child: Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 10), fontWeight: FontWeight.w600, color: textColor)),
     );
   }
 }
@@ -1336,10 +1336,10 @@ class _VenuesCategoriesSheetState extends State<_VenuesCategoriesSheet> {
               child: TextField(
                 controller: _controller,
                 onChanged: _onSearch,
-                style: GoogleFonts.poppins(fontSize: 13),
+                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13)),
                 decoration: InputDecoration(
                   hintText: 'Search Categories & more ...',
-                  hintStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade400),
+                  hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
                   prefixIcon: const Icon(Icons.search, color: Colors.grey, size: 20),
                   suffixIcon: GestureDetector(
                     onTap: () => Navigator.pop(context),
@@ -1359,12 +1359,12 @@ class _VenuesCategoriesSheetState extends State<_VenuesCategoriesSheet> {
               children: [
                 Text(
                   'All Categories',
-                  style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '(${_filtered.length} Results Found)',
-                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500),
+                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500),
                 ),
               ],
             ),
@@ -1376,7 +1376,7 @@ class _VenuesCategoriesSheetState extends State<_VenuesCategoriesSheet> {
                 ? Center(
                     child: Text(
                       'No categories found',
-                      style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
+                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: Colors.grey),
                     ),
                   )
                 : GridView.builder(
@@ -1435,7 +1435,7 @@ class _VenuesCategoriesSheetState extends State<_VenuesCategoriesSheet> {
         const SizedBox(height: 5),
         Text(
           cat['label'] as String,
-          style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E)),
+          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E)),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),

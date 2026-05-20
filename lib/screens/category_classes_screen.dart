@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../models/event_model.dart';
 import '../models/api_class_model.dart';
@@ -31,11 +32,15 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
   late int _selectedCategoryIndex;
   int _selectedFilterIndex = 0;
   final ScrollController _chipScrollController = ScrollController();
+  final ScrollController _listScrollController = ScrollController();
   late List<GlobalKey> _chipKeys;
 
+  static const int _pageSize = 20;
   List<ApiClass> _apiClasses = [];
   bool _isLoadingClasses = true;
-  String? _fetchError;
+  bool _isLoadingMore = false;
+  bool _hasMore = false;
+  int _currentPage = 1;
 
   @override
   void initState() {
@@ -46,30 +51,67 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
       DummyData.classesCategories.length,
       (_) => GlobalKey(),
     );
+    _listScrollController.addListener(_onScroll);
     _fetchClasses();
   }
 
   @override
   void dispose() {
     _chipScrollController.dispose();
+    _listScrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_listScrollController.position.pixels >=
+        _listScrollController.position.maxScrollExtent - 300 &&
+        _hasMore && !_isLoadingMore && !_isLoadingClasses) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_isLoadingMore || !_hasMore) return;
+    setState(() => _isLoadingMore = true);
+    try {
+      final next = await ClassesListingService.fetchClasses(
+        category: _categoryTitle,
+        subcategory: _selectedFilterIndex == 0 ? null : _filters[_selectedFilterIndex],
+        city: LocationState().selectedCity.value,
+        page: _currentPage + 1,
+        pageSize: _pageSize,
+      );
+      if (!mounted) return;
+      setState(() {
+        _apiClasses = [..._apiClasses, ...next.results];
+        _currentPage += 1;
+        _hasMore = _currentPage * _pageSize < next.count;
+        _isLoadingMore = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isLoadingMore = false);
+    }
   }
 
   Future<void> _fetchClasses({String? subcategory}) async {
     setState(() {
       _isLoadingClasses = true;
-      _fetchError = null;
+      _currentPage = 1;
+      _hasMore = false;
     });
     try {
       final page = await ClassesListingService.fetchClasses(
         category: _categoryTitle,
         subcategory: subcategory,
         city: LocationState().selectedCity.value,
-        pageSize: 50,
+        page: 1,
+        pageSize: _pageSize,
       );
       if (!mounted) return;
       setState(() {
         _apiClasses = page.results;
+        _hasMore = _pageSize < page.count;
         _isLoadingClasses = false;
       });
     } catch (e) {
@@ -78,7 +120,6 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
       setState(() {
         _apiClasses = [];
         _isLoadingClasses = false;
-        _fetchError = msg;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -204,6 +245,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
             // ── Scrollable Body ──────────────────────────────────────────
             Expanded(
               child: CustomScrollView(
+                controller: _listScrollController,
                 physics: const ClampingScrollPhysics(),
                 slivers: [
                   // Explore other Categories row + tinted background
@@ -226,7 +268,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                                 Text(
                                   'Explore other Categories',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 13,
+                                    fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.textPrimary,
                                   ),
@@ -237,7 +279,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                                   child: Text(
                                     'See All >',
                                     style: GoogleFonts.poppins(
-                                      fontSize: 12,
+                                      fontSize: Responsive.sp(context, 12),
                                       fontWeight: FontWeight.w500,
                                       color: const Color(0xFF5B5BD6),
                                     ),
@@ -247,7 +289,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                             ),
                           ),
                           SizedBox(
-                            height: 110,
+                            height: Responsive.h(context, 110),
                             child: ListView.builder(
                               controller: _chipScrollController,
                               scrollDirection: Axis.horizontal,
@@ -297,7 +339,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
                                               style: GoogleFonts.poppins(
-                                                fontSize: 9.5,
+                                                fontSize: Responsive.sp(context, 9.5),
                                                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                                                 height: 1.2,
                                                 color: AppColors.textPrimary,
@@ -340,7 +382,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                           Text(
                             'All $_categoryTitle',
                             style: GoogleFonts.poppins(
-                              fontSize: 14.5,
+                              fontSize: Responsive.sp(context, 14.5),
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
                             ),
@@ -379,7 +421,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                                     Text(
                                       'Filters',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 11.5,
+                                        fontSize: Responsive.sp(context, 11.5),
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white,
                                       ),
@@ -413,7 +455,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                               child: Text(
                                 _filters[filterIndex],
                                 style: GoogleFonts.poppins(
-                                  fontSize: 11.5,
+                                  fontSize: Responsive.sp(context, 11.5),
                                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                                   color: isActive ? AppColors.textPrimary : AppColors.textSecondary,
                                 ),
@@ -469,6 +511,13 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                           crossAxisSpacing: 14,
                           childAspectRatio: 0.62,
                         ),
+                      ),
+                    ),
+                  if (_isLoadingMore)
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Center(child: AppLoaderInline()),
                       ),
                     ),
                   const SliverToBoxAdapter(child: SizedBox(height: 40)),

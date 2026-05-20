@@ -72,7 +72,7 @@ class NewOnTlbCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
-                          fontSize: 15,
+                          fontSize: Responsive.sp(context, 15),
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
                         ),
@@ -92,7 +92,7 @@ class NewOnTlbCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.poppins(
-                                fontSize: 11.5,
+                                fontSize: Responsive.sp(context, 11.5),
                                 color: AppColors.textSecondary,
                               ),
                             ),
@@ -111,7 +111,7 @@ class NewOnTlbCard extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.poppins(
-                                  fontSize: 11.5,
+                                  fontSize: Responsive.sp(context, 11.5),
                                   color: AppColors.textSecondary,
                                 ),
                               ),
@@ -124,7 +124,7 @@ class NewOnTlbCard extends StatelessWidget {
                         Text(
                           'Starting from ₹${event.price!.toInt()}',
                           style: GoogleFonts.poppins(
-                            fontSize: 12,
+                            fontSize: Responsive.sp(context, 12),
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
                             decoration: TextDecoration.underline,
@@ -156,7 +156,7 @@ class NewOnTlbCard extends StatelessWidget {
                               child: Text(
                                 buttonLabel,
                                 style: GoogleFonts.poppins(
-                                  fontSize: 13,
+                                  fontSize: Responsive.sp(context, 13),
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.textPrimary,
                                 ),

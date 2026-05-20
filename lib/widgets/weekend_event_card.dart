@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
@@ -63,7 +64,7 @@ class WeekendEventCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.poppins(
-                        fontSize: 15,
+                        fontSize: Responsive.sp(context, 15),
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                         height: 1.2,
@@ -115,7 +116,7 @@ class _IconLine extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.poppins(
-              fontSize: 11.5,
+              fontSize: Responsive.sp(context, 11.5),
               color: AppColors.textSecondary,
               height: 1.2,
             ),
@@ -149,7 +150,7 @@ class _BookNowButton extends StatelessWidget {
             child: Text(
               'Book Now',
               style: GoogleFonts.poppins(
-                fontSize: 13,
+                fontSize: Responsive.sp(context, 13),
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF1A1A2E),
               ),

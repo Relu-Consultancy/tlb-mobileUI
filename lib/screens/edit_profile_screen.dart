@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/app_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
+import '../core/app_snackbar.dart';
 import '../providers/auth_state.dart';
 import '../services/auth_service.dart';
 import 'home_screen.dart';
@@ -26,6 +27,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   DateTime? _birthdate;
   bool _loading = false;
   bool _fetchingProfile = false;
+  bool _prefetchFailed = false;
 
   // Country code picker state — defaults to India
   (String, String, String) _selectedCountry = _countryCodes[0];
@@ -88,6 +90,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         _prefillFromAuthState();
       }
     } catch (_) {
+      if (!mounted) return;
+      setState(() => _prefetchFailed = true);
+      AppSnackBar.error(context, 'Could not load your profile data. Please review your details before saving.');
     } finally {
       if (mounted) setState(() => _fetchingProfile = false);
     }
@@ -271,7 +276,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     child: Text(
                       'Skip',
                       style: GoogleFonts.poppins(
-                        fontSize: 14,
+                        fontSize: Responsive.sp(context, 14),
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF2F80ED),
                       ),
@@ -289,12 +294,59 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   "Let's set up your profile so we can personalise your experience.",
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    fontSize: 13,
+                    fontSize: Responsive.sp(context, 13),
                     color: Colors.grey.shade500,
                     height: 1.5,
                   ),
                 ),
                 const SizedBox(height: 20),
+              ],
+
+              if (_prefetchFailed) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF3E0),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFFFB300), width: 1),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.warning_amber_rounded, color: Color(0xFFE65100), size: 18),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Profile data could not be loaded',
+                              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w700, color: const Color(0xFFE65100)),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Fields may be empty or outdated. Please fill them in carefully before saving.',
+                              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: const Color(0xFF7A4000), height: 1.4),
+                            ),
+                            const SizedBox(height: 6),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() => _prefetchFailed = false);
+                                _fetchAndPrefill();
+                              },
+                              child: Text(
+                                'Tap to retry',
+                                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), fontWeight: FontWeight.w700, color: const Color(0xFFE65100), decoration: TextDecoration.underline),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
 
               // ── Basic Info ──
@@ -366,7 +418,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ? const AppLoaderInline(dotSize: 7, spacing: 4, color: Color(0xFF1A1A2E))
                       : Text(
                           widget.isOnboarding ? 'Save & Continue' : 'Update Profile',
-                          style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600),
+                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w600),
                         ),
                 ),
               ),
@@ -392,7 +444,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           Text(
             title,
             style: GoogleFonts.poppins(
-              fontSize: 14,
+              fontSize: Responsive.sp(context, 14),
               fontWeight: FontWeight.w700,
               color: const Color(0xFF1A1A2E),
             ),
@@ -412,7 +464,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       child: Text(
         text,
         style: GoogleFonts.poppins(
-          fontSize: 12,
+          fontSize: Responsive.sp(context, 12),
           fontWeight: FontWeight.w600,
           color: const Color(0xFF424242),
         ),
@@ -443,11 +495,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(_selectedCountry.$2, style: const TextStyle(fontSize: 18)),
+                  Text(_selectedCountry.$2, style: TextStyle(fontSize: Responsive.sp(context, 18))),
                   const SizedBox(width: 4),
                   Text(
                     _selectedCountry.$1,
-                    style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF424242)),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF424242)),
                   ),
                   const SizedBox(width: 2),
                   Icon(Icons.keyboard_arrow_down, size: 16, color: Colors.grey.shade500),
@@ -460,10 +512,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             child: TextField(
               controller: _phoneCtrl,
               keyboardType: TextInputType.phone,
-              style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF424242)),
+              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF424242)),
               decoration: InputDecoration(
                 hintText: 'Phone number',
-                hintStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade400),
+                hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
@@ -509,10 +561,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       controller: searchCtrl,
                       autofocus: true,
                       onChanged: (_) => setLocal(() {}),
-                      style: GoogleFonts.poppins(fontSize: 14),
+                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14)),
                       decoration: InputDecoration(
                         hintText: 'Search country or code...',
-                        hintStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade400),
+                        hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
                         prefixIcon: const Icon(Icons.search, size: 20),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         enabledBorder: OutlineInputBorder(
@@ -535,12 +587,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         final isSelected = c.$1 == _selectedCountry.$1 && c.$2 == _selectedCountry.$2;
                         return ListTile(
                           dense: true,
-                          leading: Text(c.$2, style: const TextStyle(fontSize: 22)),
-                          title: Text(c.$3, style: GoogleFonts.poppins(fontSize: 14)),
+                          leading: Text(c.$2, style: TextStyle(fontSize: Responsive.sp(context, 22))),
+                          title: Text(c.$3, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14))),
                           trailing: Text(
                             c.$1,
                             style: GoogleFonts.poppins(
-                              fontSize: 13,
+                              fontSize: Responsive.sp(context, 13),
                               color: isSelected ? const Color(0xFFDE7104) : Colors.grey.shade600,
                               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                             ),
@@ -575,10 +627,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
-        style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF424242)),
+        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF424242)),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade400),
+          hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
           contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
@@ -610,7 +662,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               child: Text(
                 _birthdate != null ? _formatDate(_birthdate!) : 'Select date of birth',
                 style: GoogleFonts.poppins(
-                  fontSize: 13,
+                  fontSize: Responsive.sp(context, 13),
                   color: _birthdate != null ? const Color(0xFF424242) : Colors.grey.shade400,
                 ),
               ),
@@ -638,10 +690,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
-          hint: Text(hint, style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade400)),
+          hint: Text(hint, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400)),
           isExpanded: true,
           icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade500, size: 20),
-          style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF424242)),
+          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF424242)),
           items: items,
           onChanged: onChanged,
         ),

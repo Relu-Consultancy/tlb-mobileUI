@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
@@ -92,7 +93,7 @@ class EventCard extends StatelessWidget {
                   Text(
                     event.title,
                     style: GoogleFonts.poppins(
-                      fontSize: 15,
+                      fontSize: Responsive.sp(context, 15),
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
@@ -112,7 +113,7 @@ class EventCard extends StatelessWidget {
                         child: Text(
                           event.venue,
                           style: GoogleFonts.poppins(
-                            fontSize: 12,
+                            fontSize: Responsive.sp(context, 12),
                             color: AppColors.textSecondary,
                           ),
                           maxLines: 1,

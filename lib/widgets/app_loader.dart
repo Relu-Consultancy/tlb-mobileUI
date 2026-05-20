@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 
 /// ─────────────────────────────────────────────────────────────────────────────
 /// AppLoader — Premium branded loading indicator for TLB.
@@ -53,8 +54,8 @@ class AppLoader extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 message!,
-                style: const TextStyle(
-                  fontSize: 13,
+                style: TextStyle(
+                  fontSize: Responsive.sp(context, 13),
                   color: Color(0xFF9E9E9E),
                 ),
               ),
@@ -77,8 +78,8 @@ class AppLoader extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               message!,
-              style: const TextStyle(
-                fontSize: 13,
+              style: TextStyle(
+                fontSize: Responsive.sp(context, 13),
                 color: Color(0xFF9E9E9E),
                 fontWeight: FontWeight.w500,
               ),

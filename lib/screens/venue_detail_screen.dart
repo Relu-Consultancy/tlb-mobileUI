@@ -223,7 +223,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                 const Icon(Icons.error_outline_rounded, size: 48, color: Color(0xFFB0B0B0)),
                 const SizedBox(height: 12),
                 Text(_error!, textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey.shade600)),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: Colors.grey.shade600)),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _fetchDetail,
@@ -326,7 +326,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                           child: Text(
                             _tag,
                             style: GoogleFonts.poppins(
-                              fontSize: 12,
+                              fontSize: Responsive.sp(context, 12),
                               fontWeight: FontWeight.w600,
                               color: const Color(0xFF1A1A2E),
                             ),
@@ -366,7 +366,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                             Expanded(
                               child: Text(
                                 _locationText,
-                                style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF1A1A2E)),
+                                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF1A1A2E)),
                               ),
                             ),
                           ],
@@ -389,7 +389,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                             Expanded(
                               child: Text(
                                 '${_formatDate(_firstSlot!.date)}, ${_formatTime(_firstSlot!.startTime)} – ${_formatTime(_firstSlot!.endTime)}',
-                                style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF1A1A2E)),
+                                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF1A1A2E)),
                               ),
                             ),
                           ],
@@ -413,11 +413,11 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                           children: [
                             Text('About Venue',
                                 style: GoogleFonts.poppins(
-                                    fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                                    fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                             const SizedBox(height: 8),
                             Text(
                               _description!,
-                              style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600, height: 1.5),
+                              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600, height: 1.5),
                             ),
                           ],
                         ),
@@ -431,7 +431,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text('Things to Know',
                             style: GoogleFonts.poppins(
-                                fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                                fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                       ),
                       const SizedBox(height: 12),
                       Padding(
@@ -462,7 +462,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text('Packages',
                             style: GoogleFonts.poppins(
-                                fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                                fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                       ),
                       const SizedBox(height: 12),
                       ..._detail!.packages.map((pkg) => _buildPackageCard(pkg)),
@@ -477,13 +477,13 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                         children: [
                           Text('Gallery',
                               style: GoogleFonts.poppins(
-                                  fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                                  fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                           GestureDetector(
                             onTap: () => Navigator.push(context,
                                 MaterialPageRoute(builder: (_) => GalleryScreen(event: _eventForWidgets))),
                             child: Text('See All >',
                                 style: GoogleFonts.poppins(
-                                    fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6))),
+                                    fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6))),
                           ),
                         ],
                       ),
@@ -492,7 +492,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text('Sneak peek into what awaits you!',
-                          style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500)),
+                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
                     ),
                     const SizedBox(height: 12),
                     if (_galleryMedia.isNotEmpty)
@@ -540,7 +540,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text('Location',
                           style: GoogleFonts.poppins(
-                              fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                              fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                     ),
                     const SizedBox(height: 12),
                     Container(
@@ -582,7 +582,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                                 Text(
                                   _address ?? _locationText,
                                   style: GoogleFonts.poppins(
-                                      fontSize: 13, fontWeight: FontWeight.w500, color: Colors.white),
+                                      fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: Colors.white),
                                 ),
                                 const SizedBox(height: 8),
                                 SizedBox(
@@ -693,14 +693,14 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                                   children: [
                                     Text('MANAGED BY',
                                         style: GoogleFonts.poppins(
-                                            fontSize: 10,
+                                            fontSize: Responsive.sp(context, 10),
                                             fontWeight: FontWeight.w600,
                                             color: const Color(0xFFF5A623),
                                             letterSpacing: 0.5)),
                                     const SizedBox(height: 2),
                                     Text(_detail!.organizer!.businessName,
                                         style: GoogleFonts.poppins(
-                                            fontSize: 15,
+                                            fontSize: Responsive.sp(context, 15),
                                             fontWeight: FontWeight.w600,
                                             color: const Color(0xFF1A1A2E))),
                                   ],
@@ -715,7 +715,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                                 ),
                                 child: Text('Follow',
                                     style: GoogleFonts.poppins(
-                                        fontSize: 13,
+                                        fontSize: Responsive.sp(context, 13),
                                         fontWeight: FontWeight.w600,
                                         color: Colors.grey.shade600)),
                               ),
@@ -746,7 +746,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                     //   child: Text('Related Venues', ...),
                     // ),
 
-                    const SizedBox(height: 100),
+                    SizedBox(height: Responsive.h(context, 100)),
                   ],
                 ),
               ),
@@ -782,7 +782,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                           ),
                           TextSpan(
                               text: '/',
-                              style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey)),
+                              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: Colors.grey)),
                         ],
                       ),
                     )
@@ -833,11 +833,11 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
         children: [
           Icon(icon, size: 20, color: Colors.grey.shade600),
           const SizedBox(width: 12),
-          Text(label, style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600)),
+          Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600)),
           const Spacer(),
           Text(value,
               style: GoogleFonts.poppins(
-                  fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+                  fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
         ],
       ),
     );
@@ -861,12 +861,12 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
               children: [
                 Text(pkg.name,
                     style: GoogleFonts.poppins(
-                        fontSize: 13, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                        fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                 if (pkg.description?.isNotEmpty == true) ...[
                   const SizedBox(height: 4),
                   Text(pkg.description!,
                       style: GoogleFonts.poppins(
-                          fontSize: 11.5, color: Colors.grey.shade600, height: 1.4)),
+                          fontSize: Responsive.sp(context, 11.5), color: Colors.grey.shade600, height: 1.4)),
                 ],
                 if (pkg.durationMinutes != null || pkg.maxGuests != null) ...[
                   const SizedBox(height: 6),
@@ -876,14 +876,14 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                         const Icon(Icons.timer_outlined, size: 13, color: Colors.grey),
                         const SizedBox(width: 4),
                         Text('${pkg.durationMinutes} min',
-                            style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade600)),
+                            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade600)),
                         const SizedBox(width: 12),
                       ],
                       if (pkg.maxGuests != null) ...[
                         const Icon(Icons.people_outline, size: 13, color: Colors.grey),
                         const SizedBox(width: 4),
                         Text('Up to ${pkg.maxGuests} guests',
-                            style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade600)),
+                            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade600)),
                       ],
                     ],
                   ),
@@ -894,7 +894,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
           const SizedBox(width: 12),
           Text('₹${pkg.price.toInt()}',
               style: GoogleFonts.poppins(
-                  fontSize: 15, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                  fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
         ],
       ),
     );
@@ -908,7 +908,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
       child: Center(
         child: Text(initial,
             style: GoogleFonts.poppins(
-                fontSize: 20, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                fontSize: Responsive.sp(context, 20), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
       ),
     );
   }

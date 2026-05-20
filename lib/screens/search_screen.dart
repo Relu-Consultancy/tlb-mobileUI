@@ -55,6 +55,7 @@ class _SearchScreenState extends State<SearchScreen> {
   int _selectedChip = 0;
   Timer? _debounce;
   bool _loading = false;
+  bool _hasError = false;
   List<_SearchItem> _allResults = [];
   String _query = '';
 
@@ -93,10 +94,10 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Future<void> _doSearch(String q) async {
     if (q.isEmpty) {
-      setState(() { _query = ''; _allResults = []; _loading = false; });
+      setState(() { _query = ''; _allResults = []; _loading = false; _hasError = false; });
       return;
     }
-    setState(() { _query = q; _loading = true; });
+    setState(() { _query = q; _loading = true; _hasError = false; });
 
     try {
       // Start all four in parallel, await each after
@@ -174,10 +175,19 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
       ];
 
-      setState(() { _allResults = items; _loading = false; });
+      // Client-side filter: the backend may return unrelated results if the
+      // search param isn't implemented — only keep items that genuinely
+      // contain the query in their title or subtitle.
+      final qLower = q.toLowerCase();
+      final relevant = items.where((item) {
+        return item.title.toLowerCase().contains(qLower) ||
+            item.subtitle.toLowerCase().contains(qLower);
+      }).toList();
+
+      setState(() { _allResults = relevant; _loading = false; });
     } catch (_) {
       if (!mounted) return;
-      setState(() => _loading = false);
+      setState(() { _loading = false; _hasError = true; });
     }
   }
 
@@ -211,7 +221,7 @@ class _SearchScreenState extends State<SearchScreen> {
             onChanged: _onSearchChanged,
             decoration: InputDecoration(
               hintText: 'Search events, classes, venues...',
-              hintStyle: GoogleFonts.poppins(fontSize: 14, color: Colors.grey),
+              hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: Colors.grey),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               suffixIcon: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -246,7 +256,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 borderSide: const BorderSide(color: Color(0xFF1A1A2E), width: 1.5),
               ),
             ),
-            style: GoogleFonts.poppins(fontSize: 14),
+            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14)),
           ),
         ),
       ),
@@ -276,7 +286,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: Text(
                       _chips[index],
                       style: GoogleFonts.poppins(
-                        fontSize: 13,
+                        fontSize: Responsive.sp(context, 13),
                         fontWeight: FontWeight.w600,
                         color: isSelected ? Colors.white : const Color(0xFF1A1A2E),
                       ),
@@ -306,7 +316,7 @@ class _SearchScreenState extends State<SearchScreen> {
               Text(
                 'Search anything',
                 style: GoogleFonts.poppins(
-                  fontSize: 18,
+                  fontSize: Responsive.sp(context, 18),
                   fontWeight: FontWeight.w600,
                   color: const Color(0xFF1A1A2E),
                 ),
@@ -314,7 +324,7 @@ class _SearchScreenState extends State<SearchScreen> {
               const SizedBox(height: 6),
               Text(
                 'Find events, classes, programs & venues by name',
-                style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey),
+                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -332,6 +342,54 @@ class _SearchScreenState extends State<SearchScreen> {
       );
     }
 
+    if (_hasError) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.wifi_off_rounded, size: 56, color: Colors.grey.shade300),
+              const SizedBox(height: 16),
+              Text(
+                'Search failed',
+                style: GoogleFonts.poppins(
+                  fontSize: Responsive.sp(context, 15),
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF1A1A2E),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Could not reach the server. Check your connection and try again.',
+                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              GestureDetector(
+                onTap: () => _doSearch(_query),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFCC00),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Text(
+                    'Retry',
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 14),
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF1A1A2E),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     final results = _filteredResults;
     if (results.isEmpty) {
       return Center(
@@ -343,7 +401,7 @@ class _SearchScreenState extends State<SearchScreen> {
             Text(
               'No results for "$_query"',
               style: GoogleFonts.poppins(
-                fontSize: 15,
+                fontSize: Responsive.sp(context, 15),
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF1A1A2E),
               ),
@@ -351,7 +409,7 @@ class _SearchScreenState extends State<SearchScreen> {
             const SizedBox(height: 6),
             Text(
               'Try a different search term',
-              style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey),
+              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey),
             ),
           ],
         ),
@@ -381,7 +439,7 @@ class _SearchScreenState extends State<SearchScreen> {
           title: Text(
             item.title,
             style: GoogleFonts.poppins(
-              fontSize: 14,
+              fontSize: Responsive.sp(context, 14),
               fontWeight: FontWeight.w600,
               color: const Color(0xFF1A1A2E),
             ),
@@ -401,7 +459,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   child: Text(
                     item.typeLabel,
                     style: GoogleFonts.poppins(
-                      fontSize: 10,
+                      fontSize: Responsive.sp(context, 10),
                       fontWeight: FontWeight.w600,
                       color: item.typeColor,
                     ),
@@ -412,7 +470,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   Expanded(
                     child: Text(
                       item.subtitle,
-                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -507,7 +565,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Age Group', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                              Text('Age Group', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                               const SizedBox(height: 12),
                               Wrap(
                                 spacing: 8,
@@ -530,7 +588,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Mode', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                              Text('Mode', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                               const SizedBox(height: 12),
                               ..._modes.map((mode) => _buildRadioOption(
                                 label: mode,
@@ -549,7 +607,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Location', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                              Text('Location', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                               const SizedBox(height: 12),
                               _buildDropdown(
                                 hint: 'City',
@@ -574,7 +632,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Date', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                              Text('Date', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                               const SizedBox(height: 12),
                               Wrap(
                                 spacing: 8,
@@ -615,7 +673,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
-                          child: Text('Clear All', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+                          child: Text('Clear All', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -671,7 +729,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   : null,
             ),
             const SizedBox(width: 12),
-            Text(label, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
+            Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
           ],
         ),
       ),
@@ -686,16 +744,16 @@ class _SearchScreenState extends State<SearchScreen> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
-          hint: Text(hint, style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey.shade500)),
+          hint: Text(hint, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: Colors.grey.shade500)),
           items: items.map((item) => DropdownMenuItem(
             value: item,
-            child: Text(item, style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF1A1A2E))),
+            child: Text(item, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFF1A1A2E))),
           )).toList(),
           onChanged: onChanged,
           isExpanded: true,
           icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF1A1A2E)),
           dropdownColor: Colors.white,
-          style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF1A1A2E)),
+          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFF1A1A2E)),
         ),
       ),
     );
@@ -717,7 +775,7 @@ class _SearchScreenState extends State<SearchScreen> {
               const Icon(Icons.close, size: 16, color: Color(0xFF1A1A2E)),
               const SizedBox(width: 6),
             ],
-            Text(label, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
+            Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
           ],
         ),
       ),

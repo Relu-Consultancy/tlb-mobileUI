@@ -72,7 +72,7 @@ class TlbSignatureSection extends StatelessWidget {
                             Text(
                               event.title,
                               style: GoogleFonts.poppins(
-                                fontSize: 14,
+                                fontSize: Responsive.sp(context, 14),
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFF1A1A2E),
                               ),
@@ -84,7 +84,7 @@ class TlbSignatureSection extends StatelessWidget {
                               child: Text(
                                 event.venue, // Using venue for subtitle in our dummy data
                                 style: GoogleFonts.poppins(
-                                  fontSize: 12,
+                                  fontSize: Responsive.sp(context, 12),
                                   color: Colors.grey,
                                 ),
                                 maxLines: 3,

@@ -161,7 +161,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                             return Padding(
                               padding: const EdgeInsets.only(right: 16),
                               child: SizedBox(
-                                width: 240,
+                                width: Responsive.w(context, 240),
                                 child: EventCardWithRating(
                                   event: DummyData.classesWhatEveryoneJoining[index],
                                   buttonLabel: 'Check Availability',
@@ -223,8 +223,8 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                       item['label'] as String,
                                       textAlign: TextAlign.center,
                                       maxLines: 2,
-                                      style: const TextStyle(
-                                        fontSize: 11,
+                                      style: TextStyle(
+                                        fontSize: Responsive.sp(context, 11),
                                         fontWeight: FontWeight.w600,
                                         color: AppColors.textPrimary,
                                         height: 1.3,

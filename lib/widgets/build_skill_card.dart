@@ -73,7 +73,7 @@ class BuildSkillCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
-                          fontSize: 13.5,
+                          fontSize: Responsive.sp(context, 13.5),
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
                           height: 1.25,
@@ -92,7 +92,7 @@ class BuildSkillCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.poppins(
-                                fontSize: 11,
+                                fontSize: Responsive.sp(context, 11),
                                 color: AppColors.textSecondary,
                               ),
                             ),
@@ -110,7 +110,7 @@ class BuildSkillCard extends StatelessWidget {
                             Text(
                               event.rating!.toStringAsFixed(1),
                               style: GoogleFonts.poppins(
-                                fontSize: 11,
+                                fontSize: Responsive.sp(context, 11),
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textPrimary,
                               ),
@@ -120,7 +120,7 @@ class BuildSkillCard extends StatelessWidget {
                               Text(
                                 event.reviewCount!,
                                 style: GoogleFonts.poppins(
-                                  fontSize: 10.5,
+                                  fontSize: Responsive.sp(context, 10.5),
                                   color: AppColors.textSecondary,
                                 ),
                               ),
@@ -140,7 +140,7 @@ class BuildSkillCard extends StatelessWidget {
                           child: Text(
                             event.tag!,
                             style: GoogleFonts.poppins(
-                              fontSize: 10.5,
+                              fontSize: Responsive.sp(context, 10.5),
                               fontWeight: FontWeight.w600,
                               color: const Color(0xFFBE185D),
                             ),
@@ -170,7 +170,7 @@ class BuildSkillCard extends StatelessWidget {
                             child: Text(
                               ctaLabel,
                               style: GoogleFonts.poppins(
-                                fontSize: 12,
+                                fontSize: Responsive.sp(context, 12),
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFF1A1A2E),
                               ),

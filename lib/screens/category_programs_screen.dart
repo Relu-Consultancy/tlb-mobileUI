@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../models/event_model.dart';
 import '../providers/location_state.dart';
@@ -10,6 +11,7 @@ import '../widgets/all_categories_popup.dart';
 import '../widgets/category_screen_header.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/subcategory_empty_state.dart';
+import '../models/api_category_model.dart';
 import '../models/api_program_model.dart';
 import '../services/programs_listing_service.dart';
 import '../widgets/app_loader.dart';
@@ -31,11 +33,21 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
   late int _selectedCategoryIndex;
   int _selectedFilterIndex = 0;
   final ScrollController _chipScrollController = ScrollController();
+  final ScrollController _listScrollController = ScrollController();
   late List<GlobalKey> _chipKeys;
 
+  // API category metadata
+  List<ApiCategory> _apiCategories = [];
+  int? _selectedCategoryId;
+  int? _selectedSubcategoryId;
+  List<ApiSubcategory> _currentSubcategories = [];
+
+  static const int _pageSize = 20;
   List<ApiProgram> _apiPrograms = [];
   bool _isLoadingPrograms = true;
-  String? _fetchError;
+  bool _isLoadingMore = false;
+  bool _hasMore = false;
+  int _currentPage = 1;
 
   @override
   void initState() {
@@ -46,13 +58,87 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
       DummyData.programsCategories.length,
       (_) => GlobalKey(),
     );
+    _listScrollController.addListener(_onScroll);
+    _fetchApiCategories();
+  }
+
+  Future<void> _fetchApiCategories() async {
+    try {
+      final cats = await ProgramsListingService.fetchProgramCategories();
+      if (!mounted) return;
+      setState(() => _apiCategories = cats);
+    } catch (_) {}
+    _resolveAndFetch();
+  }
+
+  void _resolveAndFetch() {
+    _selectedCategoryId = _resolveId(_categoryTitle);
+    _currentSubcategories = _resolveSubs(_selectedCategoryId);
     _fetchPrograms();
+  }
+
+  // Normalise names for fuzzy matching (strip newlines, lowercase, collapse whitespace)
+  static String _norm(String s) =>
+      s.replaceAll('\n', ' ').trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+
+  int? _resolveId(String label) {
+    final needle = _norm(label);
+    for (final cat in _apiCategories) {
+      final hay = _norm(cat.name);
+      // Exact match or one is a prefix of the other (handles truncated dummy labels)
+      if (hay == needle || hay.startsWith(needle) || needle.startsWith(hay)) {
+        return cat.id;
+      }
+    }
+    return null;
+  }
+
+  List<ApiSubcategory> _resolveSubs(int? categoryId) {
+    if (categoryId == null) return [];
+    try {
+      return _apiCategories.firstWhere((c) => c.id == categoryId).subcategories;
+    } catch (_) {
+      return [];
+    }
   }
 
   @override
   void dispose() {
     _chipScrollController.dispose();
+    _listScrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_listScrollController.position.pixels >=
+        _listScrollController.position.maxScrollExtent - 300 &&
+        _hasMore && !_isLoadingMore && !_isLoadingPrograms) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_isLoadingMore || !_hasMore) return;
+    setState(() => _isLoadingMore = true);
+    try {
+      final next = await ProgramsListingService.fetchPrograms(
+        categoryId: _selectedCategoryId,
+        subcategoryId: _selectedSubcategoryId,
+        city: LocationState().selectedCity.value,
+        page: _currentPage + 1,
+        pageSize: _pageSize,
+      );
+      if (!mounted) return;
+      setState(() {
+        _apiPrograms = [..._apiPrograms, ...next.results];
+        _currentPage += 1;
+        _hasMore = _currentPage * _pageSize < next.count;
+        _isLoadingMore = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isLoadingMore = false);
+    }
   }
 
   void _showAllCategories() {
@@ -73,21 +159,24 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
     );
   }
 
-  Future<void> _fetchPrograms({String? subcategory}) async {
+  Future<void> _fetchPrograms({int? subcategoryId}) async {
     setState(() {
       _isLoadingPrograms = true;
-      _fetchError = null;
+      _currentPage = 1;
+      _hasMore = false;
     });
     try {
       final page = await ProgramsListingService.fetchPrograms(
-        category: _categoryTitle,
-        subcategory: subcategory, // Note: the backend uses subcategory_id, but we'll map or send title based on backend behavior
+        categoryId: _selectedCategoryId,
+        subcategoryId: subcategoryId,
         city: LocationState().selectedCity.value,
-        pageSize: 50,
+        page: 1,
+        pageSize: _pageSize,
       );
       if (!mounted) return;
       setState(() {
         _apiPrograms = page.results;
+        _hasMore = _pageSize < page.count;
         _isLoadingPrograms = false;
       });
     } catch (e) {
@@ -96,7 +185,6 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
       setState(() {
         _apiPrograms = [];
         _isLoadingPrograms = false;
-        _fetchError = msg;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -115,7 +203,12 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
     setState(() {
       _selectedCategoryIndex = index;
       _selectedFilterIndex = 0;
+      _selectedSubcategoryId = null;
     });
+    final newTitle = (DummyData.programsCategories[index]['label'] as String)
+        .replaceAll('\n', ' ');
+    _selectedCategoryId = _resolveId(newTitle);
+    _currentSubcategories = _resolveSubs(_selectedCategoryId);
     _fetchPrograms();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final key = _chipKeys[index];
@@ -138,8 +231,10 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
 
   Color get _accentColor => _currentGradient.last;
 
-  List<String> get _filters =>
-      DummyData.programsSubFilters[_selectedCategoryIndex];
+  // Use API subcategories when available, fall back to dummy strings as display-only
+  List<String> get _filters => _currentSubcategories.isNotEmpty
+      ? ['All', ..._currentSubcategories.map((s) => s.name)]
+      : DummyData.programsSubFilters[_selectedCategoryIndex];
 
   List<ApiProgram> get _filteredPrograms => _apiPrograms;
 
@@ -205,6 +300,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
             // ── Scrollable Body ──────────────────────────────────────────
             Expanded(
               child: CustomScrollView(
+                controller: _listScrollController,
                 physics: const ClampingScrollPhysics(),
                 slivers: [
                   // Explore other Programs row + tinted background
@@ -227,7 +323,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                                 Text(
                                   'Explore other Programs',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 13,
+                                    fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.textPrimary,
                                   ),
@@ -238,7 +334,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                                   child: Text(
                                     'See All >',
                                     style: GoogleFonts.poppins(
-                                      fontSize: 12,
+                                      fontSize: Responsive.sp(context, 12),
                                       fontWeight: FontWeight.w500,
                                       color: const Color(0xFF5B5BD6),
                                     ),
@@ -248,7 +344,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                             ),
                           ),
                           SizedBox(
-                            height: 132,
+                            height: Responsive.h(context, 132),
                             child: ListView.builder(
                               controller: _chipScrollController,
                               scrollDirection: Axis.horizontal,
@@ -298,7 +394,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
                                               style: GoogleFonts.poppins(
-                                                fontSize: 9.5,
+                                                fontSize: Responsive.sp(context, 9.5),
                                                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                                                 height: 1.2,
                                                 color: AppColors.textPrimary,
@@ -341,7 +437,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                           Text(
                             'All $_categoryTitle',
                             style: GoogleFonts.poppins(
-                              fontSize: 14.5,
+                              fontSize: Responsive.sp(context, 14.5),
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
                             ),
@@ -382,7 +478,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                                     Text(
                                       'Filters',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 11.5,
+                                        fontSize: Responsive.sp(context, 11.5),
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white,
                                       ),
@@ -402,12 +498,16 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                               filterIndex == _selectedFilterIndex;
                           return GestureDetector(
                             onTap: () {
-                              setState(() => _selectedFilterIndex = filterIndex);
-                              if (filterIndex == 0) {
-                                _fetchPrograms(subcategory: null);
-                              } else {
-                                _fetchPrograms(subcategory: _filters[filterIndex]);
+                              int? subId;
+                              if (filterIndex > 0 && _currentSubcategories.isNotEmpty) {
+                                // filterIndex 1+ maps to _currentSubcategories[filterIndex - 1]
+                                subId = _currentSubcategories[filterIndex - 1].id;
                               }
+                              setState(() {
+                                _selectedFilterIndex = filterIndex;
+                                _selectedSubcategoryId = subId;
+                              });
+                              _fetchPrograms(subcategoryId: subId);
                             },
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
@@ -428,7 +528,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                               child: Text(
                                 _filters[filterIndex],
                                 style: GoogleFonts.poppins(
-                                  fontSize: 11.5,
+                                  fontSize: Responsive.sp(context, 11.5),
                                   fontWeight: isActive
                                       ? FontWeight.w700
                                       : FontWeight.w500,
@@ -490,6 +590,13 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                           crossAxisSpacing: 14,
                           childAspectRatio: 0.55,
                         ),
+                      ),
+                    ),
+                  if (_isLoadingMore)
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Center(child: AppLoaderInline()),
                       ),
                     ),
                   const SliverToBoxAdapter(child: SizedBox(height: 40)),

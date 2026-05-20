@@ -1,15 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../models/event_model.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import '../core/app_config.dart';
+import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
-import 'payment_screen.dart';
+import '../models/api_booking_model.dart';
+import '../models/event_model.dart';
+import '../providers/auth_state.dart';
+import '../services/booking_service.dart';
+import '../widgets/app_loader.dart';
+import 'booking_confirmed_screen.dart';
 
-class ReviewPayScreen extends StatelessWidget {
+class ReviewPayScreen extends StatefulWidget {
   final EventModel event;
   final String selectedDate;
   final String selectedTime;
   final String ticketDetails;
   final double subtotal;
+  final List<Map<String, dynamic>> lineItems;
+  final Map<String, dynamic> attendee;
+  final String bookingType;
+  final int? batchId;
+  // Venue-specific
+  final int? slotId;
+  final int? packageId;
+  final int? guestCount;
+  final String? specialRequests;
 
   const ReviewPayScreen({
     super.key,
@@ -18,20 +34,261 @@ class ReviewPayScreen extends StatelessWidget {
     required this.selectedTime,
     required this.ticketDetails,
     required this.subtotal,
+    required this.lineItems,
+    required this.attendee,
+    this.bookingType = 'event',
+    this.batchId,
+    this.slotId,
+    this.packageId,
+    this.guestCount,
+    this.specialRequests,
   });
 
   @override
-  Widget build(BuildContext context) {
-    // Math logic matching design: booking fee + subtotal
-    // The design shows subtotal=399, fee=32.96, total=431.96
-    // So fee is roughly 8.26% of subtotal.
-    final bookingFee = subtotal * 0.0826;
-    final totalAmount = subtotal + bookingFee;
+  State<ReviewPayScreen> createState() => _ReviewPayScreenState();
+}
 
+class _ReviewPayScreenState extends State<ReviewPayScreen> {
+  late final Razorpay _razorpay;
+  bool _isInitiating = false;
+  String? _pendingBookingId;
+  String? _pendingBookingRef;
+
+  double get _bookingFee => widget.subtotal * 0.0826;
+  double get _totalAmount => widget.subtotal + _bookingFee;
+
+  @override
+  void initState() {
+    super.initState();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
+
+  @override
+  void dispose() {
+    _razorpay.clear();
+    super.dispose();
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  //  Step 1 — Initiate booking, then open Razorpay checkout
+  // ─────────────────────────────────────────────────────────────
+  Future<void> _onProceedToPay() async {
+    final token = AuthState.accessToken;
+    if (token == null) {
+      AppSnackBar.error(context, 'Please log in to continue.');
+      return;
+    }
+    if (widget.event.id.isEmpty) {
+      AppSnackBar.error(context, 'Booking unavailable for this listing.');
+      return;
+    }
+
+    setState(() => _isInitiating = true);
+
+    try {
+      List<BookingLineItem> lineItems = [];
+      List<BookingAttendee> attendees = [];
+      int? qty;
+
+      if (widget.bookingType == 'event') {
+        lineItems = widget.lineItems
+            .where((t) => (t['count'] as int) > 0 && t.containsKey('ticketId'))
+            .map((t) => BookingLineItem(
+                  ticketId: t['ticketId'] as int,
+                  quantity: t['count'] as int,
+                ))
+            .toList();
+
+        final totalQty =
+            widget.lineItems.fold<int>(0, (s, t) => s + (t['count'] as int));
+        final count = totalQty > 0 ? totalQty : 1;
+        final att = widget.attendee;
+        attendees = List.generate(
+          count,
+          (_) => BookingAttendee(
+            name: (att['name'] as String? ?? '').isNotEmpty
+                ? att['name'] as String
+                : 'Guest',
+            age: int.tryParse(att['age']?.toString() ?? ''),
+            phone: att['phone'] as String?,
+          ),
+        );
+      } else if (widget.bookingType == 'class' ||
+          widget.bookingType == 'program') {
+        final totalQty =
+            widget.lineItems.fold<int>(0, (s, t) => s + (t['count'] as int));
+        qty = totalQty > 0 ? totalQty : 1;
+        final att = widget.attendee;
+        if ((att['name'] as String? ?? '').isNotEmpty) {
+          attendees = List.generate(
+            qty,
+            (_) => BookingAttendee(
+              name: att['name'] as String,
+              age: int.tryParse(att['age']?.toString() ?? ''),
+              phone: att['phone'] as String?,
+            ),
+          );
+        }
+      }
+      // For 'venue': attendees are optional — only send if attendee data provided
+      else if (widget.bookingType == 'venue') {
+        final att = widget.attendee;
+        if ((att['name'] as String? ?? '').isNotEmpty) {
+          attendees = [
+            BookingAttendee(
+              name: att['name'] as String,
+              phone: att['phone'] as String?,
+            ),
+          ];
+        }
+      }
+
+      final resp = await BookingService.initiateBooking(
+        token: token,
+        listingId: widget.event.id,
+        bookingType: widget.bookingType,
+        lineItems: lineItems,
+        attendees: attendees,
+        batchId: widget.batchId,
+        quantity: qty,
+        slotId: widget.slotId,
+        packageId: widget.packageId,
+        guestCount: widget.guestCount,
+        specialRequests: widget.specialRequests,
+      );
+
+      _pendingBookingId = resp.bookingId;
+      _pendingBookingRef = resp.bookingReference;
+
+      final options = <String, dynamic>{
+        'key': AppConfig.razorpayKeyId,
+        'order_id': resp.razorpayOrderId,
+        'amount': (resp.amount * 100).toInt(), // Razorpay expects paise
+        'currency': resp.currency,
+        'name': 'TLB Events',
+        'description': resp.bookingReference,
+        'prefill': {
+          'contact': AuthState.userPhone ?? '',
+          'email': AuthState.userEmail ?? '',
+        },
+        'theme': {'color': '#FFCC00'},
+      };
+
+      _razorpay.open(options);
+    } catch (e) {
+      if (mounted) AppSnackBar.error(context, e.toString());
+    } finally {
+      if (mounted) setState(() => _isInitiating = false);
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  //  Step 3 — Verify payment with backend after Razorpay success
+  // ─────────────────────────────────────────────────────────────
+  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    final bookingId = _pendingBookingId;
+    if (bookingId == null) return;
+
+    final token = AuthState.accessToken;
+    if (token == null) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: AppLoader(message: 'Confirming your booking…'),
+      ),
+    );
+
+    try {
+      final confirmed = await BookingService.verifyPayment(
+        token: token,
+        bookingId: bookingId,
+        razorpayPaymentId: response.paymentId ?? '',
+        razorpayOrderId: response.orderId ?? '',
+        razorpaySignature: response.signature ?? '',
+      );
+
+      if (!mounted) return;
+      Navigator.pop(context); // close loader
+
+      if (confirmed.status != 'confirmed' ||
+          confirmed.paymentStatus != 'paid') {
+        _showVerificationFailureDialog(_pendingBookingRef ?? bookingId);
+        return;
+      }
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => BookingConfirmedScreen(
+            event: widget.event,
+            selectedDate: widget.selectedDate,
+            selectedTime: widget.selectedTime,
+            bookingReference: confirmed.bookingReference,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context); // close loader
+      // Payment went through Razorpay but backend verification failed.
+      // Show a recoverable error — user can contact support with their ref.
+      _showVerificationFailureDialog(_pendingBookingRef ?? bookingId);
+    }
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    final msg = (response.message?.isNotEmpty == true)
+        ? response.message!
+        : 'Payment failed. Please try again.';
+    AppSnackBar.error(context, msg);
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    AppSnackBar.show(context, 'Redirecting to ${response.walletName}…');
+  }
+
+  void _showVerificationFailureDialog(String ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Booking Pending',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
+        ),
+        content: Text(
+          'Your payment was received but we could not confirm the booking automatically.\n\n'
+          'Reference: $ref\n\n'
+          'Please contact support and share this reference number.',
+          style: GoogleFonts.poppins(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('OK',
+                style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF1A1A2E))),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  //  UI
+  // ─────────────────────────────────────────────────────────────
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F7),
       appBar: AppBar(
-        backgroundColor: Colors.white, // Solid yellow header changed to white
+        backgroundColor: Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
@@ -41,7 +298,7 @@ class ReviewPayScreen extends StatelessWidget {
         title: Text(
           'Review & Pay',
           style: GoogleFonts.poppins(
-            fontSize: 16, // Font size reduced to 16
+            fontSize: Responsive.sp(context, 16),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
@@ -57,188 +314,15 @@ class ReviewPayScreen extends StatelessWidget {
               Text(
                 'Please review your booking details',
                 style: GoogleFonts.poppins(
-                  fontSize: 14,
+                  fontSize: Responsive.sp(context, 14),
                   fontWeight: FontWeight.w500,
                   color: Colors.grey.shade600,
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Booking details card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title & Base Price
-                    Text(
-                      event.title,
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1A1A2E),
-                        height: 1.3,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      '₹${event.price} per ticket',
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        color: Colors.grey.shade500,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-                    Divider(color: Colors.grey.shade200, thickness: 1),
-                    const SizedBox(height: 16),
-
-                    // Date & Time
-                    Row(
-                      children: [
-                        const Icon(Icons.calendar_month_outlined, color: Color(0xFFFFC107), size: 20),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            '$selectedDate • $selectedTime',
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF1A1A2E),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Location
-                    Row(
-                      children: [
-                        const Icon(Icons.location_on_outlined, color: Color(0xFFFFC107), size: 20),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            event.venue,
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF1A1A2E),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-                    
-                    // Tickets Details
-                    Text(
-                      'Tickets',
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1A1A2E),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      ticketDetails,
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        color: const Color(0xFF1A1A2E),
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
-                    Divider(color: Colors.grey.shade200, thickness: 1),
-                    const SizedBox(height: 16),
-
-                    // Pricing Breakdown
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Sub-total',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                        ),
-                        Text(
-                          '₹${subtotal.toStringAsFixed(0)}',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Booking Fee',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                        ),
-                        Text(
-                          '₹${bookingFee.toStringAsFixed(2)}',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-                    Divider(color: Colors.grey.shade200, thickness: 1),
-                    const SizedBox(height: 16),
-
-                    // Total Amount
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Total Amount',
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                        ),
-                        Text(
-                          '₹${totalAmount.toStringAsFixed(2)}',
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFFFFB300), // Darker yellow for emphasis
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+              _buildBookingCard(),
+              const SizedBox(height: 16),
+              _buildSecurePaymentNote(),
             ],
           ),
         ),
@@ -254,39 +338,194 @@ class ReviewPayScreen extends StatelessWidget {
             width: double.infinity,
             height: 52,
             child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => PaymentScreen(
-                      event: event,
-                      amount: totalAmount.toInt(),
-                      selectedDate: selectedDate,
-                      selectedTime: selectedTime,
-                    ),
-                  ),
-                );
-              },
+              onPressed: _isInitiating ? null : _onProceedToPay,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFFCC00),
                 foregroundColor: const Color(0xFF1A1A2E),
+                disabledBackgroundColor: Colors.grey.shade300,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(28),
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 elevation: 0,
               ),
-              child: Text(
-                'Proceed to Pay',
-                style: GoogleFonts.poppins(
-                  fontSize: Responsive.sp(context, 16),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              child: _isInitiating
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: AppLoaderInline(),
+                    )
+                  : Text(
+                      'Pay ₹${_totalAmount.toStringAsFixed(2)}',
+                      style: GoogleFonts.poppins(
+                        fontSize: Responsive.sp(context, 16),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildBookingCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Title
+          Text(
+            widget.event.title,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 18),
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1A1A2E),
+              height: 1.3,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Divider(color: Colors.grey.shade200, thickness: 1),
+          const SizedBox(height: 16),
+
+          // Date & Time
+          _iconRow(
+            Icons.calendar_month_outlined,
+            '${widget.selectedDate} • ${widget.selectedTime}',
+          ),
+          const SizedBox(height: 12),
+
+          // Location
+          _iconRow(Icons.location_on_outlined, widget.event.venue),
+
+          const SizedBox(height: 24),
+
+          // Tickets
+          Text(
+            'Tickets',
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 16),
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1A1A2E),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            widget.ticketDetails,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 14),
+              color: const Color(0xFF1A1A2E),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+          Divider(color: Colors.grey.shade200, thickness: 1),
+          const SizedBox(height: 16),
+
+          // Price breakdown
+          _priceRow('Sub-total', '₹${widget.subtotal.toStringAsFixed(0)}'),
+          const SizedBox(height: 8),
+          _priceRow('Booking Fee', '₹${_bookingFee.toStringAsFixed(2)}'),
+          const SizedBox(height: 16),
+          Divider(color: Colors.grey.shade200, thickness: 1),
+          const SizedBox(height: 16),
+
+          // Total
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total Amount',
+                style: GoogleFonts.poppins(
+                  fontSize: Responsive.sp(context, 16),
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF1A1A2E),
+                ),
+              ),
+              Text(
+                '₹${_totalAmount.toStringAsFixed(2)}',
+                style: GoogleFonts.poppins(
+                  fontSize: Responsive.sp(context, 16),
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFFFFB300),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSecurePaymentNote() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.lock_outline, size: 14, color: Colors.grey.shade400),
+        const SizedBox(width: 6),
+        Text(
+          'Payments powered by Razorpay — 256-bit SSL secured',
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 11),
+            color: Colors.grey.shade400,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _iconRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, color: const Color(0xFFFFC107), size: 20),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 14),
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF1A1A2E),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _priceRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 14),
+            color: const Color(0xFF1A1A2E),
+          ),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 14),
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF1A1A2E),
+          ),
+        ),
+      ],
     );
   }
 }

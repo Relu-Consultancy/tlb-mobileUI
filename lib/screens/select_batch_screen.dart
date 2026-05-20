@@ -495,6 +495,8 @@ class _SelectBatchScreenState extends State<SelectBatchScreen> {
                         event: widget.event,
                         selectedDate: _startingFrom,
                         selectedTime: _timeRange(batches[_batchIdx]),
+                        bookingType: 'class',
+                        batchId: batches[_batchIdx].id,
                       ),
                     ),
                   );

@@ -1,3 +1,6 @@
+# Local development assets (screenshots, design refs — not for version control)
+Development/
+
 # Miscellaneous
 *.class
 *.log

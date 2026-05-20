@@ -203,14 +203,14 @@ class _SignupScreenState extends State<SignupScreen> {
 
                   // ── Illustration ──────────────────────────────────────────
                   SizedBox(
-                    width: 152,
-                    height: 152,
+                    width: Responsive.w(context, 152),
+                    height: Responsive.h(context, 152),
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
                         Container(
-                          width: 132,
-                          height: 132,
+                          width: Responsive.w(context, 132),
+                          height: Responsive.h(context, 132),
                           decoration: const BoxDecoration(
                             color: Color(0xFFFDE3D8),
                             shape: BoxShape.circle,
@@ -316,7 +316,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       Text(
                         'Already have an account? ',
                         style: GoogleFonts.poppins(
-                          fontSize: 13.5,
+                          fontSize: Responsive.sp(context, 13.5),
                           color: const Color(0xFF9E9E9E),
                         ),
                       ),
@@ -325,7 +325,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         child: Text(
                           'Log In',
                           style: GoogleFonts.poppins(
-                            fontSize: 13.5,
+                            fontSize: Responsive.sp(context, 13.5),
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF1A1A1A),
                           ),
@@ -436,7 +436,7 @@ class _PrimaryButton extends StatelessWidget {
             : Text(
                 label,
                 style: GoogleFonts.poppins(
-                  fontSize: 15,
+                  fontSize: Responsive.sp(context, 15),
                   fontWeight: FontWeight.w700,
                   color: const Color(0xFF1A1A1A),
                 ),
@@ -460,7 +460,7 @@ class _OrDivider extends StatelessWidget {
           child: Text(
             'OR',
             style: GoogleFonts.poppins(
-              fontSize: 12,
+              fontSize: Responsive.sp(context, 12),
               fontWeight: FontWeight.w500,
               color: const Color(0xFFBBBBBB),
             ),
@@ -495,7 +495,7 @@ class _GoogleButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/images/google_logo.png',
+              'resources- tlb-ui/google.png',
               width: 20,
               height: 20,
               errorBuilder: (_, __, ___) => const Icon(
@@ -507,7 +507,7 @@ class _GoogleButton extends StatelessWidget {
             Text(
               'Continue with Google',
               style: GoogleFonts.poppins(
-                fontSize: 14.5,
+                fontSize: Responsive.sp(context, 14.5),
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF3C3C3C),
               ),

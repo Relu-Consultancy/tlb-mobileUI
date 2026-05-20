@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_state.dart';
 
@@ -42,7 +43,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
         title: Text(
           'Reminders',
           style: GoogleFonts.poppins(
-            fontSize: 18,
+            fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
@@ -67,7 +68,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                           return Text(
                             'Hi ${AuthState.firstName},',
                             style: GoogleFonts.poppins(
-                              fontSize: 22,
+                              fontSize: Responsive.sp(context, 22),
                               fontWeight: FontWeight.w800,
                               color: const Color(0xFF1A1A2E),
                             ),
@@ -77,7 +78,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                       Text(
                         'Manage upcoming reminders.',
                         style: GoogleFonts.poppins(
-                          fontSize: 13,
+                          fontSize: Responsive.sp(context, 13),
                           color: Colors.grey.shade500,
                         ),
                       ),
@@ -101,7 +102,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
             Text(
               'Upcoming',
               style: GoogleFonts.poppins(
-                fontSize: 14,
+                fontSize: Responsive.sp(context, 14),
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF1A1A2E),
               ),
@@ -114,7 +115,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                   padding: const EdgeInsets.only(top: 48),
                   child: Text(
                     'No upcoming reminders',
-                    style: GoogleFonts.poppins(fontSize: 15, color: Colors.grey.shade400),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), color: Colors.grey.shade400),
                   ),
                 ),
               )
@@ -176,7 +177,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                           child: Text(
                             r['title'] as String,
                             style: GoogleFonts.poppins(
-                              fontSize: 14,
+                              fontSize: Responsive.sp(context, 14),
                               fontWeight: FontWeight.w700,
                               color: const Color(0xFF1A1A2E),
                             ),
@@ -195,7 +196,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                         Expanded(
                           child: Text(
                             r['date'] as String,
-                            style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500),
+                            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -210,7 +211,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                         Expanded(
                           child: Text(
                             r['venue'] as String,
-                            style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500),
+                            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -228,7 +229,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
           Text(
             r['reminderText'] as String,
             style: GoogleFonts.poppins(
-              fontSize: 12,
+              fontSize: Responsive.sp(context, 12),
               color: Colors.grey.shade500,
             ),
           ),
@@ -248,7 +249,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                   child: Text(
                     'Edit Reminder Time',
                     style: GoogleFonts.poppins(
-                      fontSize: 12,
+                      fontSize: Responsive.sp(context, 12),
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF1A1A2E),
                     ),
@@ -267,7 +268,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                   child: Text(
                     'Turn Off',
                     style: GoogleFonts.poppins(
-                      fontSize: 12,
+                      fontSize: Responsive.sp(context, 12),
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFFFF6B6B),
                     ),

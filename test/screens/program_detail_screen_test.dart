@@ -19,9 +19,9 @@ void main() {
       await mockNetworkImages(() async {
         await pumpTLBApp(tester, ProgramDetailScreen(event: testEvent));
 
-        // Session 19: ProgramDetailScreen is now its own StatefulWidget (not a ClassDetailScreen wrapper)
+        // Session 32: CTA label changed to "Enquire Now" (was "Send Enquiry")
         expect(find.text('Test Program'), findsOneWidget);
-        expect(find.text('Send Enquiry'), findsOneWidget);
+        expect(find.text('Enquire Now'), findsOneWidget);
       });
     });
   });

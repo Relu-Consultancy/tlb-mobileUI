@@ -84,14 +84,36 @@ class EventsScreen extends StatefulWidget {
   State<EventsScreen> createState() => _EventsScreenState();
 }
 
+// Slugs matching DummyData.exploreCategories order
+const _kFallbackSlugs = [
+  'arts-crafts',
+  'performing-arts',
+  'stem-innovation',
+  'sports-fitness',
+  'languages-communication',
+  'life-skills',
+];
+
 class _EventsScreenState extends State<EventsScreen> {
   int _currentNavIndex = 1;
   final PageController _newOnTlbController = PageController(viewportFraction: 0.92);
 
-  // ── Explore by Categories (live API) ────────────────────────────────────
-  List<Map<String, dynamic>>? _gridCategories;
-  bool _isCategoriesLoading = true;
-  String? _categoriesError;
+  // ── Explore by Categories ────────────────────────────────────────────────
+  // Starts with dummy fallback so the section is always visible immediately.
+  // API call in initState silently replaces with live data when available.
+  late List<Map<String, dynamic>> _gridCategories = _buildFallbackCategories();
+
+  List<Map<String, dynamic>> _buildFallbackCategories() {
+    return List.generate(DummyData.exploreCategories.length, (i) {
+      final cat = DummyData.exploreCategories[i];
+      return <String, dynamic>{
+        ...cat,
+        'slug': i < _kFallbackSlugs.length ? _kFallbackSlugs[i] : '',
+        'id': i + 1,
+        'subcategories': <String>[],
+      };
+    });
+  }
 
   @override
   void initState() {
@@ -103,26 +125,11 @@ class _EventsScreenState extends State<EventsScreen> {
     try {
       final apiCats = await EventsListingService.fetchCategories();
       if (!mounted) return;
-      setState(() {
-        _gridCategories = _toGridFormat(apiCats);
-        _isCategoriesLoading = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _categoriesError = e.toString().replaceFirst('Exception: ', '');
-        _isCategoriesLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(_categoriesError!),
-          backgroundColor: const Color(0xFF1A1A2E),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      if (apiCats.isNotEmpty) {
+        setState(() => _gridCategories = _toGridFormat(apiCats));
+      }
+    } catch (_) {
+      // Keep fallback categories — no error state needed
     }
   }
 
@@ -181,81 +188,6 @@ class _EventsScreenState extends State<EventsScreen> {
     }
   }
 
-  // ── Error state for categories grid ─────────────────────────────────────
-  Widget _buildCategoriesError() {
-    return SizedBox(
-      height: Responsive.h(context, 140),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.wifi_off_rounded, size: 32, color: Color(0xFFB0B0B0)),
-            const SizedBox(height: 8),
-            Text(
-              'Could not load categories',
-              style: TextStyle(
-                fontSize: Responsive.sp(context, 13),
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 10),
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isCategoriesLoading = true;
-                  _categoriesError = null;
-                });
-                _loadCategories();
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A2E),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  'Retry',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: Responsive.sp(context, 12),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ── Loading shimmer for the categories grid ──────────────────────────────
-  Widget _buildCategoriesShimmer() {
-    return SizedBox(
-      height: Responsive.h(context, 260),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: GridView.builder(
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: 0.8,
-          ),
-          itemCount: 6,
-          itemBuilder: (_, __) => Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFEEEEEE),
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final safeBottom = MediaQuery.of(context).padding.bottom;
@@ -302,33 +234,28 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
-                      // ── Explore by Categories (live API) ──────────────
+                      // ── Explore by Categories ─────────────────────────
                       const SectionDividerWidget(title: 'Explore by Categories'),
-                      if (_isCategoriesLoading)
-                        _buildCategoriesShimmer()
-                      else if (_categoriesError != null)
-                        _buildCategoriesError()
-                      else
-                        RepaintBoundary(
-                          child: ExploreCategoriesGrid(
-                            categories: _gridCategories!,
-                            scrollable: true,
-                            scrollHeight: 260,
-                            childAspectRatio: 0.8,
-                            onViewAll: () => _showAllCategoriesPopup(context),
-                            onCategoryTap: (index) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => CategoryEventsScreen(
-                                    categories: _gridCategories!,
-                                    initialCategoryIndex: index,
-                                  ),
+                      RepaintBoundary(
+                        child: ExploreCategoriesGrid(
+                          categories: _gridCategories,
+                          scrollable: true,
+                          scrollHeight: 260,
+                          childAspectRatio: 0.8,
+                          onViewAll: () => _showAllCategoriesPopup(context),
+                          onCategoryTap: (index) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => CategoryEventsScreen(
+                                  categories: _gridCategories,
+                                  initialCategoryIndex: index,
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          },
                         ),
+                      ),
 
                       const SectionDividerWidget(title: 'Trending Events'),
                       SizedBox(

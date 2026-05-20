@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import '../widgets/app_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
@@ -192,7 +193,7 @@ class _LocationScreenState extends State<LocationScreen> {
         title: Text(
           'Select Location',
           style: GoogleFonts.poppins(
-            fontSize: 18,
+            fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
@@ -217,14 +218,14 @@ class _LocationScreenState extends State<LocationScreen> {
                 decoration: InputDecoration(
                   hintText: 'Search city, area or landmark...',
                   hintStyle: GoogleFonts.poppins(
-                    fontSize: 14,
+                    fontSize: Responsive.sp(context, 14),
                     color: Colors.grey.shade500,
                   ),
                   prefixIcon: Icon(Icons.search, color: Colors.grey.shade600),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 15),
                 ),
-                style: GoogleFonts.poppins(fontSize: 14),
+                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14)),
                 onSubmitted: (value) {
                   if (value.trim().isNotEmpty) {
                     _selectCity(value);
@@ -246,7 +247,7 @@ class _LocationScreenState extends State<LocationScreen> {
                 label: Text(
                   _isLoadingLocation ? 'Fetching location...' : 'Use current location',
                   style: GoogleFonts.poppins(
-                    fontSize: 14,
+                    fontSize: Responsive.sp(context, 14),
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF1A1A2E),
                   ),
@@ -266,7 +267,7 @@ class _LocationScreenState extends State<LocationScreen> {
             Text(
               'Popular Cities',
               style: GoogleFonts.poppins(
-                fontSize: 16,
+                fontSize: Responsive.sp(context, 16),
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF1A1A2E),
               ),
@@ -312,7 +313,7 @@ class _LocationScreenState extends State<LocationScreen> {
                         Text(
                           city['name'] as String,
                           style: GoogleFonts.poppins(
-                            fontSize: 13,
+                            fontSize: Responsive.sp(context, 13),
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF1A1A2E),
                           ),
@@ -330,7 +331,7 @@ class _LocationScreenState extends State<LocationScreen> {
             Text(
               'All Cities',
               style: GoogleFonts.poppins(
-                fontSize: 16,
+                fontSize: Responsive.sp(context, 16),
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF1A1A2E),
               ),
@@ -355,7 +356,7 @@ class _LocationScreenState extends State<LocationScreen> {
                     child: Text(
                       city,
                       style: GoogleFonts.poppins(
-                        fontSize: 14,
+                        fontSize: Responsive.sp(context, 14),
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF1A1A2E),
                       ),

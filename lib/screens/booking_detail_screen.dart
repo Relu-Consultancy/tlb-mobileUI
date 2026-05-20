@@ -115,7 +115,7 @@ class _HeaderSection extends StatelessWidget {
             child: Text(
               booking.status,
               style: GoogleFonts.poppins(
-                fontSize: 12,
+                fontSize: Responsive.sp(context, 12),
                 fontWeight: FontWeight.w600,
                 color: _statusColor(booking.status),
               ),
@@ -127,7 +127,7 @@ class _HeaderSection extends StatelessWidget {
           Text(
             'Booking Details',
             style: GoogleFonts.poppins(
-              fontSize: 20,
+              fontSize: Responsive.sp(context, 20),
               fontWeight: FontWeight.w700,
               color: const Color(0xFF1A3A8F),
             ),
@@ -136,7 +136,7 @@ class _HeaderSection extends StatelessWidget {
           Text(
             'Booking ID: ${booking.bookingId}',
             style: GoogleFonts.poppins(
-              fontSize: 12,
+              fontSize: Responsive.sp(context, 12),
               color: Colors.grey.shade600,
             ),
           ),
@@ -227,7 +227,7 @@ class _TicketCard extends StatelessWidget {
                   Text(
                     'Scan QR Code',
                     style: GoogleFonts.poppins(
-                      fontSize: 13,
+                      fontSize: Responsive.sp(context, 13),
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF1A1A2E),
                     ),
@@ -274,7 +274,7 @@ class _TicketContent extends StatelessWidget {
         Text(
           event.title,
           style: GoogleFonts.poppins(
-            fontSize: 16,
+            fontSize: Responsive.sp(context, 16),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
@@ -295,13 +295,13 @@ class _TicketContent extends StatelessWidget {
                   Text(
                     'Location',
                     style: GoogleFonts.poppins(
-                        fontSize: 10, color: Colors.grey.shade500),
+                        fontSize: Responsive.sp(context, 10), color: Colors.grey.shade500),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     event.venue,
                     style: GoogleFonts.poppins(
-                      fontSize: 12,
+                      fontSize: Responsive.sp(context, 12),
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF1A1A2E),
                     ),
@@ -330,7 +330,7 @@ class _TicketContent extends StatelessWidget {
                     Text(
                       'Map',
                       style: GoogleFonts.poppins(
-                          fontSize: 10, color: Colors.grey.shade600),
+                          fontSize: Responsive.sp(context, 10), color: Colors.grey.shade600),
                     ),
                   ],
                 ),
@@ -351,13 +351,13 @@ class _TicketContent extends StatelessWidget {
                   Text(
                     'Date',
                     style: GoogleFonts.poppins(
-                        fontSize: 10, color: Colors.grey.shade500),
+                        fontSize: Responsive.sp(context, 10), color: Colors.grey.shade500),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     booking.date,
                     style: GoogleFonts.poppins(
-                      fontSize: 12,
+                      fontSize: Responsive.sp(context, 12),
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF1A1A2E),
                     ),
@@ -372,13 +372,13 @@ class _TicketContent extends StatelessWidget {
                   Text(
                     'Time',
                     style: GoogleFonts.poppins(
-                        fontSize: 10, color: Colors.grey.shade500),
+                        fontSize: Responsive.sp(context, 10), color: Colors.grey.shade500),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     booking.time,
                     style: GoogleFonts.poppins(
-                      fontSize: 12,
+                      fontSize: Responsive.sp(context, 12),
                       fontWeight: FontWeight.w600,
                       color: const Color(0xFF1A1A2E),
                     ),
@@ -467,7 +467,7 @@ class _ActionBtn extends StatelessWidget {
             Text(
               label,
               style: GoogleFonts.poppins(
-                fontSize: 14,
+                fontSize: Responsive.sp(context, 14),
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF1A1A2E),
               ),

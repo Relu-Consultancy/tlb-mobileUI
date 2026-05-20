@@ -69,7 +69,7 @@ class FamilyFeelsSection extends StatelessWidget {
                                 Text(
                                   event.title,
                                   style: GoogleFonts.poppins(
-                                    fontSize: 14,
+                                    fontSize: Responsive.sp(context, 14),
                                     fontWeight: FontWeight.bold,
                                     color: const Color(0xFF1A1A2E),
                                   ),
@@ -87,7 +87,7 @@ class FamilyFeelsSection extends StatelessWidget {
                                       child: Text(
                                         event.venue,
                                         style: GoogleFonts.poppins(
-                                          fontSize: 12,
+                                          fontSize: Responsive.sp(context, 12),
                                           color: Colors.grey,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -107,7 +107,7 @@ class FamilyFeelsSection extends StatelessWidget {
                                     Text(
                                       event.reviewCount ?? '3.5k reviews',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 12,
+                                        fontSize: Responsive.sp(context, 12),
                                         color: Colors.grey,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -120,7 +120,7 @@ class FamilyFeelsSection extends StatelessWidget {
                                 Text(
                                   'Starting from ₹${event.price?.toInt() ?? 200}',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 12,
+                                    fontSize: Responsive.sp(context, 12),
                                     fontWeight: FontWeight.w600,
                                     color: const Color(0xFF4A4A68),
                                     decoration: TextDecoration.underline,

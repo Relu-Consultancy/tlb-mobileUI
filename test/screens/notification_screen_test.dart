@@ -6,29 +6,30 @@ import '../helpers/test_setup.dart';
 
 void main() {
   group('NotificationScreen Tests', () {
-    testWidgets('renders all major sections and notifications', (WidgetTester tester) async {
+    testWidgets('renders title and empty state', (WidgetTester tester) async {
       await pumpTLBApp(tester, const NotificationScreen());
 
       expect(find.text('Notifications'), findsOneWidget);
-      expect(find.text('Today'), findsOneWidget);
-      expect(find.text('Yesterday'), findsOneWidget);
-      
-      // Verify some sample notification content
-      expect(find.text('Limited Time Cashback'), findsOneWidget);
-      expect(find.text('Classes Rescheduled'), findsOneWidget);
+      expect(find.text('No Notifications Yet'), findsOneWidget);
+      expect(find.byIcon(Icons.notifications_off_outlined), findsOneWidget);
     });
 
-    testWidgets('Mark All as Read updates the summary and hides dots', (WidgetTester tester) async {
+    testWidgets('empty state body copy is present', (WidgetTester tester) async {
       await pumpTLBApp(tester, const NotificationScreen());
 
-      // Initial state (should have 2 new notifications based on dummy data)
-      expect(find.textContaining('2 Notifications', findRichText: true), findsOneWidget);
+      expect(
+        find.textContaining("You're all caught up"),
+        findsOneWidget,
+      );
+    });
 
-      await tester.tap(find.text('Mark All as Read'));
-      await tester.pump();
+    testWidgets('no mock notification cards are shown', (WidgetTester tester) async {
+      await pumpTLBApp(tester, const NotificationScreen());
 
-      // Summary should update
-      expect(find.textContaining('0 Notifications', findRichText: true), findsOneWidget);
+      expect(find.text('Limited Time Cashback'), findsNothing);
+      expect(find.text('Classes Rescheduled'), findsNothing);
+      expect(find.text('Today'), findsNothing);
+      expect(find.text('Yesterday'), findsNothing);
     });
   });
 }

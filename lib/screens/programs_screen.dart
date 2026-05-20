@@ -348,11 +348,11 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
               borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
               child: Image.asset(
                 event.imagePath,
-                width: 120,
+                width: Responsive.w(context, 120),
                 height: double.infinity,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => Container(
-                  width: 120,
+                  width: Responsive.w(context, 120),
                   color: AppColors.primary.withOpacity(0.15),
                   child: const Icon(Icons.event, size: 32),
                 ),
@@ -367,7 +367,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                     Text(
                       event.title,
                       style: GoogleFonts.poppins(
-                        fontSize: 13,
+                        fontSize: Responsive.sp(context, 13),
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                       ),
@@ -401,7 +401,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         child: Text(
                           buttonLabel,
                           style: GoogleFonts.poppins(
-                            fontSize: 11,
+                            fontSize: Responsive.sp(context, 11),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -446,11 +446,11 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                   child: Image.asset(
                     event.imagePath,
-                    height: 160,
+                    height: Responsive.h(context, 160),
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
-                      height: 160,
+                      height: Responsive.h(context, 160),
                       color: AppColors.primary.withOpacity(0.15),
                       child: const Icon(Icons.event, size: 40),
                     ),
@@ -480,7 +480,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                     Text(
                       event.title,
                       style: GoogleFonts.poppins(
-                        fontSize: 13,
+                        fontSize: Responsive.sp(context, 13),
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                       ),
@@ -512,7 +512,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         ),
                         child: Text(
                           'Check Availability',
-                          style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600),
+                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),
@@ -555,11 +555,11 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                   child: Image.asset(
                     event.imagePath,
-                    height: 170,
+                    height: Responsive.h(context, 170),
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
-                      height: 170,
+                      height: Responsive.h(context, 170),
                       color: AppColors.primary.withOpacity(0.15),
                       child: const Icon(Icons.event, size: 40),
                     ),
@@ -577,7 +577,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                     child: Text(
                       'Portfolio Project : Yes',
                       style: GoogleFonts.poppins(
-                        fontSize: 10,
+                        fontSize: Responsive.sp(context, 10),
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
@@ -598,7 +598,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           child: Text(
                             event.title,
                             style: GoogleFonts.poppins(
-                              fontSize: 13,
+                              fontSize: Responsive.sp(context, 13),
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
                             ),
@@ -617,7 +617,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                             child: Text(
                               event.description!,
                               style: GoogleFonts.poppins(
-                                fontSize: 9,
+                                fontSize: Responsive.sp(context, 9),
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.textPrimary,
                               ),
@@ -650,7 +650,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         ),
                         child: Text(
                           'Check Availability',
-                          style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600),
+                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),
@@ -672,7 +672,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         Expanded(
           child: Text(
             text,
-            style: GoogleFonts.poppins(fontSize: 10.5, color: Colors.grey.shade600),
+            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 10.5), color: Colors.grey.shade600),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

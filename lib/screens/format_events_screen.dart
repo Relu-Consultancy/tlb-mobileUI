@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
@@ -183,7 +184,7 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 220),
               style: GoogleFonts.poppins(
-                fontSize: isSelected ? 9.5 : 8.5,
+                fontSize: isSelected ? Responsive.sp(context, 9.5) : Responsive.sp(context, 8.5),
                 fontWeight:
                     isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: isSelected
@@ -262,7 +263,7 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
                               Text(
                                 _formatLabel,
                                 style: GoogleFonts.poppins(
-                                  fontSize: 18,
+                                  fontSize: Responsive.sp(context, 18),
                                   fontWeight: FontWeight.w700,
                                   color: Colors.white,
                                 ),
@@ -270,7 +271,7 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
                               Text(
                                 'Explore events by format',
                                 style: GoogleFonts.poppins(
-                                  fontSize: 11,
+                                  fontSize: Responsive.sp(context, 11),
                                   color: Colors.white.withOpacity(0.75),
                                 ),
                               ),
@@ -318,7 +319,7 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
                           Text(
                             'All $_formatLabel Events',
                             style: GoogleFonts.poppins(
-                              fontSize: 14,
+                              fontSize: Responsive.sp(context, 14),
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
                             ),

@@ -81,7 +81,7 @@ class EventCardWithPrice extends StatelessWidget {
                 Text(
                   event.title,
                   style: GoogleFonts.poppins(
-                    fontSize: 16,
+                    fontSize: Responsive.sp(context, 16),
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                   ),
@@ -99,7 +99,7 @@ class EventCardWithPrice extends StatelessWidget {
                       child: Text(
                         event.venue,
                         style: GoogleFonts.poppins(
-                          fontSize: 12,
+                          fontSize: Responsive.sp(context, 12),
                           color: AppColors.textSecondary,
                         ),
                         maxLines: 1,
@@ -127,7 +127,7 @@ class EventCardWithPrice extends StatelessWidget {
                           TextSpan(
                             text: ' / Person',
                             style: GoogleFonts.poppins(
-                              fontSize: 13,
+                              fontSize: Responsive.sp(context, 13),
                               color: AppColors.textSecondary,
                             ),
                           ),

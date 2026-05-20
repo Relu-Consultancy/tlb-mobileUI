@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 import '../services/auth_service.dart';
 import '../providers/auth_state.dart';
 import '../providers/saved_events_state.dart';
@@ -185,8 +186,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
                   // ── Illustration ───────────────────────────────────────────
                   SizedBox(
-                    width: 130,
-                    height: 130,
+                    width: Responsive.w(context, 130),
+                    height: Responsive.h(context, 130),
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
@@ -229,7 +230,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   Text(
                     'OTP Verification',
                     style: GoogleFonts.poppins(
-                      fontSize: 22,
+                      fontSize: Responsive.sp(context, 22),
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF1A1A1A),
                     ),
@@ -238,7 +239,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   Text(
                     'Enter the 6-digit code sent to\n${widget.identifier}',
                     style: GoogleFonts.poppins(
-                        fontSize: 13, color: const Color(0xFF9E9E9E)),
+                        fontSize: Responsive.sp(context, 13), color: const Color(0xFF9E9E9E)),
                     textAlign: TextAlign.center,
                   ),
 
@@ -264,7 +265,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                               FilteringTextInputFormatter.digitsOnly
                             ],
                             style: GoogleFonts.poppins(
-                              fontSize: 20,
+                              fontSize: Responsive.sp(context, 20),
                               fontWeight: FontWeight.w700,
                               color: const Color(0xFF1A1A1A),
                             ),
@@ -333,7 +334,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           : Text(
                               'Verify & Continue',
                               style: GoogleFonts.poppins(
-                                fontSize: 15,
+                                fontSize: Responsive.sp(context, 15),
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFF1A1A1A),
                               ),
@@ -348,7 +349,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     Text(
                       'Resend in 00:${_resendSeconds.toString().padLeft(2, '0')}',
                       style: GoogleFonts.poppins(
-                          fontSize: 13, color: const Color(0xFF9E9E9E)),
+                          fontSize: Responsive.sp(context, 13), color: const Color(0xFF9E9E9E)),
                     )
                   else
                     TextButton(
@@ -356,7 +357,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       child: Text(
                         'Resend OTP',
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: Responsive.sp(context, 14),
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFFFFD014),
                         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:showcaseview/showcaseview.dart';
 import '../helpers/walkthrough_keys.dart';
@@ -96,10 +97,10 @@ class FloatingNavbar extends StatelessWidget {
                                   padding: const EdgeInsets.only(left: 8.0),
                                   child: Text(
                                     item.label,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Color(0xFF1E293B),
                                       fontWeight: FontWeight.w600,
-                                      fontSize: 14,
+                                      fontSize: Responsive.sp(context, 14),
                                     ),
                                   ),
                                 )

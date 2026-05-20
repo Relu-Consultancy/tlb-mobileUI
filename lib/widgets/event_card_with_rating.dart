@@ -93,7 +93,7 @@ class EventCardWithRating extends StatelessWidget {
                         Text(
                           'Sat',
                           style: GoogleFonts.poppins(
-                            fontSize: 11,
+                            fontSize: Responsive.sp(context, 11),
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF1E293B),
                           ),
@@ -101,7 +101,7 @@ class EventCardWithRating extends StatelessWidget {
                         Text(
                           '12 Aug',
                           style: GoogleFonts.poppins(
-                            fontSize: 10,
+                            fontSize: Responsive.sp(context, 10),
                             fontWeight: FontWeight.w600,
                             color: AppColors.primary,
                           ),
@@ -135,7 +135,7 @@ class EventCardWithRating extends StatelessWidget {
                     Text(
                       event.title,
                       style: GoogleFonts.poppins(
-                        fontSize: 14,
+                        fontSize: Responsive.sp(context, 14),
                         fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                       ),
@@ -157,7 +157,7 @@ class EventCardWithRating extends StatelessWidget {
                         child: Text(
                           event.tag!,
                           style: GoogleFonts.poppins(
-                            fontSize: 9,
+                            fontSize: Responsive.sp(context, 9),
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
                           ),
@@ -174,7 +174,7 @@ class EventCardWithRating extends StatelessWidget {
                           Text(
                             event.reviewCount!,
                             style: GoogleFonts.poppins(
-                              fontSize: 11,
+                              fontSize: Responsive.sp(context, 11),
                               color: AppColors.textSecondary,
                             ),
                           ),
@@ -197,7 +197,7 @@ class EventCardWithRating extends StatelessWidget {
                         Text(
                           '${event.rating?.toStringAsFixed(1) ?? '0'} reviews',
                           style: GoogleFonts.poppins(
-                            fontSize: 10,
+                            fontSize: Responsive.sp(context, 10),
                             color: AppColors.textSecondary,
                           ),
                         ),
@@ -215,7 +215,7 @@ class EventCardWithRating extends StatelessWidget {
                           child: Text(
                             event.venue,
                             style: GoogleFonts.poppins(
-                              fontSize: 11,
+                              fontSize: Responsive.sp(context, 11),
                               color: AppColors.textSecondary,
                             ),
                             maxLines: 1,
@@ -255,7 +255,7 @@ class EventCardWithRating extends StatelessWidget {
                         child: Text(
                           buttonLabel,
                           style: GoogleFonts.poppins(
-                            fontSize: 11,
+                            fontSize: Responsive.sp(context, 11),
                             fontWeight: FontWeight.w600,
                           ),
                         ),

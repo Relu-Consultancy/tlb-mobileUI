@@ -116,7 +116,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                     Text(
                                       'Sat',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 13,
+                                        fontSize: Responsive.sp(context, 13),
                                         fontWeight: FontWeight.w700,
                                         color: const Color(0xFF1A1A2E),
                                       ),
@@ -125,7 +125,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                     Text(
                                       'mar 16',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 12,
+                                        fontSize: Responsive.sp(context, 12),
                                         fontWeight: FontWeight.w700,
                                         color: const Color(0xFF0066CC), // Blue color from design
                                       ),
@@ -154,7 +154,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                               Text(
                                 event.title,
                                 style: GoogleFonts.poppins(
-                                  fontSize: 16,
+                                  fontSize: Responsive.sp(context, 16),
                                   fontWeight: FontWeight.bold,
                                   color: const Color(0xFF1A1A2E),
                                 ),
@@ -187,7 +187,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                               child: Text(
                                                 event.reviewCount ?? '3.5k reviews',
                                                 style: GoogleFonts.poppins(
-                                                  fontSize: 12,
+                                                  fontSize: Responsive.sp(context, 12),
                                                   color: Colors.grey,
                                                 ),
                                                 overflow: TextOverflow.ellipsis,
@@ -209,7 +209,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                               child: Text(
                                                 event.venue,
                                                 style: GoogleFonts.poppins(
-                                                  fontSize: 12,
+                                                  fontSize: Responsive.sp(context, 12),
                                                   fontWeight: FontWeight.w500,
                                                   color: const Color(0xFF4A4A68),
                                                 ),

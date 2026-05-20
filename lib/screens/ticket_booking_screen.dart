@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
+import '../models/api_event_model.dart';
 import '../models/event_model.dart';
 import 'date_time_selection_screen.dart';
 import 'review_pay_screen.dart';
@@ -9,12 +10,18 @@ class TicketBookingScreen extends StatefulWidget {
   final EventModel event;
   final String selectedDate;
   final String selectedTime;
+  final List<ApiEventTicket>? apiTickets;
+  final String bookingType;
+  final int? batchId;
 
   const TicketBookingScreen({
     super.key,
     required this.event,
     this.selectedDate = 'Saturday, March 21',
     this.selectedTime = '3:00 PM',
+    this.apiTickets,
+    this.bookingType = 'event',
+    this.batchId,
   });
 
   @override
@@ -22,12 +29,7 @@ class TicketBookingScreen extends StatefulWidget {
 }
 
 class _TicketBookingScreenState extends State<TicketBookingScreen> {
-  // Ticket data
-  final List<Map<String, dynamic>> _tickets = [
-    {'name': 'Standard', 'price': 360, 'count': 0},
-    {'name': 'VIPs (Special Treat)', 'price': 2000, 'count': 0},
-    {'name': 'Weekly combo 1 for 3', 'price': 360, 'count': 0},
-  ];
+  late List<Map<String, dynamic>> _tickets;
 
   // Attendee form controllers
   final _childNameController = TextEditingController();
@@ -57,9 +59,38 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
     });
   }
 
+  void _initTickets() {
+    final api = widget.apiTickets;
+    if (api != null && api.isNotEmpty) {
+      _tickets = api
+          .map((t) => <String, dynamic>{
+                'ticketId': t.id,
+                'name': t.name,
+                'price': t.price.toInt(),
+                'count': 0,
+                'available': t.availableQuantity,
+              })
+          .toList();
+    } else {
+      final base = widget.event.price?.toInt() ?? 360;
+      _tickets = [
+        {'name': 'Standard', 'price': base, 'count': 0},
+        {'name': 'VIP (Special Treat)', 'price': (base * 3).clamp(500, 5000), 'count': 0},
+        {'name': 'Early Bird', 'price': (base * 0.8).round(), 'count': 0},
+      ];
+    }
+  }
+
+  // Total available spots across all ticket types (null when no API data)
+  int? get _totalAvailableSpots {
+    if (_tickets.isEmpty || !_tickets.first.containsKey('available')) return null;
+    return _tickets.fold(0, (sum, t) => sum! + (t['available'] as int));
+  }
+
   @override
   void initState() {
     super.initState();
+    _initTickets();
     _childNameController.addListener(() => setState(() {}));
     _parentPhoneController.addListener(() => setState(() {}));
   }
@@ -110,12 +141,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
 
             const SizedBox(height: 20),
 
-            // ── 3. Offers ──
-            _buildOffersSection(),
-
-            const SizedBox(height: 24),
-
-            // ── 4. Bill Details ──
+            // ── 3. Bill Details ──
             _buildBillDetailsSection(),
 
             const SizedBox(height: 20),
@@ -134,7 +160,6 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             height: 52,
             child: ElevatedButton(
               onPressed: _isFormComplete ? () {
-                // Generate ticket details string
                 final ticketDetailsString = _tickets
                     .where((t) => (t['count'] as int) > 0)
                     .map((t) => '${t['name']} (₹${t['price']}) × ${t['count']}')
@@ -149,6 +174,14 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                       selectedDate: widget.selectedDate,
                       selectedTime: widget.selectedTime,
                       ticketDetails: ticketDetailsString,
+                      lineItems: _tickets,
+                      attendee: {
+                        'name': _childNameController.text.trim(),
+                        'age': _selectedAge ?? '0',
+                        'phone': _parentPhoneController.text.trim(),
+                      },
+                      bookingType: widget.bookingType,
+                      batchId: widget.batchId,
                     ),
                   ),
                 );
@@ -177,6 +210,13 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
     );
   }
 
+  Widget _imageFallback(BuildContext context) => Container(
+        width: Responsive.w(context, 100, min: 80),
+        height: Responsive.h(context, 110, min: 90),
+        color: Colors.grey.shade200,
+        child: const Icon(Icons.event, size: 30, color: Colors.grey),
+      );
+
   // ────────────────────────────────────────────────────────────
   //  1. Event Info Card — with pencil/edit icon
   // ────────────────────────────────────────────────────────────
@@ -200,18 +240,21 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           // Event image
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.asset(
-              event.imagePath,
-              width: Responsive.w(context, 100, min: 80),
-              height: Responsive.h(context, 110, min: 90),
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                width: Responsive.w(context, 100, min: 80),
-                height: Responsive.h(context, 110, min: 90),
-                color: Colors.grey.shade200,
-                child: const Icon(Icons.event, size: 30, color: Colors.grey),
-              ),
-            ),
+            child: event.imagePath.startsWith('http')
+                ? Image.network(
+                    event.imagePath,
+                    width: Responsive.w(context, 100, min: 80),
+                    height: Responsive.h(context, 110, min: 90),
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _imageFallback(context),
+                  )
+                : Image.asset(
+                    event.imagePath,
+                    width: Responsive.w(context, 100, min: 80),
+                    height: Responsive.h(context, 110, min: 90),
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _imageFallback(context),
+                  ),
           ),
           const SizedBox(width: 12),
           // Info
@@ -227,7 +270,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                       child: Text(
                         event.title,
                         style: GoogleFonts.poppins(
-                          fontSize: 15,
+                          fontSize: Responsive.sp(context, 15),
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF1A1A2E),
                         ),
@@ -268,7 +311,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                       child: Text(
                         '${widget.selectedDate}, ${widget.selectedTime}',
                         style: GoogleFonts.poppins(
-                            fontSize: 11, color: Colors.grey.shade600),
+                            fontSize: Responsive.sp(context, 11), color: Colors.grey.shade600),
                       ),
                     ),
                   ],
@@ -283,21 +326,22 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                       child: Text(
                         event.venue,
                         style: GoogleFonts.poppins(
-                            fontSize: 11, color: Colors.grey.shade600),
+                            fontSize: Responsive.sp(context, 11), color: Colors.grey.shade600),
                         maxLines: 2,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
-                Text(
-                  'Only 5 spots left',
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFFFF6B6B),
+                if (_totalAvailableSpots != null)
+                  Text(
+                    '$_totalAvailableSpots ${_totalAvailableSpots == 1 ? 'spot' : 'spots'} left',
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 12),
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFFFF6B6B),
+                    ),
                   ),
-                ),
               ],
             ),
           ),
@@ -323,7 +367,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           Text(
             'Select Ticket',
             style: GoogleFonts.poppins(
-              fontSize: 16,
+              fontSize: Responsive.sp(context, 16),
               fontWeight: FontWeight.w700,
               color: const Color(0xFF1A1A2E),
             ),
@@ -345,7 +389,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                           Text(
                             ticket['name'] as String,
                             style: GoogleFonts.poppins(
-                              fontSize: 14,
+                              fontSize: Responsive.sp(context, 14),
                               fontWeight: FontWeight.w600,
                               color: const Color(0xFF1A1A2E),
                             ),
@@ -354,7 +398,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                           Text(
                             '₹${ticket['price']}',
                             style: GoogleFonts.poppins(
-                              fontSize: 13,
+                              fontSize: Responsive.sp(context, 13),
                               color: Colors.grey.shade500,
                             ),
                           ),
@@ -412,7 +456,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                                 Text(
                                   '$count',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 14,
+                                    fontSize: Responsive.sp(context, 14),
                                     fontWeight: FontWeight.w700,
                                     color: const Color(0xFF1A1A2E),
                                   ),
@@ -439,96 +483,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
   }
 
   // ────────────────────────────────────────────────────────────
-  //  3. Offers
-  // ────────────────────────────────────────────────────────────
-  Widget _buildOffersSection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Offers',
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF1A1A2E),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Icon(Icons.local_offer, size: 18, color: Colors.green.shade600),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Get flat ₹50 off',
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF1A1A2E),
-                      ),
-                    ),
-                    Text(
-                      'Save ₹50 with this code',
-                      style:
-                          GoogleFonts.poppins(fontSize: 11, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 40,
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    minimumSize: const Size(0, 46),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                  ),
-                  child: Text(
-                    'Apply',
-                    style: GoogleFonts.poppins(
-                      fontSize: Responsive.sp(context, 13),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          GestureDetector(
-            onTap: () {},
-            child: Text(
-              'View all offers >',
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF3B82F6),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ────────────────────────────────────────────────────────────
-  //  4. Bill Details
+  //  3. Bill Details
   // ────────────────────────────────────────────────────────────
   Widget _buildBillDetailsSection() {
     return Column(
@@ -537,7 +492,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
         Text(
           'Bill Details',
           style: GoogleFonts.poppins(
-            fontSize: 16,
+            fontSize: Responsive.sp(context, 16),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
@@ -555,7 +510,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             Text(
               'Total to be paid',
               style: GoogleFonts.poppins(
-                fontSize: 14,
+                fontSize: Responsive.sp(context, 14),
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF1A1A2E),
               ),
@@ -563,7 +518,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             Text(
               '₹$_subtotal',
               style: GoogleFonts.poppins(
-                fontSize: 16,
+                fontSize: Responsive.sp(context, 16),
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF1A1A2E),
               ),
@@ -580,13 +535,13 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
         Expanded(
           child: Text(
             label,
-            style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600),
+            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600),
           ),
         ),
         const SizedBox(width: 8),
         Text(
           value,
-          style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF1A1A2E)),
+          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF1A1A2E)),
         ),
       ],
     );
@@ -609,7 +564,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           Text(
             'Attendee Details',
             style: GoogleFonts.poppins(
-              fontSize: 16,
+              fontSize: Responsive.sp(context, 16),
               fontWeight: FontWeight.w700,
               color: const Color(0xFF1A1A2E),
             ),
@@ -618,13 +573,13 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           // Child name
           TextField(
             controller: _childNameController,
-            style: GoogleFonts.poppins(fontSize: 14),
+            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14)),
             decoration: InputDecoration(
               prefixIcon: Icon(Icons.person_outline,
                   size: 20, color: Colors.grey.shade500),
               hintText: 'Child name',
               hintStyle: GoogleFonts.poppins(
-                  fontSize: 13, color: Colors.grey.shade400),
+                  fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
               filled: true,
               fillColor: const Color(0xFFF5F5F5),
               border: OutlineInputBorder(
@@ -655,7 +610,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                     Text(
                       'Select age',
                       style: GoogleFonts.poppins(
-                          fontSize: 13, color: Colors.grey.shade400),
+                          fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
                     ),
                   ],
                 ),
@@ -666,7 +621,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                     .map((age) => DropdownMenuItem(
                           value: age,
                           child: Text(age,
-                              style: GoogleFonts.poppins(fontSize: 14)),
+                              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14))),
                         ))
                     .toList(),
                 onChanged: (value) => setState(() => _selectedAge = value),
@@ -678,13 +633,13 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           TextField(
             controller: _parentPhoneController,
             keyboardType: TextInputType.phone,
-            style: GoogleFonts.poppins(fontSize: 14),
+            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14)),
             decoration: InputDecoration(
               prefixIcon: Icon(Icons.phone_outlined,
                   size: 20, color: Colors.grey.shade500),
               hintText: 'Parents contact number',
               hintStyle: GoogleFonts.poppins(
-                  fontSize: 13, color: Colors.grey.shade400),
+                  fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
               filled: true,
               fillColor: const Color(0xFFF5F5F5),
               border: OutlineInputBorder(

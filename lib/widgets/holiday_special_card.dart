@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
@@ -85,7 +86,7 @@ class HolidaySpecialCard extends StatelessWidget {
                           child: Text(
                             event.tag!,
                             style: GoogleFonts.poppins(
-                              fontSize: 12,
+                              fontSize: Responsive.sp(context, 12),
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
                             ),
@@ -105,7 +106,7 @@ class HolidaySpecialCard extends StatelessWidget {
                   Text(
                     event.title,
                     style: GoogleFonts.poppins(
-                      fontSize: 15,
+                      fontSize: Responsive.sp(context, 15),
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
                     ),
@@ -126,7 +127,7 @@ class HolidaySpecialCard extends StatelessWidget {
                           child: Text(
                             event.eventDate!,
                             style: GoogleFonts.poppins(
-                              fontSize: 11.5,
+                              fontSize: Responsive.sp(context, 11.5),
                               color: AppColors.textSecondary,
                             ),
                             maxLines: 1,
@@ -149,7 +150,7 @@ class HolidaySpecialCard extends StatelessWidget {
                         child: Text(
                           event.venue,
                           style: GoogleFonts.poppins(
-                            fontSize: 11.5,
+                            fontSize: Responsive.sp(context, 11.5),
                             color: AppColors.textSecondary,
                           ),
                           maxLines: 1,
@@ -178,7 +179,7 @@ class HolidaySpecialCard extends StatelessWidget {
                             child: Text(
                               buttonLabel,
                               style: GoogleFonts.poppins(
-                                fontSize: 12,
+                                fontSize: Responsive.sp(context, 12),
                                 fontWeight: FontWeight.w600,
                                 color: const Color(0xFF1A1A2E),
                               ),

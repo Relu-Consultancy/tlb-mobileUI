@@ -87,7 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: Text(
           'My Profile',
           style: GoogleFonts.poppins(
-            fontSize: 17,
+            fontSize: Responsive.sp(context, 17),
             fontWeight: FontWeight.w600,
             color: const Color(0xFF1A1A2E),
           ),
@@ -148,7 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Text(
                     userName,
                     style: GoogleFonts.poppins(
-                      fontSize: 18,
+                      fontSize: Responsive.sp(context, 18),
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF1A1A2E),
                     ),
@@ -159,7 +159,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Text(
                     userEmail,
                     style: GoogleFonts.poppins(
-                      fontSize: 13,
+                      fontSize: Responsive.sp(context, 13),
                       color: Colors.grey.shade500,
                     ),
                   ),
@@ -185,7 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Text(
                         'Edit Profile',
                         style: GoogleFonts.poppins(
-                            fontSize: 13, fontWeight: FontWeight.w500),
+                            fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500),
                       ),
                     ),
                   ),
@@ -202,7 +202,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Text(
                               'Profile Completion',
                               style: GoogleFonts.poppins(
-                                fontSize: 12,
+                                fontSize: Responsive.sp(context, 12),
                                 fontWeight: FontWeight.w500,
                                 color: Colors.grey.shade600,
                               ),
@@ -210,7 +210,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Text(
                               '${(completion * 100).toInt()}%',
                               style: GoogleFonts.poppins(
-                                fontSize: 12,
+                                fontSize: Responsive.sp(context, 12),
                                 fontWeight: FontWeight.w600,
                                 color: const Color(0xFF1A1A2E),
                               ),
@@ -337,7 +337,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       title: Text(
         label,
         style: GoogleFonts.poppins(
-          fontSize: 15,
+          fontSize: Responsive.sp(context, 15),
           fontWeight: FontWeight.w500,
           color: labelColor,
         ),
@@ -360,12 +360,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 fontSize: Responsive.sp(context, 17))),
         content: Text('Are you sure you want to log out?',
             style: GoogleFonts.poppins(
-                fontSize: 14, color: Colors.grey.shade700)),
+                fontSize: Responsive.sp(context, 14), color: Colors.grey.shade700)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text('Cancel',
-                style: GoogleFonts.poppins(color: Colors.grey, fontSize: 14)),
+                style: GoogleFonts.poppins(color: Colors.grey, fontSize: Responsive.sp(context, 14))),
           ),
           TextButton(
             onPressed: () async {
@@ -388,7 +388,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: GoogleFonts.poppins(
                     color: const Color(0xFFE53935),
                     fontWeight: FontWeight.w600,
-                    fontSize: 14)),
+                    fontSize: Responsive.sp(context, 14))),
           ),
         ],
       ),
@@ -422,7 +422,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 title: Text(
                   'View Profile Picture',
                   style: GoogleFonts.poppins(
-                    fontSize: 15,
+                    fontSize: Responsive.sp(context, 15),
                     fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E),
                   ),
@@ -437,7 +437,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 title: Text(
                   'Change Profile Picture',
                   style: GoogleFonts.poppins(
-                    fontSize: 15,
+                    fontSize: Responsive.sp(context, 15),
                     fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E),
                   ),

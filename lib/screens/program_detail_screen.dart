@@ -15,18 +15,15 @@ import '../models/api_review_model.dart';
 import '../widgets/app_loader.dart';
 import 'gallery_screen.dart';
 import 'organizer_profile_screen.dart';
+import 'select_program_batch_screen.dart';
 import '../widgets/inquire_now_sheet.dart';
 
 class ProgramDetailScreen extends StatefulWidget {
   final EventModel event;
-  final String buttonLabel;
-  final VoidCallback? onBookTapped;
 
   const ProgramDetailScreen({
     super.key,
     required this.event,
-    this.buttonLabel = 'Send Enquiry',
-    this.onBookTapped,
   });
 
   @override
@@ -148,6 +145,8 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
   static String _capitalize(String s) =>
       s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1)}';
 
+  bool get _isDirectBooking => _detail?.bookingType == 'direct_booking';
+
   EventModel get _eventForSheets => EventModel(
         id: _detail?.id ?? widget.event.id,
         title: _title,
@@ -155,6 +154,10 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
         imagePath: _coverUrl,
         tag: _tag.isNotEmpty ? _tag : null,
         price: widget.event.price,
+        rating: _detail != null ? _detail!.averageRating : widget.event.rating,
+        reviewCount: _detail != null
+            ? (_detail!.totalReviews > 0 ? '${_detail!.totalReviews} reviews' : null)
+            : widget.event.reviewCount,
       );
 
   String? get _ageGroupText {
@@ -206,7 +209,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                 child: Text(
                   _error!,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey.shade600),
+                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: Colors.grey.shade600),
                 ),
               ),
               const SizedBox(height: 20),
@@ -307,7 +310,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                           child: Text(
                             _tag,
                             style: GoogleFonts.poppins(
-                              fontSize: 12,
+                              fontSize: Responsive.sp(context, 12),
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
                             ),
@@ -350,7 +353,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                 ? '${_detail!.averageRating} (${_detail!.totalReviews} reviews)'
                                 : widget.event.reviewCount ?? '(124 reviews)',
                             style: GoogleFonts.poppins(
-                              fontSize: 13,
+                              fontSize: Responsive.sp(context, 13),
                               color: Colors.grey.shade600,
                             ),
                           ),
@@ -382,7 +385,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                             child: Text(
                               _locationText,
                               style: GoogleFonts.poppins(
-                                fontSize: 13,
+                                fontSize: Responsive.sp(context, 13),
                                 color: const Color(0xFF1A1A2E),
                               ),
                             ),
@@ -414,7 +417,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                 Text(
                                   _scheduleText,
                                   style: GoogleFonts.poppins(
-                                    fontSize: 13,
+                                    fontSize: Responsive.sp(context, 13),
                                     color: const Color(0xFF1A1A2E),
                                   ),
                                 ),
@@ -426,7 +429,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                       child: Text(
                                         'View all ${_detail!.batches.length} batches',
                                         style: GoogleFonts.poppins(
-                                          fontSize: 12,
+                                          fontSize: Responsive.sp(context, 12),
                                           fontWeight: FontWeight.w600,
                                           color: const Color(0xFF3B82F6),
                                         ),
@@ -457,7 +460,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                             Text(
                               'About Program',
                               style: GoogleFonts.poppins(
-                                fontSize: 16,
+                                fontSize: Responsive.sp(context, 16),
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFF1A1A2E),
                               ),
@@ -466,7 +469,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                             Text(
                               _description!,
                               style: GoogleFonts.poppins(
-                                fontSize: 13,
+                                fontSize: Responsive.sp(context, 13),
                                 color: Colors.grey.shade600,
                                 height: 1.5,
                               ),
@@ -483,7 +486,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                       child: Text(
                         'Things to Know',
                         style: GoogleFonts.poppins(
-                          fontSize: 16,
+                          fontSize: Responsive.sp(context, 16),
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF1A1A2E),
                         ),
@@ -544,7 +547,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                           Text(
                             'Gallery',
                             style: GoogleFonts.poppins(
-                              fontSize: 16,
+                              fontSize: Responsive.sp(context, 16),
                               fontWeight: FontWeight.w700,
                               color: const Color(0xFF1A1A2E),
                             ),
@@ -557,7 +560,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                             child: Text(
                               'See All >',
                               style: GoogleFonts.poppins(
-                                fontSize: 13,
+                                fontSize: Responsive.sp(context, 13),
                                 fontWeight: FontWeight.w500,
                                 color: const Color(0xFF3B82F6),
                               ),
@@ -571,7 +574,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
                         'Sneak peek into what awaits you!',
-                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500),
+                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -586,7 +589,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                         child: Text(
                           'Location',
                           style: GoogleFonts.poppins(
-                            fontSize: 16,
+                            fontSize: Responsive.sp(context, 16),
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF1A1A2E),
                           ),
@@ -636,7 +639,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                   Text(
                                     _locationText,
                                     style: GoogleFonts.poppins(
-                                      fontSize: 13,
+                                      fontSize: Responsive.sp(context, 13),
                                       fontWeight: FontWeight.w500,
                                       color: Colors.white,
                                     ),
@@ -648,7 +651,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: GoogleFonts.poppins(
-                                        fontSize: 11,
+                                        fontSize: Responsive.sp(context, 11),
                                         color: const Color(0xFFFFCC00),
                                       ),
                                     ),
@@ -760,7 +763,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                   Text(
                                     'ORGANIZED BY',
                                     style: GoogleFonts.poppins(
-                                      fontSize: 10,
+                                      fontSize: Responsive.sp(context, 10),
                                       fontWeight: FontWeight.w600,
                                       color: const Color(0xFFF5A623),
                                       letterSpacing: 0.5,
@@ -770,7 +773,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                   Text(
                                     _detail?.organizer?.businessName ?? 'Fun Event Co.',
                                     style: GoogleFonts.poppins(
-                                      fontSize: 15,
+                                      fontSize: Responsive.sp(context, 15),
                                       fontWeight: FontWeight.w600,
                                       color: const Color(0xFF1A1A2E),
                                     ),
@@ -788,7 +791,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                               child: Text(
                                 'Follow',
                                 style: GoogleFonts.poppins(
-                                  fontSize: 13,
+                                  fontSize: Responsive.sp(context, 13),
                                   fontWeight: FontWeight.w600,
                                   color: Colors.grey.shade600,
                                 ),
@@ -820,7 +823,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                 child: Text(
                                   'Terms & Conditions',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 14,
+                                    fontSize: Responsive.sp(context, 14),
                                     fontWeight: FontWeight.w600,
                                     color: const Color(0xFF1A1A2E),
                                   ),
@@ -849,7 +852,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                       const SizedBox(height: 16),
                     ],
 
-                    const SizedBox(height: 100),
+                    SizedBox(height: Responsive.h(context, 100)),
                   ],
                 ),
               ),
@@ -889,7 +892,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                           ),
                           TextSpan(
                             text: ' onwards',
-                            style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey),
+                            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey),
                           ),
                         ],
                       ),
@@ -897,32 +900,46 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                   if (_priceDisplay != 'Price TBA') const Spacer(),
                   Expanded(
                     flex: 2,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (widget.buttonLabel == 'Send Enquiry' || widget.buttonLabel == 'Check Availability') {
-                          showInquireNow(context, listingId: widget.event.id, isProgram: true);
-                        } else if (widget.onBookTapped != null) {
-                          widget.onBookTapped!();
-                        } else {
-                          showInquireNow(context, listingId: widget.event.id, isProgram: true);
-                        }
+                    child: Builder(
+                      builder: (context) {
+                        final label = _isDirectBooking
+                            ? 'Check Availability'
+                            : 'Enquire Now';
+                        return ElevatedButton(
+                          onPressed: () {
+                            if (_isDirectBooking) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => SelectProgramBatchScreen(
+                                    event: _eventForSheets,
+                                    batches: _detail?.batches ?? [],
+                                  ),
+                                ),
+                              );
+                            } else {
+                              showInquireNow(context,
+                                  listingId: widget.event.id, isProgram: true);
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFFCC00),
+                            foregroundColor: const Color(0xFF1A1A2E),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            label,
+                            style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, 15),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFCC00),
-                        foregroundColor: const Color(0xFF1A1A2E),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        widget.buttonLabel,
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 15),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
                     ),
                   ),
                 ],
@@ -960,7 +977,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
         child: Center(
           child: Text(
             name.isNotEmpty ? name[0].toUpperCase() : '?',
-            style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 20), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
           ),
         ),
       );
@@ -1056,24 +1073,24 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (_cancellationPolicy != null) ...[
-                      Text('Cancellation Policy', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                      Text('Cancellation Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                       const SizedBox(height: 10),
-                      Text(_cancellationPolicy!, style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700, height: 1.5)),
+                      Text(_cancellationPolicy!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
                       const SizedBox(height: 20),
                     ],
                     if (_refundPolicy != null) ...[
-                      Text('Refund Policy', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                      Text('Refund Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                       const SizedBox(height: 10),
-                      Text(_refundPolicy!, style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700, height: 1.5)),
+                      Text(_refundPolicy!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
                       const SizedBox(height: 20),
                     ],
                     if (_detail == null) ...[
-                      Text('Attendance & Participation', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                      Text('Attendance & Participation', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                       const SizedBox(height: 10),
                       _buildTermsBullet('Regular Attendance:', 'Students are expected to attend all scheduled sessions. Frequent absences may result in loss of the enrolled slot.'),
                       _buildTermsBullet('Make-up Sessions:', 'Make-up sessions are subject to availability and must be requested at least 24 hours in advance.'),
                       const SizedBox(height: 20),
-                      Text('Safety & Conduct', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                      Text('Safety & Conduct', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                       const SizedBox(height: 10),
                       _buildTermsBullet('Appropriate Attire:', 'Students must wear appropriate clothing and footwear as specified for each class type.'),
                       _buildTermsBullet('Respectful Conduct:', 'All participants must treat instructors and fellow students with respect at all times.'),
@@ -1094,9 +1111,9 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+          Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
           const SizedBox(height: 4),
-          Text(text, style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700, height: 1.5)),
+          Text(text, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
         ],
       ),
     );
@@ -1109,9 +1126,9 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
         children: [
           Icon(icon, size: 20, color: Colors.grey.shade600),
           const SizedBox(width: 12),
-          Text(label, style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600)),
+          Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600)),
           const Spacer(),
-          Text(value, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+          Text(value, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
         ],
       ),
     );
@@ -1142,7 +1159,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                 children: [
                   Text(
                     'Available Batches',
-                    style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 18), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -1170,13 +1187,13 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(b.name, style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 15)),
+                        Text(b.name, style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: Responsive.sp(context, 15))),
                         const SizedBox(height: 4),
                         Row(
                           children: [
                             const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
                             const SizedBox(width: 8),
-                            Text(days, style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600)),
+                            Text(days, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600)),
                           ],
                         ),
                         if (b.startTime != null && b.endTime != null) ...[
@@ -1185,7 +1202,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                             children: [
                               const Icon(Icons.access_time, size: 14, color: Colors.grey),
                               const SizedBox(width: 8),
-                              Text('${b.startTime} - ${b.endTime}', style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600)),
+                              Text('${b.startTime} - ${b.endTime}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600)),
                             ],
                           ),
                         ],

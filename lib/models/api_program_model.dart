@@ -159,6 +159,7 @@ class ApiProgramDetail extends ApiProgram {
   final int? maxCapacity;
   final int? totalHours;
   final int? moduleCount;
+  final String bookingType;
   final ApiCategory? subcategory;
   final List<ApiProgramTag> tags;
   final List<ApiProgramBatch> batches;
@@ -190,6 +191,7 @@ class ApiProgramDetail extends ApiProgram {
     this.maxCapacity,
     this.totalHours,
     this.moduleCount,
+    required this.bookingType,
     this.subcategory,
     required this.tags,
     required this.batches,
@@ -229,6 +231,9 @@ class ApiProgramDetail extends ApiProgram {
       maxCapacity: json['max_capacity'] as int?,
       totalHours: json['total_hours'] as int?,
       moduleCount: json['module_count'] as int?,
+      bookingType: (json['booking_type'] as String?) ??
+          ((json['service'] as Map<String, dynamic>?)?['booking_type'] as String?) ??
+          'enquiry',
       subcategory: json['subcategory'] != null
           ? ApiCategory.fromJson(json['subcategory'] as Map<String, dynamic>)
           : null,

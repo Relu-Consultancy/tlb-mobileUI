@@ -163,7 +163,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                                   child: Text(
                                     event.tag!,
                                     style: GoogleFonts.poppins(
-                                      fontSize: 11,
+                                      fontSize: Responsive.sp(context, 11),
                                       fontWeight: FontWeight.w700,
                                       color: Colors.white,
                                       letterSpacing: 1.2,
@@ -195,7 +195,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.poppins(
-                                    fontSize: 12,
+                                    fontSize: Responsive.sp(context, 12),
                                     color: Colors.white.withOpacity(0.88),
                                     height: 1.4,
                                   ),
@@ -220,7 +220,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                                     child: Text(
                                       widget.ctaText,
                                       style: GoogleFonts.poppins(
-                                        fontSize: 14,
+                                        fontSize: Responsive.sp(context, 14),
                                         fontWeight: FontWeight.w600,
                                         color: const Color(0xFF1A1A2E),
                                       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
@@ -64,7 +65,7 @@ class CategoryEventCard extends StatelessWidget {
                       child: Text(
                         event.tag!,
                         style: GoogleFonts.poppins(
-                          fontSize: 9.5,
+                          fontSize: Responsive.sp(context, 9.5),
                           fontWeight: FontWeight.w700,
                           color: Colors.white,
                         ),
@@ -85,7 +86,7 @@ class CategoryEventCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
-                    fontSize: 12.5,
+                    fontSize: Responsive.sp(context, 12.5),
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
                     height: 1.3,
@@ -102,7 +103,7 @@ class CategoryEventCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
-                          fontSize: 10.5,
+                          fontSize: Responsive.sp(context, 10.5),
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -121,7 +122,7 @@ class CategoryEventCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
-                            fontSize: 10.5,
+                            fontSize: Responsive.sp(context, 10.5),
                             fontWeight: FontWeight.w500,
                             color: AppColors.textSecondary,
                           ),
@@ -137,7 +138,7 @@ class CategoryEventCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     text: TextSpan(
                       style: GoogleFonts.poppins(
-                        fontSize: 10.5,
+                        fontSize: Responsive.sp(context, 10.5),
                         color: AppColors.textSecondary,
                         height: 1.4,
                       ),
@@ -145,7 +146,7 @@ class CategoryEventCard extends StatelessWidget {
                         TextSpan(
                           text: 'Description',
                           style: GoogleFonts.poppins(
-                            fontSize: 10.5,
+                            fontSize: Responsive.sp(context, 10.5),
                             fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
                             height: 1.4,

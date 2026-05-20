@@ -82,7 +82,7 @@ class AllCategoriesPopup extends StatelessWidget {
                             decoration: InputDecoration(
                               hintText: 'Search Categories & more ..',
                               hintStyle: GoogleFonts.poppins(
-                                fontSize: 13,
+                                fontSize: Responsive.sp(context, 13),
                                 color: Colors.grey.shade500,
                               ),
                               border: InputBorder.none,
@@ -122,7 +122,7 @@ class AllCategoriesPopup extends StatelessWidget {
                   Text(
                     'All Categories',
                     style: GoogleFonts.poppins(
-                      fontSize: 18,
+                      fontSize: Responsive.sp(context, 18),
                       fontWeight: FontWeight.w700,
                       color: Colors.black,
                     ),
@@ -131,7 +131,7 @@ class AllCategoriesPopup extends StatelessWidget {
                   Text(
                     '(${categories.length} Results Found)',
                     style: GoogleFonts.poppins(
-                      fontSize: 11,
+                      fontSize: Responsive.sp(context, 11),
                       fontWeight: FontWeight.w500,
                       color: Colors.grey.shade500,
                     ),

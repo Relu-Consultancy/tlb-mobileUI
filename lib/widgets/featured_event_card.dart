@@ -78,7 +78,7 @@ class FeaturedEventCard extends StatelessWidget {
                     child: Text(
                       'Featured',
                       style: GoogleFonts.poppins(
-                        fontSize: 11,
+                        fontSize: Responsive.sp(context, 11),
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
@@ -105,7 +105,7 @@ class FeaturedEventCard extends StatelessWidget {
                 Text(
                   event.title,
                   style: GoogleFonts.poppins(
-                    fontSize: 15,
+                    fontSize: Responsive.sp(context, 15),
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                   ),
@@ -125,7 +125,7 @@ class FeaturedEventCard extends StatelessWidget {
                       child: Text(
                         event.venue,
                         style: GoogleFonts.poppins(
-                          fontSize: 12,
+                          fontSize: Responsive.sp(context, 12),
                           color: AppColors.textSecondary,
                         ),
                         maxLines: 1,

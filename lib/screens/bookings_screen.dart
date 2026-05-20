@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/booked_events_state.dart';
 import 'booking_detail_screen.dart';
@@ -29,7 +30,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
         title: Text(
           'All Bookings',
           style: GoogleFonts.poppins(
-            fontSize: 18,
+            fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
@@ -64,7 +65,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                           _tabs[i],
                           textAlign: TextAlign.center,
                           style: GoogleFonts.poppins(
-                            fontSize: 13,
+                            fontSize: Responsive.sp(context, 13),
                             fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                             color: active ? const Color(0xFF1A1A2E) : Colors.grey.shade500,
                           ),
@@ -123,7 +124,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
           Text(
             'No $tab Bookings',
             style: GoogleFonts.poppins(
-              fontSize: 16,
+              fontSize: Responsive.sp(context, 16),
               fontWeight: FontWeight.w500,
               color: Colors.grey.shade400,
             ),
@@ -186,7 +187,7 @@ class _BookingCard extends StatelessWidget {
                   Text(
                     event.title,
                     style: GoogleFonts.poppins(
-                      fontSize: 14.5,
+                      fontSize: Responsive.sp(context, 14.5),
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF1A1A2E),
                       height: 1.3,
@@ -204,7 +205,7 @@ class _BookingCard extends StatelessWidget {
                           child: Text(
                             booking.date,
                             style: GoogleFonts.poppins(
-                              fontSize: 11.5,
+                              fontSize: Responsive.sp(context, 11.5),
                               color: Colors.grey.shade600,
                             ),
                             maxLines: 1,
@@ -222,7 +223,7 @@ class _BookingCard extends StatelessWidget {
                         child: Text(
                           event.venue,
                           style: GoogleFonts.poppins(
-                            fontSize: 11.5,
+                            fontSize: Responsive.sp(context, 11.5),
                             color: Colors.grey.shade600,
                           ),
                           maxLines: 1,
@@ -250,7 +251,7 @@ class _BookingCard extends StatelessWidget {
                           Text(
                             'View Ticket',
                             style: GoogleFonts.poppins(
-                              fontSize: 12,
+                              fontSize: Responsive.sp(context, 12),
                               fontWeight: FontWeight.w600,
                               color: const Color(0xFF1A1A2E),
                             ),

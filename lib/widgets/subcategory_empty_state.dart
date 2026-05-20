@@ -59,7 +59,7 @@ class SubcategoryEmptyState extends StatelessWidget {
                   SnackBar(
                     content: Text(
                       "You'll be notified when it's available!",
-                      style: GoogleFonts.poppins(fontSize: 13),
+                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13)),
                     ),
                     backgroundColor: AppColors.textPrimary,
                     behavior: SnackBarBehavior.floating,

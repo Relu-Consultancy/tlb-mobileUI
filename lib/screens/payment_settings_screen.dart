@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_state.dart';
 
@@ -20,7 +21,7 @@ class PaymentSettingsScreen extends StatelessWidget {
         title: Text(
           'Payment Settings',
           style: GoogleFonts.poppins(
-            fontSize: 18,
+            fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
@@ -50,7 +51,7 @@ class PaymentSettingsScreen extends StatelessWidget {
                             return Text(
                               'Hi ${AuthState.firstName},',
                               style: GoogleFonts.poppins(
-                                fontSize: 20,
+                                fontSize: Responsive.sp(context, 20),
                                 fontWeight: FontWeight.w800,
                                 color: const Color(0xFF1A1A2E),
                               ),
@@ -61,7 +62,7 @@ class PaymentSettingsScreen extends StatelessWidget {
                         Text(
                           'Manage  and  secure your saved\npayment methods.',
                           style: GoogleFonts.poppins(
-                            fontSize: 12,
+                            fontSize: Responsive.sp(context, 12),
                             color: Colors.grey.shade500,
                             height: 1.5,
                           ),
@@ -87,7 +88,7 @@ class PaymentSettingsScreen extends StatelessWidget {
             Text(
               'Saved Method',
               style: GoogleFonts.poppins(
-                fontSize: 14,
+                fontSize: Responsive.sp(context, 14),
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF1A1A2E),
               ),
@@ -115,7 +116,7 @@ class PaymentSettingsScreen extends StatelessWidget {
                           child: Text(
                             'VISA',
                             style: GoogleFonts.poppins(
-                              fontSize: 11,
+                              fontSize: Responsive.sp(context, 11),
                               fontWeight: FontWeight.w800,
                               color: Colors.white,
                               letterSpacing: 1,
@@ -130,7 +131,7 @@ class PaymentSettingsScreen extends StatelessWidget {
                               Text(
                                 'Visa**** 4578',
                                 style: GoogleFonts.poppins(
-                                  fontSize: 13.5,
+                                  fontSize: Responsive.sp(context, 13.5),
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xFF1A1A2E),
                                 ),
@@ -140,7 +141,7 @@ class PaymentSettingsScreen extends StatelessWidget {
                                   Text(
                                     'Expires 09/29',
                                     style: GoogleFonts.poppins(
-                                      fontSize: 11.5,
+                                      fontSize: Responsive.sp(context, 11.5),
                                       color: Colors.grey.shade500,
                                     ),
                                   ),
@@ -154,7 +155,7 @@ class PaymentSettingsScreen extends StatelessWidget {
                                     child: Text(
                                       'Default',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 10,
+                                        fontSize: Responsive.sp(context, 10),
                                         fontWeight: FontWeight.w600,
                                         color: const Color(0xFFFFB902),
                                       ),
@@ -183,7 +184,7 @@ class PaymentSettingsScreen extends StatelessWidget {
                           child: Text(
                             'UPI',
                             style: GoogleFonts.poppins(
-                              fontSize: 11,
+                              fontSize: Responsive.sp(context, 11),
                               fontWeight: FontWeight.w700,
                               color: const Color(0xFF1A1A2E),
                             ),
@@ -194,7 +195,7 @@ class PaymentSettingsScreen extends StatelessWidget {
                           child: Text(
                             'UPI: designer@upi',
                             style: GoogleFonts.poppins(
-                              fontSize: 13.5,
+                              fontSize: Responsive.sp(context, 13.5),
                               fontWeight: FontWeight.w500,
                               color: const Color(0xFF1A1A2E),
                             ),
@@ -227,7 +228,7 @@ class PaymentSettingsScreen extends StatelessWidget {
                       Text(
                         'Add New Method',
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: Responsive.sp(context, 14),
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF1A1A2E),
                         ),
@@ -244,7 +245,7 @@ class PaymentSettingsScreen extends StatelessWidget {
             Text(
               'Need more help?',
               style: GoogleFonts.poppins(
-                fontSize: 14,
+                fontSize: Responsive.sp(context, 14),
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFF1A1A2E),
               ),
@@ -253,7 +254,7 @@ class PaymentSettingsScreen extends StatelessWidget {
             Text(
               'Our support team is ready to assist you.',
               style: GoogleFonts.poppins(
-                fontSize: 12,
+                fontSize: Responsive.sp(context, 12),
                 color: Colors.grey.shade500,
               ),
             ),
@@ -277,14 +278,14 @@ class PaymentSettingsScreen extends StatelessWidget {
                 title: Text(
                   'Chat with support',
                   style: GoogleFonts.poppins(
-                    fontSize: 14,
+                    fontSize: Responsive.sp(context, 14),
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF1A1A2E),
                   ),
                 ),
                 subtitle: Text(
                   'We usually reply in minutes',
-                  style: GoogleFonts.poppins(fontSize: 11.5, color: Colors.grey.shade500),
+                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: Colors.grey.shade500),
                 ),
                 trailing: const Icon(Icons.chevron_right, color: Color(0xFF2563EB)),
               ),

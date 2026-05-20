@@ -134,7 +134,7 @@ class _TrendingCardState extends State<TrendingCard> {
                                   child: Text(
                                     event.tag!,
                                     style: GoogleFonts.poppins(
-                                      fontSize: 11,
+                                      fontSize: Responsive.sp(context, 11),
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.tagProgram,
                                     ),
@@ -144,7 +144,7 @@ class _TrendingCardState extends State<TrendingCard> {
                               Text(
                                 event.title,
                                 style: GoogleFonts.poppins(
-                                  fontSize: 16,
+                                  fontSize: Responsive.sp(context, 16),
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.textPrimary,
                                 ),
@@ -154,7 +154,7 @@ class _TrendingCardState extends State<TrendingCard> {
                                 child: Text(
                                   event.description ?? '',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 12,
+                                    fontSize: Responsive.sp(context, 12),
                                     color: AppColors.textSecondary,
                                     height: 1.4,
                                   ),

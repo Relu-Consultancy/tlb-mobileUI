@@ -76,7 +76,7 @@ class SpecialNeedsSection extends StatelessWidget {
                                 child: Text(
                                   event.tag!,
                                   style: GoogleFonts.poppins(
-                                    fontSize: 10,
+                                    fontSize: Responsive.sp(context, 10),
                                     color: Colors.white,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -104,7 +104,7 @@ class SpecialNeedsSection extends StatelessWidget {
                                 Text(
                                   event.title,
                                   style: GoogleFonts.poppins(
-                                    fontSize: 14,
+                                    fontSize: Responsive.sp(context, 14),
                                     fontWeight: FontWeight.bold,
                                     color: const Color(0xFF1A1A2E),
                                   ),
@@ -120,7 +120,7 @@ class SpecialNeedsSection extends StatelessWidget {
                                     Text(
                                       event.reviewCount ?? '3.5k reviews',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 11,
+                                        fontSize: Responsive.sp(context, 11),
                                         color: Colors.grey,
                                       ),
                                     ),
@@ -130,7 +130,7 @@ class SpecialNeedsSection extends StatelessWidget {
                                 Text(
                                   'Price - ₹${event.price?.toInt() ?? 200}',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 12,
+                                    fontSize: Responsive.sp(context, 12),
                                     fontWeight: FontWeight.w700,
                                     color: const Color(0xFF1A1A2E),
                                   ),

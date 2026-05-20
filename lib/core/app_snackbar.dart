@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 import 'app_spacing.dart';
@@ -46,7 +47,7 @@ class AppSnackBar {
       SnackBar(
         content: Text(
           message,
-          style: GoogleFonts.poppins(fontSize: 13, color: Colors.white),
+          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.white),
         ),
         backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,

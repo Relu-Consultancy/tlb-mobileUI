@@ -78,7 +78,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
             child: Text(
               '${widget.event.title} fun experience!',
               style: GoogleFonts.poppins(
-                fontSize: 13,
+                fontSize: Responsive.sp(context, 13),
                 color: Colors.grey.shade600,
               ),
             ),
@@ -124,7 +124,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                 Text(
                   '${_currentPage + 1}/${_images.length}',
                   style: GoogleFonts.poppins(
-                    fontSize: 14,
+                    fontSize: Responsive.sp(context, 14),
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF1A1A2E),
                   ),

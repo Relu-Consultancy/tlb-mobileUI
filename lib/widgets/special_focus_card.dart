@@ -69,7 +69,7 @@ class SpecialFocusCard extends StatelessWidget {
                           child: Text(
                             event.tag!,
                             style: GoogleFonts.poppins(
-                              fontSize: 10.5,
+                              fontSize: Responsive.sp(context, 10.5),
                               fontWeight: FontWeight.w700,
                               color: accentColor,
                               letterSpacing: 0.4,
@@ -84,7 +84,7 @@ class SpecialFocusCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: Responsive.sp(context, 14),
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
                           height: 1.25,
@@ -101,7 +101,7 @@ class SpecialFocusCard extends StatelessWidget {
                             Text(
                               event.reviewCount!,
                               style: GoogleFonts.poppins(
-                                fontSize: 11,
+                                fontSize: Responsive.sp(context, 11),
                                 color: AppColors.textSecondary,
                               ),
                             ),
@@ -120,7 +120,7 @@ class SpecialFocusCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.poppins(
-                                fontSize: 11,
+                                fontSize: Responsive.sp(context, 11),
                                 color: AppColors.textSecondary,
                               ),
                             ),
@@ -147,7 +147,7 @@ class SpecialFocusCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
-                            fontSize: 10.5,
+                            fontSize: Responsive.sp(context, 10.5),
                             color: AppColors.textSecondary,
                             height: 1.4,
                           ),

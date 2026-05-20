@@ -190,12 +190,12 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                 if (_provider != null)
                   Text(
                     '${_formatCount(_provider!.totalReviews)} Reviews',
-                    style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600),
                   )
                 else if (widget.initialName != null)
                   Text(
                     'Partner',
-                    style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600),
                   ),
                 const SizedBox(height: 20),
               ],
@@ -227,7 +227,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                           Expanded(
                             child: Text(
                               _error!,
-                              style: GoogleFonts.poppins(fontSize: 12, color: Colors.orange.shade800),
+                              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.orange.shade800),
                             ),
                           ),
                           TextButton(
@@ -236,7 +236,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               foregroundColor: Colors.orange.shade700,
                             ),
-                            child: Text('Retry', style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600)),
+                            child: Text('Retry', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w600)),
                           ),
                         ],
                       ),
@@ -258,12 +258,12 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                       children: [
                         Text(
                           'About',
-                          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           _bio,
-                          style: GoogleFonts.poppins(fontSize: 13, height: 1.6, color: Colors.grey.shade600),
+                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), height: 1.6, color: Colors.grey.shade600),
                         ),
                       ],
                     ),
@@ -299,18 +299,18 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                     children: [
                       Text(
                         'Upcoming Events',
-                        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
                       ),
                       Text(
                         'See All >',
-                        style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6)),
+                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6)),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Text(
                     "Shouldn't miss these wonderful experiences!",
-                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500),
                   ),
                   const SizedBox(height: 16),
 
@@ -357,7 +357,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
       child: Center(
         child: Text(
           initial,
-          style: GoogleFonts.poppins(fontSize: 32, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 32), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
         ),
       ),
     );
@@ -389,7 +389,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
           Text(
             label,
             style: GoogleFonts.poppins(
-              fontSize: 10,
+              fontSize: Responsive.sp(context, 10),
               fontWeight: FontWeight.w500,
               color: Colors.grey.shade500,
               letterSpacing: 0.5,
@@ -427,7 +427,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
           const SizedBox(height: 8),
           Text(
             title,
-            style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
+            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -439,7 +439,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
               Expanded(
                 child: Text(
                   venue,
-                  style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500),
+                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -449,7 +449,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
           const SizedBox(height: 4),
           Text(
             'Limited Seats',
-            style: GoogleFonts.poppins(fontSize: 11, fontWeight: FontWeight.w600, color: const Color(0xFFFF6B6B)),
+            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), fontWeight: FontWeight.w600, color: const Color(0xFFFF6B6B)),
           ),
         ],
       ),

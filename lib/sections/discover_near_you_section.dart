@@ -76,7 +76,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                               child: Text(
                                 event.tag ?? '0.5 km away', // distance
                                 style: GoogleFonts.poppins(
-                                  fontSize: 12,
+                                  fontSize: Responsive.sp(context, 12),
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xFF1A1A2E),
                                 ),
@@ -102,7 +102,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                                   child: Text(
                                     event.title,
                                     style: GoogleFonts.poppins(
-                                      fontSize: 15,
+                                      fontSize: Responsive.sp(context, 15),
                                       fontWeight: FontWeight.bold,
                                       color: const Color(0xFF1A1A2E),
                                     ),
@@ -120,7 +120,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                                   child: Text(
                                     'Outdoor Play',
                                     style: GoogleFonts.poppins(
-                                      fontSize: 10,
+                                      fontSize: Responsive.sp(context, 10),
                                       fontWeight: FontWeight.w600,
                                       color: const Color(0xFF1A1A2E),
                                     ),
@@ -138,7 +138,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                                 Expanded(
                                   child: Text(
                                     event.venue,
-                                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -159,7 +159,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                                 const SizedBox(width: 6),
                                 Text(
                                   event.reviewCount ?? '3.5k reviews',
-                                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey),
                                 ),
                               ],
                             ),
@@ -175,7 +175,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                                     TextSpan(
                                       text: 'Description - ',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 12,
+                                        fontSize: Responsive.sp(context, 12),
                                         fontWeight: FontWeight.bold,
                                         color: const Color(0xFF1A1A2E),
                                       ),
@@ -183,7 +183,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                                     TextSpan(
                                       text: event.description ?? 'Slides, Splash Zone, Mini zipline & shaded picnic areas.',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 12,
+                                        fontSize: Responsive.sp(context, 12),
                                         color: Colors.grey.shade600,
                                       ),
                                     ),

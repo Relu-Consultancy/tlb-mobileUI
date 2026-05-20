@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 
@@ -19,7 +20,7 @@ class SectionDividerWidget extends StatelessWidget {
             child: Text(
               title,
               style: GoogleFonts.poppins(
-                fontSize: 16,
+                fontSize: Responsive.sp(context, 16),
                 fontWeight: FontWeight.w700,
                 color: AppColors.textSecondary,
               ),

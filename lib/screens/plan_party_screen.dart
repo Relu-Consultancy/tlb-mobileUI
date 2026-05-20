@@ -123,7 +123,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                             Text(
                               widget.event.title,
                               style: GoogleFonts.poppins(
-                                fontSize: 13,
+                                fontSize: Responsive.sp(context, 13),
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFF1A1A2E),
                               ),
@@ -132,7 +132,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                             Text(
                               widget.event.venue,
                               style: GoogleFonts.poppins(
-                                fontSize: 11,
+                                fontSize: Responsive.sp(context, 11),
                                 color: Colors.grey.shade500,
                               ),
                             ),
@@ -148,7 +148,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                                 Text(
                                   widget.event.reviewCount ?? '(124 reviews)',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 11,
+                                    fontSize: Responsive.sp(context, 11),
                                     color: Colors.grey.shade500,
                                   ),
                                 ),
@@ -183,10 +183,10 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                   ),
                   child: TextField(
                     controller: _childNameController,
-                    style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF1A1A2E)),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFF1A1A2E)),
                     decoration: InputDecoration(
                       hintText: 'Enter child\'s name',
-                      hintStyle: GoogleFonts.poppins(fontSize: 14, color: Colors.grey.shade400),
+                      hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: Colors.grey.shade400),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       border: InputBorder.none,
                     ),
@@ -236,7 +236,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                             Text(
                               occasion,
                               style: GoogleFonts.poppins(
-                                fontSize: 13,
+                                fontSize: Responsive.sp(context, 13),
                                 fontWeight: FontWeight.w500,
                                 color: const Color(0xFF1A1A2E),
                               ),
@@ -263,7 +263,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                       Text(
                         'Select Date',
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: Responsive.sp(context, 14),
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF1A1A2E),
                         ),
@@ -298,7 +298,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                               child: Text(
                                 date['label']!,
                                 style: GoogleFonts.poppins(
-                                  fontSize: 11.5,
+                                  fontSize: Responsive.sp(context, 11.5),
                                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                                   color: const Color(0xFF1A1A2E),
                                 ),
@@ -327,7 +327,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                       Text(
                         'Select Time',
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: Responsive.sp(context, 14),
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF1A1A2E),
                         ),
@@ -356,7 +356,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                                   child: Text(
                                     time,
                                     style: GoogleFonts.poppins(
-                                      fontSize: 13,
+                                      fontSize: Responsive.sp(context, 13),
                                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                                       color: const Color(0xFF1A1A2E),
                                     ),
@@ -388,11 +388,11 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                       isExpanded: true,
                       icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF1A1A2E)),
                       dropdownColor: Colors.white,
-                      style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF1A1A2E)),
+                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFF1A1A2E)),
                       items: _kidsRanges
                           .map((r) => DropdownMenuItem(
                                 value: r,
-                                child: Text(r, style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF1A1A2E))),
+                                child: Text(r, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFF1A1A2E))),
                               ))
                           .toList(),
                       onChanged: (v) {
@@ -452,7 +452,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
         Text(
           label,
           style: GoogleFonts.poppins(
-            fontSize: 14,
+            fontSize: Responsive.sp(context, 14),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),

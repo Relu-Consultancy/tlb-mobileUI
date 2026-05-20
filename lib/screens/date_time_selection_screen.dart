@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
+import '../models/api_event_model.dart';
 import '../models/event_model.dart';
 import 'ticket_booking_screen.dart';
 
 class DateTimeSelectionScreen extends StatefulWidget {
   final EventModel event;
+  final List<ApiEventTicket>? apiTickets;
+  final DateTime? eventDateTime;
+  final DateTime? eventEndDateTime;
 
-  const DateTimeSelectionScreen({super.key, required this.event});
+  const DateTimeSelectionScreen({
+    super.key,
+    required this.event,
+    this.apiTickets,
+    this.eventDateTime,
+    this.eventEndDateTime,
+  });
 
   @override
   State<DateTimeSelectionScreen> createState() =>
@@ -21,33 +31,40 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
   late List<String> _dates;
   late List<String> _times;
 
+  static String _fmtDate(DateTime dt) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return '${days[dt.weekday - 1]} ${dt.day} ${months[dt.month - 1]}';
+  }
+
+  static String _fmtTime(DateTime dt) {
+    final h = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+    final m = dt.minute.toString().padLeft(2, '0');
+    final ampm = dt.hour >= 12 ? 'PM' : 'AM';
+    return '$h:$m $ampm';
+  }
+
   @override
   void initState() {
     super.initState();
-    // Use the event date as the primary choice, creating dummy alternatives around it.
-    // Since dates are strings, building real dynamic sequences is complex without parsing logic, 
-    // so we provide the actual event date, and fallback dummies.
-    final baseDate = widget.event.eventDate ?? 'Sat 27 Feb';
-    _dates = [
-      baseDate,
-      'Sun 28 Feb',
-      'Mon 1 Mar',
-      'Tue 2 Mar',
-      'Thu 4 Mar',
-      'Fri 5 Mar',
-    ];
+    if (widget.eventDateTime != null) {
+      // Convert UTC → device local time (handles IST and any other timezone)
+      final start = widget.eventDateTime!.toLocal();
+      final end = widget.eventEndDateTime?.toLocal();
 
-    final baseTime = widget.event.eventTime ?? '11:00 AM';
-    _times = [
-      baseTime,
-      '12:00 PM',
-      '01:00 PM',
-      '02:00 PM',
-      '03:00 PM',
-      '04:00 PM',
-    ];
-    
-    // Auto-select the first valid entry (matching the event) if possible to avoid empty states
+      // Single session: show only the real event date
+      _dates = [_fmtDate(start)];
+
+      // Show time range if end time is known, otherwise just start time
+      _times = [
+        end != null ? '${_fmtTime(start)} – ${_fmtTime(end)}' : _fmtTime(start),
+      ];
+    } else {
+      final baseDate = widget.event.eventDate ?? 'Sat 27 Feb';
+      _dates = [baseDate, 'Sun 28 Feb', 'Mon 1 Mar', 'Tue 2 Mar', 'Thu 4 Mar', 'Fri 5 Mar'];
+      final baseTime = widget.event.eventTime ?? '11:00 AM';
+      _times = [baseTime, '12:00 PM', '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM'];
+    }
     _selectedDateIndex = 0;
     _selectedTimeIndex = 0;
   }
@@ -74,7 +91,7 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: GoogleFonts.poppins(
-            fontSize: 16,
+            fontSize: Responsive.sp(context, 16),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
@@ -124,7 +141,7 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
                       Text(
                         event.venue,
                         style: GoogleFonts.poppins(
-                          fontSize: 13,
+                          fontSize: Responsive.sp(context, 13),
                           color: Colors.grey.shade600,
                         ),
                       ),
@@ -145,7 +162,7 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
                           Text(
                             '(${event.reviewCount ?? "124 reviews"})',
                             style: GoogleFonts.poppins(
-                              fontSize: 12,
+                              fontSize: Responsive.sp(context, 12),
                               color: Colors.grey.shade500,
                             ),
                           ),
@@ -203,6 +220,7 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
                             event: event,
                             selectedDate: _dates[_selectedDateIndex!],
                             selectedTime: _times[_selectedTimeIndex!],
+                            apiTickets: widget.apiTickets,
                           ),
                         ),
                       );
@@ -252,7 +270,7 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
           Text(
             title,
             style: GoogleFonts.poppins(
-              fontSize: 16,
+              fontSize: Responsive.sp(context, 16),
               fontWeight: FontWeight.w700,
               color: const Color(0xFF1A1A2E),
             ),
@@ -296,7 +314,7 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
                                   child: Text(
                                     items[row * 3 + col],
                                     style: GoogleFonts.poppins(
-                                      fontSize: 11,
+                                      fontSize: Responsive.sp(context, 11),
                                       fontWeight: selectedIndex == (row * 3 + col) ? FontWeight.w600 : FontWeight.w400,
                                       color: const Color(0xFF1A1A2E),
                                     ),

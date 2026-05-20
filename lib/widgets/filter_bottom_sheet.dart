@@ -194,7 +194,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                             Text(
                               _tabLabels[_activeTab],
                               style: GoogleFonts.poppins(
-                                fontSize: 16,
+                                fontSize: Responsive.sp(context, 16),
                                 fontWeight: FontWeight.w700,
                                 color: const Color(0xFF1A1A2E),
                               ),
@@ -249,7 +249,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                                 child: Text(
                                   'Clear All',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 13,
+                                    fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w600,
                                     color: const Color(0xFF1A1A2E),
                                   ),
@@ -273,7 +273,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                                 child: Text(
                                   'Apply',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 13,
+                                    fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -380,7 +380,7 @@ class _SortByPanel extends StatelessWidget {
                   child: Text(
                     options[i],
                     style: GoogleFonts.poppins(
-                      fontSize: 13,
+                      fontSize: Responsive.sp(context, 13),
                       fontWeight:
                           isSelected ? FontWeight.w600 : FontWeight.w400,
                       color: const Color(0xFF1A1A2E),
@@ -456,7 +456,7 @@ class _CheckboxPanel extends StatelessWidget {
                   child: Text(
                     options[i],
                     style: GoogleFonts.poppins(
-                      fontSize: 13,
+                      fontSize: Responsive.sp(context, 13),
                       fontWeight:
                           isChecked ? FontWeight.w600 : FontWeight.w400,
                       color: const Color(0xFF1A1A2E),

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../core/app_colors.dart';
@@ -115,7 +116,7 @@ Widget buildReviewInlineSection(
             const SizedBox(width: 8),
             Text(
               'Write a Review',
-              style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFFDE7104)),
+              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w600, color: const Color(0xFFDE7104)),
             ),
           ],
         ),
@@ -132,13 +133,13 @@ Widget buildReviewInlineSection(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Reviews', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+            Text('Reviews', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
             GestureDetector(
               onTap: () async {
                 await showReviewSheet(context, listingId: listingId, listingTitle: listingTitle, listingImage: listingImage);
                 onRefresh?.call();
               },
-              child: Text('See All >', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6))),
+              child: Text('See All >', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6))),
             ),
           ],
         ),
@@ -166,7 +167,7 @@ Widget buildReviewInlineSection(
               children: [
                 Column(
                   children: [
-                    Text(avg.toStringAsFixed(1), style: GoogleFonts.poppins(fontSize: 30, fontWeight: FontWeight.w800, color: const Color(0xFF1A1A2E))),
+                    Text(avg.toStringAsFixed(1), style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 30), fontWeight: FontWeight.w800, color: const Color(0xFF1A1A2E))),
                     Row(
                       children: List.generate(5, (i) {
                         if (i < avg.floor()) return const Icon(Icons.star, color: Colors.amber, size: 16);
@@ -175,7 +176,7 @@ Widget buildReviewInlineSection(
                       }),
                     ),
                     const SizedBox(height: 4),
-                    Text('$total review${total == 1 ? '' : 's'}', style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500)),
+                    Text('$total review${total == 1 ? '' : 's'}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500)),
                   ],
                 ),
                 const SizedBox(width: 16),
@@ -188,7 +189,7 @@ Widget buildReviewInlineSection(
                         padding: const EdgeInsets.symmetric(vertical: 2),
                         child: Row(
                           children: [
-                            Text('$star', style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade600)),
+                            Text('$star', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade600)),
                             const SizedBox(width: 2),
                             const Icon(Icons.star, size: 11, color: Colors.amber),
                             const SizedBox(width: 6),
@@ -206,7 +207,7 @@ Widget buildReviewInlineSection(
                             const SizedBox(width: 6),
                             SizedBox(
                               width: 20,
-                              child: Text('$count', style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500), textAlign: TextAlign.end),
+                              child: Text('$count', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500), textAlign: TextAlign.end),
                             ),
                           ],
                         ),
@@ -260,7 +261,7 @@ Widget buildReviewInlineSection(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             'No reviews yet — be the first!',
-            style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade500),
+            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade500),
           ),
         ),
         const SizedBox(height: 12),
@@ -282,8 +283,8 @@ Future<void> _confirmDeleteReview(
     context: context,
     builder: (_) => AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: Text('Delete Review', style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: 16)),
-      content: Text('Are you sure you want to delete this review?', style: GoogleFonts.poppins(fontSize: 14)),
+      title: Text('Delete Review', style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: Responsive.sp(context, 16))),
+      content: Text('Are you sure you want to delete this review?', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14))),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
@@ -398,7 +399,7 @@ class _ReviewListSheetState extends State<_ReviewListSheet> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Reviews', style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                Text('Reviews', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                 Row(
                   children: [
                     // Write / Edit button — visible to all; login guard inside
@@ -439,7 +440,7 @@ class _ReviewListSheetState extends State<_ReviewListSheet> {
           else if (_error != null)
             Padding(
               padding: const EdgeInsets.all(32),
-              child: Text(_error!, style: GoogleFonts.poppins(fontSize: 13, color: Colors.red.shade400), textAlign: TextAlign.center),
+              child: Text(_error!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.red.shade400), textAlign: TextAlign.center),
             )
           else
             Flexible(
@@ -455,7 +456,7 @@ class _ReviewListSheetState extends State<_ReviewListSheet> {
                         children: [
                           Column(
                             children: [
-                              Text(_avgRating.toStringAsFixed(1), style: GoogleFonts.poppins(fontSize: 36, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                              Text(_avgRating.toStringAsFixed(1), style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 36), fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                               Row(
                                 children: List.generate(5, (i) {
                                   if (i < _avgRating.floor()) return const Icon(Icons.star, color: Colors.amber, size: 18);
@@ -464,7 +465,7 @@ class _ReviewListSheetState extends State<_ReviewListSheet> {
                                 }),
                               ),
                               const SizedBox(height: 4),
-                              Text('$_totalReviews review${_totalReviews == 1 ? '' : 's'}', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500)),
+                              Text('$_totalReviews review${_totalReviews == 1 ? '' : 's'}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
                             ],
                           ),
                           const SizedBox(width: 20),
@@ -477,7 +478,7 @@ class _ReviewListSheetState extends State<_ReviewListSheet> {
                                   padding: const EdgeInsets.symmetric(vertical: 3),
                                   child: Row(
                                     children: [
-                                      Text('$star', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600)),
+                                      Text('$star', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade600)),
                                       const SizedBox(width: 2),
                                       const Icon(Icons.star, size: 12, color: Colors.amber),
                                       const SizedBox(width: 6),
@@ -493,7 +494,7 @@ class _ReviewListSheetState extends State<_ReviewListSheet> {
                                         ),
                                       ),
                                       const SizedBox(width: 6),
-                                      SizedBox(width: 22, child: Text('$count', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500), textAlign: TextAlign.end)),
+                                      SizedBox(width: 22, child: Text('$count', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500), textAlign: TextAlign.end)),
                                     ],
                                   ),
                                 );
@@ -511,7 +512,7 @@ class _ReviewListSheetState extends State<_ReviewListSheet> {
                       Center(
                         child: Padding(
                           padding: const EdgeInsets.all(32),
-                          child: Text('No reviews yet. Be the first!', style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey.shade500), textAlign: TextAlign.center),
+                          child: Text('No reviews yet. Be the first!', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: Colors.grey.shade500), textAlign: TextAlign.center),
                         ),
                       )
                     else ...[
@@ -562,7 +563,7 @@ class _ReviewListSheetState extends State<_ReviewListSheet> {
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                                     decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(20)),
-                                    child: Text('Load more', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
+                                    child: Text('Load more', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
                                   ),
                                 ),
                         ),
@@ -602,7 +603,7 @@ class _ReviewTile extends StatelessWidget {
               backgroundColor: AppColors.primaryLight,
               child: Text(
                 review.customerName.isNotEmpty ? review.customerName[0].toUpperCase() : '?',
-                style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w700, color: AppColors.textPrimary),
               ),
             ),
             const SizedBox(width: 8),
@@ -610,8 +611,8 @@ class _ReviewTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(review.customerName, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                  Text(dateStr, style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500)),
+                  Text(review.customerName, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                  Text(dateStr, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500)),
                 ],
               ),
             ),
@@ -640,7 +641,7 @@ class _ReviewTile extends StatelessWidget {
         Row(children: List.generate(5, (i) => Icon(i < review.rating ? Icons.star : Icons.star_border, color: Colors.amber, size: 16))),
         if (review.comment.isNotEmpty) ...[
           const SizedBox(height: 6),
-          Text('"${review.comment}"', style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700, height: 1.4)),
+          Text('"${review.comment}"', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.4)),
         ],
         if (review.media.isNotEmpty) ...[
           const SizedBox(height: 8),
@@ -854,7 +855,7 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
                     _checkingExisting
                         ? 'Loading...'
                         : (_isEdit ? 'Edit Your Review' : 'Write a Review'),
-                    style: GoogleFonts.poppins(fontSize: 17, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                   ),
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
@@ -891,14 +892,14 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
                           children: [
                             Icon(Icons.info_outline, size: 16, color: Colors.blue.shade600),
                             const SizedBox(width: 8),
-                            Expanded(child: Text('You already reviewed this — editing your existing review.', style: GoogleFonts.poppins(fontSize: 12, color: Colors.blue.shade700))),
+                            Expanded(child: Text('You already reviewed this — editing your existing review.', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.blue.shade700))),
                           ],
                         ),
                       ),
                     ],
 
                     // ── Star picker ──
-                    Text('Your Rating', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                    Text('Your Rating', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                     const SizedBox(height: 8),
                     Row(
                       children: List.generate(5, (i) => GestureDetector(
@@ -913,14 +914,14 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
                     const SizedBox(height: 20),
 
                     // ── Comment ──
-                    Text('Your Review (optional)', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                    Text('Your Review (optional)', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _controller,
                       maxLines: 4,
                       decoration: InputDecoration(
                         hintText: 'Share your experience...',
-                        hintStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade400),
+                        hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
                         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
                         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFFFCC00))),
@@ -935,8 +936,8 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Photos (optional)', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                        Text('$_totalImageCount / 5', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500)),
+                        Text('Photos (optional)', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                        Text('$_totalImageCount / 5', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -961,8 +962,8 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Videos (optional)', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                        Text('$_totalVideoCount / 2', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500)),
+                        Text('Videos (optional)', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                        Text('$_totalVideoCount / 2', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -999,7 +1000,7 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
                             ? const AppLoaderInline()
                             : Text(
                                 _isEdit ? 'Update Review' : 'Submit Review',
-                                style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
+                                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600),
                               ),
                       ),
                     ),
@@ -1048,7 +1049,7 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
         children: [
           const Icon(Icons.videocam, color: Colors.white, size: 24),
           const SizedBox(height: 4),
-          Text('Video', style: GoogleFonts.poppins(fontSize: 10, color: Colors.white70)),
+          Text('Video', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 10), color: Colors.white70)),
         ],
       ),
     ),

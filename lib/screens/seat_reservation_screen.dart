@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 import '../models/event_model.dart';
 import 'review_pay_screen.dart';
 
 class SeatReservationScreen extends StatefulWidget {
   final EventModel event;
+  final int? slotId;
+  final int? guestCount;
+  final String? specialRequests;
 
-  const SeatReservationScreen({super.key, required this.event});
+  const SeatReservationScreen({
+    super.key,
+    required this.event,
+    this.slotId,
+    this.guestCount,
+    this.specialRequests,
+  });
 
   @override
   State<SeatReservationScreen> createState() => _SeatReservationScreenState();
@@ -114,7 +124,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
         title: Text(
           'Select Seats',
           style: GoogleFonts.poppins(
-            fontSize: 16,
+            fontSize: Responsive.sp(context, 16),
             fontWeight: FontWeight.w700,
             color: const Color(0xFF1A1A2E),
           ),
@@ -134,14 +144,14 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                 Text(
                   widget.event.title,
                   style: GoogleFonts.poppins(
-                    fontSize: 14,
+                    fontSize: Responsive.sp(context, 14),
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF1A1A2E),
                   ),
                 ),
                 Text(
                   '${widget.event.venue} • ${widget.event.eventDate ?? 'TBD'} | ${widget.event.eventTime ?? 'TBD'}',
-                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600),
+                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade600),
                 ),
               ],
             ),
@@ -178,7 +188,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                         child: Text(
                           'STAGE',
                           style: GoogleFonts.poppins(
-                            fontSize: 13,
+                            fontSize: Responsive.sp(context, 13),
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
                             letterSpacing: 4,
@@ -211,7 +221,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                                 child: Text(
                                   '${_categories[cat]!.name} - ₹${_categories[cat]!.price}',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 11,
+                                    fontSize: Responsive.sp(context, 11),
                                     fontWeight: FontWeight.w600,
                                     color: _categories[cat]!.color,
                                   ),
@@ -230,7 +240,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                                       _rowLabels[row],
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.poppins(
-                                        fontSize: 10,
+                                        fontSize: Responsive.sp(context, 10),
                                         fontWeight: FontWeight.w600,
                                         color: Colors.grey,
                                       ),
@@ -295,7 +305,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                                       _rowLabels[row],
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.poppins(
-                                        fontSize: 10,
+                                        fontSize: Responsive.sp(context, 10),
                                         fontWeight: FontWeight.w600,
                                         color: Colors.grey,
                                       ),
@@ -354,7 +364,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                                 Text(
                                   entry.value.name,
                                   style: GoogleFonts.poppins(
-                                    fontSize: 11,
+                                    fontSize: Responsive.sp(context, 11),
                                     fontWeight: FontWeight.w600,
                                     color: const Color(0xFF1A1A2E),
                                   ),
@@ -362,7 +372,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                                 Text(
                                   '₹${entry.value.price}',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 12,
+                                    fontSize: Responsive.sp(context, 12),
                                     fontWeight: FontWeight.w700,
                                     color: entry.value.color,
                                   ),
@@ -375,7 +385,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 100),
+                  SizedBox(height: Responsive.h(context, 100)),
                 ],
               ),
             ),
@@ -416,7 +426,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                       child: Text(
                         entry.key,
                         style: GoogleFonts.poppins(
-                          fontSize: 11,
+                          fontSize: Responsive.sp(context, 11),
                           fontWeight: FontWeight.w600,
                           color: _categories[cat]!.color,
                         ),
@@ -436,7 +446,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                         Text(
                           '${_selectedSeats.length} Seat${_selectedSeats.length > 1 ? 's' : ''} • ₹$_totalPrice',
                           style: GoogleFonts.poppins(
-                            fontSize: 15,
+                            fontSize: Responsive.sp(context, 15),
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF1A1A2E),
                           ),
@@ -457,6 +467,13 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                             selectedDate: widget.event.eventDate ?? '',
                             selectedTime: widget.event.eventTime ?? '',
                             ticketDetails: ticketDetailsString,
+                            lineItems: const [],
+                            attendee: const {},
+                            bookingType: 'venue',
+                            slotId: widget.slotId,
+                            guestCount: widget.guestCount ??
+                                _selectedSeats.length,
+                            specialRequests: widget.specialRequests,
                           ),
                         ),
                       );
@@ -472,7 +489,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                     child: Text(
                       'Proceed',
                       style: GoogleFonts.poppins(
-                        fontSize: 15,
+                        fontSize: Responsive.sp(context, 15),
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                       ),
@@ -503,7 +520,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
         const SizedBox(width: 4),
         Text(
           label,
-          style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade600),
+          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade600),
         ),
       ],
     );

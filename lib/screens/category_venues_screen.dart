@@ -3,6 +3,7 @@ import '../widgets/app_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../models/api_category_model.dart';
 import '../models/api_venue_model.dart';
@@ -31,21 +32,26 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
   late int _selectedCategoryIndex;
   int _selectedFilterIndex = 0;
   final ScrollController _chipScrollController = ScrollController();
+  final ScrollController _listScrollController = ScrollController();
   final List<GlobalKey> _chipKeys = List.generate(
     DummyData.venuesSeeAllCategories.length,
     (_) => GlobalKey(),
   );
 
+  static const int _pageSize = 20;
   List<ApiCategory>? _apiCategories;
   List<ApiVenue> _apiVenues = [];
   bool _isLoadingVenues = false;
-  String? _fetchError;
+  bool _isLoadingMore = false;
+  bool _hasMore = false;
+  int _currentPage = 1;
 
   @override
   void initState() {
     super.initState();
     _selectedCategoryIndex = widget.initialCategoryIndex
         .clamp(0, DummyData.venuesSeeAllCategories.length - 1);
+    _listScrollController.addListener(_onScroll);
     _loadApiCategoriesThenFetch();
   }
 
@@ -78,17 +84,20 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
   Future<void> _fetchVenues() async {
     setState(() {
       _isLoadingVenues = true;
-      _fetchError = null;
+      _currentPage = 1;
+      _hasMore = false;
     });
     try {
       final page = await EventsListingService.fetchVenues(
         categoryId: _matchedCategoryId(),
         city: LocationState().selectedCity.value,
-        pageSize: 50,
+        page: 1,
+        pageSize: _pageSize,
       );
       if (!mounted) return;
       setState(() {
         _apiVenues = page.results;
+        _hasMore = _pageSize < page.count;
         _isLoadingVenues = false;
       });
     } catch (e) {
@@ -97,7 +106,6 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
       setState(() {
         _apiVenues = [];
         _isLoadingVenues = false;
-        _fetchError = msg;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -109,6 +117,37 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
           duration: const Duration(seconds: 5),
         ),
       );
+    }
+  }
+
+  void _onScroll() {
+    if (_listScrollController.position.pixels >=
+        _listScrollController.position.maxScrollExtent - 300 &&
+        _hasMore && !_isLoadingMore && !_isLoadingVenues) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_isLoadingMore || !_hasMore) return;
+    setState(() => _isLoadingMore = true);
+    try {
+      final next = await EventsListingService.fetchVenues(
+        categoryId: _matchedCategoryId(),
+        city: LocationState().selectedCity.value,
+        page: _currentPage + 1,
+        pageSize: _pageSize,
+      );
+      if (!mounted) return;
+      setState(() {
+        _apiVenues = [..._apiVenues, ...next.results];
+        _currentPage += 1;
+        _hasMore = _currentPage * _pageSize < next.count;
+        _isLoadingMore = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isLoadingMore = false);
     }
   }
 
@@ -125,6 +164,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
   @override
   void dispose() {
     _chipScrollController.dispose();
+    _listScrollController.dispose();
     super.dispose();
   }
 
@@ -181,13 +221,6 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
   List<String> get _filters =>
       DummyData.venuesSubFilters[_selectedCategoryIndex];
 
-  List<EventModel> get _filteredVenues {
-    final all = DummyData.venuesByCategory[_selectedCategoryIndex];
-    if (_selectedFilterIndex == 0) return all;
-    final filterTag = _filters[_selectedFilterIndex];
-    return all.where((e) => e.tag == filterTag).toList();
-  }
-
   String get _categoryTitle =>
       (_currentCategory['label'] as String).replaceAll('\n', ' ');
 
@@ -236,6 +269,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
             // ── Scrollable Body ──────────────────────────────────────────
             Expanded(
               child: CustomScrollView(
+                controller: _listScrollController,
                 physics: const ClampingScrollPhysics(),
                 slivers: [
                   // ── Explore other Venues label + tinted background ──
@@ -258,7 +292,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                                 Text(
                                   'Explore other Venues',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 13,
+                                    fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.textPrimary,
                                   ),
@@ -269,7 +303,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                                   child: Text(
                                     'See All >',
                                     style: GoogleFonts.poppins(
-                                      fontSize: 12,
+                                      fontSize: Responsive.sp(context, 12),
                                       fontWeight: FontWeight.w500,
                                       color: const Color(0xFF2563EB),
                                     ),
@@ -280,7 +314,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                           ),
                           // ── Circle chip row ──
                           SizedBox(
-                            height: 128,
+                            height: Responsive.h(context, 128),
                             child: ListView.builder(
                               controller: _chipScrollController,
                               scrollDirection: Axis.horizontal,
@@ -361,7 +395,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
                                               style: GoogleFonts.poppins(
-                                                fontSize: 9.5,
+                                                fontSize: Responsive.sp(context, 9.5),
                                                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                                                 height: 1.2,
                                                 color: AppColors.textPrimary,
@@ -394,7 +428,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                           Text(
                             'All $_categoryTitle',
                             style: GoogleFonts.poppins(
-                              fontSize: 14.5,
+                              fontSize: Responsive.sp(context, 14.5),
                               fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
                             ),
@@ -434,7 +468,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                                     Text(
                                       'Filters',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 11.5,
+                                        fontSize: Responsive.sp(context, 11.5),
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white,
                                       ),
@@ -474,7 +508,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                               child: Text(
                                 _filters[filterIndex],
                                 style: GoogleFonts.poppins(
-                                  fontSize: 11.5,
+                                  fontSize: Responsive.sp(context, 11.5),
                                   fontWeight: isActive
                                       ? FontWeight.w700
                                       : FontWeight.w500,
@@ -533,6 +567,13 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                           crossAxisSpacing: 14,
                           childAspectRatio: 0.62,
                         ),
+                      ),
+                    ),
+                  if (_isLoadingMore)
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Center(child: AppLoaderInline()),
                       ),
                     ),
                   const SliverToBoxAdapter(child: SizedBox(height: 40)),
@@ -624,11 +665,11 @@ class _VenuesAllCategoriesSheetState
               child: TextField(
                 controller: _controller,
                 onChanged: _onSearch,
-                style: GoogleFonts.poppins(fontSize: 13),
+                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13)),
                 decoration: InputDecoration(
                   hintText: 'Search venue categories...',
                   hintStyle: GoogleFonts.poppins(
-                      fontSize: 13, color: Colors.grey.shade400),
+                      fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
                   prefixIcon:
                       const Icon(Icons.search, color: Colors.grey, size: 20),
                   suffixIcon: GestureDetector(
@@ -651,7 +692,7 @@ class _VenuesAllCategoriesSheetState
                 Text(
                   'All Categories',
                   style: GoogleFonts.poppins(
-                      fontSize: 16,
+                      fontSize: Responsive.sp(context, 16),
                       fontWeight: FontWeight.w700,
                       color: const Color(0xFF1A1A2E)),
                 ),
@@ -659,7 +700,7 @@ class _VenuesAllCategoriesSheetState
                 Text(
                   '(${_filtered.length} Results Found)',
                   style: GoogleFonts.poppins(
-                      fontSize: 12, color: Colors.grey.shade500),
+                      fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500),
                 ),
               ],
             ),
@@ -670,7 +711,7 @@ class _VenuesAllCategoriesSheetState
                 ? Center(
                     child: Text('No categories found',
                         style: GoogleFonts.poppins(
-                            fontSize: 14, color: Colors.grey)))
+                            fontSize: Responsive.sp(context, 14), color: Colors.grey)))
                 : GridView.builder(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                     gridDelegate:
@@ -717,7 +758,7 @@ class _VenuesAllCategoriesSheetState
                             Text(
                               cat['label'] as String,
                               style: GoogleFonts.poppins(
-                                  fontSize: 11,
+                                  fontSize: Responsive.sp(context, 11),
                                   fontWeight: FontWeight.w500,
                                   color: const Color(0xFF1A1A2E)),
                               maxLines: 2,

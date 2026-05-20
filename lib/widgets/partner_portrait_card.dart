@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
@@ -64,7 +65,7 @@ class PartnerPortraitCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
-                      fontSize: 16,
+                      fontSize: Responsive.sp(context, 16),
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
                     ),
@@ -75,7 +76,7 @@ class PartnerPortraitCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
-                      fontSize: 12.5,
+                      fontSize: Responsive.sp(context, 12.5),
                       color: AppColors.textSecondary,
                       height: 1.3,
                     ),
@@ -100,7 +101,7 @@ class PartnerPortraitCard extends StatelessWidget {
                           child: Text(
                             'Book Now',
                             style: GoogleFonts.poppins(
-                              fontSize: 13,
+                              fontSize: Responsive.sp(context, 13),
                               fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
                             ),

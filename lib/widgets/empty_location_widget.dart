@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../screens/location_screen.dart';
 
@@ -29,7 +30,7 @@ class EmptyLocationWidget extends StatelessWidget {
           Text(
             'No events or bookings',
             style: GoogleFonts.poppins(
-              fontSize: 19,
+              fontSize: Responsive.sp(context, 19),
               fontWeight: FontWeight.w700,
               color: const Color(0xFF1A1A2E),
             ),
@@ -40,7 +41,7 @@ class EmptyLocationWidget extends StatelessWidget {
           Text(
             "We're not currently serving\nthis location.\nTry choosing a different city.",
             style: GoogleFonts.poppins(
-              fontSize: 13,
+              fontSize: Responsive.sp(context, 13),
               color: const Color(0xFF9097AA),
               height: 1.65,
             ),
@@ -71,7 +72,7 @@ class EmptyLocationWidget extends StatelessWidget {
                 child: Text(
                   'Change Location',
                   style: GoogleFonts.poppins(
-                    fontSize: 14,
+                    fontSize: Responsive.sp(context, 14),
                     fontWeight: FontWeight.w600,
                   ),
                 ),

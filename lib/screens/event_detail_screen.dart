@@ -96,12 +96,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     if (_detail == null) {
       return '${widget.event.eventDate ?? "TBD"}, ${widget.event.eventTime ?? ""}';
     }
-    final date = _formatDate(_detail!.startDatetime);
-    final start = _formatTime(_detail!.startDatetime);
+    final start = _detail!.startDatetime.toLocal();
+    final date = _formatDate(start);
+    final startTime = _formatTime(start);
     if (_detail!.endDatetime != null) {
-      return '$date, $start – ${_formatTime(_detail!.endDatetime!)}';
+      return '$date, $startTime – ${_formatTime(_detail!.endDatetime!.toLocal())}';
     }
-    return '$date, $start';
+    return '$date, $startTime';
   }
 
   String? get _description => _detail?.description ?? widget.event.description;
@@ -153,6 +154,14 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         imagePath: _coverUrl,
         tag: _tag.isNotEmpty ? _tag : null,
         price: _lowestTicketPrice,
+        rating: widget.event.rating,
+        reviewCount: widget.event.reviewCount,
+        eventDate: _detail != null
+            ? _formatDate(_detail!.startDatetime.toLocal())
+            : widget.event.eventDate,
+        eventTime: _detail != null
+            ? _formatTime(_detail!.startDatetime.toLocal())
+            : widget.event.eventTime,
       );
 
   // ── Build ─────────────────────────────────────────────────────────────────
@@ -180,7 +189,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 child: Text(
                   _error!,
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey.shade600),
+                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: Colors.grey.shade600),
                 ),
               ),
               const SizedBox(height: 20),
@@ -270,7 +279,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           ),
                           child: Text(
                             _tag,
-                            style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
+                            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w600, color: Colors.white),
                           ),
                         ),
                       ),
@@ -306,7 +315,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           Expanded(
                             child: Text(
                               _locationText,
-                              style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF1A1A2E)),
+                              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF1A1A2E)),
                             ),
                           ),
                         ],
@@ -329,7 +338,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           Expanded(
                             child: Text(
                               _dateTimeText,
-                              style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF1A1A2E)),
+                              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF1A1A2E)),
                             ),
                           ),
                         ],
@@ -352,12 +361,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           children: [
                             Text(
                               'About Event',
-                              style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+                              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               _description!,
-                              style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600, height: 1.5),
+                              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600, height: 1.5),
                             ),
                           ],
                         ),
@@ -370,7 +379,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
                         'Things to Know',
-                        style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -413,10 +422,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Gallery', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                          Text('Gallery', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                           GestureDetector(
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => GalleryScreen(event: _eventForSheets))),
-                            child: Text('See All >', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6))),
+                            child: Text('See All >', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6))),
                           ),
                         ],
                       ),
@@ -424,7 +433,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     const SizedBox(height: 4),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('Sneak peek into what awaits you!', style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500)),
+                      child: Text('Sneak peek into what awaits you!', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
                     ),
                     const SizedBox(height: 12),
                     _buildGallery(context),
@@ -434,7 +443,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     // ── Location map ──────────────────────────────────────
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('Location', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                      child: Text('Location', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                     ),
                     const SizedBox(height: 12),
                     Container(
@@ -472,7 +481,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                               children: [
                                 Text(
                                   _locationText,
-                                  style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.white),
+                                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: Colors.white),
                                 ),
                                 if ((_detail?.address ?? '').isNotEmpty) ...[
                                   const SizedBox(height: 2),
@@ -480,7 +489,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                     _detail!.address!,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.poppins(fontSize: 11, color: const Color(0xFFFFCC00)),
+                                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: const Color(0xFFFFCC00)),
                                   ),
                                 ],
                                 const SizedBox(height: 8),
@@ -576,11 +585,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('ORGANIZED BY', style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, color: const Color(0xFFF5A623), letterSpacing: 0.5)),
+                                  Text('ORGANIZED BY', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 10), fontWeight: FontWeight.w600, color: const Color(0xFFF5A623), letterSpacing: 0.5)),
                                   const SizedBox(height: 2),
                                   Text(
                                     _detail?.organizer?.businessName ?? 'Fun Event Co.',
-                                    style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
+                                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
                                   ),
                                 ],
                               ),
@@ -592,7 +601,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                               ),
-                              child: Text('Follow', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey.shade600)),
+                              child: Text('Follow', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: Colors.grey.shade600)),
                             ),
                           ],
                         ),
@@ -616,7 +625,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                             children: [
                               Icon(Icons.description_outlined, size: 24, color: Colors.grey.shade600),
                               const SizedBox(width: 14),
-                              Expanded(child: Text('Terms & Conditions', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)))),
+                              Expanded(child: Text('Terms & Conditions', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)))),
                               Icon(Icons.chevron_right, color: Colors.blue.shade500, size: 24),
                             ],
                           ),
@@ -645,8 +654,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     //   child: Row(
                     //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     //     children: [
-                    //       Text('Related Events', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
-                    //       Text('See All >', style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6))),
+                    //       Text('Related Events', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                    //       Text('See All >', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6))),
                     //     ],
                     //   ),
                     // ),
@@ -664,7 +673,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     //   ),
                     // ),
 
-                    const SizedBox(height: 100),
+                    SizedBox(height: Responsive.h(context, 100)),
                   ],
                 ),
               ),
@@ -689,7 +698,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         color: const Color(0xFF4CAF50).withOpacity(0.12),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text('Free', style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w700, color: const Color(0xFF2E7D32))),
+                      child: Text('Free', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 18), fontWeight: FontWeight.w700, color: const Color(0xFF2E7D32))),
                     )
                   else
                     RichText(
@@ -699,7 +708,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                             text: _priceDisplay,
                             style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 20), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
                           ),
-                          TextSpan(text: '/', style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey)),
+                          TextSpan(text: '/', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: Colors.grey)),
                         ],
                       ),
                     ),
@@ -712,7 +721,17 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           showLoginSheet(context);
                           return;
                         }
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => DateTimeSelectionScreen(event: _eventForSheets)));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DateTimeSelectionScreen(
+                              event: _eventForSheets,
+                              apiTickets: _detail?.tickets,
+                              eventDateTime: _detail?.startDatetime,
+                              eventEndDateTime: _detail?.endDatetime,
+                            ),
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFFCC00),
@@ -762,7 +781,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         child: Center(
           child: Text(
             name.isNotEmpty ? name[0].toUpperCase() : '?',
-            style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 20), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
           ),
         ),
       );
@@ -817,9 +836,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         children: [
           Icon(icon, size: 20, color: Colors.grey.shade600),
           const SizedBox(width: 12),
-          Text(label, style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600)),
+          Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600)),
           const Spacer(),
-          Text(value, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+          Text(value, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
         ],
       ),
     );
@@ -857,7 +876,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     color: tag == 'Limited Seats' ? const Color(0xFFFF6B6B) : const Color(0xFF4CAF50),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Text(tag, style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.white)),
+                  child: Text(tag, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 10), fontWeight: FontWeight.w600, color: Colors.white)),
                 ),
               ),
             ],
@@ -867,13 +886,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+                Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
                 const SizedBox(height: 4),
                 Row(
                   children: [
                     const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
                     const SizedBox(width: 4),
-                    Expanded(child: Text(location, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey))),
+                    Expanded(child: Text(location, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey))),
                   ],
                 ),
               ],
@@ -921,13 +940,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Supervision & Responsibility', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                    Text('Supervision & Responsibility', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                     const SizedBox(height: 10),
                     _buildTermsBullet('Adult Presence:', 'All children under the age of 14 must be accompanied and supervised by a parent or legal guardian throughout the event.'),
                     _buildTermsBullet('Sign-in/Sign-out:', 'Guardians must register children at the entrance and sign them out personally at the end of the activities.'),
                     _buildTermsBullet('Conduct:', 'Parents or guardians are fully responsible for the behavior and safety of their children at all times.'),
                     const SizedBox(height: 20),
-                    Text('Health & Safety Rules', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                    Text('Health & Safety Rules', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                     const SizedBox(height: 10),
                     _buildTermsBullet('Attire:', 'All children must be dressed appropriately for the activity. For play zones, socks are often required, and sharp objects must be removed for safety.'),
                     _buildTermsBullet('Illness Policy:', 'Children showing signs of communicable illness will not be permitted to participate. Please inform us in advance if your child needs special accommodations.'),
@@ -947,9 +966,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+          Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
           const SizedBox(height: 4),
-          Text(text, style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700, height: 1.5)),
+          Text(text, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
         ],
       ),
     );
