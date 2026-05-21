@@ -10,6 +10,7 @@ import '../providers/auth_state.dart';
 import '../services/booking_service.dart';
 import '../widgets/app_loader.dart';
 import 'booking_confirmed_screen.dart';
+import 'venue_booking_confirmed_screen.dart';
 
 class ReviewPayScreen extends StatefulWidget {
   final EventModel event;
@@ -221,17 +222,31 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
         return;
       }
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => BookingConfirmedScreen(
-            event: widget.event,
-            selectedDate: widget.selectedDate,
-            selectedTime: widget.selectedTime,
-            bookingReference: confirmed.bookingReference,
+      if (widget.bookingType == 'venue') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => VenueBookingConfirmedScreen(
+              event: widget.event,
+              selectedDate: widget.selectedDate,
+              selectedTime: widget.selectedTime,
+              bookingReference: confirmed.bookingReference,
+            ),
           ),
-        ),
-      );
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BookingConfirmedScreen(
+              event: widget.event,
+              selectedDate: widget.selectedDate,
+              selectedTime: widget.selectedTime,
+              bookingReference: confirmed.bookingReference,
+            ),
+          ),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       Navigator.pop(context); // close loader

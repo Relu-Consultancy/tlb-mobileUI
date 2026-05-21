@@ -1,0 +1,124 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
+import '../providers/auth_state.dart';
+import '../services/partner_service.dart';
+import 'login_sheet.dart';
+
+class PartnerFollowButton extends StatefulWidget {
+  final String? partnerId;
+
+  const PartnerFollowButton({super.key, required this.partnerId});
+
+  @override
+  State<PartnerFollowButton> createState() => _PartnerFollowButtonState();
+}
+
+class _PartnerFollowButtonState extends State<PartnerFollowButton> {
+  bool _isFollowing = false;
+  bool _isLoading = false;
+
+  Future<void> _onTap() async {
+    if (!AuthState.isLoggedIn.value) {
+      showLoginSheet(context);
+      return;
+    }
+
+    final token = AuthState.accessToken;
+    final pid = widget.partnerId;
+    if (token == null || pid == null || pid.isEmpty) return;
+
+    final wasFollowing = _isFollowing;
+    setState(() {
+      _isFollowing = !_isFollowing;
+      _isLoading = true;
+    });
+
+    try {
+      if (!wasFollowing) {
+        await PartnerService.follow(token: token, partnerId: pid);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('You are now following this partner.')),
+          );
+        }
+      } else {
+        await PartnerService.unfollow(token: token, partnerId: pid);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Unfollowed.')),
+          );
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isFollowing = wasFollowing);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
+          backgroundColor: Colors.red.shade700,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pid = widget.partnerId;
+    if (pid == null || pid.isEmpty) return const SizedBox.shrink();
+
+    if (_isLoading) {
+      return SizedBox(
+        width: 28,
+        height: 28,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: _isFollowing ? const Color(0xFFFFC533) : Colors.grey,
+        ),
+      );
+    }
+
+    if (_isFollowing) {
+      return ElevatedButton.icon(
+        onPressed: _onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFFFFC533),
+          foregroundColor: Colors.black,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        icon: const Icon(Icons.check, size: 14),
+        label: Text(
+          'Following',
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 11),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    }
+
+    return OutlinedButton(
+      onPressed: _onTap,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.grey.shade700,
+        side: BorderSide(color: Colors.grey.shade400),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: Text(
+        'Follow',
+        style: GoogleFonts.poppins(
+          fontSize: Responsive.sp(context, 11),
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}

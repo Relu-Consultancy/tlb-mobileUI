@@ -78,16 +78,37 @@ class ApiVenueAvailability {
       );
 }
 
+class ApiVenueOccasion {
+  final int id;
+  final String name;
+  final String slug;
+
+  const ApiVenueOccasion({
+    required this.id,
+    required this.name,
+    required this.slug,
+  });
+
+  factory ApiVenueOccasion.fromJson(Map<String, dynamic> json) =>
+      ApiVenueOccasion(
+        id: (json['id'] as int?) ?? 0,
+        name: (json['name'] as String?) ?? '',
+        slug: (json['slug'] as String?) ?? '',
+      );
+}
+
 class ApiVenueOrganizer {
   final String businessName;
   final String? logoUrl;
+  final String? partnerId;
 
-  const ApiVenueOrganizer({required this.businessName, this.logoUrl});
+  const ApiVenueOrganizer({required this.businessName, this.logoUrl, this.partnerId});
 
   factory ApiVenueOrganizer.fromJson(Map<String, dynamic> json) =>
       ApiVenueOrganizer(
         businessName: (json['business_name'] as String?) ?? '',
         logoUrl: json['logo_url'] as String?,
+        partnerId: json['partner_id'] as String?,
       );
 }
 
@@ -148,6 +169,7 @@ class ApiVenueDetail extends ApiVenue {
   final List<ApiVenueMedia> media;
   final List<ApiVenuePackage> packages;
   final List<ApiVenueAvailability> availability;
+  final List<ApiVenueOccasion> occasions;
   final ApiVenueOrganizer? organizer;
 
   const ApiVenueDetail({
@@ -172,6 +194,7 @@ class ApiVenueDetail extends ApiVenue {
     required this.media,
     required this.packages,
     required this.availability,
+    required this.occasions,
     this.organizer,
   });
 
@@ -214,6 +237,9 @@ class ApiVenueDetail extends ApiVenue {
             .toList(),
         availability: (json['availability'] as List? ?? [])
             .map((a) => ApiVenueAvailability.fromJson(a as Map<String, dynamic>))
+            .toList(),
+        occasions: (json['occasions'] as List? ?? [])
+            .map((o) => ApiVenueOccasion.fromJson(o as Map<String, dynamic>))
             .toList(),
         organizer: json['organizer'] != null
             ? ApiVenueOrganizer.fromJson(

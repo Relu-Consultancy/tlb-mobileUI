@@ -5,6 +5,7 @@ import '../providers/auth_state.dart';
 import '../providers/location_state.dart';
 import '../widgets/login_sheet.dart';
 import '../core/responsive.dart';
+import '../widgets/partner_follow_button.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/review_sheet.dart';
 import '../models/event_model.dart';
@@ -781,21 +782,8 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                 ],
                               ),
                             ),
-                            OutlinedButton(
-                              onPressed: () {},
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(color: Colors.grey.shade400),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                              ),
-                              child: Text(
-                                'Follow',
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 13),
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
+                            PartnerFollowButton(
+                              partnerId: _detail?.organizer?.partnerId,
                             ),
                           ],
                         ),

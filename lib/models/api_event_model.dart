@@ -84,13 +84,15 @@ class ApiEventMedia {
 class ApiEventOrganizer {
   final String businessName;
   final String? logoUrl;
+  final String? partnerId;
 
-  const ApiEventOrganizer({required this.businessName, this.logoUrl});
+  const ApiEventOrganizer({required this.businessName, this.logoUrl, this.partnerId});
 
   factory ApiEventOrganizer.fromJson(Map<String, dynamic> json) =>
       ApiEventOrganizer(
         businessName: json['business_name'] as String,
         logoUrl: json['logo_url'] as String?,
+        partnerId: json['partner_id'] as String?,
       );
 }
 

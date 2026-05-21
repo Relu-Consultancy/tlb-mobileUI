@@ -4,6 +4,7 @@ import '../core/responsive.dart';
 import '../models/api_provider_model.dart';
 import '../services/events_listing_service.dart';
 import '../widgets/app_loader.dart';
+import '../widgets/partner_follow_button.dart';
 
 class OrganizerProfileScreen extends StatefulWidget {
   final String listingId;
@@ -197,6 +198,8 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                     'Partner',
                     style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600),
                   ),
+                const SizedBox(height: 12),
+                PartnerFollowButton(partnerId: _provider?.id),
                 const SizedBox(height: 20),
               ],
             ),

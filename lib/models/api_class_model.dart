@@ -70,13 +70,15 @@ class ApiClassMedia {
 class ApiClassOrganizer {
   final String businessName;
   final String? logoUrl;
+  final String? partnerId;
 
-  const ApiClassOrganizer({required this.businessName, this.logoUrl});
+  const ApiClassOrganizer({required this.businessName, this.logoUrl, this.partnerId});
 
   factory ApiClassOrganizer.fromJson(Map<String, dynamic> json) =>
       ApiClassOrganizer(
         businessName: json['business_name'] as String,
         logoUrl: json['logo_url'] as String?,
+        partnerId: json['partner_id'] as String?,
       );
 }
 

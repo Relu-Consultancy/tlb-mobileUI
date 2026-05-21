@@ -74,13 +74,15 @@ class ApiProgramMedia {
 class ApiProgramOrganizer {
   final String businessName;
   final String? logoUrl;
+  final String? partnerId;
 
-  const ApiProgramOrganizer({required this.businessName, this.logoUrl});
+  const ApiProgramOrganizer({required this.businessName, this.logoUrl, this.partnerId});
 
   factory ApiProgramOrganizer.fromJson(Map<String, dynamic> json) =>
       ApiProgramOrganizer(
         businessName: json['business_name'] as String,
         logoUrl: json['logo_url'] as String?,
+        partnerId: json['partner_id'] as String?,
       );
 }
 

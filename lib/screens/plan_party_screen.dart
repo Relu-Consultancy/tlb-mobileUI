@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../models/api_venue_model.dart';
 import '../models/event_model.dart';
 import '../core/responsive.dart';
+import 'venue_checkout_screen.dart';
 
 class PlanPartyScreen extends StatefulWidget {
   final EventModel event;
-  const PlanPartyScreen({super.key, required this.event});
+  final ApiVenueDetail? venueDetail;
+
+  const PlanPartyScreen({
+    super.key,
+    required this.event,
+    this.venueDetail,
+  });
 
   @override
   State<PlanPartyScreen> createState() => _PlanPartyScreenState();
@@ -13,38 +21,78 @@ class PlanPartyScreen extends StatefulWidget {
 
 class _PlanPartyScreenState extends State<PlanPartyScreen> {
   final _childNameController = TextEditingController();
+  final _attendeeController = TextEditingController();
   String? _selectedOccasion;
-  String? _selectedDate;
-  String? _selectedTime;
-  String _selectedKidsRange = '40 - 50';
+  String? _selectedDateStr;
+  ApiVenueAvailability? _selectedSlot;
 
-  static const _occasions = ['Birthday', 'Playdate', 'Celebration'];
-  static const _times = ['Morning', 'Afternoon', 'Evening'];
-  static const _kidsRanges = ['0 - 10', '10 - 20', '20 - 30', '30 - 40', '40 - 50', '50+'];
+  static const _fallbackOccasions = ['Birthday', 'Playdate', 'Celebration'];
 
-  List<Map<String, String>> get _dates {
-    final days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    final now = DateTime.now();
-    return List.generate(6, (i) {
-      final d = now.add(Duration(days: i + 1));
-      return {
-        'label': '${days[d.weekday % 7]} ${d.day} ${months[d.month - 1]}',
-        'iso': d.toIso8601String(),
-      };
-    });
+  List<String> get _occasions {
+    final apiOccasions = widget.venueDetail?.occasions ?? [];
+    if (apiOccasions.isNotEmpty) {
+      return apiOccasions.map((o) => o.name).toList();
+    }
+    return _fallbackOccasions;
+  }
+
+  // Unique sorted available dates from API
+  List<String> get _availableDates {
+    final slots = widget.venueDetail?.availability ?? [];
+    final dates = slots.map((s) => s.date).toSet().toList();
+    dates.sort();
+    return dates;
+  }
+
+  // All slots for the currently selected date
+  List<ApiVenueAvailability> get _slotsForSelectedDate {
+    if (_selectedDateStr == null) return [];
+    return (widget.venueDetail?.availability ?? [])
+        .where((s) => s.date == _selectedDateStr)
+        .toList();
+  }
+
+  bool get _hasApiAvailability =>
+      (widget.venueDetail?.availability ?? []).isNotEmpty;
+
+  String get _capacityHint {
+    final min = widget.venueDetail?.minCapacity;
+    final max = widget.venueDetail?.maxCapacity;
+    if (min != null && max != null) return 'Enter between $min – $max';
+    if (max != null) return 'Enter up to $max';
+    return 'Enter number of attendees';
+  }
+
+  String get _capacitySubtext {
+    final min = widget.venueDetail?.minCapacity;
+    final max = widget.venueDetail?.maxCapacity;
+    if (min != null && max != null) return 'Capacity: $min – $max guests';
+    if (max != null) return 'Max capacity: $max guests';
+    return '';
   }
 
   @override
   void dispose() {
     _childNameController.dispose();
+    _attendeeController.dispose();
     super.dispose();
+  }
+
+  void _selectDate(String dateStr) {
+    final slots = (widget.venueDetail?.availability ?? [])
+        .where((s) => s.date == dateStr)
+        .toList();
+    setState(() {
+      _selectedDateStr = dateStr;
+      // Auto-select when only one time slot exists for this date
+      _selectedSlot = slots.length == 1 ? slots.first : null;
+    });
   }
 
   void _onContinue() {
     if (_childNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter the child\'s name')),
+        const SnackBar(content: Text("Please enter the planner's name")),
       );
       return;
     }
@@ -54,25 +102,89 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
       );
       return;
     }
-    if (_selectedDate == null) {
+    if (_selectedSlot == null) {
+      final msg = _selectedDateStr == null
+          ? 'Please select a date and time slot'
+          : 'Please select a time slot';
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a date')),
+        SnackBar(content: Text(msg)),
       );
       return;
     }
-    if (_selectedTime == null) {
+
+    final attendeeText = _attendeeController.text.trim();
+    final attendeeCount = int.tryParse(attendeeText);
+    if (attendeeCount == null || attendeeCount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a time slot')),
+        const SnackBar(content: Text('Please enter a valid number of attendees')),
       );
       return;
     }
-    // TODO: navigate to booking confirmation
+    final minCap = widget.venueDetail?.minCapacity;
+    final maxCap = widget.venueDetail?.maxCapacity;
+    if (minCap != null && attendeeCount < minCap) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Minimum $minCap attendees required for this venue')),
+      );
+      return;
+    }
+    if (maxCap != null && attendeeCount > maxCap) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('This venue can accommodate up to $maxCap guests')),
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => VenueCheckoutScreen(
+          event: widget.event,
+          venueDetail: widget.venueDetail,
+          childName: _childNameController.text.trim(),
+          occasion: _selectedOccasion!,
+          selectedSlot: _selectedSlot,
+          attendeeCount: attendeeCount,
+        ),
+      ),
+    );
+  }
+
+  // "2026-05-25" → "Sun 25 May"
+  String _formatDateChip(String dateStr) {
+    try {
+      final dt = DateTime.parse(dateStr);
+      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      ];
+      return '${days[dt.weekday - 1]} ${dt.day} ${months[dt.month - 1]}';
+    } catch (_) {
+      return dateStr;
+    }
+  }
+
+  String _formatTimeSlot(ApiVenueAvailability slot) {
+    return '${_fmtTime(slot.startTime)} – ${_fmtTime(slot.endTime)}';
+  }
+
+  // "06:00:00" → "6:00 AM"
+  String _fmtTime(String t) {
+    try {
+      final parts = t.split(':');
+      final h = int.parse(parts[0]);
+      final m = int.parse(parts[1]);
+      final period = h >= 12 ? 'PM' : 'AM';
+      final hour = h > 12 ? h - 12 : (h == 0 ? 12 : h);
+      return '$hour:${m.toString().padLeft(2, '0')} $period';
+    } catch (_) {
+      return t;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final dates = _dates;
-
     return Scaffold(
       backgroundColor: const Color(0xFFF2F3F5),
       appBar: AppBar(
@@ -87,11 +199,15 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
               color: Color(0xFFF5F5F5),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E), size: 20),
+            child: const Icon(
+              Icons.arrow_back,
+              color: Color(0xFF1A1A2E),
+              size: 20,
+            ),
           ),
         ),
         title: Text(
-          "Plan Your kid's Party",
+          "Plan Your Idea",
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 16),
             fontWeight: FontWeight.w700,
@@ -141,9 +257,17 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                               children: [
                                 ...List.generate(
                                   4,
-                                  (_) => const Icon(Icons.star_rounded, color: Colors.amber, size: 14),
+                                  (_) => const Icon(
+                                    Icons.star_rounded,
+                                    color: Colors.amber,
+                                    size: 14,
+                                  ),
                                 ),
-                                const Icon(Icons.star_half_rounded, color: Colors.amber, size: 14),
+                                const Icon(
+                                  Icons.star_half_rounded,
+                                  color: Colors.amber,
+                                  size: 14,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   widget.event.reviewCount ?? '(124 reviews)',
@@ -158,7 +282,6 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      // Map thumbnail
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: SizedBox(
@@ -174,7 +297,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                 const SizedBox(height: 20),
 
                 // ── Child Name ─────────────────────────────────────────────
-                _sectionLabel(Icons.school_rounded, 'Child Name'),
+                _sectionLabel(Icons.school_rounded, "Planner's Name"),
                 const SizedBox(height: 10),
                 Container(
                   decoration: BoxDecoration(
@@ -183,11 +306,20 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                   ),
                   child: TextField(
                     controller: _childNameController,
-                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFF1A1A2E)),
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 14),
+                      color: const Color(0xFF1A1A2E),
+                    ),
                     decoration: InputDecoration(
-                      hintText: 'Enter child\'s name',
-                      hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: Colors.grey.shade400),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      hintText: "Enter planner's name",
+                      hintStyle: GoogleFonts.poppins(
+                        fontSize: Responsive.sp(context, 14),
+                        color: Colors.grey.shade400,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                       border: InputBorder.none,
                     ),
                   ),
@@ -198,14 +330,15 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                 // ── Occasion ───────────────────────────────────────────────
                 _sectionLabel(Icons.celebration_rounded, 'Occasion'),
                 const SizedBox(height: 12),
-                Row(
+                Wrap(
+                  spacing: 20,
+                  runSpacing: 12,
                   children: _occasions.map((occasion) {
                     final isSelected = _selectedOccasion == occasion;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 24),
-                      child: GestureDetector(
-                        onTap: () => setState(() => _selectedOccasion = occasion),
-                        child: Row(
+                    return GestureDetector(
+                      onTap: () =>
+                          setState(() => _selectedOccasion = occasion),
+                      child: Row(
                           children: [
                             Container(
                               width: 20,
@@ -243,8 +376,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                             ),
                           ],
                         ),
-                      ),
-                    );
+                      );
                   }).toList(),
                 ),
 
@@ -252,6 +384,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
 
                 // ── Select Date ────────────────────────────────────────────
                 Container(
+                  width: double.infinity,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -269,138 +402,207 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                         ),
                       ),
                       const SizedBox(height: 14),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: dates.length,
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                          childAspectRatio: 2.4,
-                        ),
-                        itemBuilder: (context, i) {
-                          final date = dates[i];
-                          final isSelected = _selectedDate == date['iso'];
-                          return GestureDetector(
-                            onTap: () => setState(() => _selectedDate = date['iso']),
-                            child: Container(
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: isSelected ? const Color(0xFFFFCC00) : Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
+                      if (!_hasApiAvailability)
+                        Center(
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 12),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.event_busy_outlined,
+                                  size: 36,
+                                  color: Colors.grey.shade300,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'No availability slots found for this venue',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 12.5),
+                                    color: Colors.grey.shade400,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      else
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: _availableDates.map((dateStr) {
+                            final isSelected =
+                                _selectedDateStr == dateStr;
+                            return GestureDetector(
+                              onTap: () => _selectDate(dateStr),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
                                   color: isSelected
                                       ? const Color(0xFFFFCC00)
-                                      : const Color(0xFFE0E0E0),
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? const Color(0xFFFFCC00)
+                                        : const Color(0xFFE0E0E0),
+                                  ),
+                                ),
+                                child: Text(
+                                  _formatDateChip(dateStr),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 12),
+                                    fontWeight: isSelected
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                    color: const Color(0xFF1A1A2E),
+                                  ),
                                 ),
                               ),
-                              child: Text(
-                                date['label']!,
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 11.5),
-                                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                  color: const Color(0xFF1A1A2E),
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // ── Select Time ────────────────────────────────────────────
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Select Time',
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 14),
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1A1A2E),
+                            );
+                          }).toList(),
                         ),
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        children: _times.map((time) {
-                          final isSelected = _selectedTime == time;
-                          return Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.only(right: time != _times.last ? 10 : 0),
-                              child: GestureDetector(
-                                onTap: () => setState(() => _selectedTime = time),
-                                child: Container(
-                                  height: 40,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: isSelected ? const Color(0xFFFFCC00) : Colors.white,
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? const Color(0xFFFFCC00)
-                                          : const Color(0xFFE0E0E0),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    time,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 13),
-                                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                      color: const Color(0xFF1A1A2E),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
                     ],
                   ),
                 ),
+
+                // ── Select Time Slot ───────────────────────────────────────
+                if (_selectedDateStr != null &&
+                    _slotsForSelectedDate.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Select Time Slot',
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 14),
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF1A1A2E),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: _slotsForSelectedDate.map((slot) {
+                            final isSelected =
+                                _selectedSlot?.id == slot.id;
+                            return GestureDetector(
+                              onTap: () =>
+                                  setState(() => _selectedSlot = slot),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? const Color(0xFFFFCC00)
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? const Color(0xFFFFCC00)
+                                        : const Color(0xFFE0E0E0),
+                                  ),
+                                ),
+                                child: Text(
+                                  _formatTimeSlot(slot),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 13),
+                                    fontWeight: isSelected
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                    color: const Color(0xFF1A1A2E),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        if (_slotsForSelectedDate.any(
+                            (s) => s.note?.isNotEmpty == true))
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Text(
+                              _slotsForSelectedDate
+                                      .firstWhere(
+                                          (s) => s.note?.isNotEmpty == true)
+                                      .note ??
+                                  '',
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 11),
+                                color: Colors.grey.shade500,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
 
                 const SizedBox(height: 20),
 
-                // ── Number of Kids ─────────────────────────────────────────
-                _sectionLabel(Icons.groups_rounded, 'Number of Kids'),
+                // ── Number of Attendees ────────────────────────────────────
+                _sectionLabel(Icons.groups_rounded, 'Number of Attendees'),
                 const SizedBox(height: 10),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: _selectedKidsRange,
-                      isExpanded: true,
-                      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF1A1A2E)),
-                      dropdownColor: Colors.white,
-                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFF1A1A2E)),
-                      items: _kidsRanges
-                          .map((r) => DropdownMenuItem(
-                                value: r,
-                                child: Text(r, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFF1A1A2E))),
-                              ))
-                          .toList(),
-                      onChanged: (v) {
-                        if (v != null) setState(() => _selectedKidsRange = v);
-                      },
+                  child: TextField(
+                    controller: _attendeeController,
+                    keyboardType: TextInputType.number,
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 14),
+                      color: const Color(0xFF1A1A2E),
+                    ),
+                    decoration: InputDecoration(
+                      hintText: _capacityHint,
+                      hintStyle: GoogleFonts.poppins(
+                        fontSize: Responsive.sp(context, 14),
+                        color: Colors.grey.shade400,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.people_outline,
+                        color: Color(0xFF1A1A2E),
+                        size: 20,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      border: InputBorder.none,
                     ),
                   ),
                 ),
+                if (widget.venueDetail?.maxCapacity != null) ...[
+                  const SizedBox(height: 6),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: Text(
+                      _capacitySubtext,
+                      style: GoogleFonts.poppins(
+                        fontSize: Responsive.sp(context, 11),
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -412,7 +614,10 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
             bottom: 0,
             child: Container(
               padding: EdgeInsets.fromLTRB(
-                16, 12, 16, 16 + MediaQuery.of(context).padding.bottom,
+                16,
+                12,
+                16,
+                16 + MediaQuery.of(context).padding.bottom,
               ),
               color: const Color(0xFFF2F3F5),
               child: SizedBox(
@@ -461,6 +666,8 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
     );
   }
 }
+
+// ── Mini map painter (unchanged) ─────────────────────────────────────────────
 
 class _MiniMapPainter extends CustomPainter {
   @override

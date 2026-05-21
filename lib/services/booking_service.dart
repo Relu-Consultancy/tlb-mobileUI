@@ -116,6 +116,99 @@ class BookingService {
     }
   }
 
+  /// GET /api/v1/bookings/ — paginated list, optional status filter.
+  static Future<ApiBookingsPage> listBookings({
+    required String token,
+    String? status,
+    int page = 1,
+  }) async {
+    final params = <String, String>{'page': '$page'};
+    if (status != null) params['status'] = status;
+
+    try {
+      final resp = await http
+          .get(
+            Uri.parse('$_base/api/v1/bookings/')
+                .replace(queryParameters: params),
+            headers: {'Authorization': 'Bearer $token'},
+          )
+          .timeout(_timeout);
+
+      final json = jsonDecode(resp.body) as Map<String, dynamic>;
+
+      if (resp.statusCode == 200 && json['success'] == true) {
+        final data = _unwrap(json);
+        return ApiBookingsPage.fromJson(data);
+      }
+      if (resp.statusCode == 404) return ApiBookingsPage.empty();
+      throw Exception(_extractError(json, resp.statusCode));
+    } on SocketException {
+      throw Exception('Cannot reach server. Check your connection.');
+    } on TimeoutException {
+      throw Exception('Request timed out. Please try again.');
+    }
+  }
+
+  /// GET /api/v1/bookings/{bookingId}/
+  static Future<ApiBookingItem> getBookingDetail({
+    required String token,
+    required String bookingId,
+  }) async {
+    try {
+      final resp = await http
+          .get(
+            Uri.parse('$_base/api/v1/bookings/$bookingId/'),
+            headers: {'Authorization': 'Bearer $token'},
+          )
+          .timeout(_timeout);
+
+      final json = jsonDecode(resp.body) as Map<String, dynamic>;
+
+      if (resp.statusCode == 200 && json['success'] == true) {
+        return ApiBookingItem.fromJson(_unwrap(json));
+      }
+      throw Exception(_extractError(json, resp.statusCode));
+    } on SocketException {
+      throw Exception('Cannot reach server. Check your connection.');
+    } on TimeoutException {
+      throw Exception('Request timed out. Please try again.');
+    }
+  }
+
+  /// POST /api/v1/bookings/{bookingId}/cancel/
+  static Future<ApiBookingItem> cancelBooking({
+    required String token,
+    required String bookingId,
+    String? reason,
+  }) async {
+    final body = <String, dynamic>{};
+    if (reason != null && reason.isNotEmpty) body['reason'] = reason;
+
+    try {
+      final resp = await http
+          .post(
+            Uri.parse('$_base/api/v1/bookings/$bookingId/cancel/'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(body),
+          )
+          .timeout(_timeout);
+
+      final json = jsonDecode(resp.body) as Map<String, dynamic>;
+
+      if (resp.statusCode == 200 && json['success'] == true) {
+        return ApiBookingItem.fromJson(_unwrap(json));
+      }
+      throw Exception(_extractError(json, resp.statusCode));
+    } on SocketException {
+      throw Exception('Cannot reach server. Check your connection.');
+    } on TimeoutException {
+      throw Exception('Request timed out. Please try again.');
+    }
+  }
+
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
   static Map<String, dynamic> _unwrap(Map<String, dynamic> body) {
@@ -127,6 +220,10 @@ class BookingService {
   static String _extractError(Map<String, dynamic> body, int statusCode) {
     final err = body['error'];
     if (err is Map) {
+      final code = err['code'] as String?;
+      if (code == 'PAYMENT_GATEWAY_NOT_CONFIGURED') {
+        return 'Online payment is temporarily unavailable for this booking. Please contact support.';
+      }
       final msg = err['message'];
       if (msg is String && msg.isNotEmpty) return msg;
     }

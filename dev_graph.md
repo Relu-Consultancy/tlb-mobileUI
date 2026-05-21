@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-20 (Session 35)
+**Last Updated:** 2026-05-21 (Session 38)
 
 ---
 
@@ -35,22 +35,24 @@ lib/
 │   └── user_reviews_state.dart    ValueNotifier for user reviews
 ├── services/
 │   ├── wishlist_service.dart      fetchWishlist / add / remove — REST calls to /api/v1/wishlist/
-│   └── review_service.dart        fetchReviews / createReview / updateReview / deleteReview — /api/v1/listings/{id}/reviews/ + /api/v1/reviews/{id}/
+│   ├── review_service.dart        fetchReviews / createReview / updateReview / deleteReview — /api/v1/listings/{id}/reviews/ + /api/v1/reviews/{id}/
+│   └── partner_service.dart       follow(token, partnerId) → POST /api/v1/partner/{id}/follow/; unfollow → DELETE /api/v1/partner/{id}/unfollow/
 ├── models/
 │   ├── event_model.dart           Core data model — title, venue, price, rating, date, image, etc.
 │   ├── category_model.dart        Category model with label, image, color
 │   ├── api_category_model.dart    API-backed category — id, name, slug, sortOrder, subcategories
-│   ├── api_event_model.dart       API models: ApiEvent (list), ApiEventDetail (full), ApiEventsPage
+│   ├── api_event_model.dart       API models: ApiEvent (list), ApiEventDetail (full), ApiEventsPage; ApiEventOrganizer has partnerId: String?
 │   ├── api_provider_model.dart    ApiProvider — id, name, bio, logoUrl, totalListings, averageRating, totalReviews, experienceYears
 │   ├── api_review_model.dart      ApiReviewMedia, ApiReview, ApiReviewPage (nested reviews.results pagination)
 │   └── api_venue_model.dart       API models: ApiVenue (list), ApiVenueDetail (full), ApiVenuesPage,
 │                                  ApiVenueCategory, ApiVenueMedia, ApiVenuePackage,
-│                                  ApiVenueAvailability, ApiVenueOrganizer
+│                                  ApiVenueAvailability, ApiVenueOccasion;
+│                                  ApiVenueOrganizer/ApiClassOrganizer/ApiProgramOrganizer all have partnerId: String?
 ├── services/
 │   └── events_listing_service.dart  REST calls for events + venues listing APIs (see Section 6)
 ├── data/
 │   └── dummy_data.dart            All mock data — events, categories, banners, partners, etc.
-├── screens/                       46 screens (see Section 3)
+├── screens/                       48 screens (see Section 3)
 ├── widgets/                       25+ reusable widgets incl. login_sheet.dart, walkthrough_intro_overlay.dart (see Section 4)
 └── sections/                      9 home-page sections (see Section 5)
 ```
@@ -74,7 +76,7 @@ SplashScreen
         │   ├── ProgramDetailScreen → SelectProgramBatchScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
         │   └── CategoryProgramsScreen
         └── VenuesScreen        (Tab: Venues)
-            ├── VenueDetailScreen → PlanPartyScreen
+            ├── VenueDetailScreen → PlanPartyScreen → VenueCheckoutScreen → ReviewPayScreen → VenueBookingConfirmedScreen
             └── CategoryVenuesScreen
 
 HomeScreen (sidebar/action flows)
@@ -139,8 +141,10 @@ HomeScreen (sidebar/action flows)
 | `review_pay_screen.dart` | Order summary → PaymentScreen |
 | `payment_screen.dart` | Payment method selection |
 | `booking_confirmed_screen.dart` | Booking success — animated teaser flip → ticket card with full-width image, notch cut + dashed divider (CustomPainter), QR, Share/Download actions |
+| `venue_booking_confirmed_screen.dart` | Venue booking success — non-ticket design; animated ScaleTransition + FadeTransition green checkmark (700ms elasticOut); yellow-header summary card (venue, location, date, time, booking ref); PopScope prevents back navigation; "View My Bookings" → BookingsScreen, "Explore More" → HomeScreen |
 | `seat_reservation_screen.dart` | Interactive seat map |
-| `plan_party_screen.dart` | "Plan Your Kid's Party" — child name, occasion, date/time grid, kids count → Continue |
+| `plan_party_screen.dart` | Venue planning screen — planner's name, API occasion chips (Wrap, multi-row), API availability date chips + time slot chips, numeric attendees field with min/max capacity validation → VenueCheckoutScreen |
+| `venue_checkout_screen.dart` | Venue checkout — cover image card, date/time from selected slot, attendee count + occasion info chip, package selection with Add/+/- qty controls, bill details (subtotal + 8.26% taxes + total) → ReviewPayScreen(bookingType:'venue', slotId, packageId, guestCount) |
 
 ### Category Screens
 | File | Description |
@@ -187,6 +191,7 @@ HomeScreen (sidebar/action flows)
 | `event_card.dart` / `event_card_with_rating.dart` / `event_card_with_price.dart` | Various event card styles |
 | `class_nearby_card.dart` | Horizontal class card with tag + button |
 | `wishlist_button.dart` | Heart toggle with disperse animation |
+| `partner_follow_button.dart` | Follow/Unfollow stateful button — grey outlined "Follow" / yellow filled "Following"; auth guard; optimistic update; returns `SizedBox.shrink()` when partnerId is null |
 | `explore_categories_grid.dart` | 3-col category icon grid. `scrollable: true` + `visibleRows` = fixed-height inner scroll with "View All" chip overlaid at bottom |
 | `explore_format_row.dart` | Horizontal format circles row — 6 pre-designed circle images from `Explore_by_format/`; `onFormatTap(index)` callback; `ColorFilter.matrix` inversion for MasterClass; `Transform.scale` per-entry zoom; `ClipOval + BoxFit.cover` |
 | `holiday_special_card.dart` | Tall gradient card for holiday events |
@@ -246,6 +251,7 @@ HomeScreen (sidebar/action flows)
 **`ApiVenueDetail`** (extends ApiVenue) — adds `description, subcategory, locationType, address, minAge, maxAge, minCapacity, maxCapacity, media, packages, availability, organizer`  
 **`ApiVenuePackage`** — `id, name, price (double — parsed from "2500.00" string), description, durationMinutes, maxGuests`  
 **`ApiVenueAvailability`** — `id, date ("2026-06-14"), startTime ("10:00:00"), endTime ("13:00:00"), note`  
+**`ApiVenueOccasion`** — `id, name, slug` — API-fetched occasions for venue booking (e.g. Birthday Party, Weekend Fun, Community Event); added to `ApiVenueDetail.occasions`  
 **`ApiProgramDetail`** (extends ApiProgram) — adds `description, area, address, maxCapacity, totalHours, moduleCount, bookingType (String — "enquiry" | "direct_booking"), subcategory, tags, batches, faqs, media, organizer`  
 **`ApiProgramBatch`** — `id, name, startDate?, endDate?, startTime?, endTime?, fee?, totalSeats?, isActive, daysOfWeek: List<String>`
 
@@ -510,11 +516,37 @@ SelectProgramBatchScreen (Programs) — real API data:
   Continue → TicketBookingScreen(event, selectedDate, selectedTime)
 ```
 
-### Plan Party Screen (Venues)
+### Plan Party / Venue Booking Flow
 ```
-VenueDetailScreen "Plan Event" → PlanPartyScreen
-Fields: Child Name | Occasion radios | Date grid (6 days) | Time chips | Kids range dropdown
-Validation before Continue | MiniMapPainter for venue map thumbnail
+VenueDetailScreen "Plan Event" → PlanPartyScreen → VenueCheckoutScreen → ReviewPayScreen → VenueBookingConfirmedScreen
+
+PlanPartyScreen:
+  Fields: Planner's Name | Occasion (Wrap chips from API venueDetail.occasions, fallback to hardcoded) |
+          Date chips (Wrap from venueDetail.availability unique dates) |
+          Time slot chips (shown after date selected, from API slots for that date) |
+          Number of Attendees (numeric TextField; validated against minCapacity / maxCapacity)
+  Auto-selects slot when only one exists for the picked date
+  _availableDates: unique sorted dates from venueDetail.availability
+  _slotsForSelectedDate: all slots whose date matches _selectedDateStr
+  Continue validation: name → occasion → slot (not null) → attendeeCount > 0 → capacity range
+  MiniMapPainter for venue thumbnail in info card
+
+VenueCheckoutScreen:
+  Constructor: EventModel event, ApiVenueDetail? venueDetail, String childName,
+               String occasion, ApiVenueAvailability? selectedSlot, int attendeeCount
+  Package selection: Add/+/- qty controls; first package pre-selected; _packageQty: Map<int, int>
+  _displayDateTime: reads from selectedSlot.date / startTime / endTime directly (no fuzzy matching)
+  Bill: subtotal + 8.26% taxes + total (both shown in Bill Details card)
+  Sticky CTA: "Pay ₹X  |  Continue to payment"
+  On continue: validates subtotal > 0 and slot != null; builds ticketDetails string; pushes ReviewPayScreen
+
+VenueBookingConfirmedScreen:
+  Constructor: EventModel event, String selectedDate, String selectedTime, String bookingReference
+  AnimationController (700ms, elasticOut): ScaleTransition + FadeTransition on green checkmark
+  Yellow-header summary card with venue name, location icon row, date/time, booking reference
+  Blue info note about confirmation email
+  PopScope(canPop: false) — back navigation disabled on confirmation screen
+  "View My Bookings" → BookingsScreen | "Explore More" → HomeScreen (both replace current route)
 ```
 
 ### Forgot Password — 3-Step OTP Wizard
@@ -679,8 +711,7 @@ Reacts to profile edits without requiring screen re-navigation.
 [Events]  EventDetailScreen   → DateTimeSelectionScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
 [Classes] ClassDetailScreen   → SelectBatchScreen        → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
 [Program] ProgramDetailScreen → SelectProgramBatchScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
-[Venues]  VenueDetailScreen   → SeatReservationScreen(slotId, guestCount)      → ReviewPayScreen → BookingConfirmedScreen
-          VenueDetailScreen   → PlanPartyScreen          (party enquiry only — no booking confirmation)
+[Venues]  VenueDetailScreen   → PlanPartyScreen → VenueCheckoutScreen → ReviewPayScreen → VenueBookingConfirmedScreen
 ```
 
 ---
@@ -710,12 +741,13 @@ Reacts to profile edits without requiring screen re-navigation.
 | ~~SelectProgramBatchScreen real batch data~~ | `select_program_batch_screen.dart` | ✅ Done — accepts `List<ApiProgramBatch>`; real date computation from `daysOfWeek`; nullable time handling |
 | ~~CategoryProgramsScreen API category filter~~ | `category_programs_screen.dart` | ✅ Done — fetches metadata, resolves `category_id` + `subcategory_id` integers; subcategory chips from API |
 | ~~Set real Razorpay key~~ | `lib/core/app_config.dart` | ✅ Done (Session 35) — `rzp_test_SpYAGfwgdidCZq` |
-| PlanPartyScreen → booking confirmation | `plan_party_screen.dart:_onContinue` | ❌ Pending — validated but navigates nowhere |
+| ~~All Bookings screen — real API~~ | `bookings_screen.dart`, `booking_detail_screen.dart`, `booking_service.dart`, `api_booking_model.dart` | ✅ Done (Session 36) — fetches `GET /api/v1/bookings/`; tab filter per API status; cancel flow with `POST /api/v1/bookings/{id}/cancel/` |
+| ~~PlanPartyScreen → booking confirmation~~ | `plan_party_screen.dart`, `venue_checkout_screen.dart`, `venue_booking_confirmed_screen.dart` | ✅ Done (Session 37) — full flow: PlanPartyScreen → VenueCheckoutScreen → ReviewPayScreen → VenueBookingConfirmedScreen |
 | Profile screen reactive to name/avatar changes | `profile_screen.dart` | ❌ Pending — reads `AuthState.userName.value` but no `ValueListenableBuilder`; won't update on profile edit without navigate-back rebuild |
 | Profile avatar upload | `edit_profile_screen.dart` | ❌ Pending — removed from profile form (new API has no avatar field); needs separate endpoint when available |
 | Startup profile completion check | `main.dart` | ❌ Pending — `tryRestoreSession()` restores session but does NOT redirect incomplete profiles |
 | Venue metadata categories endpoint | backend | ❌ Pending — `GET /api/v1/listings/venues/metadata/categories/` not yet live; `fetchVenueCategories()` catch is silent so category filter falls back to fetching all venues |
-| **Backend Razorpay SDK missing** | backend server | ❌ Pending — `POST /api/v1/bookings/initiate/` returns `PAYMENT_GATEWAY_NOT_CONFIGURED`; backend needs `pip install razorpay`, `razorpay` in `requirements.txt`, and `RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET` env vars set; mobile app is correct |
+| **Backend Razorpay SDK missing for venues** | backend server | ❌ Pending — `POST /api/v1/bookings/initiate/` with `booking_type:'venue'` returns `PAYMENT_GATEWAY_NOT_CONFIGURED`; backend's venue booking handler needs `pip install razorpay`, `razorpay` in `requirements.txt`, and `RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET` env vars; events already work; mobile app shows user-friendly message "Online payment is temporarily unavailable for this booking. Please contact support." |
 
 ---
 
@@ -1224,6 +1256,31 @@ IMPORTANT: Replace AppConfig.razorpayKeyId with real Razorpay key before live us
 | **`SeatReservationScreen` venue booking wired** — added constructor params `slotId: int?`, `guestCount: int?`, `specialRequests: String?`; `ReviewPayScreen` call now passes `bookingType: 'venue'`, `slotId: widget.slotId`, `guestCount: widget.guestCount ?? _selectedSeats.length`, `specialRequests: widget.specialRequests` | `lib/screens/seat_reservation_screen.dart` |
 | All 107 tests pass — no regressions | test suite |
 
+### Session 36
+| Change | Files |
+|--------|-------|
+| **`ApiBookingItem` model added** — full booking list/detail response shape: `id, bookingReference, bookingType, status, listingTitle, totalAmount, currency, paymentStatus, holdExpiresAt, isCancellable, createdAt, cancelledAt?, cancellationReason?, refundAmount?`; `copyWith()` for cancel response merge | `lib/models/api_booking_model.dart` |
+| **`ApiBookingsPage` model added** — paginated list wrapper: `count, next, results: List<ApiBookingItem>`, `hasMore` getter, `empty()` factory | `lib/models/api_booking_model.dart` |
+| **`BookingService.listBookings()` added** — `GET /api/v1/bookings/` with optional `status` filter and `page` param; returns `ApiBookingsPage`; 404 → empty page | `lib/services/booking_service.dart` |
+| **`BookingService.getBookingDetail()` added** — `GET /api/v1/bookings/{id}/`; returns `ApiBookingItem` | `lib/services/booking_service.dart` |
+| **`BookingService.cancelBooking()` added** — `POST /api/v1/bookings/{id}/cancel/` with optional `reason` body; returns updated `ApiBookingItem` | `lib/services/booking_service.dart` |
+| **`BookingsScreen` rewritten** — fetches `GET /api/v1/bookings/` on load; tab filter applied client-side: Upcoming = `{confirmed, hold, awaiting_payment, payment_failed}`, Past = `{attended, refunded}`, Cancelled = `{cancelled}`; pull-to-refresh; loading/error/empty states; `_BookingCard` shows status badge, title, booking reference, amount, CTA ("View Ticket" for confirmed/attended, inline status message for others); `_StatusBadge` widget with color-coded labels for all 7 API statuses; cancelled booking updates propagate to list without re-fetch via `onUpdated` callback | `lib/screens/bookings_screen.dart` |
+| **`ApiBookingItem.listingId` + `listingCover` added** — optional fields parsed from `listing_id`, `listing_cover`, `cover_url`, `listing.cover_url`; propagated through `copyWith()` | `lib/models/api_booking_model.dart` |
+| **`BookingDetailScreen` cover image fetch** — `initState` calls `BookingService.getBookingDetail()` to get full detail; if `listingCover` present uses it; else uses `listingId` to call `fetchEventDetail` / `fetchClassDetail` / `fetchProgramDetail` / `fetchVenueDetail` based on `bookingType`; cover shown as `AspectRatio(16/9) Image.network` in the ticket card header; `_BookingTypeBanner` gradient remains as fallback; non-fatal on any error | `lib/screens/booking_detail_screen.dart` |
+| **`_BookingCard` cover image** — shows `Image.network(listingCover)` when `ApiBookingItem.listingCover` is non-null; falls back to gray calendar placeholder | `lib/screens/bookings_screen.dart` |
+| **`BookingDetailScreen` rewritten** — accepts `ApiBookingItem` (replacing old `BookingEntry`); `_BookingTypeBanner` gradient placeholder replaces event image (icon + type label per booking_type); `_TicketContent` shows: listing title, booking reference, type, booked-on date, amount paid; cancellation fields (cancelled_at, refund_amount) shown when `status == 'cancelled'`; bottom `_ActionBar` adds "Cancel Booking" outlined red button above Share/Download when `isCancellable == true`; cancel flow: confirmation `AlertDialog` with optional reason `TextField` → `BookingService.cancelBooking()` → updates local state + fires `onUpdated` callback; `AppLoaderInline` spinner replaces cancel button during API call | `lib/screens/booking_detail_screen.dart` |
+
+#### Booking Status → Tab Mapping
+| API Status | Tab |
+|------------|-----|
+| `hold` | Upcoming ("Awaiting Payment") |
+| `awaiting_payment` | Upcoming ("Processing...") |
+| `confirmed` | Upcoming ("Confirmed ✓") |
+| `payment_failed` | Upcoming ("Payment Failed") |
+| `attended` | Past |
+| `refunded` | Past |
+| `cancelled` | Cancelled |
+
 #### Booking Flow (Post-Session 35 — Unified Razorpay Service)
 ```
 [Events]  EventDetailScreen
@@ -1250,9 +1307,37 @@ IMPORTANT: Replace AppConfig.razorpayKeyId with real Razorpay key before live us
       batch_id=X, quantity=N, attendees=[N copies of form data]
       → same Razorpay flow
 
-[Venues] VenueDetailScreen → SeatReservationScreen(slotId, guestCount, specialRequests)
+[Venues] VenueDetailScreen → PlanPartyScreen → VenueCheckoutScreen
   → ReviewPayScreen._onProceedToPay():
-      booking_type='venue', slot_id=X, guest_count=N
-      attendees=[] (optional — only sent if name provided)
-      → same Razorpay flow
+      booking_type='venue', slot_id=X, package_id=Y, guest_count=N, special_requests='...'
+      attendees=[] (optional)
+      POST /api/v1/bookings/initiate/ → BookingInitiateResponse
+      Razorpay.open(order_id, amount_in_paise)
+      On success: POST /api/v1/bookings/{id}/verify-payment/
+        → check status=='confirmed' && payment_status=='paid'
+        → VenueBookingConfirmedScreen(bookingReference)
+
+NOTE: backend currently returns PAYMENT_GATEWAY_NOT_CONFIGURED for venue bookings —
+      fix requires pip install razorpay on server; frontend is correct.
 ```
+
+### Session 37
+| Change | Files |
+|--------|-------|
+| **`ApiVenueOccasion` model added** — `id, name, slug`; parsed from `occasions` list in venue detail API response | `lib/models/api_venue_model.dart` |
+| **`ApiVenueDetail.occasions` added** — `List<ApiVenueOccasion>` field; `fromJson` maps `json['occasions']` array | `lib/models/api_venue_model.dart` |
+| **`VenueCheckoutScreen` created** — full checkout for venue booking; package selection with Add/+/- qty controls (`_PackageItem` + `_QtyButton`); `_displayDateTime` reads directly from `selectedSlot`; bill details: subtotal + 8.26% taxes; sticky CTA "Pay ₹X \| Continue to payment"; navigates to `ReviewPayScreen(bookingType:'venue', slotId, packageId, guestCount, specialRequests)` | `lib/screens/venue_checkout_screen.dart` (NEW) |
+| **`VenueBookingConfirmedScreen` created** — non-ticket design; `AnimationController` (700ms, elasticOut): `ScaleTransition + FadeTransition` green checkmark; yellow-header summary card with venue, location, date, time, booking reference; blue info note; `PopScope(canPop: false)`; "View My Bookings" → BookingsScreen, "Explore More" → HomeScreen | `lib/screens/venue_booking_confirmed_screen.dart` (NEW) |
+| **`PlanPartyScreen` redesigned** — AppBar title "Plan Your Kid's Party" → "Plan Your Idea"; "Child Name" label → "Planner's Name"; date grid replaced with API availability date chips (`Wrap` from `venueDetail.availability` unique dates); Morning/Afternoon/Evening buttons replaced with API time slot chips per selected date; "Number of Kids" dropdown replaced with numeric `TextField` "Number of Attendees" validated against `venueDetail.minCapacity/maxCapacity`; occasions read from `venueDetail.occasions` (API) with fallback to hardcoded; occasions displayed in `Wrap` (multi-row, no overflow); auto-selects slot when only one exists for chosen date; navigates to `VenueCheckoutScreen` | `lib/screens/plan_party_screen.dart` |
+| **`VenueDetailScreen` "Plan Event" button** — now passes `venueDetail: _detail` to `PlanPartyScreen` so API data flows through the full booking pipeline | `lib/screens/venue_detail_screen.dart` |
+| **`ReviewPayScreen` venue routing** — `_handlePaymentSuccess()` now routes to `VenueBookingConfirmedScreen` when `widget.bookingType == 'venue'`; all other types continue to `BookingConfirmedScreen` | `lib/screens/review_pay_screen.dart` |
+| **`BookingService._extractError()` hardened** — intercepts `PAYMENT_GATEWAY_NOT_CONFIGURED` error code and returns "Online payment is temporarily unavailable for this booking. Please contact support." instead of leaking the raw backend Python/pip error to users | `lib/services/booking_service.dart` |
+
+### Session 38
+| Change | Files |
+|--------|-------|
+| **`partnerId: String?` added to all 4 organizer models** — `ApiEventOrganizer`, `ApiClassOrganizer`, `ApiProgramOrganizer`, `ApiVenueOrganizer` all gain a nullable `partnerId` field parsed from `json['partner_id']` | `lib/models/api_event_model.dart`, `lib/models/api_class_model.dart`, `lib/models/api_program_model.dart`, `lib/models/api_venue_model.dart` |
+| **`PartnerService` created** — `follow(token, partnerId)` → `POST /api/v1/partner/{id}/follow/` (200/201 success, 400 treated as success); `unfollow(token, partnerId)` → `DELETE /api/v1/partner/{id}/unfollow/` (200 success, 404 treated as success); 30s timeout, Socket/Timeout error handling | `lib/services/partner_service.dart` (NEW) |
+| **`PartnerFollowButton` widget created** — StatefulWidget with `partnerId: String?`; returns `SizedBox.shrink()` when partnerId is null/empty; grey `OutlinedButton` "Follow" when not following; yellow `ElevatedButton.icon` with check icon "Following" when following; spinner during loading; auth guard via `showLoginSheet(context)`; optimistic state flip with revert on error; SnackBar feedback on success/error | `lib/widgets/partner_follow_button.dart` (NEW) |
+| **Follow buttons wired in all 4 detail screens** — replaced dead `OutlinedButton(onPressed: () {}, ...)` Follow buttons with `PartnerFollowButton(partnerId: _detail?.organizer?.partnerId)` in each organizer section | `lib/screens/event_detail_screen.dart`, `lib/screens/class_detail_screen.dart`, `lib/screens/program_detail_screen.dart`, `lib/screens/venue_detail_screen.dart` |
+| **`OrganizerProfileScreen` Follow button added** — `PartnerFollowButton(partnerId: _provider?.id)` inserted below review count in the gradient header; uses the UUID from the provider API response | `lib/screens/organizer_profile_screen.dart` |

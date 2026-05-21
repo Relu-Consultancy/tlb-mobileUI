@@ -13,6 +13,7 @@ import '../models/api_review_model.dart';
 import '../services/review_service.dart';
 import '../widgets/login_sheet.dart';
 import '../widgets/review_sheet.dart';
+import '../widgets/partner_follow_button.dart';
 import '../widgets/wishlist_button.dart';
 import 'date_time_selection_screen.dart';
 import 'gallery_screen.dart';
@@ -594,14 +595,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 ],
                               ),
                             ),
-                            OutlinedButton(
-                              onPressed: () {},
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(color: Colors.grey.shade400),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                              ),
-                              child: Text('Follow', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: Colors.grey.shade600)),
+                            PartnerFollowButton(
+                              partnerId: _detail?.organizer?.partnerId,
                             ),
                           ],
                         ),

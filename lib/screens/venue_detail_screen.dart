@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_state.dart';
 import '../providers/location_state.dart';
 import '../core/responsive.dart';
+import '../widgets/partner_follow_button.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/review_sheet.dart';
 import '../models/event_model.dart';
@@ -706,18 +707,8 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                                   ],
                                 ),
                               ),
-                              OutlinedButton(
-                                onPressed: () {},
-                                style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: Colors.grey.shade400),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                                ),
-                                child: Text('Follow',
-                                    style: GoogleFonts.poppins(
-                                        fontSize: Responsive.sp(context, 13),
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.grey.shade600)),
+                              PartnerFollowButton(
+                                partnerId: _detail?.organizer?.partnerId,
                               ),
                             ],
                           ),
@@ -801,9 +792,15 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                           showLoginSheet(context);
                           return;
                         }
-                        Navigator.push(context,
-                            MaterialPageRoute(
-                                builder: (_) => PlanPartyScreen(event: _eventForWidgets)));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PlanPartyScreen(
+                              event: _eventForWidgets,
+                              venueDetail: _detail,
+                            ),
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFFCC00),
