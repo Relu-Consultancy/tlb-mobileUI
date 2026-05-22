@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -304,16 +305,12 @@ Future<void> _confirmDeleteReview(
     await ReviewService.deleteReview(token, review.id);
     await UserReviewsState.remove(review.id);
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Review deleted.')),
-      );
+      AppSnackBar.success(context, 'Review deleted.');
       onSuccess?.call();
     }
   } catch (e) {
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
-      );
+      AppSnackBar.error(context, e.toString().replaceFirst('Exception: ', ''));
     }
   }
 }
@@ -821,15 +818,11 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
 
       if (!mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_isEdit ? 'Review updated!' : 'Review submitted!')),
-      );
+      AppSnackBar.success(context, _isEdit ? 'Review updated!' : 'Review submitted!');
     } catch (e) {
       if (!mounted) return;
       setState(() => _submitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
-      );
+      AppSnackBar.error(context, e.toString().replaceFirst('Exception: ', ''));
     }
   }
 

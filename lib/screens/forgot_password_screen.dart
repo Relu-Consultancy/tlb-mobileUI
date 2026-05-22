@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../widgets/app_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 import '../services/auth_service.dart';
 
@@ -56,7 +57,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Future<void> _onSendOtp() async {
     final email = _emailCtrl.text.trim();
     if (email.isEmpty || !email.contains('@')) {
-      _snack('Please enter a valid email address');
+      AppSnackBar.show(context, 'Please enter a valid email address');
       return;
     }
     setState(() => _loading = true);
@@ -69,7 +70,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         _step = 1;
       });
     } else {
-      _snack(result['message'] ?? 'Failed to send OTP', isError: true);
+      AppSnackBar.error(context, result['message'] ?? 'Failed to send OTP');
     }
   }
 
@@ -78,7 +79,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Future<void> _onVerifyOtp() async {
     final code = _otpCtrl.map((c) => c.text).join();
     if (code.length < 6) {
-      _snack('Enter all 6 digits');
+      AppSnackBar.show(context, 'Enter all 6 digits');
       return;
     }
     setState(() => _loading = true);
@@ -92,7 +93,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         _step = 2;
       });
     } else {
-      _snack(result['message'] ?? 'Invalid OTP', isError: true);
+      AppSnackBar.error(context, result['message'] ?? 'Invalid OTP');
     }
   }
 
@@ -100,9 +101,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final result = await AuthService.forgotPassword(email: _identifier);
     if (!mounted) return;
     if (result['success'] == true) {
-      _snack('OTP resent to $_identifier');
+      AppSnackBar.success(context, 'OTP resent to $_identifier');
     } else {
-      _snack(result['message'] ?? 'Failed to resend OTP', isError: true);
+      AppSnackBar.error(context, result['message'] ?? 'Failed to resend OTP');
     }
   }
 
@@ -112,11 +113,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final newPass = _newPassCtrl.text;
     final confirmPass = _confirmPassCtrl.text;
     if (newPass.isEmpty || confirmPass.isEmpty) {
-      _snack('Please fill in both password fields');
+      AppSnackBar.show(context, 'Please fill in both password fields');
       return;
     }
     if (newPass != confirmPass) {
-      _snack('Passwords do not match', isError: true);
+      AppSnackBar.error(context, 'Passwords do not match');
       return;
     }
     setState(() => _loading = true);
@@ -130,7 +131,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (result['success'] == true) {
       _showSuccessDialog();
     } else {
-      _snack(result['message'] ?? 'Failed to reset password', isError: true);
+      AppSnackBar.error(context, result['message'] ?? 'Failed to reset password');
     }
   }
 
@@ -144,13 +145,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         },
       ),
     );
-  }
-
-  void _snack(String msg, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor: isError ? const Color(0xFFE53935) : null,
-    ));
   }
 
   // ── Build ───────────────────────────────────────────────────────────────────

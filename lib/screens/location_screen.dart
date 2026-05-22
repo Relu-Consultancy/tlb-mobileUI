@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 import '../widgets/app_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -77,9 +78,7 @@ class _LocationScreenState extends State<LocationScreen> {
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location services are disabled. Please enable GPS.')),
-        );
+        AppSnackBar.show(context, 'Location services are disabled. Please enable GPS.');
         return;
       }
 
@@ -89,9 +88,7 @@ class _LocationScreenState extends State<LocationScreen> {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
           if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location permission denied.')),
-          );
+          AppSnackBar.show(context, 'Location permission denied.');
           return;
         }
       }
@@ -100,9 +97,7 @@ class _LocationScreenState extends State<LocationScreen> {
         if (!mounted) return;
         final opened = await Geolocator.openAppSettings();
         if (!opened && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please enable location permission from app settings.')),
-          );
+          AppSnackBar.show(context, 'Please enable location permission from app settings.');
         }
         return;
       }
@@ -128,15 +123,11 @@ class _LocationScreenState extends State<LocationScreen> {
       }
     } on TimeoutException {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location request timed out. Please try again.')),
-        );
+        AppSnackBar.error(context, 'Location request timed out. Please try again.');
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not determine your location. Please try again.')),
-        );
+        AppSnackBar.error(context, 'Could not determine your location. Please try again.');
       }
     } finally {
       if (mounted) setState(() => _isLoadingLocation = false);

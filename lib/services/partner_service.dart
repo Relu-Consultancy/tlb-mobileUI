@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import '../models/api_followed_partner_model.dart';
 
 class PartnerService {
   static const _base = 'https://tlb-api.reluconsultancy.in';
@@ -23,8 +25,12 @@ class PartnerService {
           .timeout(_timeout);
 
       if (resp.statusCode == 200 || resp.statusCode == 201) return;
-      if (resp.statusCode == 400) return; // already following — treat as success
-      throw Exception('Failed to follow partner (${resp.statusCode})');
+      if (resp.statusCode == 400) {
+        // 400 usually means already following — treat as success
+        return;
+      }
+      final errBody = resp.body.length > 200 ? resp.body.substring(0, 200) : resp.body;
+      throw Exception('Failed to follow partner (${resp.statusCode}): $errBody');
     } on SocketException {
       throw Exception('Cannot reach server. Check your connection.');
     } on TimeoutException {
@@ -52,6 +58,46 @@ class PartnerService {
       throw Exception('Cannot reach server. Check your connection.');
     } on TimeoutException {
       throw Exception('Request timed out. Please try again.');
+    }
+  }
+
+  /// GET /api/v1/partner/followed/
+  /// Returns the paginated list of partners the authenticated customer follows.
+  static Future<List<ApiFollowedPartner>> fetchFollowed({
+    required String token,
+    int page = 1,
+    int pageSize = 50,
+  }) async {
+    try {
+      final uri = Uri.parse('$_base/api/v1/partner/followed/').replace(
+        queryParameters: {
+          'page': '$page',
+          'page_size': '$pageSize',
+        },
+      );
+      final resp = await http.get(
+        uri,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      ).timeout(_timeout);
+
+      if (resp.statusCode == 401) throw Exception('Session expired. Please log in again.');
+      if (resp.statusCode != 200) throw Exception('Failed to load followed partners (${resp.statusCode})');
+
+      final body = jsonDecode(resp.body);
+      final data = (body['data'] ?? body) as Map<String, dynamic>;
+      final results = (data['results'] as List<dynamic>? ?? []);
+      return results
+          .map((e) => ApiFollowedPartner.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } on SocketException {
+      throw Exception('Cannot reach server. Check your connection.');
+    } on TimeoutException {
+      throw Exception('Request timed out. Please try again.');
+    } catch (e) {
+      throw Exception('Failed to load followed partners: $e');
     }
   }
 }

@@ -13,6 +13,7 @@ import 'account_settings_screen.dart';
 import 'edit_profile_screen.dart';
 import 'payment_settings_screen.dart';
 import 'your_reviews_screen.dart';
+import 'followed_partners_screen.dart';
 import 'notification_screen.dart';
 import 'reminders_screen.dart';
 import 'home_screen.dart';
@@ -268,6 +269,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   context,
                   MaterialPageRoute(
                       builder: (_) => const YourReviewsScreen())),
+            ),
+            _item(
+              icon: Icons.people_alt_outlined,
+              label: 'Followed Partners',
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const FollowedPartnersScreen())),
             ),
             _item(
               icon: Icons.notifications_none_rounded,

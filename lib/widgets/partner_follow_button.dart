@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 import '../providers/auth_state.dart';
+import '../providers/follow_state.dart';
 import '../services/partner_service.dart';
 import 'login_sheet.dart';
 
@@ -17,6 +19,27 @@ class PartnerFollowButton extends StatefulWidget {
 class _PartnerFollowButtonState extends State<PartnerFollowButton> {
   bool _isFollowing = false;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final pid = widget.partnerId;
+    if (pid != null && pid.isNotEmpty) {
+      _isFollowing = FollowState.isFollowing(pid);
+    }
+  }
+
+  @override
+  void didUpdateWidget(PartnerFollowButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // partnerId can change when OrganizerCard loads provider data late
+    if (oldWidget.partnerId != widget.partnerId) {
+      final pid = widget.partnerId;
+      if (pid != null && pid.isNotEmpty) {
+        setState(() => _isFollowing = FollowState.isFollowing(pid));
+      }
+    }
+  }
 
   Future<void> _onTap() async {
     if (!AuthState.isLoggedIn.value) {
@@ -37,28 +60,17 @@ class _PartnerFollowButtonState extends State<PartnerFollowButton> {
     try {
       if (!wasFollowing) {
         await PartnerService.follow(token: token, partnerId: pid);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('You are now following this partner.')),
-          );
-        }
+        FollowState.set(pid, following: true).catchError((_) {});
+        if (mounted) AppSnackBar.success(context, 'You are now following this partner.');
       } else {
         await PartnerService.unfollow(token: token, partnerId: pid);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Unfollowed.')),
-          );
-        }
+        FollowState.set(pid, following: false).catchError((_) {});
+        if (mounted) AppSnackBar.show(context, 'Unfollowed.');
       }
     } catch (e) {
       if (!mounted) return;
       setState(() => _isFollowing = wasFollowing);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString().replaceFirst('Exception: ', '')),
-          backgroundColor: Colors.red.shade700,
-        ),
-      );
+      AppSnackBar.error(context, e.toString().replaceFirst('Exception: ', ''));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

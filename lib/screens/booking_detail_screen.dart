@@ -25,20 +25,50 @@ class BookingDetailScreen extends StatefulWidget {
   State<BookingDetailScreen> createState() => _BookingDetailScreenState();
 }
 
-class _BookingDetailScreenState extends State<BookingDetailScreen> {
+class _BookingDetailScreenState extends State<BookingDetailScreen>
+    with SingleTickerProviderStateMixin {
   late ApiBookingItem _booking;
   bool _cancelling = false;
   String? _coverUrl;
+
+  late final AnimationController _animController;
+  late final Animation<double> _scaleAnim;
+  late final Animation<double> _fadeAnim;
 
   @override
   void initState() {
     super.initState();
     _booking = widget.booking;
+
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+    _scaleAnim = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.elasticOut,
+    );
+    _fadeAnim = CurvedAnimation(
+      parent: _animController,
+      curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
+    );
+    if (_booking.bookingType == 'venue' ||
+        _booking.bookingType == 'program' ||
+        _booking.bookingType == 'class') {
+      _animController.forward();
+    }
+
     // Seed cover from list response if API already returned it
     if (widget.booking.listingCover != null) {
       _coverUrl = widget.booking.listingCover;
     }
     _loadCover();
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadCover() async {
@@ -202,6 +232,17 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_booking.bookingType == 'venue') {
+      return _buildVenueLayout(context);
+    }
+    if (_booking.bookingType == 'program' ||
+        _booking.bookingType == 'class') {
+      return _buildProgramLayout(context);
+    }
+    return _buildTicketLayout(context);
+  }
+
+  Widget _buildTicketLayout(BuildContext context) {
     final safeTop = MediaQuery.of(context).padding.top;
     final safeBottom = MediaQuery.of(context).padding.bottom;
 
@@ -220,9 +261,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                       Transform.translate(
                         offset: const Offset(0, -20),
                         child: Padding(
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 18),
-                          child: _TicketCard(booking: _booking, coverUrl: _coverUrl),
+                          padding: const EdgeInsets.symmetric(horizontal: 18),
+                          child: _TicketCard(
+                              booking: _booking, coverUrl: _coverUrl),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -234,42 +275,716 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                 safeBottom: safeBottom,
                 booking: _booking,
                 cancelling: _cancelling,
-                onCancelTap:
-                    _booking.isCancellable ? _onCancelTap : null,
+                onCancelTap: _booking.isCancellable ? _onCancelTap : null,
               ),
             ],
           ),
+          _floatingBackButton(safeTop),
+        ],
+      ),
+    );
+  }
 
-          // Floating back button
-          Positioned(
-            top: safeTop + 8,
-            left: 14,
-            child: GestureDetector(
-              onTap: () => Navigator.of(context).pop(),
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.12),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+  Widget _buildVenueLayout(BuildContext context) {
+    final safeBottom = MediaQuery.of(context).padding.bottom;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 48),
+
+                        // ── Animated checkmark ──────────────────────────────
+                        FadeTransition(
+                          opacity: _fadeAnim,
+                          child: ScaleTransition(
+                            scale: _scaleAnim,
+                            child: Container(
+                              width: 110,
+                              height: 110,
+                              decoration: BoxDecoration(
+                                color:
+                                    const Color(0xFF22C55E).withOpacity(0.12),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF22C55E),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.check_rounded,
+                                    color: Colors.white,
+                                    size: 44,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        FadeTransition(
+                          opacity: _fadeAnim,
+                          child: Column(
+                            children: [
+                              Text(
+                                'Booking Details',
+                                style: GoogleFonts.poppins(
+                                  fontSize: Responsive.sp(context, 24),
+                                  fontWeight: FontWeight.w800,
+                                  color: const Color(0xFF1A1A2E),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                _booking.bookingReference,
+                                style: GoogleFonts.poppins(
+                                  fontSize: Responsive.sp(context, 12),
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        // ── Summary card ─────────────────────────────────────
+                        FadeTransition(
+                          opacity: _fadeAnim,
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8F9FA),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                  color: const Color(0xFFEEEEEE)),
+                            ),
+                            child: Column(
+                              children: [
+                                // Yellow header strip
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 14),
+                                  decoration: BoxDecoration(
+                                    color: _booking.status == 'cancelled'
+                                        ? const Color(0xFFEF4444)
+                                            .withOpacity(0.15)
+                                        : const Color(0xFFFFCC00),
+                                    borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(20)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.place_rounded,
+                                          color: Color(0xFF1A1A2E), size: 20),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          'Venue Booking',
+                                          style: GoogleFonts.poppins(
+                                            fontSize:
+                                                Responsive.sp(context, 13),
+                                            fontWeight: FontWeight.w700,
+                                            color: const Color(0xFF1A1A2E),
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: _HeaderSection._statusColor(
+                                              _booking.status),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          _HeaderSection._statusLabel(
+                                              _booking.status),
+                                          style: GoogleFonts.poppins(
+                                            fontSize:
+                                                Responsive.sp(context, 10),
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                Padding(
+                                  padding: const EdgeInsets.all(20),
+                                  child: Column(
+                                    children: [
+                                      _venueDetailRow(
+                                        context,
+                                        Icons.business_rounded,
+                                        'Venue',
+                                        _booking.listingTitle,
+                                      ),
+                                      _venueDivider(),
+                                      _venueDetailRow(
+                                        context,
+                                        Icons.confirmation_number_outlined,
+                                        'Booking Ref',
+                                        _booking.bookingReference,
+                                        valueColor: const Color(0xFF3B82F6),
+                                        mono: true,
+                                      ),
+                                      _venueDivider(),
+                                      _venueDetailRow(
+                                        context,
+                                        Icons.calendar_today_outlined,
+                                        'Booked On',
+                                        _fmtDate(
+                                            _booking.createdAt.toLocal()),
+                                      ),
+                                      _venueDivider(),
+                                      _venueDetailRow(
+                                        context,
+                                        Icons.payments_outlined,
+                                        'Amount Paid',
+                                        _booking.totalAmount ==
+                                                _booking.totalAmount
+                                                    .truncateToDouble()
+                                            ? '₹${_booking.totalAmount.toInt()}'
+                                            : '₹${_booking.totalAmount.toStringAsFixed(2)}',
+                                      ),
+                                      if (_booking.status == 'cancelled' &&
+                                          _booking.cancelledAt != null) ...[
+                                        _venueDivider(),
+                                        _venueDetailRow(
+                                          context,
+                                          Icons.cancel_outlined,
+                                          'Cancelled On',
+                                          _fmtDate(DateTime.tryParse(
+                                                      _booking.cancelledAt!)
+                                                  ?.toLocal() ??
+                                              DateTime.now()),
+                                          valueColor:
+                                              const Color(0xFFEF4444),
+                                        ),
+                                        if (_booking.refundAmount !=
+                                            null) ...[
+                                          _venueDivider(),
+                                          _venueDetailRow(
+                                            context,
+                                            Icons.currency_rupee_rounded,
+                                            'Refund Amount',
+                                            '₹${_booking.refundAmount!.toStringAsFixed(0)}',
+                                            valueColor:
+                                                const Color(0xFF22C55E),
+                                          ),
+                                        ],
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // ── Info note ─────────────────────────────────────────
+                        FadeTransition(
+                          opacity: _fadeAnim,
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEFF6FF),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                  color: const Color(0xFFBFDBFE)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.info_outline_rounded,
+                                    color: Color(0xFF3B82F6), size: 20),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'A confirmation has been sent to you. '
+                                    'Please save your booking reference for check-in.',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 11.5),
+                                      color: const Color(0xFF1D4ED8),
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 32),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-                child: const Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  size: 16,
-                  color: Color(0xFF1A1A2E),
+              _ActionBar(
+                safeBottom: safeBottom,
+                booking: _booking,
+                cancelling: _cancelling,
+                onCancelTap: _booking.isCancellable ? _onCancelTap : null,
+              ),
+            ],
+          ),
+            // Back button (no SafeArea offset needed — SafeArea wraps body)
+            Positioned(
+              top: 8,
+              left: 14,
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.12),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 16,
+                    color: Color(0xFF1A1A2E),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildProgramLayout(BuildContext context) {
+    final safeBottom = MediaQuery.of(context).padding.bottom;
+    final isProgram = _booking.bookingType == 'program';
+    final accentColor =
+        isProgram ? const Color(0xFF6366F1) : const Color(0xFF0284C7);
+    final headerIcon = isProgram
+        ? Icons.workspace_premium_outlined
+        : Icons.school_rounded;
+    final headerLabel = isProgram ? 'Program Booking' : 'Class Booking';
+    final itemLabel = isProgram ? 'Program' : 'Class';
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 48),
+
+                        // ── Animated checkmark ──────────────────────────────
+                        FadeTransition(
+                          opacity: _fadeAnim,
+                          child: ScaleTransition(
+                            scale: _scaleAnim,
+                            child: Container(
+                              width: 110,
+                              height: 110,
+                              decoration: BoxDecoration(
+                                color: _booking.status == 'cancelled'
+                                    ? const Color(0xFFEF4444).withOpacity(0.12)
+                                    : const Color(0xFF22C55E).withOpacity(0.12),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: Container(
+                                  width: 80,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                    color: _booking.status == 'cancelled'
+                                        ? const Color(0xFFEF4444)
+                                        : const Color(0xFF22C55E),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    _booking.status == 'cancelled'
+                                        ? Icons.close_rounded
+                                        : Icons.check_rounded,
+                                    color: Colors.white,
+                                    size: 44,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        FadeTransition(
+                          opacity: _fadeAnim,
+                          child: Column(
+                            children: [
+                              Text(
+                                'Booking Details',
+                                style: GoogleFonts.poppins(
+                                  fontSize: Responsive.sp(context, 24),
+                                  fontWeight: FontWeight.w800,
+                                  color: const Color(0xFF1A1A2E),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                _booking.bookingReference,
+                                style: GoogleFonts.poppins(
+                                  fontSize: Responsive.sp(context, 12),
+                                  color: Colors.grey.shade500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        // ── Summary card ──────────────────────────────────────
+                        FadeTransition(
+                          opacity: _fadeAnim,
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8F9FA),
+                              borderRadius: BorderRadius.circular(20),
+                              border:
+                                  Border.all(color: const Color(0xFFEEEEEE)),
+                            ),
+                            child: Column(
+                              children: [
+                                // Accent header strip
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 14),
+                                  decoration: BoxDecoration(
+                                    color: _booking.status == 'cancelled'
+                                        ? const Color(0xFFEF4444)
+                                            .withOpacity(0.15)
+                                        : accentColor.withOpacity(0.1),
+                                    borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(20)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(headerIcon,
+                                          color: _booking.status == 'cancelled'
+                                              ? const Color(0xFFEF4444)
+                                              : accentColor,
+                                          size: 20),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          headerLabel,
+                                          style: GoogleFonts.poppins(
+                                            fontSize:
+                                                Responsive.sp(context, 13),
+                                            fontWeight: FontWeight.w700,
+                                            color: _booking.status ==
+                                                    'cancelled'
+                                                ? const Color(0xFFEF4444)
+                                                : accentColor,
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: _HeaderSection._statusColor(
+                                              _booking.status),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          _HeaderSection._statusLabel(
+                                              _booking.status),
+                                          style: GoogleFonts.poppins(
+                                            fontSize:
+                                                Responsive.sp(context, 10),
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                Padding(
+                                  padding: const EdgeInsets.all(20),
+                                  child: Column(
+                                    children: [
+                                      _venueDetailRow(
+                                        context,
+                                        headerIcon,
+                                        itemLabel,
+                                        _booking.listingTitle,
+                                      ),
+                                      _venueDivider(),
+                                      _venueDetailRow(
+                                        context,
+                                        Icons.confirmation_number_outlined,
+                                        'Booking Ref',
+                                        _booking.bookingReference,
+                                        valueColor: const Color(0xFF3B82F6),
+                                        mono: true,
+                                      ),
+                                      _venueDivider(),
+                                      _venueDetailRow(
+                                        context,
+                                        Icons.calendar_today_outlined,
+                                        'Booked On',
+                                        _fmtDate(_booking.createdAt.toLocal()),
+                                      ),
+                                      _venueDivider(),
+                                      _venueDetailRow(
+                                        context,
+                                        Icons.payments_outlined,
+                                        'Amount Paid',
+                                        _booking.totalAmount ==
+                                                _booking.totalAmount
+                                                    .truncateToDouble()
+                                            ? '₹${_booking.totalAmount.toInt()}'
+                                            : '₹${_booking.totalAmount.toStringAsFixed(2)}',
+                                      ),
+                                      if (_booking.status == 'cancelled' &&
+                                          _booking.cancelledAt != null) ...[
+                                        _venueDivider(),
+                                        _venueDetailRow(
+                                          context,
+                                          Icons.cancel_outlined,
+                                          'Cancelled On',
+                                          _fmtDate(DateTime.tryParse(
+                                                      _booking.cancelledAt!)
+                                                  ?.toLocal() ??
+                                              DateTime.now()),
+                                          valueColor:
+                                              const Color(0xFFEF4444),
+                                        ),
+                                        if (_booking.refundAmount !=
+                                            null) ...[
+                                          _venueDivider(),
+                                          _venueDetailRow(
+                                            context,
+                                            Icons.currency_rupee_rounded,
+                                            'Refund Amount',
+                                            '₹${_booking.refundAmount!.toStringAsFixed(0)}',
+                                            valueColor:
+                                                const Color(0xFF22C55E),
+                                          ),
+                                        ],
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // ── Info note ──────────────────────────────────────────
+                        FadeTransition(
+                          opacity: _fadeAnim,
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEFF6FF),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                  color: const Color(0xFFBFDBFE)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.info_outline_rounded,
+                                    color: Color(0xFF3B82F6), size: 20),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'A confirmation has been sent to you. '
+                                    'Please save your booking reference for check-in.',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 11.5),
+                                      color: const Color(0xFF1D4ED8),
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 32),
+                      ],
+                    ),
+                  ),
+                ),
+                _ActionBar(
+                  safeBottom: safeBottom,
+                  booking: _booking,
+                  cancelling: _cancelling,
+                  onCancelTap: _booking.isCancellable ? _onCancelTap : null,
+                ),
+              ],
+            ),
+            Positioned(
+              top: 8,
+              left: 14,
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.12),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 16,
+                    color: Color(0xFF1A1A2E),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _floatingBackButton(double safeTop) {
+    return Positioned(
+      top: safeTop + 8,
+      left: 14,
+      child: GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.12),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            size: 16,
+            color: Color(0xFF1A1A2E),
+          ),
+        ),
+      ),
+    );
+  }
+
+  static String _fmtDate(DateTime dt) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
+  }
+
+  Widget _venueDivider() =>
+      Divider(color: Colors.grey.shade200, thickness: 1, height: 20);
+
+  Widget _venueDetailRow(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value, {
+    Color? valueColor,
+    bool mono = false,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: Colors.grey.shade400),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: GoogleFonts.poppins(
+                  fontSize: Responsive.sp(context, 11),
+                  color: Colors.grey.shade500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              mono
+                  ? Text(
+                      value,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: Responsive.sp(context, 13),
+                        fontWeight: FontWeight.w700,
+                        color: valueColor ?? const Color(0xFF1A1A2E),
+                        letterSpacing: 0.5,
+                      ),
+                    )
+                  : Text(
+                      value,
+                      style: GoogleFonts.poppins(
+                        fontSize: Responsive.sp(context, 13),
+                        fontWeight: FontWeight.w600,
+                        color: valueColor ?? const Color(0xFF1A1A2E),
+                      ),
+                    ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

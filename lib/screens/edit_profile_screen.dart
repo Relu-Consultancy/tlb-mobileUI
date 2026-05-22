@@ -166,17 +166,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _onSave() async {
     final firstName = _firstNameCtrl.text.trim();
     if (firstName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('First name is required')),
-      );
+      AppSnackBar.show(context, 'First name is required');
       return;
     }
 
     final token = AuthState.accessToken;
     if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Session expired. Please log in again.')),
-      );
+      AppSnackBar.error(context, 'Session expired. Please log in again.');
       return;
     }
 
@@ -205,18 +201,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           (route) => false,
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated!')),
-        );
+        AppSnackBar.success(context, 'Profile updated!');
         Navigator.pop(context);
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message'] ?? 'Update failed. Try again.'),
-          backgroundColor: const Color(0xFFE53935),
-        ),
-      );
+      AppSnackBar.error(context, result['message'] ?? 'Update failed. Try again.');
     }
   }
 

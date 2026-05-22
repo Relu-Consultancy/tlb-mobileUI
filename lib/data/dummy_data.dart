@@ -105,56 +105,67 @@ class DummyData {
   static const List<Map<String, dynamic>> classesCategories = [
     {
       'label': 'Academic',
+      'apiName': 'Academic',
       'image': 'assets/images/class_page/academic.png',
       'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
     },
     {
       'label': 'Creative Arts',
+      'apiName': 'Creative Arts',
       'image': 'assets/images/class_page/creative.png',
       'gradient': [Color(0xFFFFF0F0), Color(0xFFFFDBDB)],
     },
     {
       'label': 'Tech & Innovation',
+      'apiName': 'Tech & Innovation',
       'image': 'assets/images/class_page/tech.png',
       'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
     },
     {
       'label': 'Performing Arts',
+      'apiName': 'Performing Arts',
       'image': 'assets/images/class_page/performing.png',
       'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
     },
     {
       'label': 'Sports & Fitness',
+      'apiName': 'Sports & Fitness',
       'image': 'assets/images/class_page/sports.png',
       'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
     },
     {
       'label': 'Speech &\nCommunication',
+      'apiName': 'Speech & Communication',
       'image': 'assets/images/class_page/speech.png',
       'gradient': [Color(0xFFFFE4E6), Color(0xFFFECDD3)],
     },
     {
       'label': 'Life Skills &\nPersonality Dev',
+      'apiName': 'Life Skills & Personality Development',
       'image': 'assets/images/class_page/lifeskills.png',
       'gradient': [Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
     },
     {
       'label': 'Creative Media',
+      'apiName': 'Creative Media',
       'image': 'assets/images/class_page/media.png',
       'gradient': [Color(0xFFFEF3C7), Color(0xFFFDE68A)],
     },
     {
       'label': 'Outdoor &\nNature Learning',
+      'apiName': 'Outdoor & Nature Learning',
       'image': 'assets/images/class_page/outdoor.png',
       'gradient': [Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
     },
     {
       'label': 'Culinary',
+      'apiName': 'Culinary',
       'image': 'assets/images/class_page/culinary.png',
       'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
     },
     {
       'label': 'Brain Boosters',
+      'apiName': 'Brain Boosters',
       'image': 'assets/images/class_page/brainboosters.png',
       'gradient': [Color(0xFFF5F3FF), Color(0xFFEDE9FE)],
     },

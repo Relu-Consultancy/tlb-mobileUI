@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/app_snackbar.dart';
 import '../models/api_venue_model.dart';
 import '../models/event_model.dart';
 import '../core/responsive.dart';
@@ -91,47 +92,35 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
 
   void _onContinue() {
     if (_childNameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter the planner's name")),
-      );
+      AppSnackBar.show(context, "Please enter the planner's name");
       return;
     }
     if (_selectedOccasion == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select an occasion')),
-      );
+      AppSnackBar.show(context, 'Please select an occasion');
       return;
     }
     if (_selectedSlot == null) {
       final msg = _selectedDateStr == null
           ? 'Please select a date and time slot'
           : 'Please select a time slot';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg)),
-      );
+      AppSnackBar.show(context, msg);
       return;
     }
 
     final attendeeText = _attendeeController.text.trim();
     final attendeeCount = int.tryParse(attendeeText);
     if (attendeeCount == null || attendeeCount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid number of attendees')),
-      );
+      AppSnackBar.show(context, 'Please enter a valid number of attendees');
       return;
     }
     final minCap = widget.venueDetail?.minCapacity;
     final maxCap = widget.venueDetail?.maxCapacity;
     if (minCap != null && attendeeCount < minCap) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Minimum $minCap attendees required for this venue')),
-      );
+      AppSnackBar.show(context, 'Minimum $minCap attendees required for this venue');
       return;
     }
     if (maxCap != null && attendeeCount > maxCap) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('This venue can accommodate up to $maxCap guests')),
-      );
+      AppSnackBar.show(context, 'This venue can accommodate up to $maxCap guests');
       return;
     }
 

@@ -11,11 +11,16 @@ class OrganizerProfileScreen extends StatefulWidget {
   final String? initialName;
   final String? initialLogoUrl;
 
+  /// Pre-fetched provider data. When supplied the screen skips the API call
+  /// and displays immediately without a loading state.
+  final ApiProvider? provider;
+
   const OrganizerProfileScreen({
     super.key,
     required this.listingId,
     this.initialName,
     this.initialLogoUrl,
+    this.provider,
   });
 
   @override
@@ -30,7 +35,11 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.listingId.isNotEmpty) _fetchProvider();
+    if (widget.provider != null) {
+      _provider = widget.provider;
+    } else if (widget.listingId.isNotEmpty) {
+      _fetchProvider();
+    }
   }
 
   Future<void> _fetchProvider() async {
@@ -62,23 +71,6 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
       (_provider?.bio?.isNotEmpty == true)
           ? _provider!.bio!
           : 'We bring unique and memorable experiences to the community.';
-  String get _totalListingsLabel {
-    final n = _provider?.totalListings ?? 0;
-    return n > 0 ? '$n+' : '–';
-  }
-
-  String get _ratingLabel {
-    if (_provider == null) return '–';
-    return _provider!.averageRating > 0
-        ? _provider!.averageRating.toStringAsFixed(1)
-        : '–';
-  }
-
-  String get _experienceLabel {
-    final y = _provider?.experienceYears ?? 0;
-    return y > 0 ? '$y+' : '–';
-  }
-
   String _formatCount(int n) {
     if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}k';
     return '$n';
@@ -95,15 +87,8 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
       );
     }
 
-    // Static placeholder upcoming events — no provider-filtered API available yet
-    final upcomingEvents = [
-      {'title': 'Creative Color Workshop', 'venue': 'The Arts Studio, Mumbai', 'image': 'assets/images/kids_party.png'},
-      {'title': 'Creative Storytime', 'venue': 'The Arts Studio, Mumbai', 'image': 'assets/images/story_telling.png'},
-      {'title': 'Weekend Fun Fest', 'venue': 'City Park, Mumbai', 'image': 'assets/images/halloween_party.png'},
-    ];
-
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F9FA),
       body: Column(
         children: [
           // ── Gradient Header ───────────────────────────────────────────────
@@ -168,7 +153,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                         width: 24,
                         height: 24,
                         decoration: const BoxDecoration(
-                          color: Colors.green,
+                          color: Color(0xFF22C55E),
                           shape: BoxShape.circle,
                           border: Border.fromBorderSide(BorderSide(color: Colors.white, width: 2)),
                         ),
@@ -189,18 +174,31 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                 ),
                 const SizedBox(height: 4),
                 if (_provider != null)
-                  Text(
-                    '${_formatCount(_provider!.totalReviews)} Reviews',
-                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (_provider!.averageRating > 0) ...[
+                        const Icon(Icons.star_rounded, size: 14, color: Color(0xFFF5A623)),
+                        const SizedBox(width: 3),
+                        Text(
+                          '${_provider!.averageRating.toStringAsFixed(1)} · ',
+                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade700),
+                        ),
+                      ],
+                      Text(
+                        '${_formatCount(_provider!.totalReviews)} Reviews',
+                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade700),
+                      ),
+                    ],
                   )
                 else if (widget.initialName != null)
                   Text(
                     'Partner',
                     style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600),
                   ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 PartnerFollowButton(partnerId: _provider?.id),
-                const SizedBox(height: 20),
+                const SizedBox(height: 22),
               ],
             ),
           ),
@@ -208,13 +206,12 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
           // ── Scrollable Body ───────────────────────────────────────────────
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 20),
 
-                  // Error banner (non-fatal — header still shows initialName)
+                  // Error banner
                   if (_error != null) ...[
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -247,6 +244,54 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                     const SizedBox(height: 16),
                   ],
 
+                  // ── Stats grid ────────────────────────────────────────────
+                  if (_provider != null) ...[
+                    Row(
+                      children: [
+                        _statCard(
+                          context,
+                          Icons.collections_bookmark_outlined,
+                          _provider!.totalListings > 0 ? '${_provider!.totalListings}+' : '–',
+                          'Listings',
+                          const Color(0xFFEEF2FF),
+                          const Color(0xFF6366F1),
+                        ),
+                        const SizedBox(width: 10),
+                        _statCard(
+                          context,
+                          Icons.star_rounded,
+                          _provider!.averageRating > 0
+                              ? _provider!.averageRating.toStringAsFixed(1)
+                              : '–',
+                          'Avg Rating',
+                          const Color(0xFFFFFBEB),
+                          const Color(0xFFF5A623),
+                        ),
+                        const SizedBox(width: 10),
+                        _statCard(
+                          context,
+                          Icons.rate_review_outlined,
+                          _formatCount(_provider!.totalReviews),
+                          'Reviews',
+                          const Color(0xFFF0FDF4),
+                          const Color(0xFF22C55E),
+                        ),
+                        const SizedBox(width: 10),
+                        _statCard(
+                          context,
+                          Icons.workspace_premium_outlined,
+                          _provider!.experienceYears > 0
+                              ? '${_provider!.experienceYears} yrs'
+                              : '–',
+                          'Experience',
+                          const Color(0xFFFFF1F2),
+                          const Color(0xFFEF4444),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
                   // ── About ─────────────────────────────────────────────────
                   Container(
                     width: double.infinity,
@@ -254,82 +299,31 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(color: const Color(0xFFF0F0F0)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'About',
-                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 15),
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF1A1A2E),
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           _bio,
-                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), height: 1.6, color: Colors.grey.shade600),
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 13),
+                            height: 1.6,
+                            color: Colors.grey.shade600,
+                          ),
                         ),
                       ],
                     ),
                   ),
-
-                  const SizedBox(height: 16),
-
-                  // ── Stats Row ─────────────────────────────────────────────
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Row(
-                      children: [
-                        _buildStatItem(context, _totalListingsLabel, 'EVENTS HOSTED'),
-                        Container(width: 1, height: 40, color: Colors.grey.shade200),
-                        _buildStatItem(context, _ratingLabel, 'RATING', showStar: true),
-                        Container(width: 1, height: 40, color: Colors.grey.shade200),
-                        _buildStatItem(context, _experienceLabel, 'EXPERIENCE'),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // ── Upcoming Events ───────────────────────────────────────
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Upcoming Events',
-                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
-                      ),
-                      Text(
-                        'See All >',
-                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6)),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Shouldn't miss these wonderful experiences!",
-                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500),
-                  ),
-                  const SizedBox(height: 16),
-
-                  SizedBox(
-                    height: Responsive.h(context, 260, min: 200),
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: upcomingEvents.length,
-                      itemBuilder: (context, index) {
-                        final e = upcomingEvents[index];
-                        return _buildEventCard(context, e['image']!, e['title']!, e['venue']!);
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
                 ],
               ),
             ),
@@ -366,95 +360,44 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
     );
   }
 
-  Widget _buildStatItem(BuildContext context, String value, String label, {bool showStar = false}) {
+  Widget _statCard(
+    BuildContext context,
+    IconData icon,
+    String value,
+    String label,
+    Color bg,
+    Color accent,
+  ) {
     return Expanded(
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                value,
-                style: GoogleFonts.poppins(
-                  fontSize: Responsive.sp(context, 17),
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF1A1A2E),
-                ),
-              ),
-              if (showStar) ...[
-                const SizedBox(width: 3),
-                const Icon(Icons.star_rounded, size: 17, color: Colors.amber),
-              ],
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: GoogleFonts.poppins(
-              fontSize: Responsive.sp(context, 10),
-              fontWeight: FontWeight.w500,
-              color: Colors.grey.shade500,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEventCard(BuildContext context, String image, String title, String venue) {
-    final cardW = Responsive.cardWidth(context, fraction: 0.46, max: 180);
-    final imgH = Responsive.h(context, 160, min: 120);
-    return Container(
-      width: cardW,
-      margin: const EdgeInsets.only(right: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(14),
-            child: Image.asset(
-              image,
-              height: imgH,
-              width: cardW,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                height: imgH,
-                width: cardW,
-                decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(14)),
-                child: const Icon(Icons.image, size: 40, color: Colors.grey),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 20, color: accent),
+            const SizedBox(height: 5),
+            Text(
+              value,
+              style: GoogleFonts.poppins(
+                fontSize: Responsive.sp(context, 13),
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1A1A2E),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 2),
-          Row(
-            children: [
-              Icon(Icons.location_on_outlined, size: 12, color: Colors.grey.shade500),
-              const SizedBox(width: 3),
-              Expanded(
-                child: Text(
-                  venue,
-                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                fontSize: Responsive.sp(context, 9),
+                color: Colors.grey.shade600,
               ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Limited Seats',
-            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), fontWeight: FontWeight.w600, color: const Color(0xFFFF6B6B)),
-          ),
-        ],
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

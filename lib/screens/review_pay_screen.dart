@@ -11,6 +11,7 @@ import '../services/booking_service.dart';
 import '../widgets/app_loader.dart';
 import 'booking_confirmed_screen.dart';
 import 'venue_booking_confirmed_screen.dart';
+import 'program_booking_confirmed_screen.dart';
 
 class ReviewPayScreen extends StatefulWidget {
   final EventModel event;
@@ -234,6 +235,20 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
             ),
           ),
         );
+      } else if (widget.bookingType == 'program' ||
+          widget.bookingType == 'class') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProgramBookingConfirmedScreen(
+              event: widget.event,
+              selectedDate: widget.selectedDate,
+              selectedTime: widget.selectedTime,
+              bookingReference: confirmed.bookingReference,
+              bookingType: widget.bookingType,
+            ),
+          ),
+        );
       } else {
         Navigator.pushReplacement(
           context,
@@ -428,9 +443,11 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
 
           const SizedBox(height: 24),
 
-          // Tickets
+          // Tickets / Batch
           Text(
-            'Tickets',
+            (widget.bookingType == 'program' || widget.bookingType == 'class')
+                ? 'Batch Details'
+                : 'Tickets',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 16),
               fontWeight: FontWeight.w700,
@@ -445,6 +462,34 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
               color: const Color(0xFF1A1A2E),
             ),
           ),
+          // Attendee row (shown for program/class when data is present)
+          if ((widget.bookingType == 'program' ||
+                  widget.bookingType == 'class') &&
+              (widget.attendee['name'] as String? ?? '').isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Divider(color: Colors.grey.shade200, thickness: 1),
+            const SizedBox(height: 16),
+            Text(
+              'Attendee',
+              style: GoogleFonts.poppins(
+                fontSize: Responsive.sp(context, 16),
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1A1A2E),
+              ),
+            ),
+            const SizedBox(height: 8),
+            _iconRow(
+              Icons.person_outline_rounded,
+              '${widget.attendee['name']}  •  Age ${widget.attendee['age']}',
+            ),
+            if ((widget.attendee['phone'] as String? ?? '').isNotEmpty) ...[
+              const SizedBox(height: 6),
+              _iconRow(
+                Icons.phone_outlined,
+                widget.attendee['phone'] as String,
+              ),
+            ],
+          ],
 
           const SizedBox(height: 16),
           Divider(color: Colors.grey.shade200, thickness: 1),

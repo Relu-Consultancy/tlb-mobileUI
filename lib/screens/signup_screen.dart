@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import '../core/app_snackbar.dart';
 import '../services/auth_service.dart';
 import '../services/walkthrough_service.dart';
 import '../providers/auth_state.dart';
@@ -34,9 +35,7 @@ class _SignupScreenState extends State<SignupScreen> {
   Future<void> _onSendOTP() async {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your email address')),
-      );
+      AppSnackBar.show(context, 'Please enter your email address');
       return;
     }
     setState(() => _loading = true);
@@ -60,12 +59,7 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message'] ?? 'Failed to send OTP'),
-          backgroundColor: const Color(0xFFE53935),
-        ),
-      );
+      AppSnackBar.error(context, result['message'] ?? 'Failed to send OTP');
     }
   }
 
@@ -98,12 +92,7 @@ class _SignupScreenState extends State<SignupScreen> {
       if (firebaseIdToken == null) {
         if (!mounted) return;
         setState(() => _loading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Google authentication failed. Please try again.'),
-            backgroundColor: Color(0xFFE53935),
-          ),
-        );
+        AppSnackBar.error(context, 'Google authentication failed. Please try again.');
         return;
       }
 
@@ -140,13 +129,7 @@ class _SignupScreenState extends State<SignupScreen> {
         }
       } else {
         debugPrint('[Google Signup] API error: ${result['message']}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result['message'] ??
-                'Google sign-up failed. Please try again.'),
-            backgroundColor: const Color(0xFFE53935),
-          ),
-        );
+        AppSnackBar.error(context, result['message'] ?? 'Google sign-up failed. Please try again.');
       }
     } catch (e, stack) {
       if (!mounted) return;
@@ -157,12 +140,7 @@ class _SignupScreenState extends State<SignupScreen> {
           : e is TimeoutException
               ? 'Connection timed out. Please try again.'
               : 'Google sign-up failed. Please try again.';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(msg),
-          backgroundColor: const Color(0xFFE53935),
-        ),
-      );
+      AppSnackBar.error(context, msg);
     }
   }
 

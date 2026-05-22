@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import '../widgets/app_loader.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/app_snackbar.dart';
 import '../providers/auth_state.dart';
 import '../providers/location_state.dart';
 import '../core/responsive.dart';
 import '../widgets/partner_follow_button.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/review_sheet.dart';
+import '../widgets/organizer_card.dart';
 import '../models/event_model.dart';
 import '../models/api_venue_model.dart';
 import '../services/events_listing_service.dart';
@@ -596,9 +598,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                                       }
                                       if (LocationState().selectedCity.value == 'Bhopal City') {
                                         if (context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Please set your current location')),
-                                          );
+                                          AppSnackBar.show(context, 'Please set your current location');
                                         }
                                         return;
                                       }
@@ -609,9 +609,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                                         await launchUrl(url, mode: LaunchMode.externalApplication);
                                       } catch (_) {
                                         if (context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Could not open map.')),
-                                          );
+                                          AppSnackBar.error(context, 'Could not open map.');
                                         }
                                       }
                                     },
@@ -641,21 +639,26 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                     const SizedBox(height: 24),
 
                     // ── Organizer ──
-                    if (_detail?.organizer != null) ...[
+                    OrganizerCard(
+                      listingId: widget.event.id,
+                      partnerId: _detail?.organizer?.partnerId,
+                      initialName: _detail?.organizer?.businessName,
+                      initialLogoUrl: _detail?.organizer?.logoUrl,
+                      label: 'MANAGED BY',
+                    ),
+                    const SizedBox(height: 24),
+
+                    // ── Terms & Conditions ────────────────────────────────
+                    if (_detail != null && (
+                      (_detail!.cancellationPolicy?.isNotEmpty == true) ||
+                      (_detail!.refundPolicy?.isNotEmpty == true) ||
+                      _detail!.faqs.isNotEmpty
+                    )) ...[
                       GestureDetector(
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => OrganizerProfileScreen(
-                              listingId: widget.event.id,
-                              initialName: _detail?.organizer?.businessName,
-                              initialLogoUrl: _detail?.organizer?.logoUrl,
-                            ),
-                          ),
-                        ),
+                        onTap: () => _showTermsBottomSheet(context),
                         child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 16),
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16),
@@ -663,53 +666,19 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                           ),
                           child: Row(
                             children: [
-                              Container(
-                                width: Responsive.w(context, 54, min: 46),
-                                height: Responsive.w(context, 54, min: 46),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white, width: 2),
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2))
-                                  ],
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(27),
-                                  child: _detail!.organizer!.logoUrl != null
-                                      ? Image.network(
-                                          _detail!.organizer!.logoUrl!,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (_, __, ___) => _buildOrgInitial(),
-                                        )
-                                      : _buildOrgInitial(),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
+                              Icon(Icons.description_outlined, size: 24, color: Colors.grey.shade600),
+                              const SizedBox(width: 14),
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('MANAGED BY',
-                                        style: GoogleFonts.poppins(
-                                            fontSize: Responsive.sp(context, 10),
-                                            fontWeight: FontWeight.w600,
-                                            color: const Color(0xFFF5A623),
-                                            letterSpacing: 0.5)),
-                                    const SizedBox(height: 2),
-                                    Text(_detail!.organizer!.businessName,
-                                        style: GoogleFonts.poppins(
-                                            fontSize: Responsive.sp(context, 15),
-                                            fontWeight: FontWeight.w600,
-                                            color: const Color(0xFF1A1A2E))),
-                                  ],
+                                child: Text(
+                                  'Terms & Conditions',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 14),
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF1A1A2E),
+                                  ),
                                 ),
                               ),
-                              PartnerFollowButton(
-                                partnerId: _detail?.organizer?.partnerId,
-                              ),
+                              Icon(Icons.chevron_right, color: Colors.blue.shade500, size: 24),
                             ],
                           ),
                         ),
@@ -840,6 +809,88 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
     );
   }
 
+  void _showTermsBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Terms & Conditions',
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(ctx),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(color: Colors.grey.shade200, shape: BoxShape.circle),
+                      child: const Icon(Icons.close, size: 20, color: Color(0xFF1A1A2E)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_detail?.cancellationPolicy?.isNotEmpty == true) ...[
+                      Text('Cancellation Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                      const SizedBox(height: 10),
+                      Text(_detail!.cancellationPolicy!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
+                      const SizedBox(height: 20),
+                    ],
+                    if (_detail?.refundPolicy?.isNotEmpty == true) ...[
+                      Text('Refund Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                      const SizedBox(height: 10),
+                      Text(_detail!.refundPolicy!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
+                      const SizedBox(height: 20),
+                    ],
+                    if (_detail?.faqs.isNotEmpty == true) ...[
+                      Text('FAQs', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                      const SizedBox(height: 10),
+                      ...(_detail!.faqs.map((faq) => _buildTermsBullet(faq['question'] ?? '', faq['answer'] ?? ''))),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTermsBullet(String label, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+          const SizedBox(height: 4),
+          Text(text, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
+        ],
+      ),
+    );
+  }
+
   Widget _buildPackageCard(ApiVenuePackage pkg) {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
@@ -897,18 +948,6 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
     );
   }
 
-  Widget _buildOrgInitial() {
-    final name = _detail?.organizer?.businessName ?? '';
-    final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
-    return Container(
-      color: const Color(0xFFFFCC00),
-      child: Center(
-        child: Text(initial,
-            style: GoogleFonts.poppins(
-                fontSize: Responsive.sp(context, 20), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
-      ),
-    );
-  }
 
 }
 

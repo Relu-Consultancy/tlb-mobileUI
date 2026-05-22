@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-21 (Session 38)
+**Last Updated:** 2026-05-22 (Session 39)
 
 ---
 
@@ -70,7 +70,7 @@ SplashScreen
         │   ├── FormatEventsScreen (format circle tap → filtered events by format slug)
         │   └── EventDetailScreen (same checkout flow)
         ├── ClassesScreen       (Tab: Classes)
-        │   ├── ClassDetailScreen → SelectBatchScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
+        │   ├── ClassDetailScreen → SelectBatchScreen → AttendeeDetailsScreen → ReviewPayScreen → BookingConfirmedScreen
         │   └── CategoryClassesScreen
         ├── ProgramsScreen      (Tab: Programs)
         │   ├── ProgramDetailScreen → SelectProgramBatchScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
@@ -135,7 +135,7 @@ HomeScreen (sidebar/action flows)
 | `program_detail_screen.dart` | Program detail — StatefulWidget; fetches `GET /api/v1/listings/programs/{id}/`. CTA gated on `_detail?.bookingType`: `direct_booking` → "Check Availability" → `SelectProgramBatchScreen(batches)`; otherwise → "Enquire Now" → `showInquireNow()`. Shows hero, schedule, Things to Know, gallery, map, organizer, reviews |
 | `venue_detail_screen.dart` | Venue detail — StatefulWidget; fetches `GET /api/v1/listings/venues/{id}/` when `event.id` is non-empty; falls back to dummy `EventModel` fields. Shows cover, category tag, availability slot, About, Things to Know, Packages, Gallery, Location map, Organizer. "Plan Event" CTA → PlanPartyScreen |
 | `date_time_selection_screen.dart` | Pick date + time → TicketBookingScreen |
-| `select_batch_screen.dart` | Classes batch selection — real `List<ApiClassBatch>` data; date chips computed from batch days pattern (next 5 upcoming dates); selecting a batch refreshes dates; batch card shows time range, days, name tag → Continue → TicketBookingScreen |
+| `select_batch_screen.dart` | Classes batch selection — real `List<ApiClassBatch>` data; date chips computed from batch days pattern (next 5 upcoming dates); selecting a batch refreshes dates; batch card shows time range, days, name tag → Continue → AttendeeDetailsScreen(bookingType: 'class', batchId) |
 | `select_program_batch_screen.dart` | Programs batch selection — real `List<ApiProgramBatch>` data; same pattern as `SelectBatchScreen`; `daysOfWeek` handles both full ("monday") and short ("mon") day names; nullable `startTime`/`endTime` ("Time TBA" fallback); `totalSeats` chip when non-null; name tag with 5-color palette → Continue → TicketBookingScreen |
 | `ticket_booking_screen.dart` | Ticket count + price breakdown → ReviewPayScreen |
 | `review_pay_screen.dart` | Order summary → PaymentScreen |
@@ -246,13 +246,13 @@ HomeScreen (sidebar/action flows)
 ### API Models
 **`ApiCategory`** — `id, name, slug, sortOrder, subcategories: List<ApiSubcategory>`  
 **`ApiEvent`** (list) — `id, title, category, subcategory, city, area, cover, isFeatured, startDate, endDate, mode, ageGroup`  
-**`ApiEventDetail`** (extends ApiEvent) — adds `description, address, locationType, minAge, maxAge, price, priceType, media, schedules, organizer`  
+**`ApiEventDetail`** (extends ApiEvent) — adds `description, address, locationType, minAge, maxAge, price, priceType, media, schedules, organizer, cancellationPolicy, refundPolicy, faqs: List<Map<String,String>>`  
 **`ApiVenue`** (list) — `id, title, category, city, area, cover, isFeatured, isNewThisWeek, isTopRated, distanceKm`  
-**`ApiVenueDetail`** (extends ApiVenue) — adds `description, subcategory, locationType, address, minAge, maxAge, minCapacity, maxCapacity, media, packages, availability, organizer`  
+**`ApiVenueDetail`** (extends ApiVenue) — adds `description, subcategory, locationType, address, minAge, maxAge, minCapacity, maxCapacity, media, packages, availability, organizer, cancellationPolicy, refundPolicy, faqs: List<Map<String,String>>`  
 **`ApiVenuePackage`** — `id, name, price (double — parsed from "2500.00" string), description, durationMinutes, maxGuests`  
 **`ApiVenueAvailability`** — `id, date ("2026-06-14"), startTime ("10:00:00"), endTime ("13:00:00"), note`  
 **`ApiVenueOccasion`** — `id, name, slug` — API-fetched occasions for venue booking (e.g. Birthday Party, Weekend Fun, Community Event); added to `ApiVenueDetail.occasions`  
-**`ApiProgramDetail`** (extends ApiProgram) — adds `description, area, address, maxCapacity, totalHours, moduleCount, bookingType (String — "enquiry" | "direct_booking"), subcategory, tags, batches, faqs, media, organizer`  
+**`ApiProgramDetail`** (extends ApiProgram) — adds `description, area, address, maxCapacity, totalHours, moduleCount, bookingType (String — "enquiry" | "direct_booking"), subcategory, tags, batches, faqs, cancellationPolicy, refundPolicy, media, organizer`  
 **`ApiProgramBatch`** — `id, name, startDate?, endDate?, startTime?, endTime?, fee?, totalSeats?, isActive, daysOfWeek: List<String>`
 
 ### API ↔ UI Gating Pattern
@@ -709,7 +709,7 @@ Reacts to profile edits without requiring screen re-navigation.
 
 ```
 [Events]  EventDetailScreen   → DateTimeSelectionScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
-[Classes] ClassDetailScreen   → SelectBatchScreen        → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
+[Classes] ClassDetailScreen   → SelectBatchScreen → AttendeeDetailsScreen → ReviewPayScreen → BookingConfirmedScreen
 [Program] ProgramDetailScreen → SelectProgramBatchScreen → TicketBookingScreen → ReviewPayScreen → BookingConfirmedScreen
 [Venues]  VenueDetailScreen   → PlanPartyScreen → VenueCheckoutScreen → ReviewPayScreen → VenueBookingConfirmedScreen
 ```
@@ -743,6 +743,8 @@ Reacts to profile edits without requiring screen re-navigation.
 | ~~Set real Razorpay key~~ | `lib/core/app_config.dart` | ✅ Done (Session 35) — `rzp_test_SpYAGfwgdidCZq` |
 | ~~All Bookings screen — real API~~ | `bookings_screen.dart`, `booking_detail_screen.dart`, `booking_service.dart`, `api_booking_model.dart` | ✅ Done (Session 36) — fetches `GET /api/v1/bookings/`; tab filter per API status; cancel flow with `POST /api/v1/bookings/{id}/cancel/` |
 | ~~PlanPartyScreen → booking confirmation~~ | `plan_party_screen.dart`, `venue_checkout_screen.dart`, `venue_booking_confirmed_screen.dart` | ✅ Done (Session 37) — full flow: PlanPartyScreen → VenueCheckoutScreen → ReviewPayScreen → VenueBookingConfirmedScreen |
+| ~~T&C real API data on all 4 detail screens~~ | all 4 detail screens + 3 models | ✅ Done (Session 39) — `cancellationPolicy`, `refundPolicy`, `faqs` fetched from API; hardcoded fallback sections removed; T&C row hidden when no data |
+| ~~Category classes filter label mismatch~~ | `category_classes_screen.dart`, `dummy_data.dart` | ✅ Done (Session 39) — `apiName` mapping added to all 11 `classesCategories`; `_apiCategoryName` getter resolves correct backend string |
 | Profile screen reactive to name/avatar changes | `profile_screen.dart` | ❌ Pending — reads `AuthState.userName.value` but no `ValueListenableBuilder`; won't update on profile edit without navigate-back rebuild |
 | Profile avatar upload | `edit_profile_screen.dart` | ❌ Pending — removed from profile form (new API has no avatar field); needs separate endpoint when available |
 | Startup profile completion check | `main.dart` | ❌ Pending — `tryRestoreSession()` restores session but does NOT redirect incomplete profiles |
@@ -1341,3 +1343,16 @@ NOTE: backend currently returns PAYMENT_GATEWAY_NOT_CONFIGURED for venue booking
 | **`PartnerFollowButton` widget created** — StatefulWidget with `partnerId: String?`; returns `SizedBox.shrink()` when partnerId is null/empty; grey `OutlinedButton` "Follow" when not following; yellow `ElevatedButton.icon` with check icon "Following" when following; spinner during loading; auth guard via `showLoginSheet(context)`; optimistic state flip with revert on error; SnackBar feedback on success/error | `lib/widgets/partner_follow_button.dart` (NEW) |
 | **Follow buttons wired in all 4 detail screens** — replaced dead `OutlinedButton(onPressed: () {}, ...)` Follow buttons with `PartnerFollowButton(partnerId: _detail?.organizer?.partnerId)` in each organizer section | `lib/screens/event_detail_screen.dart`, `lib/screens/class_detail_screen.dart`, `lib/screens/program_detail_screen.dart`, `lib/screens/venue_detail_screen.dart` |
 | **`OrganizerProfileScreen` Follow button added** — `PartnerFollowButton(partnerId: _provider?.id)` inserted below review count in the gradient header; uses the UUID from the provider API response | `lib/screens/organizer_profile_screen.dart` |
+
+### Session 39
+| Change | Files |
+|--------|-------|
+| **`ApiEventDetail` extended with T&C fields** — added `cancellationPolicy: String?`, `refundPolicy: String?`, `faqs: List<Map<String,String>>`; all 3 fields parsed at top-level JSON (not under `service`) | `lib/models/api_event_model.dart` |
+| **`ApiProgramDetail` extended with T&C fields** — added `cancellationPolicy: String?`, `refundPolicy: String?` (faqs already existed); parsed at top-level | `lib/models/api_program_model.dart` |
+| **`ApiVenueDetail` extended with T&C fields** — added `cancellationPolicy: String?`, `refundPolicy: String?`, `faqs: List<Map<String,String>>`; parsed at top-level JSON; `faqs = const []` default | `lib/models/api_venue_model.dart` |
+| **T&C row conditional on real data** — all 4 detail screens: T&C "Terms & Conditions" row is now hidden when `_detail` has no `cancellationPolicy`, `refundPolicy`, or `faqs` data; was previously always visible with hardcoded content | `lib/screens/class_detail_screen.dart`, `event_detail_screen.dart`, `program_detail_screen.dart`, `venue_detail_screen.dart` |
+| **T&C bottom sheets use real API data** — removed all hardcoded "Attendance & Participation", "Safety & Conduct", "Supervision & Responsibility", "Health & Safety Rules" sections; replaced with `cancellationPolicy`, `refundPolicy`, and `faqs` sections dynamically rendered from API; each section hidden when its field is empty/null | `lib/screens/class_detail_screen.dart`, `event_detail_screen.dart`, `program_detail_screen.dart`, `venue_detail_screen.dart` |
+| **`VenueDetailScreen` T&C added** — T&C row placed after OrganizerCard (before Reviews); `_showTermsBottomSheet()` and `_buildTermsBullet()` methods added; previously no T&C row existed on venue detail | `lib/screens/venue_detail_screen.dart` |
+| **`classesCategories` `apiName` mapping** — all 11 `DummyData.classesCategories` entries now carry an `apiName` key with the exact backend category name string; critical fix: `'Life Skills &\nPersonality Dev'` → `apiName: 'Life Skills & Personality Development'`; all other newline-containing labels also mapped (e.g. `'Outdoor &\nNature Learning'` → exact API string) | `lib/data/dummy_data.dart` |
+| **`CategoryClassesScreen` category filter fixed** — added `_apiCategoryName` getter that reads `currentCategory['apiName']` (falls back to label with `\n` → ` `); `_fetchClasses` and `_loadMore` now use `category: _apiCategoryName` instead of the display label; city filter (`LocationState().selectedCity.value`) and subcategory filter preserved; root cause was label mismatch between DummyData and API | `lib/screens/category_classes_screen.dart` |
+| **Class booking flow confirmed** — `SelectBatchScreen` routes to `AttendeeDetailsScreen(bookingType: 'class', batchId)`, NOT `TicketBookingScreen`; TicketBookingScreen is only used by Events and Programs | `lib/screens/select_batch_screen.dart` |

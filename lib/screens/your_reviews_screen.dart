@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/api_review_model.dart';
@@ -358,9 +359,7 @@ class _ReviewCard extends StatelessWidget {
       await UserReviewsState.remove(review.id);
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
-        );
+        AppSnackBar.error(context, e.toString().replaceFirst('Exception: ', ''));
       }
     }
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../models/event_model.dart';
@@ -75,7 +76,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
     setState(() => _isLoadingMore = true);
     try {
       final next = await ClassesListingService.fetchClasses(
-        category: _categoryTitle,
+        category: _apiCategoryName,
         subcategory: _selectedFilterIndex == 0 ? null : _filters[_selectedFilterIndex],
         city: LocationState().selectedCity.value,
         page: _currentPage + 1,
@@ -102,7 +103,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
     });
     try {
       final page = await ClassesListingService.fetchClasses(
-        category: _categoryTitle,
+        category: _apiCategoryName,
         subcategory: subcategory,
         city: LocationState().selectedCity.value,
         page: 1,
@@ -121,16 +122,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
         _apiClasses = [];
         _isLoadingClasses = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Classes: $msg'),
-          backgroundColor: const Color(0xFF1A1A2E),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          duration: const Duration(seconds: 5),
-        ),
-      );
+      AppSnackBar.error(context, 'Classes: $msg');
     }
   }
 
@@ -185,6 +177,11 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
 
   String get _categoryTitle {
     return (_currentCategory['label'] as String).replaceAll('\n', ' ');
+  }
+
+  String get _apiCategoryName {
+    return (_currentCategory['apiName'] as String?) ??
+        (_currentCategory['label'] as String).replaceAll('\n', ' ');
   }
 
   EventModel _toEventModel(ApiClass cls) {

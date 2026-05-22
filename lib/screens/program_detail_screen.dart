@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/app_snackbar.dart';
 import '../providers/auth_state.dart';
 import '../providers/location_state.dart';
 import '../widgets/login_sheet.dart';
@@ -8,6 +9,7 @@ import '../core/responsive.dart';
 import '../widgets/partner_follow_button.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/review_sheet.dart';
+import '../widgets/organizer_card.dart';
 import '../models/event_model.dart';
 import '../models/api_program_model.dart';
 import '../services/programs_listing_service.dart';
@@ -177,13 +179,8 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
     return _detail!.deliveryMode;
   }
 
-  String? get _cancellationPolicy {
-    return null;
-  }
-
-  String? get _refundPolicy {
-    return null;
-  }
+  String? get _cancellationPolicy => _detail?.cancellationPolicy;
+  String? get _refundPolicy => _detail?.refundPolicy;
 
   // ── Build ─────────────────────────────────────────────────────────────────
 
@@ -668,9 +665,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                         }
                                         if (LocationState().selectedCity.value == 'Bhopal City') {
                                           if (context.mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(content: Text('Please set your current location')),
-                                            );
+                                            AppSnackBar.show(context, 'Please set your current location');
                                           }
                                           return;
                                         }
@@ -680,9 +675,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                           await launchUrl(url, mode: LaunchMode.externalApplication);
                                         } catch (_) {
                                           if (context.mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(content: Text('Could not open map.')),
-                                            );
+                                            AppSnackBar.error(context, 'Could not open map.');
                                           }
                                         }
                                       },
@@ -716,83 +709,20 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                     ],
 
                     // Organizer
-                    GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => OrganizerProfileScreen(
-                            listingId: widget.event.id,
-                            initialName: _detail?.organizer?.businessName,
-                            initialLogoUrl: _detail?.organizer?.logoUrl,
-                          ),
-                        ),
-                      ),
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: Responsive.w(context, 54, min: 46),
-                              height: Responsive.w(context, 54, min: 46),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 2),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(27),
-                                child: _buildOrganizerAvatar(),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'ORGANIZED BY',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 10),
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xFFF5A623),
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    _detail?.organizer?.businessName ?? 'Fun Event Co.',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 15),
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF1A1A2E),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            PartnerFollowButton(
-                              partnerId: _detail?.organizer?.partnerId,
-                            ),
-                          ],
-                        ),
-                      ),
+                    OrganizerCard(
+                      listingId: widget.event.id,
+                      partnerId: _detail?.organizer?.partnerId,
+                      initialName: _detail?.organizer?.businessName,
+                      initialLogoUrl: _detail?.organizer?.logoUrl,
                     ),
 
                     const SizedBox(height: 24),
 
-                    if (_detail == null || (_cancellationPolicy != null || _refundPolicy != null)) ...[
+                    if (_detail != null && (
+                      (_cancellationPolicy?.isNotEmpty == true) ||
+                      (_refundPolicy?.isNotEmpty == true) ||
+                      (_detail!.faqs.isNotEmpty)
+                    )) ...[
                       GestureDetector(
                         onTap: () => _showTermsBottomSheet(context),
                         child: Container(
@@ -866,7 +796,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
               ),
               child: Row(
                 children: [
-                  if (_priceDisplay != 'Price TBA')
+                  if (_priceDisplay != 'Price TBA') ...[
                     RichText(
                       text: TextSpan(
                         children: [
@@ -885,9 +815,9 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                         ],
                       ),
                     ),
-                  if (_priceDisplay != 'Price TBA') const Spacer(),
+                    const SizedBox(width: 16),
+                  ],
                   Expanded(
-                    flex: 2,
                     child: Builder(
                       builder: (context) {
                         final label = _isDirectBooking
@@ -946,29 +876,6 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
         child: const Center(child: Icon(Icons.school, size: 60, color: Colors.grey)),
       );
 
-  Widget _buildOrganizerAvatar() {
-    final logoUrl = _detail?.organizer?.logoUrl;
-    final name = _detail?.organizer?.businessName ?? '';
-    if (logoUrl != null) {
-      return Image.network(
-        logoUrl,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _organizerInitial(name),
-      );
-    }
-    if (name.isNotEmpty) return _organizerInitial(name);
-    return Image.asset('assets/images/new_home/profilepic.jpg', fit: BoxFit.cover);
-  }
-
-  Widget _organizerInitial(String name) => Container(
-        color: const Color(0xFFFFF5E0),
-        child: Center(
-          child: Text(
-            name.isNotEmpty ? name[0].toUpperCase() : '?',
-            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 20), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
-          ),
-        ),
-      );
 
   Widget _buildGallery(BuildContext context) {
     final media = _galleryMedia;
@@ -1060,28 +967,22 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_cancellationPolicy != null) ...[
+                    if (_cancellationPolicy?.isNotEmpty == true) ...[
                       Text('Cancellation Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                       const SizedBox(height: 10),
                       Text(_cancellationPolicy!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
                       const SizedBox(height: 20),
                     ],
-                    if (_refundPolicy != null) ...[
+                    if (_refundPolicy?.isNotEmpty == true) ...[
                       Text('Refund Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                       const SizedBox(height: 10),
                       Text(_refundPolicy!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
                       const SizedBox(height: 20),
                     ],
-                    if (_detail == null) ...[
-                      Text('Attendance & Participation', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                    if (_detail?.faqs.isNotEmpty == true) ...[
+                      Text('FAQs', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                       const SizedBox(height: 10),
-                      _buildTermsBullet('Regular Attendance:', 'Students are expected to attend all scheduled sessions. Frequent absences may result in loss of the enrolled slot.'),
-                      _buildTermsBullet('Make-up Sessions:', 'Make-up sessions are subject to availability and must be requested at least 24 hours in advance.'),
-                      const SizedBox(height: 20),
-                      Text('Safety & Conduct', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
-                      const SizedBox(height: 10),
-                      _buildTermsBullet('Appropriate Attire:', 'Students must wear appropriate clothing and footwear as specified for each class type.'),
-                      _buildTermsBullet('Respectful Conduct:', 'All participants must treat instructors and fellow students with respect at all times.'),
+                      ...(_detail!.faqs.map((faq) => _buildTermsBullet(faq['question'] ?? '', faq['answer'] ?? ''))),
                     ],
                   ],
                 ),

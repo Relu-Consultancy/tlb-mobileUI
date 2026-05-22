@@ -3,6 +3,7 @@ import '../widgets/app_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../models/api_category_model.dart';
@@ -107,16 +108,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
         _apiVenues = [];
         _isLoadingVenues = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Venues: $msg'),
-          backgroundColor: const Color(0xFF1A1A2E),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          duration: const Duration(seconds: 5),
-        ),
-      );
+      AppSnackBar.error(context, 'Venues: $msg');
     }
   }
 

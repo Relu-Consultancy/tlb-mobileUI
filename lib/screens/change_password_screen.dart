@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 import '../widgets/app_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -38,9 +39,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     final confirmPwd = _confirmPasswordCtrl.text;
 
     if (oldPwd.isEmpty || newPwd.isEmpty || confirmPwd.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
-      );
+      AppSnackBar.show(context, 'Please fill in all fields');
       return;
     }
 
@@ -82,12 +81,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     if (result['success'] == true) {
       _showSuccessDialog();
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message'] ?? 'Failed to change password'),
-          backgroundColor: const Color(0xFFE53935),
-        ),
-      );
+      AppSnackBar.error(context, result['message'] ?? 'Failed to change password');
     }
   }
 

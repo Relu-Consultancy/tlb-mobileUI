@@ -4,8 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import '../models/api_class_model.dart';
+import '../models/api_program_model.dart';
 import '../models/event_model.dart';
-import 'ticket_booking_screen.dart';
+import 'attendee_details_screen.dart';
 
 const List<Color> _kTagBg = [
   Color(0xFFCCFBF1), Color(0xFFEDE9FE), Color(0xFFDCFCE7),
@@ -488,15 +489,25 @@ class _SelectBatchScreenState extends State<SelectBatchScreen> {
           onPressed: batches.isEmpty
               ? null
               : () {
+                  final cb = batches[_batchIdx];
+                  final programBatch = ApiProgramBatch(
+                    id: cb.id,
+                    name: cb.name,
+                    fee: cb.fee,
+                    isActive: cb.isActive,
+                    daysOfWeek: cb.days,
+                    startTime: cb.startTime,
+                    endTime: cb.endTime,
+                  );
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => TicketBookingScreen(
+                      builder: (_) => AttendeeDetailsScreen(
                         event: widget.event,
+                        batch: programBatch,
                         selectedDate: _startingFrom,
-                        selectedTime: _timeRange(batches[_batchIdx]),
+                        selectedTime: _timeRange(cb),
                         bookingType: 'class',
-                        batchId: batches[_batchIdx].id,
                       ),
                     ),
                   );

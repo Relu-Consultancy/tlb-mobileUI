@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_snackbar.dart';
 import '../models/event_model.dart';
 import 'auth_state.dart';
 import '../widgets/login_sheet.dart';
@@ -79,12 +80,7 @@ class SavedEventsState {
         savedEvents.value = revert;
 
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(e.toString().replaceFirst('Exception: ', '')),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          AppSnackBar.error(context, e.toString().replaceFirst('Exception: ', ''));
         }
         return wasLiked;
       }

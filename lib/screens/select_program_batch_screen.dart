@@ -5,7 +5,7 @@ import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import '../models/api_program_model.dart';
 import '../models/event_model.dart';
-import 'ticket_booking_screen.dart';
+import 'attendee_details_screen.dart';
 
 const List<Color> _kTagBg = [
   Color(0xFFCCFBF1), Color(0xFFEDE9FE), Color(0xFFDCFCE7),
@@ -15,10 +15,6 @@ const List<Color> _kTagFg = [
   Color(0xFF0F766E), Color(0xFF6D28D9), Color(0xFF15803D),
   Color(0xFFB45309), Color(0xFFBE123C),
 ];
-
-const Map<String, int> _kDayNum = {
-  'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6, 'sun': 7,
-};
 
 String _fmt12h(String t) {
   final parts = t.split(':');
@@ -31,26 +27,18 @@ String _fmt12h(String t) {
   return m == '00' ? '$h $ampm' : '$h:$m $ampm';
 }
 
-String _fmtDate(DateTime d) {
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return '${days[d.weekday - 1]} ${d.day} ${months[d.month - 1]}';
-}
-
-List<String> _nextDates(ApiProgramBatch batch, {int count = 5}) {
-  final weekdays = batch.daysOfWeek
-      .map((d) => _kDayNum[d.toLowerCase().substring(0, d.length >= 3 ? 3 : d.length)] ?? 0)
-      .where((n) => n > 0)
-      .toSet();
-  if (weekdays.isEmpty) return [];
-  final result = <String>[];
-  var cursor = DateTime.now();
-  while (result.length < count) {
-    cursor = cursor.add(const Duration(days: 1));
-    if (weekdays.contains(cursor.weekday)) result.add(_fmtDate(cursor));
-  }
-  return result;
+/// Parses "2026-05-25" → "25 May 2026"
+String _fmtApiDate(String? raw) {
+  if (raw == null || raw.isEmpty) return 'TBA';
+  final parts = raw.split('-');
+  if (parts.length != 3) return raw;
+  const months = [
+    '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+  final month = int.tryParse(parts[1]) ?? 0;
+  final day = int.tryParse(parts[2]) ?? 0;
+  return '$day ${months[month]} ${parts[0]}';
 }
 
 class SelectProgramBatchScreen extends StatefulWidget {
@@ -70,23 +58,6 @@ class SelectProgramBatchScreen extends StatefulWidget {
 
 class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
   int _batchIdx = 0;
-  int _dateIdx = 0;
-  List<String> _dates = const [];
-
-  @override
-  void initState() {
-    super.initState();
-    _refreshDates();
-  }
-
-  void _refreshDates() {
-    _dates = widget.batches.isEmpty
-        ? const []
-        : _nextDates(widget.batches[_batchIdx]);
-    _dateIdx = 0;
-  }
-
-  String get _startingFrom => _dates.isNotEmpty ? _dates[_dateIdx] : 'TBA';
 
   String _timeRange(ApiProgramBatch b) {
     if (b.startTime != null && b.endTime != null) {
@@ -121,13 +92,9 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
                   children: [
                     _buildVenueCard(context),
                     const SizedBox(height: 22),
-                    if (_dates.isNotEmpty) ...[
-                      _buildDateSection(context),
-                      const SizedBox(height: 24),
-                    ],
                     _buildBatchSection(context),
                     const SizedBox(height: 8),
-                    _buildStartingFromCard(context),
+                    _buildDateRangeCard(context),
                   ],
                 ),
               ),
@@ -255,62 +222,6 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
     );
   }
 
-  Widget _buildDateSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Select Date',
-          style: GoogleFonts.poppins(
-            fontSize: Responsive.sp(context, 15),
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 10),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: List.generate(_dates.length, (i) {
-              final sel = i == _dateIdx;
-              return GestureDetector(
-                onTap: () => setState(() => _dateIdx = i),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  margin: const EdgeInsets.only(right: 10),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 9),
-                  decoration: BoxDecoration(
-                    color: sel
-                        ? const Color(0xFFF0FDFB)
-                        : const Color(0xFFF5F5F5),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: sel
-                          ? const Color(0xFF0D9488)
-                          : const Color(0xFFE5E5E5),
-                      width: sel ? 1.5 : 1,
-                    ),
-                  ),
-                  child: Text(
-                    _dates[i],
-                    style: GoogleFonts.poppins(
-                      fontSize: Responsive.sp(context, 12),
-                      fontWeight: sel ? FontWeight.w600 : FontWeight.w500,
-                      color: sel
-                          ? const Color(0xFF0D9488)
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildBatchSection(BuildContext context) {
     final batches = widget.batches;
     return Column(
@@ -351,10 +262,7 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
     final fg = _kTagFg[i % _kTagFg.length];
 
     return GestureDetector(
-      onTap: () => setState(() {
-        _batchIdx = i;
-        _refreshDates();
-      }),
+      onTap: () => setState(() => _batchIdx = i),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         margin: const EdgeInsets.only(bottom: 12),
@@ -471,7 +379,10 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
     );
   }
 
-  Widget _buildStartingFromCard(BuildContext context) {
+  Widget _buildDateRangeCard(BuildContext context) {
+    if (widget.batches.isEmpty) return const SizedBox.shrink();
+    final batch = widget.batches[_batchIdx];
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -481,32 +392,50 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.schedule_rounded,
-              size: 20, color: Color(0xFF0284C7)),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Batch starting from',
-                style: GoogleFonts.poppins(
-                  fontSize: Responsive.sp(context, 12),
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF0284C7),
+          const Icon(Icons.calendar_month_rounded,
+              size: 22, color: Color(0xFF0284C7)),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Row(
+              children: [
+                _dateColumn(context, 'Start Date', batch.startDate),
+                Container(
+                  width: 1,
+                  height: 32,
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  color: const Color(0xFF93C5FD),
                 ),
-              ),
-              Text(
-                _startingFrom,
-                style: GoogleFonts.poppins(
-                  fontSize: Responsive.sp(context, 13),
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF0369A1),
-                ),
-              ),
-            ],
+                _dateColumn(context, 'End Date', batch.endDate),
+              ],
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _dateColumn(BuildContext context, String label, String? raw) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 11),
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFF0284C7),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          _fmtApiDate(raw),
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 13),
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF0369A1),
+          ),
+        ),
+      ],
     );
   }
 
@@ -523,15 +452,16 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
           onPressed: batches.isEmpty
               ? null
               : () {
+                  final batch = batches[_batchIdx];
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => TicketBookingScreen(
+                      builder: (_) => AttendeeDetailsScreen(
                         event: widget.event,
-                        selectedDate: _startingFrom,
-                        selectedTime: _timeRange(batches[_batchIdx]),
+                        batch: batch,
+                        selectedDate: _fmtApiDate(batch.startDate),
+                        selectedTime: _timeRange(batch),
                         bookingType: 'program',
-                        batchId: batches[_batchIdx].id,
                       ),
                     ),
                   );

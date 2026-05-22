@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/classes_listing_service.dart';
@@ -53,9 +54,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
         _mobile.text.trim().isEmpty ||
         _parentName.text.trim().isEmpty ||
         (widget.isProgram && messageText.isEmpty)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill all required fields${widget.isProgram ? ' including message' : ''}.')),
-      );
+      AppSnackBar.show(context, 'Please fill all required fields${widget.isProgram ? ' including message' : ''}.');
       return;
     }
 
@@ -93,9 +92,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
-      );
+      AppSnackBar.error(context, e.toString().replaceFirst('Exception: ', ''));
     }
   }
 

@@ -5,6 +5,7 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'core/app_theme.dart';
 import 'providers/auth_state.dart';
+import 'providers/follow_state.dart';
 import 'providers/saved_events_state.dart';
 import 'screens/home_screen.dart';
 import 'screens/splash_screen.dart';
@@ -17,7 +18,11 @@ void main() async {
     debugPrint('Firebase init skipped: $e');
   }
   final restored = await AuthState.tryRestoreSession();
-  if (restored) SavedEventsState.loadFromApi(); // fire-and-forget
+  if (restored) {
+    SavedEventsState.loadFromApi(); // fire-and-forget
+    final uid = AuthState.userId;
+    if (uid != null) FollowState.loadForUser(uid); // fire-and-forget
+  }
   // Request highest refresh rate (90Hz / 120Hz depending on device)
   await FlutterDisplayMode.setHighRefreshRate();
   SystemChrome.setSystemUIOverlayStyle(

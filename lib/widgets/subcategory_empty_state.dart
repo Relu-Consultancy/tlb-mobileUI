@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 
 class SubcategoryEmptyState extends StatelessWidget {
@@ -55,19 +56,7 @@ class SubcategoryEmptyState extends StatelessWidget {
             width: sw * 0.46,
             child: ElevatedButton(
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      "You'll be notified when it's available!",
-                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13)),
-                    ),
-                    backgroundColor: AppColors.textPrimary,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                );
+                AppSnackBar.show(context, "You'll be notified when it's available!");
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryLight,

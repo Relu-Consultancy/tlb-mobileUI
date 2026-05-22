@@ -168,6 +168,8 @@ class ApiProgramDetail extends ApiProgram {
   final List<Map<String, String>> faqs;
   final List<ApiProgramMedia> media;
   final ApiProgramOrganizer? organizer;
+  final String? cancellationPolicy;
+  final String? refundPolicy;
 
   const ApiProgramDetail({
     required super.id,
@@ -200,6 +202,8 @@ class ApiProgramDetail extends ApiProgram {
     required this.faqs,
     required this.media,
     this.organizer,
+    this.cancellationPolicy,
+    this.refundPolicy,
   });
 
   factory ApiProgramDetail.fromJson(Map<String, dynamic> json) {
@@ -261,6 +265,8 @@ class ApiProgramDetail extends ApiProgram {
       organizer: json['organizer'] != null
           ? ApiProgramOrganizer.fromJson(json['organizer'] as Map<String, dynamic>)
           : null,
+      cancellationPolicy: json['cancellation_policy'] as String?,
+      refundPolicy: json['refund_policy'] as String?,
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
 import 'review_pay_screen.dart';
@@ -97,9 +98,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
     setState(() {
       if (_seatMap[row][col] == 1) {
         if (_selectedSeats.length >= 6) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Maximum 6 seats per booking')),
-          );
+          AppSnackBar.show(context, 'Maximum 6 seats per booking');
           return;
         }
         _seatMap[row][col] = 3;

@@ -171,6 +171,9 @@ class ApiVenueDetail extends ApiVenue {
   final List<ApiVenueAvailability> availability;
   final List<ApiVenueOccasion> occasions;
   final ApiVenueOrganizer? organizer;
+  final String? cancellationPolicy;
+  final String? refundPolicy;
+  final List<Map<String, String>> faqs;
 
   const ApiVenueDetail({
     required super.id,
@@ -196,6 +199,9 @@ class ApiVenueDetail extends ApiVenue {
     required this.availability,
     required this.occasions,
     this.organizer,
+    this.cancellationPolicy,
+    this.refundPolicy,
+    this.faqs = const [],
   });
 
   List<ApiVenueMedia> get galleryMedia =>
@@ -245,6 +251,15 @@ class ApiVenueDetail extends ApiVenue {
             ? ApiVenueOrganizer.fromJson(
                 json['organizer'] as Map<String, dynamic>)
             : null,
+        cancellationPolicy: json['cancellation_policy'] as String?,
+        refundPolicy: json['refund_policy'] as String?,
+        faqs: (json['faqs'] as List?)
+                ?.map((e) => {
+                      'question': (e['question'] as String?) ?? '',
+                      'answer': (e['answer'] as String?) ?? '',
+                    })
+                .toList() ??
+            [],
       );
 }
 

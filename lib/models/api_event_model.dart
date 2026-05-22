@@ -164,6 +164,9 @@ class ApiEventDetail extends ApiEvent {
   final List<ApiEventTicket> tickets;
   final List<ApiEventMedia> media;
   final ApiEventOrganizer? organizer;
+  final String? cancellationPolicy;
+  final String? refundPolicy;
+  final List<Map<String, String>> faqs;
 
   const ApiEventDetail({
     required super.id,
@@ -188,6 +191,9 @@ class ApiEventDetail extends ApiEvent {
     required this.tickets,
     required this.media,
     this.organizer,
+    this.cancellationPolicy,
+    this.refundPolicy,
+    this.faqs = const [],
   });
 
   factory ApiEventDetail.fromJson(Map<String, dynamic> json) => ApiEventDetail(
@@ -235,6 +241,15 @@ class ApiEventDetail extends ApiEvent {
             ? ApiEventOrganizer.fromJson(
                 json['organizer'] as Map<String, dynamic>)
             : null,
+        cancellationPolicy: json['cancellation_policy'] as String?,
+        refundPolicy: json['refund_policy'] as String?,
+        faqs: (json['faqs'] as List?)
+                ?.map((e) => {
+                      'question': (e['question'] as String?) ?? '',
+                      'answer': (e['answer'] as String?) ?? '',
+                    })
+                .toList() ??
+            [],
       );
 }
 

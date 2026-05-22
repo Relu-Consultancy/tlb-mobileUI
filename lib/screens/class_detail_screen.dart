@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/app_snackbar.dart';
 import '../providers/auth_state.dart';
 import '../providers/location_state.dart';
 import '../widgets/login_sheet.dart';
@@ -8,6 +9,7 @@ import '../core/responsive.dart';
 import '../widgets/partner_follow_button.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/review_sheet.dart';
+import '../widgets/organizer_card.dart';
 import '../models/event_model.dart';
 import '../models/api_class_model.dart';
 import '../services/classes_listing_service.dart';
@@ -522,9 +524,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                                       }
                                       if (LocationState().selectedCity.value == 'Bhopal City') {
                                         if (context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Please set your current location')),
-                                          );
+                                          AppSnackBar.show(context, 'Please set your current location');
                                         }
                                         return;
                                       }
@@ -534,9 +534,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                                         await launchUrl(url, mode: LaunchMode.externalApplication);
                                       } catch (_) {
                                         if (context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Could not open map.')),
-                                          );
+                                          AppSnackBar.error(context, 'Could not open map.');
                                         }
                                       }
                                     },
@@ -571,74 +569,21 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                     const SizedBox(height: 24),
 
                     // Organizer
-                    GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => OrganizerProfileScreen(
-                            listingId: widget.event.id,
-                            initialName: _detail?.organizer?.businessName,
-                            initialLogoUrl: _detail?.organizer?.logoUrl,
-                          ),
-                        ),
-                      ),
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: Responsive.w(context, 54, min: 46),
-                              height: Responsive.w(context, 54, min: 46),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 2),
-                                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(0, 2))],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(27),
-                                child: _buildOrganizerAvatar(),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'ORGANIZED BY',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 10),
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xFFF5A623),
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    _detail?.organizer?.businessName ?? 'Fun Event Co.',
-                                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            PartnerFollowButton(
-                              partnerId: _detail?.organizer?.partnerId,
-                            ),
-                          ],
-                        ),
-                      ),
+                    OrganizerCard(
+                      listingId: widget.event.id,
+                      partnerId: _detail?.organizer?.partnerId,
+                      initialName: _detail?.organizer?.businessName,
+                      initialLogoUrl: _detail?.organizer?.logoUrl,
                     ),
 
                     const SizedBox(height: 24),
 
                     // Terms & Conditions
-                    GestureDetector(
+                    if (_detail != null && (
+                      (_detail!.cancellationPolicy?.isNotEmpty == true) ||
+                      (_detail!.refundPolicy?.isNotEmpty == true) ||
+                      _detail!.faqs.isNotEmpty
+                    )) GestureDetector(
                       onTap: () => _showTermsBottomSheet(context),
                       child: Container(
                         margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -702,22 +647,23 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                 color: Colors.white,
                 boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 10, offset: const Offset(0, -2))],
               ),
-              child: Row(
-                children: [
-                  if (widget.event.price != null)
-                    RichText(
-                      text: TextSpan(children: [
-                        TextSpan(text: '₹${widget.event.price!.toStringAsFixed(0)}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 20), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
-                        TextSpan(text: '/mo', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey)),
-                      ]),
-                    ),
-                  if (widget.event.price != null) const Spacer(),
-                  Expanded(
-                    flex: 2,
-                    child: Builder(builder: (context) {
-                      final isDirectBooking =
-                          _detail?.bookingType == 'direct_booking';
-                      return ElevatedButton(
+              child: Builder(builder: (context) {
+                final isDirectBooking =
+                    _detail?.bookingType == 'direct_booking';
+                final showPrice = isDirectBooking && widget.event.price != null;
+                return Row(
+                  children: [
+                    if (showPrice)
+                      RichText(
+                        text: TextSpan(children: [
+                          TextSpan(text: '₹${widget.event.price!.toStringAsFixed(0)}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 20), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                          TextSpan(text: '/mo', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey)),
+                        ]),
+                      ),
+                    if (showPrice) const Spacer(),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton(
                         onPressed: () {
                           if (isDirectBooking) {
                             Navigator.push(
@@ -743,16 +689,16 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                           elevation: 0,
                         ),
                         child: Text(
-                          isDirectBooking ? 'Check Availability' : 'Send Enquiry',
+                          isDirectBooking ? 'Check Availability' : 'Enquire Now',
                           style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 15),
                               fontWeight: FontWeight.w700),
                         ),
-                      );
-                    }),
-                  ),
-                ],
-              ),
+                      ),
+                    ),
+                  ],
+                );
+              }),
             ),
           ),
         ],
@@ -801,27 +747,23 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_detail?.cancellationPolicy != null && _detail!.cancellationPolicy!.isNotEmpty) ...[
+                    if (_detail?.cancellationPolicy?.isNotEmpty == true) ...[
                       Text('Cancellation Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                       const SizedBox(height: 10),
                       Text(_detail!.cancellationPolicy!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
                       const SizedBox(height: 20),
                     ],
-                    if (_detail?.refundPolicy != null && _detail!.refundPolicy!.isNotEmpty) ...[
+                    if (_detail?.refundPolicy?.isNotEmpty == true) ...[
                       Text('Refund Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
                       const SizedBox(height: 10),
                       Text(_detail!.refundPolicy!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
                       const SizedBox(height: 20),
                     ],
-                    Text('Attendance & Participation', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
-                    const SizedBox(height: 10),
-                    _buildTermsBullet('Regular Attendance:', 'Students are expected to attend all scheduled sessions. Frequent absences may result in loss of the enrolled slot.'),
-                    _buildTermsBullet('Make-up Sessions:', 'Make-up sessions are subject to availability and must be requested at least 24 hours in advance.'),
-                    const SizedBox(height: 20),
-                    Text('Safety & Conduct', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
-                    const SizedBox(height: 10),
-                    _buildTermsBullet('Appropriate Attire:', 'Students must wear appropriate clothing and footwear as specified for each class type.'),
-                    _buildTermsBullet('Respectful Conduct:', 'All participants must treat instructors and fellow students with respect at all times.'),
+                    if (_detail?.faqs.isNotEmpty == true) ...[
+                      Text('FAQs', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                      const SizedBox(height: 10),
+                      ...(_detail!.faqs.map((faq) => _buildTermsBullet(faq['question'] ?? '', faq['answer'] ?? ''))),
+                    ],
                   ],
                 ),
               ),
@@ -907,26 +849,6 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
     );
   }
 
-  Widget _buildOrganizerAvatar() {
-    final logoUrl = _detail?.organizer?.logoUrl;
-    if (logoUrl != null && logoUrl.isNotEmpty) {
-      return Image.network(logoUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _buildDefaultAvatar());
-    }
-    return _buildDefaultAvatar();
-  }
-
-  Widget _buildDefaultAvatar() {
-    final name = _detail?.organizer?.businessName ?? '';
-    return Container(
-      color: Colors.grey.shade200,
-      child: Center(
-        child: Text(
-          name.isNotEmpty ? name[0].toUpperCase() : 'O',
-          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 20), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
-        ),
-      ),
-    );
-  }
 }
 
 class _MapPlaceholderPainter extends CustomPainter {

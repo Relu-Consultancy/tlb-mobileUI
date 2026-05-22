@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../services/token_storage.dart';
 import '../services/auth_service.dart';
+import 'follow_state.dart';
 
 class AuthState {
   static final ValueNotifier<bool> isLoggedIn = ValueNotifier<bool>(false);
@@ -36,6 +37,8 @@ class AuthState {
     userData = user;
     avatarUrl.value = (user?['profile'] as Map<String, dynamic>?)?['avatar_url'] as String?;
     isLoggedIn.value = true;
+    final uid = user?['id'] as String?;
+    if (uid != null) FollowState.loadForUser(uid).catchError((_) {});
     if (access != null && refresh != null) {
       TokenStorage.saveTokens(
               access, refresh, user != null ? jsonEncode(user) : '{}')
@@ -104,6 +107,7 @@ class AuthState {
     userData = null;
     avatarUrl.value = null;
     isLoggedIn.value = false;
+    FollowState.clear();
     TokenStorage.clearTokens().catchError((_) {});
   }
 

@@ -27,6 +27,7 @@ class ApiClassBatch {
   final String endTime;
   final int capacity;
   final bool isActive;
+  final String? fee;
 
   const ApiClassBatch({
     required this.id,
@@ -36,6 +37,7 @@ class ApiClassBatch {
     required this.endTime,
     required this.capacity,
     required this.isActive,
+    this.fee,
   });
 
   factory ApiClassBatch.fromJson(Map<String, dynamic> json) => ApiClassBatch(
@@ -46,6 +48,7 @@ class ApiClassBatch {
         endTime: json['end_time'] as String,
         capacity: json['capacity'] as int,
         isActive: json['is_active'] as bool,
+        fee: json['fee']?.toString(),
       );
 }
 
