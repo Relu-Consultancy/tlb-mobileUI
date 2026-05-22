@@ -420,7 +420,7 @@ class _Avatar extends StatelessWidget {
           child: Text(
             name.isNotEmpty ? name[0].toUpperCase() : 'P',
             style: GoogleFonts.poppins(
-              fontSize: 22,
+              fontSize: Responsive.sp(context, 22),
               fontWeight: FontWeight.w700,
               color: const Color(0xFFF5A623),
             ),

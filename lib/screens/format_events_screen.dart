@@ -26,7 +26,6 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
   late int _selectedIndex;
   List<ApiEvent> _events = [];
   bool _isLoading = true;
-  String? _error;
 
   static const _invertMatrix = <double>[
     -1,  0,  0, 0, 255,
@@ -53,7 +52,6 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
   Future<void> _fetchEvents() async {
     setState(() {
       _isLoading = true;
-      _error = null;
     });
     try {
       // The backend format filter is not yet live, so fetch all events and
@@ -76,7 +74,6 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
       setState(() {
         _events = [];
         _isLoading = false;
-        _error = msg;
       });
       AppSnackBar.error(context, msg);
     }

@@ -14,12 +14,10 @@ import '../models/api_review_model.dart';
 import '../services/review_service.dart';
 import '../widgets/login_sheet.dart';
 import '../widgets/review_sheet.dart';
-import '../widgets/partner_follow_button.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/organizer_card.dart';
 import 'date_time_selection_screen.dart';
 import 'gallery_screen.dart';
-import 'organizer_profile_screen.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final EventModel event;
@@ -769,64 +767,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     );
   }
 
-  Widget _buildRelatedEventCard(BuildContext context, String title, String imagePath, String location, String tag) {
-    return Container(
-      width: Responsive.cardWidth(context, fraction: 0.41, max: 160),
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                child: Image.asset(
-                  imagePath,
-                  width: Responsive.cardWidth(context, fraction: 0.41, max: 160),
-                  height: Responsive.h(context, 120, min: 90),
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 120, min: 90), color: Colors.grey.shade200),
-                ),
-              ),
-              Positioned(
-                top: 8, left: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: tag == 'Limited Seats' ? const Color(0xFFFF6B6B) : const Color(0xFF4CAF50),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(tag, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 10), fontWeight: FontWeight.w600, color: Colors.white)),
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Expanded(child: Text(location, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey))),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   // ── Bottom Sheets ─────────────────────────────────────────────────────────
 

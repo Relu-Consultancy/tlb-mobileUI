@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
-import '../core/app_snackbar.dart';
 import '../models/api_booking_model.dart';
 import '../providers/auth_state.dart';
 import '../services/booking_service.dart';
@@ -441,7 +440,7 @@ class _BookingCard extends StatelessWidget {
           Text(
             _typeLabel(type),
             style: GoogleFonts.poppins(
-              fontSize: 9,
+              fontSize: Responsive.sp(context, 9),
               color: Colors.grey.shade500,
               fontWeight: FontWeight.w500,
             ),

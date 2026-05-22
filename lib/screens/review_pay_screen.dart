@@ -295,7 +295,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
           'Your payment was received but we could not confirm the booking automatically.\n\n'
           'Reference: $ref\n\n'
           'Please contact support and share this reference number.',
-          style: GoogleFonts.poppins(fontSize: 14),
+          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14)),
         ),
         actions: [
           TextButton(

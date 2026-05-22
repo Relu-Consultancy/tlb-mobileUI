@@ -6,7 +6,6 @@ import '../providers/auth_state.dart';
 import '../providers/location_state.dart';
 import '../widgets/login_sheet.dart';
 import '../core/responsive.dart';
-import '../widgets/partner_follow_button.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/review_sheet.dart';
 import '../widgets/organizer_card.dart';
@@ -17,7 +16,6 @@ import '../services/review_service.dart';
 import '../models/api_review_model.dart';
 import '../widgets/app_loader.dart';
 import 'gallery_screen.dart';
-import 'organizer_profile_screen.dart';
 import 'select_batch_screen.dart';
 import '../widgets/inquire_now_sheet.dart';
 

@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-22 (Session 39)
+**Last Updated:** 2026-05-22 (Session 40)
 
 ---
 
@@ -1356,3 +1356,14 @@ NOTE: backend currently returns PAYMENT_GATEWAY_NOT_CONFIGURED for venue booking
 | **`classesCategories` `apiName` mapping** — all 11 `DummyData.classesCategories` entries now carry an `apiName` key with the exact backend category name string; critical fix: `'Life Skills &\nPersonality Dev'` → `apiName: 'Life Skills & Personality Development'`; all other newline-containing labels also mapped (e.g. `'Outdoor &\nNature Learning'` → exact API string) | `lib/data/dummy_data.dart` |
 | **`CategoryClassesScreen` category filter fixed** — added `_apiCategoryName` getter that reads `currentCategory['apiName']` (falls back to label with `\n` → ` `); `_fetchClasses` and `_loadMore` now use `category: _apiCategoryName` instead of the display label; city filter (`LocationState().selectedCity.value`) and subcategory filter preserved; root cause was label mismatch between DummyData and API | `lib/screens/category_classes_screen.dart` |
 | **Class booking flow confirmed** — `SelectBatchScreen` routes to `AttendeeDetailsScreen(bookingType: 'class', batchId)`, NOT `TicketBookingScreen`; TicketBookingScreen is only used by Events and Programs | `lib/screens/select_batch_screen.dart` |
+
+### Session 40
+| Change | Files |
+|--------|-------|
+| **Flutter analyze run — all source warnings cleared** — ran `flutter analyze`; resolved 44 issues down to 0 warnings in production code (only test-file warnings and `info`-level style hints remain) | project-wide |
+| **Removed stale unused imports (partner_follow_button + organizer_profile_screen)** — both imports were left over from a refactor that replaced them with `organizer_card.dart`; removed from all 4 detail screens | `lib/screens/class_detail_screen.dart`, `event_detail_screen.dart`, `program_detail_screen.dart`, `venue_detail_screen.dart` |
+| **Removed unused `app_snackbar` import from bookings_screen** | `lib/screens/bookings_screen.dart` |
+| **Removed dead `_buildRelatedEventCard` method** — method body was 58 lines; all call sites were commented out; safe to delete | `lib/screens/event_detail_screen.dart` |
+| **Removed unused `_error` field from `FormatEventsScreen`** — field was set in catch block but never read (error already shown via `AppSnackBar.error()`); removed field declaration and both assignments | `lib/screens/format_events_screen.dart` |
+| **Responsiveness audit — 3 raw `fontSize` values fixed** — `fontSize: 9` → `Responsive.sp(context, 9)` (bookings filter tab label); `fontSize: 22` → `Responsive.sp(context, 22)` (partner avatar initial); `fontSize: 14` → `Responsive.sp(context, 14)` (review pay error dialog body); all other text already used `Responsive.sp()` | `lib/screens/bookings_screen.dart`, `followed_partners_screen.dart`, `review_pay_screen.dart` |
+
