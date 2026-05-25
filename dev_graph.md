@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-22 (Session 40)
+**Last Updated:** 2026-05-25 (Session 41)
 
 ---
 
@@ -1366,4 +1366,10 @@ NOTE: backend currently returns PAYMENT_GATEWAY_NOT_CONFIGURED for venue booking
 | **Removed dead `_buildRelatedEventCard` method** — method body was 58 lines; all call sites were commented out; safe to delete | `lib/screens/event_detail_screen.dart` |
 | **Removed unused `_error` field from `FormatEventsScreen`** — field was set in catch block but never read (error already shown via `AppSnackBar.error()`); removed field declaration and both assignments | `lib/screens/format_events_screen.dart` |
 | **Responsiveness audit — 3 raw `fontSize` values fixed** — `fontSize: 9` → `Responsive.sp(context, 9)` (bookings filter tab label); `fontSize: 22` → `Responsive.sp(context, 22)` (partner avatar initial); `fontSize: 14` → `Responsive.sp(context, 14)` (review pay error dialog body); all other text already used `Responsive.sp()` | `lib/screens/bookings_screen.dart`, `followed_partners_screen.dart`, `review_pay_screen.dart` |
+
+### Session 41
+| Change | Files |
+|--------|-------|
+| **`_buildPlaceholder` context param added** — `_BookingCard._buildPlaceholder(String type)` → `_buildPlaceholder(BuildContext context, String type)`; both call sites updated (image `errorBuilder` and fallback branch); fixes missing `context` needed for `Responsive.sp()` calls inside the method | `lib/screens/bookings_screen.dart` |
+| **`_Avatar._initial` context param added** — `_Avatar._initial(String name)` → `_initial(BuildContext context, String name)`; both call sites updated (`errorBuilder` and fallback branch); same pattern as above | `lib/screens/followed_partners_screen.dart` |
 

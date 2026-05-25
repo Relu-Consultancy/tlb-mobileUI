@@ -302,9 +302,9 @@ class _BookingCard extends StatelessWidget {
                     height: 80,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) =>
-                        _buildPlaceholder(booking.bookingType),
+                        _buildPlaceholder(context, booking.bookingType),
                   )
-                : _buildPlaceholder(booking.bookingType),
+                : _buildPlaceholder(context, booking.bookingType),
           ),
           const SizedBox(width: 14),
 
@@ -426,7 +426,7 @@ class _BookingCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPlaceholder(String type) {
+  Widget _buildPlaceholder(BuildContext context, String type) {
     return Container(
       width: 80,
       height: 80,

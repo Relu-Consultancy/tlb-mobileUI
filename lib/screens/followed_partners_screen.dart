@@ -407,14 +407,14 @@ class _Avatar extends StatelessWidget {
             ? Image.network(
                 logoUrl!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _initial(name),
+                errorBuilder: (_, __, ___) => _initial(context, name),
               )
-            : _initial(name),
+            : _initial(context, name),
       ),
     );
   }
 
-  Widget _initial(String name) => Container(
+  Widget _initial(BuildContext context, String name) => Container(
         color: const Color(0xFFFEF3C7),
         child: Center(
           child: Text(
