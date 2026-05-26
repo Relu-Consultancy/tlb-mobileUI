@@ -87,7 +87,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
     venue: _locationText,
     imagePath: _coverUrl,
     tag: _tag.isNotEmpty ? _tag : null,
-    price: widget.event.price,
+    price: _detail?.price ?? widget.event.price,
     rating: _detail?.averageRating ?? widget.event.rating,
     reviewCount: _detail != null && _detail!.totalReviews > 0
         ? '(${_detail!.totalReviews} reviews)'
@@ -648,15 +648,18 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
               child: Builder(builder: (context) {
                 final isDirectBooking =
                     _detail?.bookingType == 'direct_booking';
-                final showPrice = isDirectBooking && widget.event.price != null;
+                final price = _detail?.price ?? widget.event.price;
+                final showPrice = isDirectBooking && price != null;
                 return Row(
                   children: [
                     if (showPrice)
-                      RichText(
-                        text: TextSpan(children: [
-                          TextSpan(text: '₹${widget.event.price!.toStringAsFixed(0)}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 20), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
-                          TextSpan(text: '/mo', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey)),
-                        ]),
+                      Text(
+                        '₹${price.toStringAsFixed(0)}',
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 20),
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF1A1A2E),
+                        ),
                       ),
                     if (showPrice) const Spacer(),
                     Expanded(

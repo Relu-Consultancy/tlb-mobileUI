@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-26 (Session 42)
+**Last Updated:** 2026-05-26 (Session 43)
 
 ---
 
@@ -255,6 +255,7 @@ HomeScreen (sidebar/action flows)
 **`ApiVenueAvailability`** — `id, date ("2026-06-14"), startTime ("10:00:00"), endTime ("13:00:00"), note`  
 **`ApiVenueOccasion`** — `id, name, slug` — API-fetched occasions for venue booking (e.g. Birthday Party, Weekend Fun, Community Event); added to `ApiVenueDetail.occasions`  
 **`ApiProgramDetail`** (extends ApiProgram) — adds `description, area, address, maxCapacity, totalHours, moduleCount, bookingType (String — "enquiry" | "direct_booking"), subcategory, tags, batches, faqs, cancellationPolicy, refundPolicy, media, organizer`  
+**`ApiClassDetail`** (extends ApiClass) — adds `description, organizer, subcategory, format, mode, ageGroup, tags, city, area, address, meetingLink, teaserVideoUrl, cancellationPolicy, refundPolicy, faqs, bookingType (String — "enquiry" | "direct_booking"), price (double? — parsed from service.price), batches, media`  
 **`ApiProgramBatch`** — `id, name, startDate?, endDate?, startTime?, endTime?, fee?, totalSeats?, isActive, daysOfWeek: List<String>`
 
 ### API ↔ UI Gating Pattern
@@ -788,6 +789,7 @@ Reacts to profile edits without requiring screen re-navigation.
 | ~~T&C real API data on all 4 detail screens~~ | all 4 detail screens + 3 models | ✅ Done (Session 39) — `cancellationPolicy`, `refundPolicy`, `faqs` fetched from API; hardcoded fallback sections removed; T&C row hidden when no data |
 | ~~Category classes filter label mismatch~~ | `category_classes_screen.dart`, `dummy_data.dart` | ✅ Done (Session 39) — `apiName` mapping added to all 11 `classesCategories`; `_apiCategoryName` getter resolves correct backend string |
 | Profile screen reactive to name/avatar changes | `profile_screen.dart` | ❌ Pending — reads `AuthState.userName.value` but no `ValueListenableBuilder`; won't update on profile edit without navigate-back rebuild |
+| Programs price flow (parallel of Session 43 class fix) | `lib/models/api_program_model.dart`, `lib/screens/program_detail_screen.dart` | ❌ Pending — `ApiProgramDetail` has no `price` field; `program_detail_screen.dart` reads only `widget.event.price`; same Review & Pay ₹0 bug likely present when arriving from list pages |
 | Profile avatar upload | `edit_profile_screen.dart` | ❌ Pending — removed from profile form (new API has no avatar field); needs separate endpoint when available |
 | Startup profile completion check | `main.dart` | ❌ Pending — `tryRestoreSession()` restores session but does NOT redirect incomplete profiles |
 | Venue metadata categories endpoint | backend | ❌ Pending — `GET /api/v1/listings/venues/metadata/categories/` not yet live; `fetchVenueCategories()` catch is silent so category filter falls back to fetching all venues |
@@ -1415,6 +1417,15 @@ NOTE: backend currently returns PAYMENT_GATEWAY_NOT_CONFIGURED for venue booking
 |--------|-------|
 | **`_buildPlaceholder` context param added** — `_BookingCard._buildPlaceholder(String type)` → `_buildPlaceholder(BuildContext context, String type)`; both call sites updated (image `errorBuilder` and fallback branch); fixes missing `context` needed for `Responsive.sp()` calls inside the method | `lib/screens/bookings_screen.dart` |
 | **`_Avatar._initial` context param added** — `_Avatar._initial(String name)` → `_initial(BuildContext context, String name)`; both call sites updated (`errorBuilder` and fallback branch); same pattern as above | `lib/screens/followed_partners_screen.dart` |
+
+### Session 43
+| Change | Files |
+|--------|-------|
+| **`ApiClassDetail.price` field added** — root cause of "Review & Pay" showing ₹0 for class bookings: `service.price` was never parsed off the API response; added `final double? price` to `ApiClassDetail`, populated via `(service['price'] as num?)?.toDouble()` in `fromJson` | `lib/models/api_class_model.dart` |
+| **ClassDetailScreen price wired to API** — `_eventForSheets.price` and the sticky bottom bar's price both changed from `widget.event.price` (which is null when arriving from a list page that carries no price) to `_detail?.price ?? widget.event.price`; this propagates the real price through the entire booking chain (`SelectBatchScreen → AttendeeDetailsScreen → ReviewPayScreen`) so subtotal/total compute correctly | `lib/screens/class_detail_screen.dart` |
+| **`/mo` suffix dropped from class price** — bottom bar previously showed `₹X/mo` but the API has no period field, just a flat `price` value; replaced the two-`TextSpan` `RichText` with a plain `Text('₹X')` to avoid misleading users | `lib/screens/class_detail_screen.dart` |
+| **`AttendeeDetailsScreen._fee` fallback added** — was `double.tryParse(widget.batch.fee ?? '0') ?? 0.0`, but the classes API response has no `fee` field on batches (only `service.price` at the listing level); now: returns `batch.fee` when present + positive, else falls back to `widget.event.price ?? 0.0`; this is the actual screen that feeds `subtotal` to `ReviewPayScreen` for class bookings | `lib/screens/attendee_details_screen.dart` |
+| **Pricing/CTA gate confirmed correct** — `booking_type == 'direct_booking'` → show price + "Check Availability" button → `SelectBatchScreen`; `booking_type == 'enquiry'` → hide price + "Enquire Now" button → `showInquireNow()`; gating logic was already right, only the price data flow was broken | `lib/screens/class_detail_screen.dart` |
 
 ### Session 42
 | Change | Files |

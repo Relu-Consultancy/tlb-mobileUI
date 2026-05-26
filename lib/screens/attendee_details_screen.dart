@@ -37,7 +37,11 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
       _selectedAge != null &&
       _phoneController.text.trim().isNotEmpty;
 
-  double get _fee => double.tryParse(widget.batch.fee ?? '0') ?? 0.0;
+  double get _fee {
+    final batchFee = double.tryParse(widget.batch.fee ?? '');
+    if (batchFee != null && batchFee > 0) return batchFee;
+    return widget.event.price ?? 0.0;
+  }
 
   String get _feeDisplay {
     if (_fee <= 0) return 'Free';
