@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-25 (Session 41)
+**Last Updated:** 2026-05-26 (Session 42)
 
 ---
 
@@ -17,6 +17,7 @@ lib/
 │   ├── app_theme.dart             MaterialApp ThemeData
 │   ├── app_snackbar.dart          AppSnackBar.show/error/success helpers
 │   ├── app_spacing.dart           AppSpacing semantic spacing constants
+│   ├── preview_mode.dart          PreviewMode.enabled ValueNotifier + SharedPreferences persistence (device_preview toggle)
 │   └── responsive.dart            Responsive.w / Responsive.h / Responsive.sp helpers
 ├── services/                      API + secure storage
 │   ├── auth_service.dart          HTTP wrappers — login/signup/logout/Google/OTP/refresh/updateProfile
@@ -209,6 +210,7 @@ HomeScreen (sidebar/action flows)
 | `walkthrough_intro_overlay.dart` | Full-screen animated welcome card — fade+scale entrance (380ms), repeating icon pulse glow, "Let's Go" dismiss triggers showcase start |
 | `category_event_card.dart` | Flat grid card for category screens (no container/shadow) — 12px rounded image, subcategory badge, title, 📍 venue, ⭐ reviewCount row, `Description –` body up to 3 lines (no price); accepts `onTap` callback override; used by CategoryEvents/Classes/Programs/VenuesScreen |
 | `app_loader.dart` | Premium branded loading animation (bouncing dots). Uses `AppLoader.useCustomLoader` static flag for fallback to default `CircularProgressIndicator`. Contains `AppLoader()` (fullscreen) and `AppLoaderInline()` (buttons/spinners). |
+| `preview_toggle_button.dart` | Draggable 44×44 floating button overlaying every screen. Tap toggles `PreviewMode.enabled`; dark icon (off) ↔ yellow icon (on). Position stored in widget state, clamped to screen bounds. |
 
 ---
 
@@ -694,6 +696,46 @@ Pattern: 'Hi ${AuthState.firstName},'
 AuthState.firstName = userName.value.trim().split(' ').first, fallback "User"
 ```
 
+### Device Preview Toggle (Dev Tool)
+```
+Always-mounted DevicePreview wrapper at app root + draggable floating toggle button:
+
+main.dart structure:
+  runApp(TLBRoot)
+    └── TLBRoot
+          Directionality(ltr) → Stack(fit: expand)
+            ├── ValueListenableBuilder<bool>(PreviewMode.enabled)
+            │     DevicePreview(enabled: isEnabled, builder: (_) => TLBApp())
+            │       ← stays mounted; toggling `enabled` flips frame on/off
+            │         without unmounting MaterialApp (navigation state preserved)
+            └── PreviewToggleButton()  ← floats above device frame + chrome
+
+TLBApp MaterialApp config:
+  locale: DevicePreview.locale(context)
+  builder: (ctx, child) {
+    final clamped = MediaQuery(textScaler: 1.0, child: child!);
+    return DevicePreview.appBuilder(ctx, clamped);   ← order matters: clamp first, frame second
+  }
+
+PreviewToggleButton:
+  44×44 Material circle, Positioned in root Stack
+  Default position: top-right (screen.width - 56, safeTop + 12)
+  Drag via GestureDetector.onPanUpdate; Offset clamped to screen bounds
+  Tap → PreviewMode.toggle()
+  Visual: Icons.devices on dark-translucent (off) / Icons.phone_iphone on #FFCC00 (on)
+
+PreviewMode:
+  static ValueNotifier<bool> enabled
+  SharedPreferences key: 'tlb_device_preview_enabled' (persists across restarts)
+  load() called from main() after Firebase init
+
+Integration with existing Responsive helper:
+  Responsive.w/h/sp all read MediaQuery.of(context).size
+  device_preview overrides MediaQuery per simulated device
+  → switching device in preview shell re-flows all screens automatically
+  → no per-screen changes required
+```
+
 ### Account Settings — Live User Data
 ```
 account_settings_screen.dart Personal Info row uses ValueListenableBuilder<String?> on AuthState.avatarUrl:
@@ -774,6 +816,7 @@ geocoding: ^3.0.0              # placemarkFromCoordinates() — lat/lng → city
 url_launcher: ^6.3.2           # External URL / deep-link launching
 image_picker: ^1.2.2         # Review media upload (re-added in Session 24)
 razorpay_flutter: ^1.4.5     # Razorpay payment gateway SDK (added Session 34)
+device_preview: ^1.2.0       # Device-frame preview shell — resolved to 1.3.1 (added Session 42)
 ```
 
 ---
@@ -1372,4 +1415,14 @@ NOTE: backend currently returns PAYMENT_GATEWAY_NOT_CONFIGURED for venue booking
 |--------|-------|
 | **`_buildPlaceholder` context param added** — `_BookingCard._buildPlaceholder(String type)` → `_buildPlaceholder(BuildContext context, String type)`; both call sites updated (image `errorBuilder` and fallback branch); fixes missing `context` needed for `Responsive.sp()` calls inside the method | `lib/screens/bookings_screen.dart` |
 | **`_Avatar._initial` context param added** — `_Avatar._initial(String name)` → `_initial(BuildContext context, String name)`; both call sites updated (`errorBuilder` and fallback branch); same pattern as above | `lib/screens/followed_partners_screen.dart` |
+
+### Session 42
+| Change | Files |
+|--------|-------|
+| **`device_preview: ^1.2.0` added** — resolves to 1.3.1; pulls transitive `device_frame`, `provider`, `flutter_localizations`, `intl` | `pubspec.yaml` |
+| **`PreviewMode` created** — singleton-style helper class; `static ValueNotifier<bool> enabled` (default false); `load()` reads `tlb_device_preview_enabled` from SharedPreferences on app start; `toggle()` flips notifier + persists; both methods swallow exceptions silently | `lib/core/preview_mode.dart` (NEW) |
+| **`PreviewToggleButton` widget created** — 44×44 draggable floating button; default position top-right (`screen.width - 56`, `safeTop + 12`); `GestureDetector.onPanUpdate` updates `Offset` state, clamped to screen bounds via `screen.width/height - _size`; `ValueListenableBuilder<bool>` swaps icon (`Icons.devices` white-on-dark when off, `Icons.phone_iphone` black-on-yellow #FFCC00 when on) and tap calls `PreviewMode.toggle()` | `lib/widgets/preview_toggle_button.dart` (NEW) |
+| **`main.dart` restructured** — new top-level `TLBRoot` widget wraps the app in `Directionality(textDirection: ltr)` + root `Stack`; child 1 = `ValueListenableBuilder` on `PreviewMode.enabled` returning a permanently-mounted `DevicePreview(enabled: isEnabled, builder: …)` (toggling `enabled` keeps the MaterialApp element tree alive, preserving navigation state across previews); child 2 = the floating `PreviewToggleButton` sibling so it floats above both the device frame and the surrounding chrome; `main()` calls `await PreviewMode.load()` after Firebase init | `lib/main.dart` |
+| **`TLBApp` updated** — added `locale: DevicePreview.locale(context)` and wrapped existing `MediaQuery(textScaler: 1.0)` builder output with `DevicePreview.appBuilder(context, …)` so device-preview MediaQuery overrides flow into the existing text-scaling clamp | `lib/main.dart` |
+| **Why this works with `Responsive` helper** — `Responsive.w/h/sp` all read `MediaQuery.of(context).size`, which device_preview overrides per simulated device; switching device in the preview shell automatically re-flows every screen through existing `Responsive` calls — no per-screen changes needed | (architecture note) |
 
