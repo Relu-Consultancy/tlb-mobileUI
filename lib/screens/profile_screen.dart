@@ -15,7 +15,7 @@ import 'payment_settings_screen.dart';
 import 'your_reviews_screen.dart';
 import 'followed_partners_screen.dart';
 import 'notification_screen.dart';
-import 'reminders_screen.dart';
+// import 'reminders_screen.dart'; // Reminders entry temporarily hidden — restore when the feature is ready.
 import 'home_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -286,14 +286,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   MaterialPageRoute(
                       builder: (_) => const NotificationScreen())),
             ),
-            _item(
-              icon: Icons.alarm_outlined,
-              label: 'Reminders',
-              onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const RemindersScreen())),
-            ),
+            // Reminders entry temporarily hidden — restore when the feature is ready.
+            // _item(
+            //   icon: Icons.alarm_outlined,
+            //   label: 'Reminders',
+            //   onTap: () => Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //           builder: (_) => const RemindersScreen())),
+            // ),
 
             const SizedBox(height: 4),
             const Divider(height: 1, color: Color(0xFFF0F0F0), indent: 20, endIndent: 20),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
+import '../services/ticket_pdf_service.dart';
 import 'home_screen.dart';
 import 'bookings_screen.dart';
 
@@ -11,6 +12,7 @@ class ProgramBookingConfirmedScreen extends StatefulWidget {
   final String selectedTime;
   final String bookingReference;
   final String bookingType; // 'program' or 'class'
+  final String? bookingId;
 
   const ProgramBookingConfirmedScreen({
     super.key,
@@ -19,6 +21,7 @@ class ProgramBookingConfirmedScreen extends StatefulWidget {
     required this.selectedTime,
     required this.bookingReference,
     this.bookingType = 'program',
+    this.bookingId,
   });
 
   @override
@@ -307,6 +310,11 @@ class _ProgramBookingConfirmedScreenState
                 ),
                 child: Column(
                   children: [
+                    if (widget.bookingId != null &&
+                        widget.bookingId!.isNotEmpty) ...[
+                      _DownloadTicketButton(bookingId: widget.bookingId!),
+                      const SizedBox(height: 12),
+                    ],
                     SizedBox(
                       width: double.infinity,
                       height: 52,
@@ -423,6 +431,41 @@ class _ProgramBookingConfirmedScreenState
           ),
         ),
       ],
+    );
+  }
+}
+
+class _DownloadTicketButton extends StatelessWidget {
+  final String bookingId;
+  const _DownloadTicketButton({required this.bookingId});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: OutlinedButton.icon(
+        onPressed: () => TicketPdfService.downloadAndShare(
+          context,
+          bookingId: bookingId,
+        ),
+        icon: const Icon(Icons.download_outlined,
+            size: 18, color: Color(0xFF1A1A2E)),
+        label: Text(
+          'Download Ticket',
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 15),
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF1A1A2E),
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: Color(0xFF1A1A2E), width: 1.2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
+        ),
+      ),
     );
   }
 }

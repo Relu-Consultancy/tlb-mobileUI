@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
+import '../services/ticket_pdf_service.dart';
 import 'home_screen.dart';
 import 'bookings_screen.dart';
 
@@ -10,6 +11,7 @@ class VenueBookingConfirmedScreen extends StatefulWidget {
   final String selectedDate;
   final String selectedTime;
   final String bookingReference;
+  final String? bookingId;
 
   const VenueBookingConfirmedScreen({
     super.key,
@@ -17,6 +19,7 @@ class VenueBookingConfirmedScreen extends StatefulWidget {
     required this.selectedDate,
     required this.selectedTime,
     required this.bookingReference,
+    this.bookingId,
   });
 
   @override
@@ -302,6 +305,37 @@ class _VenueBookingConfirmedScreenState
                 ),
                 child: Column(
                   children: [
+                    if (widget.bookingId != null &&
+                        widget.bookingId!.isNotEmpty) ...[
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: OutlinedButton.icon(
+                          onPressed: () => TicketPdfService.downloadAndShare(
+                            context,
+                            bookingId: widget.bookingId!,
+                          ),
+                          icon: const Icon(Icons.download_outlined,
+                              size: 18, color: Color(0xFF1A1A2E)),
+                          label: Text(
+                            'Download Ticket',
+                            style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, 15),
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF1A1A2E),
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(
+                                color: Color(0xFF1A1A2E), width: 1.2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     SizedBox(
                       width: double.infinity,
                       height: 52,

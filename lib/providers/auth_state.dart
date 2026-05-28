@@ -24,18 +24,21 @@ class AuthState {
     Map<String, dynamic>? user,
   }) {
     final profile = user?['profile'] as Map<String, dynamic>?;
-    userName.value = name ??
-        (profile != null
-            ? '${profile['first_name'] ?? ''} ${profile['last_name'] ?? ''}'.trim()
-            : null) ??
-        user?['email'] ??
-        'User';
+    final profileName = profile != null
+        ? '${profile['first_name'] ?? ''} ${profile['last_name'] ?? ''}'.trim()
+        : '';
+    final resolvedName = (name != null && name.trim().isNotEmpty)
+        ? name.trim()
+        : (profileName.isNotEmpty ? profileName : null);
+    // Never fall back to email here — the home greeting reads this value
+    // and showing "Hello user@example.com" is worse than "Hello There".
+    userName.value = resolvedName;
     userEmail = email ?? user?['email'] as String?;
     userPhone = phone ?? user?['phone'] as String?;
     accessToken = access;
     refreshToken = refresh;
     userData = user;
-    avatarUrl.value = (user?['profile'] as Map<String, dynamic>?)?['avatar_url'] as String?;
+    avatarUrl.value = profile?['avatar_url'] as String?;
     isLoggedIn.value = true;
     final uid = user?['id'] as String?;
     if (uid != null) FollowState.loadForUser(uid).catchError((_) {});
@@ -43,7 +46,26 @@ class AuthState {
       TokenStorage.saveTokens(
               access, refresh, user != null ? jsonEncode(user) : '{}')
           .catchError((_) {});
+      // OTP/Google sign-in responses often omit `profile`, leaving the
+      // greeting blank. Pull the canonical profile from the API so the
+      // home header shows the real first name without waiting for the
+      // user to open Edit Profile.
+      if (resolvedName == null) {
+        _refreshProfileFromApi(access);
+      }
     }
+  }
+
+  /// Fire-and-forget profile fetch — called from [login] when the verify-OTP
+  /// payload didn't carry a `profile` block. Updates [userName] and persists
+  /// the fresh user data via [updateProfileData].
+  static Future<void> _refreshProfileFromApi(String token) async {
+    try {
+      final result = await AuthService.getProfile(accessToken: token);
+      if (result['success'] == true && result['profile'] is Map) {
+        updateProfileData(Map<String, dynamic>.from(result['profile'] as Map));
+      }
+    } catch (_) {}
   }
 
   /// UUID of the authenticated customer — used to detect review ownership.

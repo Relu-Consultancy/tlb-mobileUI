@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-05-26 (Session 43)
+**Last Updated:** 2026-05-26 (Session 45)
 
 ---
 
@@ -37,7 +37,8 @@ lib/
 ├── services/
 │   ├── wishlist_service.dart      fetchWishlist / add / remove — REST calls to /api/v1/wishlist/
 │   ├── review_service.dart        fetchReviews / createReview / updateReview / deleteReview — /api/v1/listings/{id}/reviews/ + /api/v1/reviews/{id}/
-│   └── partner_service.dart       follow(token, partnerId) → POST /api/v1/partner/{id}/follow/; unfollow → DELETE /api/v1/partner/{id}/unfollow/
+│   ├── partner_service.dart       follow(token, partnerId) → POST /api/v1/partner/{id}/follow/; unfollow → DELETE /api/v1/partner/{id}/unfollow/
+│   └── ticket_pdf_service.dart    downloadAndShare(ctx, bookingId) — fetches /ticket/data/, builds PDF natively, opens OS share sheet via printing.Printing.sharePdf
 ├── models/
 │   ├── event_model.dart           Core data model — title, venue, price, rating, date, image, etc.
 │   ├── category_model.dart        Category model with label, image, color
@@ -234,6 +235,14 @@ HomeScreen (sidebar/action flows)
 
 ## 6. Core Services & State
 
+### BookingService — ticket data (`lib/services/booking_service.dart`)
+- **`fetchTicketData({token, bookingId})`** — GET `/api/v1/bookings/{id}/ticket/data/` → `Map<String, dynamic>` raw JSON (booking_reference, listing details, customer, line_items, date/time, `qr_code` as base64 PNG); only returns for `status=CONFIRMED`; 30s timeout, typed Socket/Timeout errors; unwraps `data` envelope
+
+### TicketPdfService (`lib/services/ticket_pdf_service.dart`)
+- **`downloadAndShare(context, bookingId)`** — one-shot helper: shows a blocking spinner, calls `BookingService.fetchTicketData`, builds an A4 PDF natively via the `pdf` package (yellow header band, cover image fetched separately, title, booking ref + date/time/venue rows, line-item table, total, decoded QR), then triggers OS share sheet via `Printing.sharePdf(filename: tlb_ticket_<ref>.pdf)`.
+- Graceful degradation: QR decode failure / cover-image fetch failure don't abort — PDF renders without them. `context.mounted` checked before every navigation pop.
+- `Navigator.of(context, rootNavigator: true).pop()` used for the spinner dismiss so it works regardless of nested route depth.
+
 ### EventsListingService (`lib/services/events_listing_service.dart`)
 - Base URL: `https://tlb-api.reluconsultancy.in` · 30-second timeout · no auth token required
 - All methods throw typed `Exception` messages for `SocketException` and `TimeoutException`
@@ -299,6 +308,7 @@ CTA gating: `ClassDetailScreen` and `ProgramDetailScreen` check `_detail?.bookin
 - `isProfileComplete` — getter; true if `profile.first_name` is non-empty
 - `updateUserProfile(updatedUser)` — syncs API response into state, fires `userName` + `avatarUrl` notifiers, re-saves tokens
 - `firstName` — static getter; first word of `userName.value`, fallback `"User"`. Use for `"Hi $firstName,"` greetings everywhere.
+- `_refreshProfileFromApi(token)` — private fire-and-forget; called from `login()` when the auth response carries no `profile` block (the verify-OTP and Google sign-in payloads typically don't); GETs `/api/v1/customer/profile/` and feeds the result into `updateProfileData()` so the home greeting catches up to the real name without the user opening Edit Profile.
 
 ### WalkthroughService (`lib/services/walkthrough_service.dart`)
 - Key: `tlb_is_new_user` (SharedPreferences)
@@ -790,6 +800,10 @@ Reacts to profile edits without requiring screen re-navigation.
 | ~~Category classes filter label mismatch~~ | `category_classes_screen.dart`, `dummy_data.dart` | ✅ Done (Session 39) — `apiName` mapping added to all 11 `classesCategories`; `_apiCategoryName` getter resolves correct backend string |
 | Profile screen reactive to name/avatar changes | `profile_screen.dart` | ❌ Pending — reads `AuthState.userName.value` but no `ValueListenableBuilder`; won't update on profile edit without navigate-back rebuild |
 | Programs price flow (parallel of Session 43 class fix) | `lib/models/api_program_model.dart`, `lib/screens/program_detail_screen.dart` | ❌ Pending — `ApiProgramDetail` has no `price` field; `program_detail_screen.dart` reads only `widget.event.price`; same Review & Pay ₹0 bug likely present when arriving from list pages |
+| Invoice download (parallel of Session 45 ticket download) | `lib/services/booking_service.dart`, `lib/services/ticket_pdf_service.dart`, confirmation/detail screens | ❌ Pending — `GET /bookings/{id}/invoice/data/` not wired; users can download tickets but not separate invoices. Same shape as ticket flow; could be a second bottom-sheet option behind the Download button |
+| Reminders feature restore | `lib/screens/profile_screen.dart`, `lib/screens/reminders_screen.dart` | ⏸️ On hold — profile entry + import commented out in Session 45 with "restore when ready" note; screen file untouched and ready to re-enable |
+| Analyzer `info`-level cleanup | `lib/services/{events,classes,programs}_listing_service.dart`, `lib/screens/booking_detail_screen.dart` | ❌ Pending — 27 `use_null_aware_elements` hints (Dart 3 syntax `[?x]` over `if (x != null) x` in collection literals) + 1 `curly_braces_in_flow_control_structures`; non-blocking modernization, no warnings or errors |
+| Test file unused imports | `test/helpers/test_setup.dart`, `test/screens/{category_venues,change_password,event_detail}_screen_test.dart` | ❌ Pending — 5 unused-import warnings in test files; doesn't affect runtime |
 | Profile avatar upload | `edit_profile_screen.dart` | ❌ Pending — removed from profile form (new API has no avatar field); needs separate endpoint when available |
 | Startup profile completion check | `main.dart` | ❌ Pending — `tryRestoreSession()` restores session but does NOT redirect incomplete profiles |
 | Venue metadata categories endpoint | backend | ❌ Pending — `GET /api/v1/listings/venues/metadata/categories/` not yet live; `fetchVenueCategories()` catch is silent so category filter falls back to fetching all venues |
@@ -819,6 +833,8 @@ url_launcher: ^6.3.2           # External URL / deep-link launching
 image_picker: ^1.2.2         # Review media upload (re-added in Session 24)
 razorpay_flutter: ^1.4.5     # Razorpay payment gateway SDK (added Session 34)
 device_preview: ^1.2.0       # Device-frame preview shell — resolved to 1.3.1 (added Session 42)
+printing: ^5.13.0            # Native PDF generation + system share sheet (added Session 45)
+pdf: ^3.11.0                 # PDF document model used by printing (added Session 45)
 ```
 
 ---
@@ -1417,6 +1433,53 @@ NOTE: backend currently returns PAYMENT_GATEWAY_NOT_CONFIGURED for venue booking
 |--------|-------|
 | **`_buildPlaceholder` context param added** — `_BookingCard._buildPlaceholder(String type)` → `_buildPlaceholder(BuildContext context, String type)`; both call sites updated (image `errorBuilder` and fallback branch); fixes missing `context` needed for `Responsive.sp()` calls inside the method | `lib/screens/bookings_screen.dart` |
 | **`_Avatar._initial` context param added** — `_Avatar._initial(String name)` → `_initial(BuildContext context, String name)`; both call sites updated (`errorBuilder` and fallback branch); same pattern as above | `lib/screens/followed_partners_screen.dart` |
+
+### Session 45
+| Change | Files |
+|--------|-------|
+| **`printing: ^5.13.0` + `pdf: ^3.11.0` added** — native PDF generation + OS share sheet via `Printing.sharePdf`; 9 transitive deps; no Android manifest or iOS Info.plist changes required | `pubspec.yaml` |
+| **`BookingService.fetchTicketData()` added** — GET `/api/v1/bookings/{id}/ticket/data/` with Bearer auth; returns raw JSON for native rendering; 30s timeout + typed Socket/Timeout errors; unwraps `data` envelope; only succeeds for `status=CONFIRMED` per API spec | `lib/services/booking_service.dart` |
+| **`TicketPdfService` created** — `downloadAndShare(ctx, bookingId)` one-shot helper: blocking spinner → `fetchTicketData` → builds A4 PDF (yellow header band, cover image fetched separately, title, booking ref + date/time/venue rows, line-item table, total, decoded base64 QR) → `Printing.sharePdf(filename: tlb_ticket_<ref>.pdf)`; graceful degradation on QR/cover-image failures; uses `rootNavigator: true` for spinner pop | `lib/services/ticket_pdf_service.dart` (NEW) |
+| **`BookingConfirmedScreen` (events ticket) Download wired** — added `bookingId: String?` constructor param (threads API UUID separately from the existing `bookingReference` text); `_TicketScreen` gains `apiBookingId` field that flows into `_ActionButtons.bookingId`; both Share and Download buttons call `TicketPdfService.downloadAndShare`; `_ActionBtn.onTap` made nullable so buttons grey out when `bookingId` is null | `lib/screens/booking_confirmed_screen.dart` |
+| **`ProgramBookingConfirmedScreen` Download button added** — new `bookingId: String?` constructor param; inserted a `_DownloadTicketButton` outlined button above the existing "View My Bookings" / "Explore More" CTAs when `bookingId` is non-null; tap calls `TicketPdfService.downloadAndShare` | `lib/screens/program_booking_confirmed_screen.dart` |
+| **`VenueBookingConfirmedScreen` Download button added** — same pattern as Programs screen; new `bookingId: String?` constructor param; inline outlined "Download Ticket" button injected above existing CTAs when `bookingId` is non-null | `lib/screens/venue_booking_confirmed_screen.dart` |
+| **`BookingDetailScreen` Download/Share wired** — existing no-op `onTap: () {}` replaced with `TicketPdfService.downloadAndShare(ctx, booking.id)`; gated on `booking.status` being `confirmed` or `attended` (matches API contract — ticket data is only available for those statuses); buttons grey out for `cancelled`/`hold`/`awaiting_payment`/`payment_failed`/`refunded`; `_ActionBtn.onTap` made nullable with grey-disabled styling | `lib/screens/booking_detail_screen.dart` |
+| **`ReviewPayScreen` threads `confirmed.id` through** — after `verifyPayment` returns `BookingConfirmResponse(id, bookingReference, ...)`, the `id` (UUID) is now passed as `bookingId:` to all three confirmation screens; without this the new download buttons would never have anything to download against | `lib/screens/review_pay_screen.dart` |
+| **Reminders profile entry hidden** — `_item(...)` for Reminders in `profile_screen.dart` commented out (not removed) with a "restore when the feature is ready" note; import of `reminders_screen.dart` also commented out; the screen file itself is untouched and remains in the codebase | `lib/screens/profile_screen.dart` |
+
+#### Test coverage added (Sessions 42–45 backfill)
+| Tests added | Coverage |
+|-------------|----------|
+| `test/core/preview_mode_test.dart` (NEW, 7 tests) | `PreviewMode.load()` default + stored true/false from SharedPreferences; `toggle()` flips value, persists to prefs, notifies listeners (Session 42) |
+| `test/providers/auth_state_test.dart` (5 appended) | `login()` resolves `userName` to `first_name + last_name` when profile present; falls back to **null** (not email) when profile absent or has empty fields; explicit `name` param wins over profile; `userEmail` still populated independently (Session 44 regression) |
+| `test/models/api_class_model_test.dart` (NEW, 6 tests) | `ApiClassDetail.price` parses `int` → double, parses `double`, returns null when `service.price` absent or explicitly null; `bookingType` defaults to `'enquiry'` when missing (Session 43) |
+| `test/screens/attendee_details_screen_test.dart` (NEW, 4 tests) | Widget test — fee display shows `batch.fee` when present, falls back to `event.price` when `batch.fee` is null/`'0'`, shows `'Free'` only when both are missing (Session 43 regression) |
+| **All 22 new tests pass; no existing tests broken** | |
+
+#### Booking Flow (Post-Session 45)
+```
+[Events]   BookingConfirmedScreen          ← bookingId now threaded from confirmed.id
+[Classes]  ProgramBookingConfirmedScreen   ← bookingId now threaded
+[Programs] ProgramBookingConfirmedScreen   ← bookingId now threaded
+[Venues]   VenueBookingConfirmedScreen     ← bookingId now threaded
+
+Download tap on any of the above → TicketPdfService.downloadAndShare(ctx, bookingId)
+  → GET /api/v1/bookings/{id}/ticket/data/  (with Bearer auth)
+  → Build A4 PDF natively (pdf package)
+  → Printing.sharePdf(filename: tlb_ticket_<ref>.pdf)
+  → System share sheet: Save to Files / WhatsApp / Email / Print / etc.
+
+BookingDetailScreen Share & Download buttons follow the same flow,
+gated on booking.status ∈ {confirmed, attended}.
+```
+
+### Session 44
+| Change | Files |
+|--------|-------|
+| **`AuthState.login()` no longer falls back to email for `userName`** — root cause of "Hello user@example.com" appearing in the home header after login: when the verify-OTP / Google sign-in response had no `profile` block (the API's actual default), the chained `??` cascade landed on `user?['email']`; replaced with `userName.value = resolvedName` (the trimmed `first_name last_name` if present, else `null`); the home header's existing `name != null` branch then shows `"Hello There"` instead of an email until the real name loads | `lib/providers/auth_state.dart` |
+| **`AuthState._refreshProfileFromApi()` added** — fire-and-forget; called at the end of `login()` whenever `resolvedName` is null and an access token exists; GETs `/api/v1/customer/profile/`, then calls `updateProfileData()` (same code path that fixes the header after the user opens Edit Profile manually); greeting now self-heals within one network round-trip instead of requiring a profile-screen visit | `lib/providers/auth_state.dart` |
+| **`avatarUrl` lookup simplified** — was reading `user?['profile']` again as a separate cast; now reuses the `profile` local already extracted at the top of `login()` | `lib/providers/auth_state.dart` |
+| **`showWelcomeBackDialog` grey-flash fix** — root cause of the post-login grey screen: `Navigator.of(context).pushAndRemoveUntil(HomeScreen, (r) => false)` was being called from inside the dialog's `onPressed` while the dialog route was still on top; the predicate tore down the dialog + OTP + LoginScreen mid-transition, leaving a one-frame window with no painted route. Fix: capture `navigator = Navigator.of(context)` BEFORE `showDialog`; in `onDone`, `Navigator.of(dialogContext).pop()` first (dismisses dialog cleanly), then `navigator.pushAndRemoveUntil(...)` using the captured navigator — eliminates the gap | `lib/widgets/login_sheet.dart` |
 
 ### Session 43
 | Change | Files |

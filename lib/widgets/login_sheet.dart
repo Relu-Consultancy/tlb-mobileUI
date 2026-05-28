@@ -562,12 +562,19 @@ class _OrDivider extends StatelessWidget {
 // ─────────────────────────────────────────────
 
 void showWelcomeBackDialog(BuildContext context) {
+  // Capture the navigator BEFORE the dialog is pushed so we can still drive
+  // it after the dialog (and underlying OTP screen) have been torn down.
+  final navigator = Navigator.of(context);
   showDialog(
     context: context,
     barrierDismissible: false,
-    builder: (_) => _WelcomeBackDialog(
+    builder: (dialogContext) => _WelcomeBackDialog(
       onDone: () {
-        Navigator.of(context).pushAndRemoveUntil(
+        // Dismiss the dialog first — pushing HomeScreen with predicate=false
+        // while a dialog is still on top leaves a one-frame gap where neither
+        // is painted, which manifests as a grey flash.
+        Navigator.of(dialogContext).pop();
+        navigator.pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const HomeScreen()),
           (route) => false,
         );

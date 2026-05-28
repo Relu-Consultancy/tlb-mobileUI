@@ -6,6 +6,7 @@ import '../core/app_snackbar.dart';
 import '../models/api_booking_model.dart';
 import '../providers/auth_state.dart';
 import '../services/booking_service.dart';
+import '../services/ticket_pdf_service.dart';
 import '../services/events_listing_service.dart';
 import '../services/classes_listing_service.dart';
 import '../services/programs_listing_service.dart';
@@ -1441,26 +1442,41 @@ class _ActionBar extends StatelessWidget {
             const SizedBox(height: 10),
           ],
 
-          // Share / Download
-          Row(
-            children: [
-              Expanded(
-                child: _ActionBtn(
-                  icon: Icons.share_outlined,
-                  label: 'Share',
-                  onTap: () {},
+          // Share / Download — both call the same flow; system share sheet
+          // gives users save/print/forward options once the PDF is built.
+          Builder(builder: (ctx) {
+            final canDownload =
+                booking.status == 'confirmed' || booking.status == 'attended';
+            return Row(
+              children: [
+                Expanded(
+                  child: _ActionBtn(
+                    icon: Icons.share_outlined,
+                    label: 'Share',
+                    onTap: canDownload
+                        ? () => TicketPdfService.downloadAndShare(
+                              ctx,
+                              bookingId: booking.id,
+                            )
+                        : null,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: _ActionBtn(
-                  icon: Icons.download_outlined,
-                  label: 'Download',
-                  onTap: () {},
+                const SizedBox(width: 14),
+                Expanded(
+                  child: _ActionBtn(
+                    icon: Icons.download_outlined,
+                    label: 'Download',
+                    onTap: canDownload
+                        ? () => TicketPdfService.downloadAndShare(
+                              ctx,
+                              bookingId: booking.id,
+                            )
+                        : null,
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            );
+          }),
         ],
       ),
     );
@@ -1470,7 +1486,7 @@ class _ActionBar extends StatelessWidget {
 class _ActionBtn extends StatelessWidget {
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _ActionBtn({
     required this.icon,
@@ -1480,6 +1496,7 @@ class _ActionBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final disabled = onTap == null;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -1491,14 +1508,20 @@ class _ActionBtn extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 18, color: const Color(0xFF1A1A2E)),
+            Icon(icon,
+                size: 18,
+                color: disabled
+                    ? const Color(0xFF9CA3AF)
+                    : const Color(0xFF1A1A2E)),
             const SizedBox(width: 8),
             Text(
               label,
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 14),
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF1A1A2E),
+                color: disabled
+                    ? const Color(0xFF9CA3AF)
+                    : const Color(0xFF1A1A2E),
               ),
             ),
           ],

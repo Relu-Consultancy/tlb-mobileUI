@@ -175,6 +175,36 @@ class BookingService {
     }
   }
 
+  /// GET /api/v1/bookings/{bookingId}/ticket/data/
+  ///
+  /// Returns the raw JSON ticket payload (booking_reference, listing details,
+  /// customer info, line items, date/time, and `qr_code` as a base64 PNG).
+  /// Only succeeds for bookings with status=CONFIRMED.
+  static Future<Map<String, dynamic>> fetchTicketData({
+    required String token,
+    required String bookingId,
+  }) async {
+    try {
+      final resp = await http
+          .get(
+            Uri.parse('$_base/api/v1/bookings/$bookingId/ticket/data/'),
+            headers: {'Authorization': 'Bearer $token'},
+          )
+          .timeout(_timeout);
+
+      final json = jsonDecode(resp.body) as Map<String, dynamic>;
+
+      if (resp.statusCode == 200 && json['success'] == true) {
+        return _unwrap(json);
+      }
+      throw Exception(_extractError(json, resp.statusCode));
+    } on SocketException {
+      throw Exception('Cannot reach server. Check your connection.');
+    } on TimeoutException {
+      throw Exception('Request timed out. Please try again.');
+    }
+  }
+
   /// POST /api/v1/bookings/{bookingId}/cancel/
   static Future<ApiBookingItem> cancelBooking({
     required String token,

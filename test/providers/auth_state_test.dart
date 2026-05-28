@@ -82,4 +82,58 @@ void main() {
       expect(tokens['access'], isNull);
     });
   });
+
+  // ── Session 44 regression: email-in-greeting bug ─────────────────────────
+  group('AuthState.login userName resolution (Session 44)', () {
+    test('uses first + last name when profile is populated', () {
+      AuthState.login(
+        user: {
+          'email': 'visheshsrivastava@reluconsultancy.in',
+          'profile': {'first_name': 'Vishesh', 'last_name': 'Srivastava'},
+        },
+      );
+      expect(AuthState.userName.value, 'Vishesh Srivastava');
+      expect(AuthState.firstName, 'Vishesh');
+    });
+
+    test('falls back to null (not email) when profile is absent', () {
+      // The home header reads userName and shows "Hello There" when null.
+      // Before the fix, this returned the email and the header showed
+      // "Hello visheshsrivastava@reluconsultancy.in".
+      AuthState.login(
+        user: {'email': 'visheshsrivastava@reluconsultancy.in'},
+      );
+      expect(AuthState.userName.value, isNull);
+      expect(AuthState.firstName, 'User');
+    });
+
+    test('falls back to null when profile has empty first/last', () {
+      AuthState.login(
+        user: {
+          'email': 'visheshsrivastava@reluconsultancy.in',
+          'profile': {'first_name': '', 'last_name': ''},
+        },
+      );
+      expect(AuthState.userName.value, isNull);
+    });
+
+    test('explicit name parameter wins over profile', () {
+      AuthState.login(
+        name: 'Override Name',
+        user: {
+          'email': 'a@b.com',
+          'profile': {'first_name': 'Profile', 'last_name': 'Name'},
+        },
+      );
+      expect(AuthState.userName.value, 'Override Name');
+    });
+
+    test('userEmail is still populated from email field', () {
+      // The email itself is still stored — just not used as a greeting.
+      AuthState.login(
+        user: {'email': 'visheshsrivastava@reluconsultancy.in'},
+      );
+      expect(AuthState.userEmail, 'visheshsrivastava@reluconsultancy.in');
+    });
+  });
 }

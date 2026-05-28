@@ -232,6 +232,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
               selectedDate: widget.selectedDate,
               selectedTime: widget.selectedTime,
               bookingReference: confirmed.bookingReference,
+              bookingId: confirmed.id,
             ),
           ),
         );
@@ -246,6 +247,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
               selectedTime: widget.selectedTime,
               bookingReference: confirmed.bookingReference,
               bookingType: widget.bookingType,
+              bookingId: confirmed.id,
             ),
           ),
         );
@@ -258,6 +260,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
               selectedDate: widget.selectedDate,
               selectedTime: widget.selectedTime,
               bookingReference: confirmed.bookingReference,
+              bookingId: confirmed.id,
             ),
           ),
         );

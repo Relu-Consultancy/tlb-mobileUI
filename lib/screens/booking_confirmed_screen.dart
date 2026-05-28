@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../providers/booked_events_state.dart';
 import '../models/event_model.dart';
+import '../services/ticket_pdf_service.dart';
 import 'event_detail_screen.dart';
 
 class BookingConfirmedScreen extends StatefulWidget {
@@ -11,6 +12,7 @@ class BookingConfirmedScreen extends StatefulWidget {
   final String selectedDate;
   final String selectedTime;
   final String? bookingReference;
+  final String? bookingId;
 
   const BookingConfirmedScreen({
     super.key,
@@ -18,6 +20,7 @@ class BookingConfirmedScreen extends StatefulWidget {
     this.selectedDate = 'Saturday, March',
     this.selectedTime = '3:00 pm–6:00 pm',
     this.bookingReference,
+    this.bookingId,
   });
 
   @override
@@ -78,6 +81,7 @@ class _BookingConfirmedScreenState extends State<BookingConfirmedScreen>
       return _TicketScreen(
         event: widget.event,
         bookingId: _bookingId,
+        apiBookingId: widget.bookingId,
         selectedDate: widget.selectedDate,
         selectedTime: widget.selectedTime,
         showConfirmation: true,
@@ -99,6 +103,7 @@ class _BookingConfirmedScreenState extends State<BookingConfirmedScreen>
       child: _TicketScreen(
         event: widget.event,
         bookingId: _bookingId,
+        apiBookingId: widget.bookingId,
         selectedDate: widget.selectedDate,
         selectedTime: widget.selectedTime,
         showConfirmation: true,
@@ -181,6 +186,7 @@ class _ClickHereTeaser extends StatelessWidget {
 class _TicketScreen extends StatelessWidget {
   final EventModel event;
   final String bookingId;
+  final String? apiBookingId;
   final String selectedDate;
   final String selectedTime;
   final bool showConfirmation;
@@ -189,6 +195,7 @@ class _TicketScreen extends StatelessWidget {
   const _TicketScreen({
     required this.event,
     required this.bookingId,
+    this.apiBookingId,
     this.selectedDate = 'Saturday, March',
     this.selectedTime = '3:00 pm–6:00 pm',
     this.showConfirmation = false,
@@ -240,7 +247,10 @@ class _TicketScreen extends StatelessWidget {
               ),
 
               // ── Bottom action bar ──
-              _ActionButtons(safeBottom: safeBottom),
+              _ActionButtons(
+                safeBottom: safeBottom,
+                bookingId: apiBookingId,
+              ),
             ],
           ),
 
@@ -654,11 +664,13 @@ class _TicketContent extends StatelessWidget {
 
 class _ActionButtons extends StatelessWidget {
   final double safeBottom;
+  final String? bookingId;
 
-  const _ActionButtons({required this.safeBottom});
+  const _ActionButtons({required this.safeBottom, this.bookingId});
 
   @override
   Widget build(BuildContext context) {
+    final canDownload = bookingId != null && bookingId!.isNotEmpty;
     return Container(
       padding: EdgeInsets.fromLTRB(20, 12, 20, safeBottom > 0 ? safeBottom : 16),
       decoration: BoxDecoration(
@@ -677,7 +689,12 @@ class _ActionButtons extends StatelessWidget {
             child: _ActionBtn(
               icon: Icons.share_outlined,
               label: 'Share',
-              onTap: () {},
+              onTap: canDownload
+                  ? () => TicketPdfService.downloadAndShare(
+                        context,
+                        bookingId: bookingId!,
+                      )
+                  : null,
             ),
           ),
           const SizedBox(width: 14),
@@ -685,7 +702,12 @@ class _ActionButtons extends StatelessWidget {
             child: _ActionBtn(
               icon: Icons.download_outlined,
               label: 'Download',
-              onTap: () {},
+              onTap: canDownload
+                  ? () => TicketPdfService.downloadAndShare(
+                        context,
+                        bookingId: bookingId!,
+                      )
+                  : null,
             ),
           ),
         ],
@@ -697,7 +719,7 @@ class _ActionButtons extends StatelessWidget {
 class _ActionBtn extends StatelessWidget {
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _ActionBtn({
     required this.icon,
@@ -707,6 +729,7 @@ class _ActionBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final disabled = onTap == null;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -718,14 +741,20 @@ class _ActionBtn extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 18, color: const Color(0xFF1A1A2E)),
+            Icon(icon,
+                size: 18,
+                color: disabled
+                    ? const Color(0xFF9CA3AF)
+                    : const Color(0xFF1A1A2E)),
             const SizedBox(width: 8),
             Text(
               label,
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 14),
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF1A1A2E),
+                color: disabled
+                    ? const Color(0xFF9CA3AF)
+                    : const Color(0xFF1A1A2E),
               ),
             ),
           ],
