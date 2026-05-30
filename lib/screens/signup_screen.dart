@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import '../core/app_snackbar.dart';
+import '../core/google_auth_error.dart';
 import '../services/auth_service.dart';
 import '../services/walkthrough_service.dart';
 import '../providers/auth_state.dart';
@@ -134,13 +134,8 @@ class _SignupScreenState extends State<SignupScreen> {
     } catch (e, stack) {
       if (!mounted) return;
       setState(() => _loading = false);
-      debugPrint('[Google Signup] Exception: $e\n$stack');
-      final msg = e is SocketException
-          ? 'No internet connection. Please check and try again.'
-          : e is TimeoutException
-              ? 'Connection timed out. Please try again.'
-              : 'Google sign-up failed. Please try again.';
-      AppSnackBar.error(context, msg);
+      debugPrint('[Google Signup] Exception (${e.runtimeType}): $e\n$stack');
+      AppSnackBar.error(context, googleAuthErrorMessage(e));
     }
   }
 

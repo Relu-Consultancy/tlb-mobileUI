@@ -25,9 +25,12 @@ void main() {
         expect(find.text('Test Class'), findsOneWidget);
         expect(find.text('Test Venue').first, findsOneWidget);
         expect(find.text('Art'), findsOneWidget);
-        // Bottom bar: RichText '₹500' + '/mo' → collapsed '₹500/mo'
-        expect(find.text('₹500/mo', findRichText: true), findsOneWidget);
-        expect(find.text('Send Enquiry'), findsOneWidget);
+        // Sessions 43 + Session-32-era: with id='' (dummy mode) no API
+        // detail is fetched, so booking_type is unknown → screen falls
+        // through to the enquiry CTA and hides the price field.
+        expect(find.text('Enquire Now'), findsOneWidget);
+        expect(find.text('₹500'), findsNothing);
+        expect(find.text('₹500/mo', findRichText: true), findsNothing);
       });
     });
 

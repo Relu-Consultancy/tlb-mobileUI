@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import '../core/app_snackbar.dart';
+import '../core/google_auth_error.dart';
 import '../widgets/app_loader.dart';
 import '../services/auth_service.dart';
 import '../providers/auth_state.dart';
@@ -138,29 +138,9 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e, stack) {
       if (!mounted) return;
       setState(() => _loading = false);
-      debugPrint('[Google Login] Exception: $e\n$stack');
-      AppSnackBar.error(context, _googleErrorMessage(e));
+      debugPrint('[Google Login] Exception (${e.runtimeType}): $e\n$stack');
+      AppSnackBar.error(context, googleAuthErrorMessage(e));
     }
-  }
-
-  String _googleErrorMessage(Object e) {
-    if (e is SocketException) {
-      return 'No internet connection. Please check and try again.';
-    }
-    if (e is TimeoutException) {
-      return 'Connection timed out. Please try again.';
-    }
-    final msg = e.toString().toLowerCase();
-    if (msg.contains('sign_in_cancelled') || msg.contains('sign_in_canceled')) {
-      return 'Sign-in was cancelled.';
-    }
-    if (msg.contains('network_error') || msg.contains('network error')) {
-      return 'Network error. Please check your connection.';
-    }
-    if (msg.contains('sign_in_failed')) {
-      return 'Google sign-in failed. Please try again.';
-    }
-    return 'Google sign-in error. Please try again.';
   }
 
   @override

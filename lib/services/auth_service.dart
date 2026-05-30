@@ -195,7 +195,24 @@ class AuthService {
           'user': inner['user'],
         };
       }
-      return {'success': false, 'message': _extractError(body)};
+      // Surface the three documented error codes with friendly text;
+      // anything else falls back to the generic extractor.
+      final code = (body['error'] is Map) ? body['error']['code'] : null;
+      String msg;
+      switch (code) {
+        case 'INVALID_GOOGLE_TOKEN':
+          msg = 'Your Google sign-in token was rejected. Please try again.';
+          break;
+        case 'UNVERIFIED_EMAIL':
+          msg = 'Your Google account email is not verified. Verify it in your Google account and try again.';
+          break;
+        case 'USER_ROLE_MISMATCH':
+          msg = 'This email is already registered as a partner account. Use the partner app to sign in.';
+          break;
+        default:
+          msg = _extractError(body);
+      }
+      return {'success': false, 'message': msg, 'code': code};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }

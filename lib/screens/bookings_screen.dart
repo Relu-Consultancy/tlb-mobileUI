@@ -4,6 +4,9 @@ import '../core/responsive.dart';
 import '../models/api_booking_model.dart';
 import '../providers/auth_state.dart';
 import '../services/booking_service.dart';
+import '../services/classes_listing_service.dart';
+import '../services/events_listing_service.dart';
+import '../services/programs_listing_service.dart';
 import '../widgets/app_loader.dart';
 import 'booking_detail_screen.dart';
 
@@ -265,11 +268,74 @@ class _TabBar extends StatelessWidget {
 
 // ── Booking Card ─────────────────────────────────────────────────────────────
 
-class _BookingCard extends StatelessWidget {
+class _BookingCard extends StatefulWidget {
   final ApiBookingItem booking;
   final void Function(ApiBookingItem) onUpdated;
 
   const _BookingCard({required this.booking, required this.onUpdated});
+
+  @override
+  State<_BookingCard> createState() => _BookingCardState();
+}
+
+class _BookingCardState extends State<_BookingCard> {
+  /// In-memory cache shared across all _BookingCard instances — keyed by
+  /// `"$bookingType:$listingId"`. `null` value means "fetched, none found".
+  /// The list API doesn't include cover URLs, so each unique listing needs
+  /// one detail fetch; subsequent rebuilds (tab switches, scroll) reuse the
+  /// cached URL.
+  static final Map<String, String?> _coverCache = {};
+
+  String? _coverUrl;
+
+  ApiBookingItem get booking => widget.booking;
+
+  @override
+  void initState() {
+    super.initState();
+    if (booking.listingCover != null && booking.listingCover!.isNotEmpty) {
+      _coverUrl = booking.listingCover;
+      return;
+    }
+    final lid = booking.listingId;
+    if (lid == null || lid.isEmpty) return;
+    final key = '${booking.bookingType}:$lid';
+    if (_coverCache.containsKey(key)) {
+      _coverUrl = _coverCache[key];
+      return;
+    }
+    _fetchCover(key, booking.bookingType, lid);
+  }
+
+  Future<void> _fetchCover(
+      String cacheKey, String bookingType, String listingId) async {
+    try {
+      final url = await _resolveCover(bookingType, listingId);
+      _coverCache[cacheKey] = url;
+      if (!mounted) return;
+      setState(() => _coverUrl = url);
+    } catch (_) {
+      _coverCache[cacheKey] = null;
+    }
+  }
+
+  static Future<String?> _resolveCover(
+      String bookingType, String listingId) async {
+    switch (bookingType) {
+      case 'event':
+        return (await EventsListingService.fetchEventDetail(listingId)).coverUrl;
+      case 'class':
+        return (await ClassesListingService.fetchClassDetail(listingId))
+            .coverUrl;
+      case 'program':
+        return (await ProgramsListingService.fetchProgramDetail(listingId))
+            .cover;
+      case 'venue':
+        return (await EventsListingService.fetchVenueDetail(listingId)).cover;
+      default:
+        return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -295,9 +361,9 @@ class _BookingCard extends StatelessWidget {
           // ── Thumbnail (cover image or placeholder) ──
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: booking.listingCover != null
+            child: (_coverUrl != null && _coverUrl!.isNotEmpty)
                 ? Image.network(
-                    booking.listingCover!,
+                    _coverUrl!,
                     width: 80,
                     height: 80,
                     fit: BoxFit.cover,
@@ -456,7 +522,7 @@ class _BookingCard extends StatelessWidget {
       MaterialPageRoute(
         builder: (_) => BookingDetailScreen(
           booking: booking,
-          onUpdated: onUpdated,
+          onUpdated: widget.onUpdated,
         ),
       ),
     );
