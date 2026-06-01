@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 
 class ExploreFormatRow extends StatelessWidget {
@@ -6,15 +7,25 @@ class ExploreFormatRow extends StatelessWidget {
 
   const ExploreFormatRow({super.key, this.onFormatTap});
 
+  /// Matches the Figma spec (98.98 px on a 393 px design width). Responsive
+  /// scaling keeps the diameter proportional on smaller / larger devices.
+  static const double _designCircle = 99;
+  static const double _designGap = 14;
+
+  /// Color-inversion matrix — flips luminance so a white-bg PNG renders
+  /// as black-bg without needing a redrawn asset.
   static const _invertMatrix = <double>[
-    -1,  0,  0, 0, 255,
-     0, -1,  0, 0, 255,
-     0,  0, -1, 0, 255,
-     0,  0,  0, 1,   0,
+    -1, 0, 0, 0, 255, //
+    0, -1, 0, 0, 255, //
+    0, 0, -1, 0, 255, //
+    0, 0, 0, 1, 0, //
   ];
 
   @override
   Widget build(BuildContext context) {
+    final size = Responsive.w(context, _designCircle, min: 72);
+    final gap = Responsive.w(context, _designGap, min: 10);
+
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       scrollDirection: Axis.horizontal,
@@ -23,13 +34,17 @@ class ExploreFormatRow extends StatelessWidget {
         children: DummyData.exploreFormats.asMap().entries.map((entry) {
           final int index = entry.key;
           final Map<String, dynamic> format = entry.value;
+
+          // Per-format scale lets us compensate when a source PNG has no
+          // built-in padding (Competition) or has a lot of it (MasterClass).
+          // Default 1.0 → render the PNG at the full circle size.
           final double scale = (format['scale'] as double?) ?? 1.0;
           final bool invert = format['invertColors'] == true;
 
           Widget img = Image.asset(
             format['image'],
-            width: 84,
-            height: 84,
+            width: size,
+            height: size,
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) => Container(
               color: Colors.grey.shade200,
@@ -51,10 +66,10 @@ class ExploreFormatRow extends StatelessWidget {
           return GestureDetector(
             onTap: () => onFormatTap?.call(index),
             child: Padding(
-              padding: const EdgeInsets.only(right: 14),
+              padding: EdgeInsets.only(right: gap),
               child: SizedBox(
-                width: 84,
-                height: 84,
+                width: size,
+                height: size,
                 child: ClipOval(child: img),
               ),
             ),

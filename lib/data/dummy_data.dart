@@ -79,13 +79,18 @@ class DummyData {
       'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/competition.png',
       'formatSlug': 'competition',
       'accentColor': Color(0xFFD4A800),
+      // PNG artwork fills the entire square (no built-in padding) so it
+      // visually dominates the row — shrink to match Camp / MasterClass.
+      'scale': 0.85,
     },
     {
       'label': 'MasterClass',
       'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/masterclass.png',
       'formatSlug': 'masterclass',
       'accentColor': Color(0xFF1A1A2E),
-      'scale': 1.42,
+      // Source PNG is white-bg with dark text; invert to render the
+      // black-bg / white-text look matching the Figma. No scale override
+      // — same size as every other format circle.
       'invertColors': true,
     },
     {
