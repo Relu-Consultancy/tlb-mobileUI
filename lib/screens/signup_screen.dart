@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import '../core/app_snackbar.dart';
 import '../core/google_auth_error.dart';
@@ -136,6 +137,19 @@ class _SignupScreenState extends State<SignupScreen> {
       setState(() => _loading = false);
       debugPrint('[Google Signup] Exception (${e.runtimeType}): $e\n$stack');
       AppSnackBar.error(context, googleAuthErrorMessage(e));
+    }
+  }
+
+  /// Partner sign-up lives in a separate web app — open it in the device's
+  /// default browser. Wired to the "Continue as Event Partner" link.
+  Future<void> _onContinueAsPartner() async {
+    final uri = Uri.parse('https://tlbpartner.reluconsultancy.in/');
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok && mounted) {
+      AppSnackBar.error(
+        context,
+        'Could not open the partner portal. Please try again.',
+      );
     }
   }
 
@@ -280,7 +294,27 @@ class _SignupScreenState extends State<SignupScreen> {
                   // ── Continue with Google ──────────────────────────────────
                   _GoogleButton(onTap: _loading ? null : _onGoogleSignUp),
 
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 18),
+
+                  // ── Continue as Event Partner — external partner portal ───
+                  TextButton(
+                    onPressed: _loading ? null : _onContinueAsPartner,
+                    style: TextButton.styleFrom(
+                      minimumSize: Size.zero,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                    ),
+                    child: Text(
+                      'Continue as Event Partner',
+                      style: GoogleFonts.poppins(
+                        fontSize: Responsive.sp(context, 14),
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFFE6A800),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
 
                   // ── Already have an account? ──────────────────────────────
                   Row(

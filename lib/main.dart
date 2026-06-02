@@ -1,4 +1,5 @@
 import 'package:device_preview/device_preview.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
@@ -9,8 +10,10 @@ import 'core/preview_mode.dart';
 import 'providers/auth_state.dart';
 import 'providers/follow_state.dart';
 import 'providers/saved_events_state.dart';
+import 'services/avatar_storage.dart';
 import 'screens/home_screen.dart';
 import 'screens/splash_screen.dart';
+import 'widgets/login_sheet.dart';
 import 'widgets/preview_toggle_button.dart';
 
 void main() async {
@@ -21,6 +24,10 @@ void main() async {
     debugPrint('Firebase init skipped: $e');
   }
   await PreviewMode.load();
+  // Local profile picture survives across launches even though backend
+  // profile API has no avatar field yet.
+  final localAvatar = await AvatarStorage.load();
+  if (localAvatar != null) AuthState.avatarUrl.value = localAvatar;
   final restored = await AuthState.tryRestoreSession();
   if (restored) {
     SavedEventsState.loadFromApi(); // fire-and-forget
@@ -37,11 +44,15 @@ void main() async {
   );
   // Disable runtime font fetching — use bundled fonts only
   GoogleFonts.config.allowRuntimeFetching = false;
-  runApp(const TLBRoot());
+  runApp(TLBRoot(isLoggedIn: restored));
 }
 
 class TLBRoot extends StatelessWidget {
-  const TLBRoot({super.key});
+  /// True when [AuthState.tryRestoreSession] succeeded at startup. Used to
+  /// decide whether the splash routes to the dashboard or the login screen.
+  final bool isLoggedIn;
+
+  const TLBRoot({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
@@ -50,16 +61,22 @@ class TLBRoot extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          ValueListenableBuilder<bool>(
-            valueListenable: PreviewMode.enabled,
-            builder: (_, isEnabled, __) {
-              return DevicePreview(
-                enabled: isEnabled,
-                builder: (_) => const TLBApp(),
-              );
-            },
-          ),
-          const PreviewToggleButton(),
+          // Dev tools (DevicePreview wrapper + floating toggle button) only
+          // mount in *debug* mode. Profile and release builds skip them
+          // entirely so end users never see the developer chrome.
+          if (kDebugMode)
+            ValueListenableBuilder<bool>(
+              valueListenable: PreviewMode.enabled,
+              builder: (_, isEnabled, __) {
+                return DevicePreview(
+                  enabled: isEnabled,
+                  builder: (_) => TLBApp(isLoggedIn: isLoggedIn),
+                );
+              },
+            )
+          else
+            TLBApp(isLoggedIn: isLoggedIn),
+          if (kDebugMode) const PreviewToggleButton(),
         ],
       ),
     );
@@ -67,15 +84,26 @@ class TLBRoot extends StatelessWidget {
 }
 
 class TLBApp extends StatelessWidget {
-  const TLBApp({super.key});
+  final bool isLoggedIn;
+
+  const TLBApp({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
+    // First launch with no saved session → land on the login screen after the
+    // splash. Existing users with a restored session keep their previous
+    // behaviour and go straight to the dashboard.
+    final Widget nextScreen =
+        isLoggedIn ? const HomeScreen() : const LoginScreen();
+
     return MaterialApp(
       title: 'TLB',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      locale: DevicePreview.locale(context),
+      // DevicePreview.locale / appBuilder require the DevicePreview ancestor
+      // — which is only present in debug builds — so skip them in profile
+      // and release.
+      locale: kDebugMode ? DevicePreview.locale(context) : null,
       // Clamp OS text-scaling to 1.0 so system "Large Text" settings
       // cannot overflow fixed-height layouts across all 44 screens.
       builder: (context, child) {
@@ -85,9 +113,11 @@ class TLBApp extends StatelessWidget {
           ),
           child: child!,
         );
-        return DevicePreview.appBuilder(context, clamped);
+        return kDebugMode
+            ? DevicePreview.appBuilder(context, clamped)
+            : clamped;
       },
-      home: const SplashScreen(nextScreen: HomeScreen()),
+      home: SplashScreen(nextScreen: nextScreen),
     );
   }
 }

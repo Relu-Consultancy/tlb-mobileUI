@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:showcaseview/showcaseview.dart';
 import '../core/responsive.dart';
+import '../core/avatar_image.dart';
 import '../providers/auth_state.dart';
+import '../providers/notifications_state.dart';
 import '../screens/search_screen.dart';
 import '../screens/notification_screen.dart';
 import '../screens/profile_screen.dart';
@@ -149,13 +151,42 @@ class HomeHeader extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: Center(
-                  child: Image.asset(
-                    'resources- tlb-ui/alert.png',
-                    width: 26,
-                    height: 26,
-                    fit: BoxFit.contain,
-                  ),
+                // Replaces the alert.png that had a red dot baked in. The
+                // dot is now a separate Positioned widget gated on
+                // NotificationsState.unreadCount so it only appears when
+                // there are real unread notifications.
+                child: ValueListenableBuilder<int>(
+                  valueListenable: NotificationsState.unreadCount,
+                  builder: (_, unread, __) {
+                    return Stack(
+                      alignment: Alignment.center,
+                      clipBehavior: Clip.none,
+                      children: [
+                        const Icon(
+                          Icons.notifications_outlined,
+                          size: 22,
+                          color: Color(0xFF1A1A2E),
+                        ),
+                        if (unread > 0)
+                          Positioned(
+                            top: 8,
+                            right: 9,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFEF4444),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 1.5,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -187,19 +218,18 @@ class HomeHeader extends StatelessWidget {
                       ],
                     ),
                     child: ClipOval(
-                      child: (url != null && url.isNotEmpty)
-                          ? Image.network(
-                              url,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Image.asset(
-                                'assets/images/new_home/profilepic.jpg',
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : Image.asset(
-                              'assets/images/new_home/profilepic.jpg',
-                              fit: BoxFit.cover,
-                            ),
+                      child: Image(
+                        image: avatarImageProvider(
+                          url,
+                          fallback: const AssetImage(
+                              'assets/images/new_home/profilepic.jpg'),
+                        ),
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Image.asset(
+                          'assets/images/new_home/profilepic.jpg',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
                   ),
                 );

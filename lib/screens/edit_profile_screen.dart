@@ -209,7 +209,36 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  void _skip() {
+  Future<void> _skip() async {
+    final firstName = _firstNameCtrl.text.trim();
+    if (firstName.isEmpty) {
+      AppSnackBar.show(
+        context,
+        'Please enter your first name to continue.',
+      );
+      return;
+    }
+
+    // Save only the first name so the home greeting works immediately and
+    // the walkthrough that fires on the next screen can read it. Other
+    // fields are intentionally left for the user to fill later.
+    setState(() => _loading = true);
+    final token = AuthState.accessToken;
+    if (token != null) {
+      final result = await AuthService.updateProfile(
+        accessToken: token,
+        firstName: firstName,
+      );
+      if (result['success'] == true && result['profile'] is Map) {
+        AuthState.updateProfileData(
+          Map<String, dynamic>.from(result['profile'] as Map),
+        );
+      }
+    }
+
+    if (!mounted) return;
+    setState(() => _loading = false);
+
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const HomeScreen()),
       (route) => false,
@@ -261,7 +290,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           actions: widget.isOnboarding
               ? [
                   TextButton(
-                    onPressed: _skip,
+                    onPressed: (_loading || _fetchingProfile) ? null : _skip,
                     child: Text(
                       'Skip',
                       style: GoogleFonts.poppins(

@@ -36,6 +36,15 @@ class AppSnackBar {
     _show(context, message, _ToastType.success, duration);
   }
 
+  /// Standardised "this feature isn't ready yet" toast. Pass a [feature]
+  /// label (e.g. "Chat with support") to personalise the message.
+  static void comingSoon(BuildContext context, [String? feature]) {
+    final msg = feature != null && feature.isNotEmpty
+        ? '$feature is coming soon. Stay tuned!'
+        : 'This feature is coming soon. Stay tuned!';
+    _show(context, msg, _ToastType.info, const Duration(seconds: 3));
+  }
+
   static void _show(
     BuildContext context,
     String message,

@@ -21,10 +21,21 @@ class OtpVerificationScreen extends StatefulWidget {
   final String identifier;
   final void Function(BuildContext context)? onExistingUser;
 
+  /// True when the user arrived via the login flow. In that case, an
+  /// `is_new_user: true` verify-OTP response is treated as a bug — the
+  /// backend auto-created an account for a login attempt — so we surface
+  /// "No account found with this email. Please sign up first." instead of
+  /// silently logging the new user in and pushing them to onboarding.
+  ///
+  /// TODO: ideally the OTP request itself should be rejected by the backend
+  /// for unregistered emails when this flag is set (no OTP delivered at all).
+  final bool isLoginFlow;
+
   const OtpVerificationScreen({
     super.key,
     required this.identifier,
     this.onExistingUser,
+    this.isLoginFlow = false,
   });
 
   @override
@@ -85,6 +96,21 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     setState(() => _loading = false);
 
     if (result['success'] == true) {
+      final isNew = result['is_new_user'] == true;
+
+      // Reject before any state mutation: the user came here to LOG IN, but
+      // the backend auto-created an account because the email wasn't
+      // registered. Surface the error and route them to signup instead — do
+      // NOT call AuthState.login(), do NOT mark the walkthrough flag.
+      if (isNew && widget.isLoginFlow) {
+        AppSnackBar.error(
+          context,
+          'No account found with this email. Please sign up first.',
+        );
+        Navigator.of(context).pop();
+        return;
+      }
+
       AuthState.login(
         access: result['access'] as String?,
         refresh: result['refresh'] as String?,
@@ -92,7 +118,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       );
       SavedEventsState.loadFromApi();
 
-      final isNew = result['is_new_user'] == true;
       if (isNew) {
         await WalkthroughService.markAsNewUser();
         if (!mounted) return;
@@ -242,42 +267,66 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         return SizedBox(
                           width: boxW,
                           height: boxW * 1.25,
-                          child: TextField(
-                            controller: _controllers[i],
-                            focusNode: _focusNodes[i],
-                            textAlign: TextAlign.center,
-                            keyboardType: TextInputType.number,
-                            maxLength: 1,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 20),
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1A1A1A),
-                            ),
-                            decoration: InputDecoration(
-                              counterText: '',
-                              filled: true,
-                              fillColor: const Color(0xFFF5F5F5),
-                              contentPadding: EdgeInsets.zero,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                    color: Color(0xFFFFD014), width: 2),
-                              ),
-                            ),
-                            onChanged: (v) {
-                              if (v.isNotEmpty && i < 5) {
-                                _focusNodes[i + 1].requestFocus();
-                              } else if (v.isEmpty && i > 0) {
+                          // Focus wrapper handles backspace on an already-empty
+                          // box (onChanged never fires when the value doesn't
+                          // change) — moves focus back and clears the previous
+                          // digit so the cursor isn't stuck.
+                          child: Focus(
+                            onKeyEvent: (node, event) {
+                              if (event is KeyDownEvent &&
+                                  event.logicalKey ==
+                                      LogicalKeyboardKey.backspace &&
+                                  _controllers[i].text.isEmpty &&
+                                  i > 0) {
+                                _controllers[i - 1].clear();
                                 _focusNodes[i - 1].requestFocus();
+                                return KeyEventResult.handled;
                               }
+                              return KeyEventResult.ignored;
                             },
+                            child: TextField(
+                              controller: _controllers[i],
+                              focusNode: _focusNodes[i],
+                              textAlign: TextAlign.center,
+                              keyboardType: TextInputType.number,
+                              maxLength: 1,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ],
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 20),
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF1A1A1A),
+                              ),
+                              decoration: InputDecoration(
+                                counterText: '',
+                                filled: true,
+                                fillColor: const Color(0xFFF5F5F5),
+                                contentPadding: EdgeInsets.zero,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                      color: Color(0xFFFFD014), width: 2),
+                                ),
+                              ),
+                              onChanged: (v) {
+                                if (v.isNotEmpty && i < 5) {
+                                  _focusNodes[i + 1].requestFocus();
+                                } else if (v.isNotEmpty && i == 5) {
+                                  // Last digit entered — dismiss the
+                                  // keyboard so the Verify button (sitting
+                                  // below the boxes) becomes visible.
+                                  FocusScope.of(context).unfocus();
+                                }
+                                // No auto-retreat on empty onChanged — the
+                                // Focus.onKeyEvent above handles backspace
+                                // explicitly so cursor doesn't get stuck.
+                              },
+                            ),
                           ),
                         );
                       }),

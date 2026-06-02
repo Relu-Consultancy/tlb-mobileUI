@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import '../core/app_snackbar.dart';
+import '../core/avatar_image.dart';
 import '../services/auth_service.dart';
+import '../services/avatar_storage.dart';
 import '../providers/auth_state.dart';
 import '../core/responsive.dart';
 import '../providers/saved_events_state.dart';
@@ -15,8 +19,8 @@ import 'payment_settings_screen.dart';
 import 'your_reviews_screen.dart';
 import 'followed_partners_screen.dart';
 import 'notification_screen.dart';
+import '../widgets/login_sheet.dart';
 // import 'reminders_screen.dart'; // Reminders entry temporarily hidden — restore when the feature is ready.
-import 'home_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -28,26 +32,46 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   double _calculateCompletion() {
     final profile = AuthState.userData?['profile'] as Map<String, dynamic>?;
+    // Mirror the actual fields collected by EditProfileScreen — Session 12
+    // renamed several fields and dropped guardian/institution entirely.
+    // Email + locally-picked avatar also count toward "complete".
+    const fields = [
+      'first_name',
+      'last_name',
+      'phone_number',
+      'gender',
+      'birthdate',
+      'region',
+    ];
     int filled = 0;
-    const totalFields = 8;
+    int total = fields.length;
     if (profile != null) {
-      if ((profile['first_name'] as String?)?.isNotEmpty == true) filled++;
-      if ((profile['last_name'] as String?)?.isNotEmpty == true) filled++;
-      if ((profile['date_of_birth'] as String?)?.isNotEmpty == true) filled++;
-      if ((profile['city'] as String?)?.isNotEmpty == true) filled++;
-      if ((profile['state'] as String?)?.isNotEmpty == true) filled++;
-      if ((profile['guardian_name'] as String?)?.isNotEmpty == true) filled++;
-      if ((profile['institution_name'] as String?)?.isNotEmpty == true) filled++;
-      if ((profile['institution_type'] as String?)?.isNotEmpty == true) filled++;
+      for (final f in fields) {
+        if ((profile[f] as String?)?.trim().isNotEmpty == true) filled++;
+      }
     }
-    return filled / totalFields;
+    // Email is always present after signup, count it as a +1 baseline so
+    // a brand-new account isn't stuck at 0 %.
+    total++;
+    if ((AuthState.userEmail ?? '').trim().isNotEmpty) filled++;
+    // Profile picture (local or remote) counts too.
+    total++;
+    if ((AuthState.avatarUrl.value ?? '').trim().isNotEmpty) filled++;
+    return total == 0 ? 0 : filled / total;
   }
 
   @override
   Widget build(BuildContext context) {
+    // Rebuild on either name OR avatar change so the completion tracker
+    // and avatar render stay in sync when EditProfileScreen pops back.
     return ValueListenableBuilder<String?>(
       valueListenable: AuthState.userName,
-      builder: (context, _, __) => _buildScaffold(context),
+      builder: (context, _, __) {
+        return ValueListenableBuilder<String?>(
+          valueListenable: AuthState.avatarUrl,
+          builder: (context, _, __) => _buildScaffold(context),
+        );
+      },
     );
   }
 
@@ -116,8 +140,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             border: Border.all(color: Colors.grey.shade300, width: 3),
                           ),
                           child: ClipOval(
-                            child: Image.network(
-                              avatarUrl,
+                            child: Image(
+                              image: avatarImageProvider(
+                                avatarUrl,
+                                fallback: const AssetImage(
+                                    'assets/images/new_home/profilepic.jpg'),
+                              ),
                               fit: BoxFit.cover,
                               errorBuilder: (_, __, ___) => Image.asset(
                                 'assets/images/new_home/profilepic.jpg',
@@ -389,8 +417,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               BookedEventsState.bookings.value = [];
               await UserReviewsState.clear();
               if (!context.mounted) return;
+              // Send the user to the login screen rather than a guest
+              // HomeScreen — matches the cold-start behaviour added in
+              // Session 47 and avoids a second HomeScreen instance being
+              // pushed when they log back in (which was racing the
+              // ShowcaseView register/unregister lifecycle and crashing).
               Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const HomeScreen()),
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
                 (route) => false,
               );
             },
@@ -403,6 +436,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _pickAvatar(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final file = await picker.pickImage(
+        source: source,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
+      if (file == null) return; // user cancelled
+
+      final saved = await AvatarStorage.saveFromPickedFile(file.path);
+      if (!mounted) return;
+
+      if (saved != null) {
+        // Triggers ValueListenableBuilders in home_header, profile, account.
+        AuthState.avatarUrl.value = saved;
+        setState(() {});
+        AppSnackBar.success(context, 'Profile picture updated.');
+      } else {
+        AppSnackBar.error(context, 'Could not save the picture. Try again.');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      AppSnackBar.error(context, 'Could not open the picker.');
+    }
   }
 
   void _showAvatarOptions(BuildContext context, String avatarUrl) {
@@ -443,9 +504,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.camera_alt_outlined, color: Color(0xFF1A1A2E)),
+                leading: const Icon(Icons.camera_alt_outlined,
+                    color: Color(0xFF1A1A2E)),
                 title: Text(
-                  'Change Profile Picture',
+                  'Take a Photo',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 15),
                     fontWeight: FontWeight.w500,
@@ -454,13 +516,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 onTap: () {
                   Navigator.pop(ctx);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const EditProfileScreen()),
-                  ).then((_) => setState(() {}));
+                  _pickAvatar(ImageSource.camera);
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined,
+                    color: Color(0xFF1A1A2E)),
+                title: Text(
+                  'Choose from Gallery',
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 15),
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF1A1A2E),
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickAvatar(ImageSource.gallery);
+                },
+              ),
+              if (AuthState.avatarUrl.value != null &&
+                  AuthState.avatarUrl.value!.isNotEmpty)
+                ListTile(
+                  leading: const Icon(Icons.delete_outline,
+                      color: Color(0xFFE53935)),
+                  title: Text(
+                    'Remove Profile Picture',
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 15),
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFFE53935),
+                    ),
+                  ),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    await AvatarStorage.clear();
+                    AuthState.avatarUrl.value = null;
+                    setState(() {});
+                  },
+                ),
               const SizedBox(height: 16),
             ],
           ),
@@ -480,8 +574,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: Image.network(
-                avatarUrl,
+              child: Image(
+                image: avatarImageProvider(
+                  avatarUrl,
+                  fallback: const AssetImage(
+                      'assets/images/new_home/profilepic.jpg'),
+                ),
                 fit: BoxFit.contain,
                 errorBuilder: (_, __, ___) => Image.asset(
                   'assets/images/new_home/profilepic.jpg',

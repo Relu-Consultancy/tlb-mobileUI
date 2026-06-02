@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
+import '../core/share_helper.dart';
 import '../models/api_provider_model.dart';
 import '../services/events_listing_service.dart';
 import '../widgets/app_loader.dart';
@@ -124,7 +125,12 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                           backgroundColor: Colors.white,
                           child: Icon(Icons.share_outlined, size: 16, color: Color(0xFF1A1A2E)),
                         ),
-                        onPressed: () {},
+                        onPressed: () => ShareHelper.shareListing(
+                          context,
+                          type: 'partner',
+                          title: _name,
+                          id: _provider?.id,
+                        ),
                       ),
                     ],
                   ),

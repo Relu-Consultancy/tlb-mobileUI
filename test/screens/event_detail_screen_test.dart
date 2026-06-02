@@ -50,15 +50,26 @@ void main() {
       });
     });
 
-    testWidgets('navigates to DateTimeSelectionScreen when Book Now is tapped while logged in', (WidgetTester tester) async {
+    testWidgets(
+        'shows featured-highlight snackbar when Book Now is tapped on a dummy event with no API id',
+        (WidgetTester tester) async {
+      // Regression guard for the "Booking Unavailable" bug — featured /
+      // dummy cards (id: '') must NOT navigate into the booking flow,
+      // since they have no API UUID to initiate against.
       await mockNetworkImages(() async {
         AuthState.isLoggedIn.value = true;
         await pumpTLBApp(tester, const EventDetailScreen(event: testEvent));
 
         await tester.tap(find.text('Book Now'));
-        await tester.pumpAndSettle();
+        await tester.pump(); // settle one frame for the snackbar
 
-        expect(find.text('Book Now'), findsNothing);
+        // Still on the same screen (no navigation happened).
+        expect(find.text('Book Now'), findsOneWidget);
+        // Snackbar surfaced the helpful message instead.
+        expect(
+          find.textContaining('not a bookable listing yet'),
+          findsOneWidget,
+        );
       });
     });
   });

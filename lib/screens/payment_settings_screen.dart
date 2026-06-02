@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_state.dart';
@@ -85,157 +86,55 @@ class PaymentSettingsScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            Text(
-              'Saved Method',
-              style: GoogleFonts.poppins(
-                fontSize: Responsive.sp(context, 14),
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF1A1A2E),
-              ),
-            ),
-            const SizedBox(height: 10),
-
-            // ── Visa card ──
+            // ── Coming Soon — saved methods + add-new aren't wired to a
+            // backend yet, so the dummy Visa/UPI cards (and Add New Method
+            // CTA) have been replaced with a clear under-development card.
             Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1A3A8F),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'VISA',
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 11),
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Visa**** 4578',
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 13.5),
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF1A1A2E),
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    'Expires 09/29',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 11.5),
-                                      color: Colors.grey.shade500,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFFFF8E1),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Text(
-                                      'Default',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: Responsive.sp(context, 10),
-                                        fontWeight: FontWeight.w600,
-                                        color: const Color(0xFFFFB902),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(Icons.more_horiz, color: Colors.grey),
-                      ],
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF8E1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.credit_card_outlined,
+                      color: Color(0xFFFFB902),
+                      size: 30,
                     ),
                   ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'UPI',
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 11),
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1A1A2E),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'UPI: designer@upi',
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 13.5),
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF1A1A2E),
-                            ),
-                          ),
-                        ),
-                        const Icon(Icons.more_horiz, color: Colors.grey),
-                      ],
+                  const SizedBox(height: 14),
+                  Text(
+                    'Currently being developed',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 15),
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF1A1A2E),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    "We're building the saved-methods feature. "
+                    'For now, payments still complete through the Razorpay '
+                    'checkout during booking.',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 12.5),
+                      color: Colors.grey.shade600,
+                      height: 1.45,
                     ),
                   ),
                 ],
-              ),
-            ),
-
-            const SizedBox(height: 14),
-
-            // ── Add New Method ──
-            Material(
-              color: const Color(0xFFFFB902),
-              borderRadius: BorderRadius.circular(28),
-              child: InkWell(
-                onTap: () {},
-                borderRadius: BorderRadius.circular(28),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.add, color: Color(0xFF1A1A2E), size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Add New Method',
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 14),
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1A1A2E),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ),
             ),
 
@@ -288,6 +187,8 @@ class PaymentSettingsScreen extends StatelessWidget {
                   style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: Colors.grey.shade500),
                 ),
                 trailing: const Icon(Icons.chevron_right, color: Color(0xFF2563EB)),
+                onTap: () =>
+                    AppSnackBar.comingSoon(context, 'Chat with support'),
               ),
             ),
             const SizedBox(height: 24),

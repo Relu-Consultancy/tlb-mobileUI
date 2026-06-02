@@ -3,6 +3,7 @@ import '../widgets/app_loader.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_snackbar.dart';
+import '../core/share_helper.dart';
 import '../providers/auth_state.dart';
 import '../providers/location_state.dart';
 import '../core/responsive.dart';
@@ -275,7 +276,12 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                     decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
                     child: IconButton(
                       icon: const Icon(Icons.share_outlined, color: Color(0xFF1A1A2E), size: 20),
-                      onPressed: () {},
+                      onPressed: () => ShareHelper.shareListing(
+                        context,
+                        type: 'venue',
+                        title: _title,
+                        id: _detail?.id ?? widget.event.id,
+                      ),
                     ),
                   ),
                 ],
@@ -757,6 +763,13 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                       onPressed: () {
                         if (!AuthState.isLoggedIn.value) {
                           showLoginSheet(context);
+                          return;
+                        }
+                        if (!_hasApiId) {
+                          AppSnackBar.show(
+                            context,
+                            'This is a featured highlight, not a bookable venue yet. Browse Venues to find one you can book.',
+                          );
                           return;
                         }
                         Navigator.push(

@@ -38,13 +38,25 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    ShowcaseView.register();
+    // Defensive — register can throw if a stale registration from a
+    // previous HomeScreen still owns the singleton (happens during
+    // pushAndRemoveUntil when the new HomeScreen's initState fires before
+    // the old HomeScreen's dispose).
+    try {
+      ShowcaseView.register();
+    } catch (_) {}
     _checkAndStartWalkthrough();
   }
 
   @override
   void dispose() {
-    ShowcaseView.get().unregister();
+    // Same defensive guard. get() resolves to the *current* singleton,
+    // which during a HomeScreen replacement may already be the NEW one;
+    // .unregister() there would either unregister the wrong instance or
+    // throw and crash the dispose path.
+    try {
+      ShowcaseView.get().unregister();
+    } catch (_) {}
     super.dispose();
   }
 
@@ -134,79 +146,87 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
 
+    // Extra bottom space so the last section isn't hidden behind the
+    // floating navbar (which is overlaid via Positioned).
+    final double navOverlap =
+        (safeBottom > 0 ? safeBottom + 15.0 : 30.0) + 64.0;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          Column(
-            children: [
-              // ── Unified header + Spotlight title on one gradient background ──
-              Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFFFFF5E0),
-                      Color(0xFFFFF5E0),
-                      Color(0xFFFFFAF0),
-                      Colors.white,
-                    ],
-                    stops: [0.0, 0.55, 0.80, 1.0],
-                  ),
-                ),
+          // Single scroll view — the gradient header scrolls together with
+          // the rest of the page so the whole screen feels like one
+          // continuous surface (Session-48 fix for the "partial scroll" bug).
+          ValueListenableBuilder<String>(
+            valueListenable: LocationState().selectedCity,
+            builder: (context, city, _) {
+              return SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    HomeHeader(
-                      profileShowcaseConfig: kProfileShowcaseConfig,
-                      locationShowcaseConfig: kLocationShowcaseConfig,
+                    // ── Unified header on a gradient background ──
+                    Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0xFFFFF5E0),
+                            Color(0xFFFFF5E0),
+                            Color(0xFFFFFAF0),
+                            Colors.white,
+                          ],
+                          stops: [0.0, 0.55, 0.80, 1.0],
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          HomeHeader(
+                            profileShowcaseConfig: kProfileShowcaseConfig,
+                            locationShowcaseConfig: kLocationShowcaseConfig,
+                          ),
+                        ],
+                      ),
                     ),
+
+                    // ── Body: empty state OR full feed ──
+                    if (!LocationState().isLocationSupported(city))
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.6,
+                        child: const EmptyLocationWidget(),
+                      )
+                    else ...[
+                      const SectionDividerWidget(title: 'Spotlight'),
+                      RepaintBoundary(
+                        child: BannerCarousel(
+                          events: DummyData.bannerEvents,
+                          height: Responsive.h(context, 421.0),
+                          fixedCardWidth: Responsive.w(context, 355.0),
+                        ),
+                      ),
+                      const RepaintBoundary(child: CategoriesGrid()),
+
+                      // Sections
+                      const RepaintBoundary(child: HotPicksSection()),
+                      const RepaintBoundary(child: WeekendSpecialSection()),
+                      const RepaintBoundary(child: DiscoverNearYouSection()),
+                      const RepaintBoundary(child: FamilyFeelsSection()),
+                      const RepaintBoundary(child: SpecialNeedsSection()),
+                      const RepaintBoundary(child: StealersSection()),
+                      const RepaintBoundary(child: TlbSignatureSection()),
+
+                      // AppFooter with upward gradient
+                      const AppFooter(),
+                    ],
+
+                    // Spacer so the last item clears the floating navbar.
+                    SizedBox(height: navOverlap),
                   ],
                 ),
-              ),
-
-              // Scrollable feed or Empty State
-              Expanded(
-                child: ValueListenableBuilder<String>(
-                  valueListenable: LocationState().selectedCity,
-                  builder: (context, city, _) {
-                    if (!LocationState().isLocationSupported(city)) {
-                      return const EmptyLocationWidget();
-                    }
-                      return SingleChildScrollView(
-                        physics: const ClampingScrollPhysics(),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SectionDividerWidget(title: 'Spotlight'),
-                            RepaintBoundary(
-                              child: BannerCarousel(
-                                events: DummyData.bannerEvents,
-                                height: Responsive.h(context, 421.0),
-                                fixedCardWidth: Responsive.w(context, 355.0),
-                              ),
-                            ),
-                            const RepaintBoundary(child: CategoriesGrid()),
-                            
-                            // Sections
-                            const RepaintBoundary(child: HotPicksSection()),
-                            const RepaintBoundary(child: WeekendSpecialSection()),
-                            const RepaintBoundary(child: DiscoverNearYouSection()),
-                            const RepaintBoundary(child: FamilyFeelsSection()),
-                            
-                            const RepaintBoundary(child: SpecialNeedsSection()),
-                            const RepaintBoundary(child: StealersSection()),
-                            const RepaintBoundary(child: TlbSignatureSection()),
-
-                            // AppFooter with upward gradient
-                            const AppFooter(),
-                          ],
-                        ),
-                    );
-                  },
-                ),
-              ),
-            ],
+              );
+            },
           ),
           Positioned(
             bottom: 0,

@@ -84,7 +84,13 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
       return;
     }
     if (widget.event.id.isEmpty) {
-      AppSnackBar.error(context, 'Booking unavailable for this listing.');
+      // Safety net — caller should have gated this at the Book Now button.
+      // Hitting this path means the user is on a featured-highlight / dummy
+      // card that has no API UUID and therefore can't be initiated.
+      AppSnackBar.error(
+        context,
+        "This listing isn't available for booking yet. Browse the catalog to find one you can book.",
+      );
       return;
     }
 

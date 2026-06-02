@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail_image_network/mocktail_image_network.dart';
 import 'package:tlb_mobile_ui/providers/auth_state.dart';
 import 'package:tlb_mobile_ui/screens/account_settings_screen.dart';
-import 'package:tlb_mobile_ui/screens/change_password_screen.dart';
 
 import '../helpers/test_setup.dart';
 
@@ -20,7 +19,8 @@ void main() {
   });
 
   group('AccountSettingsScreen Tests', () {
-    testWidgets('renders account settings correctly', (WidgetTester tester) async {
+    testWidgets('renders account settings correctly',
+        (WidgetTester tester) async {
       await mockNetworkImages(() async {
         await pumpTLBApp(tester, const AccountSettingsScreen());
 
@@ -31,7 +31,6 @@ void main() {
         expect(find.text('Personal Info'), findsOneWidget);
         expect(find.text('john@example.com'), findsOneWidget);
         expect(find.text('Phone Number'), findsOneWidget);
-        expect(find.text('Change Password'), findsOneWidget);
 
         // Verify privacy card elements
         expect(find.text('Privacy'), findsOneWidget);
@@ -40,7 +39,19 @@ void main() {
       });
     });
 
-    testWidgets('ValueListenableBuilder updates UI when avatarUrl changes', (WidgetTester tester) async {
+    testWidgets('Change Password row is hidden — auth is OTP-only',
+        (WidgetTester tester) async {
+      // Regression guard for the bug where the screen showed a dead
+      // "Change Password" entry even though users never set a password.
+      await mockNetworkImages(() async {
+        await pumpTLBApp(tester, const AccountSettingsScreen());
+
+        expect(find.text('Change Password'), findsNothing);
+      });
+    });
+
+    testWidgets('ValueListenableBuilder updates UI when avatarUrl changes',
+        (WidgetTester tester) async {
       await mockNetworkImages(() async {
         await pumpTLBApp(tester, const AccountSettingsScreen());
 
@@ -53,17 +64,6 @@ void main() {
 
         // UI should rebuild and still have the avatar
         expect(find.byType(CircleAvatar), findsOneWidget);
-      });
-    });
-
-    testWidgets('navigates to ChangePasswordScreen when tapped', (WidgetTester tester) async {
-      await mockNetworkImages(() async {
-        await pumpTLBApp(tester, const AccountSettingsScreen());
-
-        await tester.tap(find.text('Change Password'));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(ChangePasswordScreen), findsOneWidget);
       });
     });
   });

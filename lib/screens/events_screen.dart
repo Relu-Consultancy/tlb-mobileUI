@@ -196,34 +196,33 @@ class _EventsScreenState extends State<EventsScreen> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          Column(
-            children: [
-              Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFFFFF5E0),
-                      Color(0xFFFFF5E0),
-                      Color(0xFFFFFAF0),
-                      Colors.white,
+          // Single scroll view — header scrolls with the rest of the page
+          // (Session-48 fix for "partial scroll" bug).
+          SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Column(
+              children: [
+                Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0xFFFFF5E0),
+                        Color(0xFFFFF5E0),
+                        Color(0xFFFFFAF0),
+                        Colors.white,
+                      ],
+                      stops: [0.0, 0.55, 0.80, 1.0],
+                    ),
+                  ),
+                  child: const Column(
+                    children: [
+                      HomeHeader(),
+                      SizedBox(height: 16),
                     ],
-                    stops: [0.0, 0.55, 0.80, 1.0],
                   ),
                 ),
-                child: const Column(
-                  children: [
-                    HomeHeader(),
-                    SizedBox(height: 16),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const ClampingScrollPhysics(),
-                  child: Column(
-                    children: [
                       // Spotlight Banner
                       RepaintBoundary(
                         child: BannerCarousel(
@@ -397,12 +396,12 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
-                      const AppFooter(),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+                const AppFooter(),
+                // Clear the floating navbar.
+                SizedBox(
+                    height: (safeBottom > 0 ? safeBottom + 15.0 : 30.0) + 64),
+              ],
+            ),
           ),
           Positioned(
             bottom: 0,

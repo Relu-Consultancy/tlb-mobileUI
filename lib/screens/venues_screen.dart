@@ -44,35 +44,33 @@ class _VenuesScreenState extends State<VenuesScreen> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          Column(
-            children: [
-              Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFFFFF5E0),
-                      Color(0xFFFFF5E0),
-                      Color(0xFFFFFAF0),
-                      Colors.white,
-                    ],
-                    stops: [0.0, 0.55, 0.80, 1.0],
-                  ),
-                ),
-                child: const Column(
-                  children: [
-                    HomeHeader(),
-                    SizedBox(height: 16),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
+          // Single scroll view — header scrolls with body (Session-48 fix).
+          SingleChildScrollView(
                   physics: const ClampingScrollPhysics(),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Color(0xFFFFF5E0),
+                              Color(0xFFFFF5E0),
+                              Color(0xFFFFFAF0),
+                              Colors.white,
+                            ],
+                            stops: [0.0, 0.55, 0.80, 1.0],
+                          ),
+                        ),
+                        child: const Column(
+                          children: [
+                            HomeHeader(),
+                            SizedBox(height: 16),
+                          ],
+                        ),
+                      ),
                       // ── Banner ──
                       RepaintBoundary(
                         child: BannerCarousel(
@@ -229,12 +227,12 @@ class _VenuesScreenState extends State<VenuesScreen> {
 
                       const SizedBox(height: 40),
                       const AppFooter(),
+                      SizedBox(
+                          height: (safeBottom > 0 ? safeBottom + 15.0 : 30.0) +
+                              64),
                     ],
                   ),
                 ),
-              ),
-            ],
-          ),
           Positioned(
             bottom: 0,
             left: 0,

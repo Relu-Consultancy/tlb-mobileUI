@@ -351,6 +351,45 @@ class AuthService {
     }
   }
 
+  /// DELETE /api/v1/customer/account/ — soft-deletes the customer account.
+  /// Access is revoked immediately on success; the backend keeps profile and
+  /// booking history but the user can no longer authenticate.
+  /// Returns `{'success': true}` on 200, `{'success': false, 'message': ...}` otherwise.
+  static Future<Map<String, dynamic>> deleteAccount({
+    required String accessToken,
+  }) async {
+    try {
+      final res = await http
+          .delete(
+            Uri.parse('$_base/api/v1/customer/account/'),
+            headers: {
+              ..._headers,
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 30));
+
+      if (res.statusCode == 200) return {'success': true};
+      if (res.statusCode == 401) {
+        return {
+          'success': false,
+          'message': 'Your session has expired. Please log in again.',
+        };
+      }
+      if (res.statusCode == 403) {
+        return {
+          'success': false,
+          'message':
+              'This account type cannot be deleted from the mobile app.',
+        };
+      }
+      final body = _decode(res.body);
+      return {'success': false, 'message': _extractError(body)};
+    } catch (e) {
+      return {'success': false, 'message': _networkError(e)};
+    }
+  }
+
   // ── Logout ───────────────────────────────────────────────────────────────────
 
   /// Blacklists the refresh token. Returns true on success.

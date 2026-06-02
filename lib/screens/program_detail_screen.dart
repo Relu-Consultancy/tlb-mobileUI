@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_snackbar.dart';
+import '../core/share_helper.dart';
 import '../providers/auth_state.dart';
 import '../providers/location_state.dart';
 import '../widgets/login_sheet.dart';
@@ -265,7 +266,12 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                     ),
                     child: IconButton(
                       icon: const Icon(Icons.share_outlined, color: Color(0xFF1A1A2E), size: 20),
-                      onPressed: () {},
+                      onPressed: () => ShareHelper.shareListing(
+                        context,
+                        type: 'program',
+                        title: _title,
+                        id: _detail?.id ?? widget.event.id,
+                      ),
                     ),
                   ),
                 ],
@@ -823,6 +829,13 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                             : 'Enquire Now';
                         return ElevatedButton(
                           onPressed: () {
+                            if (!_hasApiId) {
+                              AppSnackBar.show(
+                                context,
+                                'This is a featured highlight, not a bookable program yet. Browse Programs to find one you can book.',
+                              );
+                              return;
+                            }
                             if (_isDirectBooking) {
                               Navigator.push(
                                 context,

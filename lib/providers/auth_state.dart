@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../services/avatar_storage.dart';
 import '../services/token_storage.dart';
 import '../services/auth_service.dart';
 import 'follow_state.dart';
@@ -38,7 +39,13 @@ class AuthState {
     accessToken = access;
     refreshToken = refresh;
     userData = user;
-    avatarUrl.value = profile?['avatar_url'] as String?;
+    // Preserve a locally-picked avatar (file path) when the API payload
+    // doesn't carry one — backend profile has no avatar field yet, and
+    // setting null would blank out the photo the user picked locally.
+    final apiAvatar = profile?['avatar_url'] as String?;
+    if (apiAvatar != null && apiAvatar.isNotEmpty) {
+      avatarUrl.value = apiAvatar;
+    }
     isLoggedIn.value = true;
     final uid = user?['id'] as String?;
     if (uid != null) FollowState.loadForUser(uid).catchError((_) {});
@@ -106,7 +113,10 @@ class AuthState {
   static void updateUserProfile(Map<String, dynamic> updatedUser) {
     userData = updatedUser;
     final profile = updatedUser['profile'] as Map<String, dynamic>?;
-    avatarUrl.value = profile?['avatar_url'] as String?;
+    final apiAvatar = profile?['avatar_url'] as String?;
+    if (apiAvatar != null && apiAvatar.isNotEmpty) {
+      avatarUrl.value = apiAvatar;
+    }
     if (profile != null) {
       final first = profile['first_name'] as String? ?? '';
       final last = profile['last_name'] as String? ?? '';
@@ -131,6 +141,9 @@ class AuthState {
     isLoggedIn.value = false;
     FollowState.clear();
     TokenStorage.clearTokens().catchError((_) {});
+    // Drop the locally-picked profile picture too — different user might
+    // log in next, and the previous user's photo shouldn't linger.
+    AvatarStorage.clear();
   }
 
   /// On app start: exchange stored refresh token for a fresh access token.

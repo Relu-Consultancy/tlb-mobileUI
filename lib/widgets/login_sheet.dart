@@ -61,6 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
           builder: (_) => OtpVerificationScreen(
             identifier: email,
             onExistingUser: showWelcomeBackDialog,
+            isLoginFlow: true,
           ),
         ),
       );
@@ -347,26 +348,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 18),
 
-                  // ── Continue as Event Partner ───────────────────────────
-                  TextButton(
-                    onPressed: () {},
-                    style: TextButton.styleFrom(
-                      minimumSize: Size.zero,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                    ),
-                    child: Text(
-                      'Continue as Event Partner',
-                      style: GoogleFonts.poppins(
-                        fontSize: Responsive.sp(context, 14),
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFFE6A800),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 18),
-
                   // ── New user — navigate to Signup screen ────────────────
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -542,18 +523,22 @@ class _OrDivider extends StatelessWidget {
 // ─────────────────────────────────────────────
 
 void showWelcomeBackDialog(BuildContext context) {
-  // Capture the navigator BEFORE the dialog is pushed so we can still drive
-  // it after the dialog (and underlying OTP screen) have been torn down.
-  final navigator = Navigator.of(context);
+  // Capture the ROOT navigator before the dialog is pushed. Using
+  // rootNavigator:true guards against nested Navigators (e.g. inside a
+  // showcase overlay) ending up with a stale reference, and also keeps
+  // this safe to call from a context whose underlying route has been
+  // removed by the post-dialog pushAndRemoveUntil.
+  final navigator = Navigator.of(context, rootNavigator: true);
   showDialog(
     context: context,
     barrierDismissible: false,
+    useRootNavigator: true,
     builder: (dialogContext) => _WelcomeBackDialog(
       onDone: () {
         // Dismiss the dialog first — pushing HomeScreen with predicate=false
         // while a dialog is still on top leaves a one-frame gap where neither
         // is painted, which manifests as a grey flash.
-        Navigator.of(dialogContext).pop();
+        Navigator.of(dialogContext, rootNavigator: true).pop();
         navigator.pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const HomeScreen()),
           (route) => false,

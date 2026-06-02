@@ -495,6 +495,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               onChanged: (val) {
                 if (val.isNotEmpty && i < 5) {
                   _otpFocus[i + 1].requestFocus();
+                } else if (val.isNotEmpty && i == 5) {
+                  // Last digit entered — dismiss the keyboard so the
+                  // Verify OTP button below the row stays visible.
+                  FocusScope.of(context).unfocus();
                 }
               },
             ),
