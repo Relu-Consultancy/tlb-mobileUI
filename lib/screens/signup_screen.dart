@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import '../core/app_snackbar.dart';
+import '../core/firebase_bootstrap.dart';
 import '../core/google_auth_error.dart';
 import '../services/auth_service.dart';
 import '../services/walkthrough_service.dart';
@@ -67,6 +68,11 @@ class _SignupScreenState extends State<SignupScreen> {
   Future<void> _onGoogleSignUp() async {
     setState(() => _loading = true);
     try {
+      // Make sure Firebase is up before any FirebaseAuth.instance access —
+      // main.dart's startup init can fail transiently (e.g. cold-start
+      // network blip) and we'd otherwise see "No Firebase App '[DEFAULT]'".
+      await FirebaseBootstrap.ensureInitialized();
+
       // Force the account picker every time
       final googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
       await googleSignIn.signOut();

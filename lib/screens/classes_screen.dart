@@ -250,6 +250,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               padding: const EdgeInsets.only(right: 14),
                               child: ClassNearbyCard(
                                 event: DummyData.classesRightAroundYou[index],
+                                width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                                 buttonLabel: 'Check Availability',
                               ),
                             );
@@ -269,7 +270,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                             return Padding(
                               padding: const EdgeInsets.only(right: 14),
                               child: SizedBox(
-                                width: MediaQuery.of(context).size.width - 48,
+                                width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                                 child: NewOnTlbCard(
                                   event: DummyData.classesTopPicks[index],
                                   buttonLabel: 'Send Enquiry',
@@ -308,6 +309,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               child: RepaintBoundary(
                                 child: HolidaySpecialCard(
                                   event: DummyData.classesHolidaySpecial[index],
+                                  width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                                   buttonLabel: 'Send Enquiry',
                                 ),
                               ),
@@ -329,6 +331,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               padding: const EdgeInsets.only(right: 14),
                               child: BuildSkillCard(
                                 event: DummyData.classesBuildNewSkills[index],
+                                width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                                 ctaLabel: 'Send Enquiry',
                               ),
                             );
@@ -354,6 +357,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               padding: const EdgeInsets.only(right: 14),
                               child: ClassNearbyCard(
                                 event: DummyData.classesSpecialFocus[index],
+                                width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                                 buttonLabel: 'Join Class',
                                 tagColor: tagColors[index % tagColors.length],
                               ),

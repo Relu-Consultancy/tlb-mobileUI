@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import '../core/app_snackbar.dart';
+import '../core/firebase_bootstrap.dart';
 import '../core/google_auth_error.dart';
 import '../widgets/app_loader.dart';
 import '../services/auth_service.dart';
@@ -73,6 +74,10 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _onGoogleSignIn() async {
     setState(() => _loading = true);
     try {
+      // Make sure Firebase is initialised before any FirebaseAuth access —
+      // see comment in signup_screen._onGoogleSignUp.
+      await FirebaseBootstrap.ensureInitialized();
+
       // Force the account picker every time
       final googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
       await googleSignIn.signOut();

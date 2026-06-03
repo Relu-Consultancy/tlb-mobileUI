@@ -10,11 +10,13 @@ import 'inquire_now_sheet.dart';
 class BuildSkillCard extends StatelessWidget {
   final EventModel event;
   final String ctaLabel;
+  final double? width;
 
   const BuildSkillCard({
     super.key,
     required this.event,
     this.ctaLabel = 'Start Now',
+    this.width,
   });
 
   @override
@@ -30,7 +32,7 @@ class BuildSkillCard extends StatelessWidget {
         }
       },
       child: Container(
-        width: Responsive.w(context, 290, min: 240),
+        width: width ?? Responsive.w(context, 290, min: 240),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'core/app_theme.dart';
+import 'core/firebase_bootstrap.dart';
 import 'core/preview_mode.dart';
 import 'providers/auth_state.dart';
 import 'providers/follow_state.dart';
@@ -18,10 +18,13 @@ import 'widgets/preview_toggle_button.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Tolerate startup-time init failures here — the Google sign-in screens
+  // retry [FirebaseBootstrap.ensureInitialized] before touching FirebaseAuth
+  // and will surface the real error to the user if it still fails there.
   try {
-    await Firebase.initializeApp();
-  } catch (e) {
-    debugPrint('Firebase init skipped: $e');
+    await FirebaseBootstrap.ensureInitialized();
+  } catch (_) {
+    /* swallowed — retried on-demand in Google sign-in flows */
   }
   await PreviewMode.load();
   // Local profile picture survives across launches even though backend

@@ -413,7 +413,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
   // ── For the Big Days card ──
   Widget _buildBigDaysCard(BuildContext context, EventModel event) {
     return Container(
-      width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+      width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -482,7 +482,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
   // ── Weekend Plan Sorted card (side-by-side) ──
   Widget _buildWeekendPlanCard(BuildContext context, EventModel event) {
     return Container(
-      width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
+      width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -546,7 +546,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
   // ── Close to You card ──
   Widget _buildCloseToYouCard(BuildContext context, EventModel event) {
     return Container(
-      width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+      width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -619,7 +619,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: SizedBox(
-        width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+        width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -659,7 +659,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
     final gradientColors = (data['gradient'] as List).cast<Color>();
 
     return Container(
-      width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
+      width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -861,7 +861,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
   // ── Hand-On Spaces card ──
   Widget _buildHandsOnCard(BuildContext context, EventModel event) {
     return Container(
-      width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+      width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -916,7 +916,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
   // ── Easy on the Pocket card ──
   Widget _buildEasyPocketCard(BuildContext context, EventModel event) {
     return Container(
-      width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+      width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -987,7 +987,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
   // ── Headed to the Mall card ──
   Widget _buildMallCard(BuildContext context, EventModel event) {
     return Container(
-      width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+      width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -1142,7 +1142,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
     ];
 
     return Container(
-      width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+      width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),

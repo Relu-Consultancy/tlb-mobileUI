@@ -145,7 +145,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           itemBuilder: (context, index) => Padding(
                             padding: const EdgeInsets.only(right: 16),
                             child: SizedBox(
-                              width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+                              width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                               child: EventCardWithRating(
                                 event: DummyData.hotPicks[index],
                                 buttonLabel: 'Check Availability',
@@ -236,7 +236,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                               padding: const EdgeInsets.only(right: 14),
                               child: ClassNearbyCard(
                                 event: DummyData.hotPicks[index],
-                                width: Responsive.cardWidth(context, fraction: 0.88, max: 360),
+                                width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                                 buttonLabel: 'Check Availability',
                                 tagColor: tagColors[index % tagColors.length],
                                 onTap: () => Navigator.push(
@@ -328,7 +328,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
       ),
       child: Container(
-        width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
+        width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -423,7 +423,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
       ),
       child: Container(
-        width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+        width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -532,7 +532,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
       ),
       child: Container(
-        width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
+        width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),

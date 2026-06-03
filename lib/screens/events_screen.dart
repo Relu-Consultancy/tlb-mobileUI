@@ -267,7 +267,7 @@ class _EventsScreenState extends State<EventsScreen> {
                             return Padding(
                               padding: const EdgeInsets.only(right: 16),
                               child: SizedBox(
-                                width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+                                width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                                 child: EventCardWithRating(
                                   event: DummyData.hotPicks[index],
                                 ),
@@ -304,7 +304,7 @@ class _EventsScreenState extends State<EventsScreen> {
                               padding: const EdgeInsets.only(right: 14),
                               child: WeekendEventCard(
                                 event: DummyData.weekendSpecial[index],
-                                width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
+                                width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                               ),
                             );
                           },
@@ -324,7 +324,7 @@ class _EventsScreenState extends State<EventsScreen> {
                               child: RepaintBoundary(
                                 child: HolidaySpecialCard(
                                   event: DummyData.holidaySpecials[index],
-                                  width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+                                  width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                                 ),
                               ),
                             );
@@ -342,7 +342,7 @@ class _EventsScreenState extends State<EventsScreen> {
                           itemBuilder: (context, index) {
                             return PartnerPortraitCard(
                               event: DummyData.featuredPartners[index],
-                              width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+                              width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                             );
                           },
                         ),
@@ -389,7 +389,7 @@ class _EventsScreenState extends State<EventsScreen> {
                               padding: const EdgeInsets.only(right: 14),
                               child: OnlineEventCard(
                                 event: DummyData.onlineEvents[index],
-                                width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+                                width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                               ),
                             );
                           },

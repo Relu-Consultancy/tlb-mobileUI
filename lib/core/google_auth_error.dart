@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:firebase_core/firebase_core.dart' show FirebaseException;
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/services.dart' show PlatformException;
 
@@ -15,6 +16,24 @@ String googleAuthErrorMessage(Object e) {
   }
   if (e is HandshakeException) {
     return 'Secure connection failed. Please try again.';
+  }
+
+  // firebase_core's base FirebaseException — surfaced when the SDK can't
+  // find an initialized app (code 'no-app'), when the underlying native
+  // SDK is missing google-services.json, or when the app's package name
+  // doesn't match the one in the Firebase project.
+  if (e is FirebaseException && e is! fb.FirebaseAuthException) {
+    final code = e.code.toLowerCase();
+    if (code == 'no-app' || code == 'core/no-app') {
+      return 'Sign-in service is not ready yet. Please close the app and '
+          'reopen it, or check your internet connection.';
+    }
+    if (code.contains('duplicate-app')) {
+      // Shouldn't reach the user — handled in FirebaseBootstrap — but be defensive.
+      return 'Sign-in service is restarting. Please tap again.';
+    }
+    final msg = e.message?.isNotEmpty == true ? e.message : e.code;
+    return 'Firebase error: $msg';
   }
 
   if (e is fb.FirebaseAuthException) {

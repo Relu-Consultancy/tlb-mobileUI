@@ -81,8 +81,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final userEmail = AuthState.userEmail ?? 'No email provided';
 
     String avatarUrl;
+    // Prefer the live ValueNotifier — _pickAvatar writes the local file path
+    // there, and AvatarStorage.load() repopulates it on cold start. The
+    // userData['profile']['avatar_url'] copy is only updated by API refreshes
+    // and won't reflect a freshly picked photo.
+    final liveAvatar = AuthState.avatarUrl.value;
     final rawAvatar = profile?['avatar_url'] as String?;
-    if (rawAvatar != null && rawAvatar.isNotEmpty) {
+    if (liveAvatar != null && liveAvatar.trim().isNotEmpty) {
+      avatarUrl = liveAvatar;
+    } else if (rawAvatar != null && rawAvatar.isNotEmpty) {
       avatarUrl = rawAvatar;
     } else {
       final firstChar = AuthState.userEmail?.isNotEmpty == true
