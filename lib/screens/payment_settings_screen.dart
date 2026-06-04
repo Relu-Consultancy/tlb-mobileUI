@@ -23,7 +23,7 @@ class PaymentSettingsScreen extends StatelessWidget {
           'Payment Settings',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -53,7 +53,7 @@ class PaymentSettingsScreen extends StatelessWidget {
                               'Hi ${AuthState.firstName},',
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 20),
-                                fontWeight: FontWeight.w800,
+                                fontWeight: FontWeight.w500,
                                 color: const Color(0xFF1A1A2E),
                               ),
                             );
@@ -118,7 +118,7 @@ class PaymentSettingsScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 15),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFF1A1A2E),
                     ),
                   ),
@@ -145,7 +145,7 @@ class PaymentSettingsScreen extends StatelessWidget {
               'Need more help?',
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 14),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A2E),
               ),
             ),
@@ -178,7 +178,7 @@ class PaymentSettingsScreen extends StatelessWidget {
                   'Chat with support',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 14),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E),
                   ),
                 ),

@@ -817,19 +817,21 @@ class DummyData {
     ),
   ];
 
+  // "Where Every Star Shines" — horizontal split cards. `venue` holds the
+  // "area • distance" line and `tag` holds the pink pill label.
   static const List<EventModel> specialNeeds = [
     EventModel(
-      title: 'Sensory Play Activity Kit',
-      venue: '',
+      title: 'Sensory Play Area',
+      venue: 'Bandra • 2 km',
       imagePath: 'assets/images/new_home/specialneeds1.png',
-      rating: 5.0,
-      reviewCount: '3.5k reviews',
+      rating: 4.5,
+      reviewCount: '4.5k reviews',
       price: 200.0,
-      tag: 'Therapist Recommended', // We'll hijack 'tag' for the bottom banner
+      tag: 'Sensory Friendly',
     ),
     EventModel(
       title: 'Therapeutic Art Class',
-      venue: '',
+      venue: 'Andheri • 3 km',
       imagePath: 'assets/images/new_home/specialneeds2.png',
       rating: 4.8,
       reviewCount: '1.2k reviews',
@@ -922,6 +924,62 @@ class DummyData {
       rating: 4.9,
       reviewCount: '2.1k reviews',
       price: 500.0,
+    ),
+  ];
+
+  // "New on the Block" — recently-added listings. `venue` holds the
+  // "area • distance" line and `tag` holds the time-ago badge text.
+  static const List<EventModel> newOnTheBlock = [
+    EventModel(
+      title: 'Robotics Lab',
+      venue: 'Andheri • 4 kms',
+      imagePath: 'assets/images/new_home/weekendspl4.png',
+      tag: '2 days ago',
+    ),
+    EventModel(
+      title: 'Storytelling Club',
+      venue: 'Andheri • 4 kms',
+      imagePath: 'assets/images/new_home/newontlb1.jpg',
+      tag: 'Just now',
+    ),
+    EventModel(
+      title: 'Pottery Basics',
+      venue: 'Bandra • 6 kms',
+      imagePath: 'assets/images/new_home/weekendspl2.png',
+      tag: '5 days ago',
+    ),
+  ];
+
+  // "Parents' Favorite" — `description` holds the age range, `rating` /
+  // `reviewCount` / `price` drive the rating + price rows. Every card shows
+  // the fixed "Loved by Parents" badge.
+  static const List<EventModel> parentsFavorite = [
+    EventModel(
+      title: 'Abacus Classes',
+      venue: 'Andheri',
+      imagePath: 'assets/images/new_home/weekendspl3.png',
+      description: '4-12 Yrs',
+      rating: 4.8,
+      reviewCount: '3.5k reviews',
+      price: 800.0,
+    ),
+    EventModel(
+      title: 'Chess Academy',
+      venue: 'Bandra',
+      imagePath: 'assets/images/new_home/newontlb1.jpg',
+      description: '6-14 Yrs',
+      rating: 4.9,
+      reviewCount: '2.1k reviews',
+      price: 1000.0,
+    ),
+    EventModel(
+      title: 'Phonics & Reading',
+      venue: 'Powai',
+      imagePath: 'assets/images/new_home/weekendspl2.png',
+      description: '3-8 Yrs',
+      rating: 4.7,
+      reviewCount: '1.8k reviews',
+      price: 650.0,
     ),
   ];
 

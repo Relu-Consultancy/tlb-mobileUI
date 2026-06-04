@@ -65,7 +65,7 @@ class WeekendEventCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 15),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w500,
                         color: AppColors.textPrimary,
                         height: 1.2,
                       ),
@@ -151,7 +151,7 @@ class _BookNowButton extends StatelessWidget {
               'Book Now',
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 13),
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A2E),
               ),
             ),

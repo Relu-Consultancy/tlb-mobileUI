@@ -198,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         'Skip',
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 14),
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                           color: const Color(0xFF2F80ED),
                         ),
                       ),
@@ -306,7 +306,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     "Let's Get Started!",
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 22),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFF1A1A1A),
                     ),
                   ),
@@ -374,7 +374,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           'Signup',
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 13.5),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                             color: const Color(0xFF1A1A1A),
                           ),
                         ),
@@ -487,7 +487,7 @@ class _PrimaryButton extends StatelessWidget {
                 label,
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 15),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                   color: const Color(0xFF1A1A1A),
                 ),
               ),
@@ -639,7 +639,7 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
                   'Welcome Back!',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 22),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: Colors.white,
                   ),
                 ),
@@ -671,7 +671,7 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
                       "Let's Go!",
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 16),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
@@ -784,7 +784,7 @@ class _GoogleButton extends StatelessWidget {
               'Continue with Google',
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 14.5),
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF3C3C3C),
               ),
             ),

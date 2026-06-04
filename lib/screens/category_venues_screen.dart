@@ -285,7 +285,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                                   'Explore other Venues',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 13),
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w500,
                                     color: AppColors.textPrimary,
                                   ),
                                 ),
@@ -388,7 +388,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                                               overflow: TextOverflow.ellipsis,
                                               style: GoogleFonts.poppins(
                                                 fontSize: Responsive.sp(context, 9.5),
-                                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                                fontWeight: isSelected ? FontWeight.w500 : FontWeight.w500,
                                                 height: 1.2,
                                                 color: AppColors.textPrimary,
                                               ),
@@ -421,7 +421,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                             'All $_categoryTitle',
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 14.5),
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w500,
                               color: AppColors.textPrimary,
                             ),
                           ),
@@ -461,7 +461,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                                       'Filters',
                                       style: GoogleFonts.poppins(
                                         fontSize: Responsive.sp(context, 11.5),
-                                        fontWeight: FontWeight.w600,
+                                        fontWeight: FontWeight.w500,
                                         color: Colors.white,
                                       ),
                                     ),
@@ -502,7 +502,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 11.5),
                                   fontWeight: isActive
-                                      ? FontWeight.w700
+                                      ? FontWeight.w500
                                       : FontWeight.w500,
                                   color: isActive
                                       ? AppColors.textPrimary
@@ -685,7 +685,7 @@ class _VenuesAllCategoriesSheetState
                   'All Categories',
                   style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 16),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFF1A1A2E)),
                 ),
                 const SizedBox(width: 8),

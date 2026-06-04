@@ -35,7 +35,7 @@ class PaymentScreen extends StatelessWidget {
           'Payment',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 17),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -61,7 +61,7 @@ class PaymentScreen extends StatelessWidget {
                   'Amount Payable',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 14),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E),
                   ),
                 ),
@@ -69,7 +69,7 @@ class PaymentScreen extends StatelessWidget {
                   '₹${amount > 0 ? amount.toStringAsFixed(2) : "0.00"}',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 18),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E),
                   ),
                 ),
@@ -221,7 +221,7 @@ class PaymentScreen extends StatelessWidget {
         title,
         style: GoogleFonts.poppins(
           fontSize: Responsive.sp(context, 12),
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
           color: Colors.grey.shade600,
           letterSpacing: 0.5,
         ),
@@ -262,7 +262,7 @@ class PaymentScreen extends StatelessWidget {
                     title,
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 14),
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFF1A1A2E),
                     ),
                   ),

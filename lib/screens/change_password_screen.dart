@@ -119,7 +119,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 'Password Changed!',
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 18),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                   color: const Color(0xFF1A1A2E),
                 ),
               ),
@@ -154,7 +154,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     'Done',
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 14),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
@@ -182,7 +182,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           'Change Password',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -304,7 +304,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         'Update Password',
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 15),
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
               ),
@@ -344,7 +344,7 @@ class _PasswordField extends StatelessWidget {
           label,
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 12.5),
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF6B7280),
           ),
         ),

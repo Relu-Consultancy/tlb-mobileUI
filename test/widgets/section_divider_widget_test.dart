@@ -14,13 +14,16 @@ void main() {
       expect(find.text('Top Events'), findsOneWidget);
     });
 
-    testWidgets('TC_W_SDW_002 — renders two gradient line containers', (tester) async {
+    testWidgets('TC_W_SDW_002 — renders two short gradient line containers', (tester) async {
       await pumpTLBApp(
         tester,
         const Scaffold(body: SectionDividerWidget(title: 'Events')),
       );
-      // Two Expanded children for the left and right gradient lines
-      expect(find.byType(Expanded), findsNWidgets(2));
+      // Session-49 redesign: lines are fixed-width SizedBoxes (lineLength
+      // wide) flanking the title — not Expanded children. Verify by
+      // checking the Row has three children (left line, title, right line).
+      final row = tester.widget<Row>(find.byType(Row).first);
+      expect(row.children.length, 3);
     });
 
     testWidgets('TC_W_SDW_003 — title is centre-aligned between two lines', (tester) async {

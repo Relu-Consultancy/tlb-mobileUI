@@ -174,7 +174,7 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
               style: GoogleFonts.poppins(
                 fontSize: isSelected ? Responsive.sp(context, 9.5) : Responsive.sp(context, 8.5),
                 fontWeight:
-                    isSelected ? FontWeight.w700 : FontWeight.w500,
+                    isSelected ? FontWeight.w500 : FontWeight.w500,
                 color: isSelected
                     ? Colors.white
                     : Colors.white.withOpacity(0.7),
@@ -252,7 +252,7 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
                                 _formatLabel,
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 18),
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.w500,
                                   color: Colors.white,
                                 ),
                               ),
@@ -308,7 +308,7 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
                             'All $_formatLabel Events',
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 14),
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w500,
                               color: AppColors.textPrimary,
                             ),
                           ),

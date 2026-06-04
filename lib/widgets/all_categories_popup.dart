@@ -123,7 +123,7 @@ class AllCategoriesPopup extends StatelessWidget {
                     'All Categories',
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 18),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: Colors.black,
                     ),
                   ),
@@ -193,7 +193,7 @@ class AllCategoriesPopup extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 10),
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
                               height: 1.1,
                               color: Colors.black87,
                             ),

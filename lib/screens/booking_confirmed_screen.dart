@@ -386,7 +386,7 @@ class _HeaderSection extends StatelessWidget {
                   'Booking Confirmed!',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 20),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A3A8F),
                   ),
                 ),
@@ -489,7 +489,7 @@ class _TicketCard extends StatelessWidget {
                     'Scan QR Code',
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 13),
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFF1A1A2E),
                     ),
                   ),
@@ -542,7 +542,7 @@ class _TicketContent extends StatelessWidget {
           event.title,
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 16),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
           maxLines: 1,
@@ -569,7 +569,7 @@ class _TicketContent extends StatelessWidget {
                     event.venue,
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 12),
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFF1A1A2E),
                     ),
                     maxLines: 2,
@@ -625,7 +625,7 @@ class _TicketContent extends StatelessWidget {
                     selectedDate,
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 12),
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFF1A1A2E),
                     ),
                   ),
@@ -646,7 +646,7 @@ class _TicketContent extends StatelessWidget {
                     selectedTime,
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 12),
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFF1A1A2E),
                     ),
                   ),
@@ -751,7 +751,7 @@ class _ActionBtn extends StatelessWidget {
               label,
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 14),
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: disabled
                     ? const Color(0xFF9CA3AF)
                     : const Color(0xFF1A1A2E),

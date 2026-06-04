@@ -66,7 +66,7 @@ class PartnerPortraitCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 16),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
                     ),
                   ),
@@ -102,7 +102,7 @@ class PartnerPortraitCard extends StatelessWidget {
                             'Book Now',
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 13),
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
                               color: AppColors.textPrimary,
                             ),
                           ),

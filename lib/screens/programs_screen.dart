@@ -366,7 +366,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       event.title,
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 13),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w500,
                         color: AppColors.textPrimary,
                       ),
                       maxLines: 2,
@@ -400,7 +400,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           buttonLabel,
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 11),
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -479,7 +479,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       event.title,
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 13),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w500,
                         color: AppColors.textPrimary,
                       ),
                       maxLines: 1,
@@ -510,7 +510,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         ),
                         child: Text(
                           'Check Availability',
-                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), fontWeight: FontWeight.w600),
+                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), fontWeight: FontWeight.w500),
                         ),
                       ),
                     ),
@@ -576,7 +576,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       'Portfolio Project : Yes',
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 10),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: Colors.white,
                       ),
                     ),
@@ -597,7 +597,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                             event.title,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 13),
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w500,
                               color: AppColors.textPrimary,
                             ),
                             maxLines: 1,
@@ -616,7 +616,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                               event.description!,
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 9),
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w500,
                                 color: AppColors.textPrimary,
                               ),
                             ),
@@ -648,7 +648,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         ),
                         child: Text(
                           'Check Availability',
-                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w600),
+                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w500),
                         ),
                       ),
                     ),

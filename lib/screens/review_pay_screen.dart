@@ -298,7 +298,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Booking Pending',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w700),
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
         ),
         content: Text(
           'Your payment was received but we could not confirm the booking automatically.\n\n'
@@ -311,7 +311,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
             onPressed: () => Navigator.pop(ctx),
             child: Text('OK',
                 style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E))),
           ),
         ],
@@ -338,7 +338,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
           'Review & Pay',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 16),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -398,7 +398,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
                       'Pay ₹${_totalAmount.toStringAsFixed(2)}',
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 16),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
             ),
@@ -431,7 +431,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
             widget.event.title,
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 18),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFF1A1A2E),
               height: 1.3,
             ),
@@ -459,7 +459,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
                 : 'Tickets',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 16),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFF1A1A2E),
             ),
           ),
@@ -482,7 +482,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
               'Attendee',
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 16),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A2E),
               ),
             ),
@@ -520,7 +520,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
                 'Total Amount',
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 16),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                   color: const Color(0xFF1A1A2E),
                 ),
               ),
@@ -528,7 +528,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
                 '₹${_totalAmount.toStringAsFixed(2)}',
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 16),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                   color: const Color(0xFFFFB300),
                 ),
               ),
@@ -590,7 +590,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
           value,
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 14),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),

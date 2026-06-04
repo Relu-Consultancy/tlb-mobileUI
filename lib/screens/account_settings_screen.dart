@@ -27,7 +27,7 @@ class AccountSettingsScreen extends StatelessWidget {
           'Account Settings',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -108,7 +108,7 @@ class AccountSettingsScreen extends StatelessWidget {
                                     'Personal Info',
                                     style: GoogleFonts.poppins(
                                       fontSize: Responsive.sp(context, 15),
-                                      fontWeight: FontWeight.w700,
+                                      fontWeight: FontWeight.w500,
                                       color: const Color(0xFF1A1A2E),
                                     ),
                                   ),
@@ -162,7 +162,7 @@ class AccountSettingsScreen extends StatelessWidget {
                       'Privacy',
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 13),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w500,
                         color: const Color(0xFF1A1A2E),
                       ),
                     ),
@@ -206,7 +206,7 @@ class AccountSettingsScreen extends StatelessWidget {
         title: Text(
           'Delete account?',
           style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             fontSize: Responsive.sp(context, 17),
           ),
         ),
@@ -235,7 +235,7 @@ class AccountSettingsScreen extends StatelessWidget {
               'Delete',
               style: GoogleFonts.poppins(
                 color: const Color(0xFFE53935),
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 fontSize: Responsive.sp(context, 14),
               ),
             ),

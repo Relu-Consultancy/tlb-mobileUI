@@ -70,7 +70,7 @@ class SpecialFocusCard extends StatelessWidget {
                             event.tag!,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 10.5),
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w500,
                               color: accentColor,
                               letterSpacing: 0.4,
                             ),
@@ -85,7 +85,7 @@ class SpecialFocusCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 14),
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                           color: AppColors.textPrimary,
                           height: 1.25,
                         ),

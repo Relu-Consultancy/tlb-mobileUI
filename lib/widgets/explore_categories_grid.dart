@@ -141,7 +141,7 @@ class ExploreCategoriesGrid extends StatelessWidget {
             'View All',
             style: GoogleFonts.poppins(
               fontSize: 12,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               color: Colors.blueAccent,
             ),
           ),
@@ -186,7 +186,7 @@ class ExploreCategoriesGrid extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 11),
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   height: 1.2,
                   color: AppColors.textPrimary,
                 ),

@@ -92,7 +92,7 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
           overflow: TextOverflow.ellipsis,
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 16),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -240,7 +240,7 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
                 'Continue',
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 16),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
@@ -271,7 +271,7 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
             title,
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 16),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFF1A1A2E),
             ),
           ),
@@ -315,7 +315,7 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
                                     items[row * 3 + col],
                                     style: GoogleFonts.poppins(
                                       fontSize: Responsive.sp(context, 11),
-                                      fontWeight: selectedIndex == (row * 3 + col) ? FontWeight.w600 : FontWeight.w400,
+                                      fontWeight: selectedIndex == (row * 3 + col) ? FontWeight.w500 : FontWeight.w400,
                                       color: const Color(0xFF1A1A2E),
                                     ),
                                   ),

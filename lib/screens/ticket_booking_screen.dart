@@ -121,7 +121,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           'Checkout',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 17),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -200,7 +200,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                 'Proceed to Pay${_subtotal > 0 ? ' • ₹$_subtotal' : ''}',
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 16),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
@@ -271,7 +271,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                         event.title,
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 15),
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                           color: const Color(0xFF1A1A2E),
                         ),
                         maxLines: 2,
@@ -338,7 +338,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                     '$_totalAvailableSpots ${_totalAvailableSpots == 1 ? 'spot' : 'spots'} left',
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 12),
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFFFF6B6B),
                     ),
                   ),
@@ -368,7 +368,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             'Select Ticket',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 16),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFF1A1A2E),
             ),
           ),
@@ -390,7 +390,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                             ticket['name'] as String,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 14),
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
                               color: const Color(0xFF1A1A2E),
                             ),
                           ),
@@ -423,7 +423,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                                 'Add',
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 13),
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w500,
                                   color: const Color(0xFF1A1A2E),
                                 ),
                               ),
@@ -457,7 +457,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                                   '$count',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 14),
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w500,
                                     color: const Color(0xFF1A1A2E),
                                   ),
                                 ),
@@ -493,7 +493,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           'Bill Details',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 16),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -511,7 +511,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
               'Total to be paid',
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 14),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A2E),
               ),
             ),
@@ -519,7 +519,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
               '₹$_subtotal',
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 16),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A2E),
               ),
             ),
@@ -565,7 +565,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             'Attendee Details',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 16),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFF1A1A2E),
             ),
           ),

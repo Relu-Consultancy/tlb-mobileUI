@@ -143,7 +143,7 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
             'Attendee Details',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 17),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: AppColors.textPrimary,
             ),
           ),
@@ -192,7 +192,7 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
                       widget.event.title,
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 14),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w500,
                         color: AppColors.textPrimary,
                       ),
                       maxLines: 2,
@@ -203,7 +203,7 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
                       widget.batch.name,
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 12),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: const Color(0xFF0284C7),
                       ),
                     ),
@@ -215,7 +215,7 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
                 _feeDisplay,
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 17),
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w500,
                   color: const Color(0xFF0369A1),
                 ),
               ),
@@ -265,7 +265,7 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
           'Attendee Information',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 15),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: AppColors.textPrimary,
           ),
         ),
@@ -414,7 +414,7 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
             'Continue',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 15),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),

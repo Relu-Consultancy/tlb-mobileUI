@@ -34,7 +34,7 @@ class SubcategoryEmptyState extends StatelessWidget {
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 18),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: AppColors.textPrimary,
             ),
           ),
@@ -71,7 +71,7 @@ class SubcategoryEmptyState extends StatelessWidget {
                 'Notify Me',
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 14),
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),

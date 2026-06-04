@@ -120,7 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           'My Profile',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 17),
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -185,7 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     userName,
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 18),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFF1A1A2E),
                     ),
                   ),
@@ -247,7 +247,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               '${(completion * 100).toInt()}%',
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 12),
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w500,
                                 color: const Color(0xFF1A1A2E),
                               ),
                             ),
@@ -401,7 +401,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text('Log Out',
             style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 fontSize: Responsive.sp(context, 17))),
         content: Text('Are you sure you want to log out?',
             style: GoogleFonts.poppins(
@@ -437,7 +437,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Text('Log Out',
                 style: GoogleFonts.poppins(
                     color: const Color(0xFFE53935),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     fontSize: Responsive.sp(context, 14))),
           ),
         ],

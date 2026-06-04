@@ -63,7 +63,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
           'Gallery',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 17),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -125,7 +125,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                   '${_currentPage + 1}/${_images.length}',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 14),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E),
                   ),
                 ),

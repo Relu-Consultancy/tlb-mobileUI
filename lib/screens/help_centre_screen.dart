@@ -77,7 +77,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
           'Help',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -102,7 +102,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                             'Hi ${AuthState.firstName},',
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 22),
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w500,
                               color: const Color(0xFF1A1A2E),
                             ),
                           );
@@ -171,7 +171,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
               'Common Topics',
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 14),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A2E),
               ),
             ),
@@ -236,7 +236,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
               'Talk to us',
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 14),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A2E),
               ),
             ),
@@ -303,7 +303,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                           'Support Hours',
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 13),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                             color: const Color(0xFF1A1A2E),
                           ),
                         ),
@@ -370,7 +370,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                       title,
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 14),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: const Color(0xFF1A1A2E),
                       ),
                     ),

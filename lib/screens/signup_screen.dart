@@ -257,7 +257,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     'Create Account',
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 22),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFF1A1A1A),
                     ),
                   ),
@@ -314,7 +314,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       'Continue as Event Partner',
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 14),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: const Color(0xFFE6A800),
                       ),
                     ),
@@ -339,7 +339,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           'Log In',
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 13.5),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                             color: const Color(0xFF1A1A1A),
                           ),
                         ),
@@ -450,7 +450,7 @@ class _PrimaryButton extends StatelessWidget {
                 label,
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 15),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                   color: const Color(0xFF1A1A1A),
                 ),
               ),
@@ -521,7 +521,7 @@ class _GoogleButton extends StatelessWidget {
               'Continue with Google',
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 14.5),
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF3C3C3C),
               ),
             ),

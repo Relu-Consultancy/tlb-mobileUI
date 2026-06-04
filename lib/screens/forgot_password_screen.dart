@@ -216,7 +216,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           'Forgot Password?',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 22),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A1A),
           ),
         ),
@@ -256,7 +256,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           'Enter OTP',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 22),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A1A),
           ),
         ),
@@ -274,7 +274,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           _identifier,
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 13),
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A1A),
           ),
           textAlign: TextAlign.center,
@@ -288,7 +288,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             'Resend OTP',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 13),
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFF3B82F6),
             ),
           ),
@@ -315,7 +315,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           'Set New Password',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 22),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A1A),
           ),
         ),
@@ -474,7 +474,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               ],
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 20),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A1A),
               ),
               decoration: InputDecoration(
@@ -581,7 +581,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 label,
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 15),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                   color: const Color(0xFF1A1A1A),
                 ),
               ),
@@ -602,7 +602,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               text: 'Log In',
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 13),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A1A),
               ),
             ),
@@ -691,7 +691,7 @@ class _PasswordResetSuccessDialogState
                     'Password Reset!',
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 20),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: Colors.white,
                     ),
                     textAlign: TextAlign.center,
@@ -727,7 +727,7 @@ class _PasswordResetSuccessDialogState
                         'Back to Login',
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 14),
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),

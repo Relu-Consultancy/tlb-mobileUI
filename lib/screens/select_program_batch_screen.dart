@@ -130,7 +130,7 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
             'Select Batch',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 17),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: AppColors.textPrimary,
             ),
           ),
@@ -164,7 +164,7 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
                   widget.event.venue,
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 13),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: AppColors.textPrimary,
                   ),
                 ),
@@ -231,7 +231,7 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
           'Available Batches',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 15),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: AppColors.textPrimary,
           ),
         ),
@@ -293,7 +293,7 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
                     _timeRange(batch),
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 16),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
                     ),
                   ),
@@ -319,7 +319,7 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
                           batch.name,
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 11),
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                             color: fg,
                           ),
                         ),
@@ -343,7 +343,7 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
                                 '${batch.totalSeats} Seats',
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 11),
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w500,
                                   color: const Color(0xFFE53935),
                                 ),
                               ),
@@ -431,7 +431,7 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
           _fmtApiDate(raw),
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 13),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF0369A1),
           ),
         ),
@@ -478,7 +478,7 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
             'Continue',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 15),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: AppColors.textPrimary,
             ),
           ),

@@ -51,7 +51,7 @@ class _YourReviewsScreenState extends State<YourReviewsScreen> {
         ),
         title: Text(
           'Your Reviews',
-          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 18), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 18), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E)),
         ),
       ),
       body: RefreshIndicator(
@@ -76,7 +76,7 @@ class _YourReviewsScreenState extends State<YourReviewsScreen> {
                           builder: (_, __, ___) => Text(
                             'Hi ${AuthState.firstName},',
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 22), fontWeight: FontWeight.w800, color: const Color(0xFF1A1A2E),
+                              fontSize: Responsive.sp(context, 22), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E),
                             ),
                           ),
                         ),
@@ -97,7 +97,7 @@ class _YourReviewsScreenState extends State<YourReviewsScreen> {
 
               const SizedBox(height: 20),
               Text('Activities Review',
-                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
               const SizedBox(height: 10),
 
               // ── Content ──
@@ -116,7 +116,7 @@ class _YourReviewsScreenState extends State<YourReviewsScreen> {
                         const SizedBox(height: 12),
                         TextButton(
                           onPressed: _load,
-                          child: Text('Retry', style: GoogleFonts.poppins(color: const Color(0xFFFFB902), fontWeight: FontWeight.w600)),
+                          child: Text('Retry', style: GoogleFonts.poppins(color: const Color(0xFFFFB902), fontWeight: FontWeight.w500)),
                         ),
                       ],
                     ),
@@ -197,7 +197,7 @@ class _ReviewCard extends StatelessWidget {
                           child: Text(
                             title,
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E),
+                              fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -237,7 +237,7 @@ class _ReviewCard extends StatelessWidget {
             Text(
               '"${review.comment}"',
               style: GoogleFonts.poppins(
-                fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E), height: 1.4,
+                fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E), height: 1.4,
               ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
@@ -289,7 +289,7 @@ class _ReviewCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                   child: Text('Edit Review',
-                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
                 ),
               ),
               const SizedBox(width: 12),
@@ -302,7 +302,7 @@ class _ReviewCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                   child: Text('Delete',
-                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFFFF6B6B))),
+                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFFFF6B6B))),
                 ),
               ),
             ],
@@ -341,7 +341,7 @@ class _ReviewCard extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text('Delete Review', style: GoogleFonts.poppins(fontWeight: FontWeight.w700)),
+        title: Text('Delete Review', style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
         content: Text('Are you sure you want to delete this review?', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14))),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),

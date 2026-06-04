@@ -90,7 +90,7 @@ class _WalkthroughIntroOverlayState extends State<WalkthroughIntroOverlay>
                         'Welcome to\nThe Little Broadway',
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 22),
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                           color: Colors.white,
                           height: 1.3,
                         ),
@@ -126,7 +126,7 @@ class _WalkthroughIntroOverlayState extends State<WalkthroughIntroOverlay>
                             "Let's Go  →",
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 15),
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w500,
                               color: const Color(0xFF1A1A2E),
                             ),
                           ),

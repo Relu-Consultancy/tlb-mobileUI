@@ -101,7 +101,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
           'All Bookings',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -201,7 +201,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
               ),
               child: Text(
                 'Retry',
-                style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
               ),
             ),
           ],
@@ -252,7 +252,7 @@ class _TabBar extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 13),
-                      fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                      fontWeight: active ? FontWeight.w500 : FontWeight.w500,
                       color: active ? const Color(0xFF1A1A2E) : Colors.grey.shade500,
                     ),
                   ),
@@ -386,7 +386,7 @@ class _BookingCardState extends State<_BookingCard> {
                   booking.listingTitle,
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 14.5),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E),
                     height: 1.3,
                   ),
@@ -425,7 +425,7 @@ class _BookingCardState extends State<_BookingCard> {
                       _fmtAmount(booking.totalAmount),
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 12.5),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: const Color(0xFF1A1A2E),
                       ),
                     ),
@@ -452,7 +452,7 @@ class _BookingCardState extends State<_BookingCard> {
                             'View Ticket',
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 12),
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
                               color: const Color(0xFF1A1A2E),
                             ),
                           ),
@@ -570,7 +570,7 @@ class _StatusBadge extends StatelessWidget {
         _statusLabel(status),
         style: GoogleFonts.poppins(
           fontSize: Responsive.sp(context, 10.5),
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
           color: color,
         ),
       ),

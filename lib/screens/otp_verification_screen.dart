@@ -243,7 +243,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     'OTP Verification',
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 22),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFF1A1A1A),
                     ),
                   ),
@@ -295,7 +295,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                               ],
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 20),
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w500,
                                 color: const Color(0xFF1A1A1A),
                               ),
                               decoration: InputDecoration(
@@ -371,7 +371,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                               'Verify & Continue',
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 15),
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w500,
                                 color: const Color(0xFF1A1A1A),
                               ),
                             ),
@@ -394,7 +394,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         'Resend OTP',
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 14),
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                           color: const Color(0xFFFFD014),
                         ),
                       ),

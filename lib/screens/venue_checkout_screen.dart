@@ -158,7 +158,7 @@ String _formatDate(String dateStr) {
           'Checkout',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 17),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -220,7 +220,7 @@ String _formatDate(String dateStr) {
                               widget.event.title,
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 15),
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w500,
                                 color: const Color(0xFF1A1A2E),
                               ),
                             ),
@@ -251,7 +251,7 @@ String _formatDate(String dateStr) {
                                 '${widget.attendeeCount} Attendees • ${widget.occasion}',
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 11),
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w500,
                                   color: const Color(0xFF8B6A00),
                                 ),
                               ),
@@ -271,7 +271,7 @@ String _formatDate(String dateStr) {
                     'Select Packages',
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 15),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFF1A1A2E),
                     ),
                   ),
@@ -315,7 +315,7 @@ String _formatDate(String dateStr) {
                         'Bill Details',
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 15),
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                           color: const Color(0xFF1A1A2E),
                         ),
                       ),
@@ -342,7 +342,7 @@ String _formatDate(String dateStr) {
                             'Total to be paid',
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 14),
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w500,
                               color: const Color(0xFF1A1A2E),
                             ),
                           ),
@@ -350,7 +350,7 @@ String _formatDate(String dateStr) {
                             '₹${_total.toStringAsFixed(0)}',
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 15),
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w500,
                               color: const Color(0xFFFFB300),
                             ),
                           ),
@@ -406,7 +406,7 @@ String _formatDate(String dateStr) {
                         'Pay ₹${_total.toStringAsFixed(0)}',
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 15),
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -420,7 +420,7 @@ String _formatDate(String dateStr) {
                         'Continue to payment',
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 13),
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
@@ -480,7 +480,7 @@ String _formatDate(String dateStr) {
             value,
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 13),
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               color: valueColor ?? const Color(0xFF1A1A2E),
             ),
           ),
@@ -533,7 +533,7 @@ class _PackageItem extends StatelessWidget {
                   pkg.name,
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 13.5),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E),
                   ),
                 ),
@@ -587,7 +587,7 @@ class _PackageItem extends StatelessWidget {
                   '₹${pkg.price.toInt()}',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 14),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E),
                   ),
                 ),
@@ -611,7 +611,7 @@ class _PackageItem extends StatelessWidget {
                   'Add',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 13),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E),
                   ),
                 ),
@@ -628,7 +628,7 @@ class _PackageItem extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 14),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFF1A1A2E),
                     ),
                   ),

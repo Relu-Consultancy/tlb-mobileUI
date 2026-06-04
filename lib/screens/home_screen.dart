@@ -15,6 +15,8 @@ import '../sections/special_needs_section.dart';
 import '../sections/stealers_section.dart';
 import '../sections/discover_near_you_section.dart';
 import '../sections/family_feels_section.dart';
+import '../sections/new_on_the_block_section.dart';
+import '../sections/parents_favorite_section.dart';
 import '../sections/app_footer.dart';
 import '../widgets/floating_navbar.dart';
 import '../helpers/walkthrough_keys.dart';
@@ -167,18 +169,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // ── Unified header on a gradient background ──
+                    // Gradient extends past the search bar through the
+                    // Spotlight divider so the warm tone blends seamlessly
+                    // into the purple Spotlight banner that follows.
                     Container(
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Color(0xFFFFF5E0),
-                            Color(0xFFFFF5E0),
-                            Color(0xFFFFFAF0),
-                            Colors.white,
+                            Color(0xFFFFD893), // vibrant warm yellow at top
+                            Color(0xFFFFE3AE),
+                            Color(0xFFFFEDC4),
+                            Color(0xFFFFF1D2), // hold the warm cream through
+                            // the Spotlight divider so the cloud image fades
+                            // into a continuously-warm band, not a white one.
+                            Colors.white, // fade to scaffold white at the end
                           ],
-                          stops: [0.0, 0.55, 0.80, 1.0],
+                          stops: [0.0, 0.30, 0.55, 0.88, 1.0],
                         ),
                       ),
                       child: Column(
@@ -187,6 +195,25 @@ class _HomeScreenState extends State<HomeScreen> {
                             profileShowcaseConfig: kProfileShowcaseConfig,
                             locationShowcaseConfig: kLocationShowcaseConfig,
                           ),
+                          if (LocationState().isLocationSupported(city)) ...[
+                            // Small breathing room below the search bar; the
+                            // divider's own vertical padding does most of it.
+                            const SizedBox(height: 4),
+                            const SectionDividerWidget(
+                              title: 'Spotlight',
+                              lineLength: 100,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              textColor: Color(0xFF3A3A3A), // dark charcoal
+                              lineThickness: 1.5,
+                              lineColor: Color(0xFFD4A537), // warm gold
+                            ),
+                            // Keep the header close to the Spotlight banner;
+                            // still extend the warm gradient slightly past the
+                            // divider so the fade to scaffold-white happens
+                            // *inside* the gradient container, not as a cut.
+                            const SizedBox(height: 6),
+                          ],
                         ],
                       ),
                     ),
@@ -198,12 +225,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: const EmptyLocationWidget(),
                       )
                     else ...[
-                      const SectionDividerWidget(title: 'Spotlight'),
                       RepaintBoundary(
                         child: BannerCarousel(
                           events: DummyData.bannerEvents,
-                          height: Responsive.h(context, 421.0),
-                          fixedCardWidth: Responsive.w(context, 355.0),
+                          height: Responsive.h(context, 470.0),
+                          fixedCardWidth: Responsive.w(context, 345.0),
                         ),
                       ),
                       const RepaintBoundary(child: CategoriesGrid()),
@@ -213,8 +239,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       const RepaintBoundary(child: WeekendSpecialSection()),
                       const RepaintBoundary(child: DiscoverNearYouSection()),
                       const RepaintBoundary(child: FamilyFeelsSection()),
-                      const RepaintBoundary(child: SpecialNeedsSection()),
+                      const RepaintBoundary(child: NewOnTheBlockSection()),
+                      const RepaintBoundary(child: ParentsFavoriteSection()),
                       const RepaintBoundary(child: StealersSection()),
+                      // "Where Every Star Shines" (renamed Special Needs)
+                      const RepaintBoundary(child: SpecialNeedsSection()),
                       const RepaintBoundary(child: TlbSignatureSection()),
 
                       // AppFooter with upward gradient

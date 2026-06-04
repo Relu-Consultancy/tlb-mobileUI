@@ -28,24 +28,41 @@ class HomeHeader extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.hardEdge,
       children: [
-        // ── Layer 1: Cloud image with screen-blend gradient mask ──────
-        // screen brightens: golden(top)+pixel = warm bright result
-        //                   white(bottom)+pixel = fully white fade
+        // ── Layer 1: Cloud image, golden-tinted, fading to transparent ──
+        //
+        // Previous version used a single ShaderMask with BlendMode.screen
+        // and white at the bottom — that painted the lower half of the
+        // header *opaque white*, blocking the warm gradient container
+        // beneath it. Two operations now run separately:
+        //   1. ColorFiltered tints the cloud image golden (screen blend)
+        //   2. ShaderMask(dstIn) fades the result to transparent at the
+        //      bottom, letting the home-screen gradient show through.
         Positioned.fill(
           child: ShaderMask(
-            blendMode: BlendMode.screen,
+            blendMode: BlendMode.dstIn,
             shaderCallback: (bounds) => const LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFFFFB219), Colors.white],
+              colors: [
+                Colors.white,
+                Colors.white,
+                Colors.transparent,
+              ],
+              stops: [0.0, 0.35, 1.0],
             ).createShader(bounds),
-            child: Transform.flip(
-              flipY: true,
-              child: Image.asset(
-                'resources- tlb-ui/header.jpg',
-                width: double.infinity,
-                fit: BoxFit.fitWidth,
-                alignment: Alignment.topCenter,
+            child: ColorFiltered(
+              colorFilter: const ColorFilter.mode(
+                Color(0xFFFFB219),
+                BlendMode.screen,
+              ),
+              child: Transform.flip(
+                flipY: true,
+                child: Image.asset(
+                  'resources- tlb-ui/header.jpg',
+                  width: double.infinity,
+                  fit: BoxFit.fitWidth,
+                  alignment: Alignment.topCenter,
+                ),
               ),
             ),
           ),
@@ -106,7 +123,7 @@ class HomeHeader extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 20),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w700, // header greeting — bold
                             color: const Color(0xFF1A1A2E),
                           ),
                         );
@@ -326,7 +343,16 @@ class HomeHeader extends StatelessWidget {
       child: Container(
         height: Responsive.h(context, 48, min: 42),
         decoration: BoxDecoration(
-          color: Colors.white,
+          gradient: const LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [
+              Color(0xFFFFE9B8), // soft golden
+              Color(0xFFFFF4D8), // pale gold
+              Color(0xFFFFFDF7), // near-white highlight
+            ],
+            stops: [0.0, 0.55, 1.0],
+          ),
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(

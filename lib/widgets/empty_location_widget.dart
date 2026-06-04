@@ -31,7 +31,7 @@ class EmptyLocationWidget extends StatelessWidget {
             'No events or bookings',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 19),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFF1A1A2E),
             ),
             textAlign: TextAlign.center,
@@ -73,7 +73,7 @@ class EmptyLocationWidget extends StatelessWidget {
                   'Change Location',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 14),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),

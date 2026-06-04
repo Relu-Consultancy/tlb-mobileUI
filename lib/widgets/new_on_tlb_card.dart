@@ -73,7 +73,7 @@ class NewOnTlbCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 15),
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                           color: AppColors.textPrimary,
                         ),
                       ),
@@ -125,7 +125,7 @@ class NewOnTlbCard extends StatelessWidget {
                           'Starting from ₹${event.price!.toInt()}',
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 12),
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                             color: AppColors.textPrimary,
                             decoration: TextDecoration.underline,
                           ),
@@ -157,7 +157,7 @@ class NewOnTlbCard extends StatelessWidget {
                                 buttonLabel,
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 13),
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w500,
                                   color: AppColors.textPrimary,
                                 ),
                               ),

@@ -164,7 +164,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
         title: Text(
           'Cancel Booking',
           style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               fontSize: Responsive.sp(context, 17)),
         ),
         content: Column(
@@ -221,7 +221,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
             ),
             child: Text('Cancel Booking',
                 style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     fontSize: Responsive.sp(context, 13))),
           ),
         ],
@@ -345,7 +345,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                 'Booking Details',
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 24),
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w500,
                                   color: const Color(0xFF1A1A2E),
                                 ),
                               ),
@@ -400,7 +400,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                           style: GoogleFonts.poppins(
                                             fontSize:
                                                 Responsive.sp(context, 13),
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             color: const Color(0xFF1A1A2E),
                                           ),
                                         ),
@@ -420,7 +420,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                           style: GoogleFonts.poppins(
                                             fontSize:
                                                 Responsive.sp(context, 10),
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             color: Colors.white,
                                           ),
                                         ),
@@ -655,7 +655,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                 'Booking Details',
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 24),
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w500,
                                   color: const Color(0xFF1A1A2E),
                                 ),
                               ),
@@ -713,7 +713,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                           style: GoogleFonts.poppins(
                                             fontSize:
                                                 Responsive.sp(context, 13),
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             color: _booking.status ==
                                                     'cancelled'
                                                 ? const Color(0xFFEF4444)
@@ -736,7 +736,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                           style: GoogleFonts.poppins(
                                             fontSize:
                                                 Responsive.sp(context, 10),
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             color: Colors.white,
                                           ),
                                         ),
@@ -969,7 +969,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                       style: TextStyle(
                         fontFamily: 'monospace',
                         fontSize: Responsive.sp(context, 13),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w500,
                         color: valueColor ?? const Color(0xFF1A1A2E),
                         letterSpacing: 0.5,
                       ),
@@ -978,7 +978,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                       value,
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 13),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: valueColor ?? const Color(0xFF1A1A2E),
                       ),
                     ),
@@ -1019,7 +1019,7 @@ class _HeaderSection extends StatelessWidget {
               _statusLabel(booking.status),
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 12),
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: _statusColor(booking.status),
               ),
             ),
@@ -1031,7 +1031,7 @@ class _HeaderSection extends StatelessWidget {
             'Booking Details',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 20),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFF1A3A8F),
             ),
           ),
@@ -1152,7 +1152,7 @@ class _TicketCard extends StatelessWidget {
                     'Scan QR Code',
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 13),
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFF1A1A2E),
                     ),
                   ),
@@ -1209,7 +1209,7 @@ class _BookingTypeBanner extends StatelessWidget {
             label,
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 14),
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               color: Colors.white,
             ),
           ),
@@ -1271,7 +1271,7 @@ class _TicketContent extends StatelessWidget {
           booking.listingTitle,
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 16),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
           maxLines: 2,
@@ -1367,7 +1367,7 @@ class _Field extends StatelessWidget {
           value,
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 12),
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
           maxLines: 2,
@@ -1424,7 +1424,7 @@ class _ActionBar extends StatelessWidget {
                       label: Text(
                         'Cancel Booking',
                         style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                           fontSize: Responsive.sp(context, 14),
                           color: const Color(0xFFEF4444),
                         ),
@@ -1518,7 +1518,7 @@ class _ActionBtn extends StatelessWidget {
               label,
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 14),
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w500,
                 color: disabled
                     ? const Color(0xFF9CA3AF)
                     : const Color(0xFF1A1A2E),

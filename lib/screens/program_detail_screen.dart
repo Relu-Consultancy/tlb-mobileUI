@@ -217,7 +217,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
                 ),
-                child: Text('Retry', style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w600)),
+                child: Text('Retry', style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w500)),
               ),
             ],
           ),
@@ -313,7 +313,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                             _tag,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 12),
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
                               color: Colors.white,
                             ),
                           ),
@@ -329,7 +329,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                         _title,
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 20),
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                           color: const Color(0xFF1A1A2E),
                         ),
                       ),
@@ -432,7 +432,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                         'View all ${_detail!.batches.length} batches',
                                         style: GoogleFonts.poppins(
                                           fontSize: Responsive.sp(context, 12),
-                                          fontWeight: FontWeight.w600,
+                                          fontWeight: FontWeight.w500,
                                           color: const Color(0xFF3B82F6),
                                         ),
                                       ),
@@ -463,7 +463,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                               'About Program',
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 16),
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w500,
                                 color: const Color(0xFF1A1A2E),
                               ),
                             ),
@@ -489,7 +489,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                         'Things to Know',
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 16),
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                           color: const Color(0xFF1A1A2E),
                         ),
                       ),
@@ -550,7 +550,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                             'Gallery',
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 16),
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w500,
                               color: const Color(0xFF1A1A2E),
                             ),
                           ),
@@ -592,7 +592,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                           'Location',
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 16),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                             color: const Color(0xFF1A1A2E),
                           ),
                         ),
@@ -688,7 +688,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                         'Get Direction',
                                         style: GoogleFonts.poppins(
                                           fontSize: Responsive.sp(context, 12),
-                                          fontWeight: FontWeight.w600,
+                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
                                       style: ElevatedButton.styleFrom(
@@ -746,7 +746,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                   'Terms & Conditions',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 14),
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w500,
                                     color: const Color(0xFF1A1A2E),
                                   ),
                                 ),
@@ -808,7 +808,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                             text: _priceDisplay,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 20),
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w500,
                               color: const Color(0xFF1A1A2E),
                             ),
                           ),
@@ -864,7 +864,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                             label,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 15),
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         );
@@ -958,7 +958,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                 children: [
                   Text(
                     'Terms & Conditions',
-                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E)),
                   ),
                   GestureDetector(
                     onTap: () => Navigator.pop(ctx),
@@ -979,19 +979,19 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (_cancellationPolicy?.isNotEmpty == true) ...[
-                      Text('Cancellation Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                      Text('Cancellation Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
                       const SizedBox(height: 10),
                       Text(_cancellationPolicy!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
                       const SizedBox(height: 20),
                     ],
                     if (_refundPolicy?.isNotEmpty == true) ...[
-                      Text('Refund Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                      Text('Refund Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
                       const SizedBox(height: 10),
                       Text(_refundPolicy!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
                       const SizedBox(height: 20),
                     ],
                     if (_detail?.faqs.isNotEmpty == true) ...[
-                      Text('FAQs', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                      Text('FAQs', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
                       const SizedBox(height: 10),
                       ...(_detail!.faqs.map((faq) => _buildTermsBullet(faq['question'] ?? '', faq['answer'] ?? ''))),
                     ],
@@ -1011,7 +1011,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+          Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
           const SizedBox(height: 4),
           Text(text, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
         ],
@@ -1028,7 +1028,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
           const SizedBox(width: 12),
           Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600)),
           const Spacer(),
-          Text(value, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+          Text(value, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
         ],
       ),
     );
@@ -1059,7 +1059,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                 children: [
                   Text(
                     'Available Batches',
-                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 18), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 18), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E)),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -1087,7 +1087,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(b.name, style: GoogleFonts.poppins(fontWeight: FontWeight.w700, fontSize: Responsive.sp(context, 15))),
+                        Text(b.name, style: GoogleFonts.poppins(fontWeight: FontWeight.w500, fontSize: Responsive.sp(context, 15))),
                         const SizedBox(height: 4),
                         Row(
                           children: [

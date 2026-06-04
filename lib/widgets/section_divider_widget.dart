@@ -1,45 +1,82 @@
 import 'package:flutter/material.dart';
-import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/responsive.dart';
 
+/// Section title with short golden accent lines on either side.
+///
+/// Session-49 redesign: lines are now a fixed short length (not Expanded),
+/// the gap between text and lines is tight (8 px), and the title uses a
+/// slimmer weight (w500) per the home-screen redesign mocks.
 class SectionDividerWidget extends StatelessWidget {
   final String title;
 
-  const SectionDividerWidget({super.key, required this.title});
+  /// Length of each accent line in logical pixels.
+  final double lineLength;
+
+  /// Base font size for the title (passed through `Responsive.sp`).
+  final double fontSize;
+
+  /// Font weight for the title.
+  final FontWeight fontWeight;
+
+  /// Color of the title text.
+  final Color textColor;
+
+  /// Color of the accent lines (defaults to the pale section gold).
+  final Color lineColor;
+
+  /// Thickness of the accent lines in logical pixels.
+  final double lineThickness;
+
+  const SectionDividerWidget({
+    super.key,
+    required this.title,
+    this.lineLength = 72,
+    this.fontSize = 14.5,
+    this.fontWeight = FontWeight.w600, // section titles — light bold
+    this.textColor = AppColors.textSecondary,
+    this.lineColor = AppColors.dividerGold,
+    this.lineThickness = 1,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24),
+      padding: const EdgeInsets.symmetric(vertical: 20),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Expanded(child: _buildLine(isLeft: true)),
+          _buildLine(isLeft: true),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Text(
               title,
               style: GoogleFonts.poppins(
-                fontSize: Responsive.sp(context, 16),
-                fontWeight: FontWeight.w700,
-                color: AppColors.textSecondary,
+                fontSize: Responsive.sp(context, fontSize),
+                fontWeight: fontWeight,
+                color: textColor,
+                letterSpacing: 0.2,
               ),
             ),
           ),
-          Expanded(child: _buildLine(isLeft: false)),
+          _buildLine(isLeft: false),
         ],
       ),
     );
   }
 
   Widget _buildLine({required bool isLeft}) {
-    return Container(
-      height: 1,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isLeft
-              ? [Colors.transparent, AppColors.dividerGold]
-              : [AppColors.dividerGold, Colors.transparent],
+    return SizedBox(
+      width: lineLength,
+      height: lineThickness,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: isLeft
+                ? [Colors.transparent, lineColor]
+                : [lineColor, Colors.transparent],
+          ),
         ),
       ),
     );

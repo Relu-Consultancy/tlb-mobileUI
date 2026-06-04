@@ -108,7 +108,7 @@ class _PartnerFollowButtonState extends State<PartnerFollowButton> {
           'Following',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 11),
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
       );
@@ -128,7 +128,7 @@ class _PartnerFollowButtonState extends State<PartnerFollowButton> {
         'Follow',
         style: GoogleFonts.poppins(
           fontSize: Responsive.sp(context, 11),
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );

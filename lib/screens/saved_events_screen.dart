@@ -25,7 +25,7 @@ class SavedEventsScreen extends StatelessWidget {
           'Favorites',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -50,7 +50,7 @@ class SavedEventsScreen extends StatelessWidget {
                             'Hi ${AuthState.firstName},',
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 22),
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w500,
                               color: const Color(0xFF1A1A2E),
                             ),
                           );
@@ -84,7 +84,7 @@ class SavedEventsScreen extends StatelessWidget {
               'Saved Activities',
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 14),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A2E),
               ),
             ),
@@ -204,7 +204,7 @@ class _SavedRow extends StatelessWidget {
                   event.title,
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 14),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E),
                   ),
                   maxLines: 1,

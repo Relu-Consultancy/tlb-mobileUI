@@ -85,7 +85,7 @@ class _FollowedPartnersScreenState extends State<FollowedPartnersScreen> {
             'Followed Partners',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 17),
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFF1A1A2E),
             ),
           ),
@@ -126,7 +126,7 @@ class _FollowedPartnersScreenState extends State<FollowedPartnersScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
                 ),
                 child: Text('Retry',
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
               ),
             ],
           ),
@@ -159,7 +159,7 @@ class _FollowedPartnersScreenState extends State<FollowedPartnersScreen> {
                 'No Followed Partners',
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 17),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                   color: const Color(0xFF1A1A2E),
                 ),
               ),
@@ -274,7 +274,7 @@ class _PartnerCard extends StatelessWidget {
                                   name,
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 15),
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w500,
                                     color: const Color(0xFF1A1A2E),
                                   ),
                                   maxLines: 1,
@@ -421,7 +421,7 @@ class _Avatar extends StatelessWidget {
             name.isNotEmpty ? name[0].toUpperCase() : 'P',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 22),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFFF5A623),
             ),
           ),
@@ -464,7 +464,7 @@ class _CategoryChip extends StatelessWidget {
         label,
         style: GoogleFonts.poppins(
           fontSize: Responsive.sp(context, 10),
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
           color: const Color(0xFFF5A623),
         ),
       ),
@@ -493,7 +493,7 @@ class _UnfollowButton extends StatelessWidget {
         'Unfollow',
         style: GoogleFonts.poppins(
           fontSize: Responsive.sp(context, 11),
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );

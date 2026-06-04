@@ -97,7 +97,7 @@ class _TicketsListScreenState extends State<TicketsListScreen> {
           'My Tickets',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -117,7 +117,7 @@ class _TicketsListScreenState extends State<TicketsListScreen> {
           'New Ticket',
           style: GoogleFonts.poppins(
             fontSize: 13,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
         onPressed: _openNewTicket,
@@ -180,7 +180,7 @@ class _TicketsListScreenState extends State<TicketsListScreen> {
               'No tickets yet',
               style: GoogleFonts.poppins(
                 fontSize: 16,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A2E),
               ),
             ),
@@ -266,7 +266,7 @@ class _TicketCard extends StatelessWidget {
                       ticket.subject.isEmpty ? '(no subject)' : ticket.subject,
                       style: GoogleFonts.poppins(
                         fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: const Color(0xFF1A1A2E),
                       ),
                       maxLines: 2,
@@ -318,7 +318,7 @@ class _TicketCard extends StatelessWidget {
                             : '${ticket.unreadCount} new',
                         style: GoogleFonts.poppins(
                           fontSize: 10.5,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                           color: Colors.white,
                         ),
                       ),
@@ -384,7 +384,7 @@ class _StatusChip extends StatelessWidget {
         _capitalize(s),
         style: GoogleFonts.poppins(
           fontSize: 10.5,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
           color: fg,
         ),
       ),

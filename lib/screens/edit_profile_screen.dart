@@ -283,7 +283,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             widget.isOnboarding ? 'Complete Your Profile' : 'Edit Profile',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 18),
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFF1A1A2E),
             ),
           ),
@@ -295,7 +295,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       'Skip',
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 14),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: const Color(0xFF2F80ED),
                       ),
                     ),
@@ -341,7 +341,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           children: [
                             Text(
                               'Profile data could not be loaded',
-                              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w700, color: const Color(0xFFE65100)),
+                              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w500, color: const Color(0xFFE65100)),
                             ),
                             const SizedBox(height: 2),
                             Text(
@@ -356,7 +356,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               },
                               child: Text(
                                 'Tap to retry',
-                                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), fontWeight: FontWeight.w700, color: const Color(0xFFE65100), decoration: TextDecoration.underline),
+                                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), fontWeight: FontWeight.w500, color: const Color(0xFFE65100), decoration: TextDecoration.underline),
                               ),
                             ),
                           ],
@@ -436,7 +436,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ? const AppLoaderInline(dotSize: 7, spacing: 4, color: Color(0xFF1A1A2E))
                       : Text(
                           widget.isOnboarding ? 'Save & Continue' : 'Update Profile',
-                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w600),
+                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500),
                         ),
                 ),
               ),
@@ -463,7 +463,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             title,
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 14),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFF1A1A2E),
             ),
           ),
@@ -483,7 +483,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         text,
         style: GoogleFonts.poppins(
           fontSize: Responsive.sp(context, 12),
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
           color: const Color(0xFF424242),
         ),
       ),
@@ -612,7 +612,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 13),
                               color: isSelected ? const Color(0xFFDE7104) : Colors.grey.shade600,
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                              fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
                             ),
                           ),
                           selected: isSelected,

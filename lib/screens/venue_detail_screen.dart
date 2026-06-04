@@ -236,7 +236,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
                     elevation: 0,
                   ),
-                  child: Text('Retry', style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                  child: Text('Retry', style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
                 ),
               ],
             ),
@@ -334,7 +334,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                             _tag,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 12),
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
                               color: const Color(0xFF1A1A2E),
                             ),
                           ),
@@ -350,7 +350,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                         _title,
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 20),
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                           color: const Color(0xFF1A1A2E),
                         ),
                       ),
@@ -420,7 +420,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                           children: [
                             Text('About Venue',
                                 style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                                    fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
                             const SizedBox(height: 8),
                             Text(
                               _description!,
@@ -438,7 +438,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text('Things to Know',
                             style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                                fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
                       ),
                       const SizedBox(height: 12),
                       Padding(
@@ -469,7 +469,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text('Packages',
                             style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                                fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
                       ),
                       const SizedBox(height: 12),
                       ..._detail!.packages.map((pkg) => _buildPackageCard(pkg)),
@@ -484,7 +484,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                         children: [
                           Text('Gallery',
                               style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                                  fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
                           GestureDetector(
                             onTap: () => Navigator.push(context,
                                 MaterialPageRoute(builder: (_) => GalleryScreen(event: _eventForWidgets))),
@@ -547,7 +547,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text('Location',
                           style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                              fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
                     ),
                     const SizedBox(height: 12),
                     Container(
@@ -621,7 +621,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                                     label: Text('Get Direction',
                                         style: GoogleFonts.poppins(
                                             fontSize: Responsive.sp(context, 12),
-                                            fontWeight: FontWeight.w600)),
+                                            fontWeight: FontWeight.w500)),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFFFFCC00),
                                       foregroundColor: const Color(0xFF1A1A2E),
@@ -677,7 +677,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                                   'Terms & Conditions',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 14),
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w500,
                                     color: const Color(0xFF1A1A2E),
                                   ),
                                 ),
@@ -741,7 +741,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                             text: '₹${_lowestPackagePrice!.toInt()}',
                             style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 20),
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w500,
                                 color: const Color(0xFF1A1A2E)),
                           ),
                           TextSpan(
@@ -754,7 +754,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                     Text('Free',
                         style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 20),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                             color: const Color(0xFF16A34A))),
                   const Spacer(),
                   Expanded(
@@ -791,7 +791,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                       ),
                       child: Text('Plan Event',
                           style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700)),
+                              fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500)),
                     ),
                   ),
                 ],
@@ -814,7 +814,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
           const Spacer(),
           Text(value,
               style: GoogleFonts.poppins(
-                  fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+                  fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
         ],
       ),
     );
@@ -841,7 +841,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                 children: [
                   Text(
                     'Terms & Conditions',
-                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E)),
                   ),
                   GestureDetector(
                     onTap: () => Navigator.pop(ctx),
@@ -862,19 +862,19 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (_detail?.cancellationPolicy?.isNotEmpty == true) ...[
-                      Text('Cancellation Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                      Text('Cancellation Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
                       const SizedBox(height: 10),
                       Text(_detail!.cancellationPolicy!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
                       const SizedBox(height: 20),
                     ],
                     if (_detail?.refundPolicy?.isNotEmpty == true) ...[
-                      Text('Refund Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                      Text('Refund Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
                       const SizedBox(height: 10),
                       Text(_detail!.refundPolicy!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
                       const SizedBox(height: 20),
                     ],
                     if (_detail?.faqs.isNotEmpty == true) ...[
-                      Text('FAQs', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                      Text('FAQs', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
                       const SizedBox(height: 10),
                       ...(_detail!.faqs.map((faq) => _buildTermsBullet(faq['question'] ?? '', faq['answer'] ?? ''))),
                     ],
@@ -894,7 +894,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+          Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
           const SizedBox(height: 4),
           Text(text, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
         ],
@@ -920,7 +920,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
               children: [
                 Text(pkg.name,
                     style: GoogleFonts.poppins(
-                        fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                        fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
                 if (pkg.description?.isNotEmpty == true) ...[
                   const SizedBox(height: 4),
                   Text(pkg.description!,
@@ -953,7 +953,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
           const SizedBox(width: 12),
           Text('₹${pkg.price.toInt()}',
               style: GoogleFonts.poppins(
-                  fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+                  fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
         ],
       ),
     );

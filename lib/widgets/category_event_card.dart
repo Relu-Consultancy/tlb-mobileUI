@@ -66,7 +66,7 @@ class CategoryEventCard extends StatelessWidget {
                         event.tag!,
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 9.5),
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                           color: Colors.white,
                         ),
                       ),
@@ -87,7 +87,7 @@ class CategoryEventCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 12.5),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: AppColors.textPrimary,
                     height: 1.3,
                   ),
@@ -147,7 +147,7 @@ class CategoryEventCard extends StatelessWidget {
                           text: 'Description',
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 10.5),
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                             color: AppColors.textPrimary,
                             height: 1.4,
                           ),

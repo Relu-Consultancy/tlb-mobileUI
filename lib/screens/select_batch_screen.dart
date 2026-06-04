@@ -159,7 +159,7 @@ class _SelectBatchScreenState extends State<SelectBatchScreen> {
             'Select batch',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 17),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: AppColors.textPrimary,
             ),
           ),
@@ -193,7 +193,7 @@ class _SelectBatchScreenState extends State<SelectBatchScreen> {
                   widget.event.venue,
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 13),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: AppColors.textPrimary,
                   ),
                 ),
@@ -259,7 +259,7 @@ class _SelectBatchScreenState extends State<SelectBatchScreen> {
           'Select Date',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 15),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: AppColors.textPrimary,
           ),
         ),
@@ -292,7 +292,7 @@ class _SelectBatchScreenState extends State<SelectBatchScreen> {
                     _dates[i],
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 12),
-                      fontWeight: sel ? FontWeight.w600 : FontWeight.w500,
+                      fontWeight: sel ? FontWeight.w500 : FontWeight.w500,
                       color: sel
                           ? const Color(0xFF0D9488)
                           : AppColors.textSecondary,
@@ -316,7 +316,7 @@ class _SelectBatchScreenState extends State<SelectBatchScreen> {
           'Available Batches',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 15),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: AppColors.textPrimary,
           ),
         ),
@@ -381,7 +381,7 @@ class _SelectBatchScreenState extends State<SelectBatchScreen> {
                     _timeRange(batch),
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 16),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
                     ),
                   ),
@@ -405,7 +405,7 @@ class _SelectBatchScreenState extends State<SelectBatchScreen> {
                       batch.name,
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 11),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: fg,
                       ),
                     ),
@@ -465,7 +465,7 @@ class _SelectBatchScreenState extends State<SelectBatchScreen> {
                 _startingFrom,
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 13),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                   color: const Color(0xFF0369A1),
                 ),
               ),
@@ -524,7 +524,7 @@ class _SelectBatchScreenState extends State<SelectBatchScreen> {
             'Continue',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 15),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: AppColors.textPrimary,
             ),
           ),

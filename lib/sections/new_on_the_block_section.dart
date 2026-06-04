@@ -1,12 +1,12 @@
 import '../core/responsive.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../widgets/section_divider_widget.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../data/dummy_data.dart';
 import '../screens/event_detail_screen.dart';
 
-class TlbSignatureSection extends StatelessWidget {
-  const TlbSignatureSection({super.key});
+class NewOnTheBlockSection extends StatelessWidget {
+  const NewOnTheBlockSection({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,21 +14,22 @@ class TlbSignatureSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionDividerWidget(
-          title: 'TLB Signature',
+          title: 'New on the Block',
           fontSize: 17,
           textColor: Color(0xFF1A1A2E), // dark navy
         ),
         SizedBox(
-          height: Responsive.h(context, 480, min: 430),
+          height: Responsive.h(context, 380, min: 340),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
-            itemCount: DummyData.tlbSignature.length,
+            itemCount: DummyData.newOnTheBlock.length,
+            addAutomaticKeepAlives: false,
             itemBuilder: (context, index) {
-              final event = DummyData.tlbSignature[index];
+              final event = DummyData.newOnTheBlock[index];
               return Container(
-                width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+                width: Responsive.cardWidth(context, fraction: 0.72, max: 300),
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -45,9 +46,9 @@ class TlbSignatureSection extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Top Image Area — Expanded so the poster dominates the
-                    // card; flush to the edges with the "TLB Originals" pill
-                    // centered at the top.
+                    // Top Image Area — Expanded so the image dominates the
+                    // card; flush to the card edges with a time-ago band at
+                    // the bottom.
                     Expanded(
                       child: Stack(
                         children: [
@@ -63,33 +64,29 @@ class TlbSignatureSection extends StatelessWidget {
                               ),
                             ),
                           ),
-                          // "TLB Originals" purple pill (top-center)
+                          // Dark navy gradient band with the time-ago text
                           Positioned(
-                            top: 12,
+                            bottom: 0,
                             left: 0,
                             right: 0,
-                            child: Center(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 6),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFF7C3AED), // violet
-                                      Color(0xFF5B21B6), // deep purple
-                                    ],
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.15),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2),
-                                    ),
+                            child: Container(
+                              padding: const EdgeInsets.only(
+                                top: 24,
+                                bottom: 10,
+                              ),
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Color(0xCC0E2340), // dark navy, ~80% opacity
                                   ],
                                 ),
+                              ),
+                              child: Center(
                                 child: Text(
-                                  'TLB Originals',
+                                  event.tag ?? 'New',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 12),
                                     fontWeight: FontWeight.w500,
@@ -103,13 +100,14 @@ class TlbSignatureSection extends StatelessWidget {
                       ),
                     ),
 
-                    // Bottom Content — natural height.
+                    // Bottom Content Area — natural height.
                     Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(12),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // Title
                           Text(
                             event.title,
                             style: GoogleFonts.poppins(
@@ -117,24 +115,36 @@ class TlbSignatureSection extends StatelessWidget {
                               fontWeight: FontWeight.w600,
                               color: const Color(0xFF1A1A2E),
                             ),
-                            maxLines: 2,
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            event.venue, // venue holds the subtitle/description
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 12),
-                              color: Colors.grey,
-                              height: 1.4,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                          const SizedBox(height: 6),
+
+                          // Location • distance
+                          Row(
+                            children: [
+                              const Icon(Icons.location_on_outlined,
+                                  size: 14, color: Colors.grey),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  event.venue,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 12),
+                                    color: Colors.grey,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 12),
+
+                          // View Details button (bottom-left)
                           SizedBox(
-                            width: double.infinity,
-                            height: Responsive.h(context, 44, min: 40),
+                            width: Responsive.w(context, 140, min: 120),
+                            height: Responsive.h(context, 38, min: 32),
                             child: ElevatedButton(
                               onPressed: () {
                                 Navigator.push(
@@ -154,10 +164,10 @@ class TlbSignatureSection extends StatelessWidget {
                                 ),
                               ),
                               child: Text(
-                                'Register Now',
+                                'View Details',
                                 style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 13),
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: Responsive.sp(context, 12),
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),

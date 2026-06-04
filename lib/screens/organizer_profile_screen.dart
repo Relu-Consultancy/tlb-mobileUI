@@ -174,7 +174,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                   _name,
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 18),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E),
                   ),
                 ),
@@ -242,7 +242,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                               foregroundColor: Colors.orange.shade700,
                             ),
-                            child: Text('Retry', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w600)),
+                            child: Text('Retry', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w500)),
                           ),
                         ],
                       ),
@@ -314,7 +314,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                           'About',
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 15),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                             color: const Color(0xFF1A1A2E),
                           ),
                         ),
@@ -360,7 +360,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
       child: Center(
         child: Text(
           initial,
-          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 32), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 32), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E)),
         ),
       ),
     );
@@ -390,7 +390,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
               value,
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 13),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A2E),
               ),
             ),

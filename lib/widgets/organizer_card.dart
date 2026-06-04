@@ -152,7 +152,7 @@ class _OrganizerCardState extends State<OrganizerCard> {
                           widget.label,
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 10),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                             color: const Color(0xFFF5A623),
                             letterSpacing: 0.6,
                           ),
@@ -171,7 +171,7 @@ class _OrganizerCardState extends State<OrganizerCard> {
                                 _name,
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 15),
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.w500,
                                   color: const Color(0xFF1A1A2E),
                                 ),
                               ),
@@ -254,7 +254,7 @@ class _OrganizerCardState extends State<OrganizerCard> {
               value,
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 12),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A2E),
               ),
             ),
@@ -290,7 +290,7 @@ class _OrganizerCardState extends State<OrganizerCard> {
             name.isNotEmpty ? name[0].toUpperCase() : 'P',
             style: GoogleFonts.poppins(
               fontSize: 20,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: const Color(0xFFF5A623),
             ),
           ),

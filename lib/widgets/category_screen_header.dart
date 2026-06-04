@@ -68,7 +68,7 @@ class CategoryScreenHeader extends StatelessWidget {
                   title,
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 18),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E),
                   ),
                 ),

@@ -13,9 +13,14 @@ class HotPicksSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionDividerWidget(title: 'Hot Picks'),
+        const SectionDividerWidget(
+          title: 'Hot Picks',
+          fontSize: 17,
+          fontWeight: FontWeight.w600,
+          textColor: Color(0xFF1A1A2E), // dark navy
+        ),
         SizedBox(
-          height: Responsive.h(context, 420, min: 370),
+          height: Responsive.h(context, 440, min: 395),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.hardEdge,
@@ -42,65 +47,72 @@ class HotPicksSection extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Top Image Area
-                    Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                          child: Image.asset(
-                            event.imagePath,
-                            height: Responsive.h(context, 190, min: 150),
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        // Top-left floating badge (Filling Fast / Bestseller)
-                        if (event.tag != null)
-                          Positioned(
-                            top: 0,
-                            left: 0,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                              decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(16),
-                                  bottomRight: Radius.circular(16),
-                                ),
-                                gradient: LinearGradient(
-                                  colors: event.tag?.toLowerCase() == 'filling fast' 
-                                      ? [const Color(0xFF5C79E8), const Color(0xFF384B99)] // Blue gradient
-                                      : [const Color(0xFFE85C79), const Color(0xFF99384B)], // Red gradient
-                                ),
+                    // Top Image Area — flush to the card edges (no margin);
+                    // top corners follow the card's rounded border. Expanded
+                    // so the image takes up the majority of the card; the
+                    // content below sizes to its natural height.
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(16),
                               ),
-                              child: Text(
-                                event.tag ?? 'Filling Fast',
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 12),
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
+                              child: Image.asset(
+                                event.imagePath,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
                               ),
                             ),
                           ),
-                      ],
-                    ),
-                    
-                    // Bottom Content Area (Flex)
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
+                          // Top-left floating badge (Filling Fast / Bestseller)
+                          if (event.tag != null)
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(16),
+                                    bottomRight: Radius.circular(16),
+                                  ),
+                                  gradient: LinearGradient(
+                                    colors: event.tag?.toLowerCase() == 'filling fast'
+                                        ? [const Color(0xFF5C79E8), const Color(0xFF384B99)] // Blue gradient
+                                        : [const Color(0xFFE85C79), const Color(0xFF99384B)], // Red gradient
+                                  ),
+                                ),
+                                child: Text(
+                                  event.tag ?? 'Filling Fast',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 12),
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    // Bottom Content Area — natural height (sizes to fit).
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   event.title,
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 15),
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w500,
                                     color: const Color(0xFF1A1A2E),
                                   ),
                                   maxLines: 2,
@@ -160,7 +172,8 @@ class HotPicksSection extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            
+                            const SizedBox(height: 12),
+
                             // Bottom row with Price and Book Now button
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -173,7 +186,7 @@ class HotPicksSection extends StatelessWidget {
                                           text: event.price != null ? '₹${event.price!.toInt()}' : '₹5000',
                                           style: GoogleFonts.poppins(
                                             fontSize: Responsive.sp(context, 16),
-                                            fontWeight: FontWeight.bold,
+                                            fontWeight: FontWeight.w500,
                                             color: const Color(0xFF1A1A2E),
                                           ),
                                         ),
@@ -213,7 +226,7 @@ class HotPicksSection extends StatelessWidget {
                                       'Book Now',
                                       style: GoogleFonts.poppins(
                                         fontSize: Responsive.sp(context, 11),
-                                        fontWeight: FontWeight.w600,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ),
@@ -223,7 +236,6 @@ class HotPicksSection extends StatelessWidget {
                           ],
                         ),
                       ),
-                    ),
                   ],
                 ),
               );

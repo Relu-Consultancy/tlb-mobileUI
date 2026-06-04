@@ -199,7 +199,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
           "Plan Your Idea",
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 16),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -229,7 +229,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                               widget.event.title,
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 13),
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w500,
                                 color: const Color(0xFF1A1A2E),
                               ),
                             ),
@@ -386,7 +386,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                         'Select Date',
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 14),
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                           color: const Color(0xFF1A1A2E),
                         ),
                       ),
@@ -446,7 +446,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 12),
                                     fontWeight: isSelected
-                                        ? FontWeight.w700
+                                        ? FontWeight.w500
                                         : FontWeight.w500,
                                     color: const Color(0xFF1A1A2E),
                                   ),
@@ -477,7 +477,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                           'Select Time Slot',
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 14),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                             color: const Color(0xFF1A1A2E),
                           ),
                         ),
@@ -512,7 +512,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 13),
                                     fontWeight: isSelected
-                                        ? FontWeight.w700
+                                        ? FontWeight.w500
                                         : FontWeight.w500,
                                     color: const Color(0xFF1A1A2E),
                                   ),
@@ -626,7 +626,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                     'Continue',
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 16),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
@@ -647,7 +647,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
           label,
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 14),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),

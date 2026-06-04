@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-06-02 (Session 48)
+**Last Updated:** 2026-06-04 (Session 50)
 
 ---
 
@@ -209,7 +209,7 @@ HomeScreen (sidebar/action flows)
 | `online_event_card.dart` | Online event card with platform badge |
 | `weekend_event_card.dart` | Compact horizontal weekend card |
 | `partner_portrait_card.dart` | Featured partner portrait card |
-| `section_divider_widget.dart` | Section title with "See All" |
+| `section_divider_widget.dart` | Centered section title flanked by golden accent lines. Params: `title`, `lineLength`, `fontSize` (default 14.5), `fontWeight` (default `w600`), `textColor` (default `textSecondary`), `lineColor` (default `dividerGold`), `lineThickness` |
 | `filter_bottom_sheet.dart` | Legacy filter sheet |
 | `all_categories_popup.dart` | Full-screen categories popup |
 | `pick_your_pace_row.dart` | Skill level selector row |
@@ -223,21 +223,27 @@ HomeScreen (sidebar/action flows)
 
 ---
 
-## 5. Sections (Home Page, 9 active)
+## 5. Sections (Home Page, 11 active)
+
+Session-50 redesign: all card sections share one visual language — **image-dominant cards** (image is `Expanded` so it fills the majority of the card and is flush to the card edges with rounded top corners; content sits below at natural height, no `spaceBetween` gaps). Section titles use `SectionDividerWidget(fontSize: 17, textColor: 0xFF1A1A2E)` (light-bold `w600` from the new default).
+
+Feed order (top → bottom): Spotlight (inline) → Categories grid (inline) → Hot Picks → Weekend Specials → Discover Near You → Family Feels → New on the Block → Parents' Favorite → Stealers → Where Every Star Shines → TLB Signature → AppFooter.
 
 | Section | Content |
 |---------|---------|
-| `home_header.dart` | Gradient header (#FFB219 → white), first-name greeting (ValueListenableBuilder on `userName`), location, alert icon, avatar (ValueListenableBuilder on `avatarUrl`), search bar |
-| `hot_picks_section.dart` | Hot picks card list |
-| `weekend_special_section.dart` | Weekend event chips |
-| `discover_near_you_section.dart` | Location-based cards |
+| `home_header.dart` | Gradient header (#FFB219 → white), first-name greeting **bold `w700`** (ValueListenableBuilder on `userName`), location, bell icon, avatar (ValueListenableBuilder on `avatarUrl`), **search bar with golden gradient fill** (`#FFE9B8 → #FFF4D8 → #FFFDF7`, left→right) |
+| `hot_picks_section.dart` | Image-dominant cards — "Filling Fast" diagonal badge top-left; title, 3-5 Yrs, stars+reviews, venue, `₹X / child`, Book Now |
+| `weekend_special_section.dart` | PageView carousel — image-dominant; white date badge (Fri / mar 15) top-left, heart top-right; title, stars+reviews, venue, Book Now; dot indicator |
+| `discover_near_you_section.dart` | Image-dominant; pink "X km away" gradient band at image bottom; title + grey `Outdoor Play` chip, venue, stars, `Description – …` (2 lines), Book Now |
 | `family_feels_section.dart` | Family events section |
-| `special_needs_section.dart` | Inclusive/special-needs events |
-| `stealers_section.dart` | Deal/discount events |
-| `tlb_signature_section.dart` | TLB signature events |
+| `new_on_the_block_section.dart` | **NEW (S50)** — image-dominant; dark-navy time-ago band at image bottom ("2 days ago"); title, `area • distance`, View Details. Data: `DummyData.newOnTheBlock` (`venue`=location line, `tag`=time-ago) |
+| `parents_favorite_section.dart` | **NEW (S50)** — image-dominant; pink→purple "Loved by Parents" diagonal badge top-left; title + age (person icon + `4-12 Yrs`), star+`4.8`+`(reviews)`, `Price – ₹X` + Visit. Data: `DummyData.parentsFavorite` (`description`=age range) |
+| `stealers_section.dart` | Image-dominant; yellow countdown pill ("End in …") top-center, pink "60% OFF" band bottom; title, stars+reviews, `₹X` + Grab Deal. (`description`=countdown, `tag`=discount) |
+| `special_needs_section.dart` | **Renamed "Where Every Star Shines" (S50)** — horizontal split card: left inset image + red circular star badge; right column has pink→purple `Sensory Friendly` pill (right-aligned), title, star+reviews, `area • km`, Explore. Data: `DummyData.specialNeeds` (`venue`=location, `tag`=pill) |
+| `tlb_signature_section.dart` | Image-dominant poster; purple "TLB Originals" pill centered at top; title, description (2 lines), full-width Register Now |
 | `app_footer.dart` | `resources- tlb-ui/main-footer.png` with 60px top gap |
 
-> Spotlight is rendered inline in `home_screen.dart` via `BannerCarousel`. The "Explore the Stage" category grid is `widgets/categories_grid.dart` (also inline).
+> Spotlight is rendered inline in `home_screen.dart` via `BannerCarousel`. The "Explore the Stage" category grid is `widgets/categories_grid.dart` (also inline). Note: the "Where Every Star Shines" section's class/file is still named `SpecialNeedsSection` / `special_needs_section.dart` — only the displayed title changed.
 
 ---
 
@@ -857,6 +863,37 @@ share_plus: ^7.2.2           # Native share sheet for events/classes/programs/ve
 ---
 
 ## 12. Development Sessions Summary
+
+### Session 50 — Home-feed visual redesign + global slim typography
+A design-driven pass replicating provided mocks for every home-screen card section, plus an app-wide font-weight change.
+
+#### Shared card pattern
+| Change | Files |
+|--------|-------|
+| **Image-dominant cards** — across all card sections the image is now wrapped in `Expanded` (fills the majority of the card) and flush to the card edges (removed inset padding; top corners rounded via `BorderRadius.vertical(top:16)`). Content moved out of `Expanded`/`spaceBetween` into a natural-height `Padding` + `Column(mainAxisSize.min)` so it packs tightly under the image with no stray gap. Root cause of the earlier "image too small / big empty gap" was fixed-height image + `Expanded` content + `spaceBetween` | `hot_picks_section.dart`, `weekend_special_section.dart`, `discover_near_you_section.dart`, `stealers_section.dart`, `tlb_signature_section.dart` |
+| `SectionDividerWidget` extended — new optional params `fontSize`, `fontWeight`, `textColor`, `lineThickness` (all with defaults); **default `fontWeight` changed `w500 → w600`** so every section title is light-bold. Line color/length still per-instance | `lib/widgets/section_divider_widget.dart` |
+| All section headers set to `fontSize: 17, textColor: 0xFF1A1A2E` (dark navy) | all section files + `home_screen.dart` (Spotlight) |
+
+#### Per-section
+| Change | Files |
+|--------|-------|
+| **Spotlight** (inline) — header moved closer to banner; longer thin golden lines (`lineLength:100, lineThickness:1.5, lineColor:0xFFD4A537`); banner taller + tuned width (`height 470`, `fixedCardWidth 345`) | `lib/screens/home_screen.dart` |
+| **Search bar golden gradient** — white fill replaced with L→R gradient `#FFE9B8 → #FFF4D8 → #FFFDF7` | `lib/sections/home_header.dart` |
+| **Hot Picks** redesigned — image-dominant, flush; "Filling Fast"/"Bestseller" diagonal badge | `lib/sections/hot_picks_section.dart` |
+| **Weekend Specials** (renamed from "Weekend Special") — image-dominant PageView; white Fri/mar-15 date badge, heart; Book Now (was "View Details") | `lib/sections/weekend_special_section.dart` |
+| **Discover Near You** — image-dominant; pink "X km away" band at image bottom; `Description –` en-dash | `lib/sections/discover_near_you_section.dart` |
+| **New on the Block** — NEW section below Family Feels; dark-navy time-ago band; View Details. New data list `DummyData.newOnTheBlock` | `lib/sections/new_on_the_block_section.dart` (NEW), `dummy_data.dart`, `home_screen.dart` |
+| **Parents' Favorite** — NEW section below New on the Block; pink→purple "Loved by Parents" badge; age chip, star+rating+(reviews), `Price – ₹X` + Visit. New data list `DummyData.parentsFavorite` | `lib/sections/parents_favorite_section.dart` (NEW), `dummy_data.dart`, `home_screen.dart` |
+| **Stealers** — image-dominant (removed `Spacer` gap); countdown pill top-center, "60% OFF" band bottom; moved above the renamed Special Needs section | `lib/sections/stealers_section.dart`, `home_screen.dart` |
+| **"Where Every Star Shines"** — Special Needs renamed + fully redesigned to a horizontal split card (left image + red star badge, right column with "Sensory Friendly" pink pill, title, rating, `area • km`, Explore); moved below Stealers. Class/file still named `SpecialNeedsSection`/`special_needs_section.dart`. Data updated (`venue`=location, `tag`=pill) | `lib/sections/special_needs_section.dart`, `dummy_data.dart`, `home_screen.dart` |
+| **TLB Signature** — image-dominant poster; "TLB Originals" purple pill centered at top (replaced heart); title, description, full-width Register Now | `lib/sections/tlb_signature_section.dart` |
+
+#### Global typography
+| Change | Files |
+|--------|-------|
+| **Slim font sweep** — project-wide replace `FontWeight.{w600,w700,w800,w900,bold} → w500` (531 occurrences, 90 files) so nothing renders bold by default. Excluded `ticket_pdf_service.dart` (`pw.FontWeight` from the `pdf` package only supports `normal`/`bold`) | `lib/**/*.dart` |
+| **Two deliberate exceptions** — home header greeting "Hello …" set to **`w700`** (the one bold element); all section titles set to **`w600`** (light-bold) via `SectionDividerWidget` default + the 4 explicit call sites | `home_header.dart`, `section_divider_widget.dart`, section files, `home_screen.dart` |
+| No tests assert on font weights; analyzer clean (only pre-existing `info`-level `use_null_aware_elements` hints remain) | — |
 
 ### Session 1–3 (Prior)
 - Full home screen with all 17 sections built

@@ -169,7 +169,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 14),
                               fontWeight:
-                                  isActive ? FontWeight.w600 : FontWeight.w500,
+                                  isActive ? FontWeight.w500 : FontWeight.w500,
                               color: isActive
                                   ? const Color(0xFF1A1A1A)
                                   : const Color(0xFF757575),
@@ -195,7 +195,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                               _tabLabels[_activeTab],
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 16),
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w500,
                                 color: const Color(0xFF1A1A2E),
                               ),
                             ),
@@ -250,7 +250,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                                   'Clear All',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 13),
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w500,
                                     color: const Color(0xFF1A1A2E),
                                   ),
                                 ),
@@ -274,7 +274,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                                   'Apply',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 13),
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ),
@@ -382,7 +382,7 @@ class _SortByPanel extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 13),
                       fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.w400,
+                          isSelected ? FontWeight.w500 : FontWeight.w400,
                       color: const Color(0xFF1A1A2E),
                     ),
                   ),
@@ -458,7 +458,7 @@ class _CheckboxPanel extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 13),
                       fontWeight:
-                          isChecked ? FontWeight.w600 : FontWeight.w400,
+                          isChecked ? FontWeight.w500 : FontWeight.w400,
                       color: const Color(0xFF1A1A2E),
                     ),
                   ),

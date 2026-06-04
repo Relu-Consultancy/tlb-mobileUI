@@ -67,7 +67,7 @@ class OnlineEventCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 14.5),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                             color: AppColors.textPrimary,
                           ),
                         ),
@@ -87,7 +87,7 @@ class OnlineEventCard extends StatelessWidget {
                             event.tag!,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 10.5),
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
                               color: const Color(0xFF0284C7),
                             ),
                           ),
@@ -158,7 +158,7 @@ class OnlineEventCard extends StatelessWidget {
                                 'View Event',
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 12),
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w500,
                                   color: AppColors.textPrimary,
                                 ),
                               ),

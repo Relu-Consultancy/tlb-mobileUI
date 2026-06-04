@@ -94,7 +94,7 @@ class EventCard extends StatelessWidget {
                     event.title,
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 15),
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
                     ),
                     maxLines: 1,

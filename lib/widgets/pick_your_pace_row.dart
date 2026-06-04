@@ -55,7 +55,7 @@ class PickYourPaceRow extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 10),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     height: 1.2,
                     color: const Color(0xFF1A1A2E),
                   ),

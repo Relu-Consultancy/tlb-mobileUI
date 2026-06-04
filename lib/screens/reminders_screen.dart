@@ -44,7 +44,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
           'Reminders',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -69,7 +69,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                             'Hi ${AuthState.firstName},',
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 22),
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w500,
                               color: const Color(0xFF1A1A2E),
                             ),
                           );
@@ -103,7 +103,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
               'Upcoming',
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 14),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A2E),
               ),
             ),
@@ -178,7 +178,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                             r['title'] as String,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 14),
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w500,
                               color: const Color(0xFF1A1A2E),
                             ),
                             maxLines: 1,
@@ -250,7 +250,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                     'Edit Reminder Time',
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 12),
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFF1A1A2E),
                     ),
                   ),
@@ -269,7 +269,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                     'Turn Off',
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 12),
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFFFF6B6B),
                     ),
                   ),

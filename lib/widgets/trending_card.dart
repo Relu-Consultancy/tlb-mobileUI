@@ -135,7 +135,7 @@ class _TrendingCardState extends State<TrendingCard> {
                                     event.tag!,
                                     style: GoogleFonts.poppins(
                                       fontSize: Responsive.sp(context, 11),
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.w500,
                                       color: AppColors.tagProgram,
                                     ),
                                   ),
@@ -145,7 +145,7 @@ class _TrendingCardState extends State<TrendingCard> {
                                 event.title,
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 16),
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.w500,
                                   color: AppColors.textPrimary,
                                 ),
                               ),
@@ -189,7 +189,7 @@ class _TrendingCardState extends State<TrendingCard> {
                                     'Book Now',
                                     style: GoogleFonts.poppins(
                                       fontSize: Responsive.sp(context, 13),
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ),

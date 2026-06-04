@@ -185,7 +185,7 @@ class _LocationScreenState extends State<LocationScreen> {
           'Select Location',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -239,7 +239,7 @@ class _LocationScreenState extends State<LocationScreen> {
                   _isLoadingLocation ? 'Fetching location...' : 'Use current location',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 14),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E),
                   ),
                 ),
@@ -259,7 +259,7 @@ class _LocationScreenState extends State<LocationScreen> {
               'Popular Cities',
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 16),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A2E),
               ),
             ),
@@ -305,7 +305,7 @@ class _LocationScreenState extends State<LocationScreen> {
                           city['name'] as String,
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 13),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                             color: const Color(0xFF1A1A2E),
                           ),
                           textAlign: TextAlign.center,
@@ -323,7 +323,7 @@ class _LocationScreenState extends State<LocationScreen> {
               'All Cities',
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 16),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A2E),
               ),
             ),
@@ -348,7 +348,7 @@ class _LocationScreenState extends State<LocationScreen> {
                       city,
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 14),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: const Color(0xFF1A1A2E),
                       ),
                     ),

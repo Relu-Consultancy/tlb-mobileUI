@@ -316,7 +316,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                                   'Explore other Programs',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 13),
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w500,
                                     color: AppColors.textPrimary,
                                   ),
                                 ),
@@ -387,7 +387,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                                               overflow: TextOverflow.ellipsis,
                                               style: GoogleFonts.poppins(
                                                 fontSize: Responsive.sp(context, 9.5),
-                                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                                                fontWeight: isSelected ? FontWeight.w500 : FontWeight.w500,
                                                 height: 1.2,
                                                 color: AppColors.textPrimary,
                                               ),
@@ -430,7 +430,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                             'All $_categoryTitle',
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 14.5),
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w500,
                               color: AppColors.textPrimary,
                             ),
                           ),
@@ -471,7 +471,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                                       'Filters',
                                       style: GoogleFonts.poppins(
                                         fontSize: Responsive.sp(context, 11.5),
-                                        fontWeight: FontWeight.w600,
+                                        fontWeight: FontWeight.w500,
                                         color: Colors.white,
                                       ),
                                     ),
@@ -522,7 +522,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 11.5),
                                   fontWeight: isActive
-                                      ? FontWeight.w700
+                                      ? FontWeight.w500
                                       : FontWeight.w500,
                                   color: isActive
                                       ? AppColors.textPrimary

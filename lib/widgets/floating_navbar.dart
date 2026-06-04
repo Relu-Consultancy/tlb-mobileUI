@@ -99,7 +99,7 @@ class FloatingNavbar extends StatelessWidget {
                                     item.label,
                                     style: TextStyle(
                                       color: Color(0xFF1E293B),
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.w500,
                                       fontSize: Responsive.sp(context, 14),
                                     ),
                                   ),

@@ -82,7 +82,7 @@ class EventCardWithPrice extends StatelessWidget {
                   event.title,
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 16),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: AppColors.textPrimary,
                   ),
                 ),
@@ -120,7 +120,7 @@ class EventCardWithPrice extends StatelessWidget {
                             text: '₹${event.price?.toInt() ?? 0}',
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 20),
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w500,
                               color: AppColors.textPrimary,
                             ),
                           ),
@@ -158,7 +158,7 @@ class EventCardWithPrice extends StatelessWidget {
                         'Book Now',
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 13),
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),

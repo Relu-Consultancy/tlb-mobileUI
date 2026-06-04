@@ -52,7 +52,7 @@ class CategoriesGrid extends StatelessWidget {
                   'Explore the Stage',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 15),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF5A5A5A),
                   ),
                 ),
@@ -174,7 +174,7 @@ class CategoriesGrid extends StatelessWidget {
                 cat['label'],
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 14),
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w500,
                   color: const Color(0xFF1A1A2E),
                 ),
               ),

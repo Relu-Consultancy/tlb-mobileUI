@@ -13,9 +13,13 @@ class StealersSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionDividerWidget(title: 'Stealers'),
+        const SectionDividerWidget(
+          title: 'Stealers',
+          fontSize: 17,
+          textColor: Color(0xFF1A1A2E), // dark navy
+        ),
         SizedBox(
-          height: Responsive.h(context, 450, min: 380),
+          height: Responsive.h(context, 420, min: 380),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.hardEdge,
@@ -41,162 +45,173 @@ class StealersSection extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Top Image Area
-                    Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                          child: Image.asset(
-                            event.imagePath,
-                            height: Responsive.h(context, 260, min: 180),
-                            width: double.infinity,
-                            fit: BoxFit.cover,
+                    // Top Image Area — Expanded so the image dominates the
+                    // card; flush to the edges, with the countdown pill at the
+                    // top and the discount band at the bottom.
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(16),
+                              ),
+                              child: Image.asset(
+                                event.imagePath,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
-                        ),
-                        // Top Yellow Pill (End in time)
-                        if (event.description != null)
-                          Positioned(
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            child: Center(
+                          // Top yellow countdown pill ("End in ...")
+                          if (event.description != null)
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              child: Center(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 6),
+                                  decoration: const BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Color(0xFFFFF176), // light yellow
+                                        Color(0xFFFFEE58),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.vertical(
+                                        bottom: Radius.circular(12)),
+                                  ),
+                                  child: Text(
+                                    event.description!,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 11),
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color(0xFF1A1A2E),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          // Bottom pink discount band ("60% OFF")
+                          if (event.tag != null)
+                            Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                                 decoration: const BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
-                                      Color(0xFFFFF176), // Light yellow
-                                      Color(0xFFFFEE58),
+                                      Color(0xFFE040FB), // bright pink
+                                      Color(0xFFEA80FC), // lighter pink-purple
                                     ],
                                   ),
-                                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
                                 ),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 6, horizontal: 12),
                                 child: Text(
-                                  event.description!,
+                                  event.tag!,
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 11),
-                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+
+                    // Bottom Content Area — natural height.
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            event.title,
+                            style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, 16),
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF1A1A2E),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 6),
+                          // Stars + review count
+                          Row(
+                            children: [
+                              Row(
+                                children: List.generate(
+                                  5,
+                                  (i) => const Icon(Icons.star,
+                                      size: 14, color: Colors.amber),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                event.reviewCount ?? '3.5k reviews',
+                                style: GoogleFonts.poppins(
+                                  fontSize: Responsive.sp(context, 12),
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          // Price + Grab Deal button
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  '₹${event.price?.toInt() ?? 2000}',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 16),
+                                    fontWeight: FontWeight.w500,
                                     color: const Color(0xFF1A1A2E),
                                   ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                            ),
-                          ),
-                        // Bottom Pink Banner (Discount)
-                        if (event.tag != null)
-                          Positioned(
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            child: Container(
-                              decoration: const BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Color(0xFFE040FB), // Bright pink
-                                    Color(0xFFEA80FC), // Lighter pinkish-purple
-                                  ],
-                                ),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                              child: Text(
-                                event.tag!,
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 11),
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    
-                    // Bottom Content Area
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              event.title,
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 16),
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1A1A2E),
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 6),
-                            // Stars + review count
-                            Row(
-                              children: [
-                                Row(
-                                  children: List.generate(
-                                    5,
-                                    (i) => const Icon(Icons.star, size: 14, color: Colors.amber),
+                              SizedBox(
+                                height: Responsive.h(context, 44, min: 38),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            EventDetailScreen(event: event),
+                                      ),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFFCC00),
+                                    foregroundColor: const Color(0xFF1A1A2E),
+                                    elevation: 0,
+                                    minimumSize: const Size(0, 46),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  event.reviewCount ?? '3.5k reviews',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 12),
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Spacer(),
-                            // Price + Button row
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Flexible(
                                   child: Text(
-                                    '₹${event.price?.toInt() ?? 2000}',
+                                    'Grab Deal',
                                     style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 16),
-                                      fontWeight: FontWeight.w800,
-                                      color: const Color(0xFF1A1A2E),
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: Responsive.h(context, 44, min: 38),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => EventDetailScreen(event: event),
-                                        ),
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFFFFCC00),
-                                      foregroundColor: const Color(0xFF1A1A2E),
-                                      elevation: 0,
-                                      minimumSize: const Size(0, 46),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      'Grab Deal',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: Responsive.sp(context, 13),
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      fontSize: Responsive.sp(context, 13),
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ],

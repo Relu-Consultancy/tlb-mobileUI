@@ -94,7 +94,7 @@ class EventCardWithRating extends StatelessWidget {
                           'Sat',
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 11),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                             color: const Color(0xFF1E293B),
                           ),
                         ),
@@ -102,7 +102,7 @@ class EventCardWithRating extends StatelessWidget {
                           '12 Aug',
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 10),
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                             color: AppColors.primary,
                           ),
                         ),
@@ -136,7 +136,7 @@ class EventCardWithRating extends StatelessWidget {
                       event.title,
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 14),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w500,
                         color: AppColors.textPrimary,
                       ),
                       maxLines: 1,
@@ -158,7 +158,7 @@ class EventCardWithRating extends StatelessWidget {
                           event.tag!,
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 9),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                             color: Colors.white,
                           ),
                         ),
@@ -256,7 +256,7 @@ class EventCardWithRating extends StatelessWidget {
                           buttonLabel,
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 11),
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),

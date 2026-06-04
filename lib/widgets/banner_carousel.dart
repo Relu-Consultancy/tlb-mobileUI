@@ -135,7 +135,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                                     event.title,
                                     style: GoogleFonts.poppins(
                                       fontSize: Responsive.sp(context, 22),
-                                      fontWeight: FontWeight.w700,
+                                      fontWeight: FontWeight.w500,
                                       color: Colors.white,
                                     ),
                                   ),
@@ -191,7 +191,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                                           style: GoogleFonts.poppins(
                                             fontSize:
                                                 Responsive.sp(context, 11),
-                                            fontWeight: FontWeight.w700,
+                                            fontWeight: FontWeight.w500,
                                             color: Colors.white,
                                             letterSpacing: 1.2,
                                           ),
@@ -203,7 +203,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                                       event.title,
                                       style: GoogleFonts.poppins(
                                         fontSize: Responsive.sp(context, 24),
-                                        fontWeight: FontWeight.w700,
+                                        fontWeight: FontWeight.w500,
                                         color: Colors.white,
                                         height: 1.2,
                                         shadows: const [
@@ -252,7 +252,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                                             style: GoogleFonts.poppins(
                                               fontSize:
                                                   Responsive.sp(context, 14),
-                                              fontWeight: FontWeight.w600,
+                                              fontWeight: FontWeight.w500,
                                               color: const Color(0xFF1A1A2E),
                                             ),
                                           ),

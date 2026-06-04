@@ -26,7 +26,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           'Notifications',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -64,7 +64,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 15),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E),
                   ),
                 ),
@@ -106,7 +106,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
        *           'No Notifications Yet',
        *           style: GoogleFonts.poppins(
        *             fontSize: Responsive.sp(context, 18),
-       *             fontWeight: FontWeight.w700,
+       *             fontWeight: FontWeight.w500,
        *             color: const Color(0xFF1A1A2E),
        *           ),
        *         ),

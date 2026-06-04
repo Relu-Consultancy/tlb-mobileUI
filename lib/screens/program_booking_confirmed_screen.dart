@@ -131,7 +131,7 @@ class _ProgramBookingConfirmedScreenState
                               'Booking Confirmed!',
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 24),
-                                fontWeight: FontWeight.w800,
+                                fontWeight: FontWeight.w500,
                                 color: const Color(0xFF1A1A2E),
                               ),
                             ),
@@ -185,7 +185,7 @@ class _ProgramBookingConfirmedScreenState
                                         style: GoogleFonts.poppins(
                                           fontSize:
                                               Responsive.sp(context, 13),
-                                          fontWeight: FontWeight.w700,
+                                          fontWeight: FontWeight.w500,
                                           color: accentColor,
                                         ),
                                       ),
@@ -203,7 +203,7 @@ class _ProgramBookingConfirmedScreenState
                                         style: GoogleFonts.poppins(
                                           fontSize:
                                               Responsive.sp(context, 10),
-                                          fontWeight: FontWeight.w700,
+                                          fontWeight: FontWeight.w500,
                                           color: Colors.white,
                                         ),
                                       ),
@@ -337,7 +337,7 @@ class _ProgramBookingConfirmedScreenState
                           'View My Bookings',
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 15),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -365,7 +365,7 @@ class _ProgramBookingConfirmedScreenState
                           'Explore More',
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 15),
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -414,7 +414,7 @@ class _ProgramBookingConfirmedScreenState
                       style: TextStyle(
                         fontFamily: 'monospace',
                         fontSize: Responsive.sp(context, 13),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w500,
                         color: valueColor ?? const Color(0xFF1A1A2E),
                         letterSpacing: 0.5,
                       ),
@@ -423,7 +423,7 @@ class _ProgramBookingConfirmedScreenState
                       value,
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 13),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: valueColor ?? const Color(0xFF1A1A2E),
                       ),
                     ),
@@ -455,7 +455,7 @@ class _DownloadTicketButton extends StatelessWidget {
           'Download Ticket',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 15),
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),

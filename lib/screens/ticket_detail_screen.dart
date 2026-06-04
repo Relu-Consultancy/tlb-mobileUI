@@ -206,7 +206,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 15),
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A2E),
               ),
             ),
@@ -448,7 +448,7 @@ class _Bubble extends StatelessWidget {
                         _displayName(message),
                         style: GoogleFonts.poppins(
                           fontSize: 11,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                           color: const Color(0xFF2563EB),
                         ),
                       ),

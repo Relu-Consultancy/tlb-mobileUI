@@ -124,7 +124,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
           'Select Seats',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 16),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -144,7 +144,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                   widget.event.title,
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 14),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: const Color(0xFF1A1A2E),
                   ),
                 ),
@@ -188,7 +188,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                           'STAGE',
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 13),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                             color: Colors.white,
                             letterSpacing: 4,
                           ),
@@ -221,7 +221,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                                   '${_categories[cat]!.name} - ₹${_categories[cat]!.price}',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 11),
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w500,
                                     color: _categories[cat]!.color,
                                   ),
                                 ),
@@ -240,7 +240,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.poppins(
                                         fontSize: Responsive.sp(context, 10),
-                                        fontWeight: FontWeight.w600,
+                                        fontWeight: FontWeight.w500,
                                         color: Colors.grey,
                                       ),
                                     ),
@@ -305,7 +305,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.poppins(
                                         fontSize: Responsive.sp(context, 10),
-                                        fontWeight: FontWeight.w600,
+                                        fontWeight: FontWeight.w500,
                                         color: Colors.grey,
                                       ),
                                     ),
@@ -364,7 +364,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                                   entry.value.name,
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 11),
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w500,
                                     color: const Color(0xFF1A1A2E),
                                   ),
                                 ),
@@ -372,7 +372,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                                   '₹${entry.value.price}',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 12),
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w500,
                                     color: entry.value.color,
                                   ),
                                 ),
@@ -426,7 +426,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                         entry.key,
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 11),
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                           color: _categories[cat]!.color,
                         ),
                       ),
@@ -446,7 +446,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                           '${_selectedSeats.length} Seat${_selectedSeats.length > 1 ? 's' : ''} • ₹$_totalPrice',
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 15),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                             color: const Color(0xFF1A1A2E),
                           ),
                         ),
@@ -489,7 +489,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                       'Proceed',
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 15),
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w500,
                         color: Colors.white,
                       ),
                     ),

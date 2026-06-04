@@ -87,7 +87,7 @@ class HolidaySpecialCard extends StatelessWidget {
                             event.tag!,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 12),
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
                               color: Colors.white,
                             ),
                           ),
@@ -107,7 +107,7 @@ class HolidaySpecialCard extends StatelessWidget {
                     event.title,
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 15),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
                     ),
                     maxLines: 1,
@@ -180,7 +180,7 @@ class HolidaySpecialCard extends StatelessWidget {
                               buttonLabel,
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 12),
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w500,
                                 color: const Color(0xFF1A1A2E),
                               ),
                             ),

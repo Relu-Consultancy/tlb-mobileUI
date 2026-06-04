@@ -224,7 +224,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                       maxLines: 2,
                                       style: TextStyle(
                                         fontSize: Responsive.sp(context, 11),
-                                        fontWeight: FontWeight.w600,
+                                        fontWeight: FontWeight.w500,
                                         color: AppColors.textPrimary,
                                         height: 1.3,
                                       ),

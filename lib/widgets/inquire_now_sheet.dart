@@ -153,7 +153,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
                           'Inquire Now',
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 18),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                             color: const Color(0xFF1A1A2E),
                           ),
                         ),
@@ -321,7 +321,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
                           'Send Enquiry',
                           style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 16),
-                              fontWeight: FontWeight.w700),
+                              fontWeight: FontWeight.w500),
                         ),
                 ),
               ),
@@ -341,12 +341,12 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
           TextSpan(children: [
             TextSpan(
               text: label,
-              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E)),
             ),
             if (required)
               TextSpan(
                 text: '*',
-                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w700, color: Colors.red),
+                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: Colors.red),
               ),
             if (optional)
               TextSpan(
@@ -528,7 +528,7 @@ class _EnquirySuccessDialogState extends State<_EnquirySuccessDialog>
                   'Enquiry Submitted',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 20),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
                     color: Colors.white,
                   ),
                 ),
@@ -556,7 +556,7 @@ class _EnquirySuccessDialogState extends State<_EnquirySuccessDialog>
                     ),
                     child: Text(
                       'Okay, Got it!',
-                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700),
+                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500),
                     ),
                   ),
                 ),

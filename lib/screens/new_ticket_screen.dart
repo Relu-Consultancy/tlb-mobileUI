@@ -104,7 +104,7 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
           'New Ticket',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A2E),
           ),
         ),
@@ -228,7 +228,7 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
                         'Submit Ticket',
                         style: GoogleFonts.poppins(
                           fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
               ),
@@ -254,7 +254,7 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
         text,
         style: GoogleFonts.poppins(
           fontSize: 13,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
           color: const Color(0xFF1A1A2E),
         ),
       );

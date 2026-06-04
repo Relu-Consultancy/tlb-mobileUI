@@ -70,7 +70,7 @@ class FamilyFeelsSection extends StatelessWidget {
                                   event.title,
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 14),
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w500,
                                     color: const Color(0xFF1A1A2E),
                                   ),
                                   maxLines: 2,
@@ -89,7 +89,7 @@ class FamilyFeelsSection extends StatelessWidget {
                                         style: GoogleFonts.poppins(
                                           fontSize: Responsive.sp(context, 12),
                                           color: Colors.grey,
-                                          fontWeight: FontWeight.w600,
+                                          fontWeight: FontWeight.w500,
                                         ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -121,7 +121,7 @@ class FamilyFeelsSection extends StatelessWidget {
                                   'Starting from ₹${event.price?.toInt() ?? 200}',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 12),
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w500,
                                     color: const Color(0xFF4A4A68),
                                     decoration: TextDecoration.underline,
                                   ),
@@ -156,7 +156,7 @@ class FamilyFeelsSection extends StatelessWidget {
                                   'Book Now',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 12),
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ),
