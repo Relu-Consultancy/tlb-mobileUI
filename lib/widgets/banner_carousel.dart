@@ -15,6 +15,14 @@ class BannerCarousel extends StatefulWidget {
   final String ctaText;
   final double? fixedCardWidth;
 
+  /// Overrides the card corner radius. Use 0 for a full-bleed edge-to-edge
+  /// banner. When null, falls back to 28 (overlay style) / 14.
+  final double? cornerRadius;
+
+  /// When true, the page-dot indicator is overlaid at the bottom of the banner
+  /// image (and the external dots row below is removed).
+  final bool overlayDots;
+
   const BannerCarousel({
     super.key,
     required this.events,
@@ -23,6 +31,8 @@ class BannerCarousel extends StatefulWidget {
     this.overlayStyle = false,
     this.ctaText = 'Explore Event',
     this.fixedCardWidth,
+    this.cornerRadius,
+    this.overlayDots = false,
   });
 
   @override
@@ -75,14 +85,33 @@ class _BannerCarouselState extends State<BannerCarousel> {
 
     final screenWidth = MediaQuery.of(context).size.width;
     final cardWidth = widget.fixedCardWidth ?? (screenWidth * 0.92 - 12);
-    final radius = widget.overlayStyle ? 28.0 : 14.0;
+    final radius = widget.cornerRadius ?? (widget.overlayStyle ? 28.0 : 14.0);
+
+    final indicator = AnimatedSmoothIndicator(
+      activeIndex: _currentIndex,
+      count: widget.events.length,
+      effect: WormEffect(
+        dotHeight: 8,
+        dotWidth: 8,
+        activeDotColor: widget.overlayDots
+            ? Colors.white
+            : const Color(0xFFFFB902),
+        dotColor: widget.overlayDots
+            ? Colors.white.withOpacity(0.45)
+            : const Color(0xFFE0E0E0),
+        spacing: 6,
+      ),
+    );
 
     return Column(
       children: [
         // ── Swipeable PageView ────────────────────────────────────────
         SizedBox(
           height: widget.height,
-          child: NotificationListener<ScrollNotification>(
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              NotificationListener<ScrollNotification>(
             onNotification: (n) {
               if (n is ScrollStartNotification) {
                 _userInteracting = true;
@@ -278,33 +307,31 @@ class _BannerCarouselState extends State<BannerCarousel> {
                 );
               },
             ),
+              ),
+              // Page dots overlaid at the bottom of the banner image.
+              if (widget.overlayDots)
+                Positioned(
+                  bottom: 14,
+                  child: indicator,
+                ),
+            ],
           ),
         ),
 
-        // ── Shadow image (showGlow screens only) ───────────────────
-        if (widget.showGlow) ...[
-          const SizedBox(height: 8),
-          Image.asset(
-            'resources- tlb-ui/shadow_underneath.png',
-            width: cardWidth,
-            fit: BoxFit.contain,
-          ),
-          const SizedBox(height: 6),
-        ] else
-          const SizedBox(height: 12),
-
-        // ── Dot indicator ───────────────────────────────────────────
-        AnimatedSmoothIndicator(
-          activeIndex: _currentIndex,
-          count: widget.events.length,
-          effect: const WormEffect(
-            dotHeight: 8,
-            dotWidth: 8,
-            activeDotColor: Color(0xFFFFB902),
-            dotColor: Color(0xFFE0E0E0),
-            spacing: 6,
-          ),
-        ),
+        // ── Shadow image + external dots (skipped when dots are overlaid) ──
+        if (!widget.overlayDots) ...[
+          if (widget.showGlow) ...[
+            const SizedBox(height: 8),
+            Image.asset(
+              'resources- tlb-ui/shadow_underneath.png',
+              width: cardWidth,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 6),
+          ] else
+            const SizedBox(height: 12),
+          indicator,
+        ],
       ],
     );
   }

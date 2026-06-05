@@ -118,19 +118,54 @@ class HelpService {
     }
   }
 
+  // ── Categories ──────────────────────────────────────────────────────────────
+
+  /// GET /api/v1/help/tickets/categories/
+  static Future<Map<String, dynamic>> getCategories({
+    required String accessToken,
+  }) async {
+    try {
+      final res = await http
+          .get(
+            Uri.parse('$_base/api/v1/help/tickets/categories/'),
+            headers: _authHeaders(accessToken),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      final decoded = _decodeAny(res.body);
+      if (res.statusCode == 200) {
+        final list = _unwrapList(decoded);
+        final categories = list
+            .whereType<Map<String, dynamic>>()
+            .map(HelpCategory.fromJson)
+            .toList();
+        return {'success': true, 'categories': categories};
+      }
+      return {
+        'success': false,
+        'message': _extractError(
+          decoded is Map<String, dynamic> ? decoded : {},
+          res.statusCode,
+        ),
+      };
+    } catch (e) {
+      return {'success': false, 'message': _networkError(e)};
+    }
+  }
+
   // ── Messages — poll ─────────────────────────────────────────────────────────
 
   /// GET /api/v1/help/tickets/{id}/messages/?since=ISO_8601
-  /// [since] is optional. When supplied, only messages with `created_at > since`
+  /// [sinceRaw] is optional. When supplied, only messages with `created_at > since`
   /// are returned — used by the chat poller to fetch incrementals only.
   static Future<Map<String, dynamic>> getMessages({
     required String accessToken,
     required String ticketId,
-    DateTime? since,
+    String? sinceRaw,
   }) async {
     try {
       final params = <String, String>{};
-      if (since != null) params['since'] = since.toUtc().toIso8601String();
+      if (sinceRaw != null) params['since'] = sinceRaw;
       final uri = Uri.parse('$_base/api/v1/help/tickets/$ticketId/messages/')
           .replace(queryParameters: params.isEmpty ? null : params);
 
@@ -140,12 +175,22 @@ class HelpService {
 
       final decoded = _decodeAny(res.body);
       if (res.statusCode == 200) {
-        final list = _unwrapList(decoded);
+        final inner = decoded is Map<String, dynamic> && decoded['data'] is Map<String, dynamic> 
+            ? decoded['data'] 
+            : {};
+            
+        final list = inner['messages'] as List<dynamic>? ?? [];
         final messages = list
             .whereType<Map<String, dynamic>>()
             .map(HelpTicketMessage.fromJson)
             .toList();
-        return {'success': true, 'messages': messages};
+        
+        final ticketStatus = inner['ticket_status'] as String?;
+        return {
+          'success': true, 
+          'messages': messages,
+          'ticket_status': ticketStatus,
+        };
       }
       return {
         'success': false,
@@ -154,6 +199,32 @@ class HelpService {
           res.statusCode,
         ),
       };
+    } catch (e) {
+      return {'success': false, 'message': _networkError(e)};
+    }
+  }
+
+  // ── Close ticket ────────────────────────────────────────────────────────────
+
+  /// POST /api/v1/help/tickets/{id}/close/
+  static Future<Map<String, dynamic>> closeTicket({
+    required String accessToken,
+    required String ticketId,
+  }) async {
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$_base/api/v1/help/tickets/$ticketId/close/'),
+            headers: _authHeaders(accessToken),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      final decoded = _decode(res.body);
+      if (res.statusCode == 200) {
+        final inner = _inner(decoded) ?? decoded;
+        return {'success': true, 'ticket': HelpTicket.fromJson(inner)};
+      }
+      return {'success': false, 'message': _extractError(decoded, res.statusCode)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }

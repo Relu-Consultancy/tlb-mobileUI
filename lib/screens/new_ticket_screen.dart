@@ -33,6 +33,8 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
   final _subjectCtrl = TextEditingController();
   final _bodyCtrl = TextEditingController();
   late HelpCategory _category;
+  List<HelpCategory> _categories = [];
+  bool _loadingCategories = true;
   bool _submitting = false;
   AutovalidateMode _autovalidate = AutovalidateMode.disabled;
 
@@ -40,6 +42,28 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
   void initState() {
     super.initState();
     _category = widget.initialCategory ?? HelpCategory.general;
+    _categories = [_category];
+    _fetchCategories();
+  }
+
+  Future<void> _fetchCategories() async {
+    final token = AuthState.accessToken;
+    if (token == null) {
+      if (mounted) setState(() => _loadingCategories = false);
+      return;
+    }
+    final res = await HelpService.getCategories(accessToken: token);
+    if (mounted) {
+      setState(() {
+        if (res['success'] == true) {
+          _categories = res['categories'] as List<HelpCategory>;
+          if (!_categories.contains(_category)) {
+            _category = _categories.isNotEmpty ? _categories.first : HelpCategory.general;
+          }
+        }
+        _loadingCategories = false;
+      });
+    }
   }
 
   @override
@@ -63,7 +87,7 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
     final result = await HelpService.createTicket(
       accessToken: token,
       subject: _subjectCtrl.text.trim(),
-      category: _category.slug,
+      category: _category.value,
       body: _bodyCtrl.text.trim(),
       bookingId: widget.initialBookingId,
     );
@@ -117,23 +141,25 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
           children: [
             _label('Category'),
             const SizedBox(height: 6),
-            DropdownButtonFormField<HelpCategory>(
-              value: _category,
-              decoration: _inputDecoration(),
-              borderRadius: BorderRadius.circular(12),
-              items: HelpCategory.all
-                  .map((c) => DropdownMenuItem(
-                        value: c,
-                        child: Text(
-                          c.label,
-                          style: GoogleFonts.poppins(fontSize: 14),
-                        ),
-                      ))
-                  .toList(),
-              onChanged: _submitting
-                  ? null
-                  : (v) => setState(() => _category = v ?? _category),
-            ),
+            _loadingCategories
+                ? const Center(child: Padding(padding: EdgeInsets.all(8.0), child: CircularProgressIndicator()))
+                : DropdownButtonFormField<HelpCategory>(
+                    value: _category,
+                    decoration: _inputDecoration(),
+                    borderRadius: BorderRadius.circular(12),
+                    items: _categories
+                        .map((c) => DropdownMenuItem(
+                              value: c,
+                              child: Text(
+                                c.label,
+                                style: GoogleFonts.poppins(fontSize: 14),
+                              ),
+                            ))
+                        .toList(),
+                    onChanged: _submitting
+                        ? null
+                        : (v) => setState(() => _category = v ?? _category),
+                  ),
             if (widget.initialBookingLabel != null) ...[
               const SizedBox(height: 16),
               _label('Linked Booking'),

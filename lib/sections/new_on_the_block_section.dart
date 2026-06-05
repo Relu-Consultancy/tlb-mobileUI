@@ -19,7 +19,7 @@ class NewOnTheBlockSection extends StatelessWidget {
           textColor: Color(0xFF1A1A2E), // dark navy
         ),
         SizedBox(
-          height: Responsive.h(context, 380, min: 340),
+          height: Responsive.h(context, 330, min: 290),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.hardEdge,
@@ -138,39 +138,6 @@ class NewOnTheBlockSection extends StatelessWidget {
                                 ),
                               ),
                             ],
-                          ),
-                          const SizedBox(height: 12),
-
-                          // View Details button (bottom-left)
-                          SizedBox(
-                            width: Responsive.w(context, 140, min: 120),
-                            height: Responsive.h(context, 38, min: 32),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        EventDetailScreen(event: event),
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFFFCC00),
-                                foregroundColor: const Color(0xFF1A1A2E),
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                              child: Text(
-                                'View Details',
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 12),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
                           ),
                         ],
                       ),

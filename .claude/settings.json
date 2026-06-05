@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(flutter analyze lib/screens/bookings_screen.dart 2>&1)",
+      "PowerShell(flutter analyze lib/core/google_auth_error.dart lib/services/auth_service.dart lib/screens/signup_screen.dart lib/widgets/login_sheet.dart 2>&1)",
+      "PowerShell(flutter analyze lib/screens/signup_screen.dart lib/services/auth_service.dart lib/core/google_auth_error.dart lib/widgets/login_sheet.dart 2>&1)",
+      "PowerShell(flutter analyze lib/widgets/explore_format_row.dart 2>&1)",
+      "PowerShell(flutter analyze lib/widgets/explore_format_row.dart lib/data/dummy_data.dart 2>&1)",
+      "PowerShell(flutter analyze lib/screens/edit_profile_screen.dart 2>&1)",
+      "PowerShell(flutter test test/screens/edit_profile_screen_test.dart 2>&1)"
+    ]
+  }
+}

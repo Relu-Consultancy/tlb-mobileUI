@@ -13,7 +13,11 @@ class FamilyFeelsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionDividerWidget(title: 'Family Feels'),
+        const SectionDividerWidget(
+          title: 'Family Feels',
+          fontSize: 17,
+          textColor: Color(0xFF1A1A2E), // dark navy
+        ),
         SizedBox(
           height: Responsive.h(context, 200, min: 170),
           child: ListView.builder(

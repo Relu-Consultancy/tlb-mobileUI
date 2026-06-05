@@ -11,7 +11,7 @@ import 'inquire_now_sheet.dart';
 class ClassNearbyCard extends StatelessWidget {
   final EventModel event;
   final double width;
-  final String buttonLabel;
+  final String? buttonLabel;
   final Color? tagColor;
   final VoidCallback? onTap;
 
@@ -31,7 +31,7 @@ class ClassNearbyCard extends StatelessWidget {
         if (onTap != null) {
           onTap!();
         } else if (buttonLabel == 'Send Enquiry') {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event, buttonLabel: buttonLabel)));
+          Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event, buttonLabel: buttonLabel!)));
         } else if (buttonLabel == 'Check Availability') {
           Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
         } else {
@@ -220,35 +220,36 @@ class ClassNearbyCard extends StatelessWidget {
                   const SizedBox(height: 12),
 
                   // Join Now button
-                  Material(
-                    color: const Color(0xFFFFB902),
-                    borderRadius: BorderRadius.circular(24),
-                    child: InkWell(
+                  if (buttonLabel != null)
+                    Material(
+                      color: const Color(0xFFFFB902),
                       borderRadius: BorderRadius.circular(24),
-                      onTap: () {
-                        if (onTap != null) {
-                          onTap!();
-                        } else if (buttonLabel == 'Send Enquiry') {
-                          showInquireNow(context, listingId: event.id);
-                        } else if (buttonLabel == 'Check Availability') {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
-                        } else {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
-                        }
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
-                        child: Text(
-                          buttonLabel,
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 13),
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF1A1A2E),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(24),
+                        onTap: () {
+                          if (onTap != null) {
+                            onTap!();
+                          } else if (buttonLabel == 'Send Enquiry') {
+                            showInquireNow(context, listingId: event.id);
+                          } else if (buttonLabel == 'Check Availability') {
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
+                          } else {
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+                          child: Text(
+                            buttonLabel!,
+                            style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, 13),
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xFF1A1A2E),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),

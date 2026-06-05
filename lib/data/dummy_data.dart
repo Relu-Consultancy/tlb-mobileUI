@@ -67,43 +67,43 @@ class DummyData {
       'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/Workshops.png',
       'formatSlug': 'workshop',
       'accentColor': Color(0xFF3D2817),
+      'scale': 1.41, // 1 / 0.709
     },
     {
       'label': 'Camp',
       'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/camp.png',
       'formatSlug': 'camp',
       'accentColor': Color(0xFF1A9ED4),
+      'scale': 1.40, // 1 / 0.713
     },
     {
       'label': 'Competition',
       'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/competition.png',
       'formatSlug': 'competition',
       'accentColor': Color(0xFFD4A800),
-      // PNG artwork fills the entire square (no built-in padding) so it
-      // visually dominates the row — shrink to match Camp / MasterClass.
-      'scale': 0.85,
+      'scale': 1.14, // 1 / 0.878
     },
     {
       'label': 'MasterClass',
       'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/masterclass.png',
       'formatSlug': 'masterclass',
       'accentColor': Color(0xFF1A1A2E),
-      // Source PNG is white-bg with dark text; invert to render the
-      // black-bg / white-text look matching the Figma. No scale override
-      // — same size as every other format circle.
       'invertColors': true,
+      'scale': 1.45, // 1 / 0.690
     },
     {
       'label': 'Showcase Performance',
       'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/shocase.png',
       'formatSlug': 'showcase_performance',
       'accentColor': Color(0xFF0D8DAA),
+      'scale': 1.66, // 1 / 0.603
     },
     {
       'label': 'Demo',
       'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/demo.png',
       'formatSlug': 'demo',
       'accentColor': Color(0xFF0E2B44),
+      'scale': 1.71, // 1 / 0.586
     },
   ];
 
@@ -947,6 +947,45 @@ class DummyData {
       venue: 'Bandra • 6 kms',
       imagePath: 'assets/images/new_home/weekendspl2.png',
       tag: '5 days ago',
+    ),
+  ];
+
+  // "Trending Events" — vertical cards. `eventDate` holds "Day, DD Mon" for
+  // the date badge, `tag` the category chip, `description` the age range,
+  // `venue` the city line.
+  static const List<EventModel> trendingEvents = [
+    EventModel(
+      title: 'Kids Party – Fun at the Stable',
+      venue: 'Bangalore',
+      imagePath: 'assets/images/new_home/hotpics1.jpg',
+      tag: 'Workshop',
+      description: '4-12 Yrs',
+      rating: 4.8,
+      reviewCount: '3.5k reviews',
+      price: 800.0,
+      eventDate: 'Sat, 21 Mar',
+    ),
+    EventModel(
+      title: 'Kids Pottery & Clay Day',
+      venue: 'Kidsville, Pune',
+      imagePath: 'assets/images/new_home/weekendspl2.png',
+      tag: 'Workshop',
+      description: '6-14 Yrs',
+      rating: 4.7,
+      reviewCount: '2.1k reviews',
+      price: 1000.0,
+      eventDate: 'Sat, 15 Aug',
+    ),
+    EventModel(
+      title: 'Family Creativity Day',
+      venue: 'Mumbai',
+      imagePath: 'assets/images/new_home/hotpic2.png',
+      tag: 'Camp',
+      description: '3-10 Yrs',
+      rating: 4.9,
+      reviewCount: '1.8k reviews',
+      price: 650.0,
+      eventDate: 'Sun, 23 Mar',
     ),
   ];
 

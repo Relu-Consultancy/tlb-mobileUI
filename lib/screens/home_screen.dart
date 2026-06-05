@@ -207,6 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               textColor: Color(0xFF3A3A3A), // dark charcoal
                               lineThickness: 1.5,
                               lineColor: Color(0xFFD4A537), // warm gold
+                              topPadding: 6, // 4 (SizedBox) + 6 = 10px total gap
                             ),
                             // Keep the header close to the Spotlight banner;
                             // still extend the warm gradient slightly past the
@@ -228,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       RepaintBoundary(
                         child: BannerCarousel(
                           events: DummyData.bannerEvents,
-                          height: Responsive.h(context, 470.0),
+                          height: Responsive.h(context, 480.0), // Increased height
                           fixedCardWidth: Responsive.w(context, 345.0),
                         ),
                       ),
@@ -246,12 +247,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       const RepaintBoundary(child: SpecialNeedsSection()),
                       const RepaintBoundary(child: TlbSignatureSection()),
 
-                      // AppFooter with upward gradient
-                      const AppFooter(),
+                      // AppFooter — orange gradient stretched past the
+                      // floating navbar (bottomExtra) so there's no white gap.
+                      AppFooter(bottomExtra: navOverlap),
                     ],
-
-                    // Spacer so the last item clears the floating navbar.
-                    SizedBox(height: navOverlap),
                   ],
                 ),
               );

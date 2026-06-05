@@ -3,9 +3,210 @@ import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_state.dart';
+import '../services/payment_method_service.dart';
+import '../models/api_payment_method_model.dart';
+import '../services/token_storage.dart';
 
-class PaymentSettingsScreen extends StatelessWidget {
+class PaymentSettingsScreen extends StatefulWidget {
   const PaymentSettingsScreen({super.key});
+
+  @override
+  State<PaymentSettingsScreen> createState() => _PaymentSettingsScreenState();
+}
+
+class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
+  List<ApiPaymentMethod>? _methods;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchMethods();
+  }
+
+  Future<void> _fetchMethods() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      final tokens = await TokenStorage.loadTokens();
+      final token = tokens['access'];
+      if (token == null) throw Exception('Not authenticated');
+      final methods = await PaymentMethodService.listPaymentMethods(token: token);
+      setState(() {
+        _methods = methods;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _deleteMethod(ApiPaymentMethod method) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove Payment Method?'),
+        content: Text('Are you sure you want to remove this ${method.methodType == 'card' ? 'card' : 'UPI ID'}?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Remove', style: TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      final tokens = await TokenStorage.loadTokens();
+      final token = tokens['access'];
+      if (token == null) return;
+      await PaymentMethodService.deletePaymentMethod(token: token, id: method.id);
+      if (mounted) AppSnackBar.success(context, 'Payment method removed');
+      _fetchMethods();
+    } catch (e) {
+      if (mounted) AppSnackBar.error(context, e.toString());
+    }
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 32, 20, 32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF2F2F7),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.credit_card_off_outlined,
+              color: Colors.grey,
+              size: 30,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No saved payment methods',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 15),
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF1A1A2E),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Your saved cards and UPI IDs will appear here. You can save them during your next booking checkout.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 12.5),
+              color: Colors.grey.shade600,
+              height: 1.45,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMethodCard(ApiPaymentMethod method) {
+    final isCard = method.methodType == 'card';
+    String title = '';
+    String subtitle = '';
+    IconData iconData = Icons.payment;
+    Color iconBg = const Color(0xFFEDF4FF);
+    Color iconColor = const Color(0xFF2563EB);
+
+    if (isCard) {
+      final network = method.cardNetwork ?? 'Card';
+      final type = method.cardType != null ? '${method.cardType![0].toUpperCase()}${method.cardType!.substring(1)}' : '';
+      title = '$network $type ···${method.cardLast4 ?? 'XXXX'}';
+      subtitle = method.cardIssuer ?? '';
+      iconData = Icons.credit_card;
+    } else if (method.methodType == 'upi') {
+      title = 'UPI';
+      subtitle = method.upiVpaMasked ?? '';
+      iconData = Icons.account_balance_wallet_outlined;
+      iconBg = const Color(0xFFE8F5E9);
+      iconColor = const Color(0xFF2E7D32);
+    } else {
+      title = method.methodType.toUpperCase();
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(iconData, color: iconColor),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 14),
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF1A1A2E),
+                  ),
+                ),
+                if (subtitle.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 12),
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.grey, size: 20),
+            onPressed: () => _deleteMethod(method),
+            tooltip: 'Remove payment method',
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,61 +285,41 @@ class PaymentSettingsScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 20),
-
-            // ── Coming Soon — saved methods + add-new aren't wired to a
-            // backend yet, so the dummy Visa/UPI cards (and Add New Method
-            // CTA) have been replaced with a clear under-development card.
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFF8E1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.credit_card_outlined,
-                      color: Color(0xFFFFB902),
-                      size: 30,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    'Currently being developed',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      fontSize: Responsive.sp(context, 15),
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF1A1A2E),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "We're building the saved-methods feature. "
-                    'For now, payments still complete through the Razorpay '
-                    'checkout during booking.',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      fontSize: Responsive.sp(context, 12.5),
-                      color: Colors.grey.shade600,
-                      height: 1.45,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
             const SizedBox(height: 24),
+
+            // ── Saved Methods ──
+            if (_isLoading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 40),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (_error != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                child: Center(
+                  child: Text(
+                    _error!,
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              )
+            else if (_methods == null || _methods!.isEmpty)
+              _buildEmptyState()
+            else ...[
+              Text(
+                'Saved Methods',
+                style: GoogleFonts.poppins(
+                  fontSize: Responsive.sp(context, 14),
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF1A1A2E),
+                ),
+              ),
+              const SizedBox(height: 12),
+              ..._methods!.map(_buildMethodCard),
+            ],
+
+            const SizedBox(height: 32),
 
             // ── Need more help ──
             Text(
@@ -191,7 +372,7 @@ class PaymentSettingsScreen extends StatelessWidget {
                     AppSnackBar.comingSoon(context, 'Chat with support'),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 40),
           ],
         ),
       ),

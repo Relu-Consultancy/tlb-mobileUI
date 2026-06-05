@@ -6,44 +6,48 @@
 //   GET    /api/v1/help/tickets/{id}/                     detail
 //   GET    /api/v1/help/tickets/{id}/messages/?since=...  poll
 //   POST   /api/v1/help/tickets/{id}/messages/send/       reply
+//   GET    /api/v1/help/tickets/categories/               categories
 
-/// Categories the backend accepts. Keep in sync with the API enum —
-/// `refund_status` is the only one documented in the swagger example,
-/// the others are inferred from the original Help Centre design and
-/// are safe to send (DRF validates and we surface the error inline).
+/// Categories returned dynamically from the API based on user role.
 class HelpCategory {
-  final String slug;
+  final String value;
   final String label;
-  const HelpCategory(this.slug, this.label);
 
-  static const bookingIssue =
-      HelpCategory('booking_issue', 'Booking Issues');
-  static const paymentProblem =
-      HelpCategory('payment_problem', 'Payment Problems');
-  static const refundStatus =
-      HelpCategory('refund_status', 'Refund Status');
-  static const general = HelpCategory('general', 'General');
+  const HelpCategory({
+    required this.value,
+    required this.label,
+  });
 
-  static const all = <HelpCategory>[
-    bookingIssue,
-    paymentProblem,
-    refundStatus,
-    general,
-  ];
+  static const general = HelpCategory(value: 'general', label: 'General');
 
-  static HelpCategory fromSlug(String? s) {
-    for (final c in all) {
-      if (c.slug == s) return c;
-    }
-    // Unknown slug — render the raw token so we never silently lose info.
-    return HelpCategory(s ?? 'general', _humanize(s ?? 'general'));
+  factory HelpCategory.fromJson(Map<String, dynamic> json) {
+    return HelpCategory(
+      value: json['value'] as String,
+      label: json['label'] as String,
+    );
   }
 
-  static String _humanize(String s) =>
-      s.replaceAll('_', ' ').split(' ').map((w) {
+  static HelpCategory fromSlug(String? s) {
+    return HelpCategory(
+      value: s ?? 'general',
+      label: _humanize(s ?? 'general'),
+    );
+  }
+
+  static String _humanize(String s) => s.replaceAll('_', ' ').split(' ').map((w) {
         if (w.isEmpty) return w;
         return w[0].toUpperCase() + w.substring(1);
       }).join(' ');
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is HelpCategory &&
+          runtimeType == other.runtimeType &&
+          value == other.value;
+
+  @override
+  int get hashCode => value.hashCode;
 }
 
 class HelpTicket {
@@ -70,8 +74,6 @@ class HelpTicket {
   });
 
   factory HelpTicket.fromJson(Map<String, dynamic> j) {
-    // List endpoint returns `unread_count` as a string ("0") — the rest of
-    // the API uses ints. Accept both.
     final unreadRaw = j['unread_count'];
     int unread = 0;
     if (unreadRaw is int) {
@@ -103,6 +105,7 @@ class HelpTicketMessage {
   final String body;
   final bool isRead;
   final DateTime? createdAt;
+  final String? createdAtRaw; // Keep verbatim for polling API
 
   HelpTicketMessage({
     required this.id,
@@ -111,6 +114,7 @@ class HelpTicketMessage {
     required this.body,
     required this.isRead,
     this.createdAt,
+    this.createdAtRaw,
   });
 
   bool get isFromCustomer => senderRole == 'customer';
@@ -123,6 +127,7 @@ class HelpTicketMessage {
       body: (j['body'] ?? '').toString(),
       isRead: j['is_read'] == true,
       createdAt: _parseDate(j['created_at']),
+      createdAtRaw: j['created_at']?.toString(),
     );
   }
 }

@@ -104,20 +104,22 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
     if (!mounted) return;
     final token = AuthState.accessToken;
     if (token == null) return;
-    DateTime? since;
+    String? sinceRaw;
     if (_messages.isNotEmpty) {
+      DateTime? latestDate;
       // Pick the most recent created_at across all rows we already have.
       for (final m in _messages) {
         if (m.createdAt == null) continue;
-        if (since == null || m.createdAt!.isAfter(since)) {
-          since = m.createdAt;
+        if (latestDate == null || m.createdAt!.isAfter(latestDate)) {
+          latestDate = m.createdAt;
+          sinceRaw = m.createdAtRaw;
         }
       }
     }
     final result = await HelpService.getMessages(
       accessToken: token,
       ticketId: widget.ticket.id,
-      since: since,
+      sinceRaw: sinceRaw,
     );
     if (!mounted) return;
     if (result['success'] != true) return;
@@ -219,6 +221,16 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Color(0xFF1A1A2E)),
+            onPressed: () {
+              if (!_loadingInitial) _pollOnce();
+            },
+            tooltip: 'Refresh messages',
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: Column(
         children: [

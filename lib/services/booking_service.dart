@@ -17,6 +17,7 @@ class BookingService {
     required String token,
     required String listingId,
     required String bookingType,
+    String? couponCode,
     List<BookingLineItem> lineItems = const [],
     List<BookingAttendee> attendees = const [],
     String? customerNotes,
@@ -32,6 +33,9 @@ class BookingService {
       'booking_type': bookingType,
     };
 
+    if (couponCode != null && couponCode.isNotEmpty) {
+      body['coupon_code'] = couponCode;
+    }
     if (lineItems.isNotEmpty) {
       body['line_items'] = lineItems.map((e) => e.toJson()).toList();
     }
@@ -65,7 +69,78 @@ class BookingService {
       final json = jsonDecode(resp.body) as Map<String, dynamic>;
       final data = _unwrap(json);
 
-      if (resp.statusCode == 201 && (json['success'] == true)) {
+      if (resp.statusCode == 201 && (json['success'] == true || json['success'] == null)) {
+        return BookingInitiateResponse.fromJson(data);
+      }
+
+      throw Exception(_extractError(json, resp.statusCode));
+    } on SocketException {
+      throw Exception('Cannot reach server. Check your connection.');
+    } on TimeoutException {
+      throw Exception('Request timed out. Please try again.');
+    }
+  }
+
+  /// POST /api/v1/bookings/initiate-with-saved-method/
+  static Future<BookingInitiateResponse> initiateWithSavedMethod({
+    required String token,
+    required String listingId,
+    required String bookingType,
+    required String savedMethodId,
+    String? couponCode,
+    List<BookingLineItem> lineItems = const [],
+    List<BookingAttendee> attendees = const [],
+    String? customerNotes,
+    int? batchId,
+    int? quantity,
+    int? slotId,
+    int? packageId,
+    int? guestCount,
+    String? specialRequests,
+  }) async {
+    final body = <String, dynamic>{
+      'listing_id': listingId,
+      'booking_type': bookingType,
+      'saved_method_id': savedMethodId,
+    };
+
+    if (couponCode != null && couponCode.isNotEmpty) {
+      body['coupon_code'] = couponCode;
+    }
+    if (lineItems.isNotEmpty) {
+      body['line_items'] = lineItems.map((e) => e.toJson()).toList();
+    }
+    if (attendees.isNotEmpty) {
+      body['attendees'] = attendees.map((e) => e.toJson()).toList();
+    }
+    if (customerNotes != null && customerNotes.isNotEmpty) {
+      body['customer_notes'] = customerNotes;
+    }
+    if (batchId != null) body['batch_id'] = batchId;
+    if (quantity != null) body['quantity'] = quantity;
+    if (slotId != null) body['slot_id'] = slotId;
+    if (packageId != null) body['package_id'] = packageId;
+    if (guestCount != null) body['guest_count'] = guestCount;
+    if (specialRequests != null && specialRequests.isNotEmpty) {
+      body['special_requests'] = specialRequests;
+    }
+
+    try {
+      final resp = await http
+          .post(
+            Uri.parse('$_base/api/v1/bookings/initiate-with-saved-method/'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode(body),
+          )
+          .timeout(_timeout);
+
+      final json = jsonDecode(resp.body) as Map<String, dynamic>;
+      final data = _unwrap(json);
+
+      if (resp.statusCode == 201 && (json['success'] == true || json['success'] == null)) {
         return BookingInitiateResponse.fromJson(data);
       }
 
@@ -84,8 +159,18 @@ class BookingService {
     required String razorpayPaymentId,
     required String razorpayOrderId,
     required String razorpaySignature,
+    bool? saveMethod,
   }) async {
     try {
+      final body = <String, dynamic>{
+        'razorpay_payment_id': razorpayPaymentId,
+        'razorpay_order_id': razorpayOrderId,
+        'razorpay_signature': razorpaySignature,
+      };
+      if (saveMethod != null) {
+        body['save_method'] = saveMethod;
+      }
+
       final resp = await http
           .post(
             Uri.parse('$_base/api/v1/bookings/$bookingId/verify-payment/'),
@@ -93,18 +178,14 @@ class BookingService {
               'Authorization': 'Bearer $token',
               'Content-Type': 'application/json',
             },
-            body: jsonEncode({
-              'razorpay_payment_id': razorpayPaymentId,
-              'razorpay_order_id': razorpayOrderId,
-              'razorpay_signature': razorpaySignature,
-            }),
+            body: jsonEncode(body),
           )
           .timeout(_timeout);
 
       final json = jsonDecode(resp.body) as Map<String, dynamic>;
       final data = _unwrap(json);
 
-      if (resp.statusCode == 200 && (json['success'] == true)) {
+      if (resp.statusCode == 200 && (json['success'] == true || json['success'] == null)) {
         return BookingConfirmResponse.fromJson(data);
       }
 
@@ -136,7 +217,7 @@ class BookingService {
 
       final json = jsonDecode(resp.body) as Map<String, dynamic>;
 
-      if (resp.statusCode == 200 && json['success'] == true) {
+      if (resp.statusCode == 200 && (json['success'] == true || json['success'] == null)) {
         final data = _unwrap(json);
         return ApiBookingsPage.fromJson(data);
       }
@@ -164,7 +245,7 @@ class BookingService {
 
       final json = jsonDecode(resp.body) as Map<String, dynamic>;
 
-      if (resp.statusCode == 200 && json['success'] == true) {
+      if (resp.statusCode == 200 && (json['success'] == true || json['success'] == null)) {
         return ApiBookingItem.fromJson(_unwrap(json));
       }
       throw Exception(_extractError(json, resp.statusCode));
@@ -176,10 +257,6 @@ class BookingService {
   }
 
   /// GET /api/v1/bookings/{bookingId}/ticket/data/
-  ///
-  /// Returns the raw JSON ticket payload (booking_reference, listing details,
-  /// customer info, line items, date/time, and `qr_code` as a base64 PNG).
-  /// Only succeeds for bookings with status=CONFIRMED.
   static Future<Map<String, dynamic>> fetchTicketData({
     required String token,
     required String bookingId,
@@ -194,7 +271,83 @@ class BookingService {
 
       final json = jsonDecode(resp.body) as Map<String, dynamic>;
 
-      if (resp.statusCode == 200 && json['success'] == true) {
+      if (resp.statusCode == 200 && (json['success'] == true || json['success'] == null)) {
+        return _unwrap(json);
+      }
+      throw Exception(_extractError(json, resp.statusCode));
+    } on SocketException {
+      throw Exception('Cannot reach server. Check your connection.');
+    } on TimeoutException {
+      throw Exception('Request timed out. Please try again.');
+    }
+  }
+
+  /// GET /api/v1/bookings/{bookingId}/ticket/
+  /// Returns HTML ticket with QR code
+  static Future<String> fetchTicketHtml({
+    required String token,
+    required String bookingId,
+  }) async {
+    try {
+      final resp = await http
+          .get(
+            Uri.parse('$_base/api/v1/bookings/$bookingId/ticket/'),
+            headers: {'Authorization': 'Bearer $token'},
+          )
+          .timeout(_timeout);
+
+      if (resp.statusCode == 200) {
+        return resp.body;
+      }
+      throw Exception('Failed to load ticket HTML (${resp.statusCode})');
+    } on SocketException {
+      throw Exception('Cannot reach server. Check your connection.');
+    } on TimeoutException {
+      throw Exception('Request timed out. Please try again.');
+    }
+  }
+
+  /// GET /api/v1/bookings/{bookingId}/invoice/
+  /// Returns HTML invoice
+  static Future<String> fetchInvoiceHtml({
+    required String token,
+    required String bookingId,
+  }) async {
+    try {
+      final resp = await http
+          .get(
+            Uri.parse('$_base/api/v1/bookings/$bookingId/invoice/'),
+            headers: {'Authorization': 'Bearer $token'},
+          )
+          .timeout(_timeout);
+
+      if (resp.statusCode == 200) {
+        return resp.body;
+      }
+      throw Exception('Failed to load invoice HTML (${resp.statusCode})');
+    } on SocketException {
+      throw Exception('Cannot reach server. Check your connection.');
+    } on TimeoutException {
+      throw Exception('Request timed out. Please try again.');
+    }
+  }
+
+  /// GET /api/v1/bookings/payment/{razorpay_order_id}/
+  static Future<Map<String, dynamic>> getPaymentDetail({
+    required String token,
+    required String razorpayOrderId,
+  }) async {
+    try {
+      final resp = await http
+          .get(
+            Uri.parse('$_base/api/v1/bookings/payment/$razorpayOrderId/'),
+            headers: {'Authorization': 'Bearer $token'},
+          )
+          .timeout(_timeout);
+
+      final json = jsonDecode(resp.body) as Map<String, dynamic>;
+
+      if (resp.statusCode == 200 && (json['success'] == true || json['success'] == null)) {
         return _unwrap(json);
       }
       throw Exception(_extractError(json, resp.statusCode));
@@ -228,7 +381,7 @@ class BookingService {
 
       final json = jsonDecode(resp.body) as Map<String, dynamic>;
 
-      if (resp.statusCode == 200 && json['success'] == true) {
+      if (resp.statusCode == 200 && (json['success'] == true || json['success'] == null)) {
         return ApiBookingItem.fromJson(_unwrap(json));
       }
       throw Exception(_extractError(json, resp.statusCode));

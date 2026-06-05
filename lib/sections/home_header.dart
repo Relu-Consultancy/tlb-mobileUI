@@ -343,17 +343,18 @@ class HomeHeader extends StatelessWidget {
       child: Container(
         height: Responsive.h(context, 48, min: 42),
         decoration: BoxDecoration(
+          // Golden wash across the whole bar (subtle top→bottom depth so the
+          // gold covers the full width, not just the left side).
           gradient: const LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFFFE9B8), // soft golden
-              Color(0xFFFFF4D8), // pale gold
-              Color(0xFFFFFDF7), // near-white highlight
+              Color(0xFFFFF6DE), // light golden (top)
+              Color(0xFFFFEFC8), // golden (bottom)
             ],
-            stops: [0.0, 0.55, 1.0],
           ),
           borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: Colors.white, width: 4),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.07),

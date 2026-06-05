@@ -55,7 +55,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => NewTicketScreen(
-          initialCategory: HelpCategory.general,
+          initialCategory: const HelpCategory(value: 'general', label: 'General'),
         ),
       ),
     );
@@ -199,7 +199,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                     title: 'Booking Issues',
                     subtitle: 'Trouble with a booking or cancellation?',
                     onTap: () =>
-                        _openNewTicket(category: HelpCategory.bookingIssue),
+                        _openNewTicket(category: const HelpCategory(value: 'booking_issue', label: 'Booking Issues')),
                     isFirst: true,
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 16),
@@ -211,7 +211,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                     title: 'Payment Problems',
                     subtitle: 'Payment failed or not reflected?',
                     onTap: () =>
-                        _openNewTicket(category: HelpCategory.paymentProblem),
+                        _openNewTicket(category: const HelpCategory(value: 'payment_problem', label: 'Payment Problems')),
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 16),
                   _buildTopic(
@@ -222,7 +222,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                     title: 'Refund Status',
                     subtitle: 'Check refund or cancellation status.',
                     onTap: () =>
-                        _openNewTicket(category: HelpCategory.refundStatus),
+                        _openNewTicket(category: const HelpCategory(value: 'refund_status', label: 'Refund Status')),
                     isLast: true,
                   ),
                 ],

@@ -9,7 +9,7 @@ import '../widgets/section_divider_widget.dart';
 import '../widgets/explore_categories_grid.dart';
 import '../widgets/explore_format_row.dart';
 import '../widgets/partner_portrait_card.dart';
-import '../widgets/event_card_with_rating.dart';
+import '../widgets/trending_event_card.dart';
 
 import '../widgets/holiday_special_card.dart';
 import '../widgets/new_on_tlb_card.dart';
@@ -223,13 +223,18 @@ class _EventsScreenState extends State<EventsScreen> {
                     ],
                   ),
                 ),
-                      // Spotlight Banner
+                      // Spotlight Banner — full-bleed (edge to edge).
                       RepaintBoundary(
                         child: BannerCarousel(
                           events: DummyData.eventsScreenBanners,
                           height: Responsive.h(context, 386, min: 286),
                           showGlow: false,
                           overlayStyle: true,
+                          // Full width — side edges touch the screen; only the
+                          // corners are rounded.
+                          fixedCardWidth: MediaQuery.of(context).size.width,
+                          cornerRadius: 22,
+                          overlayDots: true, // dots overlaid on the banner
                         ),
                       ),
 
@@ -240,6 +245,7 @@ class _EventsScreenState extends State<EventsScreen> {
                           categories: _gridCategories,
                           scrollable: true,
                           scrollHeight: 260,
+                          maxScrollRows: 3, // scroll stops at the 3rd row
                           childAspectRatio: 0.8,
                           onViewAll: () => _showAllCategoriesPopup(context),
                           onCategoryTap: (index) {
@@ -262,14 +268,14 @@ class _EventsScreenState extends State<EventsScreen> {
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.hotPicks.length,
+                          itemCount: DummyData.trendingEvents.length,
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.only(right: 16),
                               child: SizedBox(
                                 width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
-                                child: EventCardWithRating(
-                                  event: DummyData.hotPicks[index],
+                                child: TrendingEventCard(
+                                  event: DummyData.trendingEvents[index],
                                 ),
                               ),
                             );
@@ -379,7 +385,7 @@ class _EventsScreenState extends State<EventsScreen> {
 
                       const SectionDividerWidget(title: 'Online Events'),
                       SizedBox(
-                        height: Responsive.h(context, 370, min: 340),
+                        height: Responsive.h(context, 330, min: 300),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -396,10 +402,10 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
-                const AppFooter(),
-                // Clear the floating navbar.
-                SizedBox(
-                    height: (safeBottom > 0 ? safeBottom + 15.0 : 30.0) + 64),
+                // Footer orange stretched past the navbar (no white gap).
+                AppFooter(
+                    bottomExtra:
+                        (safeBottom > 0 ? safeBottom + 15.0 : 30.0) + 64),
               ],
             ),
           ),

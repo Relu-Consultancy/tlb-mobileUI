@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-06-04 (Session 50)
+**Last Updated:** 2026-06-05 (Session 52)
 
 ---
 
@@ -197,19 +197,20 @@ HomeScreen (sidebar/action flows)
 | Widget | Purpose |
 |--------|---------|
 | `floating_navbar.dart` | Animated pill navbar — active tab expands with label, gradient scrim above |
-| `banner_carousel.dart` | Auto-scroll image carousel with overlay style |
+| `banner_carousel.dart` | Auto-scroll image carousel with overlay style. Params incl. `fixedCardWidth`, `cornerRadius` (0 = full-bleed; S51), `overlayDots` (page dots overlaid on the banner bottom; S51) |
 | `event_card.dart` / `event_card_with_rating.dart` / `event_card_with_price.dart` | Various event card styles |
 | `class_nearby_card.dart` | Horizontal class card with tag + button |
 | `wishlist_button.dart` | Heart toggle with disperse animation |
 | `partner_follow_button.dart` | Follow/Unfollow stateful button — grey outlined "Follow" / yellow filled "Following"; auth guard; optimistic update; returns `SizedBox.shrink()` when partnerId is null |
-| `explore_categories_grid.dart` | 3-col category icon grid. `scrollable: true` + `visibleRows` = fixed-height inner scroll with "View All" chip overlaid at bottom |
-| `explore_format_row.dart` | Horizontal format circles row — 6 pre-designed circle images from `Explore_by_format/`; `onFormatTap(index)` callback; `ColorFilter.matrix` inversion for MasterClass; `Transform.scale` per-entry zoom; `ClipOval + BoxFit.cover` |
+| `explore_categories_grid.dart` | 3-col category icon grid. `scrollable: true` + `visibleRows` = fixed-height inner scroll with "View All" chip overlaid at bottom. S51: bottom-fade `ShaderMask` (soft dissolve) + `maxScrollRows` cap (Events uses 3) |
+| `explore_format_row.dart` | Horizontal format circles row — 6 circle images from `Explore_by_format/`; `onFormatTap(index)`; `ColorFilter.matrix` inversion for MasterClass; per-entry `scale`; `ClipOval + BoxFit.cover`. S51: `LayoutBuilder` sizes circles so ~3 fill the width with even 12 px gaps (~112 px) |
 | `holiday_special_card.dart` | Tall gradient card for holiday events |
 | `new_on_tlb_card.dart` | PageView card for new listings |
 | `online_event_card.dart` | Online event card with platform badge |
 | `weekend_event_card.dart` | Compact horizontal weekend card |
 | `partner_portrait_card.dart` | Featured partner portrait card |
-| `section_divider_widget.dart` | Centered section title flanked by golden accent lines. Params: `title`, `lineLength`, `fontSize` (default 14.5), `fontWeight` (default `w600`), `textColor` (default `textSecondary`), `lineColor` (default `dividerGold`), `lineThickness` |
+| `section_divider_widget.dart` | Centered section title flanked by golden accent lines. Params: `title`, `lineLength`, `fontSize` (default **17**), `fontWeight` (default `w600`), `textColor` (default **`textPrimary`** dark navy), `lineColor` (default `dividerGold`), `lineThickness`. Default style matches every section title app-wide (S51) |
+| `trending_event_card.dart` | **(S51)** Events "Trending" card — image-dominant, date badge + heart, title, `Workshop` lavender chip + age, star+reviews, location + Book Now |
 | `filter_bottom_sheet.dart` | Legacy filter sheet |
 | `all_categories_popup.dart` | Full-screen categories popup |
 | `pick_your_pace_row.dart` | Skill level selector row |
@@ -241,7 +242,7 @@ Feed order (top → bottom): Spotlight (inline) → Categories grid (inline) →
 | `stealers_section.dart` | Image-dominant; yellow countdown pill ("End in …") top-center, pink "60% OFF" band bottom; title, stars+reviews, `₹X` + Grab Deal. (`description`=countdown, `tag`=discount) |
 | `special_needs_section.dart` | **Renamed "Where Every Star Shines" (S50)** — horizontal split card: left inset image + red circular star badge; right column has pink→purple `Sensory Friendly` pill (right-aligned), title, star+reviews, `area • km`, Explore. Data: `DummyData.specialNeeds` (`venue`=location, `tag`=pill) |
 | `tlb_signature_section.dart` | Image-dominant poster; purple "TLB Originals" pill centered at top; title, description (2 lines), full-width Register Now |
-| `app_footer.dart` | `resources- tlb-ui/main-footer.png` with 60px top gap |
+| `app_footer.dart` | `main-footer.png` recoloured white→light-orange via a modulate `ShaderMask` (matches header palette); `bottomExtra` param stretches the colour past the floating navbar to the screen edge (S51) |
 
 > Spotlight is rendered inline in `home_screen.dart` via `BannerCarousel`. The "Explore the Stage" category grid is `widgets/categories_grid.dart` (also inline). Note: the "Where Every Star Shines" section's class/file is still named `SpecialNeedsSection` / `special_needs_section.dart` — only the displayed title changed.
 
@@ -813,8 +814,11 @@ Reacts to profile edits without requiring screen re-navigation.
 | ~~PlanPartyScreen → booking confirmation~~ | `plan_party_screen.dart`, `venue_checkout_screen.dart`, `venue_booking_confirmed_screen.dart` | ✅ Done (Session 37) — full flow: PlanPartyScreen → VenueCheckoutScreen → ReviewPayScreen → VenueBookingConfirmedScreen |
 | ~~T&C real API data on all 4 detail screens~~ | all 4 detail screens + 3 models | ✅ Done (Session 39) — `cancellationPolicy`, `refundPolicy`, `faqs` fetched from API; hardcoded fallback sections removed; T&C row hidden when no data |
 | ~~Category classes filter label mismatch~~ | `category_classes_screen.dart`, `dummy_data.dart` | ✅ Done (Session 39) — `apiName` mapping added to all 11 `classesCategories`; `_apiCategoryName` getter resolves correct backend string |
-| Profile screen reactive to name/avatar changes | `profile_screen.dart` | ✅ Done (Session 48) — wrapped in nested `ValueListenableBuilder` on both `userName` and `avatarUrl` |
-| Profile avatar upload | `lib/screens/profile_screen.dart`, `lib/services/avatar_storage.dart` | ✅ Done (Session 48) — local-only upload via `image_picker` + `path_provider`; persists across launches; backend integration is a one-liner when an avatar endpoint ships |
+| ~~Profile screen reactive to name/avatar changes~~ | `profile_screen.dart` | ✅ Done (Session 48) — wrapped in nested `ValueListenableBuilder` on both `userName` and `avatarUrl` |
+| ~~Profile avatar upload~~ | `lib/screens/profile_screen.dart`, `lib/services/avatar_storage.dart` | ✅ Done (Session 48) — local-only upload via `image_picker` + `path_provider`; persists across launches; backend integration is a one-liner when an avatar endpoint ships |
+| ~~Support Tickets Dynamic Integration~~ | `lib/screens/help_centre_screen.dart`, `lib/services/help_service.dart`, `ticket_detail_screen.dart` | ✅ Done (Session 52) — dynamic categories fetched from API, chat polling timezone issue solved using `sinceRaw`, manual refresh button added |
+| ~~Payment Settings API Crash~~ | `lib/services/payment_method_service.dart` | ✅ Done (Session 52) — fixed plural `customers` path to `customer`; added resilient JSON parsing to handle HTML error pages gracefully |
+| ~~Classes Screen UI Polish~~ | `lib/screens/classes_screen.dart`, `lib/widgets/class_nearby_card.dart` | ✅ Done (Session 52) — fixed CTA cutoff bugs for 'Top Picks For You' & 'Holiday Special', removed 'Right Around You' CTA button gracefully, enlarged specific Pick Your Pace images |
 | Programs price flow (parallel of Session 43 class fix) | `lib/models/api_program_model.dart`, `lib/screens/program_detail_screen.dart` | ❌ Pending — `ApiProgramDetail` has no `price` field; `program_detail_screen.dart` reads only `widget.event.price`; same Review & Pay ₹0 bug likely present when arriving from list pages |
 | Backend `/auth/request-otp/` should reject unregistered emails for login | backend | ❌ Pending — Session 48 added a client-side rejection of `is_new_user: true` on the login flow, but the OTP itself is still delivered (and an account is auto-created). Needs a `purpose: 'login'` flag on the request body that the backend honours |
 | Backend `/auth/account/` recovery / re-signup flow after delete | backend | ❌ Pending — Session 48 wires the delete API. The account is soft-deleted server-side, so the next OTP-login attempt for that email likely returns a role/status error. Need to confirm the recovery path |
@@ -863,6 +867,36 @@ share_plus: ^7.2.2           # Native share sheet for events/classes/programs/ve
 ---
 
 ## 12. Development Sessions Summary
+
+### Session 51 — Events-screen redesign + global header/footer/navbar polish
+Continuation of the Session-50 design pass: unified section-title styling, footer recolour, and a full Events-screen redesign (banner, category grid, Trending card, format circles).
+
+#### Section titles unified app-wide
+| Change | Files |
+|--------|-------|
+| **`SectionDividerWidget` defaults changed** — `fontSize 14.5 → 17`, `textColor textSecondary → textPrimary` (dark navy). Every section title that uses defaults (Events / Classes / Programs screens) now matches the home-screen titles automatically; home sections pass explicit values so they're unchanged | `lib/widgets/section_divider_widget.dart` |
+| **"Explore the Stage" + "Family Feels" titles aligned** — Explore-the-Stage (custom header in `categories_grid.dart`) set to `17 / w600 / #1A1A2E`; Family Feels divider given explicit `fontSize:17 / dark navy` | `lib/widgets/categories_grid.dart`, `lib/sections/family_feels_section.dart` |
+
+#### Header / search bar / navbar
+| Change | Files |
+|--------|-------|
+| **Search bar** — golden gradient now covers the whole bar (top→bottom wash `#FFF6DE → #FFEFC8`, was a left→right gold→white fade that left the right half white); added a 4 px white border frame | `lib/sections/home_header.dart` |
+| **Floating navbar** — active tab label weight `w500 → w600` (little bold); the dark gradient scrim above the pill lightened from opaque black to `Color(0xFF000000).withOpacity(0.6)` so footer/content behind stays visible | `lib/widgets/floating_navbar.dart` |
+| **Spotlight banner height** reduced `470 → 415` | `lib/screens/home_screen.dart` |
+
+#### Footer recolour + stretch-to-bottom (all 5 tab screens)
+| Change | Files |
+|--------|-------|
+| **`AppFooter` recoloured + extended** — single modulate `ShaderMask` recolours the white→`#FFCF19` PNG to white→light-orange (`gradient end #FFE2B0` → gold multiplies to ~`#FFB711`, matching the header palette); the logo stays black, the white top blends into the page. New `bottomExtra` param fills the floating-navbar clearance with the PNG's exact bottom colour (`#FFCF19`) so it recolours to the identical tone (seamless, no band) and the colour reaches the screen edge | `lib/sections/app_footer.dart` |
+| Each screen folds its old white clearance `SizedBox` into `AppFooter(bottomExtra: …)` | `home_screen.dart`, `events_screen.dart`, `classes_screen.dart`, `programs_screen.dart`, `venues_screen.dart` |
+
+#### Events screen
+| Change | Files |
+|--------|-------|
+| **Top banner full-bleed** — `BannerCarousel` gains `cornerRadius` + `overlayDots` params. Events banner: `fixedCardWidth = screen width` (edges touch screen), `cornerRadius: 22` (rounded corners), `overlayDots: true` (white page-dots overlaid at the bottom of the banner instead of the external row) | `lib/widgets/banner_carousel.dart`, `lib/screens/events_screen.dart` |
+| **Explore by Categories** — `ExploreCategoriesGrid` gains a bottom-fade (`ShaderMask` `dstIn`, opaque→transparent at ~72%) so the cut-off row dissolves softly; new `maxScrollRows` param caps the scroll at 3 rows (events passes `maxScrollRows: 3`); full list still reachable via "View All" | `lib/widgets/explore_categories_grid.dart`, `lib/screens/events_screen.dart` |
+| **Trending Events redesigned** — new `TrendingEventCard` (image-dominant; white Sat/21-Mar date badge top-left + heart top-right; title; `Workshop` lavender chip + person-icon age; star + reviews; location + Book Now). New data list `DummyData.trendingEvents` (`eventDate`=date badge, `tag`=chip, `description`=age, `venue`=city). `EventCardWithRating` left untouched (still used by Classes/Programs) | `lib/widgets/trending_event_card.dart` (NEW), `lib/data/dummy_data.dart`, `lib/screens/events_screen.dart` |
+| **Explore by Format circles enlarged** — `ExploreFormatRow` rewritten with `LayoutBuilder`: circle size computed so ~3 fill the width with even 12 px gaps (~112 px, bigger than the old fixed 99 px); 4th peeks to hint scroll; per-format `scale`/`invertColors` preserved; dropped unused `Responsive` import | `lib/widgets/explore_format_row.dart` |
 
 ### Session 50 — Home-feed visual redesign + global slim typography
 A design-driven pass replicating provided mocks for every home-screen card section, plus an app-wide font-weight change.

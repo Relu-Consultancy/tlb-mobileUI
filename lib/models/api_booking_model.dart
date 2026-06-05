@@ -1,3 +1,5 @@
+import 'api_payment_method_model.dart';
+
 /// Request model — one selected ticket type with a quantity.
 class BookingLineItem {
   final int ticketId;
@@ -42,19 +44,31 @@ class BookingInitiateResponse {
   final String bookingId;
   final String bookingReference;
   final String razorpayOrderId;
+  final String? razorpayCustomerId;
+  final String? tokenId;
   final double amount;
+  final double? originalAmount;
+  final double discountAmount;
+  final String? couponApplied;
   final String currency;
   final DateTime? holdExpiresAt;
   final String status;
+  final ApiPaymentMethod? savedMethod;
 
   const BookingInitiateResponse({
     required this.bookingId,
     required this.bookingReference,
     required this.razorpayOrderId,
+    this.razorpayCustomerId,
+    this.tokenId,
     required this.amount,
+    this.originalAmount,
+    this.discountAmount = 0.0,
+    this.couponApplied,
     required this.currency,
     this.holdExpiresAt,
     required this.status,
+    this.savedMethod,
   });
 
   factory BookingInitiateResponse.fromJson(Map<String, dynamic> json) =>
@@ -62,12 +76,20 @@ class BookingInitiateResponse {
         bookingId: json['booking_id'] as String,
         bookingReference: json['booking_reference'] as String,
         razorpayOrderId: json['razorpay_order_id'] as String,
+        razorpayCustomerId: json['razorpay_customer_id'] as String?,
+        tokenId: json['token_id'] as String?,
         amount: (json['amount'] as num).toDouble(),
+        originalAmount: (json['original_amount'] as num?)?.toDouble(),
+        discountAmount: (json['discount_amount'] as num?)?.toDouble() ?? 0.0,
+        couponApplied: json['coupon_applied'] as String?,
         currency: (json['currency'] as String?) ?? 'INR',
         holdExpiresAt: json['hold_expires_at'] != null
             ? DateTime.tryParse(json['hold_expires_at'] as String)
             : null,
         status: (json['status'] as String?) ?? 'awaiting_payment',
+        savedMethod: json['saved_method'] != null
+            ? ApiPaymentMethod.fromJson(json['saved_method'] as Map<String, dynamic>)
+            : null,
       );
 }
 
@@ -78,17 +100,32 @@ class ApiBookingItem {
   final String bookingType;
   final String status;
   final String listingTitle;
+  
   final double totalAmount;
+  final double? originalAmount;
+  final double discountAmount;
+  final String? couponCode;
+
   final String currency;
   final String paymentStatus;
   final DateTime? holdExpiresAt;
+  final DateTime? cancellationCutoffAt;
   final bool isCancellable;
   final DateTime createdAt;
+  
   // Fields present only in cancel response
   final String? cancelledAt;
   final String? cancellationReason;
   final double? refundAmount;
-  // Extended fields — may come from full detail response
+  
+  // Extended fields — from full detail response
+  final String? customerNotes;
+  final List<dynamic>? lineItems;
+  final List<dynamic>? attendees;
+  final Map<String, dynamic>? venueDetail;
+  final List<dynamic>? transactions;
+  final Map<String, dynamic>? paymentDetail;
+  
   final String? listingId;
   final String? listingCover;
 
@@ -99,14 +136,24 @@ class ApiBookingItem {
     required this.status,
     required this.listingTitle,
     required this.totalAmount,
+    this.originalAmount,
+    this.discountAmount = 0.0,
+    this.couponCode,
     required this.currency,
     required this.paymentStatus,
     required this.holdExpiresAt,
+    this.cancellationCutoffAt,
     required this.isCancellable,
     required this.createdAt,
     this.cancelledAt,
     this.cancellationReason,
     this.refundAmount,
+    this.customerNotes,
+    this.lineItems,
+    this.attendees,
+    this.venueDetail,
+    this.transactions,
+    this.paymentDetail,
     this.listingId,
     this.listingCover,
   });
@@ -118,10 +165,16 @@ class ApiBookingItem {
         status: (json['status'] as String?) ?? '',
         listingTitle: (json['listing_title'] as String?) ?? '',
         totalAmount: (json['total_amount'] as num?)?.toDouble() ?? 0,
+        originalAmount: (json['original_amount'] as num?)?.toDouble(),
+        discountAmount: (json['discount_amount'] as num?)?.toDouble() ?? 0.0,
+        couponCode: json['coupon_code'] as String?,
         currency: (json['currency'] as String?) ?? 'INR',
         paymentStatus: (json['payment_status'] as String?) ?? '',
         holdExpiresAt: json['hold_expires_at'] != null
             ? DateTime.tryParse(json['hold_expires_at'] as String)
+            : null,
+        cancellationCutoffAt: json['cancellation_cutoff_at'] != null
+            ? DateTime.tryParse(json['cancellation_cutoff_at'] as String)
             : null,
         isCancellable: (json['is_cancellable'] as bool?) ?? false,
         createdAt: DateTime.tryParse((json['created_at'] as String?) ?? '') ??
@@ -129,6 +182,12 @@ class ApiBookingItem {
         cancelledAt: json['cancelled_at'] as String?,
         cancellationReason: json['cancellation_reason'] as String?,
         refundAmount: (json['refund_amount'] as num?)?.toDouble(),
+        customerNotes: json['customer_notes'] as String?,
+        lineItems: json['line_items'] as List<dynamic>?,
+        attendees: json['attendees'] as List<dynamic>?,
+        venueDetail: json['venue_detail'] as Map<String, dynamic>?,
+        transactions: json['transactions'] as List<dynamic>?,
+        paymentDetail: json['payment_detail'] as Map<String, dynamic>?,
         listingId: json['listing_id'] as String? ??
             (json['listing'] as Map?)?['id']?.toString(),
         listingCover: json['listing_cover'] as String? ??
@@ -153,14 +212,24 @@ class ApiBookingItem {
         status: status ?? this.status,
         listingTitle: listingTitle,
         totalAmount: totalAmount,
+        originalAmount: originalAmount,
+        discountAmount: discountAmount,
+        couponCode: couponCode,
         currency: currency,
         paymentStatus: paymentStatus ?? this.paymentStatus,
         holdExpiresAt: holdExpiresAt,
+        cancellationCutoffAt: cancellationCutoffAt,
         isCancellable: isCancellable ?? this.isCancellable,
         createdAt: createdAt,
         cancelledAt: cancelledAt ?? this.cancelledAt,
         cancellationReason: cancellationReason ?? this.cancellationReason,
         refundAmount: refundAmount ?? this.refundAmount,
+        customerNotes: customerNotes,
+        lineItems: lineItems,
+        attendees: attendees,
+        venueDetail: venueDetail,
+        transactions: transactions,
+        paymentDetail: paymentDetail,
         listingId: listingId ?? this.listingId,
         listingCover: listingCover ?? this.listingCover,
       );

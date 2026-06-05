@@ -51,9 +51,9 @@ class CategoriesGrid extends StatelessWidget {
                 child: Text(
                   'Explore the Stage',
                   style: GoogleFonts.poppins(
-                    fontSize: Responsive.sp(context, 15),
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF5A5A5A),
+                    fontSize: Responsive.sp(context, 17),
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF1A1A2E),
                   ),
                 ),
               ),

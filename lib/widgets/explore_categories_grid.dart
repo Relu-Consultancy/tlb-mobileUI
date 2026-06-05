@@ -13,6 +13,11 @@ class ExploreCategoriesGrid extends StatelessWidget {
   /// When provided, skips LayoutBuilder and uses this exact height for the grid container.
   final double? scrollHeight;
 
+  /// When set (scrollable mode), caps how many rows of cards are scrollable —
+  /// e.g. `maxScrollRows: 3` stops the scroll at the 3rd row. The full list is
+  /// still reachable via "View All".
+  final int? maxScrollRows;
+
   const ExploreCategoriesGrid({
     super.key,
     required this.categories,
@@ -22,6 +27,7 @@ class ExploreCategoriesGrid extends StatelessWidget {
     this.scrollable = false,
     this.visibleRows = 2.3,
     this.scrollHeight,
+    this.maxScrollRows,
   });
 
   @override
@@ -37,25 +43,45 @@ class ExploreCategoriesGrid extends StatelessWidget {
     const mainAxisSpacing = 12.0;
     const crossAxisSpacing = 12.0;
 
+    // Cap the scrollable item count to maxScrollRows rows when requested.
+    final int itemCount = maxScrollRows != null
+        ? (categories.length < maxScrollRows! * crossAxisCount
+            ? categories.length
+            : maxScrollRows! * crossAxisCount)
+        : categories.length;
+
     Widget buildStack(double containerHeight) {
       return Stack(
         alignment: Alignment.bottomCenter,
         children: [
           SizedBox(
             height: containerHeight,
-            child: GridView.builder(
-              primary: false,
-              shrinkWrap: false,
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.only(bottom: 48),
-              itemCount: categories.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                mainAxisSpacing: mainAxisSpacing,
-                crossAxisSpacing: crossAxisSpacing,
-                childAspectRatio: childAspectRatio,
+            // Fade the bottom of the grid to transparent so the cut-off row
+            // dissolves softly (and hints there's more to scroll) instead of
+            // ending in a hard edge.
+            child: ShaderMask(
+              blendMode: BlendMode.dstIn,
+              shaderCallback: (rect) => const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.white, Colors.white, Colors.transparent],
+                stops: [0.0, 0.72, 1.0],
+              ).createShader(rect),
+              child: GridView.builder(
+                primary: false,
+                shrinkWrap: false,
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.only(bottom: 48),
+                itemCount: itemCount,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: mainAxisSpacing,
+                  crossAxisSpacing: crossAxisSpacing,
+                  childAspectRatio: childAspectRatio,
+                ),
+                itemBuilder: (context, index) =>
+                    _buildCategoryCard(context, index),
               ),
-              itemBuilder: (context, index) => _buildCategoryCard(context, index),
             ),
           ),
           if (onViewAll != null)

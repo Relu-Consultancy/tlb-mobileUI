@@ -29,21 +29,29 @@ class SectionDividerWidget extends StatelessWidget {
   /// Thickness of the accent lines in logical pixels.
   final double lineThickness;
 
+  /// Optional custom padding above the divider. Defaults to 64.
+  final double topPadding;
+
+  /// Optional custom padding below the divider. Defaults to 16.
+  final double bottomPadding;
+
   const SectionDividerWidget({
     super.key,
     required this.title,
     this.lineLength = 72,
-    this.fontSize = 14.5,
-    this.fontWeight = FontWeight.w600, // section titles — light bold
-    this.textColor = AppColors.textSecondary,
+    this.fontSize = 17, // section titles — match home-screen style
+    this.fontWeight = FontWeight.w600, // light bold
+    this.textColor = AppColors.textPrimary, // dark navy (#1A1A2E)
     this.lineColor = AppColors.dividerGold,
     this.lineThickness = 1,
+    this.topPadding = 64,
+    this.bottomPadding = 16,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

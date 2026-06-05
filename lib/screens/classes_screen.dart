@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
@@ -136,6 +137,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                           categories: DummyData.classesCategories,
                           scrollable: true,
                           visibleRows: 2.3,
+                          maxScrollRows: 3, // Restrict scroll to 3rd row
                           onViewAll: () => _showAllCategoriesPopup(context),
                           onCategoryTap: (index) => Navigator.push(
                             context,
@@ -174,63 +176,97 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       // ── Pick Your Pace ────────────────────────────────────
                       const SectionDividerWidget(title: 'Pick Your Pace'),
                       SizedBox(
-                        height: 148,
+                        height: 120,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
                           itemCount: DummyData.pickYourPace.length,
                           itemBuilder: (context, index) {
                             final item = DummyData.pickYourPace[index];
+                            final label = item['label'] as String;
+
+                            LinearGradient getGradient(String lbl) {
+                              switch (lbl) {
+                                case 'Weekly\nClasses':
+                                  return const LinearGradient(colors: [Color(0xFFEAF2FF), Color(0xFFD6E7FF)], begin: Alignment.topCenter, end: Alignment.bottomCenter);
+                                case 'Monthly\nPrograms':
+                                  return const LinearGradient(colors: [Color(0xFFFFF3E0), Color(0xFFFFE6C7)], begin: Alignment.topCenter, end: Alignment.bottomCenter);
+                                case 'Term Courses':
+                                  return const LinearGradient(colors: [Color(0xFFF9F8F2), Color(0xFFF2EFE0)], begin: Alignment.topCenter, end: Alignment.bottomCenter);
+                                case 'Bootcamps':
+                                  return const LinearGradient(colors: [Color(0xFF7AD6FF), Color(0xFF4DBBFF)], begin: Alignment.topCenter, end: Alignment.bottomCenter);
+                                case 'Certification':
+                                  return const LinearGradient(colors: [Color(0xFFFFF0E6), Color(0xFFFFDCC4)], begin: Alignment.topCenter, end: Alignment.bottomCenter);
+                                case 'Trial Class':
+                                  return const LinearGradient(colors: [Color(0xFFC2F6E6), Color(0xFF8CECD1)], begin: Alignment.topCenter, end: Alignment.bottomCenter);
+                                case 'Holiday\nCamps':
+                                  return const LinearGradient(colors: [Colors.white, Colors.white]);
+                                default:
+                                  return const LinearGradient(colors: [Color(0xFFF0F4FF), Color(0xFFE0E8FF)]);
+                              }
+                            }
+
                             return Padding(
-                              padding: const EdgeInsets.only(right: 20),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 90,
-                                    height: 90,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: const Color(0xFFF0F4FF),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.07),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 3),
-                                        ),
-                                      ],
+                              padding: const EdgeInsets.only(right: 16),
+                              child: Container(
+                                width: 110,
+                                height: 110,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: getGradient(label),
+                                  border: Border.all(
+                                    color: Colors.black.withOpacity(0.04),
+                                    width: 1,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.06),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 3),
                                     ),
-                                    child: ClipOval(
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const SizedBox(height: 12),
+                                    Expanded(
                                       child: Padding(
-                                        padding: const EdgeInsets.all(12),
-                                        child: Image.asset(
-                                          item['image'] as String,
-                                          fit: BoxFit.contain,
-                                          errorBuilder: (_, __, ___) => const Icon(
-                                            Icons.school_outlined,
-                                            size: 36,
-                                            color: AppColors.textSecondary,
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: label == 'Holiday\nCamps' ? 2.0 : 16.0,
+                                        ),
+                                        child: Transform.scale(
+                                          scale: label == 'Holiday\nCamps' ? 1.25 : 1.0,
+                                          child: Image.asset(
+                                            item['image'] as String,
+                                            fit: BoxFit.contain,
+                                            errorBuilder: (_, __, ___) => const Icon(
+                                              Icons.school_outlined,
+                                              size: 32,
+                                              color: AppColors.textSecondary,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  SizedBox(
-                                    width: 90,
-                                    child: Text(
-                                      item['label'] as String,
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      style: TextStyle(
-                                        fontSize: Responsive.sp(context, 11),
-                                        fontWeight: FontWeight.w500,
-                                        color: AppColors.textPrimary,
-                                        height: 1.3,
+                                    const SizedBox(height: 4),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                                      child: Text(
+                                        label,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 2,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: Responsive.sp(context, 10),
+                                          fontWeight: FontWeight.w600,
+                                          color: const Color(0xFF1A1A2E),
+                                          height: 1.1,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 12),
+                                  ],
+                                ),
                               ),
                             );
                           },
@@ -240,7 +276,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       // ── Right Around You ──────────────────────────────────
                       const SectionDividerWidget(title: 'Right Around You'),
                       SizedBox(
-                        height: Responsive.h(context, 420, min: 380),
+                        height: Responsive.h(context, 350, min: 310),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -251,7 +287,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               child: ClassNearbyCard(
                                 event: DummyData.classesRightAroundYou[index],
                                 width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
-                                buttonLabel: 'Check Availability',
+                                buttonLabel: null,
                               ),
                             );
                           },
@@ -261,7 +297,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       // ── Top Picks For You ─────────────────────────────────
                       const SectionDividerWidget(title: 'Top Picks For You'),
                       SizedBox(
-                        height: Responsive.h(context, 130, min: 115),
+                        height: Responsive.h(context, 180, min: 160),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -298,7 +334,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       // ── Holiday Special ───────────────────────────────────
                       const SectionDividerWidget(title: 'Holiday Special'),
                       SizedBox(
-                        height: Responsive.h(context, 400, min: 360),
+                        height: Responsive.h(context, 450, min: 410),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -367,10 +403,9 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      const AppFooter(),
-                      SizedBox(
-                          height: (safeBottom > 0 ? safeBottom + 15.0 : 30.0) +
-                              64),
+                      AppFooter(
+                          bottomExtra:
+                              (safeBottom > 0 ? safeBottom + 15.0 : 30.0) + 64),
                     ],
                   ),
                 ),

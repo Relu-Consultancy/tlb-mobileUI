@@ -288,10 +288,9 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       ),
 
                       const SizedBox(height: 40),
-                      const AppFooter(),
-                      SizedBox(
-                          height: (safeBottom > 0 ? safeBottom + 15.0 : 30.0) +
-                              64),
+                      AppFooter(
+                          bottomExtra:
+                              (safeBottom > 0 ? safeBottom + 15.0 : 30.0) + 64),
                     ],
                   ),
                 ),

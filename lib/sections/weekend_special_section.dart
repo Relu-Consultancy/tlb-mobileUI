@@ -57,7 +57,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
           textColor: Color(0xFF1A1A2E), // dark navy
         ),
         SizedBox(
-          height: Responsive.h(context, 420, min: 360),
+          height: Responsive.h(context, 200, min: 180),
           child: PageView.builder(
             controller: _pageController,
             clipBehavior: Clip.hardEdge,
@@ -79,18 +79,18 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                       ),
                     ],
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Image + date badge + heart — Expanded so the image
-                      // dominates the card; flush to the card edges.
+                      // Left Image Area
                       Expanded(
+                        flex: 4,
                         child: Stack(
                           children: [
                             Positioned.fill(
                               child: ClipRRect(
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(16),
+                                borderRadius: const BorderRadius.horizontal(
+                                  left: Radius.circular(16),
                                 ),
                                 child: Image.asset(
                                   event.imagePath,
@@ -99,179 +99,111 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                 ),
                               ),
                             ),
-                            // Date badge (top-left)
+                            // Heart icon (top-left)
                             Positioned(
-                              top: 12,
-                              left: 12,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 6,
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      'Fri',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: Responsive.sp(context, 13),
-                                        fontWeight: FontWeight.w500,
-                                        color: const Color(0xFF1A1A2E),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'mar 15',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: Responsive.sp(context, 12),
-                                        fontWeight: FontWeight.w500,
-                                        color: const Color(0xFF0066CC), // blue
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            // Heart icon (top-right)
-                            Positioned(
-                              top: 12,
-                              right: 12,
-                              child:
-                                  WishlistButton(event: event, showShadow: true),
+                              top: 8,
+                              left: 8,
+                              child: WishlistButton(event: event, showShadow: true),
                             ),
                           ],
                         ),
                       ),
 
-                      // Content below image — natural height.
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              event.title,
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 16),
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF1A1A2E),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
+                      // Right Content Area
+                      Expanded(
+                        flex: 5,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    event.title,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 14),
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF1A1A2E),
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  // Date
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      // Stars + review count
-                                      Row(
-                                        children: [
-                                          Row(
-                                            children: List.generate(
-                                              5,
-                                              (i) => const Icon(
-                                                Icons.star,
-                                                size: 14,
-                                                color: Colors.amber,
-                                              ),
-                                            ),
+                                      const Icon(Icons.calendar_today_outlined, size: 14, color: Colors.grey),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          'Saturday, 27 Apr\n| 10:00 AM',
+                                          style: GoogleFonts.poppins(
+                                            fontSize: Responsive.sp(context, 11),
+                                            color: Colors.grey.shade600,
+                                            height: 1.3,
                                           ),
-                                          const SizedBox(width: 6),
-                                          Flexible(
-                                            child: Text(
-                                              event.reviewCount ??
-                                                  '3.5k reviews',
-                                              style: GoogleFonts.poppins(
-                                                fontSize:
-                                                    Responsive.sp(context, 12),
-                                                color: Colors.grey,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 8),
-                                      // Location
-                                      Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.location_on_outlined,
-                                            size: 14,
-                                            color: Colors.grey,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Expanded(
-                                            child: Text(
-                                              event.venue,
-                                              style: GoogleFonts.poppins(
-                                                fontSize:
-                                                    Responsive.sp(context, 12),
-                                                fontWeight: FontWeight.w500,
-                                                color: const Color(0xFF4A4A68),
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
+                                        ),
                                       ),
                                     ],
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                // Book Now button on the right
-                                SizedBox(
-                                  height: Responsive.h(context, 38, min: 34),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              EventDetailScreen(event: event),
+                                  const SizedBox(height: 8),
+                                  // Venue
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          event.venue,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: Responsive.sp(context, 11),
+                                            color: Colors.grey.shade600,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFFFFCC00),
-                                      foregroundColor: const Color(0xFF1A1A2E),
-                                      elevation: 0,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
                                       ),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 18,
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              
+                              // Book Now button
+                              SizedBox(
+                                width: double.infinity,
+                                height: Responsive.h(context, 34, min: 30),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => EventDetailScreen(event: event),
                                       ),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFFCC00),
+                                    foregroundColor: const Color(0xFF1A1A2E),
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
                                     ),
-                                    child: Text(
-                                      'Book Now',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: Responsive.sp(context, 12),
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                  ),
+                                  child: Text(
+                                    'Book Now',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 12),
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
-                          ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],

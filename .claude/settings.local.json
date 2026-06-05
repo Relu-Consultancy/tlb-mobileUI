@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "WebFetch(domain:tlb-api.reluconsultancy.in)",
+      "Bash(curl -s \"https://tlb-api.reluconsultancy.in/api/v1/listings/events/metadata/categories/\" -H \"Accept: application/json\")",
+      "Bash(git checkout *)",
+      "Bash(curl -s \"https://tlb-api.reluconsultancy.in/api/v1/listings/events/?page=1&page_size=5\" -H \"Accept: application/json\")",
+      "Bash(python -m json.tool)",
+      "Bash(curl -s \"https://tlb-api.reluconsultancy.in/api/v1/listings/events/?format=workshop\" -H \"Accept: application/json\")",
+      "Bash(Remove-Item *)",
+      "Bash(flutter test *)",
+      "Bash(flutter pub *)",
+      "Bash(dart analyze *)",
+      "Bash(Get-Content *)",
+      "Bash(grep -v \":\\\\s*//\")",
+      "Bash(\"C:/Program Files/Google/Chrome/Application/chrome.exe\" --headless --disable-gpu --print-to-pdf=\"E:/tlb-mobileUI/Development/audit_report.pdf\" --print-to-pdf-no-header --no-margins \"E:/tlb-mobileUI/Development/audit_report.html\")",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(grep -v \"//.*fontSize\")",
+      "Bash(python -c \"import sys,json; pkgs=json.load\\(sys.stdin\\)['packages']; [print\\(p['name'],p.get\\('rootUri',''\\)\\) for p in pkgs if 'razorpay' in p['name'].lower\\(\\)]\")",
+      "Bash(flutter --version)",
+      "Bash(flutter clean *)",
+      "Bash(grep -l \"Responsive\\\\.\" /e/tlb-mobileUI/lib/screens/*.dart)",
+      "Bash(grep -l \"Responsive\\\\.\" /e/tlb-mobileUI/lib/widgets/*.dart)",
+      "PowerShell(flutter analyze lib/models/api_class_model.dart lib/screens/class_detail_screen.dart lib/screens/attendee_details_screen.dart 2>&1)",
+      "PowerShell(flutter analyze lib/providers/auth_state.dart lib/widgets/login_sheet.dart 2>&1)",
+      "PowerShell(flutter analyze 2>&1)",
+      "PowerShell(flutter analyze lib/providers/auth_state.dart lib/widgets/login_sheet.dart lib/main.dart lib/core/preview_mode.dart lib/widgets/preview_toggle_button.dart lib/models/api_class_model.dart lib/screens/class_detail_screen.dart lib/screens/attendee_details_screen.dart 2>&1)",
+      "PowerShell(flutter pub get 2>&1)",
+      "PowerShell(flutter analyze lib/services/booking_service.dart lib/services/ticket_pdf_service.dart lib/screens/booking_confirmed_screen.dart lib/screens/program_booking_confirmed_screen.dart lib/screens/venue_booking_confirmed_screen.dart lib/screens/booking_detail_screen.dart lib/screens/review_pay_screen.dart 2>&1)"
+    ]
+  }
+}
