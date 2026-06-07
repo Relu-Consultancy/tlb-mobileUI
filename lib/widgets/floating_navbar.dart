@@ -33,6 +33,30 @@ class FloatingNavbar extends StatelessWidget {
     this.showcaseConfigs,
   });
 
+  /// Rendered height of the white pill: icon (22) + item vertical padding
+  /// (12·2) + item border (2·2) + pill vertical padding (8·2) + pill border
+  /// (2·2) ≈ 72. Fixed in logical px — it does NOT shrink on small screens,
+  /// which is exactly why content clearance must be derived from it rather
+  /// than from a hard-coded guess.
+  static const double pillHeight = 72;
+
+  /// The gap the navbar keeps from the screen bottom (device safe-area inset
+  /// plus a little breathing room, or a fixed 30 on devices without an inset).
+  /// Pass this as [bottomPadding] so the pill and the content clearance below
+  /// stay in sync on every device.
+  static double bottomInset(BuildContext context) {
+    final safeBottom = MediaQuery.of(context).padding.bottom;
+    return safeBottom > 0 ? safeBottom + 15.0 : 30.0;
+  }
+
+  /// Total vertical space scrollable content must reserve at its bottom so the
+  /// floating pill never overlaps real content. = bottom inset + pill height +
+  /// a comfortable [gap]. Adapts to the device, fixing the small-screen
+  /// overlap where the old hard-coded `+64` under-reserved by ~8–14px.
+  static double clearance(BuildContext context, {double gap = 18}) {
+    return bottomInset(context) + pillHeight + gap;
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;

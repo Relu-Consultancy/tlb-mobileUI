@@ -18,6 +18,10 @@ class ExploreCategoriesGrid extends StatelessWidget {
   /// still reachable via "View All".
   final int? maxScrollRows;
 
+  /// When true the category image extends to the card's bottom edge (no bottom
+  /// padding) so the artwork sits flush at the bottom instead of floating.
+  final bool imagesFlushBottom;
+
   const ExploreCategoriesGrid({
     super.key,
     required this.categories,
@@ -28,6 +32,7 @@ class ExploreCategoriesGrid extends StatelessWidget {
     this.visibleRows = 2.3,
     this.scrollHeight,
     this.maxScrollRows,
+    this.imagesFlushBottom = false,
   });
 
   @override
@@ -187,6 +192,7 @@ class ExploreCategoriesGrid extends StatelessWidget {
     return GestureDetector(
       onTap: () => onCategoryTap?.call(index),
       child: Container(
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           gradient: LinearGradient(
@@ -203,23 +209,32 @@ class ExploreCategoriesGrid extends StatelessWidget {
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 10, 8, 6),
+          padding: EdgeInsets.fromLTRB(8, 10, 8, imagesFlushBottom ? 0 : 6),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                category['label'],
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: Responsive.sp(context, 11),
-                  fontWeight: FontWeight.w500,
-                  height: 1.2,
-                  color: AppColors.textPrimary,
+              // Auto-shrink long labels (e.g. "Entrepreneurship") so the last
+              // character never wraps to a stray extra line. Honours the
+              // forced `\n` line breaks; only scales down when a line overflows.
+              SizedBox(
+                width: double.infinity,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    category['label'],
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 11),
+                      fontWeight: FontWeight.w500,
+                      height: 1.2,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
                 ),
               ),
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(imageInset, imageInset, imageInset, 2),
+                  padding: EdgeInsets.fromLTRB(imageInset, imageInset, imageInset, imagesFlushBottom ? 0 : 2),
                   child: ClipRect(
                     child: Transform.scale(
                       scale: imageScale,

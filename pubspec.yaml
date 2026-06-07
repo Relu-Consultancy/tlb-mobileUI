@@ -64,6 +64,8 @@ flutter:
     - resources- tlb-ui/homescreen-categoryicons/
     - resources- tlb-ui/event_page_subcategoryicons/
     - resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/
+    - resources- tlb-ui/programs_findurfit/
+    - resources- tlb-ui/programs_findurfit_clean/
     - google_fonts/
 
 

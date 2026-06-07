@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../models/api_category_model.dart';
+import '../providers/saved_events_state.dart';
 import '../sections/home_header.dart';
 import '../services/events_listing_service.dart';
 import '../widgets/banner_carousel.dart';
@@ -188,20 +189,30 @@ class _EventsScreenState extends State<EventsScreen> {
     }
   }
 
+  // Pull-to-refresh: re-fetch live categories + wishlist state, then rebuild.
+  Future<void> _handleRefresh() async {
+    await Future.wait([
+      _loadCategories(),
+      SavedEventsState.loadFromApi(),
+    ]);
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
-    final safeBottom = MediaQuery.of(context).padding.bottom;
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
           // Single scroll view — header scrolls with the rest of the page
           // (Session-48 fix for "partial scroll" bug).
-          SingleChildScrollView(
-            physics: const ClampingScrollPhysics(),
-            child: Column(
-              children: [
+          RefreshIndicator(
+            onRefresh: _handleRefresh,
+            color: const Color(0xFFE6A800),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                children: [
                 Container(
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
@@ -235,6 +246,7 @@ class _EventsScreenState extends State<EventsScreen> {
                           fixedCardWidth: MediaQuery.of(context).size.width,
                           cornerRadius: 22,
                           overlayDots: true, // dots overlaid on the banner
+                          staticFade: true, // banner stays put; images animate in
                         ),
                       ),
 
@@ -356,7 +368,7 @@ class _EventsScreenState extends State<EventsScreen> {
 
                       const SectionDividerWidget(title: 'New On TLB'),
                       SizedBox(
-                        height: Responsive.h(context, 190, min: 170),
+                        height: Responsive.h(context, 230, min: 210),
                         child: PageView.builder(
                           controller: _newOnTlbController,
                           itemCount: DummyData.newOnTlb.length,
@@ -403,11 +415,10 @@ class _EventsScreenState extends State<EventsScreen> {
                       ),
 
                 // Footer orange stretched past the navbar (no white gap).
-                AppFooter(
-                    bottomExtra:
-                        (safeBottom > 0 ? safeBottom + 15.0 : 30.0) + 64),
+                AppFooter(bottomExtra: FloatingNavbar.clearance(context)),
               ],
             ),
+          ),
           ),
           Positioned(
             bottom: 0,
@@ -418,7 +429,7 @@ class _EventsScreenState extends State<EventsScreen> {
               child: FloatingNavbar(
                 currentIndex: _currentNavIndex,
                 onTap: _onNavTapped,
-                bottomPadding: safeBottom > 0 ? safeBottom + 15 : 30,
+                bottomPadding: FloatingNavbar.bottomInset(context),
               ),
             ),
           ),

@@ -21,14 +21,6 @@ class HelpCentreScreen extends StatefulWidget {
 }
 
 class _HelpCentreScreenState extends State<HelpCentreScreen> {
-  final _searchCtrl = TextEditingController();
-
-  @override
-  void dispose() {
-    _searchCtrl.dispose();
-    super.dispose();
-  }
-
   void _openNewTicket({HelpCategory? category}) {
     Navigator.push(
       context,
@@ -42,22 +34,6 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const TicketsListScreen()),
-    );
-  }
-
-  void _onSearchSubmit(String value) {
-    final query = value.trim();
-    if (query.isEmpty) return;
-    // No search API yet — pipe the query into a new-ticket subject so it
-    // doesn't get lost, and clear the field for the next try.
-    _searchCtrl.clear();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => NewTicketScreen(
-          initialCategory: const HelpCategory(value: 'general', label: 'General'),
-        ),
-      ),
     );
   }
 
@@ -128,40 +104,6 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                   ),
                 ),
               ],
-            ),
-
-            const SizedBox(height: 18),
-
-            // ── Search bar ─────────────────────────────────────────────
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: TextField(
-                controller: _searchCtrl,
-                textInputAction: TextInputAction.search,
-                onSubmitted: _onSearchSubmit,
-                decoration: InputDecoration(
-                  hintText: 'Describe your issue or raise a ticket...',
-                  hintStyle: GoogleFonts.poppins(
-                    fontSize: Responsive.sp(context, 12.5),
-                    color: Colors.grey.shade400,
-                  ),
-                  prefixIcon:
-                      const Icon(Icons.search, color: Colors.grey, size: 20),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-                style: GoogleFonts.poppins(fontSize: 13),
-              ),
             ),
 
             const SizedBox(height: 24),

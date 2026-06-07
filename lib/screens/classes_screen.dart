@@ -4,6 +4,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
+import '../providers/saved_events_state.dart';
 import '../sections/home_header.dart';
 import '../widgets/banner_carousel.dart';
 import '../widgets/section_divider_widget.dart';
@@ -84,17 +85,24 @@ class _ClassesScreenState extends State<ClassesScreen> {
     }
   }
 
+  // Pull-to-refresh: reload live wishlist/saved state and rebuild the feed.
+  Future<void> _handleRefresh() async {
+    await SavedEventsState.loadFromApi();
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
-    final safeBottom = MediaQuery.of(context).padding.bottom;
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
           // Single scroll view — header scrolls with body (Session-48 fix).
-          SingleChildScrollView(
-                  physics: const ClampingScrollPhysics(),
+          RefreshIndicator(
+            onRefresh: _handleRefresh,
+            color: const Color(0xFFE6A800),
+            child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
                     children: [
                       // Header scrolls with the rest of the page now.
@@ -119,7 +127,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                           ],
                         ),
                       ),
-                      // ── Education Banner ────────────────────────────────
+                      // ── Education Banner — full-bleed (edge to edge). ───
                       RepaintBoundary(
                         child: BannerCarousel(
                           events: DummyData.classesScreenBanners,
@@ -127,11 +135,25 @@ class _ClassesScreenState extends State<ClassesScreen> {
                           showGlow: false,
                           overlayStyle: true,
                           ctaText: 'Explore Classes',
+                          // Full width — side edges touch the screen; only the
+                          // corners are rounded.
+                          fixedCardWidth: MediaQuery.of(context).size.width,
+                          cornerRadius: 22,
+                          overlayDots: true, // dots overlaid on the banner
+                          staticFade: true, // banner stays put; images animate in
                         ),
                       ),
 
                       // ── Let's Begin Here ─────────────────────────────────
-                      const SectionDividerWidget(title: "Let's Begin Here"),
+                      const SectionDividerWidget(
+                        title: "Let's Begin Here",
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                      ),
                       RepaintBoundary(
                         child: ExploreCategoriesGrid(
                           categories: DummyData.classesCategories,
@@ -151,7 +173,15 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
 
                       // ── What's Everyone Joining? ──────────────────────────
-                      const SectionDividerWidget(title: "What's Everyone Joining?"),
+                      const SectionDividerWidget(
+                        title: "What's Everyone Joining?",
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                      ),
                       SizedBox(
                         height: Responsive.h(context, 380, min: 340),
                         child: ListView.builder(
@@ -174,7 +204,15 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
 
                       // ── Pick Your Pace ────────────────────────────────────
-                      const SectionDividerWidget(title: 'Pick Your Pace'),
+                      const SectionDividerWidget(
+                        title: 'Pick Your Pace',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                      ),
                       SizedBox(
                         height: 120,
                         child: ListView.builder(
@@ -274,7 +312,15 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
 
                       // ── Right Around You ──────────────────────────────────
-                      const SectionDividerWidget(title: 'Right Around You'),
+                      const SectionDividerWidget(
+                        title: 'Right Around You',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                      ),
                       SizedBox(
                         height: Responsive.h(context, 350, min: 310),
                         child: ListView.builder(
@@ -295,7 +341,15 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
 
                       // ── Top Picks For You ─────────────────────────────────
-                      const SectionDividerWidget(title: 'Top Picks For You'),
+                      const SectionDividerWidget(
+                        title: 'Top Picks For You',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                      ),
                       SizedBox(
                         height: Responsive.h(context, 180, min: 160),
                         child: ListView.builder(
@@ -332,7 +386,15 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
 
                       // ── Holiday Special ───────────────────────────────────
-                      const SectionDividerWidget(title: 'Holiday Special'),
+                      const SectionDividerWidget(
+                        title: 'Holiday Special',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                      ),
                       SizedBox(
                         height: Responsive.h(context, 450, min: 410),
                         child: ListView.builder(
@@ -355,7 +417,15 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
 
                       // ── Build New Skills ──────────────────────────────────
-                      const SectionDividerWidget(title: 'Build New Skills'),
+                      const SectionDividerWidget(
+                        title: 'Build New Skills',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                      ),
                       SizedBox(
                         height: Responsive.h(context, 170, min: 155),
                         child: ListView.builder(
@@ -376,7 +446,15 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
 
                       // ── Special Focus ─────────────────────────────────────
-                      const SectionDividerWidget(title: 'Special Focus'),
+                      const SectionDividerWidget(
+                        title: 'Special Focus',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                      ),
                       SizedBox(
                         height: Responsive.h(context, 430, min: 390),
                         child: ListView.builder(
@@ -404,11 +482,11 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       const SizedBox(height: 16),
 
                       AppFooter(
-                          bottomExtra:
-                              (safeBottom > 0 ? safeBottom + 15.0 : 30.0) + 64),
+                          bottomExtra: FloatingNavbar.clearance(context)),
                     ],
                   ),
                 ),
+          ),
           Positioned(
             bottom: 0,
             left: 0,
@@ -418,7 +496,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
               child: FloatingNavbar(
                 currentIndex: _currentNavIndex,
                 onTap: _onNavTapped,
-                bottomPadding: safeBottom > 0 ? safeBottom + 15 : 30,
+                bottomPadding: FloatingNavbar.bottomInset(context),
               ),
             ),
           ),

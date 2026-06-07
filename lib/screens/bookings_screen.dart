@@ -25,10 +25,13 @@ class _BookingsScreenState extends State<BookingsScreen> {
   bool _isLoading = true;
   String? _error;
 
-  // Status sets for each tab
-  static const _upcoming = {'hold', 'awaiting_payment', 'confirmed', 'payment_failed'};
+  // Status sets for each tab.
+  // NOTE: 'payment_failed' belongs in Cancelled, NOT Upcoming — a failed
+  // transaction is not an active/upcoming booking. Keeping it in Upcoming was
+  // the cause of failed payments showing up alongside live bookings.
+  static const _upcoming = {'hold', 'awaiting_payment', 'confirmed'};
   static const _past = {'attended', 'refunded'};
-  static const _cancelled = {'cancelled'};
+  static const _cancelled = {'cancelled', 'payment_failed'};
 
   @override
   void initState() {

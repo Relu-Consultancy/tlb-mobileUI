@@ -3,6 +3,7 @@ import 'package:showcaseview/showcaseview.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../providers/location_state.dart';
+import '../providers/saved_events_state.dart';
 import '../sections/home_header.dart';
 import '../widgets/banner_carousel.dart';
 import '../widgets/categories_grid.dart';
@@ -60,6 +61,12 @@ class _HomeScreenState extends State<HomeScreen> {
       ShowcaseView.get().unregister();
     } catch (_) {}
     super.dispose();
+  }
+
+  // Pull-to-refresh: reload live wishlist/saved state and rebuild the feed.
+  Future<void> _handleRefresh() async {
+    await SavedEventsState.loadFromApi();
+    if (mounted) setState(() {});
   }
 
   Future<void> _checkAndStartWalkthrough() async {
@@ -139,8 +146,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final safeBottom = MediaQuery.of(context).padding.bottom;
-
     if (_shouldShowIntro) {
       _shouldShowIntro = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -150,8 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Extra bottom space so the last section isn't hidden behind the
     // floating navbar (which is overlaid via Positioned).
-    final double navOverlap =
-        (safeBottom > 0 ? safeBottom + 15.0 : 30.0) + 64.0;
+    final double navOverlap = FloatingNavbar.clearance(context);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -163,8 +167,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ValueListenableBuilder<String>(
             valueListenable: LocationState().selectedCity,
             builder: (context, city, _) {
-              return SingleChildScrollView(
-                physics: const ClampingScrollPhysics(),
+              return RefreshIndicator(
+                onRefresh: _handleRefresh,
+                color: const Color(0xFFE6A800),
+                child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -253,6 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ],
                 ),
+                ),
               );
             },
           ),
@@ -265,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: FloatingNavbar(
                 currentIndex: _currentNavIndex,
                 onTap: _onNavTapped,
-                bottomPadding: safeBottom > 0 ? safeBottom + 15 : 30,
+                bottomPadding: FloatingNavbar.bottomInset(context),
                 showcaseConfigs: kNavShowcaseConfigs,
               ),
             ),

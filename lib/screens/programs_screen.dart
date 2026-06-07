@@ -4,13 +4,13 @@ import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../models/event_model.dart';
+import '../providers/saved_events_state.dart';
 import '../sections/home_header.dart';
 import '../widgets/banner_carousel.dart';
 import '../widgets/section_divider_widget.dart';
 import '../widgets/explore_categories_grid.dart';
 import '../widgets/pick_your_pace_row.dart';
 import '../widgets/event_card_with_rating.dart';
-import '../widgets/class_nearby_card.dart';
 import '../sections/app_footer.dart';
 import '../widgets/floating_navbar.dart';
 import '../widgets/all_categories_popup.dart';
@@ -71,17 +71,24 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
     }
   }
 
+  // Pull-to-refresh: reload live wishlist/saved state and rebuild the feed.
+  Future<void> _handleRefresh() async {
+    await SavedEventsState.loadFromApi();
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
-    final safeBottom = MediaQuery.of(context).padding.bottom;
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
           // Single scroll view — header scrolls with body (Session-48 fix).
-          SingleChildScrollView(
-                  physics: const ClampingScrollPhysics(),
+          RefreshIndicator(
+            onRefresh: _handleRefresh,
+            color: const Color(0xFFE6A800),
+            child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
                     children: [
                       Container(
@@ -105,6 +112,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           ],
                         ),
                       ),
+                      // ── Programs Banner — full-bleed (edge to edge). ────
                       RepaintBoundary(
                         child: BannerCarousel(
                           events: DummyData.programsScreenBanners,
@@ -112,16 +120,35 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           showGlow: false,
                           overlayStyle: true,
                           ctaText: 'Explore Program',
+                          // Full width — side edges touch the screen; only the
+                          // corners are rounded.
+                          fixedCardWidth: MediaQuery.of(context).size.width,
+                          cornerRadius: 22,
+                          overlayDots: true, // dots overlaid on the banner
+                          staticFade: true, // banner stays put; images animate in
                         ),
                       ),
 
-                      const SectionDividerWidget(title: 'Pave Your Path'),
+                      const SectionDividerWidget(
+                        title: 'Pave Your Path',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                        topPadding: 30, // tighter gap to the previous section
+                      ),
                       RepaintBoundary(
                         child: ExploreCategoriesGrid(
                           categories: DummyData.programsCategories,
-                          childAspectRatio: 0.62,
+                          // Match the card length of the Events screen's
+                          // "Explore by Categories" section.
+                          childAspectRatio: 0.8,
                           scrollable: true,
                           visibleRows: 2.3,
+                          maxScrollRows: 3, // scroll stops at the 3rd row
+                          imagesFlushBottom: true, // artwork sits at card bottom
                           onViewAll: () => _showAllCategoriesPopup(context),
                           onCategoryTap: (index) => Navigator.push(
                             context,
@@ -135,9 +162,18 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       ),
 
                       // ── The Big Leagues ──
-                      const SectionDividerWidget(title: 'The Big Leagues'),
+                      const SectionDividerWidget(
+                        title: 'The Big Leagues',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                        topPadding: 30, // tighter gap to the previous section
+                      ),
                       SizedBox(
-                        height: Responsive.h(context, 400, min: 360),
+                        height: Responsive.h(context, 475, min: 450),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -162,9 +198,18 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       ),
 
                       // ── Make Your Weekends Count ──
-                      const SectionDividerWidget(title: 'Make Your Weekends Count'),
+                      const SectionDividerWidget(
+                        title: 'Make Your Weekends Count',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                        topPadding: 30, // tighter gap to the previous section
+                      ),
                       SizedBox(
-                        height: Responsive.h(context, 160, min: 140),
+                        height: Responsive.h(context, 212, min: 196),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -179,23 +224,39 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                 scheduleText: 'Sat & Sun, 10:00 AM',
                                 ageText: '8-12 Yrs',
                                 locationText: 'Online',
-                                buttonLabel: 'Check Availability',
+                                buttonLabel: 'Book Now',
                               ),
                             );
                           },
                         ),
                       ),
-                      const SizedBox(height: 24),
 
                       // ── Find Your Fit ──
-                      const SectionDividerWidget(title: 'Find Your Fit'),
+                      const SectionDividerWidget(
+                        title: 'Find Your Fit',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                        topPadding: 30, // tighter gap to the previous section
+                      ),
                       PickYourPaceRow(items: DummyData.findYourFit),
-                      const SizedBox(height: 24),
 
                       // ── Zero to Hero ──
-                      const SectionDividerWidget(title: 'Zero to Hero'),
+                      const SectionDividerWidget(
+                        title: 'Zero to Hero',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                        topPadding: 30, // tighter gap to the previous section
+                      ),
                       SizedBox(
-                        height: Responsive.h(context, 160, min: 140),
+                        height: Responsive.h(context, 212, min: 196),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -216,45 +277,47 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           },
                         ),
                       ),
-                      const SizedBox(height: 8),
 
                       // ── The Holiday Edit ──
-                      const SectionDividerWidget(title: 'The Holiday Edit'),
+                      const SectionDividerWidget(
+                        title: 'The Holiday Edit',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                        topPadding: 30, // tighter gap to the previous section
+                      ),
                       SizedBox(
-                        height: Responsive.h(context, 430, min: 390),
+                        height: Responsive.h(context, 348, min: 322),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.hotPicks.length,
-                          itemBuilder: (context, index) {
-                            const tagColors = [
-                              Color(0xFF7C3AED),
-                              Color(0xFFDC2626),
-                              Color(0xFF059669),
-                            ];
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 14),
-                              child: ClassNearbyCard(
-                                event: DummyData.hotPicks[index],
-                                width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
-                                buttonLabel: 'Check Availability',
-                                tagColor: tagColors[index % tagColors.length],
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ProgramDetailScreen(event: DummyData.hotPicks[index]),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
+                          itemCount: DummyData.programsHolidayEdit.length,
+                          itemBuilder: (context, index) => Padding(
+                            padding: const EdgeInsets.only(right: 14),
+                            child: _buildHolidayCard(
+                              context,
+                              event: DummyData.programsHolidayEdit[index],
+                            ),
+                          ),
                         ),
                       ),
 
                       // ── For Unique Minds ──
-                      const SectionDividerWidget(title: 'For Unique Minds'),
+                      const SectionDividerWidget(
+                        title: 'For Unique Minds',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                        topPadding: 30, // tighter gap to the previous section
+                      ),
                       SizedBox(
-                        height: Responsive.h(context, 340, min: 300),
+                        height: Responsive.h(context, 366, min: 342),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -270,9 +333,18 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       ),
 
                       // ── Level Up Your Profile ──
-                      const SectionDividerWidget(title: 'Level Up Your Profile'),
+                      const SectionDividerWidget(
+                        title: 'Level Up Your Profile',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                        topPadding: 30, // tighter gap to the previous section
+                      ),
                       SizedBox(
-                        height: Responsive.h(context, 380, min: 340),
+                        height: Responsive.h(context, 374, min: 350),
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.only(left: 16),
@@ -289,11 +361,11 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
 
                       const SizedBox(height: 40),
                       AppFooter(
-                          bottomExtra:
-                              (safeBottom > 0 ? safeBottom + 15.0 : 30.0) + 64),
+                          bottomExtra: FloatingNavbar.clearance(context)),
                     ],
                   ),
                 ),
+          ),
           Positioned(
             bottom: 0,
             left: 0,
@@ -303,7 +375,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
               child: FloatingNavbar(
                 currentIndex: _currentNavIndex,
                 onTap: _onNavTapped,
-                bottomPadding: safeBottom > 0 ? safeBottom + 15 : 30,
+                bottomPadding: FloatingNavbar.bottomInset(context),
               ),
             ),
           ),
@@ -331,6 +403,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -345,11 +418,11 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
               borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
               child: Image.asset(
                 event.imagePath,
-                width: Responsive.w(context, 120),
+                width: Responsive.w(context, 150, min: 132),
                 height: double.infinity,
                 fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => Container(
-                  width: Responsive.w(context, 120),
+                  width: Responsive.w(context, 150, min: 132),
                   color: AppColors.primary.withOpacity(0.15),
                   child: const Icon(Icons.event, size: 32),
                 ),
@@ -357,30 +430,36 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      event.title,
-                      style: GoogleFonts.poppins(
-                        fontSize: Responsive.sp(context, 13),
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          event.title,
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 15),
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                            height: 1.25,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 10),
+                        _iconRow(Icons.calendar_month_outlined, scheduleText),
+                        const SizedBox(height: 7),
+                        _iconRow(Icons.people_outline, ageText),
+                        const SizedBox(height: 7),
+                        _iconRow(Icons.location_on_outlined, locationText),
+                      ],
                     ),
-                    const SizedBox(height: 5),
-                    _iconRow(Icons.calendar_month_outlined, scheduleText),
-                    const SizedBox(height: 3),
-                    _iconRow(Icons.people_outline, ageText),
-                    const SizedBox(height: 3),
-                    _iconRow(Icons.location_on_outlined, locationText),
-                    const Spacer(),
                     SizedBox(
                       width: double.infinity,
-                      height: 30,
+                      height: 38,
                       child: ElevatedButton(
                         onPressed: () => Navigator.push(
                           context,
@@ -392,20 +471,144 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           elevation: 0,
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(22),
                           ),
                         ),
                         child: Text(
                           buttonLabel,
                           style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 11),
-                            fontWeight: FontWeight.w500,
+                            fontSize: Responsive.sp(context, 12.5),
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                     ),
                   ],
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── The Holiday Edit card (large image + camp pill + View Now) ──
+  Widget _buildHolidayCard(BuildContext context, {required EventModel event}) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
+      ),
+      child: Container(
+        width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.07),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ── Large image with camp pill at top-center ──
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              child: Stack(
+                alignment: Alignment.topCenter,
+                children: [
+                  Image.asset(
+                    event.imagePath,
+                    height: Responsive.h(context, 215, min: 192),
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      height: Responsive.h(context, 215, min: 192),
+                      width: double.infinity,
+                      color: AppColors.primary.withOpacity(0.15),
+                      child: const Icon(Icons.event, size: 44),
+                    ),
+                  ),
+                  if ((event.tag ?? '').isNotEmpty)
+                    Positioned(
+                      top: 12,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF7C3AED), Color(0xFFEC4899)],
+                          ),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Text(
+                          event.tag!,
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 11.5),
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            // ── Info ──
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    event.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 15),
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  if ((event.reviewCount ?? '').isNotEmpty)
+                    _iconRow(Icons.people_outline, event.reviewCount!),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(child: _iconRow(Icons.location_on_outlined, event.venue)),
+                      const SizedBox(width: 8),
+                      Material(
+                        color: const Color(0xFFFFB902),
+                        borderRadius: BorderRadius.circular(22),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(22),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 9),
+                            child: Text(
+                              'View Now',
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 12.5),
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF1A1A2E),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
@@ -426,6 +629,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -443,11 +647,11 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                   child: Image.asset(
                     event.imagePath,
-                    height: Responsive.h(context, 160),
+                    height: Responsive.h(context, 210, min: 180),
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
-                      height: Responsive.h(context, 160),
+                      height: Responsive.h(context, 210, min: 180),
                       color: AppColors.primary.withOpacity(0.15),
                       child: const Icon(Icons.event, size: 40),
                     ),
@@ -457,42 +661,47 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                   top: 10,
                   left: 10,
                   child: Container(
-                    width: 32,
-                    height: 32,
+                    width: 34,
+                    height: 34,
                     decoration: const BoxDecoration(
-                      color: Color(0xFFFFB902),
+                      color: Color(0xFFDC2626), // red star badge
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.star_rounded, color: Colors.white, size: 18),
+                    child: const Icon(Icons.star_rounded, color: Colors.white, size: 20),
                   ),
                 ),
               ],
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      event.title,
-                      style: GoogleFonts.poppins(
-                        fontSize: Responsive.sp(context, 13),
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          event.title,
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 15),
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 9),
+                        if (event.reviewCount != null)
+                          _iconRow(Icons.people_outline, event.reviewCount!),
+                        const SizedBox(height: 7),
+                        _iconRow(Icons.location_on_outlined, event.venue),
+                      ],
                     ),
-                    const SizedBox(height: 3),
-                    if (event.reviewCount != null)
-                      _iconRow(Icons.people_outline, event.reviewCount!),
-                    const SizedBox(height: 2),
-                    _iconRow(Icons.location_on_outlined, event.venue),
-                    const Spacer(),
                     SizedBox(
                       width: double.infinity,
-                      height: 30,
+                      height: 38,
                       child: ElevatedButton(
                         onPressed: () => Navigator.push(
                           context,
@@ -504,12 +713,12 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           elevation: 0,
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(22),
                           ),
                         ),
                         child: Text(
-                          'Check Availability',
-                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), fontWeight: FontWeight.w500),
+                          'Enquire Now',
+                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),
@@ -535,6 +744,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -552,11 +762,11 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                   child: Image.asset(
                     event.imagePath,
-                    height: Responsive.h(context, 170),
+                    height: Responsive.h(context, 210, min: 185),
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
-                      height: Responsive.h(context, 170),
+                      height: Responsive.h(context, 210, min: 185),
                       color: AppColors.primary.withOpacity(0.15),
                       child: const Icon(Icons.event, size: 40),
                     ),
@@ -595,8 +805,8 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           child: Text(
                             event.title,
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 13),
-                              fontWeight: FontWeight.w500,
+                              fontSize: Responsive.sp(context, 15),
+                              fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
                             ),
                             maxLines: 1,
@@ -623,14 +833,14 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 8),
                     _iconRow(Icons.location_on_outlined, event.venue.split('\n').first),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 7),
                     _iconRow(Icons.workspace_premium_outlined, 'Certificate Included'),
                     const Spacer(),
                     SizedBox(
                       width: double.infinity,
-                      height: 32,
+                      height: 38,
                       child: ElevatedButton(
                         onPressed: () => Navigator.push(
                           context,
@@ -642,12 +852,12 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           elevation: 0,
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(22),
                           ),
                         ),
                         child: Text(
-                          'Check Availability',
-                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w500),
+                          'View Now',
+                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),
@@ -664,12 +874,12 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
   Widget _iconRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 12, color: Colors.grey.shade500),
-        const SizedBox(width: 4),
+        Icon(icon, size: 14, color: Colors.grey.shade500),
+        const SizedBox(width: 5),
         Expanded(
           child: Text(
             text,
-            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 10.5), color: Colors.grey.shade600),
+            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: Colors.grey.shade600),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

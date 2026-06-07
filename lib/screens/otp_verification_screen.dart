@@ -21,14 +21,18 @@ class OtpVerificationScreen extends StatefulWidget {
   final String identifier;
   final void Function(BuildContext context)? onExistingUser;
 
-  /// True when the user arrived via the login flow. In that case, an
-  /// `is_new_user: true` verify-OTP response is treated as a bug — the
-  /// backend auto-created an account for a login attempt — so we surface
-  /// "No account found with this email. Please sign up first." instead of
-  /// silently logging the new user in and pushing them to onboarding.
+  /// True when the user arrived via the login flow. In that case, verifying
+  /// OTP for an email that isn't a real registered account (the backend
+  /// auto-creates one, or the account never completed signup) is treated as a
+  /// bug: we surface "No account found with this email. Please sign up first."
+  /// instead of silently logging them in. "Not a real account" is detected by
+  /// `is_new_user` AND, because that flag can't be trusted alone, a profile
+  /// completeness cross-check (see AuthService.isAccountRegistered).
   ///
-  /// TODO: ideally the OTP request itself should be rejected by the backend
-  /// for unregistered emails when this flag is set (no OTP delivered at all).
+  /// NOTE: the real fix belongs in the backend — `POST /auth/request-otp/`
+  /// should reject unregistered emails so no OTP is ever delivered, and
+  /// `verify-otp` should not auto-create accounts on the login path. This
+  /// client guard is defense-in-depth, not a substitute for that.
   final bool isLoginFlow;
 
   const OtpVerificationScreen({
@@ -93,16 +97,31 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       otp: otp,
     );
     if (!mounted) return;
-    setState(() => _loading = false);
 
     if (result['success'] == true) {
-      final isNew = result['is_new_user'] == true;
+      final access = result['access'] as String?;
+
+      // Decide whether this account has actually completed signup. We CANNOT
+      // trust `is_new_user` alone — the backend may omit it, in which case a
+      // freshly auto-created account looks like a returning user. So if the
+      // flag doesn't already say "new", cross-check the real profile: an
+      // account with no completed profile was never truly registered.
+      // (Keep the spinner up through this extra call so Verify can't be
+      // double-tapped mid-request.)
+      bool needsSignup = result['is_new_user'] == true;
+      if (!needsSignup && access != null) {
+        final registered =
+            await AuthService.isAccountRegistered(accessToken: access);
+        if (!mounted) return;
+        needsSignup = !registered;
+      }
+      setState(() => _loading = false);
 
       // Reject before any state mutation: the user came here to LOG IN, but
-      // the backend auto-created an account because the email wasn't
-      // registered. Surface the error and route them to signup instead — do
-      // NOT call AuthState.login(), do NOT mark the walkthrough flag.
-      if (isNew && widget.isLoginFlow) {
+      // the backend auto-created (or never completed) an account because the
+      // email wasn't registered. Surface the error and route them to signup
+      // instead — do NOT call AuthState.login(), do NOT mark the walkthrough.
+      if (needsSignup && widget.isLoginFlow) {
         AppSnackBar.error(
           context,
           'No account found with this email. Please sign up first.',
@@ -110,6 +129,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         Navigator.of(context).pop();
         return;
       }
+
+      final isNew = needsSignup;
 
       AuthState.login(
         access: result['access'] as String?,
@@ -136,13 +157,19 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         }
       }
     } else {
+      setState(() => _loading = false);
       AppSnackBar.error(context, result['message'] ?? 'Verification failed. Please try again.');
     }
   }
 
   Future<void> _onResend() async {
     _startTimer();
-    final result = await AuthService.requestOtp(identifier: widget.identifier);
+    // Preserve the original purpose so a login resend stays gated to
+    // registered emails (and a signup resend keeps auto-create behaviour).
+    final result = await AuthService.requestOtp(
+      identifier: widget.identifier,
+      purpose: widget.isLoginFlow ? 'login' : 'register',
+    );
     if (!mounted) return;
     if (result['success'] == true) {
       AppSnackBar.success(context, 'OTP resent to ${widget.identifier}');
@@ -316,11 +343,21 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                               onChanged: (v) {
                                 if (v.isNotEmpty && i < 5) {
                                   _focusNodes[i + 1].requestFocus();
-                                } else if (v.isNotEmpty && i == 5) {
-                                  // Last digit entered — dismiss the
-                                  // keyboard so the Verify button (sitting
-                                  // below the boxes) becomes visible.
-                                  FocusScope.of(context).unfocus();
+                                }
+                                // Whenever all six boxes are filled — by
+                                // sequential typing, editing, paste or SMS
+                                // autofill — dismiss the keyboard so the Verify
+                                // button below becomes visible. Checking the
+                                // whole set (not just box 6) makes this fire
+                                // reliably regardless of which box was edited
+                                // last. Done after the frame so the pending
+                                // requestFocus above can't reopen the keyboard.
+                                if (_controllers.every((c) => c.text.isNotEmpty)) {
+                                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                                    if (mounted) {
+                                      FocusManager.instance.primaryFocus?.unfocus();
+                                    }
+                                  });
                                 }
                                 // No auto-retreat on empty onChanged — the
                                 // Focus.onKeyEvent above handles backspace

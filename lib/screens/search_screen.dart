@@ -99,22 +99,60 @@ class _SearchScreenState extends State<SearchScreen> {
     }
     setState(() { _query = q; _loading = true; _hasError = false; });
 
+    // Each entity type is fetched independently and fault-tolerantly. A failure
+    // in one source (e.g. the backend returns 404 / an error for a query that
+    // simply has no matches) returns null and must NOT fail the whole search —
+    // otherwise an empty result set is wrongly shown as a network error.
+    // We only treat it as a real network error when EVERY source fails.
+    final lists = await Future.wait<List<_SearchItem>?>([
+      _fetchEventItems(q),
+      _fetchClassItems(q),
+      _fetchProgramItems(q),
+      _fetchVenueItems(q),
+    ]);
+
+    if (!mounted) return;
+
+    final failureCount = lists.where((l) => l == null).length;
+    if (failureCount == lists.length) {
+      // Nothing could be reached at all — genuine connectivity problem.
+      setState(() { _loading = false; _hasError = true; });
+      return;
+    }
+
+    final items = <_SearchItem>[
+      for (final l in lists)
+        if (l != null) ...l,
+    ];
+
+    // Relevance guard: the backend `search` param drives relevance, but if it
+    // returns unrelated rows we still want to keep things on-topic — WITHOUT
+    // discarding genuine matches (the old "title/subtitle contains the whole
+    // query" check dropped valid hits like "art class" → "Art & Craft Class").
+    // So match is token-based (every query word must appear) across the title,
+    // subtitle AND tag/category, in any order.
+    final tokens = q
+        .toLowerCase()
+        .split(RegExp(r'\s+'))
+        .where((t) => t.isNotEmpty)
+        .toList();
+    final relevant = items.where((item) {
+      final haystack =
+          '${item.title} ${item.subtitle} ${item.eventModel.tag ?? ''}'
+              .toLowerCase();
+      return tokens.every(haystack.contains);
+    }).toList();
+
+    setState(() { _allResults = relevant; _loading = false; });
+  }
+
+  /// Returns the mapped items for a source, or `null` if that source's request
+  /// failed — so the caller can distinguish "no matches" from "couldn't fetch".
+  Future<List<_SearchItem>?> _fetchEventItems(String q) async {
     try {
-      // Start all four in parallel, await each after
-      final eventsFuture   = EventsListingService.fetchEvents(search: q, pageSize: 10);
-      final classesFuture  = ClassesListingService.fetchClasses(search: q, pageSize: 10);
-      final programsFuture = ProgramsListingService.fetchPrograms(search: q, pageSize: 10);
-      final venuesFuture   = EventsListingService.fetchVenues(search: q, pageSize: 10);
-
-      final eventsPage   = await eventsFuture;
-      final classesPage  = await classesFuture;
-      final programsPage = await programsFuture;
-      final venuesPage   = await venuesFuture;
-
-      if (!mounted) return;
-
-      final items = <_SearchItem>[
-        for (final e in eventsPage.results)
+      final page = await EventsListingService.fetchEvents(search: q, pageSize: 10);
+      return [
+        for (final e in page.results)
           _SearchItem(
             type: _EntityType.event,
             eventModel: EventModel(
@@ -129,7 +167,17 @@ class _SearchScreenState extends State<SearchScreen> {
             subtitle: e.city,
             coverUrl: e.coverUrl,
           ),
-        for (final c in classesPage.results)
+      ];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<List<_SearchItem>?> _fetchClassItems(String q) async {
+    try {
+      final page = await ClassesListingService.fetchClasses(search: q, pageSize: 10);
+      return [
+        for (final c in page.results)
           _SearchItem(
             type: _EntityType.klass,
             eventModel: EventModel(
@@ -144,7 +192,17 @@ class _SearchScreenState extends State<SearchScreen> {
             subtitle: c.category.name,
             coverUrl: c.coverUrl,
           ),
-        for (final p in programsPage.results)
+      ];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<List<_SearchItem>?> _fetchProgramItems(String q) async {
+    try {
+      final page = await ProgramsListingService.fetchPrograms(search: q, pageSize: 10);
+      return [
+        for (final p in page.results)
           _SearchItem(
             type: _EntityType.program,
             eventModel: EventModel(
@@ -159,7 +217,17 @@ class _SearchScreenState extends State<SearchScreen> {
             subtitle: p.city ?? p.category?.name ?? '',
             coverUrl: p.cover,
           ),
-        for (final v in venuesPage.results)
+      ];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<List<_SearchItem>?> _fetchVenueItems(String q) async {
+    try {
+      final page = await EventsListingService.fetchVenues(search: q, pageSize: 10);
+      return [
+        for (final v in page.results)
           _SearchItem(
             type: _EntityType.venue,
             eventModel: EventModel(
@@ -174,20 +242,8 @@ class _SearchScreenState extends State<SearchScreen> {
             coverUrl: v.cover,
           ),
       ];
-
-      // Client-side filter: the backend may return unrelated results if the
-      // search param isn't implemented — only keep items that genuinely
-      // contain the query in their title or subtitle.
-      final qLower = q.toLowerCase();
-      final relevant = items.where((item) {
-        return item.title.toLowerCase().contains(qLower) ||
-            item.subtitle.toLowerCase().contains(qLower);
-      }).toList();
-
-      setState(() { _allResults = relevant; _loading = false; });
     } catch (_) {
-      if (!mounted) return;
-      setState(() { _loading = false; _hasError = true; });
+      return null;
     }
   }
 

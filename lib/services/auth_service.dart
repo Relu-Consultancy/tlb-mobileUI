@@ -15,9 +15,19 @@ class AuthService {
   // ── OTP Login / Signup ───────────────────────────────────────────────────────
 
   /// Step 1: Sends a 6-digit OTP to [identifier] (email).
-  /// Returns `{'success': true}` on 200, `{'success': false, 'message': ...}` otherwise.
+  ///
+  /// [purpose] gates account auto-creation on the backend:
+  ///  • `'login'`    — OTP is only sent if the email is already registered.
+  ///                   Unregistered emails get a 400 `USER_NOT_FOUND` and NO
+  ///                   OTP is delivered (returned here as `code: 'USER_NOT_FOUND'`).
+  ///  • `'register'` — OTP is sent to any email and the account is created on
+  ///                   verify. Use for the signup flow.
+  ///
+  /// Returns `{'success': true}` on 200, `{'success': false, 'message': ...,
+  /// 'code': ...}` otherwise.
   static Future<Map<String, dynamic>> requestOtp({
     required String identifier,
+    String purpose = 'register',
   }) async {
     try {
       final res = await http
@@ -27,6 +37,7 @@ class AuthService {
             body: jsonEncode({
               'identifier': identifier,
               'identifier_type': 'email',
+              'purpose': purpose,
             }),
           )
           .timeout(const Duration(seconds: 30));
@@ -39,7 +50,18 @@ class AuthService {
       if (res.statusCode == 429) {
         return {'success': false, 'message': 'Too many requests. Please wait before trying again.'};
       }
-      return {'success': false, 'message': _extractError(body)};
+      // Login attempt for an email that isn't registered — backend blocks the
+      // OTP entirely. Surface a friendly, actionable message + the code so the
+      // caller can route the user to signup.
+      final code = (body['error'] is Map) ? body['error']['code'] : null;
+      if (res.statusCode == 400 && code == 'USER_NOT_FOUND') {
+        return {
+          'success': false,
+          'code': 'USER_NOT_FOUND',
+          'message': 'Account not found. Please sign up first.',
+        };
+      }
+      return {'success': false, 'code': code, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -71,7 +93,7 @@ class AuthService {
           'success': true,
           'access': inner['access_token'] ?? inner['access'],
           'refresh': inner['refresh_token'] ?? inner['refresh'],
-          'is_new_user': inner['is_new_user'] ?? false,
+          'is_new_user': _detectNewUser(inner),
           'user': inner['user'],
         };
       }
@@ -191,7 +213,7 @@ class AuthService {
           'success': true,
           'access': inner['access_token'] ?? inner['access'],
           'refresh': inner['refresh_token'] ?? inner['refresh'],
-          'is_new_user': inner['is_new_user'] ?? false,
+          'is_new_user': _detectNewUser(inner),
           'user': inner['user'],
         };
       }
@@ -409,6 +431,46 @@ class AuthService {
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
+
+  /// Best-effort detection of whether verify-OTP / google-login just CREATED
+  /// the account (vs. logging in an existing one). The backend is inconsistent
+  /// about this flag — it may live under several keys, inside the `user`
+  /// object, or be absent entirely. Returns false only when no positive signal
+  /// is found; callers MUST treat a freshly-created account that needs signup
+  /// as untrusted and additionally verify profile completeness via
+  /// [isAccountRegistered], because this flag cannot be relied on alone.
+  static bool _detectNewUser(Map<String, dynamic> inner) {
+    bool? readFlag(dynamic m) {
+      if (m is! Map) return null;
+      for (final k in ['is_new_user', 'is_new', 'new_user', 'created']) {
+        final v = m[k];
+        if (v is bool) return v;
+        if (v is String && (v == 'true' || v == 'false')) return v == 'true';
+      }
+      return null;
+    }
+
+    return readFlag(inner) ?? readFlag(inner['user']) ?? false;
+  }
+
+  /// Returns true when the authenticated account has actually completed signup
+  /// (a real, registered user) — i.e. the backend profile exists and is marked
+  /// completed (or at least carries a first name). Used to defend against the
+  /// backend auto-creating accounts for unregistered emails during an OTP
+  /// LOGIN: such an account authenticates but is NOT a registered user.
+  ///
+  /// Defaults to `true` on a network/parse failure so we never lock a genuine
+  /// returning user out because of a transient profile-fetch error — the
+  /// security-critical rejection still hinges on [_detectNewUser] in that case.
+  static Future<bool> isAccountRegistered({required String accessToken}) async {
+    final res = await getProfile(accessToken: accessToken);
+    if (res['success'] != true) return true; // fail open — don't lock out
+    final profile = res['profile'];
+    if (profile is! Map) return true;
+    if (profile['is_completed'] == true) return true;
+    final firstName = (profile['first_name'] as String?) ?? '';
+    return firstName.trim().isNotEmpty;
+  }
 
   static Map<String, dynamic> _decode(String body) {
     try {

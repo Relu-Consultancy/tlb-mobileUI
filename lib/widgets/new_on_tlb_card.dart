@@ -32,113 +32,120 @@ class NewOnTlbCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: Colors.black.withOpacity(0.07),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
         child: IntrinsicHeight(
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               ClipRRect(
                 borderRadius: const BorderRadius.horizontal(
-                  left: Radius.circular(16),
+                  left: Radius.circular(20),
                 ),
                 child: Image.asset(
                   event.imagePath,
-                  width: Responsive.w(context, 120, min: 96),
+                  width: Responsive.w(context, 155, min: 130),
                   height: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
-                    width: Responsive.w(context, 120, min: 96),
+                    width: Responsive.w(context, 155, min: 130),
                     color: AppColors.primary.withOpacity(0.2),
-                    child: const Icon(Icons.event, size: 40),
+                    child: const Icon(Icons.event, size: 44),
                   ),
                 ),
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        event.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 15),
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.location_on_outlined,
-                            size: 13,
-                            color: AppColors.textSecondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              event.venue,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 11.5),
-                                color: AppColors.textSecondary,
-                              ),
+                          Text(
+                            event.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, 17),
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
                             ),
                           ),
-                        ],
-                      ),
-                      if (event.reviewCount != null) ...[
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            const Icon(Icons.star, size: 13, color: Color(0xFFFFB902)),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              child: Text(
-                                event.reviewCount!,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 11.5),
-                                  color: AppColors.textSecondary,
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.location_on_outlined,
+                                size: 15,
+                                color: AppColors.textSecondary,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  event.venue,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 12.5),
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
+                              ),
+                            ],
+                          ),
+                          if (event.reviewCount != null) ...[
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                const Icon(Icons.star, size: 15, color: Color(0xFFFFB902)),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text(
+                                    event.reviewCount!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 12.5),
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                          if (event.price != null) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              'Starting from ₹${event.price!.toInt()}',
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 12.5),
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textPrimary,
+                                decoration: TextDecoration.underline,
                               ),
                             ),
                           ],
-                        ),
-                      ],
-                      if (event.price != null) ...[
-                        const SizedBox(height: 6),
-                        Text(
-                          'Starting from ₹${event.price!.toInt()}',
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 12),
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textPrimary,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.centerRight,
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      SizedBox(
+                        width: double.infinity,
                         child: Material(
                           color: const Color(0xFFFFCC00),
-                          borderRadius: BorderRadius.circular(22),
+                          borderRadius: BorderRadius.circular(24),
                           child: InkWell(
-                            borderRadius: BorderRadius.circular(22),
+                            borderRadius: BorderRadius.circular(24),
                             onTap: () {
                               if (buttonLabel == 'Send Enquiry') {
                                 showInquireNow(context, listingId: event.id);
@@ -149,15 +156,13 @@ class NewOnTlbCard extends StatelessWidget {
                               }
                             },
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 22,
-                                vertical: 9,
-                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                               child: Text(
                                 buttonLabel,
+                                textAlign: TextAlign.center,
                                 style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 13),
-                                  fontWeight: FontWeight.w500,
+                                  fontSize: Responsive.sp(context, 14),
+                                  fontWeight: FontWeight.w600,
                                   color: AppColors.textPrimary,
                                 ),
                               ),

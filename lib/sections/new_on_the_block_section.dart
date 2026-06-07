@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../widgets/section_divider_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../data/dummy_data.dart';
-import '../screens/event_detail_screen.dart';
 
 class NewOnTheBlockSection extends StatelessWidget {
   const NewOnTheBlockSection({super.key});
@@ -34,7 +33,7 @@ class NewOnTheBlockSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),

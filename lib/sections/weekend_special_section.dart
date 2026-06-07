@@ -70,7 +70,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.06),

@@ -207,84 +207,119 @@ class DummyData {
     },
   ];
 
+  // NOTE: every entry carries `imageInset` + `imageScale` so the 3D character
+  // art fills the (0.8-aspect) card consistently — without them the images
+  // render small and float. Tuned for the "Pave Your Path" grid.
   static const List<Map<String, dynamic>> programsCategories = [
     {
       'label': 'Future Tech & AI',
       'image': "resources- tlb-ui/events_page/futuretech'.png",
       'gradient': [Color(0xFFDCFCE7), Color(0xFFBBF7D0)],
       'imageInset': 0.0,
-      'imageScale': 1.5,
+      'imageScale': 1.2,
     },
     {
       'label': 'Design &\nInnovation',
       'image': 'resources- tlb-ui/events_page/design.png',
       'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
       'imageInset': 0.0,
-      'imageScale': 1.5,
+      'imageScale': 1.05,
     },
     {
       'label': 'Leadership &\nEntrepreneurship',
       'image': 'resources- tlb-ui/events_page/leadership.png',
       'gradient': [Color(0xFFDBEAFE), Color(0xFFBFDBFE)],
+      'imageInset': 0.0,
+      'imageScale': 0.9,
+      // tall figure — already fills the card
     },
     {
       'label': 'Media & Content\nCreation',
       'image': 'resources- tlb-ui/events_page/media.png',
       'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+      'imageInset': 0.0,
+      'imageScale': 1.05,
     },
     {
       'label': 'Stage Arts &\nPerformance',
       'image': 'resources- tlb-ui/events_page/stage.png',
       'gradient': [Color(0xFFECFDF5), Color(0xFFD1FAE5)],
+      'imageInset': 0.0,
+      'imageScale': 1.1,
     },
     {
       'label': 'Active Sports\n& Training',
       'image': 'resources- tlb-ui/events_page/activesports.png',
       'gradient': [Color(0xFFFEE2E2), Color(0xFFFECACA)],
+      'imageInset': 0.0,
+      'imageScale': 0.85,
+      // tall figure — already fills the card
     },
     {
       'label': 'Academics &\nCompetitive Prep',
       'image': 'assets/images/class_page/academic.png',
       'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+      'imageInset': 0.0,
+      'imageScale': 1.0,
     },
     {
       'label': 'Analytical\nThinking',
       'image': 'assets/images/class_page/brainboosters.png',
       'gradient': [Color(0xFFFEF9C3), Color(0xFFFDE68A)],
+      'imageInset': 0.0,
+      'imageScale': 1.0,
     },
     {
       'label': 'Language &\nCommunication',
       'image': 'assets/images/class_page/speech.png',
       'gradient': [Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
+      'imageInset': 0.0,
+      'imageScale': 1.0,
     },
     {
       'label': 'Culinary &\nHospitality',
       'image': 'assets/images/class_page/culinary.png',
       'gradient': [Color(0xFFFFFBEB), Color(0xFFFEF3C7)],
+      'imageInset': 0.0,
+      'imageScale': 1.0,
     },
     {
       'label': 'Grooming &\nPersonality Dev',
       'image': 'assets/images/class_page/lifeskills.png',
       'gradient': [Color(0xFFFAF5FF), Color(0xFFF3E8FF)],
+      'imageInset': 0.0,
+      'imageScale': 1.0,
     },
   ];
 
   static const List<Map<String, dynamic>> findYourFit = [
     {
       'label': 'Batch\nProgram',
-      'image': 'assets/images/new_home/eventcategory2.png',
+      'image': 'resources- tlb-ui/programs_findurfit_clean/batchprogram.png',
     },
     {
       'label': 'Camp\nProgram',
-      'image': 'assets/images/new_home/eventcategory3.png',
+      'image': 'resources- tlb-ui/programs_findurfit_clean/campprogram.png',
     },
     {
       'label': 'Holiday-\nbased',
-      'image': 'assets/images/new_home/eventcategory4.png',
+      'image': 'resources- tlb-ui/programs_findurfit_clean/holidaybased.png',
     },
     {
-      'label': 'Flexible\nPace',
-      'image': 'assets/images/new_home/eventcategory5.png',
+      'label': 'Regular\nProgram',
+      'image': 'resources- tlb-ui/programs_findurfit_clean/regularprogram.png',
+    },
+    {
+      'label': 'Short-Term\nProgram',
+      'image': 'resources- tlb-ui/programs_findurfit_clean/shorttermprogram.png',
+    },
+    {
+      'label': 'Weekend\nProgram',
+      'image': 'resources- tlb-ui/programs_findurfit_clean/weekendprogram.png',
+    },
+    {
+      'label': 'Recorded\nProgram',
+      'image': 'resources- tlb-ui/programs_findurfit_clean/recordedprogram.png',
     },
   ];
 
@@ -547,6 +582,27 @@ class DummyData {
       tag: 'EDUCATION',
       description: 'Explore robotics, dance, music, coding & more – All in one place',
     ),
+    EventModel(
+      title: 'Hands-On Workshops',
+      venue: '',
+      imagePath: 'resources- tlb-ui/workshop.png',
+      tag: 'WORKSHOPS',
+      description: 'Learn by doing with expert-led practical sessions',
+    ),
+    EventModel(
+      title: 'Creative Learning Spaces',
+      venue: '',
+      imagePath: 'resources- tlb-ui/spaces.png',
+      tag: 'CREATIVE',
+      description: 'Inspiring studios designed to spark young imaginations',
+    ),
+    EventModel(
+      title: 'Discover New Skills',
+      venue: '',
+      imagePath: 'resources- tlb-ui/header.jpg',
+      tag: 'SKILLS',
+      description: 'From art to coding – find a class your child will love',
+    ),
   ];
 
   static const List<EventModel> eventsScreenBanners = [
@@ -554,6 +610,29 @@ class DummyData {
       title: 'Summer Robotics Camp',
       venue: '',
       imagePath: 'assets/images/eventbanner.png',
+      tag: 'EVENTS',
+      description: 'Hands-on robotics fun for curious young builders',
+    ),
+    EventModel(
+      title: 'Halloween Funfest',
+      venue: '',
+      imagePath: 'resources- tlb-ui/hallowween.jpg',
+      tag: 'SEASONAL',
+      description: 'Spooky games, costumes & treats for the whole family',
+    ),
+    EventModel(
+      title: 'World Book Day Special',
+      venue: '',
+      imagePath: 'resources- tlb-ui/worldbookday.png',
+      tag: 'STORYTELLING',
+      description: 'Celebrate reading with live story sessions & activities',
+    ),
+    EventModel(
+      title: 'Weekend Workshops',
+      venue: '',
+      imagePath: 'resources- tlb-ui/workshop.png',
+      tag: 'WEEKEND',
+      description: 'Creative hands-on sessions every Saturday & Sunday',
     ),
   ];
 
@@ -565,15 +644,54 @@ class DummyData {
       tag: 'PROGRAMS',
       description: 'Build smart AI projects in 8 weeks(Online+ Offline, Age: 10 – 15 yrs)',
     ),
+    EventModel(
+      title: 'Future Tech Programs',
+      venue: '',
+      imagePath: 'resources- tlb-ui/program.png',
+      tag: 'TECH',
+      description: 'Coding, robotics & design tracks for tomorrow\'s innovators',
+    ),
+    EventModel(
+      title: 'Year-Round Learning',
+      venue: '',
+      imagePath: 'resources- tlb-ui/events.png',
+      tag: 'CONTINUOUS',
+      description: 'Structured journeys that grow with your child',
+    ),
+    EventModel(
+      title: 'Build Real Projects',
+      venue: '',
+      imagePath: 'resources- tlb-ui/header.jpg',
+      tag: 'HANDS-ON',
+      description: 'Apply skills to real-world projects & showcase them',
+    ),
   ];
 
   // ── Venues screen data ──
   static const List<EventModel> venuesScreenBanners = [
     EventModel(
-      title: 'Plan Your Perfect Weekend',
+      title: 'Creative Spaces for Kids',
       venue: '',
-      imagePath: 'resources- tlb-ui/spaces.png',
-      description: 'Discover top rated venues near you with expert instructors',
+      imagePath: 'resources- tlb-ui/spot.jpg',
+      description: 'Book memorable experiences at top-rated venues near you',
+    ),
+    EventModel(
+      title: 'Birth & Celebration Venues',
+      venue: '',
+      imagePath: 'resources- tlb-ui/worldstorytelling.jpg',
+      description: 'Throw the perfect party at curated celebration spaces',
+    ),
+    EventModel(
+      title: 'Indoor Play & Party Zones',
+      venue: '',
+      imagePath: 'resources- tlb-ui/kidspartybanner.png',
+      description: 'Safe, fun-filled play areas for every age group',
+    ),
+    EventModel(
+      title: 'Premium Event Halls',
+      venue: '',
+      imagePath: 'resources- tlb-ui/eventbanner.png',
+      description: 'Elegant halls for big days and special occasions',
     ),
   ];
 
@@ -766,6 +884,32 @@ class DummyData {
     ),
   ];
 
+  // Programs "The Holiday Edit" — `tag` holds the camp-name pill,
+  // `reviewCount` holds the age range, `venue` holds the location line.
+  static const List<EventModel> programsHolidayEdit = [
+    EventModel(
+      title: 'Painting + DIY Crafts',
+      venue: 'Powai',
+      imagePath: 'assets/images/new_home/weekendspl1.png',
+      reviewCount: '6-10 yrs',
+      tag: 'Winter Art Camp',
+    ),
+    EventModel(
+      title: 'Clay & Pottery Camp',
+      venue: 'Andheri',
+      imagePath: 'assets/images/new_home/hotpic2.png',
+      reviewCount: '7-12 yrs',
+      tag: 'Holiday Workshop',
+    ),
+    EventModel(
+      title: 'Robotics Winter Lab',
+      venue: 'Bandra',
+      imagePath: 'assets/images/new_home/hotpics1.jpg',
+      reviewCount: '9-14 yrs',
+      tag: 'Tech Camp',
+    ),
+  ];
+
   static const List<EventModel> discoverNearYou = [
     EventModel(
       title: 'Family Fun Park',
@@ -902,9 +1046,9 @@ class DummyData {
 
   static const List<EventModel> newOnTlb = [
     EventModel(
-      title: 'Slime Making Class',
-      venue: 'Calm Space Studio',
-      imagePath: 'assets/images/new_home/newontlb1.jpg',
+      title: 'Soccer Trail',
+      venue: 'Central Park',
+      imagePath: 'resources- tlb-ui/events_page/activesports.png',
       rating: 5.0,
       reviewCount: '3.5k reviews',
       price: 200.0,

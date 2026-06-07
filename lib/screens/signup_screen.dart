@@ -41,7 +41,10 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
     setState(() => _loading = true);
-    final result = await AuthService.requestOtp(identifier: email);
+    // purpose: 'register' — OTP is sent to any email; the account is created
+    // on verify. (This is the signup flow.)
+    final result =
+        await AuthService.requestOtp(identifier: email, purpose: 'register');
     if (!mounted) return;
     setState(() => _loading = false);
 

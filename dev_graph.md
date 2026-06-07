@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-06-05 (Session 52)
+**Last Updated:** 2026-06-07 (Session 53)
 
 ---
 
@@ -867,6 +867,52 @@ share_plus: ^7.2.2           # Native share sheet for events/classes/programs/ve
 ---
 
 ## 12. Development Sessions Summary
+
+### Session 53 — Tester bug-fix sweep + banner/Find-Your-Fit redesign
+A QA-driven pass: fixed a critical auth-security bug, several UI/UX tester tickets, and finished the Programs "Find Your Fit" section with cleaned circular assets. Also redesigned the Events/Classes/Programs top banners.
+
+#### Top banners — static animated image transition (Events / Classes / Programs)
+| Change | Files |
+|--------|-------|
+| **Multi-image carousels added** — each banner list expanded from 1 → 4 entries using images from `resources- tlb-ui/` (with tag + description for the overlay) | `lib/data/dummy_data.dart` |
+| **`staticFade` transition upgraded** — banner stays fixed (no swipe/slide); images cross-fade with a richer combined **fade + zoom (1.18→1.0) + slide-in (0.18→0)** via `AnimatedSwitcher` (900 ms, `easeOutCubic`). Events/Classes/Programs pass `staticFade: true` | `lib/widgets/banner_carousel.dart`, `events_screen.dart`, `classes_screen.dart`, `programs_screen.dart` |
+
+#### Auth security — unregistered email could log in via OTP (Critical)
+| Change | Files |
+|--------|-------|
+| **`requestOtp` gains `purpose` param** — login flow sends `purpose: 'login'`; backend now returns `400 USER_NOT_FOUND` for unregistered emails (no OTP sent) → surfaced as "Account not found. Please sign up first."; signup sends `purpose: 'register'` | `lib/services/auth_service.dart`, `login_sheet.dart`, `signup_screen.dart`, `otp_verification_screen.dart` |
+| **Client defense-in-depth** — `_detectNewUser()` reads the new-user flag across several keys (no longer brittle `?? false`); `isAccountRegistered()` cross-checks the real profile completeness after verify; login flow rejects + signup flow forces onboarding so no one reaches Home without completing signup | `lib/services/auth_service.dart`, `lib/screens/otp_verification_screen.dart` |
+| **Login screen "Skip" button removed** — non-functional | `lib/widgets/login_sheet.dart` |
+| **OTP keyboard auto-close hardened** — completeness checked on every box (handles paste/autofill/edit), dismiss via `FocusManager.instance.primaryFocus?.unfocus()` in a post-frame callback so the Verify button stays visible | `lib/screens/otp_verification_screen.dart` |
+
+#### Other tester tickets
+| Change | Files |
+|--------|-------|
+| **Pull-to-refresh added (High)** — all 5 tab screens wrap their `SingleChildScrollView` in `RefreshIndicator` (physics → `AlwaysScrollableScrollPhysics`); `_handleRefresh` reloads wishlist state (+ live categories on Events) | `home_screen.dart`, `events_screen.dart`, `classes_screen.dart`, `programs_screen.dart`, `venues_screen.dart` |
+| **Bottom-nav overlap on small screens (High)** — `FloatingNavbar` gains `pillHeight`, `bottomInset(context)`, `clearance(context)` helpers; all screens reserve `clearance()` instead of the hard-coded `+64` that under-reserved the true ~72 px pill | `lib/widgets/floating_navbar.dart` + 5 tab screens |
+| **Location permission / settings redirect (High)** — added missing iOS `NSLocation*UsageDescription` keys (iOS silently denied without them); `_fetchCurrentLocation` now shows an "Open Settings" dialog for GPS-off (`openLocationSettings`) and permanently-denied (`openAppSettings`) | `ios/Runner/Info.plist`, `lib/screens/location_screen.dart` |
+| **Failed payments shown as Upcoming/Processing (Critical)** — `payment_failed` moved from the Upcoming status set to the Cancelled set | `lib/screens/bookings_screen.dart` |
+| **Search: network error on no-match (Medium)** — `_doSearch` runs the 4 source fetches independently/fault-tolerantly; error state only when ALL fail, else empty merged set → "No Results" | `lib/screens/search_screen.dart` |
+| **Search: wrong/empty results per tab (High)** — relevance filter changed from "title/subtitle contains whole query" to token-based AND across title + subtitle + tag (e.g. "art class" now matches "Art & Craft Class") | `lib/screens/search_screen.dart` |
+| **Help Centre search bar removed (Low)** — non-functional bar + its controller/handler deleted | `lib/screens/help_centre_screen.dart` |
+| **Location section titles restyled (Low)** — "Popular Cities" / "All Cities" → bold 18 sp with a gold accent bar + divider | `lib/screens/location_screen.dart` |
+| **Help Centre chat history (verified, no change)** — confirmed server-backed: `TicketDetailScreen` reloads full history from `GET …/messages/` on every open; reported bug not reproducible | (investigation only) |
+
+#### Venues — "What's the Plan?" circles
+| Change | Files |
+|--------|-------|
+| **Circular border added** — each circle gets a 2 px border using a darkened shade of its own gradient end-colour (`Color.lerp(colors.last, Colors.black, 0.4)`) | `lib/screens/venues_screen.dart` |
+
+#### Programs — "Find Your Fit" finished
+| Change | Files |
+|--------|-------|
+| **7 new circular assets cleaned** — source PNGs in `resources- tlb-ui/programs_findurfit/` were inconsistent (grey vignette backgrounds, metallic rims, a notch, varying circle ratios, all fully opaque). A Python/PIL+scipy script (`tool`-style, kept at `/tmp/clean_circles.py`) detects each circle per-mode (white-bg / dark-bg / white-circle / grey-bg), strips rims+corners, and outputs uniform transparent-corner circles → `programs_findurfit_clean/` | `resources- tlb-ui/programs_findurfit_clean/` (NEW), `pubspec.yaml`, `lib/data/dummy_data.dart` |
+| **`PickYourPaceRow` redesigned** — circles enlarged to ~104 px; image fills the circle (`BoxFit.cover`); title overlaid **inside** the circle at the bottom (black text + soft white halo, no dark scrim); slim black circular border (`0.7 px`) | `lib/widgets/pick_your_pace_row.dart` |
+
+#### Card borders (carried in this batch)
+| Change | Files |
+|--------|-------|
+| **Slim black border on all cards** — Home/Events/Programs/Venues/Classes card widgets + home sections recoloured/added `Border.all(Colors.black.withOpacity(0.5), width: 0.7)` | `event_card*.dart`, `class_nearby_card.dart`, `new_on_tlb_card.dart`, `online_event_card.dart`, `holiday_special_card.dart`, `partner_portrait_card.dart`, `build_skill_card.dart`, `special_focus_card.dart`, `weekend_event_card.dart`, `trending_event_card.dart`, + 9 home `sections/*.dart` |
 
 ### Session 51 — Events-screen redesign + global header/footer/navbar polish
 Continuation of the Session-50 design pass: unified section-title styling, footer recolour, and a full Events-screen redesign (banner, category grid, Trending card, format circles).

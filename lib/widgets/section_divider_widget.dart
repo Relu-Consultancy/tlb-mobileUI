@@ -48,14 +48,30 @@ class SectionDividerWidget extends StatelessWidget {
     this.bottomPadding = 16,
   });
 
+  /// Titles longer than this many characters use the shorter accent line so
+  /// the centered row stays within the screen width.
+  static const int _kLongTitleThreshold = 16;
+
+  /// Accent-line length applied to long titles (see [_kLongTitleThreshold]).
+  static const double _kCompactLineLength = 40;
+
   @override
   Widget build(BuildContext context) {
+    // Long titles would push the fixed-length accent lines past the screen
+    // edges (RenderFlex overflow). When the title exceeds the threshold the
+    // lines shrink to a compact length; shorter titles keep their original
+    // length. Each line is also wrapped in a `Flexible` so it can never
+    // overflow on narrow devices, without affecting short-title layout.
+    final double effectiveLineLength = title.length > _kLongTitleThreshold
+        ? (lineLength < _kCompactLineLength ? lineLength : _kCompactLineLength)
+        : lineLength;
+
     return Padding(
       padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildLine(isLeft: true),
+          _buildLine(isLeft: true, length: effectiveLineLength),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Text(
@@ -68,22 +84,24 @@ class SectionDividerWidget extends StatelessWidget {
               ),
             ),
           ),
-          _buildLine(isLeft: false),
+          _buildLine(isLeft: false, length: effectiveLineLength),
         ],
       ),
     );
   }
 
-  Widget _buildLine({required bool isLeft}) {
-    return SizedBox(
-      width: lineLength,
-      height: lineThickness,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isLeft
-                ? [Colors.transparent, lineColor]
-                : [lineColor, Colors.transparent],
+  Widget _buildLine({required bool isLeft, required double length}) {
+    return Flexible(
+      child: SizedBox(
+        width: length,
+        height: lineThickness,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isLeft
+                  ? [Colors.transparent, lineColor]
+                  : [lineColor, Colors.transparent],
+            ),
           ),
         ),
       ),

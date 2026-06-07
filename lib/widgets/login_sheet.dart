@@ -52,7 +52,10 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     setState(() => _loading = true);
-    final result = await AuthService.requestOtp(identifier: email);
+    // purpose: 'login' — backend rejects unregistered emails (USER_NOT_FOUND)
+    // and never sends an OTP, instead of auto-creating an account.
+    final result =
+        await AuthService.requestOtp(identifier: email, purpose: 'login');
     if (!mounted) return;
     setState(() => _loading = false);
     if (result['success'] == true) {
@@ -183,29 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
 
-                  // ── Skip ───────────────────────────────────────────────
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () =>
-                          Navigator.popUntil(context, (r) => r.isFirst),
-                      style: TextButton.styleFrom(
-                        minimumSize: Size.zero,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 4, vertical: 4),
-                      ),
-                      child: Text(
-                        'Skip',
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 14),
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF2F80ED),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
 
                   // ── Illustration ────────────────────────────────────────
                   SizedBox(

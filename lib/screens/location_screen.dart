@@ -70,35 +70,111 @@ class _LocationScreenState extends State<LocationScreen> {
     Navigator.pop(context);
   }
 
+  /// Confirmation dialog used when location is blocked at the OS level. The
+  /// "Open Settings" action runs [onOpen] (app settings or location settings).
+  Future<void> _showSettingsDialog({
+    required String title,
+    required String message,
+    required Future<bool> Function() onOpen,
+  }) async {
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          title,
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 17),
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF1A1A2E),
+          ),
+        ),
+        content: Text(
+          message,
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 13.5),
+            color: const Color(0xFF5A5A6A),
+            height: 1.4,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF9E9E9E),
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await onOpen();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFFCC00),
+              foregroundColor: const Color(0xFF1A1A2E),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ),
+            child: Text(
+              'Open Settings',
+              style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _fetchCurrentLocation() async {
     setState(() => _isLoadingLocation = true);
 
     try {
-      // Check if location services are enabled
+      // Check if location services (GPS) are enabled device-wide. If not, send
+      // the user to the OS location settings to turn it on.
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         if (!mounted) return;
-        AppSnackBar.show(context, 'Location services are disabled. Please enable GPS.');
+        setState(() => _isLoadingLocation = false);
+        await _showSettingsDialog(
+          title: 'Turn on location',
+          message:
+              'Location services (GPS) are turned off. Enable them in settings to use your current location.',
+          onOpen: Geolocator.openLocationSettings,
+        );
         return;
       }
 
-      // Check / request permission — triggers the Android permission dialog
+      // Check / request permission — triggers the OS permission dialog.
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          if (!mounted) return;
-          AppSnackBar.show(context, 'Location permission denied.');
-          return;
-        }
       }
 
+      // Permanently denied ("Don't ask again" / iOS denied) — the OS will no
+      // longer show a prompt, so route the user to app settings instead.
       if (permission == LocationPermission.deniedForever) {
         if (!mounted) return;
-        final opened = await Geolocator.openAppSettings();
-        if (!opened && mounted) {
-          AppSnackBar.show(context, 'Please enable location permission from app settings.');
-        }
+        setState(() => _isLoadingLocation = false);
+        await _showSettingsDialog(
+          title: 'Location permission needed',
+          message:
+              'Location permission is blocked. Please enable it for TLB in app settings to use your current location.',
+          onOpen: Geolocator.openAppSettings,
+        );
+        return;
+      }
+
+      // Denied this time but not permanently — nothing more we can do now.
+      if (permission == LocationPermission.denied) {
+        if (!mounted) return;
+        AppSnackBar.show(context, 'Location permission denied.');
         return;
       }
 
@@ -158,6 +234,41 @@ class _LocationScreenState extends State<LocationScreen> {
     }
 
     return null;
+  }
+
+  /// Bold, visually-distinct section title with a gold accent bar and a
+  /// divider beneath it, so titles stand apart from the content below.
+  Widget _sectionHeader(String title) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            // Gold accent bar — ties the header to the city-icon accent colour.
+            Container(
+              width: 4,
+              height: 20,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE0A000),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              title,
+              style: GoogleFonts.poppins(
+                fontSize: Responsive.sp(context, 18),
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1A1A2E),
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Divider(color: Colors.grey.shade300, thickness: 1, height: 1),
+      ],
+    );
   }
 
   @override
@@ -255,14 +366,7 @@ class _LocationScreenState extends State<LocationScreen> {
             const SizedBox(height: 32),
 
             // Popular Cities Header
-            Text(
-              'Popular Cities',
-              style: GoogleFonts.poppins(
-                fontSize: Responsive.sp(context, 16),
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF1A1A2E),
-              ),
-            ),
+            _sectionHeader('Popular Cities'),
             const SizedBox(height: 16),
 
             // Popular Cities Grid
@@ -319,14 +423,7 @@ class _LocationScreenState extends State<LocationScreen> {
             const SizedBox(height: 32),
 
             // All Cities Header
-            Text(
-              'All Cities',
-              style: GoogleFonts.poppins(
-                fontSize: Responsive.sp(context, 16),
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF1A1A2E),
-              ),
-            ),
+            _sectionHeader('All Cities'),
             const SizedBox(height: 8),
 
             // All Cities List
