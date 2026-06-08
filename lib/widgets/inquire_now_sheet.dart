@@ -5,12 +5,22 @@ import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/classes_listing_service.dart';
 import '../services/programs_listing_service.dart';
+import '../services/events_listing_service.dart';
 
-void showInquireNow(BuildContext context, {required String listingId, bool isProgram = false}) {
+void showInquireNow(
+  BuildContext context, {
+  required String listingId,
+  bool isProgram = false,
+  bool isVenue = false,
+}) {
   showDialog(
     context: context,
     barrierDismissible: true,
-    builder: (_) => _InquireNowDialog(listingId: listingId, isProgram: isProgram),
+    builder: (_) => _InquireNowDialog(
+      listingId: listingId,
+      isProgram: isProgram,
+      isVenue: isVenue,
+    ),
   );
 }
 
@@ -19,7 +29,12 @@ void showInquireNow(BuildContext context, {required String listingId, bool isPro
 class _InquireNowDialog extends StatefulWidget {
   final String listingId;
   final bool isProgram;
-  const _InquireNowDialog({required this.listingId, this.isProgram = false});
+  final bool isVenue;
+  const _InquireNowDialog({
+    required this.listingId,
+    this.isProgram = false,
+    this.isVenue = false,
+  });
 
   @override
   State<_InquireNowDialog> createState() => _InquireNowDialogState();
@@ -89,7 +104,18 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
 
     setState(() => _isSubmitting = true);
     try {
-      if (widget.isProgram) {
+      if (widget.isVenue) {
+        await EventsListingService.submitVenueEnquiry(
+          listingId: widget.listingId,
+          studentName: _childName.text.trim(),
+          mobile: _mobile.text.trim(),
+          parentName: _parentName.text.trim(),
+          studentAge:
+              _selectedAge != null ? int.tryParse(_selectedAge!) : null,
+          message: _message.text.trim(),
+          area: _locality.text.trim(),
+        );
+      } else if (widget.isProgram) {
         await ProgramsListingService.submitEnquiry(
           listingId: widget.listingId,
           studentName: _childName.text.trim(),

@@ -1,16 +1,22 @@
 import '../core/responsive.dart';
 import 'package:flutter/material.dart';
+import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/section_divider_widget.dart';
-import '../data/dummy_data.dart';
-import '../screens/event_detail_screen.dart';
+import '../providers/home_feed_state.dart';
+import '../core/listing_navigation.dart';
 
 class SpecialNeedsSection extends StatelessWidget {
   const SpecialNeedsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ValueListenableBuilder<int>(
+      valueListenable: HomeFeedState.version,
+      builder: (context, _, __) {
+        final items = HomeFeedState.section('where_every_star_shines');
+        if (items.isEmpty) return const SizedBox.shrink();
+        return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionDividerWidget(
@@ -24,12 +30,12 @@ class SpecialNeedsSection extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
-            itemCount: DummyData.specialNeeds.length > 1
-                ? DummyData.specialNeeds.length
+            itemCount: items.length > 1
+                ? items.length
                 : 3,
             itemBuilder: (context, index) {
-              final modelIndex = index % DummyData.specialNeeds.length;
-              final event = DummyData.specialNeeds[modelIndex];
+              final modelIndex = index % items.length;
+              final event = items[modelIndex];
               return Container(
                 width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
                 margin: const EdgeInsets.only(right: 16),
@@ -58,8 +64,7 @@ class SpecialNeedsSection extends StatelessWidget {
                           Positioned.fill(
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(14),
-                              child: Image.asset(
-                                event.imagePath,
+                              child: listingImage(event.imagePath,
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -191,13 +196,7 @@ class SpecialNeedsSection extends StatelessWidget {
                               height: Responsive.h(context, 38, min: 34),
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          EventDetailScreen(event: event),
-                                    ),
-                                  );
+                                  openListingDetail(context, event);
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFFFFCC00),
@@ -228,6 +227,8 @@ class SpecialNeedsSection extends StatelessWidget {
           ),
         ),
       ],
+        );
+      },
     );
   }
 }

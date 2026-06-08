@@ -28,16 +28,16 @@ void main() {
         expect(find.text('Adventure'), findsOneWidget);
         // Bottom bar: RichText '₹350' + '/' → use findRichText to match collapsed text
         expect(find.text('₹350/', findRichText: true), findsOneWidget);
-        expect(find.text('Plan Event'), findsOneWidget);
+        expect(find.text('Check Availability'), findsOneWidget);
       });
     });
 
-    testWidgets('shows login sheet when Plan Event is tapped and not logged in', (WidgetTester tester) async {
+    testWidgets('shows login sheet when Check Availability is tapped and not logged in', (WidgetTester tester) async {
       await mockNetworkImages(() async {
         AuthState.isLoggedIn.value = false;
         await pumpTLBApp(tester, VenueDetailScreen(event: testEvent));
 
-        await tester.tap(find.text('Plan Event'));
+        await tester.tap(find.text('Check Availability'));
         await tester.pumpAndSettle();
 
         // Login sheet title shown by showLoginSheet()

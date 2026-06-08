@@ -14,14 +14,14 @@ void main() {
 
         // Verify sections by titles
         expect(find.text("What's the Plan?"), findsOneWidget);
-        expect(find.text('For the Big Days'), findsOneWidget);
+        expect(find.text('For the Big days'), findsOneWidget);
         expect(find.text('Weekend Plan Sorted'), findsOneWidget);
-        expect(find.text('Close to You'), findsOneWidget);
+        expect(find.text('Close to you'), findsOneWidget);
         expect(find.text('Out & About'), findsOneWidget);
         expect(find.text('Get Moving'), findsOneWidget);
-        expect(find.text('Hand-On Spaces'), findsOneWidget);
-        expect(find.text('Easy on the Pocket'), findsOneWidget);
-        expect(find.text('Headed to the Mall?'), findsOneWidget);
+        expect(find.text('Hand-On Space'), findsOneWidget);
+        expect(find.text('Easy on the pocket'), findsOneWidget);
+        expect(find.text('Headed to the Mall'), findsOneWidget);
         expect(find.text('Your Way, Your Plan'), findsOneWidget);
         expect(find.text('Thoughtful Spaces'), findsOneWidget);
 

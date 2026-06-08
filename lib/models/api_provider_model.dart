@@ -7,6 +7,7 @@ class ApiProvider {
   final double averageRating;
   final int totalReviews;
   final int experienceYears;
+  final int totalFollowers;
 
   const ApiProvider({
     required this.id,
@@ -17,6 +18,7 @@ class ApiProvider {
     required this.averageRating,
     required this.totalReviews,
     required this.experienceYears,
+    this.totalFollowers = 0,
   });
 
   factory ApiProvider.fromJson(Map<String, dynamic> json) => ApiProvider(
@@ -28,5 +30,8 @@ class ApiProvider {
         averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
         totalReviews: (json['total_reviews'] as num?)?.toInt() ?? 0,
         experienceYears: (json['experience_years'] as num?)?.toInt() ?? 0,
+        totalFollowers: (json['total_followers'] as num?)?.toInt() ??
+            (json['followers_count'] as num?)?.toInt() ??
+            0,
       );
 }

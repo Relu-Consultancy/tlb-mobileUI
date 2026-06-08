@@ -41,10 +41,57 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
       });
     } catch (e) {
       setState(() {
-        _error = e.toString();
+        _error = e.toString().replaceFirst('Exception: ', '');
         _isLoading = false;
       });
     }
+  }
+
+  Widget _buildError() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 32, 20, 32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.wifi_off_rounded, size: 48, color: Colors.grey.shade400),
+          const SizedBox(height: 14),
+          Text(
+            _error ?? 'Something went wrong.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 13),
+              color: Colors.grey.shade700,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 18),
+          ElevatedButton.icon(
+            onPressed: _fetchMethods,
+            icon: const Icon(Icons.refresh, size: 18, color: Color(0xFF1A1A2E)),
+            label: Text(
+              'Retry',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF1A1A2E),
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFFCC00),
+              elevation: 0,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _deleteMethod(ApiPaymentMethod method) async {
@@ -294,16 +341,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                 child: Center(child: CircularProgressIndicator()),
               )
             else if (_error != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 40),
-                child: Center(
-                  child: Text(
-                    _error!,
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              )
+              _buildError()
             else if (_methods == null || _methods!.isEmpty)
               _buildEmptyState()
             else ...[

@@ -1,12 +1,13 @@
 import '../core/responsive.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/section_divider_widget.dart';
-import '../data/dummy_data.dart';
-import '../screens/event_detail_screen.dart';
+import '../providers/home_feed_state.dart';
+import '../core/listing_navigation.dart';
 
 class WeekendSpecialSection extends StatefulWidget {
   const WeekendSpecialSection({super.key});
@@ -34,9 +35,9 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
 
   void _startAutoSlide() {
     _autoSlideTimer = Timer.periodic(const Duration(seconds: 4), (_) {
-      if (!_pageController.hasClients || DummyData.weekendSpecial.isEmpty) return;
-      final nextPage = ((_pageController.page?.round() ?? 0) + 1) %
-          DummyData.weekendSpecial.length;
+      final wk = HomeFeedState.section('weekend_specials');
+      if (!_pageController.hasClients || wk.isEmpty) return;
+      final nextPage = ((_pageController.page?.round() ?? 0) + 1) % wk.length;
       _pageController.animateToPage(
         nextPage,
         duration: const Duration(milliseconds: 400),
@@ -47,7 +48,12 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ValueListenableBuilder<int>(
+      valueListenable: HomeFeedState.version,
+      builder: (context, _, __) {
+        final items = HomeFeedState.section('weekend_specials');
+        if (items.isEmpty) return const SizedBox.shrink();
+        return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionDividerWidget(
@@ -61,9 +67,9 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
           child: PageView.builder(
             controller: _pageController,
             clipBehavior: Clip.hardEdge,
-            itemCount: DummyData.weekendSpecial.length,
+            itemCount: items.length,
             itemBuilder: (context, index) {
-              final event = DummyData.weekendSpecial[index];
+              final event = items[index];
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: Container(
@@ -92,8 +98,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                 borderRadius: const BorderRadius.horizontal(
                                   left: Radius.circular(16),
                                 ),
-                                child: Image.asset(
-                                  event.imagePath,
+                                child: listingImage(event.imagePath,
                                   width: double.infinity,
                                   fit: BoxFit.cover,
                                 ),
@@ -178,12 +183,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                 height: Responsive.h(context, 34, min: 30),
                                 child: ElevatedButton(
                                   onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => EventDetailScreen(event: event),
-                                      ),
-                                    );
+                                    openListingDetail(context, event);
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFFFFCC00),
@@ -218,7 +218,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
         Center(
           child: SmoothPageIndicator(
             controller: _pageController,
-            count: DummyData.weekendSpecial.length,
+            count: items.length,
             effect: const WormEffect(
               dotHeight: 8,
               dotWidth: 8,
@@ -230,6 +230,8 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
         ),
         const SizedBox(height: 16),
       ],
+        );
+      },
     );
   }
 }

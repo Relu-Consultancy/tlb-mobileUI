@@ -8,6 +8,7 @@ import '../models/api_booking_model.dart';
 import '../models/event_model.dart';
 import '../providers/auth_state.dart';
 import '../services/booking_service.dart';
+import '../services/coupon_service.dart';
 import '../widgets/app_loader.dart';
 import 'booking_confirmed_screen.dart';
 import 'venue_booking_confirmed_screen.dart';
@@ -56,8 +57,21 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
   String? _pendingBookingId;
   String? _pendingBookingRef;
 
-  double get _bookingFee => widget.subtotal * 0.0826;
-  double get _totalAmount => widget.subtotal + _bookingFee;
+  // ── Coupon state ──
+  final TextEditingController _couponCtrl = TextEditingController();
+  String? _appliedCoupon; // the validated code, or null
+  double _discount = 0; // discount amount from validation
+  bool _validatingCoupon = false;
+  String? _couponError;
+
+  /// Subtotal after any applied coupon discount (never below zero).
+  double get _effectiveSubtotal {
+    final v = widget.subtotal - _discount;
+    return v < 0 ? 0 : v;
+  }
+
+  double get _bookingFee => _effectiveSubtotal * 0.0826;
+  double get _totalAmount => _effectiveSubtotal + _bookingFee;
 
   @override
   void initState() {
@@ -71,7 +85,67 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
   @override
   void dispose() {
     _razorpay.clear();
+    _couponCtrl.dispose();
     super.dispose();
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  //  Coupon — validate / preview before booking
+  // ─────────────────────────────────────────────────────────────
+  Future<void> _applyCoupon() async {
+    final code = _couponCtrl.text.trim();
+    if (code.isEmpty) return;
+    final token = AuthState.accessToken;
+    if (token == null) {
+      AppSnackBar.error(context, 'Please log in to use a coupon.');
+      return;
+    }
+    if (widget.event.id.isEmpty) {
+      setState(() => _couponError = 'Coupons are not available for this listing.');
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _validatingCoupon = true;
+      _couponError = null;
+    });
+
+    final result = await CouponService.validate(
+      token: token,
+      couponCode: code,
+      listingId: widget.event.id,
+      originalAmount: widget.subtotal,
+    );
+    if (!mounted) return;
+
+    setState(() {
+      _validatingCoupon = false;
+      if (result.isValid) {
+        _appliedCoupon = code.toUpperCase();
+        _discount = result.discountAmount;
+        _couponError = null;
+      } else {
+        _appliedCoupon = null;
+        _discount = 0;
+        _couponError = result.errorMessage ?? 'This coupon could not be applied.';
+      }
+    });
+
+    if (result.isValid) {
+      AppSnackBar.success(
+        context,
+        'Coupon applied — you saved ₹${result.discountAmount.toStringAsFixed(0)}!',
+      );
+    }
+  }
+
+  void _removeCoupon() {
+    setState(() {
+      _appliedCoupon = null;
+      _discount = 0;
+      _couponError = null;
+      _couponCtrl.clear();
+    });
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -158,6 +232,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
         token: token,
         listingId: widget.event.id,
         bookingType: widget.bookingType,
+        couponCode: _appliedCoupon,
         lineItems: lineItems,
         attendees: attendees,
         batchId: widget.batchId,
@@ -504,8 +579,23 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
           Divider(color: Colors.grey.shade200, thickness: 1),
           const SizedBox(height: 16),
 
+          // Coupon
+          _buildCouponSection(),
+
+          const SizedBox(height: 16),
+          Divider(color: Colors.grey.shade200, thickness: 1),
+          const SizedBox(height: 16),
+
           // Price breakdown
           _priceRow('Sub-total', '₹${widget.subtotal.toStringAsFixed(0)}'),
+          if (_discount > 0) ...[
+            const SizedBox(height: 8),
+            _priceRow(
+              'Coupon ($_appliedCoupon)',
+              '−₹${_discount.toStringAsFixed(0)}',
+              valueColor: const Color(0xFF22C55E),
+            ),
+          ],
           const SizedBox(height: 8),
           _priceRow('Booking Fee', '₹${_bookingFee.toStringAsFixed(2)}'),
           const SizedBox(height: 16),
@@ -536,6 +626,147 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildCouponSection() {
+    if (_appliedCoupon != null) {
+      // Applied state — green confirmation chip with a Remove action.
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF22C55E).withOpacity(0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF22C55E).withOpacity(0.4)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Color(0xFF22C55E), size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                "'$_appliedCoupon' applied",
+                style: GoogleFonts.poppins(
+                  fontSize: Responsive.sp(context, 13.5),
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF1A1A2E),
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: _removeCoupon,
+              child: Text(
+                'Remove',
+                style: GoogleFonts.poppins(
+                  fontSize: Responsive.sp(context, 12.5),
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFFEF4444),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Input state — code field + Apply button.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F5F5),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: _couponError != null
+                        ? const Color(0xFFEF4444).withOpacity(0.5)
+                        : Colors.transparent,
+                  ),
+                ),
+                child: TextField(
+                  controller: _couponCtrl,
+                  textCapitalization: TextCapitalization.characters,
+                  enabled: !_validatingCoupon,
+                  onSubmitted: (_) => _applyCoupon(),
+                  decoration: InputDecoration(
+                    hintText: 'Have a coupon code?',
+                    hintStyle: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 13),
+                      color: Colors.grey.shade500,
+                    ),
+                    prefixIcon: Icon(Icons.local_offer_outlined,
+                        size: 18, color: Colors.grey.shade600),
+                    border: InputBorder.none,
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+                  ),
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 13.5),
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF1A1A2E),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            SizedBox(
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _validatingCoupon ? null : _applyCoupon,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1A1A2E),
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: Colors.grey.shade300,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                ),
+                child: _validatingCoupon
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : Text(
+                        'Apply',
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 13.5),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
+        if (_couponError != null) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(Icons.error_outline,
+                  size: 14, color: Color(0xFFEF4444)),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  _couponError!,
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 11.5),
+                    color: const Color(0xFFEF4444),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 
@@ -575,7 +806,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
     );
   }
 
-  Widget _priceRow(String label, String value) {
+  Widget _priceRow(String label, String value, {Color? valueColor}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -591,7 +822,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 14),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: valueColor ?? const Color(0xFF1A1A2E),
           ),
         ),
       ],

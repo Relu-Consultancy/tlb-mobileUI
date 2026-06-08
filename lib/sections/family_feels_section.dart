@@ -1,16 +1,22 @@
 import '../core/responsive.dart';
 import 'package:flutter/material.dart';
+import '../core/listing_image.dart';
 import '../widgets/section_divider_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../data/dummy_data.dart';
-import '../screens/event_detail_screen.dart';
+import '../providers/home_feed_state.dart';
+import '../core/listing_navigation.dart';
 
 class FamilyFeelsSection extends StatelessWidget {
   const FamilyFeelsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ValueListenableBuilder<int>(
+      valueListenable: HomeFeedState.version,
+      builder: (context, _, __) {
+        final items = HomeFeedState.section('family_feels');
+        if (items.isEmpty) return const SizedBox.shrink();
+        return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionDividerWidget(
@@ -24,10 +30,10 @@ class FamilyFeelsSection extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
-            itemCount: DummyData.familyFeels.length,
+            itemCount: items.length,
             addAutomaticKeepAlives: false,
             itemBuilder: (context, index) {
-              final event = DummyData.familyFeels[index];
+              final event = items[index];
               return Container(
                 width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
                 margin: const EdgeInsets.only(right: 16),
@@ -50,8 +56,7 @@ class FamilyFeelsSection extends StatelessWidget {
                       padding: const EdgeInsets.all(12.0),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
-                        child: Image.asset(
-                          event.imagePath,
+                        child: listingImage(event.imagePath,
                           width: Responsive.w(context, 130, min: 110),
                           height: double.infinity,
                           fit: BoxFit.cover,
@@ -140,12 +145,7 @@ class FamilyFeelsSection extends StatelessWidget {
                               height: Responsive.h(context, 36, min: 32),
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => EventDetailScreen(event: event),
-                                    ),
-                                  );
+                                  openListingDetail(context, event);
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFFFFCC00),
@@ -176,6 +176,8 @@ class FamilyFeelsSection extends StatelessWidget {
           ),
         ),
       ],
+        );
+      },
     );
   }
 }

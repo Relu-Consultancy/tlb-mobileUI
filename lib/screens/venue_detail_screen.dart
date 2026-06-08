@@ -10,6 +10,9 @@ import '../core/responsive.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/review_sheet.dart';
 import '../widgets/organizer_card.dart';
+import '../widgets/detail_sections.dart';
+import '../widgets/upcoming_events_section.dart';
+import '../widgets/inquire_now_sheet.dart';
 import '../models/event_model.dart';
 import '../models/api_venue_model.dart';
 import '../services/events_listing_service.dart';
@@ -146,6 +149,34 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
   List<ApiVenueMedia> get _galleryMedia =>
       _detail?.galleryMedia ?? [];
 
+  /// Image URLs for the gallery row — real media if present, else the cover.
+  List<String> get _galleryImages {
+    if (_galleryMedia.isNotEmpty) {
+      return _galleryMedia.map((m) => m.url).toList();
+    }
+    return [_coverUrl];
+  }
+
+  Future<void> _openDirections() async {
+    if (!AuthState.isLoggedIn.value) {
+      showLoginSheet(context);
+      return;
+    }
+    if (LocationState().selectedCity.value == 'Bhopal City') {
+      if (mounted) AppSnackBar.show(context, 'Please set your current location');
+      return;
+    }
+    final loc = _address ?? _locationText;
+    final destination = Uri.encodeComponent(loc);
+    final url = Uri.parse(
+        'https://www.google.com/maps/dir/?api=1&destination=$destination');
+    try {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      if (mounted) AppSnackBar.error(context, 'Could not open map.');
+    }
+  }
+
   // First upcoming availability slot
   ApiVenueAvailability? get _firstSlot {
     final av = _detail?.availability;
@@ -246,16 +277,16 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: kDetailBg,
       body: Stack(
         children: [
           CustomScrollView(
             slivers: [
               // ── Cover image header ──
               SliverAppBar(
-                backgroundColor: Colors.white,
-                surfaceTintColor: Colors.white,
-                expandedHeight: Responsive.h(context, 300, min: 220),
+                backgroundColor: kDetailBg,
+                surfaceTintColor: kDetailBg,
+                expandedHeight: Responsive.h(context, 230, min: 190),
                 pinned: true,
                 leading: Container(
                   margin: const EdgeInsets.all(8),
@@ -350,7 +381,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                         _title,
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 20),
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w700,
                           color: const Color(0xFF1A1A2E),
                         ),
                       ),
@@ -408,38 +439,16 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
 
                     // ── About Venue ──
                     if (_description?.isNotEmpty == true) ...[
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8F9FA),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('About Venue',
-                                style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
-                            const SizedBox(height: 8),
-                            Text(
-                              _description!,
-                              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600, height: 1.5),
-                            ),
-                          ],
-                        ),
+                      ExpandableAboutCard(
+                        title: 'About Venue',
+                        text: _description!,
                       ),
                       const SizedBox(height: 24),
                     ],
 
                     // ── Things to Know ──
                     if (_ageGroupText != null || _capacityText != null || _locationTypeText != null) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('Things to Know',
-                            style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
-                      ),
+                      const DetailSectionTitle('Things to Know'),
                       const SizedBox(height: 12),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -477,167 +486,18 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                     ],
 
                     // ── Gallery ──
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Gallery',
-                              style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
-                          GestureDetector(
-                            onTap: () => Navigator.push(context,
-                                MaterialPageRoute(builder: (_) => GalleryScreen(event: _eventForWidgets))),
-                            child: Text('See All >',
-                                style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6))),
-                          ),
-                        ],
-                      ),
+                    DetailGallery(
+                      images: _galleryImages,
+                      onSeeAll: () => Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => GalleryScreen(event: _eventForWidgets))),
                     ),
-                    const SizedBox(height: 4),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('Sneak peek into what awaits you!',
-                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
-                    ),
-                    const SizedBox(height: 12),
-                    if (_galleryMedia.isNotEmpty)
-                      SizedBox(
-                        height: Responsive.h(context, 100, min: 80),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          itemCount: _galleryMedia.length,
-                          itemBuilder: (_, i) => Container(
-                            margin: const EdgeInsets.only(right: 12),
-                            width: Responsive.w(context, 120, min: 90),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: Colors.grey.shade200,
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.network(
-                                _galleryMedia[i].url,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade200),
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                    else if (_isCoverNetwork && _coverUrl.isNotEmpty)
-                      SizedBox(
-                        height: Responsive.h(context, 100, min: 80),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.network(_coverUrl,
-                                width: Responsive.w(context, 120, min: 90), fit: BoxFit.cover),
-                          ),
-                        ),
-                      ),
 
                     const SizedBox(height: 24),
 
                     // ── Location map ──
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text('Location',
-                          style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      height: Responsive.h(context, 180, min: 140),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        color: const Color(0xFFE8F0E8),
-                      ),
-                      child: Stack(
-                        children: [
-                          Positioned.fill(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: CustomPaint(painter: _MapPlaceholderPainter()),
-                            ),
-                          ),
-                          const Positioned(
-                            top: 12, left: 0, right: 0,
-                            child: Icon(Icons.location_on, size: 36, color: Colors.red),
-                          ),
-                          Positioned.fill(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                gradient: LinearGradient(
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                  colors: [Colors.black.withOpacity(0.8), Colors.transparent],
-                                ),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 16, left: 16, right: 90,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _address ?? _locationText,
-                                  style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: Colors.white),
-                                ),
-                                const SizedBox(height: 8),
-                                SizedBox(
-                                  height: Responsive.h(context, 44, min: 38),
-                                  child: ElevatedButton.icon(
-                                    onPressed: () async {
-                                      if (!AuthState.isLoggedIn.value) {
-                                        showLoginSheet(context);
-                                        return;
-                                      }
-                                      if (LocationState().selectedCity.value == 'Bhopal City') {
-                                        if (context.mounted) {
-                                          AppSnackBar.show(context, 'Please set your current location');
-                                        }
-                                        return;
-                                      }
-                                      final loc = _address ?? _locationText;
-                                      final destination = Uri.encodeComponent(loc);
-                                      final url = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$destination');
-                                      try {
-                                        await launchUrl(url, mode: LaunchMode.externalApplication);
-                                      } catch (_) {
-                                        if (context.mounted) {
-                                          AppSnackBar.error(context, 'Could not open map.');
-                                        }
-                                      }
-                                    },
-                                    icon: const Icon(Icons.directions, size: 16),
-                                    label: Text('Get Direction',
-                                        style: GoogleFonts.poppins(
-                                            fontSize: Responsive.sp(context, 12),
-                                            fontWeight: FontWeight.w500)),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFFFFCC00),
-                                      foregroundColor: const Color(0xFF1A1A2E),
-                                      elevation: 0,
-                                      minimumSize: const Size(0, 46),
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(20)),
-                                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                    DetailDirectionsCard(
+                      locationText: _address ?? _locationText,
+                      onGetDirection: _openDirections,
                     ),
 
                     const SizedBox(height: 24),
@@ -649,6 +509,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                       initialName: _detail?.organizer?.businessName,
                       initialLogoUrl: _detail?.organizer?.logoUrl,
                       label: 'MANAGED BY',
+                      listingType: 'venue',
                     ),
                     const SizedBox(height: 24),
 
@@ -658,34 +519,8 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                       (_detail!.refundPolicy?.isNotEmpty == true) ||
                       _detail!.faqs.isNotEmpty
                     )) ...[
-                      GestureDetector(
+                      DetailTermsRow(
                         onTap: () => _showTermsBottomSheet(context),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 16),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.description_outlined, size: 24, color: Colors.grey.shade600),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Text(
-                                  'Terms & Conditions',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 14),
-                                    fontWeight: FontWeight.w500,
-                                    color: const Color(0xFF1A1A2E),
-                                  ),
-                                ),
-                              ),
-                              Icon(Icons.chevron_right, color: Colors.blue.shade500, size: 24),
-                            ],
-                          ),
-                        ),
                       ),
                       const SizedBox(height: 24),
                     ],
@@ -709,6 +544,9 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                     //   padding: const EdgeInsets.symmetric(horizontal: 16),
                     //   child: Text('Related Venues', ...),
                     // ),
+
+                    // ── Upcoming Events ───────────────────────────────────
+                    const UpcomingEventsSection(),
 
                     SizedBox(height: Responsive.h(context, 100)),
                   ],
@@ -772,6 +610,16 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                           );
                           return;
                         }
+                        // Enquiry-only venues open the enquiry sheet; direct
+                        // booking venues proceed to the booking flow.
+                        if (_detail?.isEnquiry == true) {
+                          showInquireNow(
+                            context,
+                            listingId: widget.event.id,
+                            isVenue: true,
+                          );
+                          return;
+                        }
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -789,7 +637,10 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         elevation: 0,
                       ),
-                      child: Text('Plan Event',
+                      child: Text(
+                          _detail?.isEnquiry == true
+                              ? 'Send Enquiry'
+                              : 'Check Availability',
                           style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500)),
                     ),
@@ -960,31 +811,4 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
   }
 
 
-}
-
-class _MapPlaceholderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height),
-        Paint()..color = const Color(0xFFE8F0E8));
-    final road = Paint()
-      ..color = const Color(0xFFD0D8D0)
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
-    for (double y = 0; y < size.height; y += 30) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), road);
-    }
-    for (double x = 0; x < size.width; x += 40) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), road);
-    }
-    final accent = Paint()
-      ..color = const Color(0xFFC8E0C8)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(size.width * 0.2, size.height * 0.3), 12, accent);
-    canvas.drawCircle(Offset(size.width * 0.7, size.height * 0.6), 16, accent);
-    canvas.drawCircle(Offset(size.width * 0.5, size.height * 0.15), 10, accent);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

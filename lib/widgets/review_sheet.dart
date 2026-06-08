@@ -90,186 +90,138 @@ Widget buildReviewInlineSection(
   final reviews = reviewPage?.reviews ?? [];
   final avg = reviewPage?.averageRating ?? 0.0;
   final total = reviewPage?.totalReviews ?? 0;
-  final breakdown = reviewPage?.ratingBreakdown ?? {};
 
   // Shared "Write a Review" button shown regardless of auth state.
-  Widget writeButton() => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: GestureDetector(
-      onTap: () => _openWriteReviewWithGuard(
-        context,
-        listingId: listingId,
-        listingTitle: listingTitle,
-        listingImage: listingImage,
-        onRefresh: onRefresh,
+  Widget writeButton() => GestureDetector(
+    onTap: () => _openWriteReviewWithGuard(
+      context,
+      listingId: listingId,
+      listingTitle: listingTitle,
+      listingImage: listingImage,
+      onRefresh: onRefresh,
+    ),
+    child: Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.amber.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.amber.shade200),
       ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.amber.shade50,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.amber.shade200),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.edit_outlined, color: Color(0xFFDE7104), size: 18),
-            const SizedBox(width: 8),
-            Text(
-              'Write a Review',
-              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w500, color: const Color(0xFFDE7104)),
-            ),
-          ],
-        ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.edit_outlined, color: Color(0xFFDE7104), size: 18),
+          const SizedBox(width: 8),
+          Text(
+            'Write a Review',
+            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w500, color: const Color(0xFFDE7104)),
+          ),
+        ],
       ),
     ),
   );
 
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      // Section header row
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Reviews', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
-            GestureDetector(
-              onTap: () async {
-                await showReviewSheet(context, listingId: listingId, listingTitle: listingTitle, listingImage: listingImage);
-                onRefresh?.call();
-              },
-              child: Text('See All >', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6))),
-            ),
-          ],
-        ),
+  // White card with a slim black border wrapping the whole reviews block,
+  // matching the reference: bold "Reviews", an "Overall Rating" line, then the
+  // reviewer tiles.
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0x8A000000), width: 0.7),
       ),
-      const SizedBox(height: 12),
-
-      if (isLoading) ...[
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          child: Center(child: AppLoaderInline()),
-        ),
-      ] else if (total > 0) ...[
-        // ── Rating summary card with breakdown bars ──
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Column(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Reviews', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+              GestureDetector(
+                onTap: () async {
+                  await showReviewSheet(context, listingId: listingId, listingTitle: listingTitle, listingImage: listingImage);
+                  onRefresh?.call();
+                },
+                child: Row(
                   children: [
-                    Text(avg.toStringAsFixed(1), style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 30), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
-                    Row(
-                      children: List.generate(5, (i) {
-                        if (i < avg.floor()) return const Icon(Icons.star, color: Colors.amber, size: 16);
-                        if (avg - i >= 0.5) return const Icon(Icons.star_half, color: Colors.amber, size: 16);
-                        return const Icon(Icons.star_border, color: Colors.amber, size: 16);
-                      }),
-                    ),
-                    const SizedBox(height: 4),
-                    Text('$total review${total == 1 ? '' : 's'}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500)),
+                    Text('See All', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6))),
+                    const Icon(Icons.chevron_right, size: 18, color: Color(0xFF3B82F6)),
                   ],
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    children: [5, 4, 3, 2, 1].map((star) {
-                      final count = breakdown['$star'] ?? 0;
-                      final frac = total > 0 ? (count / total).clamp(0.0, 1.0) : 0.0;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: Row(
-                          children: [
-                            Text('$star', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade600)),
-                            const SizedBox(width: 2),
-                            const Icon(Icons.star, size: 11, color: Colors.amber),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(4),
-                                child: LinearProgressIndicator(
-                                  value: frac,
-                                  backgroundColor: Colors.grey.shade200,
-                                  valueColor: const AlwaysStoppedAnimation(Colors.amber),
-                                  minHeight: 6,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            SizedBox(
-                              width: 20,
-                              child: Text('$count', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500), textAlign: TextAlign.end),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
+              ),
+            ],
+          ),
+
+          if (isLoading) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Center(child: AppLoaderInline()),
+            ),
+          ] else if (total > 0) ...[
+            const SizedBox(height: 6),
+            // Overall rating line
+            Row(
+              children: [
+                Text(
+                  'Overall Rating: ${avg.toStringAsFixed(1)}',
+                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13.5), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E)),
                 ),
+                const SizedBox(width: 4),
+                const Icon(Icons.star, color: Colors.amber, size: 16),
               ],
             ),
-          ),
-        ),
-        const SizedBox(height: 12),
+            const SizedBox(height: 14),
 
-        // Preview reviews (up to 3)
-        ...reviews.take(3).map((r) {
-          final isOwner = AuthState.userId != null && AuthState.userId == r.customerId;
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _ReviewTile(
-                  review: r,
-                  onEdit: isOwner
-                      ? () async {
-                          await showWriteReviewSheet(
-                            context,
-                            listingId: listingId,
-                            listingTitle: listingTitle,
-                            listingImage: listingImage,
-                            existing: r,
-                          );
-                          onRefresh?.call();
-                        }
-                      : null,
-                  onDelete: isOwner
-                      ? () => _confirmDeleteReview(context, r, onRefresh)
-                      : null,
-                ),
-              ),
-              Divider(height: 20, indent: 16, endIndent: 16, color: Colors.grey.shade200),
-            ],
-          );
-        }),
+            // Preview reviews (up to 3)
+            ...reviews.take(3).toList().asMap().entries.map((entry) {
+              final i = entry.key;
+              final r = entry.value;
+              final isOwner = AuthState.userId != null && AuthState.userId == r.customerId;
+              return Column(
+                children: [
+                  if (i > 0)
+                    Divider(height: 24, color: Colors.grey.shade200),
+                  _ReviewTile(
+                    review: r,
+                    onEdit: isOwner
+                        ? () async {
+                            await showWriteReviewSheet(
+                              context,
+                              listingId: listingId,
+                              listingTitle: listingTitle,
+                              listingImage: listingImage,
+                              existing: r,
+                            );
+                            onRefresh?.call();
+                          }
+                        : null,
+                    onDelete: isOwner
+                        ? () => _confirmDeleteReview(context, r, onRefresh)
+                        : null,
+                  ),
+                ],
+              );
+            }),
 
-        const SizedBox(height: 4),
-        // ── Write a Review — always visible ──
-        writeButton(),
-      ] else ...[
-        // No reviews yet
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            'No reviews yet — be the first!',
-            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade500),
-          ),
-        ),
-        const SizedBox(height: 12),
-        // ── Write a Review — always visible ──
-        writeButton(),
-      ],
-    ],
+            const SizedBox(height: 14),
+            writeButton(),
+          ] else ...[
+            const SizedBox(height: 10),
+            Text(
+              'No reviews yet — be the first!',
+              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade500),
+            ),
+            const SizedBox(height: 12),
+            writeButton(),
+          ],
+        ],
+      ),
+    ),
   );
 }
 

@@ -18,6 +18,11 @@ class OrganizerCard extends StatefulWidget {
   /// Label shown above the name. Defaults to 'ORGANIZED BY'.
   final String label;
 
+  /// The kind of listing this card sits on — `'event'`, `'class'`,
+  /// `'program'` or `'venue'`. Forwarded to the organizer profile so it can
+  /// show an "Upcoming Events" section sourced from that type's list API.
+  final String? listingType;
+
   const OrganizerCard({
     super.key,
     required this.listingId,
@@ -25,6 +30,7 @@ class OrganizerCard extends StatefulWidget {
     this.initialName,
     this.initialLogoUrl,
     this.label = 'ORGANIZED BY',
+    this.listingType,
   });
 
   @override
@@ -58,8 +64,6 @@ class _OrganizerCardState extends State<OrganizerCard> {
 
   String get _name => _provider?.name ?? widget.initialName ?? 'Partner';
   String? get _logoUrl => _provider?.logoUrl ?? widget.initialLogoUrl;
-  String? get _bio =>
-      (_provider?.bio?.isNotEmpty == true) ? _provider!.bio : null;
   String? get _effectivePartnerId =>
       (widget.partnerId?.isNotEmpty == true) ? widget.partnerId : _provider?.id;
 
@@ -74,197 +78,66 @@ class _OrganizerCardState extends State<OrganizerCard> {
             initialName: _name,
             initialLogoUrl: _logoUrl,
             provider: _provider,
+            listingType: widget.listingType,
           ),
         ),
       ),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0xFFF0F0F0)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0x8A000000), width: 0.7),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        // Minimal design per reference: avatar + "ORGANIZED BY" + name + Follow.
+        child: Row(
           children: [
-            // ── Header strip ─────────────────────────────────────────────
             Container(
-              padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
-              decoration: const BoxDecoration(
-                color: Color(0xFFFFF8EC),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-              ),
-              child: Row(
+              width: 52,
+              height: 52,
+              decoration: const BoxDecoration(shape: BoxShape.circle),
+              child: ClipOval(child: _buildAvatar()),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Avatar + verified badge
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.10),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: ClipOval(child: _buildAvatar()),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          width: 18,
-                          height: 18,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF22C55E),
-                            shape: BoxShape.circle,
-                            border:
-                                Border.all(color: Colors.white, width: 1.5),
-                          ),
-                          child: const Icon(Icons.check,
-                              size: 10, color: Colors.white),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(width: 12),
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.label,
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 10),
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFFF5A623),
-                            letterSpacing: 0.6,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        _loading && _provider == null
-                            ? Container(
-                                width: 110,
-                                height: 14,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade200,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                              )
-                            : Text(
-                                _name,
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 15),
-                                  fontWeight: FontWeight.w500,
-                                  color: const Color(0xFF1A1A2E),
-                                ),
-                              ),
-                        if (_bio != null) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            _bio!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 11),
-                              color: Colors.grey.shade500,
-                            ),
-                          ),
-                        ],
-                      ],
+                  Text(
+                    widget.label,
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 10),
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFFF5A623),
+                      letterSpacing: 0.6,
                     ),
                   ),
-
-                  const SizedBox(width: 8),
-                  PartnerFollowButton(partnerId: _effectivePartnerId),
+                  const SizedBox(height: 3),
+                  _loading && _provider == null
+                      ? Container(
+                          width: 110,
+                          height: 14,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        )
+                      : Text(
+                          _name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 15.5),
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF1A1A2E),
+                          ),
+                        ),
                 ],
               ),
             ),
-
-            // ── Stats row ────────────────────────────────────────────────
-            if (_provider != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-                child: Row(
-                  children: [
-                    _statTile(
-                      Icons.collections_bookmark_outlined,
-                      _provider!.totalListings > 0
-                          ? '${_provider!.totalListings}+'
-                          : '–',
-                      'Listings',
-                    ),
-                    const SizedBox(width: 8),
-                    _statTile(
-                      Icons.star_rounded,
-                      _provider!.averageRating > 0
-                          ? _provider!.averageRating.toStringAsFixed(1)
-                          : '–',
-                      'Rating',
-                    ),
-                    const SizedBox(width: 8),
-                    _statTile(
-                      Icons.workspace_premium_outlined,
-                      _provider!.experienceYears > 0
-                          ? '${_provider!.experienceYears}+ yrs'
-                          : '–',
-                      'Experience',
-                    ),
-                  ],
-                ),
-              )
-            else
-              const SizedBox(height: 4),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _statTile(IconData icon, String value, String label) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF8F9FA),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 16, color: const Color(0xFFF5A623)),
-            const SizedBox(height: 3),
-            Text(
-              value,
-              style: GoogleFonts.poppins(
-                fontSize: Responsive.sp(context, 12),
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF1A1A2E),
-              ),
-            ),
-            Text(
-              label,
-              style: GoogleFonts.poppins(
-                fontSize: Responsive.sp(context, 9),
-                color: Colors.grey.shade500,
-              ),
-            ),
+            const SizedBox(width: 8),
+            PartnerFollowButton(partnerId: _effectivePartnerId),
           ],
         ),
       ),

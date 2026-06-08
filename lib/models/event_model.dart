@@ -12,6 +12,10 @@ class EventModel {
   final String? eventDate;
   final String? eventTime;
 
+  /// Which catalog this listing belongs to — `'event'`, `'class'`, `'program'`
+  /// or `'venue'`. Drives which detail screen opens on tap. Defaults to event.
+  final String listingType;
+
   const EventModel({
     this.id = '',
     required this.title,
@@ -25,6 +29,7 @@ class EventModel {
     this.isFeatured = false,
     this.eventDate,
     this.eventTime,
+    this.listingType = 'event',
   });
 
   /// Stable identifier: uses explicit id if set, otherwise title+venue hash.

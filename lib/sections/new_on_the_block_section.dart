@@ -1,15 +1,21 @@
 import '../core/responsive.dart';
 import 'package:flutter/material.dart';
+import '../core/listing_image.dart';
 import '../widgets/section_divider_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../data/dummy_data.dart';
+import '../providers/home_feed_state.dart';
 
 class NewOnTheBlockSection extends StatelessWidget {
   const NewOnTheBlockSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ValueListenableBuilder<int>(
+      valueListenable: HomeFeedState.version,
+      builder: (context, _, __) {
+        final items = HomeFeedState.section('new_on_the_block');
+        if (items.isEmpty) return const SizedBox.shrink();
+        return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionDividerWidget(
@@ -23,10 +29,10 @@ class NewOnTheBlockSection extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
-            itemCount: DummyData.newOnTheBlock.length,
+            itemCount: items.length,
             addAutomaticKeepAlives: false,
             itemBuilder: (context, index) {
-              final event = DummyData.newOnTheBlock[index];
+              final event = items[index];
               return Container(
                 width: Responsive.cardWidth(context, fraction: 0.72, max: 300),
                 margin: const EdgeInsets.only(right: 16),
@@ -56,8 +62,7 @@ class NewOnTheBlockSection extends StatelessWidget {
                               borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(16),
                               ),
-                              child: Image.asset(
-                                event.imagePath,
+                              child: listingImage(event.imagePath,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               ),
@@ -148,6 +153,8 @@ class NewOnTheBlockSection extends StatelessWidget {
           ),
         ),
       ],
+        );
+      },
     );
   }
 }

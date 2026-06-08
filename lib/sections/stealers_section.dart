@@ -1,16 +1,22 @@
 import '../core/responsive.dart';
 import 'package:flutter/material.dart';
+import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/section_divider_widget.dart';
-import '../data/dummy_data.dart';
-import '../screens/event_detail_screen.dart';
+import '../providers/home_feed_state.dart';
+import '../core/listing_navigation.dart';
 
 class StealersSection extends StatelessWidget {
   const StealersSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ValueListenableBuilder<int>(
+      valueListenable: HomeFeedState.version,
+      builder: (context, _, __) {
+        final items = HomeFeedState.section('stealers');
+        if (items.isEmpty) return const SizedBox.shrink();
+        return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionDividerWidget(
@@ -24,9 +30,9 @@ class StealersSection extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
-            itemCount: DummyData.stealers.length,
+            itemCount: items.length,
             itemBuilder: (context, index) {
-              final event = DummyData.stealers[index];
+              final event = items[index];
               return Container(
                 width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
                 margin: const EdgeInsets.only(right: 16),
@@ -56,8 +62,7 @@ class StealersSection extends StatelessWidget {
                               borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(16),
                               ),
-                              child: Image.asset(
-                                event.imagePath,
+                              child: listingImage(event.imagePath,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               ),
@@ -183,13 +188,7 @@ class StealersSection extends StatelessWidget {
                                 height: Responsive.h(context, 44, min: 38),
                                 child: ElevatedButton(
                                   onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            EventDetailScreen(event: event),
-                                      ),
-                                    );
+                                    openListingDetail(context, event);
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFFFFCC00),
@@ -221,6 +220,8 @@ class StealersSection extends StatelessWidget {
           ),
         ),
       ],
+        );
+      },
     );
   }
 }

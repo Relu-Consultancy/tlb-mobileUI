@@ -272,4 +272,53 @@ class EventsListingService {
       throw Exception('Request timed out. Please try again.');
     }
   }
+
+  /// POST /api/v1/listings/venues/{id}/enquiries/ — submit a venue enquiry
+  /// (used for enquiry-only venues).
+  static Future<void> submitVenueEnquiry({
+    required String listingId,
+    required String studentName,
+    required String mobile,
+    String? parentName,
+    int? studentAge,
+    String? message,
+    String? area,
+  }) async {
+    try {
+      final url =
+          Uri.parse('$_base/api/v1/listings/venues/$listingId/enquiries/');
+      final reqBody = {
+        'student_name': studentName,
+        'mobile': mobile,
+        if (parentName != null && parentName.isNotEmpty) 'parent_name': parentName,
+        if (studentAge != null) 'student_age': studentAge,
+        if (message != null && message.isNotEmpty) 'message': message,
+        if (area != null && area.isNotEmpty) 'area': area,
+      };
+
+      final res = await http
+          .post(
+            url,
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode(reqBody),
+          )
+          .timeout(_timeout);
+
+      final resBody = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 201 || resBody['success'] == true) return;
+
+      final rawErr = resBody['error'];
+      final errMsg = rawErr is Map
+          ? (rawErr['message'] as String? ?? 'Failed to submit enquiry')
+          : (rawErr?.toString() ?? 'Failed to submit enquiry');
+      throw Exception(errMsg);
+    } on SocketException {
+      throw Exception('Cannot reach server. Check your connection.');
+    } on TimeoutException {
+      throw Exception('Request timed out. Please try again.');
+    }
+  }
 }

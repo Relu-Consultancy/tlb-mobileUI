@@ -6,28 +6,24 @@ import '../helpers/test_setup.dart';
 
 void main() {
   group('NotificationScreen Tests', () {
-    testWidgets('renders title and currently-being-developed card',
+    testWidgets('renders the Notifications title',
         (WidgetTester tester) async {
       await pumpTLBApp(tester, const NotificationScreen());
 
       expect(find.text('Notifications'), findsOneWidget);
-      // Notifications API isn't wired yet — the screen shows a clear
-      // "Currently being developed" card instead of a fake empty state.
-      expect(find.text('Currently being developed'), findsOneWidget);
-      expect(find.byIcon(Icons.notifications_active_outlined), findsOneWidget);
     });
 
-    testWidgets('coming-soon body copy is present',
+    testWidgets('shows a log-in prompt when not authenticated',
         (WidgetTester tester) async {
+      // With no access token (the default in tests) the screen short-circuits
+      // to a "please log in" message instead of hitting the network.
       await pumpTLBApp(tester, const NotificationScreen());
+      await tester.pump();
 
-      expect(
-        find.textContaining("We're building in-app notifications"),
-        findsOneWidget,
-      );
+      expect(find.textContaining('log in'), findsOneWidget);
     });
 
-    testWidgets('no mock notification cards are shown',
+    testWidgets('no hard-coded mock notification cards are shown',
         (WidgetTester tester) async {
       // Regression guard — the screen has historically been re-introduced
       // with mock data; this keeps it honest.
@@ -35,8 +31,6 @@ void main() {
 
       expect(find.text('Limited Time Cashback'), findsNothing);
       expect(find.text('Classes Rescheduled'), findsNothing);
-      expect(find.text('Today'), findsNothing);
-      expect(find.text('Yesterday'), findsNothing);
     });
   });
 }

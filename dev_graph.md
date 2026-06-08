@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-06-07 (Session 53)
+**Last Updated:** 2026-06-08 (Session 54)
 
 ---
 
@@ -867,6 +867,56 @@ share_plus: ^7.2.2           # Native share sheet for events/classes/programs/ve
 ---
 
 ## 12. Development Sessions Summary
+
+### Session 54 — Real APIs: notifications, coupons, home feed + detail/profile redesign
+Wired several screens to live backend data and redesigned the four listing detail screens, the organizer profile, and the home-feed sections. Design unchanged where the user required it; only data sources and the specified visuals changed.
+
+#### Notifications (in-app) — wired to API
+| Change | Files |
+|--------|-------|
+| **Model + service** — `ApiNotification`/`ApiNotificationPage`; `NotificationService` covers list, unread-count, mark-one-read, mark-all-read (`/api/v1/notifications/in-app/...`) | `lib/models/api_notification_model.dart` (NEW), `lib/services/notification_service.dart` (NEW) |
+| **`NotificationsState` API refresh** — `refreshFromApi()` + `decrement()`; home header bell badge now reflects the live unread count (loaded on home init) | `lib/providers/notifications_state.dart`, `lib/screens/home_screen.dart` |
+| **`NotificationScreen` rebuilt** — real list with loading / error+Retry / empty states, pull-to-refresh, infinite scroll, "From Admin" broadcast badge, optimistic mark-read on tap (+ open `action_url`), "Mark all read" | `lib/screens/notification_screen.dart` |
+
+#### Coupons — validate/preview in checkout
+| Change | Files |
+|--------|-------|
+| **Model + service** — `CouponValidationResult`; `CouponService.validate()` → `POST /api/v1/coupons/validate/` (handles invalid-coupon + 403 profile-incomplete) | `lib/models/api_coupon_model.dart` (NEW), `lib/services/coupon_service.dart` (NEW) |
+| **Review & Pay coupon UI** — code field + Apply (spinner), applied chip with Remove, green discount line, totals recompute on `_effectiveSubtotal`; validated code threaded into `initiateBooking` (backend re-validates atomically) | `lib/screens/review_pay_screen.dart` |
+
+#### Listing detail screens — redesign (Event / Class / Program / Venue)
+| Change | Files |
+|--------|-------|
+| **Shared section widgets** — `DetailSectionTitle` (bold), `ExpandableAboutCard` (white card + slim black border, 3-line clamp + See more/less), `DetailGallery` (wider/taller cards), `DetailDirectionsCard` (detailed map-art `_MapArtPainter`), `DetailTermsRow` | `lib/widgets/detail_sections.dart` (NEW) |
+| **Per-screen** — greyish background, smaller banner (300→230), bold titles, swapped About/Gallery/Location/Terms to the shared widgets; removed each screen's duplicated `_buildGallery`/`_MapPlaceholderPainter` | `event_detail_screen.dart`, `class_detail_screen.dart`, `program_detail_screen.dart`, `venue_detail_screen.dart` |
+| **`OrganizerCard` redesigned** — white rounded card, slim black border, avatar + ORGANIZED BY + name + Follow (no stats) | `lib/widgets/organizer_card.dart` |
+| **Reviews inline section redesigned** — single white card, bold "Reviews", "Overall Rating: X.X ★", reviewer tiles | `lib/widgets/review_sheet.dart` |
+
+#### Organizer Profile — exact-design rebuild + Upcoming Events
+| Change | Files |
+|--------|-------|
+| **Rebuilt to reference** — gold gradient header, white rounded sheet (`StackFit.expand` so it fills), avatar straddling the seam + green badge, name, "X Followers", left About, 3-column stats (Events Hosted / Rating ★ / Experience). `ApiProvider` gained `totalFollowers` | `lib/screens/organizer_profile_screen.dart`, `lib/models/api_provider_model.dart` |
+| **`UpcomingEventsSection`** — reusable rail sourced from the public Events API (`GET /api/v1/listings/events/`); wide image-dominant cards; added at the bottom of the organizer profile **and** all four detail screens | `lib/widgets/upcoming_events_section.dart` (NEW) + 4 detail screens |
+
+#### Venue detail — enquiry vs direct booking
+| Change | Files |
+|--------|-------|
+| **`bookingType` on venue** — `ApiVenueDetail.bookingType`/`isEnquiry`; bottom CTA reads **"Send Enquiry"** (opens enquiry sheet) for `enquiry` venues, **"Check Availability"** (PlanParty flow) for `direct_booking` | `lib/models/api_venue_model.dart`, `lib/screens/venue_detail_screen.dart` |
+| **Venue enquiry** — `EventsListingService.submitVenueEnquiry()` → `POST /api/v1/listings/venues/{id}/enquiries/`; `showInquireNow(isVenue: true)` | `lib/services/events_listing_service.dart`, `lib/widgets/inquire_now_sheet.dart` |
+
+#### Home feed — real data in the section cards
+| Change | Files |
+|--------|-------|
+| **Section membership** — `GET /api/v1/homepage/sections/` → `HomepageSection`/`HomepageListing` + `HomeFeedService` | `lib/models/homepage_section_model.dart` (NEW), `lib/services/home_feed_service.dart` (NEW) |
+| **`HomeFeedState`** — fetches sections, hydrates full card data (image/price/city/rating) by matching IDs against the Events/Classes/Programs/Venues list APIs (keyed by `listing_type`); `section(key)` + `version` notifier; minimal-card fallback for un-hydrated ids | `lib/providers/home_feed_state.dart` (NEW) |
+| **9 card sections wired** — each reads `HomeFeedState.section('<key>')` (reactive via `ValueListenableBuilder`), **hides when empty**, uses network-aware `listingImage()` covers and type-aware `openListingDetail()` taps. Card designs unchanged. Loaded on home init + pull-to-refresh | all `lib/sections/*_section.dart`, `lib/screens/home_screen.dart` |
+| **Helpers** — `listingImage()` (network/asset + grey fallback), `openListingDetail()` (route by type); `EventModel` gained `listingType` | `lib/core/listing_image.dart` (NEW), `lib/core/listing_navigation.dart` (NEW), `lib/models/event_model.dart` |
+
+#### Other
+| Change | Files |
+|--------|-------|
+| **Payment Settings** error state + Retry; stripped `Exception:` prefix | `lib/screens/payment_settings_screen.dart` |
+| **Tests** — updated stale copy (notification screen, venues section titles, venue detail CTA label); **129/129 pass** | `test/screens/notification_screen_test.dart`, `venues_screen_test.dart`, `venue_detail_screen_test.dart` |
 
 ### Session 53 — Tester bug-fix sweep + banner/Find-Your-Fit redesign
 A QA-driven pass: fixed a critical auth-security bug, several UI/UX tester tickets, and finished the Programs "Find Your Fit" section with cleaned circular assets. Also redesigned the Events/Classes/Programs top banners.

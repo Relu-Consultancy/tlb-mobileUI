@@ -4,6 +4,8 @@ import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../providers/location_state.dart';
 import '../providers/saved_events_state.dart';
+import '../providers/notifications_state.dart';
+import '../providers/home_feed_state.dart';
 import '../sections/home_header.dart';
 import '../widgets/banner_carousel.dart';
 import '../widgets/categories_grid.dart';
@@ -49,6 +51,12 @@ class _HomeScreenState extends State<HomeScreen> {
       ShowcaseView.register();
     } catch (_) {}
     _checkAndStartWalkthrough();
+    // Pull the unread notification count so the header bell badge is accurate
+    // as soon as the home screen appears (after login / session restore).
+    NotificationsState.refreshFromApi();
+    // Load the real homepage feed (sections + hydrated cards). Sections render
+    // reactively once this completes; empty sections hide themselves.
+    HomeFeedState.load();
   }
 
   @override
@@ -65,7 +73,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Pull-to-refresh: reload live wishlist/saved state and rebuild the feed.
   Future<void> _handleRefresh() async {
-    await SavedEventsState.loadFromApi();
+    await Future.wait([
+      SavedEventsState.loadFromApi(),
+      HomeFeedState.load(force: true),
+    ]);
     if (mounted) setState(() {});
   }
 

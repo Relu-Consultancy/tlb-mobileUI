@@ -175,6 +175,10 @@ class ApiVenueDetail extends ApiVenue {
   final String? refundPolicy;
   final List<Map<String, String>> faqs;
 
+  /// `'direct_booking'` → user can book/check availability; `'enquiry'` → user
+  /// can only send an enquiry. Defaults to direct booking.
+  final String bookingType;
+
   const ApiVenueDetail({
     required super.id,
     required super.title,
@@ -202,7 +206,11 @@ class ApiVenueDetail extends ApiVenue {
     this.cancellationPolicy,
     this.refundPolicy,
     this.faqs = const [],
+    this.bookingType = 'direct_booking',
   });
+
+  /// True when the venue only accepts enquiries (no direct booking).
+  bool get isEnquiry => bookingType == 'enquiry';
 
   List<ApiVenueMedia> get galleryMedia =>
       media.where((m) => m.mediaType != 'cover').toList();
@@ -253,6 +261,7 @@ class ApiVenueDetail extends ApiVenue {
             : null,
         cancellationPolicy: json['cancellation_policy'] as String?,
         refundPolicy: json['refund_policy'] as String?,
+        bookingType: (json['booking_type'] as String?) ?? 'direct_booking',
         faqs: (json['faqs'] as List?)
                 ?.map((e) => {
                       'question': (e['question'] as String?) ?? '',
