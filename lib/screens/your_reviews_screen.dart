@@ -89,7 +89,7 @@ class _YourReviewsScreenState extends State<YourReviewsScreen> {
                   ),
                   Image.asset(
                     'resources- tlb-ui/accounts_page/reviews.png',
-                    width: 80,
+                    width: 110,
                     errorBuilder: (_, __, ___) => const Icon(Icons.star, size: 64, color: Color(0xFFFFB902)),
                   ),
                 ],

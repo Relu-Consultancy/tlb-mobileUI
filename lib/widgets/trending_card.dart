@@ -116,7 +116,8 @@ class _TrendingCardState extends State<TrendingCard> {
                       // Content
                       Expanded(
                         child: Padding(
-                          padding: const EdgeInsets.all(14),
+                          // 20px gap below the CTA button (card bottom padding).
+                          padding: const EdgeInsets.fromLTRB(14, 14, 14, 20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [

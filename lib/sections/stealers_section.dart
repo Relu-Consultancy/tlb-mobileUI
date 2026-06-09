@@ -4,6 +4,7 @@ import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/section_divider_widget.dart';
 import '../providers/home_feed_state.dart';
+import '../data/dummy_data.dart';
 import '../core/listing_navigation.dart';
 
 class StealersSection extends StatelessWidget {
@@ -14,13 +15,16 @@ class StealersSection extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
-        final items = HomeFeedState.section('stealers');
-        if (items.isEmpty) return const SizedBox.shrink();
+        // ── Reverted to mock data — API wiring commented out (re-enable later) ──
+        // final items = HomeFeedState.section('stealers');
+        // if (items.isEmpty) return const SizedBox.shrink();
+        final items = DummyData.stealers;
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionDividerWidget(
           title: 'Stealers',
+          topPadding: 40, // 40px gap from previous section's cards
           fontSize: 17,
           textColor: Color(0xFF1A1A2E), // dark navy
         ),
@@ -100,6 +104,10 @@ class StealersSection extends StatelessWidget {
                               ),
                             ),
                           // Bottom pink discount band ("60% OFF")
+                          // TEMPORARILY DISABLED — `event.tag` currently carries
+                          // the raw category string from the API. Re-enable once
+                          // the tag/category value is cleaned up.
+                          /*
                           if (event.tag != null)
                             Positioned(
                               bottom: 0,
@@ -126,13 +134,15 @@ class StealersSection extends StatelessWidget {
                                 ),
                               ),
                             ),
+                          */
                         ],
                       ),
                     ),
 
                     // Bottom Content Area — natural height.
                     Padding(
-                      padding: const EdgeInsets.all(16),
+                      // 20px gap below the CTA button (card bottom padding).
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,7 +157,7 @@ class StealersSection extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 8),
                           // Stars + review count
                           Row(
                             children: [
@@ -163,7 +173,7 @@ class StealersSection extends StatelessWidget {
                                 event.reviewCount ?? '3.5k reviews',
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 12),
-                                  color: Colors.grey,
+                                  color: Color(0xFF4A4A4A),
                                 ),
                               ),
                             ],

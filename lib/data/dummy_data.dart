@@ -14,12 +14,14 @@ class DummyData {
     {
       'label': 'Classes',
       'subtitle': 'Build Your Skill',
-      'image': 'resources- tlb-ui/homescreen-categoryicons/classes.png',
+      // Image swapped with Programs per design request.
+      'image': 'resources- tlb-ui/homescreen-categoryicons/programs.png',
     },
     {
       'label': 'Programs',
       'subtitle': 'Master The Craft',
-      'image': 'resources- tlb-ui/homescreen-categoryicons/programs.png',
+      // Image swapped with Classes per design request.
+      'image': 'resources- tlb-ui/homescreen-categoryicons/classes.png',
     },
     {
       'label': 'Venues',

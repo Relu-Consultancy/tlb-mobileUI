@@ -100,7 +100,8 @@ class HolidaySpecialCard extends StatelessWidget {
             ),
             // Content
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+              // 20px gap below the CTA button (card bottom padding).
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

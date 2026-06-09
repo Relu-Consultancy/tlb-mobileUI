@@ -90,7 +90,7 @@ class TrendingEventCard extends StatelessWidget {
                               color: const Color(0xFF1A1A2E),
                             ),
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(height: 8),
                           Text(
                             dateLabel,
                             style: GoogleFonts.poppins(
@@ -120,7 +120,8 @@ class TrendingEventCard extends StatelessWidget {
 
             // ── Content ──
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+              // 20px gap below the CTA button (card bottom padding).
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,

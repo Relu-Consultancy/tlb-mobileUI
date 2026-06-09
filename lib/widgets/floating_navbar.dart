@@ -34,11 +34,11 @@ class FloatingNavbar extends StatelessWidget {
   });
 
   /// Rendered height of the white pill: icon (22) + item vertical padding
-  /// (12·2) + item border (2·2) + pill vertical padding (8·2) + pill border
-  /// (2·2) ≈ 72. Fixed in logical px — it does NOT shrink on small screens,
+  /// (9·2) + item border (2·2) + pill vertical padding (6·2) + pill border
+  /// (2·2) ≈ 60. Fixed in logical px — it does NOT shrink on small screens,
   /// which is exactly why content clearance must be derived from it rather
   /// than from a hard-coded guess.
-  static const double pillHeight = 72;
+  static const double pillHeight = 60;
 
   /// The gap the navbar keeps from the screen bottom (device safe-area inset
   /// plus a little breathing room, or a fixed 30 on devices without an inset).
@@ -63,7 +63,7 @@ class FloatingNavbar extends StatelessWidget {
 
     final pill = Container(
       width: screenWidth * 0.92,
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.white, width: 2),
         color: Colors.white,
@@ -92,7 +92,7 @@ class FloatingNavbar extends StatelessWidget {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOutCubic,
-                    padding: EdgeInsets.symmetric(horizontal: isActive ? 16 : 14, vertical: 12),
+                    padding: EdgeInsets.symmetric(horizontal: isActive ? 16 : 14, vertical: 9),
                     decoration: BoxDecoration(
                       color: isActive ? const Color(0xFFFFCC00) : Colors.transparent,
                       border: isActive ? Border.all(color: Colors.white, width: 2) : null,

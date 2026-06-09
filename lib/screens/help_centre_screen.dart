@@ -96,7 +96,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                 ),
                 Image.asset(
                   'resources- tlb-ui/accounts_page/support.png',
-                  width: 80,
+                  width: 110,
                   errorBuilder: (_, __, ___) => const Icon(
                     Icons.headphones,
                     size: 64,

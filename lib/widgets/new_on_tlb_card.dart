@@ -64,7 +64,8 @@ class NewOnTlbCard extends StatelessWidget {
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+                  // 20px gap below the CTA button (card bottom padding).
+                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -105,7 +106,7 @@ class NewOnTlbCard extends StatelessWidget {
                             ],
                           ),
                           if (event.reviewCount != null) ...[
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 8),
                             Row(
                               children: [
                                 const Icon(Icons.star, size: 15, color: Color(0xFFFFB902)),

@@ -128,8 +128,8 @@ class EventCardWithRating extends StatelessWidget {
             // ── Content below image ──
             Expanded(
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                // 20px gap below the CTA button (card bottom padding).
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -144,7 +144,7 @@ class EventCardWithRating extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 8),
 
                     // Tag pill (e.g. "Workshop")
                     if (event.tag != null)
@@ -182,7 +182,7 @@ class EventCardWithRating extends StatelessWidget {
                           ),
                         ],
                       ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 8),
 
                     // Rating row
                     Row(
@@ -205,7 +205,7 @@ class EventCardWithRating extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 8),
 
                     // Venue
                     Row(

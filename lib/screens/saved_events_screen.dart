@@ -4,10 +4,43 @@ import 'package:google_fonts/google_fonts.dart';
 import '../providers/saved_events_state.dart';
 import '../providers/auth_state.dart';
 import '../models/event_model.dart';
+import '../widgets/app_loader.dart';
 import 'event_detail_screen.dart';
 
-class SavedEventsScreen extends StatelessWidget {
+class SavedEventsScreen extends StatefulWidget {
   const SavedEventsScreen({super.key});
+
+  @override
+  State<SavedEventsScreen> createState() => _SavedEventsScreenState();
+}
+
+class _SavedEventsScreenState extends State<SavedEventsScreen> {
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetch();
+  }
+
+  Future<void> _fetch() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      await SavedEventsState.loadFromApi(silent: false);
+      if (!mounted) return;
+      setState(() => _loading = false);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString().replaceFirst('Exception: ', '');
+        _loading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +63,19 @@ class SavedEventsScreen extends StatelessWidget {
           ),
         ),
       ),
-      body: SingleChildScrollView(
+      body: _buildBody(context),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    if (_loading) return const AppLoader();
+    if (_error != null) return _buildError(context);
+
+    return RefreshIndicator(
+      onRefresh: _fetch,
+      color: const Color(0xFFFFCC00),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +113,7 @@ class SavedEventsScreen extends StatelessWidget {
                 ),
                 Image.asset(
                   'resources- tlb-ui/accounts_page/wishlist.png',
-                  width: 80,
+                  width: 110,
                   errorBuilder: (_, __, ___) => const Icon(
                     Icons.favorite_rounded,
                     size: 64,
@@ -145,6 +190,45 @@ class SavedEventsScreen extends StatelessWidget {
               },
             ),
             const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildError(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.wifi_off_rounded,
+                size: 48, color: Color(0xFFCCCCCC)),
+            const SizedBox(height: 16),
+            Text(
+              _error!,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: Responsive.sp(context, 13),
+                color: Colors.grey.shade500,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _fetch,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFFCC00),
+                foregroundColor: const Color(0xFF1A1A2E),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
+              ),
+              child: Text('Retry',
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+            ),
           ],
         ),
       ),

@@ -4,6 +4,7 @@ import '../core/listing_image.dart';
 import '../widgets/section_divider_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/home_feed_state.dart';
+import '../data/dummy_data.dart';
 import '../core/listing_navigation.dart';
 
 class HotPicksSection extends StatelessWidget {
@@ -14,13 +15,16 @@ class HotPicksSection extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
-        final items = HomeFeedState.section('hot_picks');
-        if (items.isEmpty) return const SizedBox.shrink();
+        // ── Reverted to mock data — API wiring commented out (re-enable later) ──
+        // final items = HomeFeedState.section('hot_picks');
+        // if (items.isEmpty) return const SizedBox.shrink();
+        final items = DummyData.hotPicks;
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionDividerWidget(
           title: 'Hot Picks',
+          topPadding: 40, // 40px gap from previous section's cards
           fontSize: 17,
           fontWeight: FontWeight.w600,
           textColor: Color(0xFF1A1A2E), // dark navy
@@ -72,6 +76,10 @@ class HotPicksSection extends StatelessWidget {
                             ),
                           ),
                           // Top-left floating badge (Filling Fast / Bestseller)
+                          // TEMPORARILY DISABLED — `event.tag` currently carries
+                          // the raw category string from the API. Re-enable once
+                          // the tag/category value is cleaned up.
+                          /*
                           if (event.tag != null)
                             Positioned(
                               top: 0,
@@ -99,13 +107,15 @@ class HotPicksSection extends StatelessWidget {
                                 ),
                               ),
                             ),
+                          */
                           ],
                         ),
                       ),
 
                     // Bottom Content Area — natural height (sizes to fit).
                     Padding(
-                      padding: const EdgeInsets.all(12),
+                      // 20px gap below the CTA button (card bottom padding).
+                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 20),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,15 +138,15 @@ class HotPicksSection extends StatelessWidget {
                                 // Age Range Row
                                 Row(
                                   children: [
-                                    const Icon(Icons.people_outline, size: 14, color: Colors.grey),
+                                    const Icon(Icons.people_outline, size: 14, color: Color(0xFF4A4A4A)),
                                     const SizedBox(width: 6),
                                     Text(
                                       '3-5 Yrs', // Dummy age range
-                                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey),
+                                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Color(0xFF4A4A4A)),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 6),
+                                const SizedBox(height: 8),
                                 
                                 // Reviews Row
                                 Row(
@@ -153,22 +163,22 @@ class HotPicksSection extends StatelessWidget {
                                         event.reviewCount ?? '3.5k reviews',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey),
+                                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Color(0xFF4A4A4A)),
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 6),
+                                const SizedBox(height: 8),
                                 
                                 // Venue Row
                                 Row(
                                   children: [
-                                    const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
+                                    const Icon(Icons.location_on_outlined, size: 14, color: Color(0xFF4A4A4A)),
                                     const SizedBox(width: 6),
                                     Expanded(
                                       child: Text(
                                         event.venue,
-                                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey),
+                                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Color(0xFF4A4A4A)),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -199,7 +209,7 @@ class HotPicksSection extends StatelessWidget {
                                           text: ' / child',
                                           style: GoogleFonts.poppins(
                                             fontSize: Responsive.sp(context, 12),
-                                            color: Colors.grey,
+                                            color: Color(0xFF4A4A4A),
                                           ),
                                         ),
                                       ],

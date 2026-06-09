@@ -5,7 +5,7 @@ import '../data/dummy_data.dart';
 import '../providers/location_state.dart';
 import '../providers/saved_events_state.dart';
 import '../providers/notifications_state.dart';
-import '../providers/home_feed_state.dart';
+// import '../providers/home_feed_state.dart'; // commented out — home reverted to mock data
 import '../sections/home_header.dart';
 import '../widgets/banner_carousel.dart';
 import '../widgets/categories_grid.dart';
@@ -56,7 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
     NotificationsState.refreshFromApi();
     // Load the real homepage feed (sections + hydrated cards). Sections render
     // reactively once this completes; empty sections hide themselves.
-    HomeFeedState.load();
+    // Commented out for now — home sections reverted to mock data.
+    // HomeFeedState.load();
   }
 
   @override
@@ -75,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _handleRefresh() async {
     await Future.wait([
       SavedEventsState.loadFromApi(),
-      HomeFeedState.load(force: true),
+      // HomeFeedState.load(force: true), // commented out — sections use mock data
     ]);
     if (mounted) setState(() {});
   }
@@ -213,9 +214,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             profileShowcaseConfig: kProfileShowcaseConfig,
                             locationShowcaseConfig: kLocationShowcaseConfig,
                           ),
+                          // Spotlight divider — reverted to always-shown (mock).
+                          // API version (hide when spotlight section empty)
+                          // commented out for now:
+                          /*
                           if (LocationState().isLocationSupported(city))
-                            // Spotlight divider — only when the spotlight
-                            // section has listings (hidden otherwise).
                             ValueListenableBuilder<int>(
                               valueListenable: HomeFeedState.version,
                               builder: (context, _, __) {
@@ -240,6 +243,21 @@ class _HomeScreenState extends State<HomeScreen> {
                                 );
                               },
                             ),
+                          */
+                          if (LocationState().isLocationSupported(city)) ...[
+                            const SizedBox(height: 4),
+                            const SectionDividerWidget(
+                              title: 'Spotlight',
+                              lineLength: 100,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              textColor: Color(0xFF3A3A3A),
+                              lineThickness: 1.5,
+                              lineColor: Color(0xFFD4A537),
+                              topPadding: 6,
+                            ),
+                            const SizedBox(height: 6),
+                          ],
                         ],
                       ),
                     ),
@@ -251,8 +269,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: const EmptyLocationWidget(),
                       )
                     else ...[
-                      // Spotlight banner — real data from the homepage
-                      // 'spotlight' section (hidden when empty).
+                      // Spotlight banner — reverted to mock data.
+                      // API version (real 'spotlight' section) commented out:
+                      /*
                       RepaintBoundary(
                         child: ValueListenableBuilder<int>(
                           valueListenable: HomeFeedState.version,
@@ -263,6 +282,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               fixedCardWidth: Responsive.w(context, 345.0),
                             );
                           },
+                        ),
+                      ),
+                      */
+                      RepaintBoundary(
+                        child: BannerCarousel(
+                          events: DummyData.bannerEvents,
+                          height: Responsive.h(context, 480.0),
+                          fixedCardWidth: Responsive.w(context, 345.0),
                         ),
                       ),
                       const RepaintBoundary(child: CategoriesGrid()),

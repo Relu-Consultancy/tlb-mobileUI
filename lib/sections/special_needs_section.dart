@@ -4,6 +4,7 @@ import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/section_divider_widget.dart';
 import '../providers/home_feed_state.dart';
+import '../data/dummy_data.dart';
 import '../core/listing_navigation.dart';
 
 class SpecialNeedsSection extends StatelessWidget {
@@ -14,13 +15,16 @@ class SpecialNeedsSection extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
-        final items = HomeFeedState.section('where_every_star_shines');
-        if (items.isEmpty) return const SizedBox.shrink();
+        // ── Reverted to mock data — API wiring commented out (re-enable later) ──
+        // final items = HomeFeedState.section('where_every_star_shines');
+        // if (items.isEmpty) return const SizedBox.shrink();
+        final items = DummyData.specialNeeds;
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionDividerWidget(
           title: 'Where Every Star Shines',
+          topPadding: 40, // 40px gap from previous section's cards
           fontSize: 17,
           textColor: Color(0xFF1A1A2E), // dark navy
         ),
@@ -39,7 +43,8 @@ class SpecialNeedsSection extends StatelessWidget {
               return Container(
                 width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
                 margin: const EdgeInsets.only(right: 16),
-                padding: const EdgeInsets.all(10),
+                // 20px gap below the CTA button (card bottom padding).
+                padding: const EdgeInsets.fromLTRB(10, 10, 10, 20),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -112,6 +117,10 @@ class SpecialNeedsSection extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               // "Sensory Friendly" pink pill (right-aligned)
+                              // TEMPORARILY DISABLED — `event.tag` currently
+                              // carries the raw category string from the API.
+                              // Re-enable once the tag/category value is cleaned up.
+                              /*
                               if (event.tag != null)
                                 Align(
                                   alignment: Alignment.centerRight,
@@ -137,7 +146,8 @@ class SpecialNeedsSection extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                              const SizedBox(height: 6),
+                              */
+                              const SizedBox(height: 8),
                               // Title
                               Text(
                                 event.title,
@@ -149,7 +159,7 @@ class SpecialNeedsSection extends StatelessWidget {
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 8),
                               // Rating
                               Row(
                                 children: [
@@ -160,24 +170,24 @@ class SpecialNeedsSection extends StatelessWidget {
                                     event.reviewCount ?? '4.5k reviews',
                                     style: GoogleFonts.poppins(
                                       fontSize: Responsive.sp(context, 12),
-                                      color: Colors.grey,
+                                      color: Color(0xFF4A4A4A),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 8),
                               // Location
                               Row(
                                 children: [
                                   const Icon(Icons.location_on_outlined,
-                                      size: 14, color: Colors.grey),
+                                      size: 14, color: Color(0xFF4A4A4A)),
                                   const SizedBox(width: 4),
                                   Expanded(
                                     child: Text(
                                       event.venue,
                                       style: GoogleFonts.poppins(
                                         fontSize: Responsive.sp(context, 12),
-                                        color: Colors.grey,
+                                        color: Color(0xFF4A4A4A),
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,

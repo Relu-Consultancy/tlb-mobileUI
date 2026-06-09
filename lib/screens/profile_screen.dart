@@ -130,18 +130,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             const SizedBox(height: 20),
 
-            // ── Profile header (centered layout matching Figma) ────────────
-            Center(
-              child: Column(
+            // ── Profile header — big avatar on the left, details on the right ──
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Avatar with camera badge
+                  // Big avatar with camera badge (bottom-right)
                   GestureDetector(
                     onTap: () => _showAvatarOptions(context, avatarUrl),
                     child: Stack(
                       children: [
                         Container(
-                          width: 90,
-                          height: 90,
+                          width: 128,
+                          height: 128,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.grey.shade300, width: 3),
@@ -154,6 +156,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     'assets/images/new_home/profilepic.jpg'),
                               ),
                               fit: BoxFit.cover,
+                              width: 128,
+                              height: 128,
                               errorBuilder: (_, __, ___) => Image.asset(
                                 'assets/images/new_home/profilepic.jpg',
                                 fit: BoxFit.cover,
@@ -162,108 +166,123 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         Positioned(
-                          bottom: 0,
-                          left: 0,
+                          bottom: 4,
+                          right: 4,
                           child: Container(
-                            padding: const EdgeInsets.all(6),
+                            padding: const EdgeInsets.all(7),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.grey.shade300, width: 1.5),
                             ),
                             child: const Icon(Icons.camera_alt_outlined,
-                                size: 15, color: Color(0xFF555555)),
+                                size: 16, color: Color(0xFF555555)),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(width: 18),
 
-                  // Name
-                  Text(
-                    userName,
-                    style: GoogleFonts.poppins(
-                      fontSize: Responsive.sp(context, 18),
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF1A1A2E),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-
-                  // Email
-                  Text(
-                    userEmail,
-                    style: GoogleFonts.poppins(
-                      fontSize: Responsive.sp(context, 13),
-                      color: Colors.grey.shade500,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Edit Profile button (dark rounded pill)
-                  SizedBox(
-                    height: 36,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const EditProfileScreen()),
-                      ).then((_) => setState(() {})),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0A1F11),
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 28),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20)),
-                      ),
-                      child: Text(
-                        'Edit Profile',
-                        style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Profile Completion Progress
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                  // Name + email + Edit Profile, stacked to the right
+                  Expanded(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Profile Completion',
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 12),
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                            Text(
-                              '${(completion * 100).toInt()}%',
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 12),
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF1A1A2E),
-                              ),
-                            ),
-                          ],
+                        // Name
+                        Text(
+                          userName,
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 20),
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1A1A2E),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 6),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: LinearProgressIndicator(
-                            value: completion,
-                            backgroundColor: Colors.grey.shade200,
-                            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFCC00)),
-                            minHeight: 6,
+                        const SizedBox(height: 4),
+
+                        // Email
+                        Text(
+                          userEmail,
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 12.5),
+                            color: Colors.grey.shade500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Edit Profile button (dark green pill)
+                        SizedBox(
+                          height: 42,
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const EditProfileScreen()),
+                            ).then((_) => setState(() {})),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0A1F11),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(horizontal: 30),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(24)),
+                            ),
+                            child: Text(
+                              'Edit Profile',
+                              style: GoogleFonts.poppins(
+                                  fontSize: Responsive.sp(context, 13.5),
+                                  fontWeight: FontWeight.w500),
+                            ),
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 22),
+
+            // ── Profile Completion Progress (full width) ───────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Profile Completion',
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 12),
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      Text(
+                        '${(completion * 100).toInt()}%',
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 12),
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF1A1A2E),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: completion,
+                      backgroundColor: Colors.grey.shade200,
+                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFCC00)),
+                      minHeight: 6,
                     ),
                   ),
                 ],

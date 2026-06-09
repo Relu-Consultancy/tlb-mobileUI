@@ -4,6 +4,7 @@ import '../core/listing_image.dart';
 import '../widgets/section_divider_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/home_feed_state.dart';
+import '../data/dummy_data.dart';
 
 class DiscoverNearYouSection extends StatelessWidget {
   const DiscoverNearYouSection({super.key});
@@ -13,13 +14,16 @@ class DiscoverNearYouSection extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
-        final items = HomeFeedState.section('discover_near_you');
-        if (items.isEmpty) return const SizedBox.shrink();
+        // ── Reverted to mock data — API wiring commented out (re-enable later) ──
+        // final items = HomeFeedState.section('discover_near_you');
+        // if (items.isEmpty) return const SizedBox.shrink();
+        final items = DummyData.discoverNearYou;
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionDividerWidget(
           title: 'Discover Near You',
+          topPadding: 40, // 40px gap from previous section's cards
           fontSize: 17,
           fontWeight: FontWeight.w600,
           textColor: Color(0xFF1A1A2E), // dark navy
@@ -70,6 +74,10 @@ class DiscoverNearYouSection extends StatelessWidget {
                             ),
                           ),
                           // Pink gradient distance band at the bottom
+                          // TEMPORARILY DISABLED — `event.tag` currently carries
+                          // the raw category string from the API. Re-enable once
+                          // the tag/category value is cleaned up.
+                          /*
                           Positioned(
                             bottom: 0,
                             left: 0,
@@ -98,6 +106,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                               ),
                             ),
                           ),
+                          */
                         ],
                       ),
                     ),
@@ -144,27 +153,27 @@ class DiscoverNearYouSection extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 8),
 
                           // Venue Row
                           Row(
                             children: [
                               const Icon(Icons.location_on_outlined,
-                                  size: 14, color: Colors.grey),
+                                  size: 14, color: Color(0xFF4A4A4A)),
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
                                   event.venue,
                                   style: GoogleFonts.poppins(
                                       fontSize: Responsive.sp(context, 12),
-                                      color: Colors.grey),
+                                      color: Color(0xFF4A4A4A)),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 8),
 
                           // Reviews Row
                           Row(
@@ -181,11 +190,11 @@ class DiscoverNearYouSection extends StatelessWidget {
                                 event.reviewCount ?? '3.5k reviews',
                                 style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 12),
-                                    color: Colors.grey),
+                                    color: Color(0xFF4A4A4A)),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 8),
 
                           // Description
                           RichText(
@@ -206,7 +215,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                                       'Slides, Splash Zone, Mini zipline & shaded picnic areas.',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 12),
-                                    color: Colors.grey.shade600,
+                                    color: Color(0xFF4A4A4A),
                                   ),
                                 ),
                               ],

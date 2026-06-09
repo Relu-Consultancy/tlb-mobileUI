@@ -67,7 +67,8 @@ class BuildSkillCard extends StatelessWidget {
               // Right content
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                  // 20px gap below the CTA button (card bottom padding).
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -82,7 +83,7 @@ class BuildSkillCard extends StatelessWidget {
                           height: 1.25,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 8),
 
                       // Venue
                       Row(
@@ -102,7 +103,7 @@ class BuildSkillCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 5),
+                      const SizedBox(height: 8),
 
                       // Rating + reviews
                       if (event.rating != null)
@@ -133,7 +134,7 @@ class BuildSkillCard extends StatelessWidget {
 
                       // Tag chip
                       if ((event.tag ?? '').isNotEmpty) ...[
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(

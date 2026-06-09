@@ -7,6 +7,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/section_divider_widget.dart';
 import '../providers/home_feed_state.dart';
+import '../data/dummy_data.dart';
 import '../core/listing_navigation.dart';
 
 class WeekendSpecialSection extends StatefulWidget {
@@ -35,7 +36,8 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
 
   void _startAutoSlide() {
     _autoSlideTimer = Timer.periodic(const Duration(seconds: 4), (_) {
-      final wk = HomeFeedState.section('weekend_specials');
+      // final wk = HomeFeedState.section('weekend_specials');
+      final wk = DummyData.weekendSpecial;
       if (!_pageController.hasClients || wk.isEmpty) return;
       final nextPage = ((_pageController.page?.round() ?? 0) + 1) % wk.length;
       _pageController.animateToPage(
@@ -51,13 +53,16 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
     return ValueListenableBuilder<int>(
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
-        final items = HomeFeedState.section('weekend_specials');
-        if (items.isEmpty) return const SizedBox.shrink();
+        // ── Reverted to mock data — API wiring commented out (re-enable later) ──
+        // final items = HomeFeedState.section('weekend_specials');
+        // if (items.isEmpty) return const SizedBox.shrink();
+        final items = DummyData.weekendSpecial;
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionDividerWidget(
           title: 'Weekend Specials',
+          topPadding: 40, // 40px gap from previous section's cards
           fontSize: 17,
           fontWeight: FontWeight.w600,
           textColor: Color(0xFF1A1A2E), // dark navy
@@ -118,7 +123,8 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                       Expanded(
                         flex: 5,
                         child: Padding(
-                          padding: const EdgeInsets.all(12),
+                          // 20px gap below the CTA button (card bottom padding).
+                          padding: const EdgeInsets.fromLTRB(12, 12, 12, 20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -141,14 +147,14 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                   Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Icon(Icons.calendar_today_outlined, size: 14, color: Colors.grey),
+                                      const Icon(Icons.calendar_today_outlined, size: 14, color: Color(0xFF4A4A4A)),
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(
                                           'Saturday, 27 Apr\n| 10:00 AM',
                                           style: GoogleFonts.poppins(
                                             fontSize: Responsive.sp(context, 11),
-                                            color: Colors.grey.shade600,
+                                            color: Color(0xFF4A4A4A),
                                             height: 1.3,
                                           ),
                                         ),
@@ -159,14 +165,14 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                   // Venue
                                   Row(
                                     children: [
-                                      const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
+                                      const Icon(Icons.location_on_outlined, size: 14, color: Color(0xFF4A4A4A)),
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(
                                           event.venue,
                                           style: GoogleFonts.poppins(
                                             fontSize: Responsive.sp(context, 11),
-                                            color: Colors.grey.shade600,
+                                            color: Color(0xFF4A4A4A),
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -228,7 +234,8 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        // Trailing space removed — the next section's 40px topPadding
+        // provides the gap below the dots indicator.
       ],
         );
       },

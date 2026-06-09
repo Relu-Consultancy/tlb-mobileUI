@@ -4,6 +4,7 @@ import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/section_divider_widget.dart';
 import '../providers/home_feed_state.dart';
+import '../data/dummy_data.dart';
 import '../core/listing_navigation.dart';
 
 class TlbSignatureSection extends StatelessWidget {
@@ -14,13 +15,16 @@ class TlbSignatureSection extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
-        final items = HomeFeedState.section('tlb_signature');
-        if (items.isEmpty) return const SizedBox.shrink();
+        // ── Reverted to mock data — API wiring commented out (re-enable later) ──
+        // final items = HomeFeedState.section('tlb_signature');
+        // if (items.isEmpty) return const SizedBox.shrink();
+        final items = DummyData.tlbSignature;
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionDividerWidget(
           title: 'TLB Signature',
+          topPadding: 40, // 40px gap from previous section's cards
           fontSize: 17,
           textColor: Color(0xFF1A1A2E), // dark navy
         ),
@@ -110,7 +114,8 @@ class TlbSignatureSection extends StatelessWidget {
 
                     // Bottom Content — natural height.
                     Padding(
-                      padding: const EdgeInsets.all(16),
+                      // 20px gap below the CTA button (card bottom padding).
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,7 +135,7 @@ class TlbSignatureSection extends StatelessWidget {
                             event.venue, // venue holds the subtitle/description
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 12),
-                              color: Colors.grey,
+                              color: Color(0xFF4A4A4A),
                               height: 1.4,
                             ),
                             maxLines: 2,

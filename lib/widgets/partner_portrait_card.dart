@@ -57,7 +57,8 @@ class PartnerPortraitCard extends StatelessWidget {
             ),
             // Content block under the poster
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              // 20px gap below the CTA button (card bottom padding).
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

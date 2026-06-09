@@ -75,7 +75,8 @@ class EventCardWithPrice extends StatelessWidget {
           ),
           // Content
           Padding(
-            padding: const EdgeInsets.all(14),
+            // 20px gap below the CTA button (card bottom padding).
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -87,7 +88,7 @@ class EventCardWithPrice extends StatelessWidget {
                     color: AppColors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     const Icon(

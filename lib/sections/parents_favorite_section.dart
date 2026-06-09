@@ -4,6 +4,7 @@ import '../core/listing_image.dart';
 import '../widgets/section_divider_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/home_feed_state.dart';
+import '../data/dummy_data.dart';
 import '../core/listing_navigation.dart';
 
 class ParentsFavoriteSection extends StatelessWidget {
@@ -14,13 +15,16 @@ class ParentsFavoriteSection extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
-        final items = HomeFeedState.section('parents_favorite');
-        if (items.isEmpty) return const SizedBox.shrink();
+        // ── Reverted to mock data — API wiring commented out (re-enable later) ──
+        // final items = HomeFeedState.section('parents_favorite');
+        // if (items.isEmpty) return const SizedBox.shrink();
+        final items = DummyData.parentsFavorite;
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionDividerWidget(
           title: "Parents' Favorite",
+          topPadding: 40, // 40px gap from previous section's cards
           fontSize: 17,
           textColor: Color(0xFF1A1A2E), // dark navy
         ),
@@ -105,7 +109,8 @@ class ParentsFavoriteSection extends StatelessWidget {
 
                     // Bottom Content Area — natural height.
                     Padding(
-                      padding: const EdgeInsets.all(12),
+                      // 20px gap below the CTA button (card bottom padding).
+                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 20),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,13 +132,13 @@ class ParentsFavoriteSection extends StatelessWidget {
                               ),
                               const SizedBox(width: 8),
                               const Icon(Icons.people_outline,
-                                  size: 14, color: Colors.grey),
+                                  size: 14, color: Color(0xFF4A4A4A)),
                               const SizedBox(width: 4),
                               Text(
                                 event.description ?? '4-12 Yrs',
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 12),
-                                  color: Colors.grey,
+                                  color: Color(0xFF4A4A4A),
                                 ),
                               ),
                             ],
@@ -160,7 +165,7 @@ class ParentsFavoriteSection extends StatelessWidget {
                                   '(${event.reviewCount ?? '3.5k reviews'})',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 12),
-                                    color: Colors.grey,
+                                    color: Color(0xFF4A4A4A),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -182,7 +187,7 @@ class ParentsFavoriteSection extends StatelessWidget {
                                         text: 'Price – ',
                                         style: GoogleFonts.poppins(
                                           fontSize: Responsive.sp(context, 13),
-                                          color: Colors.grey.shade600,
+                                          color: Color(0xFF4A4A4A),
                                         ),
                                       ),
                                       TextSpan(

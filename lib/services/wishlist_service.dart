@@ -23,15 +23,26 @@ class WishlistService {
 
       if (res.statusCode == 401) throw Exception('Session expired. Please log in again.');
 
+      if (res.body.isEmpty) return [];
       final body = jsonDecode(res.body);
-      // Direct array response
-      if (body is List) return body.cast<Map<String, dynamic>>();
-      // Wrapped envelope
-      if (body is Map && body['success'] == true) {
+
+      // Normalise every shape the API might return into a List, then keep
+      // only the map entries (skips any stray nulls — the source of the
+      // "Null is not a subtype of Map<String, dynamic>" cast crash).
+      List<dynamic> raw = const [];
+      if (body is List) {
+        raw = body;
+      } else if (body is Map) {
         final data = body['data'];
-        if (data is List) return data.cast<Map<String, dynamic>>();
+        if (data is List) {
+          raw = data;
+        } else if (data is Map && data['results'] is List) {
+          raw = data['results'] as List;
+        } else if (body['results'] is List) {
+          raw = body['results'] as List;
+        }
       }
-      return [];
+      return raw.whereType<Map<String, dynamic>>().toList();
     } on SocketException {
       throw Exception('Cannot reach server. Check your connection.');
     } on TimeoutException {

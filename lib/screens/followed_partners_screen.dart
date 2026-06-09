@@ -225,34 +225,21 @@ class _PartnerCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Stack(
-        clipBehavior: Clip.hardEdge,
-        children: [
-          // ── Gradient banner ─────────────────────────────────────────────
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 60,
-              decoration: BoxDecoration(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(18)),
-                gradient: LinearGradient(
-                  colors: [
-                    const Color(0xFFF5A623).withOpacity(0.25),
-                    const Color(0xFFFBD786).withOpacity(0.12),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ── Golden yellow stripe at top ───────────────────────────────
+            Container(
+              height: 6,
+              color: const Color(0xFFF5A623),
             ),
-          ),
 
-          // ── Card body ───────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 28, 14, 14),
+            // ── Card body ─────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -274,8 +261,8 @@ class _PartnerCard extends StatelessWidget {
                                   name,
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 15),
-                                    fontWeight: FontWeight.w500,
-                                    color: const Color(0xFF1A1A2E),
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF111111),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -299,7 +286,7 @@ class _PartnerCard extends StatelessWidget {
                                     city,
                                     style: GoogleFonts.poppins(
                                       fontSize: Responsive.sp(context, 11),
-                                      color: Colors.grey.shade500,
+                                      color: const Color(0xFF444444),
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -325,7 +312,7 @@ class _PartnerCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 12),
-                      color: Colors.grey.shade600,
+                      color: const Color(0xFF2D2D2D),
                       height: 1.5,
                     ),
                   ),
@@ -357,7 +344,7 @@ class _PartnerCard extends StatelessWidget {
                           '${_formatCount(partner.followerCount)} followers',
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 11),
-                            color: Colors.grey.shade500,
+                            color: const Color(0xFF444444),
                           ),
                         ),
                       ],
@@ -366,8 +353,9 @@ class _PartnerCard extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -15,25 +15,45 @@ class SavedEventsState {
   // ── API sync ───────────────────────────────────────────────────────────────
 
   /// Fetches the server wishlist and replaces local state.
-  /// Silent fail — local state stays if the network call errors.
-  static Future<void> loadFromApi() async {
-    if (!AuthState.isLoggedIn.value || AuthState.accessToken == null) return;
+  ///
+  /// By default fails silently (local state stays) — used for the fire-and-
+  /// forget app-startup load. Pass [silent] = false to rethrow errors so a
+  /// screen can show an error/Retry state.
+  static Future<void> loadFromApi({bool silent = true}) async {
+    if (!AuthState.isLoggedIn.value || AuthState.accessToken == null) {
+      if (!silent) throw Exception('Please log in to see your favorites.');
+      return;
+    }
     try {
       final items = await WishlistService.fetchWishlist(AuthState.accessToken!);
-      final events = items.map((item) {
-        final listing = item['listing'] as Map<String, dynamic>?;
-        return EventModel(
-          id: (item['listing_id'] as String?) ?? '',
-          title: (listing?['title'] as String?) ?? '',
-          venue: (listing?['city'] as String?) ?? '',
-          imagePath: (listing?['cover_url'] as String?) ?? '',
-          tag: listing?['listing_type'] as String?,
-        );
-      }).where((e) => e.id.isNotEmpty).toList();
+      final events = items
+          .map(_eventFromWishlistItem)
+          .where((e) => e.id.isNotEmpty)
+          .toList();
       savedEvents.value = events;
-    } catch (_) {
+    } catch (e) {
+      if (!silent) rethrow;
       // Silently ignore — show stale or empty state
     }
+  }
+
+  /// Builds an [EventModel] from one wishlist item, tolerating the different
+  /// shapes the API uses (nested `listing` object, or fields inline).
+  static EventModel _eventFromWishlistItem(Map<String, dynamic> item) {
+    final listing = item['listing'] is Map<String, dynamic>
+        ? item['listing'] as Map<String, dynamic>
+        : item;
+
+    String? s(dynamic v) => v?.toString();
+    final id = s(item['listing_id']) ?? s(listing['id']) ?? s(item['id']) ?? '';
+
+    return EventModel(
+      id: id,
+      title: s(listing['title']) ?? '',
+      venue: s(listing['city']) ?? s(listing['area']) ?? '',
+      imagePath: s(listing['cover_url']) ?? '',
+      tag: s(listing['listing_type']),
+    );
   }
 
   // ── Toggle (optimistic) ────────────────────────────────────────────────────

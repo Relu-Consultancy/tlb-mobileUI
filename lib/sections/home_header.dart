@@ -29,14 +29,9 @@ class HomeHeader extends StatelessWidget {
       clipBehavior: Clip.hardEdge,
       children: [
         // ── Layer 1: Cloud image, golden-tinted, fading to transparent ──
-        //
-        // Previous version used a single ShaderMask with BlendMode.screen
-        // and white at the bottom — that painted the lower half of the
-        // header *opaque white*, blocking the warm gradient container
-        // beneath it. Two operations now run separately:
-        //   1. ColorFiltered tints the cloud image golden (screen blend)
-        //   2. ShaderMask(dstIn) fades the result to transparent at the
-        //      bottom, letting the home-screen gradient show through.
+        // Restored. ColorFiltered tints the cloud image golden (screen blend);
+        // ShaderMask(dstIn) fades it to transparent toward the bottom so the
+        // home-screen warm gradient shows through.
         Positioned.fill(
           child: ShaderMask(
             blendMode: BlendMode.dstIn,
@@ -355,13 +350,8 @@ class HomeHeader extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(30),
           border: Border.all(color: Colors.white, width: 4),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.07),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          // Drop shadow removed — it read as a thin line below the bar,
+          // above the Spotlight divider.
         ),
         child: Row(
           children: [

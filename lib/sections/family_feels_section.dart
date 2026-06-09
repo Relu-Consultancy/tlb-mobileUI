@@ -4,6 +4,7 @@ import '../core/listing_image.dart';
 import '../widgets/section_divider_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/home_feed_state.dart';
+import '../data/dummy_data.dart';
 import '../core/listing_navigation.dart';
 
 class FamilyFeelsSection extends StatelessWidget {
@@ -14,13 +15,16 @@ class FamilyFeelsSection extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
-        final items = HomeFeedState.section('family_feels');
-        if (items.isEmpty) return const SizedBox.shrink();
+        // ── Reverted to mock data — API wiring commented out (re-enable later) ──
+        // final items = HomeFeedState.section('family_feels');
+        // if (items.isEmpty) return const SizedBox.shrink();
+        final items = DummyData.familyFeels;
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SectionDividerWidget(
           title: 'Family Feels',
+          topPadding: 40, // 40px gap from previous section's cards
           fontSize: 17,
           textColor: Color(0xFF1A1A2E), // dark navy
         ),
@@ -67,7 +71,8 @@ class FamilyFeelsSection extends StatelessWidget {
                     // Right Content Area
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 12, 12, 12),
+                        // 20px gap below the CTA button (card bottom padding).
+                        padding: const EdgeInsets.fromLTRB(0, 12, 12, 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -85,19 +90,19 @@ class FamilyFeelsSection extends StatelessWidget {
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                const SizedBox(height: 6),
+                                const SizedBox(height: 8),
                                 
                                 // Location Row
                                 Row(
                                   children: [
-                                    const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
+                                    const Icon(Icons.location_on_outlined, size: 14, color: Color(0xFF4A4A4A)),
                                     const SizedBox(width: 4),
                                     Expanded(
                                       child: Text(
                                         event.venue,
                                         style: GoogleFonts.poppins(
                                           fontSize: Responsive.sp(context, 12),
-                                          color: Colors.grey,
+                                          color: Color(0xFF4A4A4A),
                                           fontWeight: FontWeight.w500,
                                         ),
                                         maxLines: 1,
@@ -106,7 +111,7 @@ class FamilyFeelsSection extends StatelessWidget {
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 6),
+                                const SizedBox(height: 8),
                                 
                                 // Stars + review count
                                 Row(
@@ -117,13 +122,13 @@ class FamilyFeelsSection extends StatelessWidget {
                                       event.reviewCount ?? '3.5k reviews',
                                       style: GoogleFonts.poppins(
                                         fontSize: Responsive.sp(context, 12),
-                                        color: Colors.grey,
+                                        color: Color(0xFF4A4A4A),
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 6),
+                                const SizedBox(height: 8),
                                 
                                 // Pricing Text
                                 Text(

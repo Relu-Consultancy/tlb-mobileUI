@@ -9,19 +9,19 @@ class AppFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The footer PNG fades white → #FFCF19 (its real bottom row). A single
-    // modulate ShaderMask recolours the whole footer at once: white stays
-    // white (blends into the page), the gold shifts to a light header orange,
-    // and the black logo stays black. The extension below is filled with the
-    // PNG's exact bottom colour, so after the *shared* shader it recolours to
-    // the identical tone — image and extension match seamlessly, no band.
-    return ShaderMask(
+    // Original footer: main-footer.png (white → gold, black logo) recoloured by
+    // a single modulate ShaderMask. The shader holds *pure white* across the
+    // top portion (stops [0, 0.4]) so the PNG's white top stays truly white and
+    // blends into the white page — no faint cream "box" edge — then fades to the
+    // light tint below. The extension uses the PNG's exact bottom colour so it
+    // matches seamlessly after the shared shader.
+    final footer = ShaderMask(
       blendMode: BlendMode.modulate,
       shaderCallback: (rect) => const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        // Light tint → the gold multiplies to ~#FFB711 (light header orange).
-        colors: [Colors.white, Color(0xFFFFE2B0)],
+        colors: [Colors.white, Colors.white, Color(0xFFFFE2B0)],
+        stops: [0.0, 0.4, 1.0],
       ).createShader(rect),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -33,11 +33,34 @@ class AppFooter extends StatelessWidget {
             fit: BoxFit.fitWidth,
             errorBuilder: (_, __, ___) => const SizedBox(height: 80),
           ),
-          // PNG's exact bottom colour → recolours to the same tone as the
-          // image bottom and stretches the colour to the screen edge.
           Container(height: bottomExtra, color: const Color(0xFFFFCF19)),
         ],
       ),
+    );
+
+    // Extra-soft white → transparent veil over the top so the footer dissolves
+    // out of the white page with no perceptible boundary.
+    return Stack(
+      children: [
+        footer,
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 130,
+          child: IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.white, Colors.white.withOpacity(0)],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -268,9 +268,14 @@ class _BannerCarouselState extends State<BannerCarousel> {
             builder: (_) => EventDetailScreen(event: event),
           ),
         ),
-        child: SizedBox(
+        child: Container(
           width: cardWidth,
           height: widget.height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(radius),
+            // Very slim border around the spotlight banner.
+            border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.5),
+          ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(radius),
             child: Stack(

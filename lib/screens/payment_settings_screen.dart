@@ -321,7 +321,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                   ),
                   Image.asset(
                     'resources- tlb-ui/accounts_page/payments.png',
-                    width: 80,
+                    width: 110,
                     errorBuilder: (_, __, ___) => const Icon(
                       Icons.account_balance_wallet,
                       size: 64,

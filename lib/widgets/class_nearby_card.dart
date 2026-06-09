@@ -98,7 +98,8 @@ class ClassNearbyCard extends StatelessWidget {
 
             // Content
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+              // 20px gap below the CTA button (card bottom padding).
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -166,7 +167,7 @@ class ClassNearbyCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
 
                   // Rating
                   if (event.rating != null)
@@ -193,7 +194,7 @@ class ClassNearbyCard extends StatelessWidget {
 
                   // Description
                   if ((event.description ?? '').isNotEmpty) ...[
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     RichText(
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

@@ -56,7 +56,8 @@ class WeekendEventCard extends StatelessWidget {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
+                // 20px gap below the CTA button (card bottom padding).
+                padding: const EdgeInsets.fromLTRB(14, 14, 12, 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -80,7 +81,7 @@ class WeekendEventCard extends StatelessWidget {
                             : event.eventDate!,
                       ),
                     if (event.venue.isNotEmpty) ...[
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 8),
                       _IconLine(
                         icon: Icons.location_on_outlined,
                         text: event.venue,
