@@ -907,9 +907,10 @@ Wired several screens to live backend data and redesigned the four listing detai
 #### Home feed — real data in the section cards
 | Change | Files |
 |--------|-------|
-| **Section membership** — `GET /api/v1/homepage/sections/` → `HomepageSection`/`HomepageListing` + `HomeFeedService` | `lib/models/homepage_section_model.dart` (NEW), `lib/services/home_feed_service.dart` (NEW) |
-| **`HomeFeedState`** — fetches sections, hydrates full card data (image/price/city/rating) by matching IDs against the Events/Classes/Programs/Venues list APIs (keyed by `listing_type`); `section(key)` + `version` notifier; minimal-card fallback for un-hydrated ids | `lib/providers/home_feed_state.dart` (NEW) |
+| **Section membership + full card fields** — `GET /api/v1/homepage/sections/` → `HomepageSection`/`HomepageListing` + `HomeFeedService`. The endpoint returns the full card fields (`cover_url`, `category`, `city`, `area`, `price`, `price_type`, `rating`, `total_reviews`), so `HomepageListing.toEventModel()` builds the card directly — no cross-API hydration needed | `lib/models/homepage_section_model.dart` (NEW), `lib/services/home_feed_service.dart` (NEW) |
+| **`HomeFeedState`** — fetches sections, maps each listing → `EventModel`; `section(key)` + `version` notifier for reactivity | `lib/providers/home_feed_state.dart` (NEW) |
 | **9 card sections wired** — each reads `HomeFeedState.section('<key>')` (reactive via `ValueListenableBuilder`), **hides when empty**, uses network-aware `listingImage()` covers and type-aware `openListingDetail()` taps. Card designs unchanged. Loaded on home init + pull-to-refresh | all `lib/sections/*_section.dart`, `lib/screens/home_screen.dart` |
+| **Spotlight banner wired** — top hero `BannerCarousel` + its "Spotlight" divider now render the `spotlight` section (hidden when empty); `BannerCarousel` background made network-aware (`Image.network` for `http` covers, asset otherwise, same fallback) | `lib/screens/home_screen.dart`, `lib/widgets/banner_carousel.dart` |
 | **Helpers** — `listingImage()` (network/asset + grey fallback), `openListingDetail()` (route by type); `EventModel` gained `listingType` | `lib/core/listing_image.dart` (NEW), `lib/core/listing_navigation.dart` (NEW), `lib/models/event_model.dart` |
 
 #### Other

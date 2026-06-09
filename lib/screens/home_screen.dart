@@ -213,26 +213,33 @@ class _HomeScreenState extends State<HomeScreen> {
                             profileShowcaseConfig: kProfileShowcaseConfig,
                             locationShowcaseConfig: kLocationShowcaseConfig,
                           ),
-                          if (LocationState().isLocationSupported(city)) ...[
-                            // Small breathing room below the search bar; the
-                            // divider's own vertical padding does most of it.
-                            const SizedBox(height: 4),
-                            const SectionDividerWidget(
-                              title: 'Spotlight',
-                              lineLength: 100,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              textColor: Color(0xFF3A3A3A), // dark charcoal
-                              lineThickness: 1.5,
-                              lineColor: Color(0xFFD4A537), // warm gold
-                              topPadding: 6, // 4 (SizedBox) + 6 = 10px total gap
+                          if (LocationState().isLocationSupported(city))
+                            // Spotlight divider — only when the spotlight
+                            // section has listings (hidden otherwise).
+                            ValueListenableBuilder<int>(
+                              valueListenable: HomeFeedState.version,
+                              builder: (context, _, __) {
+                                if (HomeFeedState.section('spotlight').isEmpty) {
+                                  return const SizedBox.shrink();
+                                }
+                                return Column(
+                                  children: const [
+                                    SizedBox(height: 4),
+                                    SectionDividerWidget(
+                                      title: 'Spotlight',
+                                      lineLength: 100,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      textColor: Color(0xFF3A3A3A),
+                                      lineThickness: 1.5,
+                                      lineColor: Color(0xFFD4A537),
+                                      topPadding: 6,
+                                    ),
+                                    SizedBox(height: 6),
+                                  ],
+                                );
+                              },
                             ),
-                            // Keep the header close to the Spotlight banner;
-                            // still extend the warm gradient slightly past the
-                            // divider so the fade to scaffold-white happens
-                            // *inside* the gradient container, not as a cut.
-                            const SizedBox(height: 6),
-                          ],
                         ],
                       ),
                     ),
@@ -244,11 +251,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: const EmptyLocationWidget(),
                       )
                     else ...[
+                      // Spotlight banner — real data from the homepage
+                      // 'spotlight' section (hidden when empty).
                       RepaintBoundary(
-                        child: BannerCarousel(
-                          events: DummyData.bannerEvents,
-                          height: Responsive.h(context, 480.0), // Increased height
-                          fixedCardWidth: Responsive.w(context, 345.0),
+                        child: ValueListenableBuilder<int>(
+                          valueListenable: HomeFeedState.version,
+                          builder: (context, _, __) {
+                            return BannerCarousel(
+                              events: HomeFeedState.section('spotlight'),
+                              height: Responsive.h(context, 480.0),
+                              fixedCardWidth: Responsive.w(context, 345.0),
+                            );
+                          },
                         ),
                       ),
                       const RepaintBoundary(child: CategoriesGrid()),

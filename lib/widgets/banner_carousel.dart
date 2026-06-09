@@ -277,32 +277,46 @@ class _BannerCarouselState extends State<BannerCarousel> {
               fit: StackFit.expand,
               clipBehavior: Clip.hardEdge,
               children: [
-                // Background image
-                Image.asset(
-                  event.imagePath,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  errorBuilder: (_, __, ___) => Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.orange.shade200,
-                          Colors.orange.shade400,
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(radius),
-                    ),
-                    child: Center(
-                      child: Text(
-                        event.title,
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 22),
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
+                // Background image — network for real covers, asset for bundled.
+                Builder(
+                  builder: (context) {
+                    Widget fallback() => Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.orange.shade200,
+                                Colors.orange.shade400,
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(radius),
+                          ),
+                          child: Center(
+                            child: Text(
+                              event.title,
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 22),
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        );
+                    final url = event.imagePath;
+                    if (url.startsWith('http')) {
+                      return Image.network(
+                        url,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        errorBuilder: (_, __, ___) => fallback(),
+                      );
+                    }
+                    return Image.asset(
+                      url,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      errorBuilder: (_, __, ___) => fallback(),
+                    );
+                  },
                 ),
 
                 // Dark gradient overlay (overlayStyle only)
