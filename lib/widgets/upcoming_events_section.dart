@@ -85,7 +85,7 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
               endIndent: 20),
           const SizedBox(height: 18),
         ] else
-          const SizedBox(height: 8),
+          const SizedBox(height: 32),
 
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),

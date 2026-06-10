@@ -1,5 +1,6 @@
 import '../core/responsive.dart';
 import 'package:flutter/material.dart';
+import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
 import '../widgets/section_divider_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -29,8 +30,7 @@ class NewOnTheBlockSection extends StatelessWidget {
         ),
         SizedBox(
           height: Responsive.h(context, 330, min: 290),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
+          child: AutoScrollList(
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
             itemCount: items.length,
@@ -43,7 +43,7 @@ class NewOnTheBlockSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+                  border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -100,7 +100,7 @@ class NewOnTheBlockSection extends StatelessWidget {
                                 child: Text(
                                   event.tag ?? 'New',
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 12),
+                                    fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w500,
                                     color: Colors.white,
                                   ),
@@ -124,7 +124,7 @@ class NewOnTheBlockSection extends StatelessWidget {
                           Text(
                             event.title,
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 15),
+                              fontSize: Responsive.sp(context, 16),
                               fontWeight: FontWeight.w600,
                               color: const Color(0xFF1A1A2E),
                             ),
@@ -143,7 +143,7 @@ class NewOnTheBlockSection extends StatelessWidget {
                                 child: Text(
                                   event.venue,
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 12),
+                                    fontSize: Responsive.sp(context, 13),
                                     color: Color(0xFF4A4A4A),
                                   ),
                                   maxLines: 1,

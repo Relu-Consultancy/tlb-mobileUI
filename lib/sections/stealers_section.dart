@@ -1,5 +1,6 @@
 import '../core/responsive.dart';
 import 'package:flutter/material.dart';
+import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/section_divider_widget.dart';
@@ -30,8 +31,7 @@ class StealersSection extends StatelessWidget {
         ),
         SizedBox(
           height: Responsive.h(context, 420, min: 380),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
+          child: AutoScrollList(
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
             itemCount: items.length,
@@ -43,7 +43,7 @@ class StealersSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+                  border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -95,7 +95,7 @@ class StealersSection extends StatelessWidget {
                                   child: Text(
                                     event.description!,
                                     style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 11),
+                                      fontSize: Responsive.sp(context, 12),
                                       fontWeight: FontWeight.w500,
                                       color: const Color(0xFF1A1A2E),
                                     ),
@@ -104,10 +104,6 @@ class StealersSection extends StatelessWidget {
                               ),
                             ),
                           // Bottom pink discount band ("60% OFF")
-                          // TEMPORARILY DISABLED — `event.tag` currently carries
-                          // the raw category string from the API. Re-enable once
-                          // the tag/category value is cleaned up.
-                          /*
                           if (event.tag != null)
                             Positioned(
                               bottom: 0,
@@ -127,14 +123,13 @@ class StealersSection extends StatelessWidget {
                                 child: Text(
                                   event.tag!,
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 11),
+                                    fontSize: Responsive.sp(context, 12),
                                     color: Colors.white,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ),
                             ),
-                          */
                         ],
                       ),
                     ),
@@ -150,7 +145,7 @@ class StealersSection extends StatelessWidget {
                           Text(
                             event.title,
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 16),
+                              fontSize: Responsive.sp(context, 17),
                               fontWeight: FontWeight.w500,
                               color: const Color(0xFF1A1A2E),
                             ),
@@ -172,7 +167,7 @@ class StealersSection extends StatelessWidget {
                               Text(
                                 event.reviewCount ?? '3.5k reviews',
                                 style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 12),
+                                  fontSize: Responsive.sp(context, 13),
                                   color: Color(0xFF4A4A4A),
                                 ),
                               ),
@@ -187,7 +182,7 @@ class StealersSection extends StatelessWidget {
                                 child: Text(
                                   '₹${event.price?.toInt() ?? 2000}',
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 16),
+                                    fontSize: Responsive.sp(context, 17),
                                     fontWeight: FontWeight.w500,
                                     color: const Color(0xFF1A1A2E),
                                   ),
@@ -210,9 +205,9 @@ class StealersSection extends StatelessWidget {
                                     ),
                                   ),
                                   child: Text(
-                                    'Grab Deal',
+                                    'View Now',
                                     style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 13),
+                                      fontSize: Responsive.sp(context, 14),
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),

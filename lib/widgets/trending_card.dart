@@ -179,7 +179,7 @@ class _TrendingCardState extends State<TrendingCard> {
                                     foregroundColor: const Color(0xFF1A1A2E),
                                     minimumSize: const Size(0, 46),
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 20,
+                                      horizontal: 12,
                                     ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20),

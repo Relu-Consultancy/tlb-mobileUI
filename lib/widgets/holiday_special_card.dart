@@ -36,7 +36,7 @@ class HolidaySpecialCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -175,7 +175,7 @@ class HolidaySpecialCard extends StatelessWidget {
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 18,
+                              horizontal: 12,
                               vertical: 7,
                             ),
                             child: Text(

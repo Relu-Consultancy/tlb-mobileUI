@@ -413,7 +413,10 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
 
                     // ── First availability slot ──
                     if (_firstSlot != null) ...[
-                      const SizedBox(height: 12),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Divider(height: 24, thickness: 1, color: kRowDivider),
+                      ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Row(
@@ -435,7 +438,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                       ),
                     ],
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // ── About Venue ──
                     if (_description?.isNotEmpty == true) ...[
@@ -443,7 +446,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                         title: 'About Venue',
                         text: _description!,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
                     ],
 
                     // ── Things to Know ──
@@ -469,7 +472,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
                     ],
 
                     // ── Packages ──
@@ -482,7 +485,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                       ),
                       const SizedBox(height: 12),
                       ..._detail!.packages.map((pkg) => _buildPackageCard(pkg)),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
                     ],
 
                     // ── Gallery ──
@@ -492,7 +495,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                           MaterialPageRoute(builder: (_) => GalleryScreen(event: _eventForWidgets))),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // ── Location map ──
                     DetailDirectionsCard(
@@ -500,7 +503,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                       onGetDirection: _openDirections,
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // ── Organizer ──
                     OrganizerCard(
@@ -511,7 +514,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                       label: 'MANAGED BY',
                       listingType: 'venue',
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // ── Terms & Conditions ────────────────────────────────
                     if (_detail != null && (
@@ -522,7 +525,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                       DetailTermsRow(
                         onTap: () => _showTermsBottomSheet(context),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
                     ],
 
                     // ── Reviews ───────────────────────────────────────────

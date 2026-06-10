@@ -132,7 +132,7 @@ Widget buildReviewInlineSection(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0x8A000000), width: 0.7),
+        border: Border.all(color: const Color(0x14000000), width: 0.7),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

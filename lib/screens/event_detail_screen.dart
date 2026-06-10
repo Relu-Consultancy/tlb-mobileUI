@@ -357,7 +357,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 12),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Divider(height: 24, thickness: 1, color: kRowDivider),
+                    ),
 
                     // ── Date & Time ───────────────────────────────────────
                     Padding(
@@ -380,7 +383,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // ── About Event ───────────────────────────────────────
                     if ((_description ?? '').isNotEmpty)
@@ -389,7 +392,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         text: _description!,
                       ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // ── Things to Know ────────────────────────────────────
                     const DetailSectionTitle('Things to Know'),
@@ -425,7 +428,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // ── Gallery ───────────────────────────────────────────
                     DetailGallery(
@@ -434,7 +437,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           MaterialPageRoute(builder: (_) => GalleryScreen(event: _eventForSheets))),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // ── Location map ──────────────────────────────────────
                     DetailDirectionsCard(
@@ -443,7 +446,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       onGetDirection: _openDirections,
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // ── Organizer ─────────────────────────────────────────
                     OrganizerCard(
@@ -460,7 +463,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       (_detail!.refundPolicy?.isNotEmpty == true) ||
                       _detail!.faqs.isNotEmpty
                     )) ...[
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
                       DetailTermsRow(
                         onTap: () => _showTermsConditionsBottomSheet(context),
                       ),
@@ -468,7 +471,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
                     // ── Reviews ───────────────────────────────────────────
                     if (_hasApiId) ...[
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
                       buildReviewInlineSection(
                         context,
                         listingId: widget.event.id,

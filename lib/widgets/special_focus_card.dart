@@ -28,7 +28,7 @@ class SpecialFocusCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: accentColor.withOpacity(0.10),

@@ -1,5 +1,6 @@
 import '../core/responsive.dart';
 import 'package:flutter/material.dart';
+import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/section_divider_widget.dart';
@@ -30,8 +31,7 @@ class TlbSignatureSection extends StatelessWidget {
         ),
         SizedBox(
           height: Responsive.h(context, 480, min: 430),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
+          child: AutoScrollList(
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
             itemCount: items.length,
@@ -43,7 +43,7 @@ class TlbSignatureSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+                  border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -85,8 +85,8 @@ class TlbSignatureSection extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(20),
                                   gradient: const LinearGradient(
                                     colors: [
-                                      Color(0xFF7C3AED), // violet
-                                      Color(0xFF5B21B6), // deep purple
+                                      Color(0xFFF53C9B), // pink
+                                      Color(0xFFB13CF5), // purple
                                     ],
                                   ),
                                   boxShadow: [
@@ -100,7 +100,7 @@ class TlbSignatureSection extends StatelessWidget {
                                 child: Text(
                                   'TLB Originals',
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 12),
+                                    fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w500,
                                     color: Colors.white,
                                   ),
@@ -123,7 +123,7 @@ class TlbSignatureSection extends StatelessWidget {
                           Text(
                             event.title,
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 15),
+                              fontSize: Responsive.sp(context, 16),
                               fontWeight: FontWeight.w600,
                               color: const Color(0xFF1A1A2E),
                             ),
@@ -134,7 +134,7 @@ class TlbSignatureSection extends StatelessWidget {
                           Text(
                             event.venue, // venue holds the subtitle/description
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 12),
+                              fontSize: Responsive.sp(context, 13),
                               color: Color(0xFF4A4A4A),
                               height: 1.4,
                             ),
@@ -144,7 +144,7 @@ class TlbSignatureSection extends StatelessWidget {
                           const SizedBox(height: 14),
                           SizedBox(
                             width: double.infinity,
-                            height: Responsive.h(context, 44, min: 40),
+                            height: Responsive.h(context, 36, min: 32),
                             child: ElevatedButton(
                               onPressed: () {
                                 openListingDetail(context, event);
@@ -158,9 +158,9 @@ class TlbSignatureSection extends StatelessWidget {
                                 ),
                               ),
                               child: Text(
-                                'Register Now',
+                                'View Now',
                                 style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 13),
+                                  fontSize: Responsive.sp(context, 14),
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),

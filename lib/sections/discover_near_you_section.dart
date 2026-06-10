@@ -1,5 +1,6 @@
 import '../core/responsive.dart';
 import 'package:flutter/material.dart';
+import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
 import '../widgets/section_divider_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,8 +31,7 @@ class DiscoverNearYouSection extends StatelessWidget {
         ),
         SizedBox(
           height: Responsive.h(context, 370, min: 320),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
+          child: AutoScrollList(
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
             itemCount: items.length,
@@ -44,7 +44,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+                  border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -98,7 +98,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                                 child: Text(
                                   event.tag ?? '0.5 km away', // distance
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 12),
+                                    fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w500,
                                     color: const Color(0xFF1A1A2E),
                                   ),
@@ -126,7 +126,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                                 child: Text(
                                   event.title,
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 15),
+                                    fontSize: Responsive.sp(context, 16),
                                     fontWeight: FontWeight.w500,
                                     color: const Color(0xFF1A1A2E),
                                   ),
@@ -165,7 +165,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                                 child: Text(
                                   event.venue,
                                   style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 12),
+                                      fontSize: Responsive.sp(context, 13),
                                       color: Color(0xFF4A4A4A)),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -189,7 +189,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                               Text(
                                 event.reviewCount ?? '3.5k reviews',
                                 style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 12),
+                                    fontSize: Responsive.sp(context, 13),
                                     color: Color(0xFF4A4A4A)),
                               ),
                             ],
@@ -205,7 +205,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                                 TextSpan(
                                   text: 'Description – ',
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 12),
+                                    fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w500,
                                     color: const Color(0xFF1A1A2E),
                                   ),
@@ -214,7 +214,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                                   text: event.description ??
                                       'Slides, Splash Zone, Mini zipline & shaded picnic areas.',
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 12),
+                                    fontSize: Responsive.sp(context, 13),
                                     color: Color(0xFF4A4A4A),
                                   ),
                                 ),

@@ -424,7 +424,10 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 12),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Divider(height: 24, thickness: 1, color: kRowDivider),
+                    ),
 
                     // Schedule
                     Padding(
@@ -473,7 +476,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // About Program
                     if ((_description ?? '').isNotEmpty)
@@ -482,7 +485,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                         text: _description!,
                       ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // Things to Know
                     const DetailSectionTitle('Things to Know'),
@@ -530,7 +533,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // Gallery
                     DetailGallery(
@@ -539,7 +542,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                           MaterialPageRoute(builder: (_) => GalleryScreen(event: _eventForSheets))),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // Location map (Only if not online entirely)
                     if (_modeText != 'online') ...[
@@ -548,7 +551,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                         note: _detail?.address,
                         onGetDirection: _openDirections,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
                     ],
 
                     // Organizer
@@ -560,7 +563,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                       listingType: 'program',
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     if (_detail != null && (
                       (_cancellationPolicy?.isNotEmpty == true) ||
@@ -570,7 +573,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                       DetailTermsRow(
                         onTap: () => _showTermsBottomSheet(context),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
                     ],
 
                     // Reviews

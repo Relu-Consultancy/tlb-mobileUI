@@ -28,7 +28,7 @@ class EventCardWithPrice extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+        border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.06),
@@ -148,7 +148,7 @@ class EventCardWithPrice extends StatelessWidget {
                         foregroundColor: const Color(0xFF1A1A2E),
                         minimumSize: const Size(0, 46),
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
+                          horizontal: 12,
                           vertical: 10,
                         ),
                         shape: RoundedRectangleBorder(

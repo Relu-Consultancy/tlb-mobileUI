@@ -1,5 +1,6 @@
 import '../core/responsive.dart';
 import 'package:flutter/material.dart';
+import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
 import '../widgets/section_divider_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,8 +31,7 @@ class ParentsFavoriteSection extends StatelessWidget {
         ),
         SizedBox(
           height: Responsive.h(context, 400, min: 360),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
+          child: AutoScrollList(
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
             itemCount: items.length,
@@ -44,7 +44,7 @@ class ParentsFavoriteSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+                  border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -96,7 +96,7 @@ class ParentsFavoriteSection extends StatelessWidget {
                               child: Text(
                                 'Loved by Parents',
                                 style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 12),
+                                  fontSize: Responsive.sp(context, 13),
                                   fontWeight: FontWeight.w500,
                                   color: Colors.white,
                                 ),
@@ -122,7 +122,7 @@ class ParentsFavoriteSection extends StatelessWidget {
                                 child: Text(
                                   event.title,
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 15),
+                                    fontSize: Responsive.sp(context, 16),
                                     fontWeight: FontWeight.w600,
                                     color: const Color(0xFF1A1A2E),
                                   ),
@@ -137,7 +137,7 @@ class ParentsFavoriteSection extends StatelessWidget {
                               Text(
                                 event.description ?? '4-12 Yrs',
                                 style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 12),
+                                  fontSize: Responsive.sp(context, 13),
                                   color: Color(0xFF4A4A4A),
                                 ),
                               ),
@@ -154,7 +154,7 @@ class ParentsFavoriteSection extends StatelessWidget {
                               Text(
                                 (event.rating ?? 4.8).toStringAsFixed(1),
                                 style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 12),
+                                  fontSize: Responsive.sp(context, 13),
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xFF1A1A2E),
                                 ),
@@ -164,7 +164,7 @@ class ParentsFavoriteSection extends StatelessWidget {
                                 child: Text(
                                   '(${event.reviewCount ?? '3.5k reviews'})',
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 12),
+                                    fontSize: Responsive.sp(context, 13),
                                     color: Color(0xFF4A4A4A),
                                   ),
                                   maxLines: 1,
@@ -186,7 +186,7 @@ class ParentsFavoriteSection extends StatelessWidget {
                                       TextSpan(
                                         text: 'Price – ',
                                         style: GoogleFonts.poppins(
-                                          fontSize: Responsive.sp(context, 13),
+                                          fontSize: Responsive.sp(context, 14),
                                           color: Color(0xFF4A4A4A),
                                         ),
                                       ),
@@ -194,7 +194,7 @@ class ParentsFavoriteSection extends StatelessWidget {
                                         text:
                                             '₹${(event.price ?? 800).toInt()}',
                                         style: GoogleFonts.poppins(
-                                          fontSize: Responsive.sp(context, 14),
+                                          fontSize: Responsive.sp(context, 15),
                                           fontWeight: FontWeight.w600,
                                           color: const Color(0xFF1A1A2E),
                                         ),
@@ -204,7 +204,7 @@ class ParentsFavoriteSection extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(
-                                width: Responsive.w(context, 110, min: 96),
+                                width: Responsive.w(context, 86, min: 78),
                                 height: Responsive.h(context, 38, min: 34),
                                 child: ElevatedButton(
                                   onPressed: () {
@@ -221,7 +221,7 @@ class ParentsFavoriteSection extends StatelessWidget {
                                   child: Text(
                                     'Visit',
                                     style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 12),
+                                      fontSize: Responsive.sp(context, 13),
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),

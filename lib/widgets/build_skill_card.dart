@@ -36,7 +36,7 @@ class BuildSkillCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.07),
@@ -170,7 +170,7 @@ class BuildSkillCard extends StatelessWidget {
                             }
                           },
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                             child: Text(
                               ctaLabel,
                               style: GoogleFonts.poppins(

@@ -6,11 +6,11 @@ class ExploreFormatRow extends StatelessWidget {
 
   const ExploreFormatRow({super.key, this.onFormatTap});
 
-  /// Big circles: ~3 fit across the width so each disc is large and a 4th
-  /// peeks in to hint scrolling — matches the Figma design proportions.
+  /// Big circles: exactly 3 fill the width so each disc is large and no 4th
+  /// disc peeks in.
   static const double _visibleCount = 3;
   static const double _sidePadding = 16;
-  static const double _gap = 4;
+  static const double _gap = 8;
 
   /// Color-inversion matrix — flips luminance so a white-bg PNG renders
   /// as black-bg without needing a redrawn asset.
@@ -25,9 +25,10 @@ class ExploreFormatRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Size the circle so [_visibleCount] of them + even gaps fill the
-        // available width (bigger circles than the old fixed 99 px).
-        final double available = constraints.maxWidth - _sidePadding * 2;
+        // Subtract only the leading padding so the 3 circles span from the
+        // left edge to the right edge — each disc is as large as possible and
+        // the 4th no longer peeks in. Exactly [_visibleCount] are visible.
+        final double available = constraints.maxWidth - _sidePadding;
         final double size =
             (available - (_visibleCount - 1) * _gap) / _visibleCount;
 

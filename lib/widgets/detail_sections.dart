@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
+import 'auto_scroll_list.dart';
 
 // Shared building blocks for the Event / Program / Class / Venue detail
 // screens so they stay visually consistent. Background is greyish, cards are
 // white with a slim black border, and section titles are bold.
 
-const Color kDetailBg = Color(0xFFF2F2F7);
+const Color kDetailBg = Color(0xFFFAFAFC); // lighter, near-white background
 const Color kDetailText = Color(0xFF1A1A2E);
-const Color kCardBorder = Color(0x8A000000); // black @ ~54% — slim card border
+const Color kCardBorder = Color(0x14000000); // black @ ~8% — very light slim border
+const Color kRowDivider = Color(0x0F000000); // black @ ~6% — hairline between rows
 
 /// Bold section heading used across the detail screens.
 class DetailSectionTitle extends StatelessWidget {
@@ -191,8 +193,7 @@ class DetailGallery extends StatelessWidget {
         SizedBox(
           // Longer + wider cards than before, matching the reference.
           height: Responsive.h(context, 140, min: 120),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
+          child: AutoScrollList(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: images.isEmpty ? 1 : images.length,
             itemBuilder: (context, index) {

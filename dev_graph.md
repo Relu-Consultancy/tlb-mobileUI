@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-06-08 (Session 54)
+**Last Updated:** 2026-06-10 (Session 55)
 
 ---
 
@@ -867,6 +867,55 @@ share_plus: ^7.2.2           # Native share sheet for events/classes/programs/ve
 ---
 
 ## 12. Development Sessions Summary
+
+### Session 55 — Home-feed wiring + section/card polish, detail-screen restyle, gallery carousel
+A long UI/UX iteration pass across home, the four listing screens, and the four detail screens. Built the Spotlight section from the homepage API, then reverted home sections to mock data on request; fixed the wishlist crash; redesigned the Account header and several partner/section cards; and finished with a detail-screen restyle.
+
+#### Home feed — Spotlight wiring then mock revert
+| Change | Files |
+|--------|-------|
+| **Spotlight built from homepage API** — `HomepageListing` rewritten with full card fields + `toEventModel()`; `HomeFeedState.load()` maps listings directly (no cross-API hydration); `BannerCarousel` background made network-aware (`Image.network` for http covers, asset otherwise) | `lib/models/homepage_section_model.dart`, `lib/providers/home_feed_state.dart`, `lib/widgets/banner_carousel.dart` |
+| **Reverted home sections to mock data** (per request) — API section data-source lines + `HomeFeedState.load()` calls commented out (retrievable); banner back to `DummyData.bannerEvents` | `lib/screens/home_screen.dart` |
+| **Purple category badges removed** — overlay badges on section card images commented out (kept for future) | section card widgets |
+| **Classes ↔ Programs images swapped** in "Explore the Stage" | `lib/data/dummy_data.dart` |
+
+#### Wishlist crash fix
+| Change | Files |
+|--------|-------|
+| **"type 'Null' is not a subtype of Map<String,dynamic>" fixed** — `fetchWishlist` normalizes all response shapes (array / data / data.results / results) via `.whereType<Map<String,dynamic>>()`; `loadFromApi({silent})` + tolerant item parser; saved-events screen converted to Stateful with loading / error+Retry / RefreshIndicator | `lib/services/wishlist_service.dart`, `lib/providers/saved_events_state.dart`, `lib/screens/saved_events_screen.dart` |
+
+#### Account / cards redesign
+| Change | Files |
+|--------|-------|
+| **Account header** — big avatar on the LEFT with camera badge, name/email/Edit-Profile stacked right; completion bar full-width below | `lib/screens/profile_screen.dart` |
+| **Followed Partners card** — golden-yellow top stripe, gradient removed, text darkened | `lib/screens/followed_partners_screen.dart` |
+| **Right-side illustrations enlarged** (80→110) in Favorites / Payment Settings / Reviews / Help | respective screens |
+| **20px gap below every CTA button** across all section/listing cards (17 files); **40px gap** before next section title on home | `lib/sections/*`, card widgets |
+
+#### Section-specific redesigns
+| Change | Files |
+|--------|-------|
+| **Weekend Specials** → vertical card (image on top w/ date badge + heart, title, stars, venue + Book Now); image stretched taller | `lib/sections/weekend_special_section.dart` |
+| **Stealers** — "View Now" CTA + "60% OFF" tag re-added | `lib/sections/stealers_section.dart` |
+| **Where Every Star Shines** — Sensory-Friendly pill, View Now CTA, image flush to card's left edge + wider | `lib/sections/special_needs_section.dart` |
+| **TLB Signature** — "TLB Originals" pink→purple gradient pill, View Now CTA (shorter) | `lib/sections/tlb_signature_section.dart` |
+| **Family Feels** image enlarged/stretched right; section-card text size +1; lighter card borders (0.5→0.15) | `lib/sections/*` |
+
+#### Listing screens (Events / Classes / Programs / Venues)
+| Change | Files |
+|--------|-------|
+| **Filter chips** — selected = dark-yellow border + transparent golden tint; **image tag → corner-attached badge** (solid `0xFFE8941A`, bottom-left) | `category_*_screen.dart`, `lib/widgets/category_event_card.dart` |
+| **Circle rows** sized so exactly 3 fit (Events "Explore by Format", Classes "Pick Your Pace", Venues "What's the Plan?" w/ light border + gradient tint) | `explore_format_row.dart`, `classes_screen.dart`, `venues_screen.dart` |
+| **Auto-carousel everywhere** — new reusable `AutoScrollList` (auto-advances ~1 viewport/3s, loops, pauses on drag); top banners switched to Spotlight-style sliding; section rails auto-scroll; 45px inter-section gaps; Venues banner width matched to search bar | `lib/widgets/auto_scroll_list.dart` (NEW), all listing screens |
+
+#### Detail screens (Event / Class / Program / Venue)
+| Change | Files |
+|--------|-------|
+| **Restyle** — background lightened to `#FAFAFC`; About/card borders softened to `0x14000000` (~8% black); slim `kRowDivider` hairlines between content rows; inter-section spacing 24→32 | `lib/widgets/detail_sections.dart`, 4 detail screens |
+| **Gallery → auto-carousel** — `DetailGallery` swapped static `ListView` for `AutoScrollList` so it cycles through **all** uploaded images | `lib/widgets/detail_sections.dart` |
+| **Organized-By & Reviews cards** — dark `0x8A000000` borders lightened to `0x14000000`; **margin before "Upcoming Events"** increased 8→32 | `lib/widgets/organizer_card.dart`, `lib/widgets/review_sheet.dart`, `lib/widgets/upcoming_events_section.dart` |
+
+**`flutter analyze`:** clean (37 pre-existing baseline hints only). **`flutter test`:** 129/129 pass.
 
 ### Session 54 — Real APIs: notifications, coupons, home feed + detail/profile redesign
 Wired several screens to live backend data and redesigned the four listing detail screens, the organizer profile, and the home-feed sections. Design unchanged where the user required it; only data sources and the specified visuals changed.

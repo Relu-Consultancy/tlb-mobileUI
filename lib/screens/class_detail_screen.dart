@@ -349,7 +349,10 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 12),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Divider(height: 24, thickness: 1, color: kRowDivider),
+                    ),
 
                     // Schedule
                     Padding(
@@ -378,7 +381,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // About Class
                     if ((_description ?? '').isNotEmpty)
@@ -387,7 +390,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                         text: _description!,
                       ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // Things to Know
                     const DetailSectionTitle('Things to Know'),
@@ -419,7 +422,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // Gallery
                     DetailGallery(
@@ -428,7 +431,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                           MaterialPageRoute(builder: (_) => GalleryScreen(event: _eventForSheets))),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // Location map (only for offline/hybrid)
                     if (_detail?.mode != 'online') ...[
@@ -441,7 +444,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                       ),
                     ],
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // Organizer
                     OrganizerCard(
@@ -452,7 +455,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                       listingType: 'class',
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // Terms & Conditions
                     if (_detail != null && (
@@ -463,7 +466,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                       onTap: () => _showTermsBottomSheet(context),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // Reviews
                     if (_hasApiId) ...[

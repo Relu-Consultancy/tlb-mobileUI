@@ -1,5 +1,6 @@
 import '../core/responsive.dart';
 import 'package:flutter/material.dart';
+import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
 import '../widgets/section_divider_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -31,8 +32,7 @@ class HotPicksSection extends StatelessWidget {
         ),
         SizedBox(
           height: Responsive.h(context, 440, min: 395),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
+          child: AutoScrollList(
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
             itemCount: items.length,
@@ -45,7 +45,7 @@ class HotPicksSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+                  border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -100,7 +100,7 @@ class HotPicksSection extends StatelessWidget {
                                 child: Text(
                                   event.tag ?? 'Filling Fast',
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 12),
+                                    fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w500,
                                     color: Colors.white,
                                   ),
@@ -126,7 +126,7 @@ class HotPicksSection extends StatelessWidget {
                                 Text(
                                   event.title,
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 15),
+                                    fontSize: Responsive.sp(context, 16),
                                     fontWeight: FontWeight.w500,
                                     color: const Color(0xFF1A1A2E),
                                   ),
@@ -142,7 +142,7 @@ class HotPicksSection extends StatelessWidget {
                                     const SizedBox(width: 6),
                                     Text(
                                       '3-5 Yrs', // Dummy age range
-                                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Color(0xFF4A4A4A)),
+                                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Color(0xFF4A4A4A)),
                                     ),
                                   ],
                                 ),
@@ -163,7 +163,7 @@ class HotPicksSection extends StatelessWidget {
                                         event.reviewCount ?? '3.5k reviews',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Color(0xFF4A4A4A)),
+                                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Color(0xFF4A4A4A)),
                                       ),
                                     ),
                                   ],
@@ -178,7 +178,7 @@ class HotPicksSection extends StatelessWidget {
                                     Expanded(
                                       child: Text(
                                         event.venue,
-                                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Color(0xFF4A4A4A)),
+                                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Color(0xFF4A4A4A)),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -200,7 +200,7 @@ class HotPicksSection extends StatelessWidget {
                                         TextSpan(
                                           text: event.price != null ? '₹${event.price!.toInt()}' : '₹5000',
                                           style: GoogleFonts.poppins(
-                                            fontSize: Responsive.sp(context, 16),
+                                            fontSize: Responsive.sp(context, 17),
                                             fontWeight: FontWeight.w500,
                                             color: const Color(0xFF1A1A2E),
                                           ),
@@ -208,7 +208,7 @@ class HotPicksSection extends StatelessWidget {
                                         TextSpan(
                                           text: ' / child',
                                           style: GoogleFonts.poppins(
-                                            fontSize: Responsive.sp(context, 12),
+                                            fontSize: Responsive.sp(context, 13),
                                             color: Color(0xFF4A4A4A),
                                           ),
                                         ),
@@ -217,7 +217,7 @@ class HotPicksSection extends StatelessWidget {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: Responsive.w(context, 100, min: 90), 
+                                  width: Responsive.w(context, 82, min: 76), 
                                   height: Responsive.h(context, 34, min: 30),
                                   child: ElevatedButton(
                                     onPressed: () =>
@@ -234,7 +234,7 @@ class HotPicksSection extends StatelessWidget {
                                     child: Text(
                                       'Book Now',
                                       style: GoogleFonts.poppins(
-                                        fontSize: Responsive.sp(context, 11),
+                                        fontSize: Responsive.sp(context, 12),
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),

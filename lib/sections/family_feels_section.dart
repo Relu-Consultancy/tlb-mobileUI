@@ -1,5 +1,6 @@
 import '../core/responsive.dart';
 import 'package:flutter/material.dart';
+import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
 import '../widgets/section_divider_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -29,9 +30,8 @@ class FamilyFeelsSection extends StatelessWidget {
           textColor: Color(0xFF1A1A2E), // dark navy
         ),
         SizedBox(
-          height: Responsive.h(context, 200, min: 170),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
+          height: Responsive.h(context, 225, min: 195),
+          child: AutoScrollList(
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
             itemCount: items.length,
@@ -44,7 +44,7 @@ class FamilyFeelsSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+                  border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.04),
@@ -61,7 +61,7 @@ class FamilyFeelsSection extends StatelessWidget {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
                         child: listingImage(event.imagePath,
-                          width: Responsive.w(context, 130, min: 110),
+                          width: Responsive.w(context, 200, min: 170),
                           height: double.infinity,
                           fit: BoxFit.cover,
                         ),
@@ -83,7 +83,7 @@ class FamilyFeelsSection extends StatelessWidget {
                                 Text(
                                   event.title,
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 14),
+                                    fontSize: Responsive.sp(context, 15),
                                     fontWeight: FontWeight.w500,
                                     color: const Color(0xFF1A1A2E),
                                   ),
@@ -101,7 +101,7 @@ class FamilyFeelsSection extends StatelessWidget {
                                       child: Text(
                                         event.venue,
                                         style: GoogleFonts.poppins(
-                                          fontSize: Responsive.sp(context, 12),
+                                          fontSize: Responsive.sp(context, 13),
                                           color: Color(0xFF4A4A4A),
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -121,7 +121,7 @@ class FamilyFeelsSection extends StatelessWidget {
                                     Text(
                                       event.reviewCount ?? '3.5k reviews',
                                       style: GoogleFonts.poppins(
-                                        fontSize: Responsive.sp(context, 12),
+                                        fontSize: Responsive.sp(context, 13),
                                         color: Color(0xFF4A4A4A),
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -134,7 +134,7 @@ class FamilyFeelsSection extends StatelessWidget {
                                 Text(
                                   'Starting from ₹${event.price?.toInt() ?? 200}',
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 12),
+                                    fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w500,
                                     color: const Color(0xFF4A4A68),
                                     decoration: TextDecoration.underline,
@@ -164,7 +164,7 @@ class FamilyFeelsSection extends StatelessWidget {
                                 child: Text(
                                   'Book Now',
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 12),
+                                    fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),

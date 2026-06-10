@@ -54,19 +54,27 @@ class CategoryEventCard extends StatelessWidget {
                 ),
                 if ((event.tag ?? '').isNotEmpty)
                   Positioned(
-                    bottom: 8,
-                    left: 8,
+                    bottom: 0,
+                    left: 0,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.textPrimary.withOpacity(0.85),
-                        borderRadius: BorderRadius.circular(6),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: const BoxDecoration(
+                        // Warm-orange tab attached flush to the image's
+                        // bottom-left corner: outer corner rounded to match the
+                        // image, inner corner rounded for the tab look.
+                        // Fixed orange (not the faint per-category accent) so the
+                        // white label stays clearly visible on every category.
+                        color: Color(0xFFE8941A),
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(12),
+                          topRight: Radius.circular(10),
+                        ),
                       ),
                       child: Text(
                         event.tag!,
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 9.5),
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
                       ),

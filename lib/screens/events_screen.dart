@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/auto_scroll_list.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../models/api_category_model.dart';
@@ -246,12 +247,11 @@ class _EventsScreenState extends State<EventsScreen> {
                           fixedCardWidth: MediaQuery.of(context).size.width,
                           cornerRadius: 22,
                           overlayDots: true, // dots overlaid on the banner
-                          staticFade: true, // banner stays put; images animate in
                         ),
                       ),
 
                       // ── Explore by Categories ─────────────────────────
-                      const SectionDividerWidget(title: 'Explore by Categories'),
+                      const SectionDividerWidget(topPadding: 45, title: 'Explore by Categories'),
                       RepaintBoundary(
                         child: ExploreCategoriesGrid(
                           categories: _gridCategories,
@@ -274,11 +274,10 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
-                      const SectionDividerWidget(title: 'Trending Events'),
+                      const SectionDividerWidget(topPadding: 45, title: 'Trending Events'),
                       SizedBox(
                         height: Responsive.h(context, 420, min: 400),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.trendingEvents.length,
                           itemBuilder: (context, index) {
@@ -295,7 +294,7 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
-                      const SectionDividerWidget(title: 'Explore by Format'),
+                      const SectionDividerWidget(topPadding: 45, title: 'Explore by Format'),
                       RepaintBoundary(
                         child: ExploreFormatRow(
                           onFormatTap: (index) => Navigator.push(
@@ -308,13 +307,10 @@ class _EventsScreenState extends State<EventsScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
-
-                      const SectionDividerWidget(title: 'Happening This Weekend'),
+                      const SectionDividerWidget(topPadding: 45, title: 'Happening This Weekend'),
                       SizedBox(
                         height: Responsive.h(context, 190, min: 170),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.weekendSpecial.length,
                           itemBuilder: (context, index) {
@@ -329,11 +325,10 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
-                      const SectionDividerWidget(title: 'Holiday Special'),
+                      const SectionDividerWidget(topPadding: 45, title: 'Holiday Special'),
                       SizedBox(
                         height: Responsive.h(context, 460, min: 430),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.holidaySpecials.length,
                           itemBuilder: (context, index) {
@@ -350,11 +345,10 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
-                      const SectionDividerWidget(title: 'Featured Partners'),
+                      const SectionDividerWidget(topPadding: 45, title: 'Featured Partners'),
                       SizedBox(
                         height: Responsive.h(context, 540, min: 520),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.featuredPartners.length,
                           itemBuilder: (context, index) {
@@ -366,7 +360,7 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
-                      const SectionDividerWidget(title: 'New On TLB'),
+                      const SectionDividerWidget(topPadding: 45, title: 'New On TLB'),
                       SizedBox(
                         height: Responsive.h(context, 230, min: 210),
                         child: PageView.builder(
@@ -395,11 +389,10 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
-                      const SectionDividerWidget(title: 'Online Events'),
+                      const SectionDividerWidget(topPadding: 45, title: 'Online Events'),
                       SizedBox(
                         height: Responsive.h(context, 330, min: 300),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.onlineEvents.length,
                           itemBuilder: (context, index) {

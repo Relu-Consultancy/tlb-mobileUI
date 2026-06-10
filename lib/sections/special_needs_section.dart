@@ -1,5 +1,6 @@
 import '../core/responsive.dart';
 import 'package:flutter/material.dart';
+import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/section_divider_widget.dart';
@@ -30,8 +31,7 @@ class SpecialNeedsSection extends StatelessWidget {
         ),
         SizedBox(
           height: Responsive.h(context, 215, min: 195),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
+          child: AutoScrollList(
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
             itemCount: items.length > 1
@@ -43,12 +43,13 @@ class SpecialNeedsSection extends StatelessWidget {
               return Container(
                 width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
                 margin: const EdgeInsets.only(right: 16),
-                // 20px gap below the CTA button (card bottom padding).
-                padding: const EdgeInsets.fromLTRB(10, 10, 10, 20),
+                // Clip the flush image to the card's rounded corners so it
+                // touches the left/top/bottom borders (per reference design).
+                clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+                  border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -62,16 +63,13 @@ class SpecialNeedsSection extends StatelessWidget {
                   children: [
                     // Left image with red circular star badge
                     SizedBox(
-                      width: Responsive.w(context, 150, min: 125),
+                      width: Responsive.w(context, 215, min: 185),
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
                           Positioned.fill(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(14),
-                              child: listingImage(event.imagePath,
-                                fit: BoxFit.cover,
-                              ),
+                            child: listingImage(event.imagePath,
+                              fit: BoxFit.cover,
                             ),
                           ),
                           // Red star badge (top-left)
@@ -104,23 +102,19 @@ class SpecialNeedsSection extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 14),
-
                     // Right content
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(14, 12, 14, 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               // "Sensory Friendly" pink pill (right-aligned)
-                              // TEMPORARILY DISABLED — `event.tag` currently
-                              // carries the raw category string from the API.
-                              // Re-enable once the tag/category value is cleaned up.
-                              /*
                               if (event.tag != null)
                                 Align(
                                   alignment: Alignment.centerRight,
@@ -139,20 +133,19 @@ class SpecialNeedsSection extends StatelessWidget {
                                     child: Text(
                                       event.tag!,
                                       style: GoogleFonts.poppins(
-                                        fontSize: Responsive.sp(context, 11),
+                                        fontSize: Responsive.sp(context, 12),
                                         fontWeight: FontWeight.w500,
                                         color: Colors.white,
                                       ),
                                     ),
                                   ),
                                 ),
-                              */
                               const SizedBox(height: 8),
                               // Title
                               Text(
                                 event.title,
                                 style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 16),
+                                  fontSize: Responsive.sp(context, 17),
                                   fontWeight: FontWeight.w600,
                                   color: const Color(0xFF1A1A2E),
                                 ),
@@ -169,7 +162,7 @@ class SpecialNeedsSection extends StatelessWidget {
                                   Text(
                                     event.reviewCount ?? '4.5k reviews',
                                     style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 12),
+                                      fontSize: Responsive.sp(context, 13),
                                       color: Color(0xFF4A4A4A),
                                     ),
                                   ),
@@ -186,7 +179,7 @@ class SpecialNeedsSection extends StatelessWidget {
                                     child: Text(
                                       event.venue,
                                       style: GoogleFonts.poppins(
-                                        fontSize: Responsive.sp(context, 12),
+                                        fontSize: Responsive.sp(context, 13),
                                         color: Color(0xFF4A4A4A),
                                       ),
                                       maxLines: 1,
@@ -202,7 +195,7 @@ class SpecialNeedsSection extends StatelessWidget {
                           Align(
                             alignment: Alignment.centerRight,
                             child: SizedBox(
-                              width: Responsive.w(context, 130, min: 110),
+                              width: Responsive.w(context, 104, min: 94),
                               height: Responsive.h(context, 38, min: 34),
                               child: ElevatedButton(
                                 onPressed: () {
@@ -218,9 +211,9 @@ class SpecialNeedsSection extends StatelessWidget {
                                   ),
                                 ),
                                 child: Text(
-                                  'Explore',
+                                  'View Now',
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 12),
+                                    fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -228,6 +221,7 @@ class SpecialNeedsSection extends StatelessWidget {
                             ),
                           ),
                         ],
+                      ),
                       ),
                     ),
                   ],

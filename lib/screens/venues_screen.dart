@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/auto_scroll_list.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
@@ -98,10 +99,10 @@ class _VenuesScreenState extends State<VenuesScreen> {
                           showGlow: false,
                           overlayStyle: true,
                           ctaText: 'Explore Now',
-                          // Slightly narrower centered card.
-                          fixedCardWidth: Responsive.w(context, 325.0),
+                          // Match the search bar width (screen width − 16px side
+                          // padding each side).
+                          fixedCardWidth: MediaQuery.of(context).size.width - 32,
                           overlayDots: true, // dots on the banner
-                          staticFade: true, // no sliding — images cross-fade in place
                         ),
                       ),
 
@@ -114,7 +115,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 28,
+                        topPadding: 45,
                       ),
                       _buildWhatsPlanRow(context),
 
@@ -122,8 +123,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       _sectionHeader(context, 'For the Big days'),
                       SizedBox(
                         height: Responsive.h(context, 366, min: 348),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.venuesBigDays.length,
                           itemBuilder: (ctx, i) => Padding(
@@ -137,8 +137,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       _sectionHeader(context, 'Weekend Plan Sorted'),
                       SizedBox(
                         height: Responsive.h(context, 196, min: 182),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.venuesWeekendPlan.length,
                           itemBuilder: (ctx, i) => Padding(
@@ -152,8 +151,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       _sectionHeader(context, 'Close to you'),
                       SizedBox(
                         height: Responsive.h(context, 270, min: 256),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.venuesCloseToYou.length,
                           itemBuilder: (ctx, i) => Padding(
@@ -167,8 +165,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       _sectionHeader(context, 'Out & About'),
                       SizedBox(
                         height: Responsive.h(context, 234, min: 218),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.venuesOutAndAbout.length,
                           itemBuilder: (ctx, i) => Padding(
@@ -182,8 +179,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       _sectionHeader(context, 'Get Moving'),
                       SizedBox(
                         height: Responsive.h(context, 446, min: 430),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.venuesGetMoving.length,
                           itemBuilder: (ctx, i) => Padding(
@@ -197,8 +193,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       _sectionHeader(context, 'Hand-On Space'),
                       SizedBox(
                         height: Responsive.h(context, 304, min: 290),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.venuesHandsOn.length,
                           itemBuilder: (ctx, i) => Padding(
@@ -212,8 +207,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       _sectionHeader(context, 'Easy on the pocket'),
                       SizedBox(
                         height: Responsive.h(context, 252, min: 238),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.venuesEasyPocket.length,
                           itemBuilder: (ctx, i) => Padding(
@@ -227,8 +221,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       _sectionHeader(context, 'Headed to the Mall'),
                       SizedBox(
                         height: Responsive.h(context, 362, min: 344),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.venuesHeadedMall.length,
                           itemBuilder: (ctx, i) => Padding(
@@ -246,8 +239,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       _sectionHeader(context, 'Thoughtful Spaces'),
                       SizedBox(
                         height: Responsive.h(context, 356, min: 338),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.venuesThoughtful.length,
                           itemBuilder: (ctx, i) => Padding(
@@ -292,7 +284,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
       lineLength: 100,
       lineThickness: 1.5,
       lineColor: const Color(0xFFD4A537), // warm gold
-      topPadding: 28,
+      topPadding: 45,
     );
   }
 
@@ -301,14 +293,14 @@ class _VenuesScreenState extends State<VenuesScreen> {
     final cats = DummyData.venuesSeeAllCategories.take(6).toList();
     return SizedBox(
       height: 212,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
+      child: AutoScrollList(
         padding: const EdgeInsets.only(left: 14),
         clipBehavior: Clip.none,
         itemCount: cats.length,
         itemBuilder: (ctx, i) {
           final c = cats[i];
           final colors = List<Color>.from(c['gradient'] as List);
+          final isLast = i == cats.length - 1;
           return GestureDetector(
             onTap: () => Navigator.push(
               context,
@@ -343,14 +335,21 @@ class _VenuesScreenState extends State<VenuesScreen> {
                             height: 124,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
+                              // Gradient tint of the same colour — light pastel
+                              // (top-left) → a deeper shade of the same hue
+                              // (bottom-right) for a clearly visible gradient.
                               gradient: LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
-                                colors: colors,
+                                colors: [
+                                  colors.first,
+                                  Color.lerp(colors.last, Colors.black, 0.18)!,
+                                ],
                               ),
+                              // Light border — a subtle tint of the same colour.
                               border: Border.all(
-                                color: Color.lerp(colors.last, Colors.black, 0.4)!,
-                                width: 2,
+                                color: Color.lerp(colors.last, Colors.black, 0.12)!,
+                                width: 1.5,
                               ),
                               boxShadow: [
                                 BoxShadow(
@@ -367,8 +366,9 @@ class _VenuesScreenState extends State<VenuesScreen> {
                           bottom: 2,
                           child: Image.asset(
                             c['image'] as String,
-                            width: 134,
-                            height: 150,
+                            // Last card's image trimmed slightly.
+                            width: isLast ? 120 : 134,
+                            height: isLast ? 134 : 150,
                             fit: BoxFit.contain,
                             errorBuilder: (_, __, ___) => Icon(Icons.place, size: 58, color: AppColors.primary),
                           ),
@@ -1124,8 +1124,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
   Widget _buildYourWayRow(BuildContext context) {
     return SizedBox(
       height: 130,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
+      child: AutoScrollList(
         padding: const EdgeInsets.only(left: 16),
         itemCount: _yourWayTiles.length,
         itemBuilder: (ctx, i) {

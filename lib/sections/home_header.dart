@@ -349,14 +349,15 @@ class HomeHeader extends StatelessWidget {
             ],
           ),
           borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: Colors.white, width: 4),
+          // 2px white border.
+          border: Border.all(color: Colors.white, width: 2),
           // Drop shadow removed — it read as a thin line below the bar,
           // above the Spotlight divider.
         ),
         child: Row(
           children: [
             const SizedBox(width: 18),
-            const Icon(Icons.search, color: Color(0xFF9E9E9E), size: 22),
+            const Icon(Icons.search, color: Color(0xFF555555), size: 22),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -364,7 +365,7 @@ class HomeHeader extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 14),
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF9E9E9E),
+                  color: const Color(0xFF555555),
                 ),
               ),
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/auto_scroll_list.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../core/app_colors.dart';
@@ -140,7 +141,6 @@ class _ClassesScreenState extends State<ClassesScreen> {
                           fixedCardWidth: MediaQuery.of(context).size.width,
                           cornerRadius: 22,
                           overlayDots: true, // dots overlaid on the banner
-                          staticFade: true, // banner stays put; images animate in
                         ),
                       ),
 
@@ -184,8 +184,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
                       SizedBox(
                         height: Responsive.h(context, 380, min: 340),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesWhatEveryoneJoining.length,
                           itemBuilder: (context, index) {
@@ -214,9 +213,9 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         lineColor: Color(0xFFD4A537), // warm gold
                       ),
                       SizedBox(
-                        height: 120,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        // Sized so exactly 3 circles fill the width (no 4th peek).
+                        height: (MediaQuery.of(context).size.width - 44) / 3 + 8,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
                           itemCount: DummyData.pickYourPace.length,
                           itemBuilder: (context, index) {
@@ -244,11 +243,14 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               }
                             }
 
+                            // Circle sized so exactly 3 fill the width.
+                            final double paceSize =
+                                (MediaQuery.of(context).size.width - 44) / 3;
                             return Padding(
-                              padding: const EdgeInsets.only(right: 16),
+                              padding: const EdgeInsets.only(right: 14),
                               child: Container(
-                                width: 110,
-                                height: 110,
+                                width: paceSize,
+                                height: paceSize,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   gradient: getGradient(label),
@@ -323,8 +325,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
                       SizedBox(
                         height: Responsive.h(context, 350, min: 310),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesRightAroundYou.length,
                           itemBuilder: (context, index) {
@@ -352,8 +353,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
                       SizedBox(
                         height: Responsive.h(context, 180, min: 160),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesTopPicks.length,
                           itemBuilder: (context, index) {
@@ -397,8 +397,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
                       SizedBox(
                         height: Responsive.h(context, 450, min: 410),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesHolidaySpecial.length,
                           itemBuilder: (context, index) {
@@ -428,8 +427,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
                       SizedBox(
                         height: Responsive.h(context, 170, min: 155),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesBuildNewSkills.length,
                           itemBuilder: (context, index) {
@@ -457,8 +455,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
                       SizedBox(
                         height: Responsive.h(context, 430, min: 390),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesSpecialFocus.length,
                           itemBuilder: (context, index) {

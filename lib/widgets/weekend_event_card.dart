@@ -27,7 +27,7 @@ class WeekendEventCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -148,7 +148,7 @@ class _BookNowButton extends StatelessWidget {
             MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 9),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
             child: Text(
               'Book Now',
               style: GoogleFonts.poppins(

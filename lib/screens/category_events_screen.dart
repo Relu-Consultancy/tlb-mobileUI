@@ -412,10 +412,12 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                               margin: const EdgeInsets.only(right: 8),
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
                               decoration: BoxDecoration(
-                                color: isActive ? const Color(0xFFFFCC00) : Colors.white,
+                                // Selected: transparent golden tint + dark-yellow border.
+                                color: isActive ? const Color(0x26FFCC00) : Colors.white,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: isActive ? Colors.transparent : const Color(0xFFE0E0E0),
+                                  color: isActive ? const Color(0xFFE6A800) : const Color(0xFFE0E0E0),
+                                  width: isActive ? 1.5 : 1,
                                 ),
                               ),
                               child: Text(

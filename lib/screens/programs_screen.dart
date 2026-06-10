@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/auto_scroll_list.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
@@ -125,7 +126,6 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           fixedCardWidth: MediaQuery.of(context).size.width,
                           cornerRadius: 22,
                           overlayDots: true, // dots overlaid on the banner
-                          staticFade: true, // banner stays put; images animate in
                         ),
                       ),
 
@@ -137,7 +137,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 30, // tighter gap to the previous section
+                        topPadding: 45,
                       ),
                       RepaintBoundary(
                         child: ExploreCategoriesGrid(
@@ -170,12 +170,11 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 30, // tighter gap to the previous section
+                        topPadding: 45,
                       ),
                       SizedBox(
                         height: Responsive.h(context, 475, min: 450),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.hotPicks.length,
                           itemBuilder: (context, index) => Padding(
@@ -206,12 +205,11 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 30, // tighter gap to the previous section
+                        topPadding: 45,
                       ),
                       SizedBox(
                         height: Responsive.h(context, 212, min: 196),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.weekendSpecial.length,
                           itemBuilder: (context, index) {
@@ -240,7 +238,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 30, // tighter gap to the previous section
+                        topPadding: 45,
                       ),
                       PickYourPaceRow(items: DummyData.findYourFit),
 
@@ -253,12 +251,11 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 30, // tighter gap to the previous section
+                        topPadding: 45,
                       ),
                       SizedBox(
                         height: Responsive.h(context, 212, min: 196),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.newOnTlb.length,
                           itemBuilder: (context, index) {
@@ -287,12 +284,11 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 30, // tighter gap to the previous section
+                        topPadding: 45,
                       ),
                       SizedBox(
                         height: Responsive.h(context, 348, min: 322),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.programsHolidayEdit.length,
                           itemBuilder: (context, index) => Padding(
@@ -314,12 +310,11 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 30, // tighter gap to the previous section
+                        topPadding: 45,
                       ),
                       SizedBox(
                         height: Responsive.h(context, 366, min: 342),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesSpecialFocus.length,
                           itemBuilder: (context, index) => Padding(
@@ -341,12 +336,11 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 30, // tighter gap to the previous section
+                        topPadding: 45,
                       ),
                       SizedBox(
                         height: Responsive.h(context, 374, min: 350),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.categoryEventsExtra.length,
                           itemBuilder: (context, index) => Padding(

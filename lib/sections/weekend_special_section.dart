@@ -58,185 +58,232 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
         // if (items.isEmpty) return const SizedBox.shrink();
         final items = DummyData.weekendSpecial;
         return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SectionDividerWidget(
-          title: 'Weekend Specials',
-          topPadding: 40, // 40px gap from previous section's cards
-          fontSize: 17,
-          fontWeight: FontWeight.w600,
-          textColor: Color(0xFF1A1A2E), // dark navy
-        ),
-        SizedBox(
-          height: Responsive.h(context, 200, min: 180),
-          child: PageView.builder(
-            controller: _pageController,
-            clipBehavior: Clip.hardEdge,
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final event = items[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.06),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Left Image Area
-                      Expanded(
-                        flex: 4,
-                        child: Stack(
-                          children: [
-                            Positioned.fill(
-                              child: ClipRRect(
-                                borderRadius: const BorderRadius.horizontal(
-                                  left: Radius.circular(16),
-                                ),
-                                child: listingImage(event.imagePath,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            // Heart icon (top-left)
-                            Positioned(
-                              top: 8,
-                              left: 8,
-                              child: WishlistButton(event: event, showShadow: true),
-                            ),
-                          ],
-                        ),
-                      ),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SectionDividerWidget(
+              title: 'Weekend Specials',
+              topPadding: 40, // 40px gap from previous section's cards
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              textColor: Color(0xFF1A1A2E), // dark navy
+            ),
+            SizedBox(
+              height: Responsive.h(context, 365, min: 340),
+              child: PageView.builder(
+                controller: _pageController,
+                clipBehavior: Clip.hardEdge,
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  final event = items[index];
+                  // `tag` carries the two-line date badge, e.g. "Sun\nmar 17".
+                  final dateParts = (event.tag ?? '').split('\n');
+                  final dayStr = dateParts.isNotEmpty ? dateParts[0] : '';
+                  final dateStr = dateParts.length > 1 ? dateParts[1] : '';
 
-                      // Right Content Area
-                      Expanded(
-                        flex: 5,
-                        child: Padding(
-                          // 20px gap below the CTA button (card bottom padding).
-                          padding: const EdgeInsets.fromLTRB(12, 12, 12, 20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: Colors.black.withOpacity(0.15), width: 0.7),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.06),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // ── Top image with date badge + heart ──
+                          SizedBox(
+                            height: Responsive.h(context, 240, min: 222),
+                            width: double.infinity,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(16),
+                                  ),
+                                  child: listingImage(event.imagePath,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                // Date badge (top-left)
+                                if (dayStr.isNotEmpty)
+                                  Positioned(
+                                    top: 10,
+                                    left: 10,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.10),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            dayStr,
+                                            style: GoogleFonts.poppins(
+                                              fontSize: Responsive.sp(context, 13),
+                                              fontWeight: FontWeight.w600,
+                                              color: const Color(0xFF1A1A2E),
+                                            ),
+                                          ),
+                                          Text(
+                                            dateStr,
+                                            style: GoogleFonts.poppins(
+                                              fontSize: Responsive.sp(context, 12),
+                                              fontWeight: FontWeight.w600,
+                                              color: const Color(0xFF2563EB),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                // Heart (top-right)
+                                Positioned(
+                                  top: 10,
+                                  right: 10,
+                                  child: WishlistButton(
+                                    event: event,
+                                    containerSize: 36,
+                                    showShadow: true,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // ── Content ──
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+                              child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
+                                  // Title
                                   Text(
                                     event.title,
                                     style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 14),
+                                      fontSize: Responsive.sp(context, 17),
                                       fontWeight: FontWeight.w600,
                                       color: const Color(0xFF1A1A2E),
                                     ),
-                                    maxLines: 2,
+                                    maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  const SizedBox(height: 8),
-                                  // Date
+
+                                  // Rating: 5 stars + review count
                                   Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Icon(Icons.calendar_today_outlined, size: 14, color: Color(0xFF4A4A4A)),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          'Saturday, 27 Apr\n| 10:00 AM',
-                                          style: GoogleFonts.poppins(
-                                            fontSize: Responsive.sp(context, 11),
-                                            color: Color(0xFF4A4A4A),
-                                            height: 1.3,
-                                          ),
+                                      ...List.generate(
+                                        5,
+                                        (_) => const Icon(Icons.star,
+                                            size: 14, color: Colors.amber),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        event.reviewCount ?? '',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: Responsive.sp(context, 13),
+                                          color: const Color(0xFF4A4A4A),
                                         ),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 8),
-                                  // Venue
+
+                                  // Venue + Book Now
                                   Row(
                                     children: [
-                                      const Icon(Icons.location_on_outlined, size: 14, color: Color(0xFF4A4A4A)),
+                                      const Icon(Icons.location_on_outlined,
+                                          size: 15, color: Color(0xFF4A4A4A)),
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(
                                           event.venue,
                                           style: GoogleFonts.poppins(
-                                            fontSize: Responsive.sp(context, 11),
-                                            color: Color(0xFF4A4A4A),
+                                            fontSize: Responsive.sp(context, 13),
+                                            color: const Color(0xFF4A4A4A),
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      SizedBox(
+                                        height: Responsive.h(context, 36, min: 32),
+                                        child: ElevatedButton(
+                                          onPressed: () =>
+                                              openListingDetail(context, event),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: const Color(0xFFFFCC00),
+                                            foregroundColor: const Color(0xFF1A1A2E),
+                                            elevation: 0,
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 12),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Book Now',
+                                            style: GoogleFonts.poppins(
+                                              fontSize: Responsive.sp(context, 13),
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
-                              
-                              // Book Now button
-                              SizedBox(
-                                width: double.infinity,
-                                height: Responsive.h(context, 34, min: 30),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    openListingDetail(context, event);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFFFCC00),
-                                    foregroundColor: const Color(0xFF1A1A2E),
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    'Book Now',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 12),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 12),
-        // Dot indicators
-        Center(
-          child: SmoothPageIndicator(
-            controller: _pageController,
-            count: items.length,
-            effect: const WormEffect(
-              dotHeight: 8,
-              dotWidth: 8,
-              activeDotColor: Color(0xFFDE7104),
-              dotColor: Color(0xFFE0E0E0),
-              spacing: 6,
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-        ),
-        // Trailing space removed — the next section's 40px topPadding
-        // provides the gap below the dots indicator.
-      ],
+            const SizedBox(height: 12),
+            // Dot indicators
+            Center(
+              child: SmoothPageIndicator(
+                controller: _pageController,
+                count: items.length,
+                effect: const WormEffect(
+                  dotHeight: 8,
+                  dotWidth: 8,
+                  activeDotColor: Color(0xFFDE7104),
+                  dotColor: Color(0xFFE0E0E0),
+                  spacing: 6,
+                ),
+              ),
+            ),
+            // Trailing space removed — the next section's 40px topPadding
+            // provides the gap below the dots indicator.
+          ],
         );
       },
     );
