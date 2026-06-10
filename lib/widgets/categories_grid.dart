@@ -125,11 +125,12 @@ class CategoriesGrid extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFFF0E6D0),
-                Color(0xFFF0E6D0),
-                Colors.white,
+                Color(0xFFFCE7A6), // light golden tint at the top
+                Color(0xFFFEF3D2), // very light gold through the middle
+                Colors.white, // reaches pure white...
+                Colors.white, // ...and holds it so the bottom blends seamlessly
               ],
-              stops: [0.0, 0.58, 1.0],
+              stops: [0.0, 0.42, 0.78, 1.0],
             ),
             borderRadius: BorderRadius.circular(cardRadius),
             boxShadow: [
@@ -198,7 +199,7 @@ class CategoriesGrid extends StatelessWidget {
         Positioned.fill(
           child: CustomPaint(
             painter: _ThreeSidedBorderPainter(
-              color: const Color(0xFFD8C9A8),
+              color: const Color(0xFFCE9B1E),
               radius: cardRadius,
             ),
           ),
@@ -218,10 +219,17 @@ class _ThreeSidedBorderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0
-      ..strokeCap = StrokeCap.butt;
+      ..strokeCap = StrokeCap.butt
+      // Golden at the top, fading to transparent toward the bottom so the
+      // side borders dissolve into the page (matches the fill's fade-out).
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [color, color.withOpacity(0.0)],
+        stops: const [0.35, 0.78],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
 
     final r = radius;
     final path = Path()

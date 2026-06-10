@@ -144,7 +144,7 @@ class TlbSignatureSection extends StatelessWidget {
                           const SizedBox(height: 14),
                           SizedBox(
                             width: double.infinity,
-                            height: Responsive.h(context, 36, min: 32),
+                            height: Responsive.h(context, 42, min: 40),
                             child: ElevatedButton(
                               onPressed: () {
                                 openListingDetail(context, event);
@@ -153,6 +153,12 @@ class TlbSignatureSection extends StatelessWidget {
                                 backgroundColor: const Color(0xFFFFCC00),
                                 foregroundColor: const Color(0xFF1A1A2E),
                                 elevation: 0,
+                                // Let the SizedBox drive the height instead of the
+                                // default 48px padded tap target (which squished
+                                // the button at the previous 32–36px height).
+                                minimumSize: Size.zero,
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),

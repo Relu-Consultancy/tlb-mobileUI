@@ -23,7 +23,7 @@ class SubcategoryEmptyState extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
-            'resources- tlb-ui/empty_state_subcategoryscreen.png',
+            'resources- tlb-ui/coming soon.png',
             width: sw * 0.56,
             fit: BoxFit.contain,
             errorBuilder: (_, __, ___) => SizedBox(height: sw * 0.4),
