@@ -174,21 +174,11 @@ class StealersSection extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 14),
-                          // Price + Grab Deal button
+                          // Grab Deal button (price label removed)
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Flexible(
-                                child: Text(
-                                  '₹${event.price?.toInt() ?? 2000}',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 17),
-                                    fontWeight: FontWeight.w500,
-                                    color: const Color(0xFF1A1A2E),
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
+                              const Spacer(),
                               SizedBox(
                                 height: Responsive.h(context, 44, min: 38),
                                 child: ElevatedButton(

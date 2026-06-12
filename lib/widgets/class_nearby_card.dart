@@ -212,7 +212,7 @@ class ClassNearbyCard extends StatelessWidget {
                             text: event.description!,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 11.5),
-                              color: AppColors.textSecondary,
+                              color: AppColors.textDescription,
                             ),
                           ),
                         ],

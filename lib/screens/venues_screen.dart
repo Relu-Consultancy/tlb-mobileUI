@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/auto_scroll_list.dart';
+import '../widgets/shining_star_badge.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
@@ -10,6 +11,8 @@ import '../sections/home_header.dart';
 import '../widgets/banner_carousel.dart';
 import '../widgets/section_divider_widget.dart';
 import '../sections/app_footer.dart';
+import '../widgets/footer_quote_carousel.dart';
+import '../widgets/app_refresh_indicator.dart';
 import '../widgets/floating_navbar.dart';
 import 'events_screen.dart';
 import 'classes_screen.dart';
@@ -54,9 +57,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
       body: Stack(
         children: [
           // Single scroll view — header scrolls with body (Session-48 fix).
-          RefreshIndicator(
+          AppRefreshIndicator(
             onRefresh: _handleRefresh,
-            color: const Color(0xFFE6A800),
             child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
@@ -250,6 +252,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       ),
 
                       const SizedBox(height: 40),
+                      const FooterQuoteCarousel(),
                       AppFooter(
                           bottomExtra: FloatingNavbar.clearance(context)),
                     ],
@@ -409,9 +412,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Large image with tag pills overlapping the bottom-left ──
+            // ── Large image with tag pills inside the bottom-left ──
             Stack(
-              clipBehavior: Clip.none,
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
@@ -428,7 +430,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                 ),
                 Positioned(
                   left: 14,
-                  bottom: -13,
+                  bottom: 12,
                   child: Row(
                     children: [
                       if ((event.tag ?? '').isNotEmpty)
@@ -440,7 +442,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 20), // room for the overlapping pills
+            const SizedBox(height: 12),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
@@ -1031,9 +1033,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image with overlapping tag pills
+            // Image with tag pills inside the bottom-left
             Stack(
-              clipBehavior: Clip.none,
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
@@ -1042,7 +1043,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                 ),
                 Positioned(
                   left: 14,
-                  bottom: -13,
+                  bottom: 12,
                   child: Row(children: [
                     if ((event.tag ?? '').isNotEmpty)
                       _bigDayPill(event.tag!, const Color(0xFFDB2777), Colors.white),
@@ -1052,7 +1053,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 20), // room for pills
+            const SizedBox(height: 12),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
@@ -1187,7 +1188,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
     return GestureDetector(
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
       child: Container(
-      width: Responsive.cardWidth(context, fraction: 0.55, max: 235),
+      width: Responsive.cardWidth(context, fraction: 0.72, max: 300),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -1210,16 +1211,11 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 216, min: 198), color: Colors.grey.shade200),
                 ),
               ),
-              // Pink star badge — top left
-              Positioned(
+              // Shining star badge — top left
+              const Positioned(
                 top: 10,
                 left: 10,
-                child: Container(
-                  width: 30,
-                  height: 30,
-                  decoration: const BoxDecoration(color: Color(0xFFEC4899), shape: BoxShape.circle),
-                  child: const Icon(Icons.star_rounded, size: 18, color: Colors.white),
-                ),
+                child: ShiningStarBadge(size: 36),
               ),
               // Tag pills overlaid at bottom of image
               if (tags.isNotEmpty)

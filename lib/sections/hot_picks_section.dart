@@ -189,33 +189,11 @@ class HotPicksSection extends StatelessWidget {
                             ),
                             const SizedBox(height: 12),
 
-                            // Bottom row with Price and Book Now button
+                            // Bottom row with Book Now button (price label removed)
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Expanded(
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: event.price != null ? '₹${event.price!.toInt()}' : '₹5000',
-                                          style: GoogleFonts.poppins(
-                                            fontSize: Responsive.sp(context, 17),
-                                            fontWeight: FontWeight.w500,
-                                            color: const Color(0xFF1A1A2E),
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: ' / child',
-                                          style: GoogleFonts.poppins(
-                                            fontSize: Responsive.sp(context, 13),
-                                            color: Color(0xFF4A4A4A),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                                const Spacer(),
                                 SizedBox(
                                   width: Responsive.w(context, 82, min: 76), 
                                   height: Responsive.h(context, 34, min: 30),

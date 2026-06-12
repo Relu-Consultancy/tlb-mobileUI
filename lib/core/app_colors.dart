@@ -20,6 +20,7 @@ class AppColors {
   // Darkened from 0xFF6B7280 → somewhat-dark grey for stronger, more legible
   // secondary text on cards (age range, rating, venue, etc.).
   static const Color textSecondary = Color(0xFF4A4A4A);
+  static const Color textDescription = Color(0xFF2D2D2D); // card description body — dark grey (not black)
   static const Color textWhite = Colors.white;
 
   // Accent

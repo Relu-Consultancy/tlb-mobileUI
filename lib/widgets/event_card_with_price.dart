@@ -111,31 +111,11 @@ class EventCardWithPrice extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                // Price and Book Now
+                // Book Now (price label removed)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: '₹${event.price?.toInt() ?? 0}',
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 20),
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          TextSpan(
-                            text: ' / Person',
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 13),
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    const Spacer(),
                     ElevatedButton(
                       onPressed: () {
                         Navigator.push(

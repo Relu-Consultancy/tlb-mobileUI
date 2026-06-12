@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/auto_scroll_list.dart';
+import '../widgets/shining_star_badge.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../core/app_colors.dart';
@@ -16,6 +17,8 @@ import '../widgets/new_on_tlb_card.dart';
 import '../widgets/holiday_special_card.dart';
 import '../widgets/build_skill_card.dart';
 import '../sections/app_footer.dart';
+import '../widgets/footer_quote_carousel.dart';
+import '../widgets/app_refresh_indicator.dart';
 import '../widgets/floating_navbar.dart';
 import '../widgets/all_categories_popup.dart';
 import 'events_screen.dart';
@@ -99,9 +102,8 @@ class _ClassesScreenState extends State<ClassesScreen> {
       body: Stack(
         children: [
           // Single scroll view — header scrolls with body (Session-48 fix).
-          RefreshIndicator(
+          AppRefreshIndicator(
             onRefresh: _handleRefresh,
-            color: const Color(0xFFE6A800),
             child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
@@ -466,11 +468,23 @@ class _ClassesScreenState extends State<ClassesScreen> {
                             ];
                             return Padding(
                               padding: const EdgeInsets.only(right: 14),
-                              child: ClassNearbyCard(
-                                event: DummyData.classesSpecialFocus[index],
-                                width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
-                                buttonLabel: 'Join Class',
-                                tagColor: tagColors[index % tagColors.length],
+                              child: Stack(
+                                children: [
+                                  ClassNearbyCard(
+                                    event: DummyData.classesSpecialFocus[index],
+                                    width: Responsive.cardWidth(context,
+                                        fraction: 0.85, max: 360),
+                                    buttonLabel: 'Join Class',
+                                    tagColor:
+                                        tagColors[index % tagColors.length],
+                                  ),
+                                  // Shining star badge over the card's image.
+                                  const Positioned(
+                                    top: 10,
+                                    left: 10,
+                                    child: ShiningStarBadge(size: 40),
+                                  ),
+                                ],
                               ),
                             );
                           },
@@ -478,6 +492,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
                       const SizedBox(height: 16),
 
+                      const FooterQuoteCarousel(),
                       AppFooter(
                           bottomExtra: FloatingNavbar.clearance(context)),
                     ],

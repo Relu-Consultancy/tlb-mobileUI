@@ -8,6 +8,7 @@ import '../models/api_notification_model.dart';
 import '../providers/auth_state.dart';
 import '../providers/notifications_state.dart';
 import '../services/notification_service.dart';
+import '../widgets/app_refresh_indicator.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -208,8 +209,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     if (_error != null) return _buildError();
     if (_items.isEmpty) return _buildEmpty();
 
-    return RefreshIndicator(
-      color: const Color(0xFFFFCC00),
+    return AppRefreshIndicator(
       onRefresh: _load,
       child: ListView.separated(
         controller: _scrollCtrl,
@@ -240,8 +240,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   Widget _buildEmpty() {
-    return RefreshIndicator(
-      color: const Color(0xFFFFCC00),
+    return AppRefreshIndicator(
       onRefresh: _load,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),

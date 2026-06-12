@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-06-10 (Session 55)
+**Last Updated:** 2026-06-12 (Session 57)
 
 ---
 
@@ -200,7 +200,7 @@ HomeScreen (sidebar/action flows)
 | `banner_carousel.dart` | Auto-scroll image carousel with overlay style. Params incl. `fixedCardWidth`, `cornerRadius` (0 = full-bleed; S51), `overlayDots` (page dots overlaid on the banner bottom; S51) |
 | `event_card.dart` / `event_card_with_rating.dart` / `event_card_with_price.dart` | Various event card styles |
 | `class_nearby_card.dart` | Horizontal class card with tag + button |
-| `wishlist_button.dart` | Heart toggle with disperse animation |
+| `wishlist_button.dart` | Heart toggle (`LikeButton`) with disperse animation. S56: `LikeButton` rendered at `buttonSize` (24) inside the 36px white circle and wrapped in `OverflowBox` so its internal layout can never trigger the red "OVERFLOWED" stripe; circular Container's `Clip.hardEdge` clips stray paint |
 | `partner_follow_button.dart` | Follow/Unfollow stateful button — grey outlined "Follow" / yellow filled "Following"; auth guard; optimistic update; returns `SizedBox.shrink()` when partnerId is null |
 | `explore_categories_grid.dart` | 3-col category icon grid. `scrollable: true` + `visibleRows` = fixed-height inner scroll with "View All" chip overlaid at bottom. S51: bottom-fade `ShaderMask` (soft dissolve) + `maxScrollRows` cap (Events uses 3) |
 | `explore_format_row.dart` | Horizontal format circles row — 6 circle images from `Explore_by_format/`; `onFormatTap(index)`; `ColorFilter.matrix` inversion for MasterClass; per-entry `scale`; `ClipOval + BoxFit.cover`. S51: `LayoutBuilder` sizes circles so ~3 fill the width with even 12 px gaps (~112 px) |
@@ -413,11 +413,19 @@ FloatingNavbar returns a full-width Container with:
 
 ### Home Header
 ```
-Layer 1 (image + gradient mask):
-  ShaderMask(BlendMode.screen) on `resources- tlb-ui/header.jpg` (flipped vertically)
-  Shader: LinearGradient — Color(0xFFFFB219) top → Colors.white bottom
-  BlendMode.screen brightens image: golden tint at top, fades to white at bottom
-  JPG-safe: screen works on RGB channels, no alpha needed
+Layer 1 (cloud image, golden-tinted, fading out):
+  Positioned(top:0,left:0,right:0, bottom: 28)   ← NOT Positioned.fill (S56 seam fix)
+    └── ShaderMask(BlendMode.dstIn, stops [0,0.35,1.0])  ← fades cloud to transparent at bottom
+          └── ColorFiltered(BlendMode.screen, Color(0xFFFFB219))  ← golden tint
+                └── Transform.flip(flipY) → Image.asset('header.jpg', fitWidth, topCenter)
+  ── Seam fix (S56): ShaderMask forces a saveLayer whose bottom edge leaves a 1px
+     premultiplied-RGB fringe of the screen-blended cloud (independent of the alpha
+     mask — fading the shader did NOT remove it). `bottom: 28` tucks that edge behind
+     the opaque search bar, so it can't be seen, while the cloud still fades out around
+     the search bar (visually full). The page gradient in home_screen.dart holds a flat
+     cream band (#FFF0D0) across the header-bottom zone so the transition is continuous.
+     Do NOT change the Stack to Clip.antiAlias or tweak shader stops — neither removes
+     the fringe; only the inset (or covering it) works. Verified on-device.
 
 Layer 2 (content):
   SafeArea → Column → greeting row + search bar
@@ -867,6 +875,96 @@ share_plus: ^7.2.2           # Native share sheet for events/classes/programs/ve
 ---
 
 ## 12. Development Sessions Summary
+
+### Session 57 — Logo/brand pass: SVG footer + splash + app icon, rotating quotes, branded refresh loader, About Us
+A brand-consistency pass centred on the TLB wordmark logo (`assets/icons/the_little_broadway_logo.svg`, viewBox cropped to the artwork `100 198 900 706`). The same logo now appears in the footer, splash, and app launcher icon. Added a rotating cursive quote strip, a new About Us screen, a branded pull-to-refresh loader, and assorted card polish.
+
+#### New brand asset + fonts
+| Change | Files |
+|--------|-------|
+| **TLB wordmark SVG added** — black "tlb / The Little Broadway" logo; reused across footer, splash, About Us, app icon | `assets/icons/the_little_broadway_logo.svg` (NEW) |
+| **Dancing Script cursive font bundled** — variable TTF in `google_fonts/`, registered as Flutter `fonts:` family `DancingScript` (works offline; runtime fetch stays disabled) | `google_fonts/DancingScript-Variable.ttf` (NEW), `pubspec.yaml` |
+
+#### Footer redesign (`app_footer.dart`)
+| Change | Files |
+|--------|-------|
+| **Replaced `main-footer.png` with the logo SVG** on a header-matched warm gradient that dissolves UP into the page (transparent cream at top → golden-orange `#FB9512` at the bottom edge; mirrors the header's down-fade). Logo width 0.46× screen; `bottomExtra` filled by the same gradient (no seam) | `lib/sections/app_footer.dart` |
+
+#### Rotating quote strip
+| Change | Files |
+|--------|-------|
+| **`FooterQuoteCarousel`** — 30 kids/energy quotes, one shown at a time in **cursive** (Dancing Script), new quote every **10 s** with a fade+slide+scale `AnimatedSwitcher` transition; golden accent bar above. Placed just above `AppFooter` on all 5 tab screens | `lib/widgets/footer_quote_carousel.dart` (NEW), `home/events/classes/programs/venues_screen.dart` |
+
+#### Splash redesign (`splash_screen.dart`)
+| Change | Files |
+|--------|-------|
+| **Rebuilt** — logo SVG (elastic scale + fade) on a brand golden gradient (`#FFE08A → #FFC93C → #FFB219`), soft radial glow, cursive "Where every star shines" tagline, pulsing loading dots; fade-out to `nextScreen` (~2.8 s). Old `assets/images/tlb_logo.png` reference dropped | `lib/screens/splash_screen.dart` |
+
+#### App launcher icon
+| Change | Files |
+|--------|-------|
+| **Icon updated to the TLB logo** — rasterised the SVG (headless Chrome) to a gold-bg legacy icon + a transparent padded adaptive foreground; generated all Android/iOS icons via `flutter_launcher_icons` (adaptive bg `#FFC21A`) | `assets/icon/app_icon.png` + `app_icon_fg.png` (NEW), `pubspec.yaml`, `android/.../mipmap-*`, `ios/.../AppIcon.appiconset` |
+
+#### Branded pull-to-refresh loader
+| Change | Files |
+|--------|-------|
+| **`AppRefreshIndicator`** — wraps `custom_refresh_indicator` to show TLB's golden bouncing-dots (`AppLoaderInline`) instead of the Material spinner; content slides down on pull. Swapped into all 12 `RefreshIndicator` call sites (11 screens) | `lib/widgets/app_refresh_indicator.dart` (NEW), `pubspec.yaml` (`custom_refresh_indicator`), home/events/classes/programs/venues/followed_partners/your_reviews/saved_events/notification/bookings/tickets_list screens |
+
+#### About Us (new screen)
+| Change | Files |
+|--------|-------|
+| **`AboutUsScreen`** — logo SVG on a golden banner that extends behind a transparent AppBar (gradient covers the top); highlighted title chip; placeholder "Who We Are" copy; **Terms & Conditions** button → popup dialog with placeholder copy. Added "About Us" item to the profile menu (after Help) | `lib/screens/about_us_screen.dart` (NEW), `lib/screens/profile_screen.dart` |
+
+#### Followed Partners — interactive cards
+| Change | Files |
+|--------|-------|
+| **More interactive + vibrant** — whole card tappable → `OrganizerProfileScreen` (pre-fetched `ApiProvider` from the followed-partner data) with press-scale + golden ripple + haptic; "View Profile" gradient **pill** affordance; Unfollow now shows a **confirmation dialog**. Muted amber `#F5A623` → vibrant orange `#FF7A00`; orange→gold gradient stripe/pill, gradient avatar | `lib/screens/followed_partners_screen.dart` |
+
+#### Card polish
+| Change | Files |
+|--------|-------|
+| **Price labels removed** from section cards (CTA buttons kept, right-aligned via `Spacer`) | `hot_picks/parents_favorite/stealers/family_feels_section.dart`, `event_card_with_price.dart`, `new_on_tlb_card.dart` |
+| **Description text darkened** — card description body uses new `AppColors.textDescription` (`#2D2D2D`, dark grey not black); only the description line (not other secondary text) | `app_colors.dart`, `category_event_card/class_nearby_card/online_event_card/special_focus_card/trending_card.dart`, `discover_near_you_section.dart` |
+| **Section-divider long-title accent length** 40 → 90 px (less stubby; `Flexible` still prevents overflow) | `lib/widgets/section_divider_widget.dart` |
+| **Venues tag pills moved inside the image** (Big Days, Mall) — were straddling the image/description seam (`bottom: -13` → `bottom: 12`) | `lib/screens/venues_screen.dart` |
+
+**Tests:** splash test updated for the SVG logo + tagline; three "scroll to bottom" tests switched from `pumpAndSettle()` to bounded `pump()` (screens now have perpetual auto-scroll rails + rotating quote). **`flutter test`: 130/130 pass.** `flutter analyze`: clean (37 pre-existing baseline hints only).
+
+### Session 56 — Explore-the-Stage golden box, detail/empty-state polish, home-header seam fix
+Continued UI polish, then a deep, on-device-verified fix of the long-standing header→Spotlight seam plus its two follow-up regressions. The seam work was diagnosed by running the app on the Android emulator and using pixel-level screenshot analysis (the cause was a `ShaderMask` saveLayer edge fringe, not a gradient/line).
+
+#### Explore the Stage (home category grid)
+| Change | Files |
+|--------|-------|
+| **New category icons** — Events=tickets (`image 264`), Classes=books+pencils (`image 295`), Programs=trophy+grad-cap (`image 267`), Venues=map-pin (`image 296`); folder registered in pubspec | `lib/data/dummy_data.dart`, `pubspec.yaml`, `resources- tlb-ui/homescreen_Explorethestage/` |
+| **Golden-yellow gradient box** around each icon — light golden fill (`#FCE7A6`→`#FEF3D2`→white, holds white at bottom) that blends seamlessly into the page; 3-sided border (left/top/right, bottom open) darkened to `#CE9B1E` with a top→bottom fade shader so the sides dissolve into the page | `lib/widgets/categories_grid.dart` |
+
+#### Detail screens & empty states
+| Change | Files |
+|--------|-------|
+| **About box brighter** — page bg reverted to `#FAFAFC` while the About card stays pure white so it reads as whiter/lighter against the page | `lib/widgets/detail_sections.dart` |
+| **Gallery shows ALL images as auto-carousel** — `DetailGallery` confirmed to pass every non-cover media item; static `ListView` swapped for `AutoScrollList` | `lib/widgets/detail_sections.dart` |
+| **Coming-soon empty state image** — category-screen empty state (`SubcategoryEmptyState`) now uses `resources- tlb-ui/coming soon.png` | `lib/widgets/subcategory_empty_state.dart` |
+
+#### TLB Signature CTA fix
+| Change | Files |
+|--------|-------|
+| **Invisible "View Now" button fixed** — button had `height: 36 (min 32)` but kept the default `materialTapTargetSize: padded` (≥48px tap target), which collapsed it. Added `tapTargetSize: shrinkWrap` + `minimumSize: Size.zero` + explicit padding; height set to 42 (min 40) | `lib/sections/tlb_signature_section.dart` |
+
+#### Home-header → Spotlight seam (the definitive fix)
+| Change | Files |
+|--------|-------|
+| **Root cause (pixel-verified):** the cloud's `ShaderMask` (`BlendMode.dstIn`) forces a `saveLayer` whose hard bottom edge leaves a 1px premultiplied-RGB fringe (golden `#FFD78D`) of the screen-blended cloud, at the header's bottom — right under the search bar. It is independent of the mask's alpha (so fading the shader, changing stops, anti-aliased clipping, and transparent-cream overlays all FAILED; an earlier overlay using `Colors.transparent` = transparent **black** even introduced a dark band). | — |
+| **Fix:** cloud layer changed from `Positioned.fill` → `Positioned(..., bottom: 28)`, tucking the fringe behind the opaque search bar; the cloud still fades out around the search bar (visually full). Page gradient in home_screen holds a flat cream band (`#FFF0D0`) across the header-bottom zone for a continuous surface. ShaderMask/ColorFiltered/image left at original values. | `lib/sections/home_header.dart`, `lib/screens/home_screen.dart` |
+| **Walkthrough crash fixed (surfaced while running)** — location `Showcase` used `onTargetClick` without `disposeOnTap`, which `showcaseview` now asserts; red-screened the whole header on first launch. Added `disposeOnTap: true` | `lib/sections/home_header.dart` |
+
+#### Seam-fix regressions (both fixed & on-device verified)
+| Change | Files |
+|--------|-------|
+| **Cloud no longer cut off** — restored original header padding (top 14, bottom 20) that an interim step had reduced; with full padding the `bottom: 28` cloud extends to its original depth | `lib/sections/home_header.dart` |
+| **Wishlist heart overflow removed** — `LikeButton` was given `size: containerSize` (36) and overflowed its 36px circle (red "OVERFLOWED" stripe). Now rendered at `buttonSize` (24) inside an `OverflowBox`; card spacing bumped 12→16 | `lib/widgets/wishlist_button.dart`, `lib/widgets/banner_carousel.dart` |
+
+**`flutter analyze`:** clean (37 pre-existing baseline hints only). **`flutter test`:** smoke + wishlist tests pass. Seam/cloud/heart each verified on the Android emulator via zoomed screenshots + pixel scans.
 
 ### Session 55 — Home-feed wiring + section/card polish, detail-screen restyle, gallery carousel
 A long UI/UX iteration pass across home, the four listing screens, and the four detail screens. Built the Spotlight section from the homepage API, then reverted home sections to mock data on request; fixed the wishlist crash; redesigned the Account header and several partner/section cards; and finished with a detail-screen restyle.

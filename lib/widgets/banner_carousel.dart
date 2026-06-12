@@ -439,8 +439,8 @@ class _BannerCarouselState extends State<BannerCarousel> {
                 // Wishlist heart (non-overlay mode only)
                 if (!widget.overlayStyle)
                   Positioned(
-                    top: 12,
-                    right: 12,
+                    top: 16,
+                    right: 16,
                     child: WishlistButton(event: event),
                   ),
               ],

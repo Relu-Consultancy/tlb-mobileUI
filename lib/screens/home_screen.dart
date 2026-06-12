@@ -21,6 +21,8 @@ import '../sections/family_feels_section.dart';
 import '../sections/new_on_the_block_section.dart';
 import '../sections/parents_favorite_section.dart';
 import '../sections/app_footer.dart';
+import '../widgets/footer_quote_carousel.dart';
+import '../widgets/app_refresh_indicator.dart';
 import '../widgets/floating_navbar.dart';
 import '../helpers/walkthrough_keys.dart';
 import '../services/walkthrough_service.dart';
@@ -179,9 +181,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ValueListenableBuilder<String>(
             valueListenable: LocationState().selectedCity,
             builder: (context, city, _) {
-              return RefreshIndicator(
+              return AppRefreshIndicator(
                 onRefresh: _handleRefresh,
-                color: const Color(0xFFE6A800),
                 child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
@@ -199,13 +200,17 @@ class _HomeScreenState extends State<HomeScreen> {
                           colors: [
                             Color(0xFFFFD893), // vibrant warm yellow at top
                             Color(0xFFFFE3AE),
-                            Color(0xFFFFEDC4),
-                            Color(0xFFFFF1D2), // hold the warm cream through
-                            // the Spotlight divider so the cloud image fades
-                            // into a continuously-warm band, not a white one.
+                            Color(0xFFFFF0D0), // ── flat cream band ──────────
+                            Color(0xFFFFF0D0), // Held CONSTANT across the whole
+                            // header-bottom zone so that wherever the header
+                            // ends (status-bar height varies per device) the
+                            // background colour there is the SAME cream. The
+                            // header's blend layer fades into this exact cream,
+                            // so it always lands on a flat colour — no gradient
+                            // step to mismatch, hence no seam on any device.
                             Colors.white, // fade to scaffold white at the end
                           ],
-                          stops: [0.0, 0.30, 0.55, 0.88, 1.0],
+                          stops: [0.0, 0.30, 0.55, 0.86, 1.0],
                         ),
                       ),
                       child: Column(
@@ -305,6 +310,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       // "Where Every Star Shines" (renamed Special Needs)
                       const RepaintBoundary(child: SpecialNeedsSection()),
                       const RepaintBoundary(child: TlbSignatureSection()),
+
+                      // Rotating cursive quote just above the footer.
+                      const RepaintBoundary(child: FooterQuoteCarousel()),
 
                       // AppFooter — orange gradient stretched past the
                       // floating navbar (bottomExtra) so there's no white gap.

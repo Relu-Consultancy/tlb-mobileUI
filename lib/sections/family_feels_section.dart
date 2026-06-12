@@ -128,19 +128,6 @@ class FamilyFeelsSection extends StatelessWidget {
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 8),
-                                
-                                // Pricing Text
-                                Text(
-                                  'Starting from ₹${event.price?.toInt() ?? 200}',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 13),
-                                    fontWeight: FontWeight.w500,
-                                    color: const Color(0xFF4A4A68),
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
                               ],
                             ),
                             

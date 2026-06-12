@@ -149,7 +149,7 @@ class SpecialFocusCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 10.5),
-                            color: AppColors.textSecondary,
+                            color: AppColors.textDescription,
                             height: 1.4,
                           ),
                         ),

@@ -147,7 +147,7 @@ class CategoryEventCard extends StatelessWidget {
                     text: TextSpan(
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 10.5),
-                        color: AppColors.textSecondary,
+                        color: AppColors.textDescription,
                         height: 1.4,
                       ),
                       children: [

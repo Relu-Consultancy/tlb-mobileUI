@@ -53,7 +53,9 @@ class SectionDividerWidget extends StatelessWidget {
   static const int _kLongTitleThreshold = 16;
 
   /// Accent-line length applied to long titles (see [_kLongTitleThreshold]).
-  static const double _kCompactLineLength = 40;
+  /// Kept generous (not stubby) — each line sits in a `Flexible`, so it shrinks
+  /// to fit on narrow screens without ever overflowing.
+  static const double _kCompactLineLength = 90;
 
   @override
   Widget build(BuildContext context) {

@@ -8,6 +8,7 @@ import '../services/classes_listing_service.dart';
 import '../services/events_listing_service.dart';
 import '../services/programs_listing_service.dart';
 import '../widgets/app_loader.dart';
+import '../widgets/app_refresh_indicator.dart';
 import 'booking_detail_screen.dart';
 
 class BookingsScreen extends StatefulWidget {
@@ -129,8 +130,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
     if (_error != null) return _buildError();
     final items = _filtered;
     if (items.isEmpty) return _buildEmpty();
-    return RefreshIndicator(
-      color: const Color(0xFFFFCC00),
+    return AppRefreshIndicator(
       onRefresh: _loadBookings,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -145,8 +145,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
   }
 
   Widget _buildEmpty() {
-    return RefreshIndicator(
-      color: const Color(0xFFFFCC00),
+    return AppRefreshIndicator(
       onRefresh: _loadBookings,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),

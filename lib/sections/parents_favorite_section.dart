@@ -175,37 +175,14 @@ class ParentsFavoriteSection extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
 
-                          // Price + Visit button
+                          // Visit button (price label removed)
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Expanded(
-                                child: RichText(
-                                  text: TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: 'Price – ',
-                                        style: GoogleFonts.poppins(
-                                          fontSize: Responsive.sp(context, 14),
-                                          color: Color(0xFF4A4A4A),
-                                        ),
-                                      ),
-                                      TextSpan(
-                                        text:
-                                            '₹${(event.price ?? 800).toInt()}',
-                                        style: GoogleFonts.poppins(
-                                          fontSize: Responsive.sp(context, 15),
-                                          fontWeight: FontWeight.w600,
-                                          color: const Color(0xFF1A1A2E),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                              const Spacer(),
                               SizedBox(
                                 width: Responsive.w(context, 86, min: 78),
-                                height: Responsive.h(context, 38, min: 34),
+                                height: Responsive.h(context, 38, min: 36),
                                 child: ElevatedButton(
                                   onPressed: () {
                                     openListingDetail(context, event);
@@ -214,6 +191,13 @@ class ParentsFavoriteSection extends StatelessWidget {
                                     backgroundColor: const Color(0xFFFFCC00),
                                     foregroundColor: const Color(0xFF1A1A2E),
                                     elevation: 0,
+                                    // Let the SizedBox drive the height instead of
+                                    // the default 48px padded tap target, which
+                                    // could collapse the button at small/short
+                                    // resolutions (same fix as TLB Signature CTA).
+                                    minimumSize: Size.zero,
+                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20),
                                     ),

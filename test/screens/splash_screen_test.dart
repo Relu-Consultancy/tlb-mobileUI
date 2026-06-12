@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tlb_mobile_ui/screens/splash_screen.dart';
 
@@ -6,28 +7,20 @@ import '../helpers/test_setup.dart';
 
 void main() {
   group('SplashScreen Tests', () {
-    testWidgets('renders splash screen and logo', (WidgetTester tester) async {
-      final mockNextScreen = Scaffold(body: Text('Next Screen'));
+    testWidgets('renders splash logo and navigates', (WidgetTester tester) async {
+      const mockNextScreen = Scaffold(body: Text('Next Screen'));
 
-      await pumpTLBApp(tester, SplashScreen(nextScreen: mockNextScreen));
+      await pumpTLBApp(tester, const SplashScreen(nextScreen: mockNextScreen));
 
-      // Verify the splash screen is rendered by finding the asset image
-      expect(find.byType(Image), findsOneWidget);
-      expect(
-        find.byWidgetPredicate(
-          (widget) =>
-              widget is Image &&
-              widget.image is AssetImage &&
-              (widget.image as AssetImage).assetName == 'assets/images/tlb_logo.png',
-        ),
-        findsOneWidget,
-      );
+      // Logo now rendered as the TLB SVG, with the cursive tagline.
+      expect(find.byType(SvgPicture), findsOneWidget);
+      expect(find.text('Where every star shines'), findsOneWidget);
 
-      // Verify the animation progresses
+      // Animation progresses
       await tester.pump(const Duration(milliseconds: 1000));
-      expect(find.byType(Image), findsOneWidget);
+      expect(find.byType(SvgPicture), findsOneWidget);
 
-      // Verify navigation occurs after the animation completes (3600ms total)
+      // Navigation occurs after the animation completes (~2800ms + transition).
       await tester.pumpAndSettle(const Duration(milliseconds: 4000));
       expect(find.text('Next Screen'), findsOneWidget);
     });

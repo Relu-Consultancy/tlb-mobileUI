@@ -7,6 +7,7 @@ import '../widgets/section_divider_widget.dart';
 import '../providers/home_feed_state.dart';
 import '../data/dummy_data.dart';
 import '../core/listing_navigation.dart';
+import '../widgets/shining_star_badge.dart';
 
 class SpecialNeedsSection extends StatelessWidget {
   const SpecialNeedsSection({super.key});
@@ -72,32 +73,12 @@ class SpecialNeedsSection extends StatelessWidget {
                               fit: BoxFit.cover,
                             ),
                           ),
-                          // Red star badge (top-left)
-                          Positioned(
+                          // Shining star badge (top-left) — pink→orange
+                          // gradient star with a looping left→right shine.
+                          const Positioned(
                             top: 8,
                             left: 8,
-                            child: Container(
-                              width: 32,
-                              height: 32,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Color(0xFFFF5A5A),
-                                    Color(0xFFE53935),
-                                  ],
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Color(0x33000000),
-                                    blurRadius: 4,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(Icons.star,
-                                  size: 16, color: Colors.white),
-                            ),
+                            child: ShiningStarBadge(size: 40),
                           ),
                         ],
                       ),
@@ -120,7 +101,7 @@ class SpecialNeedsSection extends StatelessWidget {
                                   alignment: Alignment.centerRight,
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 5),
+                                        horizontal: 10, vertical: 3),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20),
                                       gradient: const LinearGradient(
@@ -132,8 +113,11 @@ class SpecialNeedsSection extends StatelessWidget {
                                     ),
                                     child: Text(
                                       event.tag!,
+                                      maxLines: 1,
+                                      softWrap: false,
+                                      overflow: TextOverflow.visible,
                                       style: GoogleFonts.poppins(
-                                        fontSize: Responsive.sp(context, 12),
+                                        fontSize: Responsive.sp(context, 10),
                                         fontWeight: FontWeight.w500,
                                         color: Colors.white,
                                       ),

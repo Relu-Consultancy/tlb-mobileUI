@@ -38,7 +38,10 @@ void main() {
         // Initially "Special Focus" might be off-screen
         // Scroll to the bottom
         await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0, -2000));
-        await tester.pumpAndSettle();
+        // Bounded pumps (not pumpAndSettle) — the screen has perpetual
+        // auto-scrolling rails + a rotating quote that never "settle".
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
 
         // Check for footer or last section
         expect(find.text('Special Focus'), findsOneWidget);

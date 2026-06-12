@@ -14,6 +14,7 @@ import 'bookings_screen.dart';
 import 'saved_events_screen.dart';
 import 'help_centre_screen.dart';
 import 'account_settings_screen.dart';
+import 'about_us_screen.dart';
 import 'edit_profile_screen.dart';
 import 'payment_settings_screen.dart';
 import 'your_reviews_screen.dart';
@@ -368,6 +369,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               label: 'Help',
               onTap: () => Navigator.push(context,
                   MaterialPageRoute(builder: (_) => const HelpCentreScreen())),
+            ),
+            _item(
+              icon: Icons.info_outline_rounded,
+              label: 'About Us',
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const AboutUsScreen())),
             ),
             _item(
               icon: Icons.logout_rounded,

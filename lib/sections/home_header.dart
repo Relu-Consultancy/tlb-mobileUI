@@ -29,10 +29,24 @@ class HomeHeader extends StatelessWidget {
       clipBehavior: Clip.hardEdge,
       children: [
         // ── Layer 1: Cloud image, golden-tinted, fading to transparent ──
-        // Restored. ColorFiltered tints the cloud image golden (screen blend);
+        // ColorFiltered tints the cloud image golden (screen blend);
         // ShaderMask(dstIn) fades it to transparent toward the bottom so the
         // home-screen warm gradient shows through.
-        Positioned.fill(
+        //
+        // `bottom: 28` (instead of Positioned.fill) is what removes the thin
+        // seam. ShaderMask forces a saveLayer whose bottom edge leaves a 1px
+        // fringe of the screen-blended cloud RGB (a premultiplied-alpha buffer-
+        // edge artifact — independent of the mask's alpha, which is why fading
+        // the shader didn't help). Insetting the cloud's bottom by 28 tucks that
+        // edge BEHIND the opaque search bar, where it can't be seen. With the
+        // header at its full (original) padding, the cloud still fades out right
+        // around the search bar — visually full, exactly like the original — but
+        // the fringe is hidden. (Verified on-device: no seam, full cloud.)
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 28,
           child: ShaderMask(
             blendMode: BlendMode.dstIn,
             shaderCallback: (bounds) => const LinearGradient(
@@ -318,7 +332,10 @@ class HomeHeader extends StatelessWidget {
       scaleAnimationCurve: Curves.easeInOut,
       movingAnimationDuration: const Duration(milliseconds: 350),
       targetPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      // Tapping the location chip opens LocationScreen; tour advances on pop
+      // Tapping the location chip opens LocationScreen; tour advances on pop.
+      // `disposeOnTap` is required by showcaseview whenever `onTargetClick` is
+      // set; we handle navigation ourselves so dispose the showcase on tap.
+      disposeOnTap: true,
       onTargetClick: () {
         Navigator.push(
           context,

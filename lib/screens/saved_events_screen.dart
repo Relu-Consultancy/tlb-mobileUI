@@ -5,6 +5,7 @@ import '../providers/saved_events_state.dart';
 import '../providers/auth_state.dart';
 import '../models/event_model.dart';
 import '../widgets/app_loader.dart';
+import '../widgets/app_refresh_indicator.dart';
 import 'event_detail_screen.dart';
 
 class SavedEventsScreen extends StatefulWidget {
@@ -71,9 +72,8 @@ class _SavedEventsScreenState extends State<SavedEventsScreen> {
     if (_loading) return const AppLoader();
     if (_error != null) return _buildError(context);
 
-    return RefreshIndicator(
+    return AppRefreshIndicator(
       onRefresh: _fetch,
-      color: const Color(0xFFFFCC00),
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

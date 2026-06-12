@@ -215,7 +215,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                                       'Slides, Splash Zone, Mini zipline & shaded picnic areas.',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 13),
-                                    color: Color(0xFF4A4A4A),
+                                    color: Color(0xFF2D2D2D), // dark grey description
                                   ),
                                 ),
                               ],

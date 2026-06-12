@@ -7,6 +7,7 @@ import '../providers/auth_state.dart';
 import '../providers/user_reviews_state.dart';
 import '../services/review_service.dart';
 import '../widgets/app_loader.dart';
+import '../widgets/app_refresh_indicator.dart';
 import '../widgets/review_sheet.dart';
 
 class YourReviewsScreen extends StatefulWidget {
@@ -54,9 +55,8 @@ class _YourReviewsScreenState extends State<YourReviewsScreen> {
           style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 18), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E)),
         ),
       ),
-      body: RefreshIndicator(
+      body: AppRefreshIndicator(
         onRefresh: _load,
-        color: const Color(0xFFFFB902),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

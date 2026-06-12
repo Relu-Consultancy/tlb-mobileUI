@@ -4,10 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 import '../models/api_followed_partner_model.dart';
+import '../models/api_provider_model.dart';
 import '../providers/auth_state.dart';
 import '../providers/follow_state.dart';
 import '../services/partner_service.dart';
 import '../widgets/app_loader.dart';
+import '../widgets/app_refresh_indicator.dart';
+import 'organizer_profile_screen.dart';
 
 class FollowedPartnersScreen extends StatefulWidget {
   const FollowedPartnersScreen({super.key});
@@ -48,6 +51,81 @@ class _FollowedPartnersScreenState extends State<FollowedPartnersScreen> {
         _loading = false;
       });
     }
+  }
+
+  Future<void> _confirmUnfollow(ApiFollowedPartner p) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: Text(
+          'Unfollow?',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            fontSize: Responsive.sp(context, 16),
+            color: const Color(0xFF1A1A2E),
+          ),
+        ),
+        content: Text(
+          'Stop following ${p.profile.businessName}? You can follow them again anytime.',
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 13),
+            color: Colors.grey.shade600,
+            height: 1.5,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Cancel',
+                style: GoogleFonts.poppins(
+                    color: Colors.grey.shade600, fontWeight: FontWeight.w500)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFFCC00),
+              foregroundColor: const Color(0xFF1A1A2E),
+              elevation: 0,
+              shape:
+                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            ),
+            child: Text('Unfollow',
+                style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) {
+      HapticFeedback.mediumImpact();
+      _unfollow(p);
+    }
+  }
+
+  void _openProfile(ApiFollowedPartner p) {
+    HapticFeedback.selectionClick();
+    final ext = p.extendedProfile;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => OrganizerProfileScreen(
+          listingId: '',
+          // Pre-fetched from the followed-partner data so the profile opens
+          // instantly (no listing context to fetch stats from).
+          provider: ApiProvider(
+            id: p.partnerId,
+            name: p.profile.businessName,
+            bio: ext?.bio,
+            logoUrl: ext?.logoUrl,
+            totalListings: 0,
+            averageRating: 0,
+            totalReviews: 0,
+            experienceYears: 0,
+            totalFollowers: p.followerCount,
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _unfollow(ApiFollowedPartner p) async {
@@ -152,7 +230,7 @@ class _FollowedPartnersScreenState extends State<FollowedPartnersScreen> {
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.people_outline_rounded,
-                    size: 44, color: Color(0xFFF5A623)),
+                    size: 44, color: Color(0xFFFF7A00)),
               ),
               const SizedBox(height: 20),
               Text(
@@ -179,16 +257,16 @@ class _FollowedPartnersScreenState extends State<FollowedPartnersScreen> {
       );
     }
 
-    return RefreshIndicator(
+    return AppRefreshIndicator(
       onRefresh: _fetch,
-      color: const Color(0xFFFFCC00),
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         itemCount: visible.length,
         separatorBuilder: (_, __) => const SizedBox(height: 12),
         itemBuilder: (context, i) => _PartnerCard(
           partner: visible[i],
-          onUnfollow: () => _unfollow(visible[i]),
+          onUnfollow: () => _confirmUnfollow(visible[i]),
+          onTap: () => _openProfile(visible[i]),
         ),
       ),
     );
@@ -197,14 +275,27 @@ class _FollowedPartnersScreenState extends State<FollowedPartnersScreen> {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _PartnerCard extends StatelessWidget {
+class _PartnerCard extends StatefulWidget {
   final ApiFollowedPartner partner;
   final VoidCallback onUnfollow;
+  final VoidCallback onTap;
 
-  const _PartnerCard({required this.partner, required this.onUnfollow});
+  const _PartnerCard({
+    required this.partner,
+    required this.onUnfollow,
+    required this.onTap,
+  });
+
+  @override
+  State<_PartnerCard> createState() => _PartnerCardState();
+}
+
+class _PartnerCardState extends State<_PartnerCard> {
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
+    final partner = widget.partner;
     final p = partner.profile;
     final ext = partner.extendedProfile;
     final logoUrl = ext?.logoUrl;
@@ -212,35 +303,50 @@ class _PartnerCard extends StatelessWidget {
     final name = p.businessName;
     final city = p.baseCity;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFF0F0F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ── Golden yellow stripe at top ───────────────────────────────
-            Container(
-              height: 6,
-              color: const Color(0xFFF5A623),
+    return AnimatedScale(
+      scale: _pressed ? 0.97 : 1.0,
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.easeOut,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFF0F0F0)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(_pressed ? 0.02 : 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
-
-            // ── Card body ─────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(18),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: widget.onTap,
+            onHighlightChanged: (v) => setState(() => _pressed = v),
+            splashColor: const Color(0xFFFF7A00).withOpacity(0.08),
+            highlightColor: const Color(0xFFFF7A00).withOpacity(0.04),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ── Vibrant orange→gold stripe at top ──────────────────
+                Container(
+                  height: 7,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFFFF7A00), Color(0xFFFFB300)],
+                    ),
+                  ),
+                ),
+
+                // ── Card body ───────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+                  child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -299,7 +405,7 @@ class _PartnerCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    _UnfollowButton(onUnfollow: onUnfollow),
+                    _UnfollowButton(onUnfollow: widget.onUnfollow),
                   ],
                 ),
 
@@ -338,7 +444,7 @@ class _PartnerCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(Icons.people_alt_outlined,
-                            size: 13, color: Color(0xFFF5A623)),
+                            size: 13, color: Color(0xFFFF7A00)),
                         const SizedBox(width: 3),
                         Text(
                           '${_formatCount(partner.followerCount)} followers',
@@ -351,10 +457,50 @@ class _PartnerCard extends StatelessWidget {
                     ),
                   ],
                 ),
+
+                // ── Interactive "View Profile" pill ─────────────────
+                const SizedBox(height: 14),
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 8),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFF7A00), Color(0xFFFFB300)],
+                      ),
+                      borderRadius: BorderRadius.circular(22),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFFF8A00).withOpacity(0.30),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'View Profile',
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 12.5),
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        const Icon(Icons.arrow_forward_rounded,
+                            size: 15, color: Colors.white),
+                      ],
+                    ),
+                  ),
+                ),
+                  ],
+                ),
+                ),
               ],
             ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -403,14 +549,20 @@ class _Avatar extends StatelessWidget {
   }
 
   Widget _initial(BuildContext context, String name) => Container(
-        color: const Color(0xFFFEF3C7),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFFFD27A), Color(0xFFFFB300)],
+          ),
+        ),
         child: Center(
           child: Text(
             name.isNotEmpty ? name[0].toUpperCase() : 'P',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 22),
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFFF5A623),
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
           ),
         ),
@@ -442,18 +594,18 @@ class _CategoryChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF8EC),
+        color: const Color(0xFFFFF1DF),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFFFE0A0)),
+        border: Border.all(color: const Color(0xFFFFC078)),
       ),
       child: Text(
         label,
         style: GoogleFonts.poppins(
           fontSize: Responsive.sp(context, 10),
           fontWeight: FontWeight.w500,
-          color: const Color(0xFFF5A623),
+          color: const Color(0xFFFF7A00),
         ),
       ),
     );

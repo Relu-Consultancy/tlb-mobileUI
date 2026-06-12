@@ -7,6 +7,7 @@ import '../widgets/section_divider_widget.dart';
 import '../providers/home_feed_state.dart';
 import '../data/dummy_data.dart';
 import '../core/listing_navigation.dart';
+import '../widgets/animated_gradient_tag.dart';
 
 class TlbSignatureSection extends StatelessWidget {
   const TlbSignatureSection({super.key});
@@ -72,39 +73,16 @@ class TlbSignatureSection extends StatelessWidget {
                               ),
                             ),
                           ),
-                          // "TLB Originals" purple pill (top-center)
-                          Positioned(
+                          // "TLB Originals" pill (top-center) — slim white
+                          // border with an endlessly colour-cycling gradient.
+                          const Positioned(
                             top: 12,
                             left: 0,
                             right: 0,
                             child: Center(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 6),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFFF53C9B), // pink
-                                      Color(0xFFB13CF5), // purple
-                                    ],
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.15),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Text(
-                                  'TLB Originals',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 13),
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white,
-                                  ),
-                                ),
+                              child: AnimatedGradientTag(
+                                text: 'TLB Originals',
+                                fontSize: 13,
                               ),
                             ),
                           ),

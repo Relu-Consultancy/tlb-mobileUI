@@ -5,6 +5,7 @@ import '../core/responsive.dart';
 import '../models/help_ticket_model.dart';
 import '../providers/auth_state.dart';
 import '../services/help_service.dart';
+import '../widgets/app_refresh_indicator.dart';
 import 'new_ticket_screen.dart';
 import 'ticket_detail_screen.dart';
 
@@ -140,9 +141,8 @@ class _TicketsListScreenState extends State<TicketsListScreen> {
     if (_tickets.isEmpty) {
       return _emptyState();
     }
-    return RefreshIndicator(
+    return AppRefreshIndicator(
       onRefresh: _load,
-      color: const Color(0xFF2563EB),
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
         itemCount: _tickets.length,

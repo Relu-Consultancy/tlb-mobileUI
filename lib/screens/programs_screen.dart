@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/auto_scroll_list.dart';
+import '../widgets/shining_star_badge.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
@@ -13,6 +14,8 @@ import '../widgets/explore_categories_grid.dart';
 import '../widgets/pick_your_pace_row.dart';
 import '../widgets/event_card_with_rating.dart';
 import '../sections/app_footer.dart';
+import '../widgets/footer_quote_carousel.dart';
+import '../widgets/app_refresh_indicator.dart';
 import '../widgets/floating_navbar.dart';
 import '../widgets/all_categories_popup.dart';
 import 'program_detail_screen.dart';
@@ -85,9 +88,8 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
       body: Stack(
         children: [
           // Single scroll view — header scrolls with body (Session-48 fix).
-          RefreshIndicator(
+          AppRefreshIndicator(
             onRefresh: _handleRefresh,
-            color: const Color(0xFFE6A800),
             child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
@@ -354,6 +356,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       ),
 
                       const SizedBox(height: 40),
+                      const FooterQuoteCarousel(),
                       AppFooter(
                           bottomExtra: FloatingNavbar.clearance(context)),
                     ],
@@ -651,18 +654,10 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                     ),
                   ),
                 ),
-                Positioned(
+                const Positioned(
                   top: 10,
                   left: 10,
-                  child: Container(
-                    width: 34,
-                    height: 34,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFDC2626), // red star badge
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.star_rounded, color: Colors.white, size: 20),
-                  ),
+                  child: ShiningStarBadge(size: 40),
                 ),
               ],
             ),

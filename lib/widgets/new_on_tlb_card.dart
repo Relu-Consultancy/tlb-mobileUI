@@ -125,18 +125,6 @@ class NewOnTlbCard extends StatelessWidget {
                               ],
                             ),
                           ],
-                          if (event.price != null) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              'Starting from ₹${event.price!.toInt()}',
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 12.5),
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textPrimary,
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ],
                         ],
                       ),
                       const SizedBox(height: 14),

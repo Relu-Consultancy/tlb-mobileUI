@@ -113,7 +113,7 @@ class OnlineEventCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 11.5),
-                              color: AppColors.textSecondary,
+                              color: AppColors.textDescription,
                             ),
                           ),
                         ),

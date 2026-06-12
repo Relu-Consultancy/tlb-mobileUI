@@ -156,7 +156,7 @@ class _TrendingCardState extends State<TrendingCard> {
                                   event.description ?? '',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 12),
-                                    color: AppColors.textSecondary,
+                                    color: AppColors.textDescription,
                                     height: 1.4,
                                   ),
                                   maxLines: 3,
