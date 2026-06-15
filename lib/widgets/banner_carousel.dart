@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -32,6 +33,16 @@ class BannerCarousel extends StatefulWidget {
   /// Takes precedence over [animatedTransition].
   final bool staticFade;
 
+  /// When true, a ~4px golden gradient border sweeps continuously (medium
+  /// pace) around each banner card.
+  final bool animatedGoldenBorder;
+
+  /// Fraction of the viewport each page occupies. Values below 1.0 reveal the
+  /// previous/next banners peeking at the left and right edges (carousel
+  /// look). When set, the card width is derived from the page width and
+  /// [fixedCardWidth] is ignored.
+  final double? viewportFraction;
+
   const BannerCarousel({
     super.key,
     required this.events,
@@ -44,6 +55,8 @@ class BannerCarousel extends StatefulWidget {
     this.overlayDots = false,
     this.animatedTransition = false,
     this.staticFade = false,
+    this.animatedGoldenBorder = false,
+    this.viewportFraction,
   });
 
   @override
@@ -61,7 +74,8 @@ class _BannerCarouselState extends State<BannerCarousel> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+    _pageController =
+        PageController(viewportFraction: widget.viewportFraction ?? 1.0);
     _startAutoSlide();
   }
 
@@ -96,7 +110,11 @@ class _BannerCarouselState extends State<BannerCarousel> {
     if (widget.events.isEmpty) return const SizedBox.shrink();
 
     final screenWidth = MediaQuery.of(context).size.width;
-    final cardWidth = widget.fixedCardWidth ?? (screenWidth * 0.92 - 12);
+    // In peek mode the card fills its (narrower) page, leaving a small gap so
+    // the neighbouring banners show as rounded slivers on each side.
+    final cardWidth = widget.viewportFraction != null
+        ? screenWidth * widget.viewportFraction! - 14
+        : (widget.fixedCardWidth ?? (screenWidth * 0.92 - 12));
     final radius = widget.cornerRadius ?? (widget.overlayStyle ? 28.0 : 14.0);
 
     final indicator = AnimatedSmoothIndicator(
@@ -199,6 +217,40 @@ class _BannerCarouselState extends State<BannerCarousel> {
                   itemBuilder: (ctx, i) {
                     final card =
                         _slide(context, widget.events[i], cardWidth, radius);
+
+                    // Peek carousel — shrink the side (neighbouring) cards so
+                    // the centred banner stands out larger than the ones
+                    // peeking at the edges. Each side card is scaled toward its
+                    // VISIBLE edge so the peeking sliver stays put (otherwise
+                    // shrinking toward the off-screen centre hides the peek).
+                    if (widget.viewportFraction != null) {
+                      return AnimatedBuilder(
+                        animation: _pageController,
+                        builder: (context, child) {
+                          double rel = 0.0; // <0 = left side, >0 = right side
+                          if (_pageController.position.haveDimensions) {
+                            final page = _pageController.page ??
+                                _currentIndex.toDouble();
+                            rel = (i - page).clamp(-1.0, 1.0);
+                          }
+                          final diff = rel.abs();
+                          // Centre card = 1.0, full neighbour = 0.84.
+                          final scale = 1.0 - diff * 0.16;
+                          // Right neighbour anchors on its left edge, left
+                          // neighbour on its right edge — keeps the peek width.
+                          final alignment = rel >= 0
+                              ? Alignment.centerLeft
+                              : Alignment.centerRight;
+                          return Transform.scale(
+                            scale: scale,
+                            alignment: alignment,
+                            child: child,
+                          );
+                        },
+                        child: card,
+                      );
+                    }
+
                     if (!widget.animatedTransition) return card;
 
                     // Scale + fade each slide based on its distance from the
@@ -260,21 +312,16 @@ class _BannerCarouselState extends State<BannerCarousel> {
     double cardWidth,
     double radius,
   ) {
-    return Center(
-      child: GestureDetector(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => EventDetailScreen(event: event),
-          ),
-        ),
-        child: Container(
+    final card = Container(
           width: cardWidth,
           height: widget.height,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(radius),
-            // Very slim border around the spotlight banner.
-            border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.5),
+            // Very slim border around the spotlight banner (omitted when the
+            // animated golden border is drawn on top).
+            border: widget.animatedGoldenBorder
+                ? null
+                : Border.all(color: Colors.black.withOpacity(0.1), width: 0.5),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(radius),
@@ -446,8 +493,129 @@ class _BannerCarouselState extends State<BannerCarousel> {
               ],
             ),
           ),
+        );
+
+    final bordered = widget.animatedGoldenBorder
+        ? _AnimatedGoldenBorder(radius: radius, strokeWidth: 4, child: card)
+        : card;
+
+    return Center(
+      child: GestureDetector(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => EventDetailScreen(event: event),
+          ),
         ),
+        child: bordered,
       ),
     );
   }
+}
+
+/// Wraps [child] with a ~4px golden gradient border that sweeps continuously
+/// around the rounded card at a medium pace.
+class _AnimatedGoldenBorder extends StatefulWidget {
+  final Widget child;
+  final double radius;
+  final double strokeWidth;
+
+  const _AnimatedGoldenBorder({
+    required this.child,
+    required this.radius,
+    this.strokeWidth = 4,
+  });
+
+  @override
+  State<_AnimatedGoldenBorder> createState() => _AnimatedGoldenBorderState();
+}
+
+class _AnimatedGoldenBorderState extends State<_AnimatedGoldenBorder>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // Medium pace: one full sweep around the border every 4 seconds.
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 4))
+          ..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return CustomPaint(
+          foregroundPainter: _GoldenBorderPainter(
+            t: _controller.value,
+            radius: widget.radius,
+            strokeWidth: widget.strokeWidth,
+          ),
+          child: child,
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
+class _GoldenBorderPainter extends CustomPainter {
+  final double t;
+  final double radius;
+  final double strokeWidth;
+
+  _GoldenBorderPainter({
+    required this.t,
+    required this.radius,
+    required this.strokeWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final inset = strokeWidth / 2;
+    final rect = Rect.fromLTWH(
+      inset,
+      inset,
+      size.width - strokeWidth,
+      size.height - strokeWidth,
+    );
+    final rrect = RRect.fromRectAndRadius(
+      rect,
+      Radius.circular(radius - inset),
+    );
+
+    // Golden sweep that rotates around the card — the bright "shine" stop
+    // travels around the border as `t` advances.
+    final gradient = SweepGradient(
+      colors: const [
+        Color(0xFFB8860B), // deep gold
+        Color(0xFFFFC93C), // gold
+        Color(0xFFFFF3B0), // light shine
+        Color(0xFFFFC93C), // gold
+        Color(0xFFB8860B), // deep gold (loops)
+      ],
+      stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
+      transform: GradientRotation(2 * math.pi * t),
+    );
+
+    final paint = Paint()
+      ..shader = gradient.createShader(Offset.zero & size)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+
+    canvas.drawRRect(rrect, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _GoldenBorderPainter old) =>
+      old.t != t || old.radius != radius || old.strokeWidth != strokeWidth;
 }

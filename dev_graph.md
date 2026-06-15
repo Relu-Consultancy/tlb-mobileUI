@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-06-12 (Session 57)
+**Last Updated:** 2026-06-15 (Session 58)
 
 ---
 
@@ -875,6 +875,56 @@ share_plus: ^7.2.2           # Native share sheet for events/classes/programs/ve
 ---
 
 ## 12. Development Sessions Summary
+
+### Session 58 — UI polish sweep: card redesigns, Spotlight peek-carousel, gradient extension, legal docs
+A broad screenshot-driven polish pass across all tabs. Focus areas: inset "image-inside-the-card" redesigns, the Spotlight banner peek-carousel with an animated golden border, extending the warm header gradient down to each screen's first section title, normalising CTA button weight/colour, and new Privacy/Terms document screens.
+
+#### Spotlight banner — peek carousel + animated golden border (`banner_carousel.dart`)
+| Change | Files |
+|--------|-------|
+| **`viewportFraction` peek mode** — Spotlight banner now shows the previous/next banners peeking at the edges (`viewportFraction: 0.84`); side cards scale down to ~0.84 anchored to their **visible edge** (so the peek width is preserved, not collapsed) | `lib/widgets/banner_carousel.dart`, `lib/screens/home_screen.dart` |
+| **`animatedGoldenBorder`** — ~4px golden `SweepGradient` border sweeps continuously (4s loop) around the Spotlight card via `CustomPaint`; corner radius matched to the venues banner (28) | `lib/widgets/banner_carousel.dart` |
+
+#### Header gradient extended to first title (all 5 tabs)
+| Change | Files |
+|--------|-------|
+| **Warm header gradient now wraps header → banner → first section title** (like the home Spotlight header), with an added stop holding cream down to the title before fading to white | `events/venues/programs/classes_screen.dart` |
+| **Home-header seam fix attempt reverted** — the `ShaderMask(dstIn)` cloud fade (with its 1px premultiplied-alpha edge fringe) was kept as-is after an opaque-overlay replacement looked worse | `lib/sections/home_header.dart` (unchanged net) |
+
+#### Card redesigns — image as an inset rounded component
+| Change | Files |
+|--------|-------|
+| **Build New Skills (classes)** — image is a separate fully-rounded thumbnail inset inside the card; 10px content gaps; CTA pinned to the bottom; wider image | `lib/widgets/build_skill_card.dart`, `classes_screen.dart` |
+| **Make Your Weekends Count / Zero to Hero (programs)** — image inset with all corners rounded (not cut at the edge), widened; Zero-to-Hero CTA made compact | `lib/screens/programs_screen.dart` |
+| **Easy on the Pocket (venues)** — image inset inside the card with rounded corners + the green distance band following the rounded bottom; taller card with more image coverage | `lib/screens/venues_screen.dart` |
+| **Hot Picks (home)** — removed the CTA button, image (Expanded) stretches down to fill, whole card tappable, 20px bottom gap | `lib/sections/hot_picks_section.dart` |
+| **For the Big Days (venues)** — narrower, taller portrait card; smaller image-banner tag pills (`_bigDayPill(small:)`) | `lib/screens/venues_screen.dart` |
+
+#### Section data + images
+| Change | Files |
+|--------|-------|
+| **What's the Plan? (venues)** — 6 category circles repointed to new `venues_page/1–6.png`; rendered uniformly (`BoxFit.contain`, no clip/shadow) at 152px with a per-image `inset` for size normalisation | `lib/data/dummy_data.dart`, `venues_screen.dart` |
+| **Find Your Fit (programs)** — softened the circular border (solid black → thin light-black hairline), per-card pastel gradient base + soft bottom gradient veil sampled from the reference | `lib/widgets/pick_your_pace_row.dart`, `dummy_data.dart` |
+| **Missing image banners fixed** — `newontlb1.jpg` (Storytelling Club, Chess Academy) and the two Online Events images repointed to existing resources; registered `resources- tlb-ui/class_page/` in pubspec | `lib/data/dummy_data.dart`, `pubspec.yaml` |
+| **Online Events card (events)** — image switched to `Expanded` (taller, 20px bottom gap) | `lib/widgets/online_event_card.dart`, `events_screen.dart` |
+
+#### Global tweaks
+| Change | Files |
+|--------|-------|
+| **CTA button text weight normalised to `w500`** (medium) across the app | many `lib/screens` + `lib/widgets` |
+| **See-All colour** standardised to `#0068E7` | `lib/core/app_colors.dart` |
+| **Holiday Special tag** — animated red→purple sliding gradient (seamless loop) via extended `AnimatedGradientTag` | `lib/widgets/animated_gradient_tag.dart`, `holiday_special_card.dart` |
+| **Date/Time selection** — selected box gradient lightened (shine kept) + soft darker-gold border | `lib/screens/date_time_selection_screen.dart` |
+| **Detail screens** — banner `expandedHeight` +20px (`230→250`) on event/class/program/venue detail | `*_detail_screen.dart` |
+| **Account Settings** — separator dividers lightened to `#EFEFEF` / 0.7 thickness | `lib/screens/account_settings_screen.dart` |
+| **Section-header gaps** standardised to 30px; card description darkened to `#333333` | `section_divider_widget.dart`, `app_colors.dart` |
+
+#### Legal documents (new screens)
+| Change | Files |
+|--------|-------|
+| **Privacy Policy + Terms of Service** screens (reached from the redesigned About Us list) built on a shared `LegalDocScaffold` (logo header + `LegalHeading/Subheading/Paragraph/Bullets`) | `lib/screens/privacy_policy_screen.dart` (NEW), `terms_of_service_screen.dart` (NEW), `lib/widgets/legal_doc.dart` (NEW), `about_us_screen.dart` |
+
+**`flutter analyze`: clean (0 errors; pre-existing baseline hints only).**
 
 ### Session 57 — Logo/brand pass: SVG footer + splash + app icon, rotating quotes, branded refresh loader, About Us
 A brand-consistency pass centred on the TLB wordmark logo (`assets/icons/the_little_broadway_logo.svg`, viewBox cropped to the artwork `100 198 900 706`). The same logo now appears in the footer, splash, and app launcher icon. Added a rotating cursive quote strip, a new About Us screen, a branded pull-to-refresh loader, and assorted card polish.

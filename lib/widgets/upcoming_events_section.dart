@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
 import '../services/events_listing_service.dart';
@@ -107,11 +108,11 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 13),
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF3B82F6),
+                      color: AppColors.seeAllBlue,
                     ),
                   ),
                   const Icon(Icons.chevron_right,
-                      size: 18, color: Color(0xFF3B82F6)),
+                      size: 18, color: AppColors.seeAllBlue),
                 ],
               ),
             ],

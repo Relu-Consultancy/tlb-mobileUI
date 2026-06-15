@@ -130,7 +130,7 @@ class AccountSettingsScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  const Divider(height: 1, thickness: 0.7, indent: 16, endIndent: 16, color: Color(0xFFEFEFEF)),
                   _buildRow(
                     context,
                     icon: Icons.phone_outlined,
@@ -167,7 +167,7 @@ class AccountSettingsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  const Divider(height: 1, thickness: 0.7, indent: 16, endIndent: 16, color: Color(0xFFEFEFEF)),
                   _buildRow(
                     context,
                     icon: Icons.settings_outlined,
@@ -175,7 +175,7 @@ class AccountSettingsScreen extends StatelessWidget {
                     onTap: () => AppSnackBar.comingSoon(
                         context, 'Manage Permissions'),
                   ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  const Divider(height: 1, thickness: 0.7, indent: 16, endIndent: 16, color: Color(0xFFEFEFEF)),
                   _buildRow(
                     context,
                     icon: Icons.delete_outline,
@@ -226,6 +226,7 @@ class AccountSettingsScreen extends StatelessWidget {
               style: GoogleFonts.poppins(
                 color: Colors.grey,
                 fontSize: Responsive.sp(context, 14),
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),

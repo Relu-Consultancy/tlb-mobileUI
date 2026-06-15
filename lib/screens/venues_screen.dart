@@ -65,6 +65,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
+                        // Gradient now extends down to the first section title
+                        // (banner included), like the home Spotlight header.
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
@@ -73,18 +75,16 @@ class _VenuesScreenState extends State<VenuesScreen> {
                               Color(0xFFFFF5E0),
                               Color(0xFFFFF5E0),
                               Color(0xFFFFFAF0),
+                              Color(0xFFFFFAF0),
                               Colors.white,
                             ],
-                            stops: [0.0, 0.55, 0.80, 1.0],
+                            stops: [0.0, 0.35, 0.60, 0.95, 1.0],
                           ),
                         ),
-                        child: const Column(
+                        child: Column(
                           children: [
-                            HomeHeader(),
-                            SizedBox(height: 16),
-                          ],
-                        ),
-                      ),
+                            const HomeHeader(),
+                            const SizedBox(height: 16),
                       // ── Banner — Home-style Spotlight: a tall centered card
                       //    that covers the majority of the screen, ending just
                       //    above the floating navbar. Height is derived from the
@@ -117,14 +117,17 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 45,
+                        topPadding: 30,
+                            ),
+                          ],
+                        ),
                       ),
                       _buildWhatsPlanRow(context),
 
                       // ── For the Big Days ──
                       _sectionHeader(context, 'For the Big days'),
                       SizedBox(
-                        height: Responsive.h(context, 366, min: 348),
+                        height: Responsive.h(context, 420, min: 400),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.venuesBigDays.length,
@@ -208,7 +211,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       // ── Easy on the Pocket ──
                       _sectionHeader(context, 'Easy on the pocket'),
                       SizedBox(
-                        height: Responsive.h(context, 252, min: 238),
+                        height: Responsive.h(context, 296, min: 282),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.venuesEasyPocket.length,
@@ -240,7 +243,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       // ── Thoughtful Spaces ──
                       _sectionHeader(context, 'Thoughtful Spaces'),
                       SizedBox(
-                        height: Responsive.h(context, 356, min: 338),
+                        height: Responsive.h(context, 432, min: 408),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.venuesThoughtful.length,
@@ -287,7 +290,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
       lineLength: 100,
       lineThickness: 1.5,
       lineColor: const Color(0xFFD4A537), // warm gold
-      topPadding: 45,
+      topPadding: 30,
     );
   }
 
@@ -295,15 +298,13 @@ class _VenuesScreenState extends State<VenuesScreen> {
   Widget _buildWhatsPlanRow(BuildContext context) {
     final cats = DummyData.venuesSeeAllCategories.take(6).toList();
     return SizedBox(
-      height: 212,
+      height: 205,
       child: AutoScrollList(
         padding: const EdgeInsets.only(left: 14),
         clipBehavior: Clip.none,
         itemCount: cats.length,
         itemBuilder: (ctx, i) {
           final c = cats[i];
-          final colors = List<Color>.from(c['gradient'] as List);
-          final isLast = i == cats.length - 1;
           return GestureDetector(
             onTap: () => Navigator.push(
               context,
@@ -316,67 +317,28 @@ class _VenuesScreenState extends State<VenuesScreen> {
             child: Padding(
             padding: const EdgeInsets.only(right: 14),
             child: SizedBox(
-              width: 134,
+              width: 158,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Circle with overflow image
+                  // Show the source image exactly as provided — it already
+                  // contains its own circular artwork. No clipping and
+                  // BoxFit.contain so nothing is cropped or stretched.
                   SizedBox(
-                    width: 134,
-                    height: 156,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      alignment: Alignment.bottomCenter,
-                      children: [
-                        // Circle background anchored to bottom
-                        Positioned(
-                          bottom: 0,
-                          left: 5,
-                          right: 5,
-                          child: Container(
-                            width: 124,
-                            height: 124,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              // Gradient tint of the same colour — light pastel
-                              // (top-left) → a deeper shade of the same hue
-                              // (bottom-right) for a clearly visible gradient.
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  colors.first,
-                                  Color.lerp(colors.last, Colors.black, 0.18)!,
-                                ],
-                              ),
-                              // Light border — a subtle tint of the same colour.
-                              border: Border.all(
-                                color: Color.lerp(colors.last, Colors.black, 0.12)!,
-                                width: 1.5,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: colors.last.withOpacity(0.35),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        // Image overflowing above the circle
-                        Positioned(
-                          bottom: 2,
-                          child: Image.asset(
-                            c['image'] as String,
-                            // Last card's image trimmed slightly.
-                            width: isLast ? 120 : 134,
-                            height: isLast ? 134 : 150,
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => Icon(Icons.place, size: 58, color: AppColors.primary),
-                          ),
-                        ),
-                      ],
+                    width: 152,
+                    height: 152,
+                    child: Padding(
+                      // Optional per-image inset to normalise sizes where an
+                      // artwork fills its canvas more than the others.
+                      padding: EdgeInsets.all(
+                        (c['inset'] as num?)?.toDouble() ?? 0.0,
+                      ),
+                      child: Image.asset(
+                        c['image'] as String,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) =>
+                            Icon(Icons.place, size: 58, color: AppColors.primary),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 9),
@@ -402,11 +364,12 @@ class _VenuesScreenState extends State<VenuesScreen> {
     return GestureDetector(
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
       child: Container(
-        width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+        // Portrait card — taller than it is wide.
+        width: Responsive.cardWidth(context, fraction: 0.72, max: 300),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 12, offset: const Offset(0, 4))],
         ),
         child: Column(
@@ -419,11 +382,11 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
                   child: Image.asset(
                     event.imagePath,
-                    height: Responsive.h(context, 200, min: 178),
+                    height: Responsive.h(context, 250, min: 222),
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
-                      height: Responsive.h(context, 200, min: 178),
+                      height: Responsive.h(context, 250, min: 222),
                       color: Colors.grey.shade200,
                     ),
                   ),
@@ -434,9 +397,9 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   child: Row(
                     children: [
                       if ((event.tag ?? '').isNotEmpty)
-                        _bigDayPill(event.tag!, const Color(0xFFDB2777), Colors.white),
-                      if ((event.tag ?? '').isNotEmpty) const SizedBox(width: 8),
-                      _bigDayPill('Premium', const Color(0xFFFFC107), const Color(0xFF1A1A2E)),
+                        _bigDayPill(event.tag!, const Color(0xFFDB2777), Colors.white, small: true),
+                      if ((event.tag ?? '').isNotEmpty) const SizedBox(width: 6),
+                      _bigDayPill('Premium', const Color(0xFFFFC107), const Color(0xFF1A1A2E), small: true),
                     ],
                   ),
                 ),
@@ -459,7 +422,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     Row(children: [
                       Icon(Icons.location_on_outlined, size: 15, color: Colors.grey.shade500),
                       const SizedBox(width: 4),
-                      Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: Colors.grey.shade600)),
+                      Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: const Color(0xFF333333))),
                     ]),
                     const SizedBox(height: 6),
                     if (event.rating != null)
@@ -483,7 +446,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
                           padding: EdgeInsets.zero,
                         ),
-                        child: Text('Book Now', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13.5), fontWeight: FontWeight.w600)),
+                        child: Text('Book Now', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13.5), fontWeight: FontWeight.w500)),
                       ),
                     ),
                   ],
@@ -497,17 +460,19 @@ class _VenuesScreenState extends State<VenuesScreen> {
   }
 
   // Filled pill used on the "For the Big Days" image (Birthday / Premium).
-  Widget _bigDayPill(String label, Color bgColor, Color textColor) {
+  Widget _bigDayPill(String label, Color bgColor, Color textColor, {bool small = false}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
+      padding: small
+          ? const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5)
+          : const EdgeInsets.symmetric(horizontal: 13, vertical: 6),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 6, offset: const Offset(0, 2))],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: small ? 4 : 6, offset: const Offset(0, 2))],
       ),
       child: Text(
         label,
-        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), fontWeight: FontWeight.w600, color: textColor),
+        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, small ? 9.5 : 11), fontWeight: FontWeight.w600, color: textColor),
       ),
     );
   }
@@ -521,7 +486,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, 3))],
         ),
         child: Row(
@@ -549,7 +514,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         Row(children: [
                           Icon(Icons.calendar_month_outlined, size: 15, color: Colors.grey.shade500),
                           const SizedBox(width: 5),
-                          Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: Colors.grey.shade600), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                          Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: const Color(0xFF333333)), maxLines: 1, overflow: TextOverflow.ellipsis)),
                         ]),
                         const SizedBox(height: 7),
                         if (event.rating != null)
@@ -574,7 +539,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
                           padding: EdgeInsets.zero,
                         ),
-                        child: Text('Inquire Now', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13.5), fontWeight: FontWeight.w600)),
+                        child: Text('Inquire Now', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13.5), fontWeight: FontWeight.w500)),
                       ),
                     ),
                   ],
@@ -596,7 +561,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 10, offset: const Offset(0, 3))],
         ),
         child: Column(
@@ -637,7 +602,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     Row(children: [
                       Icon(Icons.location_on_outlined, size: 15, color: Colors.grey.shade500),
                       const SizedBox(width: 4),
-                      Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: Colors.grey.shade600), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                      Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: const Color(0xFF333333)), maxLines: 1, overflow: TextOverflow.ellipsis)),
                     ]),
                   ],
                 ),
@@ -703,7 +668,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+        border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 16, offset: const Offset(0, 4))],
       ),
       child: Column(
@@ -725,32 +690,39 @@ class _VenuesScreenState extends State<VenuesScreen> {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  // Soft shadow ellipse under the sport image
+                  // Flat shadow-imitation ellipse placed directly below the
+                  // sport image (a drawn shadow, not a box shadow).
                   Positioned(
                     top: 92,
-                    right: 34,
+                    right: 26,
                     child: Container(
-                      width: 72,
-                      height: 13,
+                      width: 74,
+                      height: 12,
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(40),
+                        gradient: RadialGradient(
+                          colors: [
+                            Colors.black.withOpacity(0.24),
+                            Colors.black.withOpacity(0.0),
+                          ],
+                          stops: const [0.15, 1.0],
+                        ),
                       ),
                     ),
                   ),
-                  // Sport image — large, top-right, overflowing
+                  // Sport image — top-right.
                   Positioned(
-                    top: -6,
-                    right: 8,
+                    top: 12,
+                    right: 20,
                     child: Image.asset(
                       data['image'] as String,
-                      width: 118,
-                      height: 118,
+                      width: 90,
+                      height: 90,
                       fit: BoxFit.contain,
                       errorBuilder: (_, __, ___) => Icon(
                         Icons.sports,
                         color: Colors.white.withOpacity(0.7),
-                        size: 64,
+                        size: 56,
                       ),
                     ),
                   ),
@@ -843,7 +815,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                                   Expanded(
                                     child: Text(
                                       v['location'] as String,
-                                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade600),
+                                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: const Color(0xFF333333)),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -863,10 +835,10 @@ class _VenuesScreenState extends State<VenuesScreen> {
                               padding: EdgeInsets.only(right: s < slots.length - 1 ? 10 : 0),
                               child: Container(
                                 alignment: Alignment.center,
-                                padding: const EdgeInsets.symmetric(vertical: 9),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFF5F5F5),
-                                  borderRadius: BorderRadius.circular(22),
+                                  borderRadius: BorderRadius.circular(6),
                                   border: Border.all(color: const Color(0xFFE8E8E8)),
                                 ),
                                 child: Text(
@@ -905,7 +877,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     ),
                     child: Text(
                       'View Now',
-                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w600),
+                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w500),
                     ),
                   ),
                 ),
@@ -926,32 +898,35 @@ class _VenuesScreenState extends State<VenuesScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 12, offset: const Offset(0, 4))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-              child: Image.asset(event.imagePath, height: Responsive.h(context, 222, min: 200), width: double.infinity, fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 222, min: 200), color: Colors.grey.shade200)),
-            ),
+            // Image fills the extra card height so the gap below the content
+            // is always exactly the content's 20px bottom padding.
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis),
-                    const SizedBox(height: 8),
-                    Row(children: [
-                      Icon(Icons.location_on_outlined, size: 15, color: Colors.grey.shade500),
-                      const SizedBox(width: 4),
-                      Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: Colors.grey.shade600), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                    ]),
-                  ],
-                ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+                child: Image.asset(event.imagePath, width: double.infinity, height: double.infinity, fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade200)),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 8),
+                  Row(children: [
+                    Icon(Icons.location_on_outlined, size: 15, color: Colors.grey.shade500),
+                    const SizedBox(width: 4),
+                    Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: const Color(0xFF333333)), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                  ]),
+                ],
               ),
             ),
           ],
@@ -971,28 +946,34 @@ class _VenuesScreenState extends State<VenuesScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 10, offset: const Offset(0, 3))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              child: Column(
-                children: [
-                  Image.asset(event.imagePath, height: Responsive.h(context, 156, min: 140), width: double.infinity, fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 156, min: 140), color: Colors.grey.shade200)),
-                  // Full-width distance band
-                  if ((event.tag ?? '').isNotEmpty)
-                    Container(
-                      width: double.infinity,
-                      color: bandColor,
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      alignment: Alignment.center,
-                      child: Text(event.tag!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: Colors.white, fontWeight: FontWeight.w500)),
-                    ),
-                ],
+            // Image inset inside the card with a margin all around and all
+            // corners rounded — so the banner is not cut at the card edges.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: Column(
+                  children: [
+                    Image.asset(event.imagePath, height: Responsive.h(context, 186, min: 172), width: double.infinity, fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 186, min: 172), color: Colors.grey.shade200)),
+                    // Full-width distance band — rounded bottom corners follow
+                    // the inset image.
+                    if ((event.tag ?? '').isNotEmpty)
+                      Container(
+                        width: double.infinity,
+                        color: bandColor,
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        alignment: Alignment.center,
+                        child: Text(event.tag!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: Colors.white, fontWeight: FontWeight.w500)),
+                      ),
+                  ],
+                ),
               ),
             ),
             Expanded(
@@ -1006,7 +987,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     Row(children: [
                       Icon(Icons.location_on_outlined, size: 14, color: Colors.grey.shade500),
                       const SizedBox(width: 4),
-                      Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: Colors.grey.shade600), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                      Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: const Color(0xFF333333)), maxLines: 1, overflow: TextOverflow.ellipsis)),
                     ]),
                   ],
                 ),
@@ -1027,46 +1008,49 @@ class _VenuesScreenState extends State<VenuesScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.07), blurRadius: 12, offset: const Offset(0, 4))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image with tag pills inside the bottom-left
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-                  child: Image.asset(event.imagePath, height: Responsive.h(context, 218, min: 196), width: double.infinity, fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 218, min: 196), color: Colors.grey.shade200)),
-                ),
-                Positioned(
-                  left: 14,
-                  bottom: 12,
-                  child: Row(children: [
-                    if ((event.tag ?? '').isNotEmpty)
-                      _bigDayPill(event.tag!, const Color(0xFFDB2777), Colors.white),
-                    if ((event.tag ?? '').isNotEmpty) const SizedBox(width: 8),
-                    _bigDayPill('Premium', const Color(0xFFFFC107), const Color(0xFF1A1A2E)),
-                  ]),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
+            // Image fills the extra card height (tag pills inside bottom-left).
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+                      child: Image.asset(event.imagePath, width: double.infinity, height: double.infinity, fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade200)),
+                    ),
+                  ),
+                  Positioned(
+                    left: 14,
+                    bottom: 12,
+                    child: Row(children: [
+                      if ((event.tag ?? '').isNotEmpty)
+                        _bigDayPill(event.tag!, const Color(0xFFDB2777), Colors.white),
+                      if ((event.tag ?? '').isNotEmpty) const SizedBox(width: 8),
+                      _bigDayPill('Premium', const Color(0xFFFFC107), const Color(0xFF1A1A2E)),
+                    ]),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                     Row(children: [
                       Expanded(child: Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis)),
                       if (event.description != null) ...[
                         const SizedBox(width: 8),
-                        Icon(Icons.people_outline, size: 15, color: Colors.grey.shade600),
+                        Icon(Icons.people_outline, size: 15, color: const Color(0xFF333333)),
                         const SizedBox(width: 3),
-                        Text(event.description!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade600)),
+                        Text(event.description!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: const Color(0xFF333333))),
                       ],
                     ]),
                     const SizedBox(height: 6),
@@ -1078,12 +1062,12 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         const SizedBox(width: 4),
                         Text('(${event.reviewCount})', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
                       ]),
-                    const Spacer(),
+                    const SizedBox(height: 12),
                     Row(
                       children: [
                         Icon(Icons.location_on_outlined, size: 15, color: Colors.grey.shade500),
                         const SizedBox(width: 4),
-                        Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: Colors.grey.shade600), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                        Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: const Color(0xFF333333)), maxLines: 1, overflow: TextOverflow.ellipsis)),
                         const SizedBox(width: 8),
                         SizedBox(
                           height: 36,
@@ -1096,7 +1080,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
                               padding: const EdgeInsets.symmetric(horizontal: 26),
                             ),
-                            child: Text('Visit', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600)),
+                            child: Text('Visit', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500)),
                           ),
                         ),
                       ],
@@ -1104,7 +1088,6 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   ],
                 ),
               ),
-            ),
           ],
         ),
       ),
@@ -1188,111 +1171,113 @@ class _VenuesScreenState extends State<VenuesScreen> {
     return GestureDetector(
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
       child: Container(
-      width: Responsive.cardWidth(context, fraction: 0.72, max: 300),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image with overlays
-          Stack(
+        width: Responsive.cardWidth(context, fraction: 0.78, max: 320),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4))],
+        ),
+        child: Padding(
+          // Inner padding so the image floats inside the card with rounded
+          // boundaries on all sides (per reference).
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                child: Image.asset(
-                  event.imagePath,
-                  height: Responsive.h(context, 216, min: 198),
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 216, min: 198), color: Colors.grey.shade200),
+              // ── Image banner — shown whole, rounded on all corners ──
+              Expanded(
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Image.asset(
+                          event.imagePath,
+                          width: double.infinity,
+                          height: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade200),
+                        ),
+                      ),
+                    ),
+                    // Shining star badge — top left
+                    const Positioned(
+                      top: 10,
+                      left: 10,
+                      child: ShiningStarBadge(size: 38),
+                    ),
+                    // Tag pills — bottom left ("Low noise", "Safe Space")
+                    if (tags.isNotEmpty)
+                      Positioned(
+                        bottom: 10,
+                        left: 10,
+                        right: 10,
+                        child: Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: tags
+                              .map((tag) => Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFEC4899),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      tag,
+                                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 10.5), fontWeight: FontWeight.w500, color: Colors.white),
+                                    ),
+                                  ))
+                              .toList(),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              // Shining star badge — top left
-              const Positioned(
-                top: 10,
-                left: 10,
-                child: ShiningStarBadge(size: 36),
+              const SizedBox(height: 12),
+              // ── Title ──
+              Text(
+                event.title,
+                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              // Tag pills overlaid at bottom of image
-              if (tags.isNotEmpty)
-                Positioned(
-                  bottom: 10,
-                  left: 10,
-                  right: 10,
-                  child: Row(
-                    children: tags
-                        .map((tag) => Padding(
-                              padding: const EdgeInsets.only(right: 6),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFEC4899),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  tag,
-                                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 10), fontWeight: FontWeight.w500, color: Colors.white),
-                                ),
-                              ),
-                            ))
-                        .toList(),
+              const SizedBox(height: 8),
+              // ── Location ──
+              Row(children: [
+                Icon(Icons.location_on_outlined, size: 15, color: Colors.grey.shade500),
+                const SizedBox(width: 4),
+                Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: const Color(0xFF333333)), maxLines: 1, overflow: TextOverflow.ellipsis)),
+              ]),
+              const SizedBox(height: 7),
+              // ── Rating ──
+              if (event.rating != null)
+                Row(children: [
+                  const Icon(Icons.star_rounded, size: 16, color: Color(0xFFFFB902)),
+                  const SizedBox(width: 4),
+                  Text('${event.rating}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+                  const SizedBox(width: 4),
+                  Text('(${event.reviewCount})', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
+                ]),
+              const SizedBox(height: 12),
+              // ── View Details button (full width) ──
+              SizedBox(
+                width: double.infinity,
+                height: 44,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFCC00),
+                    foregroundColor: const Color(0xFF1A1A2E),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                   ),
+                  child: Text('View Details', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w500)),
                 ),
+              ),
             ],
           ),
-          // Content below image
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    event.title,
-                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14.5), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-                  Row(children: [
-                    Icon(Icons.location_on_outlined, size: 14, color: Colors.grey.shade500),
-                    const SizedBox(width: 4),
-                    Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: Colors.grey.shade600), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                  ]),
-                  const SizedBox(height: 5),
-                  if (event.rating != null)
-                    Row(children: [
-                      const Icon(Icons.star_rounded, size: 15, color: Color(0xFFFFB902)),
-                      const SizedBox(width: 4),
-                      Text('${event.rating}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
-                      const SizedBox(width: 4),
-                      Text('(${event.reviewCount})', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade500)),
-                    ]),
-                  const Spacer(),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 38,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFCC00),
-                        foregroundColor: const Color(0xFF1A1A2E),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-                      ),
-                      child: Text('View Now', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
       ),
     );
   }

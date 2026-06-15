@@ -26,7 +26,7 @@ class SpecialNeedsSection extends StatelessWidget {
       children: [
         const SectionDividerWidget(
           title: 'Where Every Star Shines',
-          topPadding: 40, // 40px gap from previous section's cards
+          topPadding: 30, // 30px gap from previous section's cards
           fontSize: 17,
           textColor: Color(0xFF1A1A2E), // dark navy
         ),
@@ -50,7 +50,7 @@ class SpecialNeedsSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
+                  border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -95,32 +95,29 @@ class SpecialNeedsSection extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // "Sensory Friendly" pink pill (right-aligned)
+                              // "Sensory Friendly" pink pill (left-aligned)
                               if (event.tag != null)
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 3),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20),
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          Color(0xFFF53C9B), // pink
-                                          Color(0xFFB13CF5), // purple
-                                        ],
-                                      ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color(0xFFF53C9B), // pink
+                                        Color(0xFFB13CF5), // purple
+                                      ],
                                     ),
-                                    child: Text(
-                                      event.tag!,
-                                      maxLines: 1,
-                                      softWrap: false,
-                                      overflow: TextOverflow.visible,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: Responsive.sp(context, 10),
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white,
-                                      ),
+                                  ),
+                                  child: Text(
+                                    event.tag!,
+                                    maxLines: 1,
+                                    softWrap: false,
+                                    overflow: TextOverflow.visible,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 10),
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white,
                                     ),
                                   ),
                                 ),
@@ -147,7 +144,7 @@ class SpecialNeedsSection extends StatelessWidget {
                                     event.reviewCount ?? '4.5k reviews',
                                     style: GoogleFonts.poppins(
                                       fontSize: Responsive.sp(context, 13),
-                                      color: Color(0xFF4A4A4A),
+                                      color: Color(0xFF333333),
                                     ),
                                   ),
                                 ],
@@ -157,14 +154,14 @@ class SpecialNeedsSection extends StatelessWidget {
                               Row(
                                 children: [
                                   const Icon(Icons.location_on_outlined,
-                                      size: 14, color: Color(0xFF4A4A4A)),
+                                      size: 14, color: Color(0xFF333333)),
                                   const SizedBox(width: 4),
                                   Expanded(
                                     child: Text(
                                       event.venue,
                                       style: GoogleFonts.poppins(
                                         fontSize: Responsive.sp(context, 13),
-                                        color: Color(0xFF4A4A4A),
+                                        color: Color(0xFF333333),
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -175,31 +172,28 @@ class SpecialNeedsSection extends StatelessWidget {
                             ],
                           ),
 
-                          // Explore button (right-aligned)
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: SizedBox(
-                              width: Responsive.w(context, 104, min: 94),
-                              height: Responsive.h(context, 38, min: 34),
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  openListingDetail(context, event);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFFFCC00),
-                                  foregroundColor: const Color(0xFF1A1A2E),
-                                  elevation: 0,
-                                  padding: EdgeInsets.zero,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
+                          // Explore button (left-aligned)
+                          SizedBox(
+                            width: Responsive.w(context, 104, min: 94),
+                            height: Responsive.h(context, 38, min: 34),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                openListingDetail(context, event);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFFFCC00),
+                                foregroundColor: const Color(0xFF1A1A2E),
+                                elevation: 0,
+                                padding: EdgeInsets.zero,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
-                                child: Text(
-                                  'View Now',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 13),
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                              ),
+                              child: Text(
+                                'View Now',
+                                style: GoogleFonts.poppins(
+                                  fontSize: Responsive.sp(context, 13),
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),

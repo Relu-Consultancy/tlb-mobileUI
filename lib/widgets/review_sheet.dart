@@ -149,8 +149,8 @@ Widget buildReviewInlineSection(
                 },
                 child: Row(
                   children: [
-                    Text('See All', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF3B82F6))),
-                    const Icon(Icons.chevron_right, size: 18, color: Color(0xFF3B82F6)),
+                    Text('See All', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: AppColors.seeAllBlue)),
+                    const Icon(Icons.chevron_right, size: 18, color: AppColors.seeAllBlue),
                   ],
                 ),
               ),

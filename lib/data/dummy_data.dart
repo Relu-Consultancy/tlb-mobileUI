@@ -296,30 +296,38 @@ class DummyData {
     {
       'label': 'Batch\nProgram',
       'image': 'resources- tlb-ui/programs_findurfit_clean/batchprogram.png',
+      // Gradient sampled to match the reference discs.
+      'bg': [Color(0xFFD2E8F6), Color(0xFFF5EFD9)], // sky blue → cream
     },
     {
       'label': 'Camp\nProgram',
       'image': 'resources- tlb-ui/programs_findurfit_clean/campprogram.png',
+      'bg': [Color(0xFFCFE5F1), Color(0xFFE3F0F7)], // light blue
     },
     {
       'label': 'Holiday-\nbased',
       'image': 'resources- tlb-ui/programs_findurfit_clean/holidaybased.png',
+      'bg': [Color(0xFFE3F5F1), Color(0xFFF4FBF9)], // light cyan
     },
     {
       'label': 'Regular\nProgram',
       'image': 'resources- tlb-ui/programs_findurfit_clean/regularprogram.png',
+      'bg': [Color(0xFFE8F0F7), Color(0xFFDBE7F1)], // light blue-grey
     },
     {
       'label': 'Short-Term\nProgram',
       'image': 'resources- tlb-ui/programs_findurfit_clean/shorttermprogram.png',
+      'bg': [Color(0xFFF7FAFC), Color(0xFFECF1F5)], // near-white
     },
     {
       'label': 'Weekend\nProgram',
       'image': 'resources- tlb-ui/programs_findurfit_clean/weekendprogram.png',
+      'bg': [Color(0xFFE2F5F6), Color(0xFFF1FBFB)], // light cyan
     },
     {
       'label': 'Recorded\nProgram',
       'image': 'resources- tlb-ui/programs_findurfit_clean/recordedprogram.png',
+      'bg': [Color(0xFFFCEFF4), Color(0xFFFADDE8)], // light pink
     },
   ];
 
@@ -384,32 +392,35 @@ class DummyData {
   static const List<Map<String, dynamic>> venuesSeeAllCategories = [
     {
       'label': 'Play & Adventure',
-      'image': 'resources- tlb-ui/venues_page/play.png',
+      'image': 'resources- tlb-ui/venues_page/1.png',
       'gradient': <Color>[Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
     },
     {
       'label': 'Sports & Active',
-      'image': 'resources- tlb-ui/venues_page/sports.png',
+      'image': 'resources- tlb-ui/venues_page/3.png',
       'gradient': <Color>[Color(0xFFFEF9C3), Color(0xFFFEF08A)],
     },
     {
       'label': 'Creative & DIY',
-      'image': 'resources- tlb-ui/venues_page/creativediy.png',
+      'image': 'resources- tlb-ui/venues_page/5.png',
       'gradient': <Color>[Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
     },
     {
       'label': 'Party & Celebration',
-      'image': 'resources- tlb-ui/venues_page/party.png',
+      'image': 'resources- tlb-ui/venues_page/2.png',
       'gradient': <Color>[Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+      // This artwork fills its canvas more than the others — inset it so it
+      // renders at a similar visual size in the What's-the-Plan circles.
+      'inset': 7,
     },
     {
       'label': 'Science & Discovery',
-      'image': 'resources- tlb-ui/venues_page/science.png',
+      'image': 'resources- tlb-ui/venues_page/4.png',
       'gradient': <Color>[Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
     },
     {
       'label': 'Nature & Animals',
-      'image': 'resources- tlb-ui/venues_page/nature.png',
+      'image': 'resources- tlb-ui/venues_page/6.png',
       'gradient': <Color>[Color(0xFFECFDF5), Color(0xFFD1FAE5)],
     },
     {
@@ -722,7 +733,7 @@ class DummyData {
   static const List<Map<String, dynamic>> venuesGetMoving = [
     {
       'sport': 'Football',
-      'image': 'assets/images/new_home/hotpics1.jpg',
+      'image': 'resources- tlb-ui/venues_page/getmoving/1.png',
       'gradient': <Color>[Color(0xFF56CFB2), Color(0xFF2BC0B4)],
       'slotsText': 'Slots Available today',
       'venues': <Map<String, dynamic>>[
@@ -732,7 +743,7 @@ class DummyData {
     },
     {
       'sport': 'Climbing',
-      'image': 'assets/images/new_home/hotpic2.png',
+      'image': 'resources- tlb-ui/venues_page/getmoving/2.png',
       'gradient': <Color>[Color(0xFF60A5FA), Color(0xFF3B82F6)],
       'slotsText': 'Slots Available today',
       'venues': <Map<String, dynamic>>[
@@ -1083,7 +1094,7 @@ class DummyData {
     EventModel(
       title: 'Storytelling Club',
       venue: 'Andheri • 4 kms',
-      imagePath: 'assets/images/new_home/newontlb1.jpg',
+      imagePath: 'resources- tlb-ui/worldstorytelling.jpg',
       tag: 'Just now',
     ),
     EventModel(
@@ -1149,7 +1160,7 @@ class DummyData {
     EventModel(
       title: 'Chess Academy',
       venue: 'Bandra',
-      imagePath: 'assets/images/new_home/newontlb1.jpg',
+      imagePath: 'resources- tlb-ui/class_page/brainboosters.png',
       description: '6-14 Yrs',
       rating: 4.9,
       reviewCount: '2.1k reviews',
@@ -1170,7 +1181,7 @@ class DummyData {
     EventModel(
       title: 'Online Coding Workshop',
       venue: 'Learn basics of programming',
-      imagePath: 'assets/images/new_home/onlineevent1.jpg',
+      imagePath: 'resources- tlb-ui/class_page/tech.png',
       tag: 'Workshop',
       description: '8-12 Yrs',
       eventDate: 'Saturday, 27 Apr',
@@ -1178,7 +1189,7 @@ class DummyData {
     EventModel(
       title: 'Virtual Art Tour',
       venue: 'Explore global art museums online',
-      imagePath: 'assets/images/new_home/onlineevent2.jpg',
+      imagePath: 'resources- tlb-ui/class_page/creative.png',
       tag: 'Tour',
       description: '6-14 Yrs',
       eventDate: 'Sunday, 28 Apr',

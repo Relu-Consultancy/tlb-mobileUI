@@ -32,7 +32,7 @@ class TrendingEventCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -225,7 +225,7 @@ class TrendingEventCard extends StatelessWidget {
                             'Book Now',
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 12),
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),

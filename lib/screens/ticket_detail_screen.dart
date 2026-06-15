@@ -284,7 +284,10 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                   _loadInitial();
                 },
                 icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('Try again'),
+                label: Text(
+                  'Try again',
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFF2563EB),
                   side: const BorderSide(color: Color(0xFF2563EB)),

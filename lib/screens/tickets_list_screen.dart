@@ -222,7 +222,7 @@ class _TicketsListScreenState extends State<TicketsListScreen> {
             OutlinedButton.icon(
               onPressed: _load,
               icon: const Icon(Icons.refresh, size: 18),
-              label: const Text('Try again'),
+              label: const Text('Try again', style: TextStyle(fontWeight: FontWeight.w500)),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF2563EB),
                 side: const BorderSide(color: Color(0xFF2563EB)),

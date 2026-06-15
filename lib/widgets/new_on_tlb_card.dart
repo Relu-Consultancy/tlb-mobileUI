@@ -33,7 +33,7 @@ class NewOnTlbCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.07),
@@ -151,7 +151,7 @@ class NewOnTlbCard extends StatelessWidget {
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 14),
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w500,
                                   color: AppColors.textPrimary,
                                 ),
                               ),

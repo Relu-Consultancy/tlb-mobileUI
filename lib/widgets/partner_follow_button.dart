@@ -87,7 +87,7 @@ class _PartnerFollowButtonState extends State<PartnerFollowButton> {
         height: 28,
         child: CircularProgressIndicator(
           strokeWidth: 2,
-          color: _isFollowing ? const Color(0xFFFFC533) : Colors.grey,
+          color: _isFollowing ? const Color(0xFFFFCC00) : Colors.grey,
         ),
       );
     }
@@ -96,7 +96,7 @@ class _PartnerFollowButtonState extends State<PartnerFollowButton> {
       return ElevatedButton.icon(
         onPressed: _onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFFC533),
+          backgroundColor: const Color(0xFFFFCC00),
           foregroundColor: Colors.black,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

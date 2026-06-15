@@ -26,7 +26,7 @@ class TlbSignatureSection extends StatelessWidget {
       children: [
         const SectionDividerWidget(
           title: 'TLB Signature',
-          topPadding: 40, // 40px gap from previous section's cards
+          topPadding: 30, // 30px gap from previous section's cards
           fontSize: 17,
           textColor: Color(0xFF1A1A2E), // dark navy
         ),
@@ -44,7 +44,7 @@ class TlbSignatureSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
+                  border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -113,7 +113,7 @@ class TlbSignatureSection extends StatelessWidget {
                             event.venue, // venue holds the subtitle/description
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 13),
-                              color: Color(0xFF4A4A4A),
+                              color: Color(0xFF333333),
                               height: 1.4,
                             ),
                             maxLines: 2,

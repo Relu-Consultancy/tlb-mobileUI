@@ -297,7 +297,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                                     style: GoogleFonts.poppins(
                                       fontSize: Responsive.sp(context, 12),
                                       fontWeight: FontWeight.w500,
-                                      color: const Color(0xFF2563EB),
+                                      color: AppColors.seeAllBlue,
                                     ),
                                   ),
                                 ),
@@ -483,6 +483,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                                 () => _selectedFilterIndex = filterIndex),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
+                              alignment: Alignment.center,
                               margin: const EdgeInsets.only(right: 8),
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 14, vertical: 5),

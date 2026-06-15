@@ -18,8 +18,11 @@ class SubcategoryEmptyState extends StatelessWidget {
     final hPad = Responsive.hPad(context);
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(hPad, 32, hPad, 40),
-      child: Column(
+      padding: EdgeInsets.fromLTRB(hPad, 6, hPad, 40),
+      // Nudge the whole empty state up so it sits higher in the viewport.
+      child: Transform.translate(
+        offset: const Offset(0, -75),
+        child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
@@ -91,6 +94,7 @@ class SubcategoryEmptyState extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

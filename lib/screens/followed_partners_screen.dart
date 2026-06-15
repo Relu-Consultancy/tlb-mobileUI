@@ -91,7 +91,7 @@ class _FollowedPartnersScreenState extends State<FollowedPartnersScreen> {
                   RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             ),
             child: Text('Unfollow',
-                style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
+                style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
           ),
         ],
       ),

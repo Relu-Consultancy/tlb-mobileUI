@@ -216,6 +216,8 @@ class _EventsScreenState extends State<EventsScreen> {
               child: Column(
                 children: [
                 Container(
+                  // Gradient now extends down to the first section title
+                  // (banner included), like the home screen's Spotlight header.
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
@@ -224,18 +226,16 @@ class _EventsScreenState extends State<EventsScreen> {
                         Color(0xFFFFF5E0),
                         Color(0xFFFFF5E0),
                         Color(0xFFFFFAF0),
+                        Color(0xFFFFFAF0),
                         Colors.white,
                       ],
-                      stops: [0.0, 0.55, 0.80, 1.0],
+                      stops: [0.0, 0.35, 0.60, 0.95, 1.0],
                     ),
                   ),
-                  child: const Column(
+                  child: Column(
                     children: [
-                      HomeHeader(),
-                      SizedBox(height: 16),
-                    ],
-                  ),
-                ),
+                      const HomeHeader(),
+                      const SizedBox(height: 16),
                       // Spotlight Banner — full-bleed (edge to edge).
                       RepaintBoundary(
                         child: BannerCarousel(
@@ -252,7 +252,10 @@ class _EventsScreenState extends State<EventsScreen> {
                       ),
 
                       // ── Explore by Categories ─────────────────────────
-                      const SectionDividerWidget(topPadding: 45, title: 'Explore by Categories'),
+                      const SectionDividerWidget(topPadding: 30, title: 'Explore by Categories'),
+                    ],
+                  ),
+                ),
                       RepaintBoundary(
                         child: ExploreCategoriesGrid(
                           categories: _gridCategories,
@@ -275,7 +278,7 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
-                      const SectionDividerWidget(topPadding: 45, title: 'Trending Events'),
+                      const SectionDividerWidget(topPadding: 30, title: 'Trending Events'),
                       SizedBox(
                         height: Responsive.h(context, 420, min: 400),
                         child: AutoScrollList(
@@ -295,7 +298,7 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
-                      const SectionDividerWidget(topPadding: 45, title: 'Explore by Format'),
+                      const SectionDividerWidget(topPadding: 30, title: 'Explore by Format'),
                       RepaintBoundary(
                         child: ExploreFormatRow(
                           onFormatTap: (index) => Navigator.push(
@@ -308,7 +311,7 @@ class _EventsScreenState extends State<EventsScreen> {
                           ),
                         ),
                       ),
-                      const SectionDividerWidget(topPadding: 45, title: 'Happening This Weekend'),
+                      const SectionDividerWidget(topPadding: 30, title: 'Happening This Weekend'),
                       SizedBox(
                         height: Responsive.h(context, 190, min: 170),
                         child: AutoScrollList(
@@ -326,7 +329,7 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
-                      const SectionDividerWidget(topPadding: 45, title: 'Holiday Special'),
+                      const SectionDividerWidget(topPadding: 30, title: 'Holiday Special'),
                       SizedBox(
                         height: Responsive.h(context, 460, min: 430),
                         child: AutoScrollList(
@@ -346,7 +349,7 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
-                      const SectionDividerWidget(topPadding: 45, title: 'Featured Partners'),
+                      const SectionDividerWidget(topPadding: 30, title: 'Featured Partners'),
                       SizedBox(
                         height: Responsive.h(context, 540, min: 520),
                         child: AutoScrollList(
@@ -361,7 +364,7 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
-                      const SectionDividerWidget(topPadding: 45, title: 'New On TLB'),
+                      const SectionDividerWidget(topPadding: 30, title: 'New On TLB'),
                       SizedBox(
                         height: Responsive.h(context, 230, min: 210),
                         child: PageView.builder(
@@ -390,9 +393,9 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
-                      const SectionDividerWidget(topPadding: 45, title: 'Online Events'),
+                      const SectionDividerWidget(topPadding: 30, title: 'Online Events'),
                       SizedBox(
-                        height: Responsive.h(context, 330, min: 300),
+                        height: Responsive.h(context, 372, min: 342),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.onlineEvents.length,

@@ -207,7 +207,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
             child: Text('Keep Booking',
                 style: GoogleFonts.poppins(
                     color: Colors.grey.shade600,
-                    fontSize: Responsive.sp(context, 13))),
+                    fontSize: Responsive.sp(context, 13),
+                    fontWeight: FontWeight.w500)),
           ),
           ElevatedButton(
             onPressed: () =>

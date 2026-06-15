@@ -328,7 +328,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                                     style: GoogleFonts.poppins(
                                       fontSize: Responsive.sp(context, 12),
                                       fontWeight: FontWeight.w500,
-                                      color: const Color(0xFF5B5BD6),
+                                      color: AppColors.seeAllBlue,
                                     ),
                                   ),
                                 ),
@@ -393,14 +393,34 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                                               ),
                                             ),
                                             Expanded(
-                                              child: Image.asset(
-                                                cat['image'] as String,
-                                                fit: BoxFit.contain,
-                                                errorBuilder: (_, __, ___) => const Icon(
-                                                  Icons.workspace_premium_outlined,
-                                                  color: Colors.grey,
-                                                  size: 28,
-                                                ),
+                                              child: Column(
+                                                children: [
+                                                  Expanded(
+                                                    child: Image.asset(
+                                                      cat['image'] as String,
+                                                      fit: BoxFit.contain,
+                                                      errorBuilder: (_, __, ___) => const Icon(
+                                                        Icons.workspace_premium_outlined,
+                                                        color: Colors.grey,
+                                                        size: 28,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  // Soft grounding shadow under the image.
+                                                  Container(
+                                                    height: 6,
+                                                    margin: const EdgeInsets.fromLTRB(18, 1, 18, 2),
+                                                    decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(20),
+                                                      gradient: RadialGradient(
+                                                        colors: [
+                                                          Colors.black.withOpacity(0.20),
+                                                          Colors.transparent,
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                           ],
@@ -503,6 +523,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                             },
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
+                              alignment: Alignment.center,
                               margin: const EdgeInsets.only(right: 8),
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 14, vertical: 5),

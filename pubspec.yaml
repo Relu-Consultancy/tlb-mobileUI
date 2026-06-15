@@ -71,6 +71,7 @@ flutter:
     - resources- tlb-ui/accounts_page/
     - resources- tlb-ui/venues_page/
     - resources- tlb-ui/venues_page/yourway/
+    - resources- tlb-ui/venues_page/getmoving/
     - resources- tlb-ui/events_page/
     - resources- tlb-ui/homescreen-categoryicons/
     - resources- tlb-ui/homescreen_Explorethestage/
@@ -78,6 +79,7 @@ flutter:
     - resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/
     - resources- tlb-ui/programs_findurfit/
     - resources- tlb-ui/programs_findurfit_clean/
+    - resources- tlb-ui/class_page/
     - google_fonts/
 
   fonts:

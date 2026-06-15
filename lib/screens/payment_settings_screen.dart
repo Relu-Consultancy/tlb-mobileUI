@@ -102,7 +102,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
         content: Text('Are you sure you want to remove this ${method.methodType == 'card' ? 'card' : 'UPI ID'}?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Remove', style: TextStyle(color: Colors.red))),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Remove', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500))),
         ],
       ),
     );

@@ -124,7 +124,7 @@ class _LocationScreenState extends State<LocationScreen> {
             ),
             child: Text(
               'Open Settings',
-              style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+              style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
             ),
           ),
         ],

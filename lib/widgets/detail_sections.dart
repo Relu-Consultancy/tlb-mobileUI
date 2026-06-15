@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import 'auto_scroll_list.dart';
 
@@ -8,7 +9,7 @@ import 'auto_scroll_list.dart';
 // white with a slim black border, and section titles are bold.
 
 const Color kDetailBg = Color(0xFFFAFAFC); // lighter, near-white background
-const Color kDetailText = Color(0xFF1A1A2E);
+const Color kDetailText = Color(0xFF333333);
 const Color kCardBorder = Color(0x14000000); // black @ ~8% — very light slim border
 const Color kRowDivider = Color(0x0F000000); // black @ ~6% — hairline between rows
 
@@ -36,7 +37,7 @@ class DetailSectionTitle extends StatelessWidget {
             text,
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 17),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: kDetailText,
             ),
           ),
@@ -90,7 +91,7 @@ class _ExpandableAboutCardState extends State<ExpandableAboutCard> {
             widget.title,
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 16),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w500,
               color: kDetailText,
             ),
           ),
@@ -169,11 +170,11 @@ class DetailGallery extends StatelessWidget {
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 13),
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFF3B82F6),
+                          color: AppColors.seeAllBlue,
                         ),
                       ),
                       const Icon(Icons.chevron_right,
-                          size: 18, color: Color(0xFF3B82F6)),
+                          size: 18, color: AppColors.seeAllBlue),
                     ],
                   ),
                 ),
@@ -322,7 +323,7 @@ class DetailDirectionsCard extends StatelessWidget {
                     'Get Direction',
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 12.5),
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   style: ElevatedButton.styleFrom(

@@ -110,6 +110,8 @@ class _ClassesScreenState extends State<ClassesScreen> {
                     children: [
                       // Header scrolls with the rest of the page now.
                       Container(
+                        // Gradient now extends down to the first section title
+                        // (banner included), like the home Spotlight header.
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
@@ -118,43 +120,44 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               Color(0xFFFFF5E0),
                               Color(0xFFFFF5E0),
                               Color(0xFFFFFAF0),
+                              Color(0xFFFFFAF0),
                               Colors.white,
                             ],
-                            stops: [0.0, 0.55, 0.80, 1.0],
+                            stops: [0.0, 0.35, 0.60, 0.95, 1.0],
                           ),
                         ),
-                        child: const Column(
+                        child: Column(
                           children: [
-                            HomeHeader(),
-                            SizedBox(height: 16),
-                          ],
-                        ),
-                      ),
-                      // ── Education Banner — full-bleed (edge to edge). ───
-                      RepaintBoundary(
-                        child: BannerCarousel(
-                          events: DummyData.classesScreenBanners,
-                          height: Responsive.h(context, 386, min: 286),
-                          showGlow: false,
-                          overlayStyle: true,
-                          ctaText: 'Explore Classes',
-                          // Full width — side edges touch the screen; only the
-                          // corners are rounded.
-                          fixedCardWidth: MediaQuery.of(context).size.width,
-                          cornerRadius: 22,
-                          overlayDots: true, // dots overlaid on the banner
-                        ),
-                      ),
+                            const HomeHeader(),
+                            const SizedBox(height: 16),
+                            // ── Education Banner — full-bleed (edge to edge). ──
+                            RepaintBoundary(
+                              child: BannerCarousel(
+                                events: DummyData.classesScreenBanners,
+                                height: Responsive.h(context, 386, min: 286),
+                                showGlow: false,
+                                overlayStyle: true,
+                                ctaText: 'Explore Classes',
+                                // Full width — side edges touch the screen; only
+                                // the corners are rounded.
+                                fixedCardWidth: MediaQuery.of(context).size.width,
+                                cornerRadius: 22,
+                                overlayDots: true, // dots overlaid on the banner
+                              ),
+                            ),
 
-                      // ── Let's Begin Here ─────────────────────────────────
-                      const SectionDividerWidget(
-                        title: "Let's Begin Here",
+                            // ── Let's Begin Here ───────────────────────────
+                            const SectionDividerWidget(
+                              title: "Let's Begin Here",
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         textColor: Color(0xFF3A3A3A), // charcoal
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
+                            ),
+                          ],
+                        ),
                       ),
                       RepaintBoundary(
                         child: ExploreCategoriesGrid(
@@ -428,7 +431,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         lineColor: Color(0xFFD4A537), // warm gold
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 170, min: 155),
+                        height: Responsive.h(context, 195, min: 180),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesBuildNewSkills.length,

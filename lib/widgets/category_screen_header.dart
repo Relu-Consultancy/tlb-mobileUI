@@ -120,7 +120,7 @@ class CategoryScreenHeader extends StatelessWidget {
                         Icons.tune_rounded,
                         size: 20,
                         color: onFilterTap != null
-                            ? const Color(0xFF5B5BD6)
+                            ? const Color(0xFF1A1A2E) // black
                             : const Color(0xFF8E8E93),
                       ),
                     ),

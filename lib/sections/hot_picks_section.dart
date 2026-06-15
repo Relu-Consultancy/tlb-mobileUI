@@ -25,7 +25,7 @@ class HotPicksSection extends StatelessWidget {
       children: [
         const SectionDividerWidget(
           title: 'Hot Picks',
-          topPadding: 40, // 40px gap from previous section's cards
+          topPadding: 30, // 30px gap from previous section's cards
           fontSize: 17,
           fontWeight: FontWeight.w600,
           textColor: Color(0xFF1A1A2E), // dark navy
@@ -39,13 +39,15 @@ class HotPicksSection extends StatelessWidget {
             addAutomaticKeepAlives: false,
             itemBuilder: (context, index) {
               final event = items[index];
-              return Container(
+              return GestureDetector(
+                onTap: () => openListingDetail(context, event),
+                child: Container(
                 width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
+                  border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -138,11 +140,11 @@ class HotPicksSection extends StatelessWidget {
                                 // Age Range Row
                                 Row(
                                   children: [
-                                    const Icon(Icons.people_outline, size: 14, color: Color(0xFF4A4A4A)),
+                                    const Icon(Icons.people_outline, size: 14, color: Color(0xFF333333)),
                                     const SizedBox(width: 6),
                                     Text(
                                       '3-5 Yrs', // Dummy age range
-                                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Color(0xFF4A4A4A)),
+                                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Color(0xFF333333)),
                                     ),
                                   ],
                                 ),
@@ -163,7 +165,7 @@ class HotPicksSection extends StatelessWidget {
                                         event.reviewCount ?? '3.5k reviews',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Color(0xFF4A4A4A)),
+                                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Color(0xFF333333)),
                                       ),
                                     ),
                                   ],
@@ -173,12 +175,12 @@ class HotPicksSection extends StatelessWidget {
                                 // Venue Row
                                 Row(
                                   children: [
-                                    const Icon(Icons.location_on_outlined, size: 14, color: Color(0xFF4A4A4A)),
+                                    const Icon(Icons.location_on_outlined, size: 14, color: Color(0xFF333333)),
                                     const SizedBox(width: 6),
                                     Expanded(
                                       child: Text(
                                         event.venue,
-                                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Color(0xFF4A4A4A)),
+                                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Color(0xFF333333)),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -187,43 +189,11 @@ class HotPicksSection extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 12),
-
-                            // Bottom row with Book Now button (price label removed)
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Spacer(),
-                                SizedBox(
-                                  width: Responsive.w(context, 82, min: 76), 
-                                  height: Responsive.h(context, 34, min: 30),
-                                  child: ElevatedButton(
-                                    onPressed: () =>
-                                        openListingDetail(context, event),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFFFFCC00),
-                                      foregroundColor: const Color(0xFF1A1A2E),
-                                      elevation: 0,
-                                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      'Book Now',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: Responsive.sp(context, 12),
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
                           ],
                         ),
                       ),
                   ],
+                ),
                 ),
               );
             },

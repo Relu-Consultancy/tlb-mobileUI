@@ -29,7 +29,8 @@ class SectionDividerWidget extends StatelessWidget {
   /// Thickness of the accent lines in logical pixels.
   final double lineThickness;
 
-  /// Optional custom padding above the divider. Defaults to 64.
+  /// Optional custom padding above the divider — the gap from the previous
+  /// section's cards. Defaults to 30.
   final double topPadding;
 
   /// Optional custom padding below the divider. Defaults to 16.
@@ -44,7 +45,7 @@ class SectionDividerWidget extends StatelessWidget {
     this.textColor = AppColors.textPrimary, // dark navy (#1A1A2E)
     this.lineColor = AppColors.dividerGold,
     this.lineThickness = 1,
-    this.topPadding = 64,
+    this.topPadding = 30,
     this.bottomPadding = 16,
   });
 

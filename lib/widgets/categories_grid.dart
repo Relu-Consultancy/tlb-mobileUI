@@ -133,26 +133,6 @@ class CategoriesGrid extends StatelessWidget {
               stops: [0.0, 0.42, 0.78, 1.0],
             ),
             borderRadius: BorderRadius.circular(cardRadius),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.07),
-                blurRadius: 10,
-                spreadRadius: -4,
-                offset: const Offset(-4, 0),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.07),
-                blurRadius: 10,
-                spreadRadius: -4,
-                offset: const Offset(4, 0),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 6,
-                spreadRadius: -3,
-                offset: const Offset(0, -2),
-              ),
-            ],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

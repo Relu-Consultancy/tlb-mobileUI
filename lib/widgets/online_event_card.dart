@@ -27,7 +27,7 @@ class OnlineEventCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -38,24 +38,27 @@ class OnlineEventCard extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-              child: AspectRatio(
-                aspectRatio: 1.3,
+            // Image fills the extra card height; the content below keeps a
+            // fixed 20px gap to the card bottom.
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
                 child: Image.asset(
                   event.imagePath,
+                  width: double.infinity,
+                  height: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
                     color: AppColors.primary.withOpacity(0.2),
-                    child: const Icon(Icons.event, size: 40),
+                    child: const Center(child: Icon(Icons.event, size: 40)),
                   ),
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

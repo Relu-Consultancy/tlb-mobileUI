@@ -36,7 +36,7 @@ class BuildSkillCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.07),
@@ -45,116 +45,132 @@ class BuildSkillCard extends StatelessWidget {
             ),
           ],
         ),
-        child: IntrinsicHeight(
-          child: Row(
-            children: [
-              // Left image
-              ClipRRect(
-                borderRadius: const BorderRadius.horizontal(left: Radius.circular(18)),
-                child: Image.asset(
-                  event.imagePath,
-                  width: Responsive.w(context, 120, min: 96),
-                  height: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    width: Responsive.w(context, 120, min: 96),
-                    color: AppColors.primary.withOpacity(0.15),
-                    child: const Icon(Icons.school_outlined, size: 40, color: AppColors.textSecondary),
+        child: Padding(
+          // The card body inset — keeps the image (and content) inside the
+          // card with a margin all around, so the image reads as a separate
+          // rounded thumbnail rather than the card's own edge.
+          padding: const EdgeInsets.all(10),
+          child: SizedBox(
+            // Fixed inner height so the CTA can be pinned to the bottom.
+            height: Responsive.h(context, 168, min: 156),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Left image — separate, fully-rounded thumbnail inside the
+                // card; widened so it covers more toward the right.
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: Image.asset(
+                    event.imagePath,
+                    width: Responsive.w(context, 150, min: 124),
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: Responsive.w(context, 150, min: 124),
+                      color: AppColors.primary.withOpacity(0.15),
+                      child: const Icon(Icons.school_outlined, size: 40, color: AppColors.textSecondary),
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(width: 12),
 
-              // Right content
-              Expanded(
-                child: Padding(
-                  // 20px gap below the CTA button (card bottom padding).
-                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 20),
+                // Right content — top group + CTA pinned to the bottom; 10px
+                // gaps between the data rows.
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        event.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 13.5),
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
-                          height: 1.25,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      // Venue
-                      Row(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.location_on_outlined, size: 12, color: AppColors.textSecondary),
-                          const SizedBox(width: 3),
-                          Expanded(
-                            child: Text(
-                              event.venue,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 11),
-                                color: AppColors.textSecondary,
-                              ),
+                          Text(
+                            event.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, 14),
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                              height: 1.25,
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
+                          const SizedBox(height: 10),
 
-                      // Rating + reviews
-                      if (event.rating != null)
-                        Row(
-                          children: [
-                            const Icon(Icons.star_rounded, size: 13, color: Color(0xFFFFB902)),
-                            const SizedBox(width: 3),
-                            Text(
-                              event.rating!.toStringAsFixed(1),
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 11),
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            if ((event.reviewCount ?? '').isNotEmpty) ...[
+                          // Venue
+                          Row(
+                            children: [
+                              const Icon(Icons.location_on_outlined, size: 12, color: AppColors.textSecondary),
                               const SizedBox(width: 3),
-                              Text(
-                                event.reviewCount!,
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 10.5),
-                                  color: AppColors.textSecondary,
+                              Expanded(
+                                child: Text(
+                                  event.venue,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 11),
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
                               ),
                             ],
-                          ],
-                        ),
-
-                      // Tag chip
-                      if ((event.tag ?? '').isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFCE7F3),
-                            borderRadius: BorderRadius.circular(20),
                           ),
-                          child: Text(
-                            event.tag!,
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 10.5),
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFFBE185D),
+
+                          // Rating + reviews
+                          if (event.rating != null) ...[
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                const Icon(Icons.star_rounded, size: 13, color: Color(0xFFFFB902)),
+                                const SizedBox(width: 3),
+                                Text(
+                                  event.rating!.toStringAsFixed(1),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 11),
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                if ((event.reviewCount ?? '').isNotEmpty) ...[
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    event.reviewCount!,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 10.5),
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
-                          ),
-                        ),
-                      ],
+                          ],
 
-                      const Spacer(),
+                          // Tag chip
+                          if ((event.tag ?? '').isNotEmpty) ...[
+                            const SizedBox(height: 10),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFCE7F3),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  event.tag!,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 10.5),
+                                    fontWeight: FontWeight.w500,
+                                    color: const Color(0xFFBE185D),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
 
-                      // CTA
+                      // CTA pinned to the bottom of the card.
                       Material(
                         color: const Color(0xFFFFCC00),
                         borderRadius: BorderRadius.circular(22),
@@ -170,7 +186,7 @@ class BuildSkillCard extends StatelessWidget {
                             }
                           },
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 9),
                             child: Text(
                               ctaLabel,
                               style: GoogleFonts.poppins(
@@ -185,8 +201,8 @@ class BuildSkillCard extends StatelessWidget {
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -353,28 +353,34 @@ class HomeHeader extends StatelessWidget {
         MaterialPageRoute(builder: (_) => const SearchScreen()),
       ),
       child: Container(
-        height: Responsive.h(context, 48, min: 42),
+        height: Responsive.h(context, 43, min: 37),
         decoration: BoxDecoration(
-          // Golden wash across the whole bar (subtle top→bottom depth so the
-          // gold covers the full width, not just the left side).
+          // Golden wash across the whole bar — slightly deeper so the dark
+          // text/icons read with more contrast.
           gradient: const LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFFFF6DE), // light golden (top)
-              Color(0xFFFFEFC8), // golden (bottom)
+              Color(0xFFFFEDC4), // golden (top)
+              Color(0xFFFFE0A6), // deeper golden (bottom)
             ],
           ),
           borderRadius: BorderRadius.circular(30),
           // 2px white border.
           border: Border.all(color: Colors.white, width: 2),
-          // Drop shadow removed — it read as a thin line below the bar,
-          // above the Spotlight divider.
+          // Soft drop shadow around the bar.
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.12),
+              blurRadius: 14,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Row(
           children: [
             const SizedBox(width: 18),
-            const Icon(Icons.search, color: Color(0xFF555555), size: 22),
+            const Icon(Icons.search, color: Color(0xFF1A1A2E), size: 22),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -382,14 +388,14 @@ class HomeHeader extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 14),
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF555555),
+                  color: const Color(0xFF1A1A2E),
                 ),
               ),
             ),
             Container(
               width: 1,
               height: 22,
-              color: const Color(0xFFE0E0E0),
+              color: const Color(0xFF1A1A2E).withOpacity(0.18),
             ),
             const SizedBox(width: 14),
             const Icon(Icons.tune_rounded, color: Color(0xFF1A1A2E), size: 20),

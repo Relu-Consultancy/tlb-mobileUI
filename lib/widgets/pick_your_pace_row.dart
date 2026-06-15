@@ -34,6 +34,9 @@ class PickYourPaceRow extends StatelessWidget {
               final int index = entry.key;
               final Map<String, dynamic> item = entry.value;
               final bool isLast = index == items.length - 1;
+              // Soft pastel base behind the icon (matches the reference).
+              final List<Color> bg = (item['bg'] as List?)?.cast<Color>() ??
+                  const [Colors.white, Colors.white];
 
               return Padding(
                 padding: EdgeInsets.only(right: isLast ? 0 : _gap),
@@ -42,14 +45,22 @@ class PickYourPaceRow extends StatelessWidget {
                   height: circleSize,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white,
-                    // Very slim black circular border around the card.
-                    border: Border.all(color: Colors.black, width: 0.7),
+                    // Light pastel fill instead of plain white.
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: bg,
+                    ),
+                    // Very thin, light black boundary around the circle.
+                    border: Border.all(
+                      color: Colors.black.withOpacity(0.18),
+                      width: 0.6,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
@@ -67,6 +78,26 @@ class PickYourPaceRow extends StatelessWidget {
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
                               const Icon(Icons.class_, color: Colors.grey),
+                        ),
+                        // Soft gradient veil to give the disc the reference
+                        // gradient tint. The icon images have opaque
+                        // backgrounds, so this washes the card's bottom tone
+                        // over the lower half while keeping the top (and the
+                        // icon) clear.
+                        Positioned.fill(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  bg.first.withOpacity(0.0),
+                                  bg.last.withOpacity(0.55),
+                                ],
+                                stops: const [0.45, 1.0],
+                              ),
+                            ),
+                          ),
                         ),
                         // Title inside the circle (black text on the light circle).
                         Padding(

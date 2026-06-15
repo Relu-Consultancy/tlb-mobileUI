@@ -25,7 +25,7 @@ class ParentsFavoriteSection extends StatelessWidget {
       children: [
         const SectionDividerWidget(
           title: "Parents' Favorite",
-          topPadding: 40, // 40px gap from previous section's cards
+          topPadding: 30, // 30px gap from previous section's cards
           fontSize: 17,
           textColor: Color(0xFF1A1A2E), // dark navy
         ),
@@ -38,13 +38,15 @@ class ParentsFavoriteSection extends StatelessWidget {
             addAutomaticKeepAlives: false,
             itemBuilder: (context, index) {
               final event = items[index];
-              return Container(
+              return GestureDetector(
+                onTap: () => openListingDetail(context, event),
+                child: Container(
                 width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
+                  border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -107,10 +109,10 @@ class ParentsFavoriteSection extends StatelessWidget {
                       ),
                     ),
 
-                    // Bottom Content Area — natural height.
+                    // Bottom Content Area — natural height (no CTA; the image
+                    // above expands to fill the freed space).
                     Padding(
-                      // 20px gap below the CTA button (card bottom padding).
-                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 20),
+                      padding: const EdgeInsets.fromLTRB(12, 10, 12, 14),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,13 +134,13 @@ class ParentsFavoriteSection extends StatelessWidget {
                               ),
                               const SizedBox(width: 8),
                               const Icon(Icons.people_outline,
-                                  size: 14, color: Color(0xFF4A4A4A)),
+                                  size: 14, color: Color(0xFF333333)),
                               const SizedBox(width: 4),
                               Text(
                                 event.description ?? '4-12 Yrs',
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 13),
-                                  color: Color(0xFF4A4A4A),
+                                  color: Color(0xFF333333),
                                 ),
                               ),
                             ],
@@ -165,50 +167,10 @@ class ParentsFavoriteSection extends StatelessWidget {
                                   '(${event.reviewCount ?? '3.5k reviews'})',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 13),
-                                    color: Color(0xFF4A4A4A),
+                                    color: Color(0xFF333333),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Visit button (price label removed)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Spacer(),
-                              SizedBox(
-                                width: Responsive.w(context, 86, min: 78),
-                                height: Responsive.h(context, 38, min: 36),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    openListingDetail(context, event);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFFFCC00),
-                                    foregroundColor: const Color(0xFF1A1A2E),
-                                    elevation: 0,
-                                    // Let the SizedBox drive the height instead of
-                                    // the default 48px padded tap target, which
-                                    // could collapse the button at small/short
-                                    // resolutions (same fix as TLB Signature CTA).
-                                    minimumSize: Size.zero,
-                                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    'Visit',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 13),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
                                 ),
                               ),
                             ],
@@ -218,7 +180,7 @@ class ParentsFavoriteSection extends StatelessWidget {
                     ),
                   ],
                 ),
-              );
+              ));
             },
           ),
         ),

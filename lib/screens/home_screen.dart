@@ -294,7 +294,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: BannerCarousel(
                           events: DummyData.bannerEvents,
                           height: Responsive.h(context, 480.0),
-                          fixedCardWidth: Responsive.w(context, 345.0),
+                          // Carousel peek — previous/next banners show at the
+                          // left & right edges.
+                          viewportFraction: 0.84,
+                          // Match the venues banner corner radius.
+                          cornerRadius: 28,
+                          // Golden gradient border sweeping around the banner.
+                          animatedGoldenBorder: true,
                         ),
                       ),
                       const RepaintBoundary(child: CategoriesGrid()),

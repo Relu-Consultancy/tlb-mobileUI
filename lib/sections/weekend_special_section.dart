@@ -62,7 +62,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
           children: [
             const SectionDividerWidget(
               title: 'Weekend Specials',
-              topPadding: 40, // 40px gap from previous section's cards
+              topPadding: 30, // 30px gap from previous section's cards
               fontSize: 17,
               fontWeight: FontWeight.w600,
               textColor: Color(0xFF1A1A2E), // dark navy
@@ -87,7 +87,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                            color: Colors.black.withOpacity(0.15), width: 0.7),
+                            color: Colors.black.withOpacity(0.1), width: 0.7),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.06),
@@ -204,7 +204,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                         event.reviewCount ?? '',
                                         style: GoogleFonts.poppins(
                                           fontSize: Responsive.sp(context, 13),
-                                          color: const Color(0xFF4A4A4A),
+                                          color: const Color(0xFF333333),
                                         ),
                                       ),
                                     ],
@@ -214,14 +214,14 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                   Row(
                                     children: [
                                       const Icon(Icons.location_on_outlined,
-                                          size: 15, color: Color(0xFF4A4A4A)),
+                                          size: 15, color: Color(0xFF333333)),
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(
                                           event.venue,
                                           style: GoogleFonts.poppins(
                                             fontSize: Responsive.sp(context, 13),
-                                            color: const Color(0xFF4A4A4A),
+                                            color: const Color(0xFF333333),
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -248,7 +248,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                             'Book Now',
                                             style: GoogleFonts.poppins(
                                               fontSize: Responsive.sp(context, 13),
-                                              fontWeight: FontWeight.w600,
+                                              fontWeight: FontWeight.w500,
                                             ),
                                           ),
                                         ),
@@ -281,7 +281,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                 ),
               ),
             ),
-            // Trailing space removed — the next section's 40px topPadding
+            // Trailing space removed — the next section's 30px topPadding
             // provides the gap below the dots indicator.
           ],
         );

@@ -24,7 +24,7 @@ class DiscoverNearYouSection extends StatelessWidget {
       children: [
         const SectionDividerWidget(
           title: 'Discover Near You',
-          topPadding: 40, // 40px gap from previous section's cards
+          topPadding: 30, // 30px gap from previous section's cards
           fontSize: 17,
           fontWeight: FontWeight.w600,
           textColor: Color(0xFF1A1A2E), // dark navy
@@ -44,7 +44,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
+                  border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -159,14 +159,14 @@ class DiscoverNearYouSection extends StatelessWidget {
                           Row(
                             children: [
                               const Icon(Icons.location_on_outlined,
-                                  size: 14, color: Color(0xFF4A4A4A)),
+                                  size: 14, color: Color(0xFF333333)),
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
                                   event.venue,
                                   style: GoogleFonts.poppins(
                                       fontSize: Responsive.sp(context, 13),
-                                      color: Color(0xFF4A4A4A)),
+                                      color: Color(0xFF333333)),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -190,7 +190,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                                 event.reviewCount ?? '3.5k reviews',
                                 style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 13),
-                                    color: Color(0xFF4A4A4A)),
+                                    color: Color(0xFF333333)),
                               ),
                             ],
                           ),

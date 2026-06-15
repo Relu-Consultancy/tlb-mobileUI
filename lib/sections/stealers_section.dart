@@ -25,7 +25,7 @@ class StealersSection extends StatelessWidget {
       children: [
         const SectionDividerWidget(
           title: 'Stealers',
-          topPadding: 40, // 40px gap from previous section's cards
+          topPadding: 30, // 30px gap from previous section's cards
           fontSize: 17,
           textColor: Color(0xFF1A1A2E), // dark navy
         ),
@@ -43,7 +43,7 @@ class StealersSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
+                  border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -134,10 +134,10 @@ class StealersSection extends StatelessWidget {
                       ),
                     ),
 
-                    // Bottom Content Area — natural height.
+                    // Bottom Content Area — kept tight so the image above
+                    // stretches further down (less white space).
                     Padding(
-                      // 20px gap below the CTA button (card bottom padding).
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,12 +168,12 @@ class StealersSection extends StatelessWidget {
                                 event.reviewCount ?? '3.5k reviews',
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 13),
-                                  color: Color(0xFF4A4A4A),
+                                  color: Color(0xFF333333),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 8),
                           // Grab Deal button (price label removed)
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,

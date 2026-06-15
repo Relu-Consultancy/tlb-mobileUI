@@ -95,6 +95,8 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                   child: Column(
                     children: [
                       Container(
+                        // Gradient now extends down to the first section title
+                        // (banner included), like the home Spotlight header.
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
@@ -103,43 +105,43 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                               Color(0xFFFFF5E0),
                               Color(0xFFFFF5E0),
                               Color(0xFFFFFAF0),
+                              Color(0xFFFFFAF0),
                               Colors.white,
                             ],
-                            stops: [0.0, 0.55, 0.80, 1.0],
+                            stops: [0.0, 0.35, 0.60, 0.95, 1.0],
                           ),
                         ),
-                        child: const Column(
+                        child: Column(
                           children: [
-                            HomeHeader(),
-                            SizedBox(height: 16),
-                          ],
-                        ),
-                      ),
-                      // ── Programs Banner — full-bleed (edge to edge). ────
-                      RepaintBoundary(
-                        child: BannerCarousel(
-                          events: DummyData.programsScreenBanners,
-                          height: Responsive.h(context, 386, min: 286),
-                          showGlow: false,
-                          overlayStyle: true,
-                          ctaText: 'Explore Program',
-                          // Full width — side edges touch the screen; only the
-                          // corners are rounded.
-                          fixedCardWidth: MediaQuery.of(context).size.width,
-                          cornerRadius: 22,
-                          overlayDots: true, // dots overlaid on the banner
-                        ),
-                      ),
-
-                      const SectionDividerWidget(
-                        title: 'Pave Your Path',
+                            const HomeHeader(),
+                            const SizedBox(height: 16),
+                            // ── Programs Banner — full-bleed (edge to edge). ──
+                            RepaintBoundary(
+                              child: BannerCarousel(
+                                events: DummyData.programsScreenBanners,
+                                height: Responsive.h(context, 386, min: 286),
+                                showGlow: false,
+                                overlayStyle: true,
+                                ctaText: 'Explore Program',
+                                // Full width — side edges touch the screen; only
+                                // the corners are rounded.
+                                fixedCardWidth: MediaQuery.of(context).size.width,
+                                cornerRadius: 22,
+                                overlayDots: true, // dots overlaid on the banner
+                              ),
+                            ),
+                            const SectionDividerWidget(
+                              title: 'Pave Your Path',
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         textColor: Color(0xFF3A3A3A), // charcoal
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 45,
+                        topPadding: 30,
+                            ),
+                          ],
+                        ),
                       ),
                       RepaintBoundary(
                         child: ExploreCategoriesGrid(
@@ -172,7 +174,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 45,
+                        topPadding: 30,
                       ),
                       SizedBox(
                         height: Responsive.h(context, 475, min: 450),
@@ -207,7 +209,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 45,
+                        topPadding: 30,
                       ),
                       SizedBox(
                         height: Responsive.h(context, 212, min: 196),
@@ -240,7 +242,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 45,
+                        topPadding: 30,
                       ),
                       PickYourPaceRow(items: DummyData.findYourFit),
 
@@ -253,7 +255,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 45,
+                        topPadding: 30,
                       ),
                       SizedBox(
                         height: Responsive.h(context, 212, min: 196),
@@ -271,6 +273,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                 ageText: '8+ Yrs',
                                 locationText: e.venue,
                                 buttonLabel: 'Check Availability',
+                                smallButton: true,
                               ),
                             );
                           },
@@ -286,7 +289,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 45,
+                        topPadding: 30,
                       ),
                       SizedBox(
                         height: Responsive.h(context, 348, min: 322),
@@ -312,7 +315,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 45,
+                        topPadding: 30,
                       ),
                       SizedBox(
                         height: Responsive.h(context, 366, min: 342),
@@ -338,7 +341,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         lineLength: 100,
                         lineThickness: 1.5,
                         lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 45,
+                        topPadding: 30,
                       ),
                       SizedBox(
                         height: Responsive.h(context, 374, min: 350),
@@ -389,6 +392,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
     required String ageText,
     required String locationText,
     required String buttonLabel,
+    bool smallButton = false,
   }) {
     return GestureDetector(
       onTap: () => Navigator.push(
@@ -400,7 +404,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -409,25 +413,31 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
             ),
           ],
         ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
-              child: Image.asset(
-                event.imagePath,
-                width: Responsive.w(context, 150, min: 132),
-                height: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  width: Responsive.w(context, 150, min: 132),
-                  color: AppColors.primary.withOpacity(0.15),
-                  child: const Icon(Icons.event, size: 32),
+        child: Padding(
+          // Inset so the image sits inside the card as a separate rounded
+          // component (not flush / cut at the card edges).
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Image — all corners rounded and widened for more coverage
+              // toward the right.
+              ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: Image.asset(
+                  event.imagePath,
+                  width: Responsive.w(context, 176, min: 150),
+                  height: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    width: Responsive.w(context, 176, min: 150),
+                    color: AppColors.primary.withOpacity(0.15),
+                    child: const Icon(Icons.event, size: 32),
+                  ),
                 ),
               ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+              const SizedBox(width: 12),
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -455,8 +465,10 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       ],
                     ),
                     SizedBox(
-                      width: double.infinity,
-                      height: 38,
+                      // Full-width by default; compact (content-sized) button
+                      // when [smallButton] is set.
+                      width: smallButton ? null : double.infinity,
+                      height: smallButton ? 32 : 38,
                       child: ElevatedButton(
                         onPressed: () => Navigator.push(
                           context,
@@ -466,7 +478,9 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           backgroundColor: AppColors.primaryLight,
                           foregroundColor: AppColors.textPrimary,
                           elevation: 0,
-                          padding: EdgeInsets.zero,
+                          padding: smallButton
+                              ? const EdgeInsets.symmetric(horizontal: 16)
+                              : EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(22),
                           ),
@@ -474,8 +488,8 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         child: Text(
                           buttonLabel,
                           style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 12.5),
-                            fontWeight: FontWeight.w600,
+                            fontSize: Responsive.sp(context, smallButton ? 11 : 12.5),
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
@@ -483,8 +497,8 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -502,7 +516,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.07),
@@ -559,7 +573,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
             ),
             // ── Info ──
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -582,7 +596,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       Expanded(child: _iconRow(Icons.location_on_outlined, event.venue)),
                       const SizedBox(width: 8),
                       Material(
-                        color: const Color(0xFFFFB902),
+                        color: const Color(0xFFFFCC00),
                         borderRadius: BorderRadius.circular(22),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(22),
@@ -596,7 +610,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                               'View Now',
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 12.5),
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w500,
                                 color: const Color(0xFF1A1A2E),
                               ),
                             ),
@@ -626,7 +640,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -707,7 +721,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         ),
                         child: Text(
                           'Enquire Now',
-                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600),
+                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w500),
                         ),
                       ),
                     ),
@@ -733,7 +747,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.black.withOpacity(0.5), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -846,7 +860,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         ),
                         child: Text(
                           'View Now',
-                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600),
+                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w500),
                         ),
                       ),
                     ),
@@ -868,7 +882,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         Expanded(
           child: Text(
             text,
-            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: Colors.grey.shade600),
+            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: const Color(0xFF333333)),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

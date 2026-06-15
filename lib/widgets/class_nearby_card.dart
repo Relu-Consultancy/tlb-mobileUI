@@ -43,7 +43,7 @@ class ClassNearbyCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.07),
@@ -224,7 +224,7 @@ class ClassNearbyCard extends StatelessWidget {
                   // Join Now button
                   if (buttonLabel != null)
                     Material(
-                      color: const Color(0xFFFFB902),
+                      color: const Color(0xFFFFCC00),
                       borderRadius: BorderRadius.circular(24),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(24),

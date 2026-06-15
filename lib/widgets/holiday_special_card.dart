@@ -3,6 +3,7 @@ import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
+import 'animated_gradient_tag.dart';
 import '../screens/class_detail_screen.dart';
 import '../screens/event_detail_screen.dart';
 import 'inquire_now_sheet.dart';
@@ -36,7 +37,7 @@ class HolidaySpecialCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.black.withOpacity(0.15), width: 0.7),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -72,26 +73,27 @@ class HolidaySpecialCard extends StatelessWidget {
                       right: 0,
                       child: Align(
                         alignment: Alignment.topCenter,
-                        child: Container(
+                        // Animated red → purple gradient that slides very
+                        // slowly and continuously (same idea as the TLB
+                        // Signature tag); shape kept as the current top tag.
+                        child: AnimatedGradientTag(
+                          text: event.tag!,
+                          fontSize: 12,
+                          period: const Duration(seconds: 6),
+                          showChrome: false,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 18,
                             vertical: 6,
                           ),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFEC407A), // Pink tag
-                            borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(14),
-                              bottomRight: Radius.circular(14),
-                            ),
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(14),
+                            bottomRight: Radius.circular(14),
                           ),
-                          child: Text(
-                            event.tag!,
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 12),
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
-                            ),
-                          ),
+                          gradientColors: const [
+                            Color(0xFFE11D48), // red
+                            Color(0xFF9333EA), // purple
+                            Color(0xFFE11D48), // red (loops seamlessly)
+                          ],
                         ),
                       ),
                     ),
