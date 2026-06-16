@@ -92,8 +92,8 @@ class TlbSignatureSection extends StatelessWidget {
 
                     // Bottom Content — natural height.
                     Padding(
-                      // 20px gap below the CTA button (card bottom padding).
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+                      // 18px gap below the CTA button (card bottom padding).
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,

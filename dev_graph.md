@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-06-16 (Session 59)
+**Last Updated:** 2026-06-16 (Session 60)
 
 ---
 
@@ -875,6 +875,31 @@ share_plus: ^7.2.2           # Native share sheet for events/classes/programs/ve
 ---
 
 ## 12. Development Sessions Summary
+
+### Session 60 — Image-matched Spotlight border/background, floating banner motion, universal 18px card gap
+Continuation of the Spotlight/card polish. The Spotlight banner's accents now derive from the artwork itself, the banner image gained a floating (non-zoom) motion, and every section card across all 5 screens was normalised to an 18px bottom gap (with overflow-safe parent heights).
+
+#### Spotlight banner — colour sampled from the artwork (`banner_carousel.dart`)
+| Change | Files |
+|--------|-------|
+| **Added `palette_generator`** + a cached `_BannerAccent` helper that samples a deep, saturated tone from each banner image (`darkVibrant → vibrant → dominant` fallback). Concurrency-safe (`putIfAbsent`) and null-safe (try/catch) | `pubspec.yaml`, `lib/widgets/banner_carousel.dart` |
+| **Border now matches the image** — `_AnimatedGoldenBorder` → `_AnimatedAccentBorder`: each card's sweeping border is built from *its own* image's sampled colour (deep → shine → deep), crossfading in over 700ms. No longer a fixed gold | `lib/widgets/banner_carousel.dart`, `lib/screens/home_screen.dart` |
+| **Dynamic tinted backdrop** (`tintedBackground` flag) — soft gradient behind the banner whose colour is sampled per banner and **lerps smoothly between the two on-screen cards** as you scroll (driven by an `AnimatedBuilder` on the `PageController`); band lightness `0.72` (a touch deeper than the prior flat violet) | `lib/widgets/banner_carousel.dart`, `lib/screens/home_screen.dart` |
+| **Floating motion replaces Ken Burns** — `_KenBurnsImage` (zoom pulse) → `_FloatingImage`: a slow Lissajous drift + subtle 3D perspective sway (no animated zoom; fixed 1.14 over-scale as headroom) so the elements inside the image appear to move | `lib/widgets/banner_carousel.dart` |
+
+#### Universal 18px card bottom gap (all 5 screens)
+| Change | Files |
+|--------|-------|
+| **Every section card** normalised so the gap below the CTA button — or below the content when there's no CTA — is **18px**. ~30 cards across home/events/classes/programs/venues | all `lib/sections/*`, many `lib/widgets/*` cards, `programs_screen.dart`, `venues_screen.dart` |
+| **Overflow-safe parent heights** — cards with a fixed inner height or top-packed `Expanded` content (Build New Skills, Weekends/Zero-to-Hero, Easy-on-the-Pocket, Close-to-You, Level-Up) had their fixed-height list parents bumped by the same delta to avoid `BOTTOM OVERFLOWED` while preserving the 18px gap | `classes_screen.dart`, `programs_screen.dart`, `venues_screen.dart` |
+
+#### Misc
+| Change | Files |
+|--------|-------|
+| **Zero-to-Hero / side-by-side CTA** — full-width pill with a `FittedBox(scaleDown)` single-line label (fixes "Check Availability" wrapping in the narrow column) | `lib/screens/programs_screen.dart` |
+| **Category screens** — removed the soft grounding drop-shadow under the "Explore other Categories" images | `category_events/classes/programs_screen.dart` |
+
+**`flutter analyze`: 0 errors. All 130 widget tests pass (no RenderFlex overflow).**
 
 ### Session 59 — Spotlight motion/loop, animated badges/tags, detail-screen typography, quote & splash timing
 A continuation of the Session 58 screenshot-driven polish pass. Focus: making the Spotlight banner feel alive (Ken Burns + shine + sparkles, endless loop), animating accent badges/tags, refining detail-screen typography, and retiming the quote carousel + splash.

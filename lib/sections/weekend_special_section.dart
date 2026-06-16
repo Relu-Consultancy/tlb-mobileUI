@@ -174,7 +174,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                           // ── Content ──
                           Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+                              padding: const EdgeInsets.fromLTRB(14, 12, 14, 18),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

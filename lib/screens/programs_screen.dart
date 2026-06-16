@@ -213,7 +213,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         topPadding: 30,
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 212, min: 196),
+                        height: Responsive.h(context, 220, min: 204),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.weekendSpecial.length,
@@ -259,7 +259,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         topPadding: 30,
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 212, min: 196),
+                        height: Responsive.h(context, 220, min: 204),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.newOnTlb.length,
@@ -345,7 +345,8 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         topPadding: 30,
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 374, min: 350),
+                        // +6 to absorb the larger 18px card bottom gap.
+                        height: Responsive.h(context, 380, min: 356),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.categoryEventsExtra.length,
@@ -416,8 +417,9 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         ),
         child: Padding(
           // Inset so the image sits inside the card as a separate rounded
-          // component (not flush / cut at the card edges).
-          padding: const EdgeInsets.all(10),
+          // component (not flush / cut at the card edges). 18px below the
+          // pinned CTA (universal card bottom gap).
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 18),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -466,10 +468,11 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       ],
                     ),
                     SizedBox(
-                      // Full-width by default; compact (content-sized) button
-                      // when [smallButton] is set.
-                      width: smallButton ? null : double.infinity,
-                      height: smallButton ? 32 : 38,
+                      // Full-width pill; slightly shorter when [smallButton] is
+                      // set. The label always stays on one line (FittedBox
+                      // scales it down to fit the narrow content column).
+                      width: double.infinity,
+                      height: smallButton ? 34 : 38,
                       child: ElevatedButton(
                         onPressed: () => Navigator.push(
                           context,
@@ -479,18 +482,21 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           backgroundColor: AppColors.primaryLight,
                           foregroundColor: AppColors.textPrimary,
                           elevation: 0,
-                          padding: smallButton
-                              ? const EdgeInsets.symmetric(horizontal: 16)
-                              : EdgeInsets.zero,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(22),
                           ),
                         ),
-                        child: Text(
-                          buttonLabel,
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, smallButton ? 11 : 12.5),
-                            fontWeight: FontWeight.w500,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            buttonLabel,
+                            maxLines: 1,
+                            softWrap: false,
+                            style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, smallButton ? 11.5 : 12.5),
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                       ),
@@ -573,7 +579,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
             ),
             // ── Info ──
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 20),
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -677,7 +683,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -798,7 +804,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

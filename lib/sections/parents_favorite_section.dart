@@ -118,7 +118,7 @@ class ParentsFavoriteSection extends StatelessWidget {
                     // Bottom Content Area — natural height (no CTA; the image
                     // above expands to fill the freed space).
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 10, 12, 14),
+                      padding: const EdgeInsets.fromLTRB(12, 10, 12, 18),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,

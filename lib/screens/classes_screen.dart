@@ -431,7 +431,10 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         lineColor: Color(0xFFD4A537), // warm gold
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 195, min: 180),
+                        // +8 vs the old 195 to absorb the larger 18px card
+                        // bottom gap (card inner height is fixed) — avoids a
+                        // BOTTOM OVERFLOW in the fixed-height list.
+                        height: Responsive.h(context, 203, min: 188),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesBuildNewSkills.length,

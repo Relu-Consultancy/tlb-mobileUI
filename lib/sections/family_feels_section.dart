@@ -71,8 +71,8 @@ class FamilyFeelsSection extends StatelessWidget {
                     // Right Content Area
                     Expanded(
                       child: Padding(
-                        // 20px gap below the CTA button (card bottom padding).
-                        padding: const EdgeInsets.fromLTRB(0, 12, 12, 20),
+                        // 18px gap below the CTA button (card bottom padding).
+                        padding: const EdgeInsets.fromLTRB(0, 12, 12, 18),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

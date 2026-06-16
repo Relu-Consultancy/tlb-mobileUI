@@ -58,7 +58,7 @@ class OnlineEventCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 20),
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

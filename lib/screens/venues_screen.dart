@@ -155,7 +155,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       // ── Close to You ──
                       _sectionHeader(context, 'Close to you'),
                       SizedBox(
-                        height: Responsive.h(context, 270, min: 256),
+                        // +6 to absorb the larger 18px card bottom gap.
+                        height: Responsive.h(context, 276, min: 262),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.venuesCloseToYou.length,
@@ -211,7 +212,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       // ── Easy on the Pocket ──
                       _sectionHeader(context, 'Easy on the pocket'),
                       SizedBox(
-                        height: Responsive.h(context, 296, min: 282),
+                        // +8 to absorb the larger 18px card bottom gap.
+                        height: Responsive.h(context, 304, min: 290),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.venuesEasyPocket.length,
@@ -412,7 +414,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
             const SizedBox(height: 12),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                padding: const EdgeInsets.fromLTRB(14, 0, 14, 18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -502,7 +504,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+                padding: const EdgeInsets.fromLTRB(14, 14, 14, 18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -587,7 +589,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -644,7 +646,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                 ),
               ),
               Positioned(
-                bottom: 16, left: 14, right: 14,
+                bottom: 18, left: 14, right: 14,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -746,7 +748,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
 
           // ── Venue list ──
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -898,7 +900,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 20),
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 18),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -962,7 +964,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1023,7 +1025,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 16),
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 18),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1164,8 +1166,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
         ),
         child: Padding(
           // Inner padding so the image floats inside the card with rounded
-          // boundaries on all sides (per reference).
-          padding: const EdgeInsets.all(10),
+          // boundaries on all sides (per reference); 18px below the pinned CTA.
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

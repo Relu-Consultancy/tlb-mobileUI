@@ -302,10 +302,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           viewportFraction: 0.84,
                           // Match the venues banner corner radius.
                           cornerRadius: 28,
-                          // Golden gradient border sweeping around the banner.
-                          animatedGoldenBorder: true,
-                          // Subtle Ken Burns motion on the banner images.
+                          // Deep gradient border whose colour is sampled from
+                          // each banner image (changes per card).
+                          animatedAccentBorder: true,
+                          // Gentle floating/parallax drift on the banner images.
                           animateImages: true,
+                          // Soft tinted backdrop that follows the current
+                          // banner's colour, lerping smoothly between cards.
+                          tintedBackground: true,
                           // Endless cycle — never rewinds to the first card.
                           infiniteScroll: true,
                         ),

@@ -56,8 +56,8 @@ class WeekendEventCard extends StatelessWidget {
             ),
             Expanded(
               child: Padding(
-                // 20px gap below the CTA button (card bottom padding).
-                padding: const EdgeInsets.fromLTRB(14, 14, 12, 20),
+                // 18px gap below the CTA button (card bottom padding).
+                padding: const EdgeInsets.fromLTRB(14, 14, 12, 18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

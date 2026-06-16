@@ -48,8 +48,9 @@ class BuildSkillCard extends StatelessWidget {
         child: Padding(
           // The card body inset — keeps the image (and content) inside the
           // card with a margin all around, so the image reads as a separate
-          // rounded thumbnail rather than the card's own edge.
-          padding: const EdgeInsets.all(10),
+          // rounded thumbnail rather than the card's own edge. 18px below the
+          // pinned CTA (universal card bottom gap).
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 18),
           child: SizedBox(
             // Fixed inner height so the CTA can be pinned to the bottom.
             height: Responsive.h(context, 168, min: 156),

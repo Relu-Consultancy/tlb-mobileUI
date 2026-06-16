@@ -116,8 +116,8 @@ class HotPicksSection extends StatelessWidget {
 
                     // Bottom Content Area — natural height (sizes to fit).
                     Padding(
-                      // 20px gap below the CTA button (card bottom padding).
-                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 20),
+                      // 18px gap below the content (card bottom padding).
+                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 18),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,

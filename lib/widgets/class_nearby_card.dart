@@ -98,8 +98,8 @@ class ClassNearbyCard extends StatelessWidget {
 
             // Content
             Padding(
-              // 20px gap below the CTA button (card bottom padding).
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 20),
+              // 18px gap below the CTA button (card bottom padding).
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

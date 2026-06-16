@@ -137,7 +137,7 @@ class StealersSection extends StatelessWidget {
                     // Bottom Content Area — kept tight so the image above
                     // stretches further down (less white space).
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,

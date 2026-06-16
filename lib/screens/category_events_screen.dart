@@ -328,20 +328,6 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                                                       ),
                                                     ),
                                                   ),
-                                                  // Soft grounding shadow under the image.
-                                                  Container(
-                                                    height: 6,
-                                                    margin: const EdgeInsets.fromLTRB(18, 1, 18, 2),
-                                                    decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius.circular(20),
-                                                      gradient: RadialGradient(
-                                                        colors: [
-                                                          Colors.black.withOpacity(0.20),
-                                                          Colors.transparent,
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
                                                 ],
                                               ),
                                             ),

@@ -128,8 +128,8 @@ class EventCardWithRating extends StatelessWidget {
             // ── Content below image ──
             Expanded(
               child: Padding(
-                // 20px gap below the CTA button (card bottom padding).
-                padding: const EdgeInsets.fromLTRB(10, 8, 10, 20),
+                // 18px gap below the CTA button (card bottom padding).
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

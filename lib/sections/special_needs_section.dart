@@ -86,7 +86,7 @@ class SpecialNeedsSection extends StatelessWidget {
                     // Right content
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 12, 14, 16),
+                        padding: const EdgeInsets.fromLTRB(14, 12, 14, 18),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

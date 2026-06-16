@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:palette_generator/palette_generator.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
@@ -33,9 +34,10 @@ class BannerCarousel extends StatefulWidget {
   /// Takes precedence over [animatedTransition].
   final bool staticFade;
 
-  /// When true, a ~4px golden gradient border sweeps continuously (medium
-  /// pace) around each banner card.
-  final bool animatedGoldenBorder;
+  /// When true, a ~4px gradient border sweeps continuously (medium pace)
+  /// around each banner card. The border colour is a deep tone extracted from
+  /// that banner's image, so it changes from card to card to match the art.
+  final bool animatedAccentBorder;
 
   /// Fraction of the viewport each page occupies. Values below 1.0 reveal the
   /// previous/next banners peeking at the left and right edges (carousel
@@ -43,13 +45,18 @@ class BannerCarousel extends StatefulWidget {
   /// [fixedCardWidth] is ignored.
   final double? viewportFraction;
 
-  /// When true, each banner image gets a subtle, continuous Ken Burns motion
-  /// (slow zoom + drifting pan) so the banner feels alive.
+  /// When true, each banner image gently floats — a slow drifting + parallax
+  /// sway (no zoom) so the elements inside the image feel like they move.
   final bool animateImages;
 
   /// When true, the carousel scrolls endlessly — after the last card it keeps
   /// advancing forward into the first (no rewind back to the start).
   final bool infiniteScroll;
+
+  /// When true, a soft gradient backdrop is painted behind the banner; its
+  /// colour is sampled from the current banner image and lerps smoothly to the
+  /// neighbouring banner's colour as the carousel scrolls.
+  final bool tintedBackground;
 
   const BannerCarousel({
     super.key,
@@ -63,10 +70,11 @@ class BannerCarousel extends StatefulWidget {
     this.overlayDots = false,
     this.animatedTransition = false,
     this.staticFade = false,
-    this.animatedGoldenBorder = false,
+    this.animatedAccentBorder = false,
     this.viewportFraction,
     this.animateImages = false,
     this.infiniteScroll = false,
+    this.tintedBackground = false,
   });
 
   @override
@@ -86,6 +94,11 @@ class _BannerCarouselState extends State<BannerCarousel> {
   int get _loopBase =>
       widget.events.isEmpty ? 0 : widget.events.length * 1000;
 
+  // Soft backdrop band colour per banner index (sampled from the image).
+  final Map<int, Color> _bandColors = {};
+  // Neutral fallback band used until the colours have been sampled.
+  static const Color _defaultBand = Color(0xFFC9B6EE);
+
   @override
   void initState() {
     super.initState();
@@ -95,6 +108,40 @@ class _BannerCarouselState extends State<BannerCarousel> {
       initialPage: _currentIndex,
     );
     _startAutoSlide();
+    if (widget.tintedBackground) _loadBandColors();
+  }
+
+  // Sample each banner's colour once and convert it into a soft (but slightly
+  // deep) backdrop tint that matches the artwork.
+  Future<void> _loadBandColors() async {
+    for (var i = 0; i < widget.events.length; i++) {
+      final raw = await _BannerAccent.of(widget.events[i].imagePath);
+      if (!mounted) return;
+      if (raw != null) {
+        final hsl = HSLColor.fromColor(raw);
+        final band = hsl
+            .withSaturation((hsl.saturation * 0.82).clamp(0.28, 0.72))
+            .withLightness(0.72) // a touch darker than the old flat violet
+            .toColor();
+        setState(() => _bandColors[i] = band);
+      }
+    }
+  }
+
+  // Backdrop band colour for the current scroll position — interpolated
+  // between the two banners on screen so the tint changes smoothly.
+  Color _currentBandColor() {
+    if (widget.events.isEmpty) return _defaultBand;
+    double page = _currentIndex.toDouble();
+    if (_pageController.hasClients &&
+        _pageController.position.haveDimensions) {
+      page = _pageController.page ?? page;
+    }
+    final lo = page.floor();
+    final f = page - lo;
+    Color bandFor(int virtual) =>
+        _bandColors[virtual % widget.events.length] ?? _defaultBand;
+    return Color.lerp(bandFor(lo), bandFor(lo + 1), f) ?? bandFor(lo);
   }
 
   @override
@@ -221,7 +268,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
       );
     }
 
-    return Column(
+    final content = Column(
       children: [
         // ── Swipeable PageView ────────────────────────────────────────
         SizedBox(
@@ -337,11 +384,36 @@ class _BannerCarouselState extends State<BannerCarousel> {
         ],
       ],
     );
+
+    if (!widget.tintedBackground) return content;
+
+    // Soft backdrop tint that tracks (and lerps between) the banner colours.
+    return AnimatedBuilder(
+      animation: _pageController,
+      builder: (context, child) {
+        final band = _currentBandColor();
+        final outer =
+            HSLColor.fromColor(band).withLightness(0.84).toColor();
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.white, outer, band, outer, Colors.white],
+              stops: const [0.0, 0.22, 0.5, 0.78, 1.0],
+            ),
+          ),
+          child: child,
+        );
+      },
+      child: content,
+    );
   }
 
-  /// Wraps [child] in a subtle Ken Burns motion when [animateImages] is set.
-  Widget _kenBurns(Widget child) =>
-      widget.animateImages ? _KenBurnsImage(child: child) : child;
+  /// Wraps [child] in a gentle floating/parallax drift when [animateImages]
+  /// is set (no zoom — the scene sways as if the elements inside are moving).
+  Widget _floating(Widget child) =>
+      widget.animateImages ? _FloatingImage(child: child) : child;
 
   /// Builds a single banner card (background image + optional overlay content).
   Widget _slide(
@@ -356,8 +428,8 @@ class _BannerCarouselState extends State<BannerCarousel> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(radius),
             // Very slim border around the spotlight banner (omitted when the
-            // animated golden border is drawn on top).
-            border: widget.animatedGoldenBorder
+            // animated accent border is drawn on top).
+            border: widget.animatedAccentBorder
                 ? null
                 : Border.all(color: Colors.black.withOpacity(0.1), width: 0.5),
           ),
@@ -369,7 +441,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
               children: [
                 // Background image — network for real covers, asset for
                 // bundled; wrapped in a subtle Ken Burns motion when enabled.
-                _kenBurns(
+                _floating(
                   Builder(
                   builder: (context) {
                     Widget fallback() => Container(
@@ -550,8 +622,13 @@ class _BannerCarouselState extends State<BannerCarousel> {
           ),
         );
 
-    final bordered = widget.animatedGoldenBorder
-        ? _AnimatedGoldenBorder(radius: radius, strokeWidth: 4, child: card)
+    final bordered = widget.animatedAccentBorder
+        ? _AnimatedAccentBorder(
+            radius: radius,
+            strokeWidth: 4,
+            imagePath: event.imagePath,
+            child: card,
+          )
         : card;
 
     return Center(
@@ -568,26 +645,80 @@ class _BannerCarouselState extends State<BannerCarousel> {
   }
 }
 
-/// Wraps [child] with a ~4px golden gradient border that sweeps continuously
-/// around the rounded card at a medium pace.
-class _AnimatedGoldenBorder extends StatefulWidget {
+/// Resolves and caches a deep accent colour for each banner image. The colour
+/// is sampled from the image itself (via [PaletteGenerator]) so the moving
+/// border around the banner matches the artwork and changes per card.
+class _BannerAccent {
+  _BannerAccent._();
+
+  static final Map<String, Color> _cache = {};
+  static final Map<String, Future<Color?>> _inflight = {};
+
+  /// Golden tone used until the real colour has been extracted.
+  static const Color fallback = Color(0xFFB8860B);
+
+  static Future<Color?> of(String imagePath) {
+    if (_cache.containsKey(imagePath)) return Future.value(_cache[imagePath]);
+    return _inflight.putIfAbsent(imagePath, () async {
+      final color = await _extract(imagePath);
+      if (color != null) _cache[imagePath] = color;
+      _inflight.remove(imagePath);
+      return color;
+    });
+  }
+
+  static Future<Color?> _extract(String imagePath) async {
+    try {
+      final ImageProvider provider = imagePath.startsWith('http')
+          ? NetworkImage(imagePath)
+          : AssetImage(imagePath) as ImageProvider;
+      final palette = await PaletteGenerator.fromImageProvider(
+        provider,
+        size: const Size(140, 90),
+        maximumColorCount: 16,
+      );
+      final swatch = palette.darkVibrantColor ??
+          palette.vibrantColor ??
+          palette.dominantColor ??
+          palette.darkMutedColor ??
+          palette.mutedColor;
+      if (swatch == null) return null;
+      // Push toward a rich, deep, saturated tone for a bold border.
+      final hsl = HSLColor.fromColor(swatch.color);
+      return hsl
+          .withSaturation((hsl.saturation + 0.25).clamp(0.5, 1.0))
+          .withLightness(hsl.lightness.clamp(0.30, 0.48))
+          .toColor();
+    } catch (_) {
+      return null;
+    }
+  }
+}
+
+/// Wraps [child] with a ~4px gradient border that sweeps continuously around
+/// the rounded card. The colour is a deep tone sampled from [imagePath] so the
+/// border dynamically matches each banner image.
+class _AnimatedAccentBorder extends StatefulWidget {
   final Widget child;
   final double radius;
   final double strokeWidth;
+  final String imagePath;
 
-  const _AnimatedGoldenBorder({
+  const _AnimatedAccentBorder({
     required this.child,
     required this.radius,
+    required this.imagePath,
     this.strokeWidth = 4,
   });
 
   @override
-  State<_AnimatedGoldenBorder> createState() => _AnimatedGoldenBorderState();
+  State<_AnimatedAccentBorder> createState() => _AnimatedAccentBorderState();
 }
 
-class _AnimatedGoldenBorderState extends State<_AnimatedGoldenBorder>
+class _AnimatedAccentBorderState extends State<_AnimatedAccentBorder>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  Color _accent = _BannerAccent.fallback;
 
   @override
   void initState() {
@@ -596,25 +727,43 @@ class _AnimatedGoldenBorderState extends State<_AnimatedGoldenBorder>
     _controller =
         AnimationController(vsync: this, duration: const Duration(seconds: 4))
           ..repeat();
+    _resolveAccent();
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  void didUpdateWidget(covariant _AnimatedAccentBorder old) {
+    super.didUpdateWidget(old);
+    if (old.imagePath != widget.imagePath) _resolveAccent();
+  }
+
+  Future<void> _resolveAccent() async {
+    final color = await _BannerAccent.of(widget.imagePath);
+    if (mounted && color != null && color != _accent) {
+      setState(() => _accent = color);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return CustomPaint(
-          foregroundPainter: _GoldenBorderPainter(
-            t: _controller.value,
-            radius: widget.radius,
-            strokeWidth: widget.strokeWidth,
-          ),
+    // Settle smoothly into the resolved colour (and crossfade when the card's
+    // image — and therefore its accent — changes).
+    return TweenAnimationBuilder<Color?>(
+      duration: const Duration(milliseconds: 700),
+      tween: ColorTween(begin: _BannerAccent.fallback, end: _accent),
+      builder: (context, color, child) {
+        return AnimatedBuilder(
+          animation: _controller,
+          builder: (context, inner) {
+            return CustomPaint(
+              foregroundPainter: _AccentBorderPainter(
+                t: _controller.value,
+                radius: widget.radius,
+                strokeWidth: widget.strokeWidth,
+                base: color ?? _accent,
+              ),
+              child: inner,
+            );
+          },
           child: child,
         );
       },
@@ -623,16 +772,25 @@ class _AnimatedGoldenBorderState extends State<_AnimatedGoldenBorder>
   }
 }
 
-class _GoldenBorderPainter extends CustomPainter {
+class _AccentBorderPainter extends CustomPainter {
   final double t;
   final double radius;
   final double strokeWidth;
+  final Color base;
 
-  _GoldenBorderPainter({
+  _AccentBorderPainter({
     required this.t,
     required this.radius,
     required this.strokeWidth,
+    required this.base,
   });
+
+  Color _shiftLightness(Color c, double delta) {
+    final hsl = HSLColor.fromColor(c);
+    return hsl
+        .withLightness((hsl.lightness + delta).clamp(0.0, 1.0))
+        .toColor();
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -648,16 +806,12 @@ class _GoldenBorderPainter extends CustomPainter {
       Radius.circular(radius - inset),
     );
 
-    // Golden sweep that rotates around the card — the bright "shine" stop
-    // travels around the border as `t` advances.
+    // Deep accent sweep — a bright shine stop travels around the border as `t`
+    // advances. Built from the banner's own sampled colour.
+    final deep = _shiftLightness(base, -0.14);
+    final shine = _shiftLightness(base, 0.26);
     final gradient = SweepGradient(
-      colors: const [
-        Color(0xFFB8860B), // deep gold
-        Color(0xFFFFC93C), // gold
-        Color(0xFFFFF3B0), // light shine
-        Color(0xFFFFC93C), // gold
-        Color(0xFFB8860B), // deep gold (loops)
-      ],
+      colors: [deep, base, shine, base, deep],
       stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
       transform: GradientRotation(2 * math.pi * t),
     );
@@ -671,42 +825,38 @@ class _GoldenBorderPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _GoldenBorderPainter old) =>
-      old.t != t || old.radius != radius || old.strokeWidth != strokeWidth;
+  bool shouldRepaint(covariant _AccentBorderPainter old) =>
+      old.t != t ||
+      old.radius != radius ||
+      old.strokeWidth != strokeWidth ||
+      old.base != base;
 }
 
-/// Wraps a banner image with a subtle, continuous Ken Burns effect — a slow
-/// zoom paired with a drifting focal point — so the banner gently feels alive.
-class _KenBurnsImage extends StatefulWidget {
+/// Wraps a banner image with a gentle floating/parallax motion — the scene
+/// continuously drifts and sways with a slight 3D tilt (NO zoom pulsing), so
+/// the elements inside the image feel like they're subtly moving.
+class _FloatingImage extends StatefulWidget {
   final Widget child;
 
-  const _KenBurnsImage({required this.child});
+  const _FloatingImage({required this.child});
 
   @override
-  State<_KenBurnsImage> createState() => _KenBurnsImageState();
+  State<_FloatingImage> createState() => _FloatingImageState();
 }
 
-class _KenBurnsImageState extends State<_KenBurnsImage>
+class _FloatingImageState extends State<_FloatingImage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _scale;
-  late final Animation<Alignment> _align;
 
   @override
   void initState() {
     super.initState();
-    // Slow loop that eases back and forth, so the motion never snaps.
+    // Slow, seamless loop (no reverse) — the drift follows a Lissajous path so
+    // it never snaps back at the loop boundary.
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10),
-    )..repeat(reverse: true);
-    final curve = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
-    // Noticeable zoom (1.0 → 1.18) with the focal point drifting diagonally.
-    _scale = Tween<double>(begin: 1.0, end: 1.18).animate(curve);
-    _align = AlignmentTween(
-      begin: const Alignment(-1.0, -0.7),
-      end: const Alignment(1.0, 0.7),
-    ).animate(curve);
+      duration: const Duration(seconds: 14),
+    )..repeat();
   }
 
   @override
@@ -720,10 +870,23 @@ class _KenBurnsImageState extends State<_KenBurnsImage>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        return Transform.scale(
-          scale: _scale.value,
-          alignment: _align.value,
-          child: child,
+        final a = _controller.value * 2 * math.pi;
+        // Drifting pan (figure-eight) + a tiny perspective sway. The constant
+        // 1.14 over-scale is fixed headroom (not an animated zoom) so the drift
+        // and tilt never expose the card edges.
+        final dx = math.sin(a) * 11.0;
+        final dy = math.sin(a * 2) * 7.0;
+        final tilt = Matrix4.identity()
+          ..setEntry(3, 2, 0.0009)
+          ..rotateY(math.sin(a) * 0.045)
+          ..rotateX(math.sin(a * 2) * 0.025);
+        return Transform(
+          alignment: Alignment.center,
+          transform: tilt,
+          child: Transform.translate(
+            offset: Offset(dx, dy),
+            child: Transform.scale(scale: 1.14, child: child),
+          ),
         );
       },
       child: widget.child,

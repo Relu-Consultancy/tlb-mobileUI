@@ -113,7 +113,7 @@ class DiscoverNearYouSection extends StatelessWidget {
 
                     // Bottom Content Area — natural height.
                     Padding(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 18),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
