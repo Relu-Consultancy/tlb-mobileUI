@@ -17,10 +17,17 @@ class HomeHeader extends StatelessWidget {
   final ShowcaseProfileConfig? profileShowcaseConfig;
   final ShowcaseProfileConfig? locationShowcaseConfig;
 
+  /// When set, a thin cream strip is painted over the cloud's ShaderMask
+  /// bottom fringe (the faint 1px line that shows in the header's side
+  /// margins, beside the rounded search bar). Pass the screen's background
+  /// tone at that depth so the cover is invisible except for hiding the line.
+  final Color? seamCoverColor;
+
   const HomeHeader({
     super.key,
     this.profileShowcaseConfig,
     this.locationShowcaseConfig,
+    this.seamCoverColor,
   });
 
   @override
@@ -76,6 +83,36 @@ class HomeHeader extends StatelessWidget {
             ),
           ),
         ),
+
+        // ── Layer 1.5: Seam cover ───────────────────────────────────────
+        // Paints the flat background cream over the cloud's ShaderMask bottom
+        // fringe. It fades in from transparent (so it never creates its own
+        // edge) and is fully opaque only across the bottom band where the
+        // fringe sits — invisible against the matching cream, but it hides the
+        // 1px line that showed beside the rounded search bar on real devices.
+        if (seamCoverColor != null)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 56,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      seamCoverColor!.withOpacity(0.0),
+                      seamCoverColor!,
+                      seamCoverColor!,
+                    ],
+                    stops: const [0.0, 0.35, 1.0],
+                  ),
+                ),
+              ),
+            ),
+          ),
 
         // ── Layer 2: Content ────────────────────────────────────────────
         SafeArea(

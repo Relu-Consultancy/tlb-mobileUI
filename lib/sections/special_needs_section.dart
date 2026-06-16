@@ -175,7 +175,7 @@ class SpecialNeedsSection extends StatelessWidget {
                           // Explore button (left-aligned)
                           SizedBox(
                             width: Responsive.w(context, 104, min: 94),
-                            height: Responsive.h(context, 38, min: 34),
+                            height: Responsive.h(context, 30, min: 27),
                             child: ElevatedButton(
                               onPressed: () {
                                 openListingDetail(context, event);
@@ -192,7 +192,7 @@ class SpecialNeedsSection extends StatelessWidget {
                               child: Text(
                                 'View Now',
                                 style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 13),
+                                  fontSize: Responsive.sp(context, 12),
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),

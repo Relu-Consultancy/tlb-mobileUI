@@ -37,7 +37,7 @@ class DetailSectionTitle extends StatelessWidget {
             text,
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 17),
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w700,
               color: kDetailText,
             ),
           ),
@@ -72,7 +72,9 @@ class _ExpandableAboutCardState extends State<ExpandableAboutCard> {
   Widget build(BuildContext context) {
     final bodyStyle = GoogleFonts.poppins(
       fontSize: Responsive.sp(context, 13),
-      color: Colors.grey.shade600,
+      // Full black, slim weight (w400 — the lightest bundled Poppins).
+      color: Colors.black,
+      fontWeight: FontWeight.w400,
       height: 1.5,
     );
 
@@ -91,7 +93,7 @@ class _ExpandableAboutCardState extends State<ExpandableAboutCard> {
             widget.title,
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 16),
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w700,
               color: kDetailText,
             ),
           ),

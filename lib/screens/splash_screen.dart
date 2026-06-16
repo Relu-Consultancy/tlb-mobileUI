@@ -27,22 +27,24 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
+    // Total splash time = 5 s. Intervals below keep the entrance crisp (same
+    // absolute timing as before) and add a longer hold before the end fade.
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2800),
+      duration: const Duration(milliseconds: 5000),
     );
 
     // Logo pops in (elastic) and fades in.
     _logoScale = Tween<double>(begin: 0.7, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.0, 0.48, curve: Curves.elasticOut),
+        curve: const Interval(0.0, 0.27, curve: Curves.elasticOut),
       ),
     );
     _logoFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.0, 0.24, curve: Curves.easeOut),
+        curve: const Interval(0.0, 0.14, curve: Curves.easeOut),
       ),
     );
 
@@ -50,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen>
     _glowScale = Tween<double>(begin: 0.6, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.0, 0.55, curve: Curves.easeOutCubic),
+        curve: const Interval(0.0, 0.31, curve: Curves.easeOutCubic),
       ),
     );
 
@@ -58,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen>
     _taglineFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.40, 0.62, curve: Curves.easeOut),
+        curve: const Interval(0.22, 0.35, curve: Curves.easeOut),
       ),
     );
     _taglineSlide = Tween<Offset>(
@@ -67,21 +69,21 @@ class _SplashScreenState extends State<SplashScreen>
     ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.40, 0.62, curve: Curves.easeOutCubic),
+        curve: const Interval(0.22, 0.35, curve: Curves.easeOutCubic),
       ),
     );
 
     _dotsFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.55, 0.75, curve: Curves.easeOut),
+        curve: const Interval(0.31, 0.42, curve: Curves.easeOut),
       ),
     );
 
     _fadeOut = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.90, 1.0, curve: Curves.easeIn),
+        curve: const Interval(0.92, 1.0, curve: Curves.easeIn),
       ),
     );
 

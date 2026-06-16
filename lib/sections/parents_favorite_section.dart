@@ -78,29 +78,35 @@ class ParentsFavoriteSection extends StatelessWidget {
                           Positioned(
                             top: 0,
                             left: 0,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 7,
+                            child: _ShineBadge(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(16),
+                                bottomRight: Radius.circular(16),
                               ),
-                              decoration: const BoxDecoration(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(16),
-                                  bottomRight: Radius.circular(16),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 7,
                                 ),
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Color(0xFFF53C9B), // pink
-                                    Color(0xFFB13CF5), // purple
-                                  ],
+                                decoration: const BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(16),
+                                    bottomRight: Radius.circular(16),
+                                  ),
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Color(0xFFF53C9B), // pink
+                                      Color(0xFFB13CF5), // purple
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              child: Text(
-                                'Loved by Parents',
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 13),
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white,
+                                child: Text(
+                                  'Loved by Parents',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 13),
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ),
@@ -187,6 +193,79 @@ class ParentsFavoriteSection extends StatelessWidget {
       ],
         );
       },
+    );
+  }
+}
+
+/// Wraps a badge with a slow diagonal "shine" that sweeps left → right across
+/// it (clipped to the badge shape), pausing briefly between sweeps.
+class _ShineBadge extends StatefulWidget {
+  final Widget child;
+  final BorderRadius borderRadius;
+
+  const _ShineBadge({required this.child, required this.borderRadius});
+
+  @override
+  State<_ShineBadge> createState() => _ShineBadgeState();
+}
+
+class _ShineBadgeState extends State<_ShineBadge>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // One slow sweep per loop, with a rest between sweeps.
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3200),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: widget.borderRadius,
+      child: Stack(
+        children: [
+          widget.child,
+          Positioned.fill(
+            child: IgnorePointer(
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, _) {
+                  // Sweep across during the first ~45% of the loop, then the
+                  // band rests off-screen (the pause) for the remainder.
+                  final double p = Curves.easeInOut
+                      .transform((_controller.value / 0.45).clamp(0.0, 1.0));
+                  final double dx = -1.6 + 3.2 * p; // off-left → off-right
+                  return DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment(dx - 0.5, -1.0),
+                        end: Alignment(dx + 0.5, 1.0),
+                        colors: [
+                          Colors.white.withOpacity(0.0),
+                          Colors.white.withOpacity(0.38),
+                          Colors.white.withOpacity(0.0),
+                        ],
+                        stops: const [0.35, 0.5, 0.65],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

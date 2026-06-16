@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-06-15 (Session 58)
+**Last Updated:** 2026-06-16 (Session 59)
 
 ---
 
@@ -875,6 +875,43 @@ share_plus: ^7.2.2           # Native share sheet for events/classes/programs/ve
 ---
 
 ## 12. Development Sessions Summary
+
+### Session 59 — Spotlight motion/loop, animated badges/tags, detail-screen typography, quote & splash timing
+A continuation of the Session 58 screenshot-driven polish pass. Focus: making the Spotlight banner feel alive (Ken Burns + shine + sparkles, endless loop), animating accent badges/tags, refining detail-screen typography, and retiming the quote carousel + splash.
+
+#### Spotlight banner — interactive motion + endless loop (`banner_carousel.dart`)
+| Change | Files |
+|--------|-------|
+| **Endless cycle** — carousel never rewinds to the first card; virtual `itemCount` (`events.length × 2000`) starting at a large base page (`× 1000`) with modulo lookup, auto-advance via `nextPage()`. Gated behind a new `infiniteScroll` flag (Spotlight only) | `lib/widgets/banner_carousel.dart`, `lib/screens/home_screen.dart` |
+| **`animateImages` FX stack** — subtle Ken Burns (`Transform.scale` 1.0→1.18 + `AlignmentTween`, 10s reverse), diagonal shine sweep (first 50% of a 4.5s loop), and drifting/twinkling sparkle particles (`CustomPainter`, 10 seeds) overlaid via `IgnorePointer` | `lib/widgets/banner_carousel.dart` |
+
+#### Animated badges & tags
+| Change | Files |
+|--------|-------|
+| **Loved-by-Parents badge** — slow left→right shine sweep (`_ShineBadge`: ClipRRect + animated diagonal band, 3.2s loop) | `lib/sections/parents_favorite_section.dart` |
+| **Holiday Edit tag (programs)** — animated red→purple sliding gradient flow via `AnimatedGradientTag` | `lib/screens/programs_screen.dart` |
+
+#### Detail-screen typography + About box
+| Change | Files |
+|--------|-------|
+| **Body text** softened to medium `#333333` (`kDetailText`), while **section titles** (e.g. "About Us", "Things to Know") kept **bold** (`w700`) | `lib/widgets/detail_sections.dart`, `*_detail_screen.dart` |
+| **About box** — inner background pure white; body copy full-black slim (`w400`) | `lib/widgets/detail_sections.dart` |
+
+#### Quote carousel + splash timing
+| Change | Files |
+|--------|-------|
+| **Footer quote carousel** — vertical slideshow transition (new quote eases in from the top while the old slides down and fades), slower 1400ms pace | `lib/widgets/footer_quote_carousel.dart` |
+| **Splash** — loading window extended to ~5s; animation intervals re-scaled accordingly | `lib/screens/splash_screen.dart` |
+
+#### Misc polish
+| Change | Files |
+|--------|-------|
+| **Home section CTA buttons** — reduced cell height with proportionally smaller font | `weekend_special / family_feels / special_needs / stealers / tlb_signature` sections |
+| **Get Moving (venues)** — removed the stray radial shadow ellipse under the top-right sport image | `lib/screens/venues_screen.dart` |
+| **What's the Plan? (venues)** — Party & Celebration circle vertical alignment nudged to match siblings | `lib/data/dummy_data.dart`, `venues_screen.dart` |
+| **Home-header seam cover** — fade-in cream strip (`seamCoverColor #FFF0D0`) painted over the ShaderMask cloud's 1px bottom fringe to kill the on-device search-bar/Spotlight seam | `lib/sections/home_header.dart`, `lib/screens/home_screen.dart` |
+
+**`flutter analyze`: clean (0 errors).**
 
 ### Session 58 — UI polish sweep: card redesigns, Spotlight peek-carousel, gradient extension, legal docs
 A broad screenshot-driven polish pass across all tabs. Focus areas: inset "image-inside-the-card" redesigns, the Spotlight banner peek-carousel with an animated golden border, extending the warm header gradient down to each screen's first section title, normalising CTA button weight/colour, and new Privacy/Terms document screens.

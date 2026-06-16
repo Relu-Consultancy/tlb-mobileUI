@@ -328,7 +328,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         _title,
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 20),
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w700,
                           color: const Color(0xFF333333),
                         ),
                       ),

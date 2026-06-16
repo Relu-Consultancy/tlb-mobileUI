@@ -410,8 +410,10 @@ class DummyData {
       'image': 'resources- tlb-ui/venues_page/2.png',
       'gradient': <Color>[Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
       // This artwork fills its canvas more than the others — inset it so it
-      // renders at a similar visual size in the What's-the-Plan circles.
+      // renders at a similar visual size in the What's-the-Plan circles, and
+      // nudge it down a touch so its circle lines up vertically with them.
       'inset': 7,
+      'nudge': 4,
     },
     {
       'label': 'Science & Discovery',

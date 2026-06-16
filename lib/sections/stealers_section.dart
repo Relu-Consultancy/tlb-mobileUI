@@ -180,7 +180,7 @@ class StealersSection extends StatelessWidget {
                             children: [
                               const Spacer(),
                               SizedBox(
-                                height: Responsive.h(context, 44, min: 38),
+                                height: Responsive.h(context, 30, min: 27),
                                 child: ElevatedButton(
                                   onPressed: () {
                                     openListingDetail(context, event);
@@ -189,7 +189,9 @@ class StealersSection extends StatelessWidget {
                                     backgroundColor: const Color(0xFFFFCC00),
                                     foregroundColor: const Color(0xFF1A1A2E),
                                     elevation: 0,
-                                    minimumSize: const Size(0, 46),
+                                    minimumSize: Size.zero,
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20),
                                     ),
@@ -197,7 +199,7 @@ class StealersSection extends StatelessWidget {
                                   child: Text(
                                     'View Now',
                                     style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 14),
+                                      fontSize: Responsive.sp(context, 12),
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),

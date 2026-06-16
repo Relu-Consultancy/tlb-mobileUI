@@ -327,17 +327,21 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   SizedBox(
                     width: 152,
                     height: 152,
-                    child: Padding(
-                      // Optional per-image inset to normalise sizes where an
-                      // artwork fills its canvas more than the others.
-                      padding: EdgeInsets.all(
-                        (c['inset'] as num?)?.toDouble() ?? 0.0,
-                      ),
-                      child: Image.asset(
-                        c['image'] as String,
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) =>
-                            Icon(Icons.place, size: 58, color: AppColors.primary),
+                    child: Transform.translate(
+                      // Optional per-image vertical nudge to line the circles up.
+                      offset: Offset(0, (c['nudge'] as num?)?.toDouble() ?? 0.0),
+                      child: Padding(
+                        // Optional per-image inset to normalise sizes where an
+                        // artwork fills its canvas more than the others.
+                        padding: EdgeInsets.all(
+                          (c['inset'] as num?)?.toDouble() ?? 0.0,
+                        ),
+                        child: Image.asset(
+                          c['image'] as String,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => Icon(Icons.place,
+                              size: 58, color: AppColors.primary),
+                        ),
                       ),
                     ),
                   ),
@@ -690,26 +694,6 @@ class _VenuesScreenState extends State<VenuesScreen> {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  // Flat shadow-imitation ellipse placed directly below the
-                  // sport image (a drawn shadow, not a box shadow).
-                  Positioned(
-                    top: 92,
-                    right: 26,
-                    child: Container(
-                      width: 74,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(40),
-                        gradient: RadialGradient(
-                          colors: [
-                            Colors.black.withOpacity(0.24),
-                            Colors.black.withOpacity(0.0),
-                          ],
-                          stops: const [0.15, 1.0],
-                        ),
-                      ),
-                    ),
-                  ),
                   // Sport image — top-right.
                   Positioned(
                     top: 12,

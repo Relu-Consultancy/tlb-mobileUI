@@ -229,7 +229,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                       ),
                                       const SizedBox(width: 8),
                                       SizedBox(
-                                        height: Responsive.h(context, 36, min: 32),
+                                        height: Responsive.h(context, 30, min: 27),
                                         child: ElevatedButton(
                                           onPressed: () =>
                                               openListingDetail(context, event),
@@ -247,7 +247,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                           child: Text(
                                             'Book Now',
                                             style: GoogleFonts.poppins(
-                                              fontSize: Responsive.sp(context, 13),
+                                              fontSize: Responsive.sp(context, 12),
                                               fontWeight: FontWeight.w500,
                                             ),
                                           ),

@@ -43,6 +43,14 @@ class BannerCarousel extends StatefulWidget {
   /// [fixedCardWidth] is ignored.
   final double? viewportFraction;
 
+  /// When true, each banner image gets a subtle, continuous Ken Burns motion
+  /// (slow zoom + drifting pan) so the banner feels alive.
+  final bool animateImages;
+
+  /// When true, the carousel scrolls endlessly — after the last card it keeps
+  /// advancing forward into the first (no rewind back to the start).
+  final bool infiniteScroll;
+
   const BannerCarousel({
     super.key,
     required this.events,
@@ -57,6 +65,8 @@ class BannerCarousel extends StatefulWidget {
     this.staticFade = false,
     this.animatedGoldenBorder = false,
     this.viewportFraction,
+    this.animateImages = false,
+    this.infiniteScroll = false,
   });
 
   @override
@@ -71,11 +81,19 @@ class _BannerCarouselState extends State<BannerCarousel> {
   // timer doesn't fight the gesture.
   bool _userInteracting = false;
 
+  // Large base page for the endless loop: a multiple of the event count, so
+  // the first shown card is index 0 and there's room to advance "forever".
+  int get _loopBase =>
+      widget.events.isEmpty ? 0 : widget.events.length * 1000;
+
   @override
   void initState() {
     super.initState();
-    _pageController =
-        PageController(viewportFraction: widget.viewportFraction ?? 1.0);
+    _currentIndex = widget.infiniteScroll ? _loopBase : 0;
+    _pageController = PageController(
+      viewportFraction: widget.viewportFraction ?? 1.0,
+      initialPage: _currentIndex,
+    );
     _startAutoSlide();
   }
 
@@ -90,13 +108,22 @@ class _BannerCarouselState extends State<BannerCarousel> {
     _autoSlideTimer?.cancel();
     _autoSlideTimer = Timer.periodic(const Duration(seconds: 4), (_) {
       if (!mounted || widget.events.isEmpty) return;
-      final next = (_currentIndex + 1) % widget.events.length;
       if (widget.staticFade) {
         // No sliding — just swap the image; AnimatedSwitcher cross-fades it.
-        setState(() => _currentIndex = next);
+        setState(() =>
+            _currentIndex = (_currentIndex + 1) % widget.events.length);
         return;
       }
       if (_userInteracting || !_pageController.hasClients) return;
+      if (widget.infiniteScroll) {
+        // Always advance forward — endless cycle, never rewinds to page 0.
+        _pageController.nextPage(
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeInOut,
+        );
+        return;
+      }
+      final next = (_currentIndex + 1) % widget.events.length;
       _pageController.animateToPage(
         next,
         duration: const Duration(milliseconds: 600),
@@ -118,7 +145,9 @@ class _BannerCarouselState extends State<BannerCarousel> {
     final radius = widget.cornerRadius ?? (widget.overlayStyle ? 28.0 : 14.0);
 
     final indicator = AnimatedSmoothIndicator(
-      activeIndex: _currentIndex,
+      activeIndex: widget.infiniteScroll
+          ? _currentIndex % widget.events.length
+          : _currentIndex,
       count: widget.events.length,
       effect: WormEffect(
         dotHeight: 8,
@@ -212,11 +241,16 @@ class _BannerCarouselState extends State<BannerCarousel> {
                 child: PageView.builder(
                   controller: _pageController,
                   physics: const BouncingScrollPhysics(),
-                  itemCount: widget.events.length,
+                  // Endless loop uses a very large virtual count with a modulo
+                  // lookup; otherwise a plain count.
+                  itemCount: widget.infiniteScroll
+                      ? widget.events.length * 2000
+                      : widget.events.length,
                   onPageChanged: (idx) => setState(() => _currentIndex = idx),
                   itemBuilder: (ctx, i) {
-                    final card =
-                        _slide(context, widget.events[i], cardWidth, radius);
+                    final event =
+                        widget.events[i % widget.events.length];
+                    final card = _slide(context, event, cardWidth, radius);
 
                     // Peek carousel — shrink the side (neighbouring) cards so
                     // the centred banner stands out larger than the ones
@@ -305,6 +339,10 @@ class _BannerCarouselState extends State<BannerCarousel> {
     );
   }
 
+  /// Wraps [child] in a subtle Ken Burns motion when [animateImages] is set.
+  Widget _kenBurns(Widget child) =>
+      widget.animateImages ? _KenBurnsImage(child: child) : child;
+
   /// Builds a single banner card (background image + optional overlay content).
   Widget _slide(
     BuildContext context,
@@ -329,8 +367,10 @@ class _BannerCarouselState extends State<BannerCarousel> {
               fit: StackFit.expand,
               clipBehavior: Clip.hardEdge,
               children: [
-                // Background image — network for real covers, asset for bundled.
-                Builder(
+                // Background image — network for real covers, asset for
+                // bundled; wrapped in a subtle Ken Burns motion when enabled.
+                _kenBurns(
+                  Builder(
                   builder: (context) {
                     Widget fallback() => Container(
                           decoration: BoxDecoration(
@@ -370,6 +410,21 @@ class _BannerCarouselState extends State<BannerCarousel> {
                     );
                   },
                 ),
+                ),
+
+                // Cool animated FX — drifting sparkles + a glossy light sweep
+                // (spotlight banner only).
+                if (widget.animateImages)
+                  const Positioned.fill(
+                    child: IgnorePointer(
+                      child: Stack(
+                        children: [
+                          Positioned.fill(child: _BannerSparkles()),
+                          Positioned.fill(child: _BannerShine()),
+                        ],
+                      ),
+                    ),
+                  ),
 
                 // Dark gradient overlay (overlayStyle only)
                 if (widget.overlayStyle)
@@ -618,4 +673,198 @@ class _GoldenBorderPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _GoldenBorderPainter old) =>
       old.t != t || old.radius != radius || old.strokeWidth != strokeWidth;
+}
+
+/// Wraps a banner image with a subtle, continuous Ken Burns effect — a slow
+/// zoom paired with a drifting focal point — so the banner gently feels alive.
+class _KenBurnsImage extends StatefulWidget {
+  final Widget child;
+
+  const _KenBurnsImage({required this.child});
+
+  @override
+  State<_KenBurnsImage> createState() => _KenBurnsImageState();
+}
+
+class _KenBurnsImageState extends State<_KenBurnsImage>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scale;
+  late final Animation<Alignment> _align;
+
+  @override
+  void initState() {
+    super.initState();
+    // Slow loop that eases back and forth, so the motion never snaps.
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 10),
+    )..repeat(reverse: true);
+    final curve = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    // Noticeable zoom (1.0 → 1.18) with the focal point drifting diagonally.
+    _scale = Tween<double>(begin: 1.0, end: 1.18).animate(curve);
+    _align = AlignmentTween(
+      begin: const Alignment(-1.0, -0.7),
+      end: const Alignment(1.0, 0.7),
+    ).animate(curve);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _scale.value,
+          alignment: _align.value,
+          child: child,
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
+/// A glossy diagonal light band that slowly sweeps left → right across the
+/// banner, then rests — adds a premium "shine" highlight.
+class _BannerShine extends StatefulWidget {
+  const _BannerShine();
+
+  @override
+  State<_BannerShine> createState() => _BannerShineState();
+}
+
+class _BannerShineState extends State<_BannerShine>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 4500),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        // Sweep across the first half of the loop, then rest off-screen.
+        final double p = Curves.easeInOut
+            .transform((_controller.value / 0.5).clamp(0.0, 1.0));
+        final double dx = -1.8 + 3.6 * p;
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment(dx - 0.4, -1.0),
+              end: Alignment(dx + 0.4, 1.0),
+              colors: [
+                Colors.white.withOpacity(0.0),
+                Colors.white.withOpacity(0.18),
+                Colors.white.withOpacity(0.0),
+              ],
+              stops: const [0.4, 0.5, 0.6],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// Particle seeds for the banner sparkles: x(0-1), startY(0-1), radius, speed,
+// phase. Fixed so the motion is deterministic (no Math.random at runtime).
+const List<List<double>> _kSparkleSeeds = [
+  [0.14, 0.85, 1.6, 0.70, 0.00],
+  [0.32, 1.00, 1.1, 0.52, 0.30],
+  [0.52, 0.78, 1.9, 0.88, 0.62],
+  [0.68, 0.95, 1.3, 0.60, 0.12],
+  [0.84, 0.82, 1.5, 0.80, 0.50],
+  [0.24, 0.66, 1.0, 0.55, 0.82],
+  [0.60, 0.90, 1.7, 0.74, 0.20],
+  [0.44, 0.55, 1.2, 0.64, 0.92],
+  [0.90, 0.70, 1.0, 0.58, 0.40],
+  [0.08, 0.60, 1.3, 0.68, 0.74],
+];
+
+/// Soft white sparkles that drift upward and twinkle across the banner — a
+/// subtle "dispersion" element that makes the banner feel alive.
+class _BannerSparkles extends StatefulWidget {
+  const _BannerSparkles();
+
+  @override
+  State<_BannerSparkles> createState() => _BannerSparklesState();
+}
+
+class _BannerSparklesState extends State<_BannerSparkles>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) =>
+          CustomPaint(painter: _SparklesPainter(_controller.value)),
+    );
+  }
+}
+
+class _SparklesPainter extends CustomPainter {
+  final double t;
+  _SparklesPainter(this.t);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint();
+    for (final s in _kSparkleSeeds) {
+      final double x = s[0] * size.width;
+      // Drift upward, looping; fade out as it rises.
+      final double prog = (t * s[3] + s[4]) % 1.0;
+      final double y = (s[1] - prog) * size.height;
+      if (y < -6 || y > size.height + 6) continue;
+      final double twinkle =
+          0.35 + 0.65 * (0.5 + 0.5 * math.sin(t * 12.566 + s[4] * 6.283));
+      final double op = (twinkle * (1.0 - prog) * 0.65).clamp(0.0, 1.0);
+      // Soft glow halo.
+      paint.color = Colors.white.withOpacity(op * 0.35);
+      canvas.drawCircle(Offset(x, y), s[2] * 2.6, paint);
+      // Bright core.
+      paint.color = Colors.white.withOpacity(op);
+      canvas.drawCircle(Offset(x, y), s[2], paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SparklesPainter old) => old.t != t;
 }

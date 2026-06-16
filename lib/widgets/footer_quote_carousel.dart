@@ -85,21 +85,28 @@ class _FooterQuoteCarouselState extends State<FooterQuoteCarousel> {
           ),
           const SizedBox(height: 16),
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 750),
+            duration: const Duration(milliseconds: 1400),
             switchInCurve: Curves.easeOutCubic,
             switchOutCurve: Curves.easeInCubic,
+            // Vertical slideshow: the new quote emerges from ABOVE and slides
+            // down into place while the previous one slides further DOWN and
+            // fades out.
             transitionBuilder: (child, animation) {
+              final bool isIncoming =
+                  animation.status == AnimationStatus.forward ||
+                      animation.status == AnimationStatus.completed;
+              final Animatable<Offset> slide = isIncoming
+                  // Incoming: from above (-y) down to centre.
+                  ? Tween<Offset>(
+                      begin: const Offset(0, -0.6), end: Offset.zero)
+                  // Outgoing: from centre down and out (+y).
+                  : Tween<Offset>(
+                      begin: const Offset(0, 0.6), end: Offset.zero);
               return FadeTransition(
                 opacity: animation,
                 child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.28),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: ScaleTransition(
-                    scale: Tween<double>(begin: 0.92, end: 1.0).animate(animation),
-                    child: child,
-                  ),
+                  position: slide.animate(animation),
+                  child: child,
                 ),
               );
             },

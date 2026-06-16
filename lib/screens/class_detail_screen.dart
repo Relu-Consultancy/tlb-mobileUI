@@ -284,7 +284,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                         _title,
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 20),
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w700,
                           color: const Color(0xFF333333),
                         ),
                       ),

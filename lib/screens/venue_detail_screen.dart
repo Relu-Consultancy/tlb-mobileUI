@@ -381,7 +381,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                         _title,
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 20),
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w700,
                           color: const Color(0xFF333333),
                         ),
                       ),

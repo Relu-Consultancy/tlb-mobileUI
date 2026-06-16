@@ -48,30 +48,30 @@ class HolidaySpecialCard extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
           children: [
-            // Image + pink overlay tag at top-center
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              child: Stack(
-                children: [
-                  AspectRatio(
-                    aspectRatio: 1.0, // square image area
-                    child: Image.asset(
+            // Image fills the extra card height (stretches downwards); the
+            // content below keeps a fixed 20px gap to the card bottom.
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.asset(
                       event.imagePath,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
                         color: AppColors.primary.withOpacity(0.2),
-                        child: const Icon(Icons.event, size: 48),
+                        child: const Center(child: Icon(Icons.event, size: 48)),
                       ),
                     ),
-                  ),
-                  if ((event.tag ?? '').isNotEmpty)
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: Align(
+                    if ((event.tag ?? '').isNotEmpty)
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: Align(
                         alignment: Alignment.topCenter,
                         // Animated red → purple gradient that slides very
                         // slowly and continuously (same idea as the TLB
@@ -97,7 +97,8 @@ class HolidaySpecialCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                ],
+                  ],
+                ),
               ),
             ),
             // Content

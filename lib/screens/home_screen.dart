@@ -218,6 +218,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           HomeHeader(
                             profileShowcaseConfig: kProfileShowcaseConfig,
                             locationShowcaseConfig: kLocationShowcaseConfig,
+                            // Hide the cloud ShaderMask's bottom fringe by
+                            // painting the header's flat cream band over it.
+                            seamCoverColor: const Color(0xFFFFF0D0),
                           ),
                           // Spotlight divider — reverted to always-shown (mock).
                           // API version (hide when spotlight section empty)
@@ -301,6 +304,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           cornerRadius: 28,
                           // Golden gradient border sweeping around the banner.
                           animatedGoldenBorder: true,
+                          // Subtle Ken Burns motion on the banner images.
+                          animateImages: true,
+                          // Endless cycle — never rewinds to the first card.
+                          infiniteScroll: true,
                         ),
                       ),
                       const RepaintBoundary(child: CategoriesGrid()),

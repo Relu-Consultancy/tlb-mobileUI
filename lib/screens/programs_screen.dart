@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/auto_scroll_list.dart';
+import '../widgets/animated_gradient_tag.dart';
 import '../widgets/shining_star_badge.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
@@ -527,48 +528,47 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
           children: [
-            // ── Large image with camp pill at top-center ──
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              child: Stack(
-                alignment: Alignment.topCenter,
-                children: [
-                  Image.asset(
-                    event.imagePath,
-                    height: Responsive.h(context, 215, min: 192),
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      height: Responsive.h(context, 215, min: 192),
-                      width: double.infinity,
-                      color: AppColors.primary.withOpacity(0.15),
-                      child: const Icon(Icons.event, size: 44),
-                    ),
-                  ),
-                  if ((event.tag ?? '').isNotEmpty)
-                    Positioned(
-                      top: 12,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF7C3AED), Color(0xFFEC4899)],
-                          ),
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Text(
-                          event.tag!,
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 11.5),
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
+            // ── Large image (fills the extra card height) + camp pill ──
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                child: Stack(
+                  alignment: Alignment.topCenter,
+                  children: [
+                    Positioned.fill(
+                      child: Image.asset(
+                        event.imagePath,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: AppColors.primary.withOpacity(0.15),
+                          child: const Center(child: Icon(Icons.event, size: 44)),
                         ),
                       ),
                     ),
-                ],
+                  if ((event.tag ?? '').isNotEmpty)
+                    Positioned(
+                      top: 12,
+                      // Animated red → purple gradient that slides slowly and
+                      // continuously across the tag.
+                      child: AnimatedGradientTag(
+                        text: event.tag!,
+                        fontSize: 11.5,
+                        period: const Duration(seconds: 6),
+                        showChrome: false,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 6),
+                        borderRadius: BorderRadius.circular(30),
+                        gradientColors: const [
+                          Color(0xFFE11D48), // red
+                          Color(0xFF9333EA), // purple
+                          Color(0xFFE11D48), // red (loops seamlessly)
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             // ── Info ──

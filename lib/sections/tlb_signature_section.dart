@@ -122,7 +122,7 @@ class TlbSignatureSection extends StatelessWidget {
                           const SizedBox(height: 14),
                           SizedBox(
                             width: double.infinity,
-                            height: Responsive.h(context, 42, min: 40),
+                            height: Responsive.h(context, 30, min: 27),
                             child: ElevatedButton(
                               onPressed: () {
                                 openListingDetail(context, event);
@@ -144,7 +144,7 @@ class TlbSignatureSection extends StatelessWidget {
                               child: Text(
                                 'View Now',
                                 style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 14),
+                                  fontSize: Responsive.sp(context, 12),
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
