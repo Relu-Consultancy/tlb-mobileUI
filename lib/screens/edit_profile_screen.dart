@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import '../widgets/app_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
@@ -155,7 +156,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       lastDate: DateTime.now(),
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
-          colorScheme: const ColorScheme.light(primary: Color(0xFFFFCC00)),
+          colorScheme: const ColorScheme.light(primary: AppColors.primaryLight),
         ),
         child: child!,
       ),
@@ -273,7 +274,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ],
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E), size: 20),
+                      icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 20),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
@@ -284,7 +285,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 18),
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF1A1A2E),
+              color: AppColors.textPrimary,
             ),
           ),
           actions: widget.isOnboarding
@@ -426,14 +427,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 child: ElevatedButton(
                   onPressed: (_loading || _fetchingProfile) ? null : _onSave,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFCC00),
-                    foregroundColor: const Color(0xFF1A1A2E),
-                    disabledBackgroundColor: const Color(0xFFFFCC00).withOpacity(0.6),
+                    backgroundColor: AppColors.primaryLight,
+                    foregroundColor: AppColors.textPrimary,
+                    disabledBackgroundColor: AppColors.primaryLight.withOpacity(0.6),
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
                   ),
                   child: (_loading || _fetchingProfile)
-                      ? const AppLoaderInline(dotSize: 7, spacing: 4, color: Color(0xFF1A1A2E))
+                      ? const AppLoaderInline(dotSize: 7, spacing: 4, color: AppColors.textPrimary)
                       : Text(
                           widget.isOnboarding ? 'Save & Continue' : 'Update Profile',
                           style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500),
@@ -464,7 +465,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 14),
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF1A1A2E),
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
@@ -591,7 +592,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Color(0xFFFFCC00), width: 1.5),
+                          borderSide: const BorderSide(color: AppColors.primaryLight, width: 1.5),
                         ),
                       ),
                     ),
@@ -656,7 +657,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFFFFCC00), width: 1.5),
+            borderSide: const BorderSide(color: AppColors.primaryLight, width: 1.5),
           ),
         ),
       ),

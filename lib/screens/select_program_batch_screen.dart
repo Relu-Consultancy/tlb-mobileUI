@@ -38,6 +38,7 @@ String _fmtApiDate(String? raw) {
   ];
   final month = int.tryParse(parts[1]) ?? 0;
   final day = int.tryParse(parts[2]) ?? 0;
+  if (month < 1 || month > 12) return raw;
   return '$day ${months[month]} ${parts[0]}';
 }
 
@@ -180,7 +181,7 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
                                 ? Icons.star_half_rounded
                                 : Icons.star_outline_rounded),
                         size: 15,
-                        color: const Color(0xFFFFCC00),
+                        color: AppColors.primaryLight,
                       );
                     }),
                     const SizedBox(width: 6),
@@ -467,7 +468,7 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
                   );
                 },
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFFFCC00),
+            backgroundColor: AppColors.primaryLight,
             foregroundColor: AppColors.textPrimary,
             elevation: 0,
             shape: RoundedRectangleBorder(

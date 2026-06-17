@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 import '../widgets/app_loader.dart';
@@ -120,7 +121,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 18),
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF1A1A2E),
+                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -142,8 +143,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     Navigator.of(context).pop(); // go back to account settings
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFCC00),
-                    foregroundColor: const Color(0xFF1A1A2E),
+                    backgroundColor: AppColors.primaryLight,
+                    foregroundColor: AppColors.textPrimary,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -169,13 +170,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: AppColors.lightGray,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF2F2F7),
+        backgroundColor: AppColors.lightGray,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -183,7 +184,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -203,7 +204,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               child: Row(
                 children: [
                   const Icon(Icons.info_outline_rounded,
-                      size: 18, color: Color(0xFF2563EB)),
+                      size: 18, color: AppColors.accentBlue),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -289,17 +290,17 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               child: ElevatedButton(
                 onPressed: _loading ? null : _onSubmit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFCC00),
-                  foregroundColor: const Color(0xFF1A1A2E),
+                  backgroundColor: AppColors.primaryLight,
+                  foregroundColor: AppColors.textPrimary,
                   disabledBackgroundColor:
-                      const Color(0xFFFFCC00).withOpacity(0.6),
+                      AppColors.primaryLight.withOpacity(0.6),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(28),
                   ),
                 ),
                 child: _loading
-                    ? const AppLoaderInline(dotSize: 7, spacing: 4, color: Color(0xFF1A1A2E))
+                    ? const AppLoaderInline(dotSize: 7, spacing: 4, color: AppColors.textPrimary)
                     : Text(
                         'Update Password',
                         style: GoogleFonts.poppins(
@@ -365,7 +366,7 @@ class _PasswordField extends StatelessWidget {
             obscureText: obscure,
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 14),
-              color: const Color(0xFF1A1A2E),
+              color: AppColors.textPrimary,
             ),
             decoration: InputDecoration(
               hintText: hint,

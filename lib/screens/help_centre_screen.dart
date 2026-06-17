@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../core/responsive.dart';
@@ -40,13 +41,13 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: AppColors.lightGray,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF2F2F7),
+        backgroundColor: AppColors.lightGray,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -54,7 +55,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -79,7 +80,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 22),
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF1A1A2E),
+                              color: AppColors.textPrimary,
                             ),
                           );
                         },
@@ -100,7 +101,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                   errorBuilder: (_, __, ___) => const Icon(
                     Icons.headphones,
                     size: 64,
-                    color: Color(0xFF2563EB),
+                    color: AppColors.accentBlue,
                   ),
                 ),
               ],
@@ -114,7 +115,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 14),
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF1A1A2E),
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 4),
@@ -137,7 +138,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                     context,
                     icon: Icons.calendar_today_outlined,
                     iconBg: const Color(0xFFEDF4FF),
-                    iconColor: const Color(0xFF2563EB),
+                    iconColor: AppColors.accentBlue,
                     title: 'Booking Issues',
                     subtitle: 'Trouble with a booking or cancellation?',
                     onTap: () =>
@@ -179,7 +180,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 14),
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF1A1A2E),
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 10),
@@ -194,7 +195,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                     context,
                     icon: Icons.receipt_long_outlined,
                     iconBg: const Color(0xFFEDF4FF),
-                    iconColor: const Color(0xFF2563EB),
+                    iconColor: AppColors.accentBlue,
                     title: 'My Tickets',
                     subtitle: 'View ongoing conversations with support',
                     onTap: _openMyTickets,
@@ -205,7 +206,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                     context,
                     icon: Icons.chat_bubble_outline,
                     iconBg: const Color(0xFFEDF4FF),
-                    iconColor: const Color(0xFF2563EB),
+                    iconColor: AppColors.accentBlue,
                     title: 'Chat with support',
                     subtitle: "Start a new conversation — we'll respond soon",
                     onTap: () => _openNewTicket(),
@@ -230,7 +231,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                     width: 38,
                     height: 38,
                     decoration: const BoxDecoration(
-                      color: Color(0xFFFFB902),
+                      color: AppColors.starAmber,
                       shape: BoxShape.circle,
                     ),
                     child:
@@ -246,7 +247,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 13),
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF1A1A2E),
+                            color: AppColors.textPrimary,
                           ),
                         ),
                         Text(
@@ -313,7 +314,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 14),
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF1A1A2E),
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     Text(
@@ -326,7 +327,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Color(0xFF2563EB)),
+              const Icon(Icons.chevron_right, color: AppColors.accentBlue),
             ],
           ),
         ),

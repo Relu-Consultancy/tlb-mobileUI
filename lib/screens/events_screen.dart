@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import '../widgets/auto_scroll_list.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
@@ -234,7 +235,12 @@ class _EventsScreenState extends State<EventsScreen> {
                   ),
                   child: Column(
                     children: [
-                      const HomeHeader(),
+                      const HomeHeader(
+                        // Hide the cloud ShaderMask's 1px bottom fringe (the
+                        // faint seam line) by painting this screen's flat
+                        // background tone over it — same fix as the Home header.
+                        seamCoverColor: Color(0xFFFFF5E0),
+                      ),
                       const SizedBox(height: 16),
                       // Spotlight Banner — full-bleed (edge to edge).
                       RepaintBoundary(
@@ -386,7 +392,7 @@ class _EventsScreenState extends State<EventsScreen> {
                           effect: const WormEffect(
                             dotHeight: 7,
                             dotWidth: 7,
-                            activeDotColor: Color(0xFF1A1A2E),
+                            activeDotColor: AppColors.textPrimary,
                             dotColor: Color(0xFFE0E0E0),
                             spacing: 5,
                           ),

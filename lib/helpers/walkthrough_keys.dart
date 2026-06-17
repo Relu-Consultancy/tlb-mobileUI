@@ -24,6 +24,20 @@ class WalkthroughKeys {
     navVenues,
     profileAvatar,
   ];
+
+  // Steps resumed AFTER the location picker closes. Tapping the highlighted
+  // location chip opens LocationScreen (which disposes the running showcase so
+  // its dark overlay doesn't sit on top of that screen); when the user returns
+  // we restart the tour from these keys so the navbar tabs and profile avatar
+  // are still shown.
+  static List<GlobalKey> get afterLocationKeys => [
+    navHome,
+    navEvents,
+    navClasses,
+    navPrograms,
+    navVenues,
+    profileAvatar,
+  ];
 }
 
 // ── Config structs ────────────────────────────────────────────────────────────

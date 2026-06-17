@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:like_button/like_button.dart';
 import '../providers/saved_events_state.dart';
 import '../models/event_model.dart';
@@ -104,7 +105,7 @@ class WishlistButton extends StatelessWidget {
                         return Icon(
                           isLiked ? iconType.filled : iconType.outlined,
                           color:
-                              isLiked ? Colors.red : const Color(0xFF1A1A2E),
+                              isLiked ? Colors.red : AppColors.textPrimary,
                           size: iconSize,
                         );
                       },

@@ -49,6 +49,7 @@ class _TrendingCardState extends State<TrendingCard> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.events.isEmpty) return const SizedBox.shrink();
     return Column(
       children: [
         SizedBox(
@@ -176,7 +177,7 @@ class _TrendingCardState extends State<TrendingCard> {
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColors.primaryLight,
-                                    foregroundColor: const Color(0xFF1A1A2E),
+                                    foregroundColor: AppColors.textPrimary,
                                     minimumSize: const Size(0, 46),
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 12,

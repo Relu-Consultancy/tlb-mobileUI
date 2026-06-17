@@ -32,6 +32,13 @@ class AnimatedGradientTag extends StatefulWidget {
   /// tag that keeps only its gradient.
   final bool showChrome;
 
+  /// Text weight. Defaults to the bold TLB-Signature look.
+  final FontWeight fontWeight;
+
+  /// When false the label is forced onto a single line (no wrap) — use for
+  /// narrow pills where wrapping would look broken.
+  final bool softWrap;
+
   const AnimatedGradientTag({
     super.key,
     required this.text,
@@ -41,6 +48,8 @@ class AnimatedGradientTag extends StatefulWidget {
     this.borderRadius,
     this.padding = const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
     this.showChrome = true,
+    this.fontWeight = FontWeight.w600,
+    this.softWrap = true,
   });
 
   @override
@@ -115,9 +124,19 @@ class _AnimatedGradientTagState extends State<AnimatedGradientTag>
           ),
           child: Text(
             widget.text,
+            softWrap: widget.softWrap,
+            maxLines: widget.softWrap ? null : 1,
+            // Single-line tags (softWrap == false) ellipsize when the label is
+            // wider than the space available, so long badges (e.g. "Therapist
+            // Recommended") show a trailing "…" instead of spilling past — and
+            // being hard-clipped by — the card edge. Using `ellipsis` (rather
+            // than `visible`) also makes the Text honour its max-width
+            // constraint even with softWrap off, so the pill caps cleanly.
+            overflow:
+                widget.softWrap ? TextOverflow.clip : TextOverflow.ellipsis,
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, widget.fontSize),
-              fontWeight: FontWeight.w600,
+              fontWeight: widget.fontWeight,
               color: Colors.white,
             ),
           ),

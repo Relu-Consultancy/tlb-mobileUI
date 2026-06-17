@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
-import '../core/app_snackbar.dart';
+import '../widgets/error_retry_view.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../models/event_model.dart';
@@ -46,6 +46,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
   static const int _pageSize = 20;
   List<ApiProgram> _apiPrograms = [];
   bool _isLoadingPrograms = true;
+  String? _programsError;
   bool _isLoadingMore = false;
   bool _hasMore = false;
   int _currentPage = 1;
@@ -163,6 +164,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
   Future<void> _fetchPrograms({int? subcategoryId}) async {
     setState(() {
       _isLoadingPrograms = true;
+      _programsError = null;
       _currentPage = 1;
       _hasMore = false;
     });
@@ -185,9 +187,9 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
       final msg = e.toString().replaceFirst('Exception: ', '');
       setState(() {
         _apiPrograms = [];
+        _programsError = msg;
         _isLoadingPrograms = false;
       });
-      AppSnackBar.error(context, 'Programs: $msg');
     }
   }
 
@@ -429,7 +431,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: Container(height: 1.5, color: const Color(0xFFFFB902)),
+                            child: Container(height: 1.5, color: AppColors.starAmber),
                           ),
                           const SizedBox(width: 10),
                           Text(
@@ -442,7 +444,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Container(height: 1.5, color: const Color(0xFFFFB902)),
+                            child: Container(height: 1.5, color: AppColors.starAmber),
                           ),
                         ],
                       ),
@@ -555,6 +557,15 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                           padding: EdgeInsets.only(top: 40),
                           child: AppLoader(),
                         ),
+                      ),
+                    )
+                  else if (_programsError != null)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: ErrorRetryView(
+                        message: _programsError!,
+                        onRetry: () => _fetchPrograms(
+                            subcategoryId: _selectedSubcategoryId),
                       ),
                     )
                   else if (_filteredPrograms.isEmpty)

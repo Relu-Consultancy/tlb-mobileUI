@@ -1,4 +1,5 @@
 import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'app_loader.dart';
 
@@ -48,7 +49,7 @@ class AppRefreshIndicator extends StatelessWidget {
                           child: const AppLoaderInline(
                             dotSize: 9,
                             spacing: 5,
-                            color: Color(0xFFFFCC00), // golden palette
+                            color: AppColors.primaryLight, // golden palette
                           ),
                         ),
                       ),

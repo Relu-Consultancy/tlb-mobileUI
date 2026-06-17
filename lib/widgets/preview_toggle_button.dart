@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import '../core/preview_mode.dart';
 
 class PreviewToggleButton extends StatefulWidget {
@@ -44,7 +45,7 @@ class _PreviewToggleButtonState extends State<PreviewToggleButton> {
                   height: _size,
                   decoration: BoxDecoration(
                     color: isOn
-                        ? const Color(0xFFFFCC00)
+                        ? AppColors.primaryLight
                         : Colors.black.withValues(alpha: 0.55),
                     shape: BoxShape.circle,
                     boxShadow: const [

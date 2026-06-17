@@ -64,9 +64,9 @@ class ApiClassMedia {
   });
 
   factory ApiClassMedia.fromJson(Map<String, dynamic> json) => ApiClassMedia(
-        id: json['id'] as int,
-        mediaType: json['media_type'] as String,
-        url: json['url'] as String,
+        id: (json['id'] as num?)?.toInt() ?? 0,
+        mediaType: (json['media_type'] as String?) ?? '',
+        url: (json['url'] as String?) ?? '',
       );
 }
 
@@ -193,7 +193,8 @@ class ApiClassDetail extends ApiClass {
       coverUrl: (service['media'] as List?)
           ?.whereType<Map<String, dynamic>>()
           .where((m) => m['media_type'] == 'cover')
-          .map((m) => m['url'] as String)
+          .map((m) => m['url'] as String?)
+          .whereType<String>()
           .firstOrNull,
       averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
       totalReviews: json['total_reviews'] as int? ?? 0,

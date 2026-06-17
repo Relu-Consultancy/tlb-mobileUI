@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
@@ -29,7 +30,7 @@ class LegalDocScaffold extends StatelessWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -53,7 +54,7 @@ class LegalDocScaffold extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 22),
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF1A1A2E),
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 4),
@@ -88,7 +89,7 @@ class LegalHeading extends StatelessWidget {
         style: GoogleFonts.poppins(
           fontSize: Responsive.sp(context, 16.5),
           fontWeight: FontWeight.w600,
-          color: const Color(0xFF1A1A2E),
+          color: AppColors.textPrimary,
         ),
       ),
     );
@@ -109,7 +110,7 @@ class LegalSubheading extends StatelessWidget {
         style: GoogleFonts.poppins(
           fontSize: Responsive.sp(context, 14),
           fontWeight: FontWeight.w600,
-          color: const Color(0xFF333333),
+          color: AppColors.textSecondary,
         ),
       ),
     );

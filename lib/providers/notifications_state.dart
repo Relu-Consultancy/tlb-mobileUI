@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/notification_service.dart';
+import '../services/push_notifications.dart';
 import 'auth_state.dart';
 
 /// Tracks the number of unread notifications.
@@ -35,5 +37,51 @@ class NotificationsState {
     if (token == null || token.isEmpty) return;
     final count = await NotificationService.unreadCount(token: token);
     if (count != null) setUnread(count);
+  }
+
+  static const _seenKey = 'seen_notification_ids';
+
+  /// Mirrors freshly-arrived in-app notifications to the device's system tray.
+  ///
+  /// Fetches the latest page, compares against the IDs we've already surfaced
+  /// (persisted), and raises a local notification for each NEW unread item.
+  /// On the very first run it just seeds the seen-set so the user isn't blasted
+  /// with a tray full of pre-existing notifications. No-op when logged out /
+  /// offline. Call on app start and whenever the app returns to the foreground.
+  static Future<void> syncAndNotify() async {
+    final token = AuthState.accessToken;
+    if (token == null || token.isEmpty) return;
+    try {
+      final page = await NotificationService.listInApp(
+        token: token,
+        page: 1,
+        pageSize: 20,
+      );
+      final prefs = await SharedPreferences.getInstance();
+      final firstRun = !prefs.containsKey(_seenKey);
+      final seen = prefs.getStringList(_seenKey)?.toSet() ?? <String>{};
+
+      if (!firstRun) {
+        // Oldest-first so the tray ordering matches arrival order.
+        for (final n in page.results.reversed) {
+          if (n.id.isEmpty || n.isRead || seen.contains(n.id)) continue;
+          await PushNotifications.showLocal(
+            title: n.title.isEmpty ? 'New notification' : n.title,
+            body: n.body,
+            payload: n.id,
+          );
+        }
+      }
+
+      // Record every fetched ID as seen (cap the set so it can't grow forever).
+      seen.addAll(page.results.map((n) => n.id).where((id) => id.isNotEmpty));
+      final capped = seen.toList();
+      if (capped.length > 300) {
+        capped.removeRange(0, capped.length - 300);
+      }
+      await prefs.setStringList(_seenKey, capped);
+    } catch (_) {
+      // Best-effort — never disrupt the UI over a tray mirror.
+    }
   }
 }

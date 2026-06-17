@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import '../widgets/app_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
@@ -28,7 +29,7 @@ class PaymentScreen extends StatelessWidget {
         surfaceTintColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -36,7 +37,7 @@ class PaymentScreen extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 17),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -62,7 +63,7 @@ class PaymentScreen extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 14),
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 Text(
@@ -70,7 +71,7 @@ class PaymentScreen extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 18),
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
@@ -263,7 +264,7 @@ class PaymentScreen extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 14),
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF1A1A2E),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   ...(subtitle != null

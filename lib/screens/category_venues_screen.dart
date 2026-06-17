@@ -3,7 +3,7 @@ import '../widgets/app_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
-import '../core/app_snackbar.dart';
+import '../widgets/error_retry_view.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../models/api_category_model.dart';
@@ -43,6 +43,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
   List<ApiCategory>? _apiCategories;
   List<ApiVenue> _apiVenues = [];
   bool _isLoadingVenues = false;
+  String? _venuesError;
   bool _isLoadingMore = false;
   bool _hasMore = false;
   int _currentPage = 1;
@@ -85,6 +86,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
   Future<void> _fetchVenues() async {
     setState(() {
       _isLoadingVenues = true;
+      _venuesError = null;
       _currentPage = 1;
       _hasMore = false;
     });
@@ -106,9 +108,9 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
       final msg = e.toString().replaceFirst('Exception: ', '');
       setState(() {
         _apiVenues = [];
+        _venuesError = msg;
         _isLoadingVenues = false;
       });
-      AppSnackBar.error(context, 'Venues: $msg');
     }
   }
 
@@ -414,7 +416,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: Container(height: 1.5, color: const Color(0xFFFFB902)),
+                            child: Container(height: 1.5, color: AppColors.starAmber),
                           ),
                           const SizedBox(width: 10),
                           Text(
@@ -427,7 +429,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Container(height: 1.5, color: const Color(0xFFFFB902)),
+                            child: Container(height: 1.5, color: AppColors.starAmber),
                           ),
                         ],
                       ),
@@ -525,6 +527,14 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                     const SliverFillRemaining(
                       hasScrollBody: false,
                       child: AppLoader(),
+                    )
+                  else if (_venuesError != null)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: ErrorRetryView(
+                        message: _venuesError!,
+                        onRetry: _fetchVenues,
+                      ),
                     )
                   else if (_apiVenues.isEmpty)
                     SliverFillRemaining(
@@ -689,7 +699,7 @@ class _VenuesAllCategoriesSheetState
                   style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 16),
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF1A1A2E)),
+                      color: AppColors.textPrimary),
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -755,7 +765,7 @@ class _VenuesAllCategoriesSheetState
                               style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 11),
                                   fontWeight: FontWeight.w500,
-                                  color: const Color(0xFF1A1A2E)),
+                                  color: AppColors.textPrimary),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),

@@ -1,4 +1,5 @@
 import '../core/responsive.dart';
+import '../core/app_colors.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../core/listing_image.dart';
@@ -57,6 +58,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
         // final items = HomeFeedState.section('weekend_specials');
         // if (items.isEmpty) return const SizedBox.shrink();
         final items = DummyData.weekendSpecial;
+        if (items.isEmpty) return const SizedBox.shrink();
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -65,7 +67,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
               topPadding: 30, // 30px gap from previous section's cards
               fontSize: 17,
               fontWeight: FontWeight.w600,
-              textColor: Color(0xFF1A1A2E), // dark navy
+              textColor: AppColors.textPrimary, // dark navy
             ),
             SizedBox(
               height: Responsive.h(context, 365, min: 340),
@@ -142,7 +144,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                             style: GoogleFonts.poppins(
                                               fontSize: Responsive.sp(context, 13),
                                               fontWeight: FontWeight.w600,
-                                              color: const Color(0xFF1A1A2E),
+                                              color: AppColors.textPrimary,
                                             ),
                                           ),
                                           Text(
@@ -150,7 +152,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                             style: GoogleFonts.poppins(
                                               fontSize: Responsive.sp(context, 12),
                                               fontWeight: FontWeight.w600,
-                                              color: const Color(0xFF2563EB),
+                                              color: AppColors.accentBlue,
                                             ),
                                           ),
                                         ],
@@ -185,7 +187,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                     style: GoogleFonts.poppins(
                                       fontSize: Responsive.sp(context, 17),
                                       fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF1A1A2E),
+                                      color: AppColors.textPrimary,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -204,7 +206,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                         event.reviewCount ?? '',
                                         style: GoogleFonts.poppins(
                                           fontSize: Responsive.sp(context, 13),
-                                          color: const Color(0xFF333333),
+                                          color: AppColors.textSecondary,
                                         ),
                                       ),
                                     ],
@@ -214,14 +216,14 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                   Row(
                                     children: [
                                       const Icon(Icons.location_on_outlined,
-                                          size: 15, color: Color(0xFF333333)),
+                                          size: 15, color: AppColors.textSecondary),
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(
                                           event.venue,
                                           style: GoogleFonts.poppins(
                                             fontSize: Responsive.sp(context, 13),
-                                            color: const Color(0xFF333333),
+                                            color: AppColors.textSecondary,
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -234,8 +236,8 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                           onPressed: () =>
                                               openListingDetail(context, event),
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: const Color(0xFFFFCC00),
-                                            foregroundColor: const Color(0xFF1A1A2E),
+                                            backgroundColor: AppColors.primaryLight,
+                                            foregroundColor: AppColors.textPrimary,
                                             elevation: 0,
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 12),

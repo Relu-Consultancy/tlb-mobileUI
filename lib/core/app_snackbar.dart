@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 enum _ToastType { info, success, error }
@@ -64,7 +65,7 @@ class AppSnackBar {
         icon = Icons.error_rounded;
         break;
       case _ToastType.info:
-        accentColor = const Color(0xFFFFCC00);
+        accentColor = AppColors.primaryLight;
         icon = Icons.info_rounded;
         break;
     }
@@ -178,7 +179,7 @@ class _ToastWidgetState extends State<_ToastWidget>
                 style: GoogleFonts.poppins(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF1A1A2E),
+                  color: AppColors.textPrimary,
                   height: 1.35,
                 ),
               ),

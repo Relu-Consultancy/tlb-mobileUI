@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../models/api_event_model.dart';
@@ -113,7 +114,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
         surfaceTintColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
@@ -122,7 +123,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 17),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -187,8 +188,8 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                 );
               } : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFCC00),
-                foregroundColor: const Color(0xFF1A1A2E),
+                backgroundColor: AppColors.primaryLight,
+                foregroundColor: AppColors.textPrimary,
                 disabledBackgroundColor: Colors.grey.shade300,
                 disabledForegroundColor: Colors.grey.shade500,
                 elevation: 0,
@@ -272,7 +273,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 15),
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFF1A1A2E),
+                          color: AppColors.textPrimary,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -369,7 +370,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 16),
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF1A1A2E),
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 16),
@@ -391,7 +392,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 14),
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF1A1A2E),
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -424,7 +425,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 13),
                                   fontWeight: FontWeight.w500,
-                                  color: const Color(0xFF1A1A2E),
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                             ),
@@ -444,7 +445,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                                       minWidth: 32, minHeight: 32),
                                   padding: EdgeInsets.zero,
                                   icon: const Icon(Icons.remove,
-                                      size: 16, color: Color(0xFF1A1A2E)),
+                                      size: 16, color: AppColors.textPrimary),
                                   onPressed: () {
                                     setState(() {
                                       if (count > 0) {
@@ -458,7 +459,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 14),
                                     fontWeight: FontWeight.w500,
-                                    color: const Color(0xFF1A1A2E),
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
                                 IconButton(
@@ -466,7 +467,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                                       minWidth: 32, minHeight: 32),
                                   padding: EdgeInsets.zero,
                                   icon: const Icon(Icons.add,
-                                      size: 16, color: Color(0xFF1A1A2E)),
+                                      size: 16, color: AppColors.textPrimary),
                                   onPressed: () => _addTicket(index),
                                 ),
                               ],
@@ -494,7 +495,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 16),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 12),
@@ -512,7 +513,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 14),
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF1A1A2E),
+                color: AppColors.textPrimary,
               ),
             ),
             Text(
@@ -520,7 +521,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 16),
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF1A1A2E),
+                color: AppColors.textPrimary,
               ),
             ),
           ],
@@ -541,7 +542,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
         const SizedBox(width: 8),
         Text(
           value,
-          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF1A1A2E)),
+          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: AppColors.textPrimary),
         ),
       ],
     );
@@ -566,7 +567,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 16),
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF1A1A2E),
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 16),

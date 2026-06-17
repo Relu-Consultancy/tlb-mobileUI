@@ -83,7 +83,12 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         ),
                         child: Column(
                           children: [
-                            const HomeHeader(),
+                            const HomeHeader(
+                              // Hide the cloud ShaderMask's 1px bottom fringe
+                              // (the faint seam line) by painting this screen's
+                              // flat background tone over it — same Home fix.
+                              seamCoverColor: Color(0xFFFFF5E0),
+                            ),
                             const SizedBox(height: 16),
                       // ── Banner — Home-style Spotlight: a tall centered card
                       //    that covers the majority of the screen, ending just
@@ -350,7 +355,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   const SizedBox(height: 9),
                   Text(
                     c['label'] as String,
-                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E)),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w500, color: AppColors.textPrimary),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -405,7 +410,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       if ((event.tag ?? '').isNotEmpty)
                         _bigDayPill(event.tag!, const Color(0xFFDB2777), Colors.white, small: true),
                       if ((event.tag ?? '').isNotEmpty) const SizedBox(width: 6),
-                      _bigDayPill('Premium', const Color(0xFFFFC107), const Color(0xFF1A1A2E), small: true),
+                      _bigDayPill('Premium', const Color(0xFFFFC107), AppColors.textPrimary, small: true),
                     ],
                   ),
                 ),
@@ -420,7 +425,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   children: [
                     Text(
                       event.title,
-                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
+                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -428,14 +433,14 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     Row(children: [
                       Icon(Icons.location_on_outlined, size: 15, color: Colors.grey.shade500),
                       const SizedBox(width: 4),
-                      Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: const Color(0xFF333333))),
+                      Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary)),
                     ]),
                     const SizedBox(height: 6),
                     if (event.rating != null)
                       Row(children: [
-                        const Icon(Icons.star_rounded, size: 16, color: Color(0xFFFFB902)),
+                        const Icon(Icons.star_rounded, size: 16, color: AppColors.starAmber),
                         const SizedBox(width: 4),
-                        Text('${event.rating}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+                        Text('${event.rating}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                         const SizedBox(width: 4),
                         Text('(${event.reviewCount})', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
                       ]),
@@ -446,8 +451,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       child: ElevatedButton(
                         onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFCC00),
-                          foregroundColor: const Color(0xFF1A1A2E),
+                          backgroundColor: AppColors.primaryLight,
+                          foregroundColor: AppColors.textPrimary,
                           elevation: 0,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
                           padding: EdgeInsets.zero,
@@ -515,19 +520,19 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         if ((event.tag ?? '').isNotEmpty)
                           _bigDayPill(event.tag!, const Color(0xFF16A34A), Colors.white),
                         const SizedBox(height: 9),
-                        Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
                         const SizedBox(height: 8),
                         Row(children: [
                           Icon(Icons.calendar_month_outlined, size: 15, color: Colors.grey.shade500),
                           const SizedBox(width: 5),
-                          Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: const Color(0xFF333333)), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                          Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
                         ]),
                         const SizedBox(height: 7),
                         if (event.rating != null)
                           Row(children: [
-                            const Icon(Icons.star_rounded, size: 16, color: Color(0xFFFFB902)),
+                            const Icon(Icons.star_rounded, size: 16, color: AppColors.starAmber),
                             const SizedBox(width: 4),
-                            Text('${event.rating}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+                            Text('${event.rating}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                             const SizedBox(width: 4),
                             Text('(${event.reviewCount})', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
                           ]),
@@ -539,8 +544,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       child: ElevatedButton(
                         onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFCC00),
-                          foregroundColor: const Color(0xFF1A1A2E),
+                          backgroundColor: AppColors.primaryLight,
+                          foregroundColor: AppColors.textPrimary,
                           elevation: 0,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
                           padding: EdgeInsets.zero,
@@ -596,7 +601,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          child: Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
                         ),
                         const SizedBox(width: 8),
                         const Icon(Icons.circle, size: 9, color: Color(0xFF16A34A)),
@@ -608,7 +613,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     Row(children: [
                       Icon(Icons.location_on_outlined, size: 15, color: Colors.grey.shade500),
                       const SizedBox(width: 4),
-                      Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: const Color(0xFF333333)), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                      Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
                     ]),
                   ],
                 ),
@@ -727,7 +732,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 22),
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1A1A2E),
+                            color: AppColors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 3),
@@ -789,7 +794,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 15),
                                     fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF1A1A2E),
+                                    color: AppColors.textPrimary,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -801,7 +806,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                                   Expanded(
                                     child: Text(
                                       v['location'] as String,
-                                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: const Color(0xFF333333)),
+                                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: AppColors.textSecondary),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -832,7 +837,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 12),
                                     fontWeight: FontWeight.w500,
-                                    color: const Color(0xFF1A1A2E),
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
                               ),
@@ -849,24 +854,6 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     ],
                   );
                 }),
-                // ── View all venues button ──
-                SizedBox(
-                  width: double.infinity,
-                  height: 46,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFCC00),
-                      foregroundColor: const Color(0xFF1A1A2E),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
-                    ),
-                    child: Text(
-                      'View Now',
-                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
@@ -905,12 +892,12 @@ class _VenuesScreenState extends State<VenuesScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 8),
                   Row(children: [
                     Icon(Icons.location_on_outlined, size: 15, color: Colors.grey.shade500),
                     const SizedBox(width: 4),
-                    Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: const Color(0xFF333333)), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                    Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
                   ]),
                 ],
               ),
@@ -968,12 +955,12 @@ class _VenuesScreenState extends State<VenuesScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14.5), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14.5), fontWeight: FontWeight.w600, color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 7),
                     Row(children: [
                       Icon(Icons.location_on_outlined, size: 14, color: Colors.grey.shade500),
                       const SizedBox(width: 4),
-                      Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: const Color(0xFF333333)), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                      Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
                     ]),
                   ],
                 ),
@@ -1018,7 +1005,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       if ((event.tag ?? '').isNotEmpty)
                         _bigDayPill(event.tag!, const Color(0xFFDB2777), Colors.white),
                       if ((event.tag ?? '').isNotEmpty) const SizedBox(width: 8),
-                      _bigDayPill('Premium', const Color(0xFFFFC107), const Color(0xFF1A1A2E)),
+                      _bigDayPill('Premium', const Color(0xFFFFC107), AppColors.textPrimary),
                     ]),
                   ),
                 ],
@@ -1031,20 +1018,20 @@ class _VenuesScreenState extends State<VenuesScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                     Row(children: [
-                      Expanded(child: Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                      Expanded(child: Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis)),
                       if (event.description != null) ...[
                         const SizedBox(width: 8),
-                        Icon(Icons.people_outline, size: 15, color: const Color(0xFF333333)),
+                        Icon(Icons.people_outline, size: 15, color: AppColors.textSecondary),
                         const SizedBox(width: 3),
-                        Text(event.description!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: const Color(0xFF333333))),
+                        Text(event.description!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: AppColors.textSecondary)),
                       ],
                     ]),
                     const SizedBox(height: 6),
                     if (event.rating != null)
                       Row(children: [
-                        const Icon(Icons.star_rounded, size: 16, color: Color(0xFFFFB902)),
+                        const Icon(Icons.star_rounded, size: 16, color: AppColors.starAmber),
                         const SizedBox(width: 4),
-                        Text('${event.rating}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+                        Text('${event.rating}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                         const SizedBox(width: 4),
                         Text('(${event.reviewCount})', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
                       ]),
@@ -1053,15 +1040,15 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       children: [
                         Icon(Icons.location_on_outlined, size: 15, color: Colors.grey.shade500),
                         const SizedBox(width: 4),
-                        Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: const Color(0xFF333333)), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                        Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
                         const SizedBox(width: 8),
                         SizedBox(
                           height: 36,
                           child: ElevatedButton(
                             onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFFCC00),
-                              foregroundColor: const Color(0xFF1A1A2E),
+                              backgroundColor: AppColors.primaryLight,
+                              foregroundColor: AppColors.textPrimary,
                               elevation: 0,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
                               padding: const EdgeInsets.symmetric(horizontal: 26),
@@ -1114,7 +1101,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
   }
 
   Widget _wayTile(String label, String imagePath, Color bg, bool lightText) {
-    final textColor = lightText ? const Color(0xFF1A1A2E) : Colors.white;
+    final textColor = lightText ? AppColors.textPrimary : Colors.white;
     return Container(
       width: 110,
       decoration: BoxDecoration(
@@ -1224,7 +1211,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
               // ── Title ──
               Text(
                 event.title,
-                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
+                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -1233,15 +1220,15 @@ class _VenuesScreenState extends State<VenuesScreen> {
               Row(children: [
                 Icon(Icons.location_on_outlined, size: 15, color: Colors.grey.shade500),
                 const SizedBox(width: 4),
-                Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: const Color(0xFF333333)), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
               ]),
               const SizedBox(height: 7),
               // ── Rating ──
               if (event.rating != null)
                 Row(children: [
-                  const Icon(Icons.star_rounded, size: 16, color: Color(0xFFFFB902)),
+                  const Icon(Icons.star_rounded, size: 16, color: AppColors.starAmber),
                   const SizedBox(width: 4),
-                  Text('${event.rating}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
+                  Text('${event.rating}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                   const SizedBox(width: 4),
                   Text('(${event.reviewCount})', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
                 ]),
@@ -1253,8 +1240,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFCC00),
-                    foregroundColor: const Color(0xFF1A1A2E),
+                    backgroundColor: AppColors.primaryLight,
+                    foregroundColor: AppColors.textPrimary,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                   ),

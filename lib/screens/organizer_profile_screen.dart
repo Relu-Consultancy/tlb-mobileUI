@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../core/share_helper.dart';
@@ -138,7 +139,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 19),
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1A1A2E),
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -211,7 +212,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 16),
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF1A1A2E),
+                                color: AppColors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -371,7 +372,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
             ),
           ],
         ),
-        child: Icon(icon, size: 18, color: const Color(0xFF1A1A2E)),
+        child: Icon(icon, size: 18, color: AppColors.textPrimary),
       ),
     );
   }
@@ -393,7 +394,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 22),
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF1A1A2E),
+                  color: AppColors.textPrimary,
                 ),
               ),
               if (showStar) ...[
@@ -441,7 +442,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 32),
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
       ),

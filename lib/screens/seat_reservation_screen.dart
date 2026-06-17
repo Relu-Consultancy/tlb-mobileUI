@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
@@ -29,7 +30,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
 
   // Seat categories by row
   final Map<String, _SeatCategory> _categories = {
-    'VIP': _SeatCategory('VIP', 2500, const Color(0xFFFFB902)),
+    'VIP': _SeatCategory('VIP', 2500, AppColors.starAmber),
     'Premium': _SeatCategory('Premium', 1500, const Color(0xFFFF6B6B)),
     'Standard': _SeatCategory('Standard', 800, const Color(0xFF5C6BC0)),
   };
@@ -117,7 +118,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
         surfaceTintColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -125,7 +126,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 16),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
         centerTitle: true,
@@ -145,7 +146,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 14),
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 Text(
@@ -170,14 +171,14 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                       height: 36,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFFFFB902), Color(0xFFFFC107)],
+                          colors: [AppColors.starAmber, Color(0xFFFFC107)],
                         ),
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(40),
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFFFB902).withOpacity(0.3),
+                            color: AppColors.starAmber.withOpacity(0.3),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -327,7 +328,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                     children: [
                       _buildLegendItem(Colors.white, Colors.grey, 'Available'),
                       const SizedBox(width: 16),
-                      _buildLegendItem(const Color(0xFFFFB902), const Color(0xFFFFB902), 'Selected'),
+                      _buildLegendItem(AppColors.starAmber, AppColors.starAmber, 'Selected'),
                       const SizedBox(width: 16),
                       _buildLegendItem(Colors.grey.shade200, Colors.grey.shade300, 'Sold'),
                     ],
@@ -365,7 +366,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 11),
                                     fontWeight: FontWeight.w500,
-                                    color: const Color(0xFF1A1A2E),
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
                                 Text(
@@ -447,7 +448,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 15),
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF1A1A2E),
+                            color: AppColors.textPrimary,
                           ),
                         ),
                       ],
@@ -478,7 +479,7 @@ class _SeatReservationScreenState extends State<SeatReservationScreen> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFCC00),
+                      backgroundColor: AppColors.primaryLight,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),

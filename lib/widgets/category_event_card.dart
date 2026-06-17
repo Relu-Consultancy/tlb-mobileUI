@@ -122,7 +122,7 @@ class CategoryEventCard extends StatelessWidget {
                   const SizedBox(height: 3),
                   Row(
                     children: [
-                      const Icon(Icons.star_rounded, size: 13, color: Color(0xFFFFB902)),
+                      const Icon(Icons.star_rounded, size: 13, color: AppColors.starAmber),
                       const SizedBox(width: 3),
                       Expanded(
                         child: Text(

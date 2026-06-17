@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
-import '../core/app_snackbar.dart';
+import '../widgets/error_retry_view.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../models/event_model.dart';
@@ -39,6 +39,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
   static const int _pageSize = 20;
   List<ApiClass> _apiClasses = [];
   bool _isLoadingClasses = true;
+  String? _classesError;
   bool _isLoadingMore = false;
   bool _hasMore = false;
   int _currentPage = 1;
@@ -77,7 +78,10 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
     try {
       final next = await ClassesListingService.fetchClasses(
         category: _apiCategoryName,
-        subcategory: _selectedFilterIndex == 0 ? null : _filters[_selectedFilterIndex],
+        subcategory: _selectedFilterIndex <= 0 ||
+                _selectedFilterIndex >= _filters.length
+            ? null
+            : _filters[_selectedFilterIndex],
         city: LocationState().selectedCity.value,
         page: _currentPage + 1,
         pageSize: _pageSize,
@@ -98,6 +102,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
   Future<void> _fetchClasses({String? subcategory}) async {
     setState(() {
       _isLoadingClasses = true;
+      _classesError = null;
       _currentPage = 1;
       _hasMore = false;
     });
@@ -120,9 +125,9 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
       final msg = e.toString().replaceFirst('Exception: ', '');
       setState(() {
         _apiClasses = [];
+        _classesError = msg;
         _isLoadingClasses = false;
       });
-      AppSnackBar.error(context, 'Classes: $msg');
     }
   }
 
@@ -379,7 +384,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: Container(height: 1.5, color: const Color(0xFFFFB902)),
+                            child: Container(height: 1.5, color: AppColors.starAmber),
                           ),
                           const SizedBox(width: 10),
                           Text(
@@ -392,7 +397,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Container(height: 1.5, color: const Color(0xFFFFB902)),
+                            child: Container(height: 1.5, color: AppColors.starAmber),
                           ),
                         ],
                       ),
@@ -479,6 +484,19 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                     const SliverFillRemaining(
                       hasScrollBody: false,
                       child: AppLoader(),
+                    )
+                  else if (_classesError != null)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: ErrorRetryView(
+                        message: _classesError!,
+                        onRetry: () => _fetchClasses(
+                          subcategory: _selectedFilterIndex <= 0 ||
+                                  _selectedFilterIndex >= _filters.length
+                              ? null
+                              : _filters[_selectedFilterIndex],
+                        ),
+                      ),
                     )
                   else if (_filteredClasses.isEmpty)
                     SliverFillRemaining(

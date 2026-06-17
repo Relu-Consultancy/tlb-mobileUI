@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../core/app_snackbar.dart';
@@ -115,13 +116,13 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: AppColors.lightGray,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF2F2F7),
+        backgroundColor: AppColors.lightGray,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -129,7 +130,7 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -172,14 +173,14 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.link, color: Color(0xFF2563EB), size: 18),
+                    const Icon(Icons.link, color: AppColors.accentBlue, size: 18),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         widget.initialBookingLabel!,
                         style: GoogleFonts.poppins(
                           fontSize: 13,
-                          color: const Color(0xFF1A1A2E),
+                          color: AppColors.textPrimary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -232,10 +233,10 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
               child: ElevatedButton(
                 onPressed: _submitting ? null : _submit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2563EB),
+                  backgroundColor: AppColors.accentBlue,
                   foregroundColor: Colors.white,
                   disabledBackgroundColor:
-                      const Color(0xFF2563EB).withOpacity(0.5),
+                      AppColors.accentBlue.withOpacity(0.5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -281,7 +282,7 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
         style: GoogleFonts.poppins(
           fontSize: 13,
           fontWeight: FontWeight.w500,
-          color: const Color(0xFF1A1A2E),
+          color: AppColors.textPrimary,
         ),
       );
 
@@ -305,7 +306,7 @@ class _NewTicketScreenState extends State<NewTicketScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+          borderSide: const BorderSide(color: AppColors.accentBlue, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

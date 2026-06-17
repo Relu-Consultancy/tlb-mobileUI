@@ -128,7 +128,12 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         ),
                         child: Column(
                           children: [
-                            const HomeHeader(),
+                            const HomeHeader(
+                              // Hide the cloud ShaderMask's 1px bottom fringe
+                              // (the faint seam line) by painting this screen's
+                              // flat background tone over it — same Home fix.
+                              seamCoverColor: Color(0xFFFFF5E0),
+                            ),
                             const SizedBox(height: 16),
                             // ── Education Banner — full-bleed (edge to edge). ──
                             RepaintBoundary(
@@ -304,7 +309,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                         style: GoogleFonts.poppins(
                                           fontSize: Responsive.sp(context, 10),
                                           fontWeight: FontWeight.w600,
-                                          color: const Color(0xFF1A1A2E),
+                                          color: AppColors.textPrimary,
                                           height: 1.1,
                                         ),
                                       ),
@@ -383,7 +388,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                           effect: const WormEffect(
                             dotHeight: 7,
                             dotWidth: 7,
-                            activeDotColor: Color(0xFF1A1A2E),
+                            activeDotColor: AppColors.textPrimary,
                             dotColor: Color(0xFFE0E0E0),
                             spacing: 5,
                           ),

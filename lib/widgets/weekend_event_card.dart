@@ -139,7 +139,7 @@ class _BookNowButton extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: Material(
-        color: const Color(0xFFFFCC00),
+        color: AppColors.primaryLight,
         borderRadius: BorderRadius.circular(24),
         child: InkWell(
           borderRadius: BorderRadius.circular(24),
@@ -154,7 +154,7 @@ class _BookNowButton extends StatelessWidget {
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 13),
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF1A1A2E),
+                color: AppColors.textPrimary,
               ),
             ),
           ),

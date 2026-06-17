@@ -163,7 +163,7 @@ class HolidaySpecialCard extends StatelessWidget {
                         ),
                       ),
                       Material(
-                        color: const Color(0xFFFFCC00),
+                        color: AppColors.primaryLight,
                         borderRadius: BorderRadius.circular(22),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(22),
@@ -186,7 +186,7 @@ class HolidaySpecialCard extends StatelessWidget {
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 12),
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF1A1A2E),
+                                color: AppColors.textPrimary,
                               ),
                             ),
                           ),

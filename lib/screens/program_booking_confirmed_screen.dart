@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
@@ -132,7 +133,7 @@ class _ProgramBookingConfirmedScreenState
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 24),
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF1A1A2E),
+                                color: AppColors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -249,7 +250,7 @@ class _ProgramBookingConfirmedScreenState
                                       Icons.confirmation_number_outlined,
                                       'Booking Ref',
                                       widget.bookingReference,
-                                      valueColor: const Color(0xFF3B82F6),
+                                      valueColor: AppColors.blue,
                                       mono: true,
                                     ),
                                   ],
@@ -276,7 +277,7 @@ class _ProgramBookingConfirmedScreenState
                           child: Row(
                             children: [
                               const Icon(Icons.info_outline_rounded,
-                                  color: Color(0xFF3B82F6), size: 20),
+                                  color: AppColors.blue, size: 20),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
@@ -326,8 +327,8 @@ class _ProgramBookingConfirmedScreenState
                           (route) => route.isFirst,
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFCC00),
-                          foregroundColor: const Color(0xFF1A1A2E),
+                          backgroundColor: AppColors.primaryLight,
+                          foregroundColor: AppColors.textPrimary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(28),
                           ),
@@ -354,7 +355,7 @@ class _ProgramBookingConfirmedScreenState
                           (_) => false,
                         ),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF1A1A2E),
+                          foregroundColor: AppColors.textPrimary,
                           side: const BorderSide(
                               color: Color(0xFFDDDDDD), width: 1.5),
                           shape: RoundedRectangleBorder(
@@ -415,7 +416,7 @@ class _ProgramBookingConfirmedScreenState
                         fontFamily: 'monospace',
                         fontSize: Responsive.sp(context, 13),
                         fontWeight: FontWeight.w500,
-                        color: valueColor ?? const Color(0xFF1A1A2E),
+                        color: valueColor ?? AppColors.textPrimary,
                         letterSpacing: 0.5,
                       ),
                     )
@@ -424,7 +425,7 @@ class _ProgramBookingConfirmedScreenState
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 13),
                         fontWeight: FontWeight.w500,
-                        color: valueColor ?? const Color(0xFF1A1A2E),
+                        color: valueColor ?? AppColors.textPrimary,
                       ),
                     ),
             ],
@@ -450,17 +451,17 @@ class _DownloadTicketButton extends StatelessWidget {
           bookingId: bookingId,
         ),
         icon: const Icon(Icons.download_outlined,
-            size: 18, color: Color(0xFF1A1A2E)),
+            size: 18, color: AppColors.textPrimary),
         label: Text(
           'Download Ticket',
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 15),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
         style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Color(0xFF1A1A2E), width: 1.2),
+          side: const BorderSide(color: AppColors.textPrimary, width: 1.2),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(28),
           ),

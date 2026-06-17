@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 
@@ -158,7 +159,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                             border: Border(
                               left: BorderSide(
                                 color: isActive
-                                    ? const Color(0xFFFFB902)
+                                    ? AppColors.starAmber
                                     : Colors.transparent,
                                 width: 3,
                               ),
@@ -196,7 +197,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 16),
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF1A1A2E),
+                                color: AppColors.textPrimary,
                               ),
                             ),
                             IconButton(
@@ -209,7 +210,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(Icons.close,
-                                    size: 16, color: Color(0xFF1A1A2E)),
+                                    size: 16, color: AppColors.textPrimary),
                               ),
                             ),
                           ],
@@ -251,7 +252,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 13),
                                     fontWeight: FontWeight.w500,
-                                    color: const Color(0xFF1A1A2E),
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
                               ),
@@ -261,8 +262,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                               child: ElevatedButton(
                                 onPressed: _apply,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFFFCC00),
-                                  foregroundColor: const Color(0xFF1A1A2E),
+                                  backgroundColor: AppColors.primaryLight,
+                                  foregroundColor: AppColors.textPrimary,
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(24),
@@ -357,7 +358,7 @@ class _SortByPanel extends StatelessWidget {
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isSelected
-                          ? const Color(0xFFFFB902)
+                          ? AppColors.starAmber
                           : Colors.grey.shade400,
                       width: 2,
                     ),
@@ -369,7 +370,7 @@ class _SortByPanel extends StatelessWidget {
                             height: 10,
                             decoration: const BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Color(0xFFFFB902),
+                              color: AppColors.starAmber,
                             ),
                           ),
                         )
@@ -383,7 +384,7 @@ class _SortByPanel extends StatelessWidget {
                       fontSize: Responsive.sp(context, 13),
                       fontWeight:
                           isSelected ? FontWeight.w500 : FontWeight.w400,
-                      color: const Color(0xFF1A1A2E),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -439,12 +440,12 @@ class _CheckboxPanel extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: isChecked
-                          ? const Color(0xFFFFB902)
+                          ? AppColors.starAmber
                           : Colors.grey.shade400,
                       width: 1.5,
                     ),
                     color: isChecked
-                        ? const Color(0xFFFFB902)
+                        ? AppColors.starAmber
                         : Colors.transparent,
                   ),
                   child: isChecked
@@ -459,7 +460,7 @@ class _CheckboxPanel extends StatelessWidget {
                       fontSize: Responsive.sp(context, 13),
                       fontWeight:
                           isChecked ? FontWeight.w500 : FontWeight.w400,
-                      color: const Color(0xFF1A1A2E),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),

@@ -302,7 +302,7 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
                           Expanded(
                               child: Container(
                                   height: 1.5,
-                                  color: const Color(0xFFFFB902))),
+                                  color: AppColors.starAmber)),
                           const SizedBox(width: 10),
                           Text(
                             'All $_formatLabel Events',
@@ -316,7 +316,7 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
                           Expanded(
                               child: Container(
                                   height: 1.5,
-                                  color: const Color(0xFFFFB902))),
+                                  color: AppColors.starAmber)),
                         ],
                       ),
                     ),

@@ -114,7 +114,12 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         ),
                         child: Column(
                           children: [
-                            const HomeHeader(),
+                            const HomeHeader(
+                              // Hide the cloud ShaderMask's 1px bottom fringe
+                              // (the faint seam line) by painting this screen's
+                              // flat background tone over it — same Home fix.
+                              seamCoverColor: Color(0xFFFFF5E0),
+                            ),
                             const SizedBox(height: 16),
                             // ── Programs Banner — full-bleed (edge to edge). ──
                             RepaintBoundary(
@@ -602,7 +607,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       Expanded(child: _iconRow(Icons.location_on_outlined, event.venue)),
                       const SizedBox(width: 8),
                       Material(
-                        color: const Color(0xFFFFCC00),
+                        color: AppColors.primaryLight,
                         borderRadius: BorderRadius.circular(22),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(22),
@@ -617,7 +622,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 12.5),
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF1A1A2E),
+                                color: AppColors.textPrimary,
                               ),
                             ),
                           ),
@@ -787,7 +792,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2563EB),
+                      color: AppColors.accentBlue,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -888,7 +893,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         Expanded(
           child: Text(
             text,
-            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: const Color(0xFF333333)),
+            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: AppColors.textSecondary),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

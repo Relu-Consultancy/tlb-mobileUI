@@ -224,7 +224,7 @@ class ClassNearbyCard extends StatelessWidget {
                   // Join Now button
                   if (buttonLabel != null)
                     Material(
-                      color: const Color(0xFFFFCC00),
+                      color: AppColors.primaryLight,
                       borderRadius: BorderRadius.circular(24),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(24),
@@ -246,7 +246,7 @@ class ClassNearbyCard extends StatelessWidget {
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 13),
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF1A1A2E),
+                              color: AppColors.textPrimary,
                             ),
                           ),
                         ),

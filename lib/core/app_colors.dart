@@ -26,6 +26,7 @@ class AppColors {
   // Accent
   static const Color blue = Color(0xFF3B82F6);
   static const Color seeAllBlue = Color(0xFF0068E7);       // "See All" links app-wide
+  static const Color accentBlue = Color(0xFF2563EB);       // ticket / notification / help accent
 
   // Category colors
   static const Color categoryOrange = Color(0xFFFFA726);

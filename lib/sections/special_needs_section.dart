@@ -1,4 +1,5 @@
 import '../core/responsive.dart';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
 import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
@@ -8,6 +9,7 @@ import '../providers/home_feed_state.dart';
 import '../data/dummy_data.dart';
 import '../core/listing_navigation.dart';
 import '../widgets/shining_star_badge.dart';
+import '../widgets/animated_gradient_tag.dart';
 
 class SpecialNeedsSection extends StatelessWidget {
   const SpecialNeedsSection({super.key});
@@ -21,6 +23,7 @@ class SpecialNeedsSection extends StatelessWidget {
         // final items = HomeFeedState.section('where_every_star_shines');
         // if (items.isEmpty) return const SizedBox.shrink();
         final items = DummyData.specialNeeds;
+        if (items.isEmpty) return const SizedBox.shrink();
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -28,7 +31,7 @@ class SpecialNeedsSection extends StatelessWidget {
           title: 'Where Every Star Shines',
           topPadding: 30, // 30px gap from previous section's cards
           fontSize: 17,
-          textColor: Color(0xFF1A1A2E), // dark navy
+          textColor: AppColors.textPrimary, // dark navy
         ),
         SizedBox(
           height: Responsive.h(context, 215, min: 195),
@@ -95,31 +98,24 @@ class SpecialNeedsSection extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // "Sensory Friendly" pink pill (left-aligned)
+                              // "Sensory Friendly" pill — animated pink→purple
+                              // gradient that slides continuously (medium pace).
                               if (event.tag != null)
-                                Container(
+                                AnimatedGradientTag(
+                                  text: event.tag!,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                  softWrap: false,
+                                  showChrome: false,
+                                  period: const Duration(seconds: 4),
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 10, vertical: 3),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        Color(0xFFF53C9B), // pink
-                                        Color(0xFFB13CF5), // purple
-                                      ],
-                                    ),
-                                  ),
-                                  child: Text(
-                                    event.tag!,
-                                    maxLines: 1,
-                                    softWrap: false,
-                                    overflow: TextOverflow.visible,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 10),
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.white,
-                                    ),
-                                  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  gradientColors: const [
+                                    Color(0xFFF53C9B), // pink
+                                    Color(0xFFB13CF5), // purple
+                                    Color(0xFFF53C9B), // pink (seamless loop)
+                                  ],
                                 ),
                               const SizedBox(height: 8),
                               // Title
@@ -128,7 +124,7 @@ class SpecialNeedsSection extends StatelessWidget {
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 17),
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF1A1A2E),
+                                  color: AppColors.textPrimary,
                                 ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -144,7 +140,7 @@ class SpecialNeedsSection extends StatelessWidget {
                                     event.reviewCount ?? '4.5k reviews',
                                     style: GoogleFonts.poppins(
                                       fontSize: Responsive.sp(context, 13),
-                                      color: Color(0xFF333333),
+                                      color: AppColors.textSecondary,
                                     ),
                                   ),
                                 ],
@@ -154,14 +150,14 @@ class SpecialNeedsSection extends StatelessWidget {
                               Row(
                                 children: [
                                   const Icon(Icons.location_on_outlined,
-                                      size: 14, color: Color(0xFF333333)),
+                                      size: 14, color: AppColors.textSecondary),
                                   const SizedBox(width: 4),
                                   Expanded(
                                     child: Text(
                                       event.venue,
                                       style: GoogleFonts.poppins(
                                         fontSize: Responsive.sp(context, 13),
-                                        color: Color(0xFF333333),
+                                        color: AppColors.textSecondary,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -181,8 +177,8 @@ class SpecialNeedsSection extends StatelessWidget {
                                 openListingDetail(context, event);
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFFFCC00),
-                                foregroundColor: const Color(0xFF1A1A2E),
+                                backgroundColor: AppColors.primaryLight,
+                                foregroundColor: AppColors.textPrimary,
                                 elevation: 0,
                                 padding: EdgeInsets.zero,
                                 shape: RoundedRectangleBorder(

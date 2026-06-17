@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -162,13 +163,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: AppColors.lightGray,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF2F2F7),
+        backgroundColor: AppColors.lightGray,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -176,7 +177,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
         actions: [
@@ -188,7 +189,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 12.5),
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF2563EB),
+                  color: AppColors.accentBlue,
                 ),
               ),
             ),
@@ -202,7 +203,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     if (_loading) {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.accentBlue),
         ),
       );
     }
@@ -260,7 +261,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 18),
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF1A1A2E),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -304,16 +305,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
             const SizedBox(height: 18),
             ElevatedButton.icon(
               onPressed: _load,
-              icon: const Icon(Icons.refresh, size: 18, color: Color(0xFF1A1A2E)),
+              icon: const Icon(Icons.refresh, size: 18, color: AppColors.textPrimary),
               label: Text(
                 'Retry',
                 style: GoogleFonts.poppins(
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF1A1A2E),
+                  color: AppColors.textPrimary,
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFCC00),
+                backgroundColor: AppColors.primaryLight,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
                 shape: RoundedRectangleBorder(
@@ -352,7 +353,7 @@ class _NotificationCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: unread
-                  ? const Color(0xFF2563EB).withOpacity(0.18)
+                  ? AppColors.accentBlue.withOpacity(0.18)
                   : Colors.black.withOpacity(0.06),
               width: 0.8,
             ),
@@ -383,7 +384,7 @@ class _NotificationCard extends StatelessWidget {
                               fontSize: Responsive.sp(context, 13.5),
                               fontWeight:
                                   unread ? FontWeight.w600 : FontWeight.w500,
-                              color: const Color(0xFF1A1A2E),
+                              color: AppColors.textPrimary,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -396,7 +397,7 @@ class _NotificationCard extends StatelessWidget {
                             height: 8,
                             margin: const EdgeInsets.only(top: 4),
                             decoration: const BoxDecoration(
-                              color: Color(0xFF2563EB),
+                              color: AppColors.accentBlue,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -472,7 +473,7 @@ class _NotificationCard extends StatelessWidget {
       case 'broadcast':
         return const Color(0xFF7C3AED);
       default:
-        return const Color(0xFF2563EB);
+        return AppColors.accentBlue;
     }
   }
 

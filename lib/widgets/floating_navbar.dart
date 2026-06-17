@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -94,7 +95,7 @@ class FloatingNavbar extends StatelessWidget {
                     curve: Curves.easeOutCubic,
                     padding: EdgeInsets.symmetric(horizontal: isActive ? 16 : 14, vertical: 9),
                     decoration: BoxDecoration(
-                      color: isActive ? const Color(0xFFFFCC00) : Colors.transparent,
+                      color: isActive ? AppColors.primaryLight : Colors.transparent,
                       border: isActive ? Border.all(color: Colors.white, width: 2) : null,
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: null,
@@ -144,7 +145,7 @@ class FloatingNavbar extends StatelessWidget {
                 title: config.title,
                 description: config.description,
                 overlayOpacity: 0.78,
-                tooltipBackgroundColor: const Color(0xFF1A1A2E),
+                tooltipBackgroundColor: AppColors.textPrimary,
                 textColor: Colors.white,
                 scaleAnimationDuration: const Duration(milliseconds: 350),
                 scaleAnimationCurve: Curves.easeInOut,

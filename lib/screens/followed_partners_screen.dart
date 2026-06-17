@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_snackbar.dart';
@@ -63,7 +64,7 @@ class _FollowedPartnersScreenState extends State<FollowedPartnersScreen> {
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w600,
             fontSize: Responsive.sp(context, 16),
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
         content: Text(
@@ -84,8 +85,8 @@ class _FollowedPartnersScreenState extends State<FollowedPartnersScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFFCC00),
-              foregroundColor: const Color(0xFF1A1A2E),
+              backgroundColor: AppColors.primaryLight,
+              foregroundColor: AppColors.textPrimary,
               elevation: 0,
               shape:
                   RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -155,7 +156,7 @@ class _FollowedPartnersScreenState extends State<FollowedPartnersScreen> {
           elevation: 0,
           scrolledUnderElevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E), size: 22),
+            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 22),
             onPressed: () => Navigator.pop(context),
           ),
           centerTitle: true,
@@ -164,7 +165,7 @@ class _FollowedPartnersScreenState extends State<FollowedPartnersScreen> {
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 17),
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF1A1A2E),
+              color: AppColors.textPrimary,
             ),
           ),
         ),
@@ -197,8 +198,8 @@ class _FollowedPartnersScreenState extends State<FollowedPartnersScreen> {
               ElevatedButton(
                 onPressed: _fetch,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFCC00),
-                  foregroundColor: const Color(0xFF1A1A2E),
+                  backgroundColor: AppColors.primaryLight,
+                  foregroundColor: AppColors.textPrimary,
                   elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                   padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
@@ -238,7 +239,7 @@ class _FollowedPartnersScreenState extends State<FollowedPartnersScreen> {
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 17),
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF1A1A2E),
+                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),

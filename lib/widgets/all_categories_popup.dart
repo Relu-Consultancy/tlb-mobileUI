@@ -155,7 +155,8 @@ class AllCategoriesPopup extends StatelessWidget {
               ),
               itemBuilder: (context, index) {
                 final category = categories[index];
-                final gradientColors = category['gradient'] as List<Color>;
+                final gradientColors = (category['gradient'] as List<Color>?) ??
+                    const [Color(0xFFEFEFEF), Color(0xFFDFDFDF)];
 
                 return GestureDetector(
                   onTap: () {

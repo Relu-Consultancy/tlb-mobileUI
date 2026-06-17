@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -389,10 +390,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     child: ElevatedButton(
                       onPressed: _loading ? null : _onVerify,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFCC00),
+                        backgroundColor: AppColors.primaryLight,
                         foregroundColor: const Color(0xFF1A1A1A),
                         disabledBackgroundColor:
-                            const Color(0xFFFFCC00).withOpacity(0.7),
+                            AppColors.primaryLight.withOpacity(0.7),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
@@ -402,7 +403,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           ? const AppLoaderInline(
                               dotSize: 7,
                               spacing: 4,
-                              color: Color(0xFF1A1A2E),
+                              color: AppColors.textPrimary,
                             )
                           : Text(
                               'Verify & Continue',

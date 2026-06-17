@@ -1,4 +1,5 @@
 import 'dart:math';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
@@ -129,9 +130,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
     final confirmed = await _showCancelDialog();
     if (confirmed == null || !mounted) return;
 
+    final token = AuthState.accessToken;
+    if (token == null) {
+      AppSnackBar.error(
+          context, 'Your session has expired. Please log in again.');
+      return;
+    }
     setState(() => _cancelling = true);
     try {
-      final token = AuthState.accessToken!;
       final updated = await BookingService.cancelBooking(
         token: token,
         bookingId: _booking.id,
@@ -347,7 +353,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 24),
                                   fontWeight: FontWeight.w500,
-                                  color: const Color(0xFF1A1A2E),
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 6),
@@ -386,14 +392,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                     color: _booking.status == 'cancelled'
                                         ? const Color(0xFFEF4444)
                                             .withOpacity(0.15)
-                                        : const Color(0xFFFFCC00),
+                                        : AppColors.primaryLight,
                                     borderRadius: const BorderRadius.vertical(
                                         top: Radius.circular(20)),
                                   ),
                                   child: Row(
                                     children: [
                                       const Icon(Icons.place_rounded,
-                                          color: Color(0xFF1A1A2E), size: 20),
+                                          color: AppColors.textPrimary, size: 20),
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
@@ -402,7 +408,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                             fontSize:
                                                 Responsive.sp(context, 13),
                                             fontWeight: FontWeight.w500,
-                                            color: const Color(0xFF1A1A2E),
+                                            color: AppColors.textPrimary,
                                           ),
                                         ),
                                       ),
@@ -446,7 +452,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                         Icons.confirmation_number_outlined,
                                         'Booking Ref',
                                         _booking.bookingReference,
-                                        valueColor: const Color(0xFF3B82F6),
+                                        valueColor: AppColors.blue,
                                         mono: true,
                                       ),
                                       _venueDivider(),
@@ -519,7 +525,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                             child: Row(
                               children: [
                                 const Icon(Icons.info_outline_rounded,
-                                    color: Color(0xFF3B82F6), size: 20),
+                                    color: AppColors.blue, size: 20),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
@@ -573,7 +579,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                   child: const Icon(
                     Icons.arrow_back_ios_new_rounded,
                     size: 16,
-                    color: Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -657,7 +663,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 24),
                                   fontWeight: FontWeight.w500,
-                                  color: const Color(0xFF1A1A2E),
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 6),
@@ -762,7 +768,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                         Icons.confirmation_number_outlined,
                                         'Booking Ref',
                                         _booking.bookingReference,
-                                        valueColor: const Color(0xFF3B82F6),
+                                        valueColor: AppColors.blue,
                                         mono: true,
                                       ),
                                       _venueDivider(),
@@ -834,7 +840,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                             child: Row(
                               children: [
                                 const Icon(Icons.info_outline_rounded,
-                                    color: Color(0xFF3B82F6), size: 20),
+                                    color: AppColors.blue, size: 20),
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
@@ -887,7 +893,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                   child: const Icon(
                     Icons.arrow_back_ios_new_rounded,
                     size: 16,
-                    color: Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -921,7 +927,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
           child: const Icon(
             Icons.arrow_back_ios_new_rounded,
             size: 16,
-            color: Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -971,7 +977,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                         fontFamily: 'monospace',
                         fontSize: Responsive.sp(context, 13),
                         fontWeight: FontWeight.w500,
-                        color: valueColor ?? const Color(0xFF1A1A2E),
+                        color: valueColor ?? AppColors.textPrimary,
                         letterSpacing: 0.5,
                       ),
                     )
@@ -980,7 +986,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 13),
                         fontWeight: FontWeight.w500,
-                        color: valueColor ?? const Color(0xFF1A1A2E),
+                        color: valueColor ?? AppColors.textPrimary,
                       ),
                     ),
             ],
@@ -1058,7 +1064,7 @@ class _HeaderSection extends StatelessWidget {
       case 'hold':
         return const Color(0xFFF59E0B);
       case 'awaiting_payment':
-        return const Color(0xFF3B82F6);
+        return AppColors.blue;
       case 'payment_failed':
         return const Color(0xFFEF4444);
       case 'cancelled':
@@ -1154,7 +1160,7 @@ class _TicketCard extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 13),
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF1A1A2E),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -1235,7 +1241,7 @@ class _BookingTypeBanner extends StatelessWidget {
       case 'class': return const Color(0xFF22C55E);
       case 'program': return const Color(0xFFF59E0B);
       case 'venue': return const Color(0xFFEF4444);
-      default: return const Color(0xFF3B82F6);
+      default: return AppColors.blue;
     }
   }
 
@@ -1273,7 +1279,7 @@ class _TicketContent extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 16),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -1369,7 +1375,7 @@ class _Field extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 12),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
@@ -1513,7 +1519,7 @@ class _ActionBtn extends StatelessWidget {
                 size: 18,
                 color: disabled
                     ? const Color(0xFF9CA3AF)
-                    : const Color(0xFF1A1A2E)),
+                    : AppColors.textPrimary),
             const SizedBox(width: 8),
             Text(
               label,
@@ -1522,7 +1528,7 @@ class _ActionBtn extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 color: disabled
                     ? const Color(0xFF9CA3AF)
-                    : const Color(0xFF1A1A2E),
+                    : AppColors.textPrimary,
               ),
             ),
           ],

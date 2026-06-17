@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../core/app_colors.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -58,6 +59,13 @@ class BannerCarousel extends StatefulWidget {
   /// neighbouring banner's colour as the carousel scrolls.
   final bool tintedBackground;
 
+  /// Master switch for the "spotlight focus" treatment: dim + desaturated side
+  /// cards, a deeper centre-card shadow, a colour-matched glow behind the
+  /// active card, a one-time swipe nudge, an idle breathing pulse,
+  /// touch-paused auto-advance, and a larger accent page indicator. Everything
+  /// is gated by this single flag, so it can be reverted in one line.
+  final bool spotlightEnhancements;
+
   const BannerCarousel({
     super.key,
     required this.events,
@@ -75,13 +83,15 @@ class BannerCarousel extends StatefulWidget {
     this.animateImages = false,
     this.infiniteScroll = false,
     this.tintedBackground = false,
+    this.spotlightEnhancements = false,
   });
 
   @override
   State<BannerCarousel> createState() => _BannerCarouselState();
 }
 
-class _BannerCarouselState extends State<BannerCarousel> {
+class _BannerCarouselState extends State<BannerCarousel>
+    with TickerProviderStateMixin {
   int _currentIndex = 0;
   Timer? _autoSlideTimer;
   late final PageController _pageController;
@@ -99,6 +109,11 @@ class _BannerCarouselState extends State<BannerCarousel> {
   // Neutral fallback band used until the colours have been sampled.
   static const Color _defaultBand = Color(0xFFC9B6EE);
 
+  // ── Spotlight-enhancement extras (gated by spotlightEnhancements) ──────────
+  AnimationController? _breatheController; // idle "breathing" pulse
+  // The first-view swipe nudge plays only once per app session.
+  static bool _nudgeShownThisSession = false;
+
   @override
   void initState() {
     super.initState();
@@ -108,7 +123,107 @@ class _BannerCarouselState extends State<BannerCarousel> {
       initialPage: _currentIndex,
     );
     _startAutoSlide();
-    if (widget.tintedBackground) _loadBandColors();
+    if (widget.tintedBackground || widget.spotlightEnhancements) {
+      _loadBandColors();
+    }
+    if (widget.spotlightEnhancements) {
+      _breatheController = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 2600),
+      )..repeat(reverse: true);
+      if (!_nudgeShownThisSession) {
+        _nudgeShownThisSession = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) => _playNudge());
+      }
+    }
+  }
+
+  /// Listenable driving the peek transform — merges the page controller with
+  /// the breathing controller (when enhancements are on) so the centre card
+  /// can pulse subtly while idle.
+  Listenable get _peekAnim => _breatheController != null
+      ? Listenable.merge([_pageController, _breatheController!])
+      : _pageController;
+
+  /// One-time, gentle "this is swipeable" nudge: the carousel eases a little to
+  /// the right then settles back, hinting the user can swipe for more.
+  Future<void> _playNudge() async {
+    await Future<void>.delayed(const Duration(milliseconds: 750));
+    if (!mounted || _userInteracting || !_pageController.hasClients) return;
+    final pos = _pageController.position;
+    if (!pos.haveDimensions) return;
+    final base = pos.pixels;
+    try {
+      await _pageController.animateTo(base + 34,
+          duration: const Duration(milliseconds: 260), curve: Curves.easeOut);
+      if (!mounted || _userInteracting) return;
+      await _pageController.animateTo(base,
+          duration: const Duration(milliseconds: 540),
+          curve: Curves.easeOutBack);
+    } catch (_) {
+      // Ignore — controller detached mid-nudge.
+    }
+  }
+
+  /// A deeper, more saturated version of the current backdrop accent — used for
+  /// the glow halo and the active page dot.
+  Color _accentDeep() {
+    final hsl = HSLColor.fromColor(_currentBandColor());
+    return hsl
+        .withSaturation((hsl.saturation + 0.18).clamp(0.4, 1.0))
+        .withLightness(0.52)
+        .toColor();
+  }
+
+  /// Combined desaturate + dim colour filter for the peeking side cards — one
+  /// `saveLayer` instead of stacking Opacity + ColorFiltered.
+  ColorFilter _dimDesat(double sat, double opacity) {
+    const lr = 0.2126, lg = 0.7152, lb = 0.0722;
+    final inv = 1 - sat;
+    return ColorFilter.matrix(<double>[
+      lr * inv + sat, lg * inv, lb * inv, 0, 0, //
+      lr * inv, lg * inv + sat, lb * inv, 0, 0, //
+      lr * inv, lg * inv, lb * inv + sat, 0, 0, //
+      0, 0, 0, opacity, 0, //
+    ]);
+  }
+
+  /// Larger page dots with an accent-coloured active dot + an "n / total"
+  /// counter (used only for the spotlight's external indicator row).
+  Widget _buildEnhancedIndicator(BuildContext context) {
+    final active = widget.infiniteScroll
+        ? _currentIndex % widget.events.length
+        : _currentIndex;
+    return AnimatedBuilder(
+      animation: _pageController,
+      builder: (context, _) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedSmoothIndicator(
+              activeIndex: active,
+              count: widget.events.length,
+              effect: WormEffect(
+                dotHeight: 9,
+                dotWidth: 9,
+                activeDotColor: _accentDeep(),
+                dotColor: const Color(0xFFD9D9D9),
+                spacing: 7,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              '${active + 1} / ${widget.events.length}',
+              style: GoogleFonts.poppins(
+                fontSize: Responsive.sp(context, 11),
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // Sample each banner's colour once and convert it into a soft (but slightly
@@ -147,6 +262,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
   @override
   void dispose() {
     _autoSlideTimer?.cancel();
+    _breatheController?.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -191,23 +307,24 @@ class _BannerCarouselState extends State<BannerCarousel> {
         : (widget.fixedCardWidth ?? (screenWidth * 0.92 - 12));
     final radius = widget.cornerRadius ?? (widget.overlayStyle ? 28.0 : 14.0);
 
-    final indicator = AnimatedSmoothIndicator(
-      activeIndex: widget.infiniteScroll
-          ? _currentIndex % widget.events.length
-          : _currentIndex,
-      count: widget.events.length,
-      effect: WormEffect(
-        dotHeight: 8,
-        dotWidth: 8,
-        activeDotColor: widget.overlayDots
-            ? Colors.white
-            : const Color(0xFFFFB902),
-        dotColor: widget.overlayDots
-            ? Colors.white.withOpacity(0.45)
-            : const Color(0xFFE0E0E0),
-        spacing: 6,
-      ),
-    );
+    final indicator = (widget.spotlightEnhancements && !widget.overlayDots)
+        ? _buildEnhancedIndicator(context)
+        : AnimatedSmoothIndicator(
+            activeIndex: widget.infiniteScroll
+                ? _currentIndex % widget.events.length
+                : _currentIndex,
+            count: widget.events.length,
+            effect: WormEffect(
+              dotHeight: 8,
+              dotWidth: 8,
+              activeDotColor:
+                  widget.overlayDots ? Colors.white : AppColors.starAmber,
+              dotColor: widget.overlayDots
+                  ? Colors.white.withOpacity(0.45)
+                  : const Color(0xFFE0E0E0),
+              spacing: 6,
+            ),
+          );
 
     // ── Static cross-fade mode — banner stays put, image fades/zooms in ──
     if (widget.staticFade) {
@@ -276,12 +393,42 @@ class _BannerCarouselState extends State<BannerCarousel> {
           child: Stack(
             alignment: Alignment.bottomCenter,
             children: [
+              // Soft colour-matched glow halo behind the active card.
+              if (widget.spotlightEnhancements)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: AnimatedBuilder(
+                      animation: _pageController,
+                      builder: (context, _) {
+                        final glow = _accentDeep();
+                        return DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: RadialGradient(
+                              center: const Alignment(0, -0.05),
+                              radius: 0.62,
+                              colors: [
+                                glow.withOpacity(0.40),
+                                glow.withOpacity(0.0),
+                              ],
+                              stops: const [0.0, 1.0],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
               NotificationListener<ScrollNotification>(
                 onNotification: (n) {
                   if (n is ScrollStartNotification) {
                     _userInteracting = true;
+                    // Pause auto-advance the moment the user touches it so the
+                    // timer never fights the gesture.
+                    if (widget.spotlightEnhancements) _autoSlideTimer?.cancel();
                   } else if (n is ScrollEndNotification) {
                     _userInteracting = false;
+                    // Resume after a full fresh interval once they let go.
+                    if (widget.spotlightEnhancements) _startAutoSlide();
                   }
                   return false;
                 },
@@ -306,7 +453,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                     // shrinking toward the off-screen centre hides the peek).
                     if (widget.viewportFraction != null) {
                       return AnimatedBuilder(
-                        animation: _pageController,
+                        animation: _peekAnim,
                         builder: (context, child) {
                           double rel = 0.0; // <0 = left side, >0 = right side
                           if (_pageController.position.haveDimensions) {
@@ -315,17 +462,39 @@ class _BannerCarouselState extends State<BannerCarousel> {
                             rel = (i - page).clamp(-1.0, 1.0);
                           }
                           final diff = rel.abs();
-                          // Centre card = 1.0, full neighbour = 0.84.
-                          final scale = 1.0 - diff * 0.16;
+                          final enh = widget.spotlightEnhancements;
+                          // Centre card = 1.0; neighbours ~0.84 normally, ~0.80
+                          // (bigger contrast) when enhanced.
+                          double scale = 1.0 - diff * (enh ? 0.20 : 0.16);
+                          if (enh && _breatheController != null) {
+                            // Subtle idle breathing pulse, strongest on the
+                            // centred card, paused while the user is swiping.
+                            final centered = (1.0 - diff).clamp(0.0, 1.0);
+                            final pulse = _userInteracting
+                                ? 0.0
+                                : Curves.easeInOut
+                                    .transform(_breatheController!.value);
+                            scale *= 1.0 + centered * 0.012 * pulse;
+                          }
                           // Right neighbour anchors on its left edge, left
                           // neighbour on its right edge — keeps the peek width.
                           final alignment = rel >= 0
                               ? Alignment.centerLeft
                               : Alignment.centerRight;
+                          Widget c = child!;
+                          if (enh && diff > 0.001) {
+                            // Dim + desaturate side cards so the centre pops.
+                            final sat = (1.0 - diff * 0.6).clamp(0.0, 1.0);
+                            final op = (1.0 - diff * 0.45).clamp(0.0, 1.0);
+                            c = ColorFiltered(
+                              colorFilter: _dimDesat(sat, op),
+                              child: c,
+                            );
+                          }
                           return Transform.scale(
                             scale: scale,
                             alignment: alignment,
-                            child: child,
+                            child: c,
                           );
                         },
                         child: card,
@@ -376,6 +545,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
               'resources- tlb-ui/shadow_underneath.png',
               width: cardWidth,
               fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
             ),
             const SizedBox(height: 6),
           ] else
@@ -432,6 +602,18 @@ class _BannerCarouselState extends State<BannerCarousel> {
             border: widget.animatedAccentBorder
                 ? null
                 : Border.all(color: Colors.black.withOpacity(0.1), width: 0.5),
+            // Deeper, softer drop shadow that lifts the card off the backdrop
+            // (side cards inherit it but are dimmed, so only the centre pops).
+            boxShadow: widget.spotlightEnhancements
+                ? [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.22),
+                      blurRadius: 30,
+                      spreadRadius: -6,
+                      offset: const Offset(0, 16),
+                    ),
+                  ]
+                : null,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(radius),
@@ -581,7 +763,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                         ],
                         const SizedBox(height: 14),
                         Material(
-                          color: const Color(0xFFFFCC00),
+                          color: AppColors.primaryLight,
                           borderRadius: BorderRadius.circular(30),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(30),
@@ -600,7 +782,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 14),
                                   fontWeight: FontWeight.w500,
-                                  color: const Color(0xFF1A1A2E),
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                             ),

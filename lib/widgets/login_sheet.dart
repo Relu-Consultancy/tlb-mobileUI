@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../core/app_colors.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -453,9 +454,9 @@ class _PrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: loading ? null : onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFFCC00),
+          backgroundColor: AppColors.primaryLight,
           foregroundColor: const Color(0xFF1A1A1A),
-          disabledBackgroundColor: const Color(0xFFFFCC00).withOpacity(0.7),
+          disabledBackgroundColor: AppColors.primaryLight.withOpacity(0.7),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
@@ -463,7 +464,7 @@ class _PrimaryButton extends StatelessWidget {
         ),
         child: loading
             ? const AppLoaderInline(
-                dotSize: 7, spacing: 4, color: Color(0xFF1A1A2E))
+                dotSize: 7, spacing: 4, color: AppColors.textPrimary)
             : Text(
                 label,
                 style: GoogleFonts.poppins(
@@ -548,7 +549,7 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
   late final List<_WbParticle> _particles;
 
   static const _kColors = [
-    Color(0xFFFFCC00),
+    AppColors.primaryLight,
     Color(0xFFFF6B6B),
     Color(0xFF4ECDC4),
     Color(0xFF45B7D1),
@@ -641,8 +642,8 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
                   child: ElevatedButton(
                     onPressed: widget.onDone,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFCC00),
-                      foregroundColor: const Color(0xFF1A1A2E),
+                      backgroundColor: AppColors.primaryLight,
+                      foregroundColor: AppColors.textPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),

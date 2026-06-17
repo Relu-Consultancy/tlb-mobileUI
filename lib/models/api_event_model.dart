@@ -75,9 +75,9 @@ class ApiEventMedia {
   });
 
   factory ApiEventMedia.fromJson(Map<String, dynamic> json) => ApiEventMedia(
-        id: json['id'] as int,
-        mediaType: json['media_type'] as String,
-        fileUrl: json['file_url'] as String,
+        id: (json['id'] as num?)?.toInt() ?? 0,
+        mediaType: (json['media_type'] as String?) ?? '',
+        fileUrl: (json['file_url'] as String?) ?? '',
       );
 }
 
@@ -143,9 +143,9 @@ class ApiEvent {
         city: (json['city'] as String?) ?? '',
         priceType: (json['price_type'] as String?) ?? 'free',
         priceFrom: json['price_from']?.toString(),
-        startDatetime: json['start_datetime'] != null
-            ? DateTime.parse(json['start_datetime'] as String)
-            : DateTime.now(),
+        startDatetime:
+            DateTime.tryParse(json['start_datetime']?.toString() ?? '') ??
+                DateTime.now(),
         coverUrl: json['cover_url'] as String?,
       );
 }
@@ -213,11 +213,14 @@ class ApiEventDetail extends ApiEvent {
         city: json['city'] as String,
         priceType: json['price_type'] as String,
         priceFrom: json['price_from'] as String?,
-        startDatetime: DateTime.parse(json['start_datetime'] as String),
+        startDatetime:
+            DateTime.tryParse(json['start_datetime']?.toString() ?? '') ??
+                DateTime.now(),
         coverUrl: (json['media'] as List?)
             ?.whereType<Map<String, dynamic>>()
             .where((m) => m['media_type'] == 'cover')
-            .map((m) => m['file_url'] as String)
+            .map((m) => m['file_url'] as String?)
+            .whereType<String>()
             .firstOrNull,
         description: json['description'] as String?,
         area: json['area'] as String?,
@@ -225,12 +228,10 @@ class ApiEventDetail extends ApiEvent {
         mode: json['mode'] as String,
         capacity: json['capacity'] as int?,
         availableSeats: json['available_seats'] as int?,
-        registrationDeadline: json['registration_deadline'] != null
-            ? DateTime.parse(json['registration_deadline'] as String)
-            : null,
-        endDatetime: json['end_datetime'] != null
-            ? DateTime.parse(json['end_datetime'] as String)
-            : null,
+        registrationDeadline:
+            DateTime.tryParse(json['registration_deadline']?.toString() ?? ''),
+        endDatetime:
+            DateTime.tryParse(json['end_datetime']?.toString() ?? ''),
         tickets: (json['tickets'] as List? ?? [])
             .map((t) => ApiEventTicket.fromJson(t as Map<String, dynamic>))
             .toList(),

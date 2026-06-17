@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../core/app_config.dart';
@@ -177,15 +178,17 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
 
       if (widget.bookingType == 'event') {
         lineItems = widget.lineItems
-            .where((t) => (t['count'] as int) > 0 && t.containsKey('ticketId'))
+            .where((t) =>
+                ((t['count'] as num?)?.toInt() ?? 0) > 0 &&
+                t.containsKey('ticketId'))
             .map((t) => BookingLineItem(
-                  ticketId: t['ticketId'] as int,
-                  quantity: t['count'] as int,
+                  ticketId: (t['ticketId'] as num?)?.toInt() ?? 0,
+                  quantity: (t['count'] as num?)?.toInt() ?? 0,
                 ))
             .toList();
 
-        final totalQty =
-            widget.lineItems.fold<int>(0, (s, t) => s + (t['count'] as int));
+        final totalQty = widget.lineItems
+            .fold<int>(0, (s, t) => s + ((t['count'] as num?)?.toInt() ?? 0));
         final count = totalQty > 0 ? totalQty : 1;
         final att = widget.attendee;
         attendees = List.generate(
@@ -387,7 +390,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
             child: Text('OK',
                 style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A2E))),
+                    color: AppColors.textPrimary)),
           ),
         ],
       ),
@@ -406,7 +409,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -414,7 +417,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 16),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
         centerTitle: true,
@@ -454,8 +457,8 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
             child: ElevatedButton(
               onPressed: _isInitiating ? null : _onProceedToPay,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFCC00),
-                foregroundColor: const Color(0xFF1A1A2E),
+                backgroundColor: AppColors.primaryLight,
+                foregroundColor: AppColors.textPrimary,
                 disabledBackgroundColor: Colors.grey.shade300,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(28),
@@ -507,7 +510,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 18),
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF1A1A2E),
+              color: AppColors.textPrimary,
               height: 1.3,
             ),
           ),
@@ -535,7 +538,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 16),
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF1A1A2E),
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -543,7 +546,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
             widget.ticketDetails,
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 14),
-              color: const Color(0xFF1A1A2E),
+              color: AppColors.textPrimary,
             ),
           ),
           // Attendee row (shown for program/class when data is present)
@@ -558,7 +561,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 16),
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF1A1A2E),
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -611,7 +614,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 16),
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF1A1A2E),
+                  color: AppColors.textPrimary,
                 ),
               ),
               Text(
@@ -649,7 +652,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 13.5),
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF1A1A2E),
+                  color: AppColors.textPrimary,
                 ),
               ),
             ),
@@ -706,7 +709,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 13.5),
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -717,7 +720,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
               child: ElevatedButton(
                 onPressed: _validatingCoupon ? null : _applyCoupon,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1A1A2E),
+                  backgroundColor: AppColors.textPrimary,
                   foregroundColor: Colors.white,
                   disabledBackgroundColor: Colors.grey.shade300,
                   elevation: 0,
@@ -798,7 +801,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 14),
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF1A1A2E),
+              color: AppColors.textPrimary,
             ),
           ),
         ),
@@ -814,7 +817,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
           label,
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 14),
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
         Text(
@@ -822,7 +825,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 14),
             fontWeight: FontWeight.w500,
-            color: valueColor ?? const Color(0xFF1A1A2E),
+            color: valueColor ?? AppColors.textPrimary,
           ),
         ),
       ],

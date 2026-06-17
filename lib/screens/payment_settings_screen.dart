@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -71,16 +72,16 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
           const SizedBox(height: 18),
           ElevatedButton.icon(
             onPressed: _fetchMethods,
-            icon: const Icon(Icons.refresh, size: 18, color: Color(0xFF1A1A2E)),
+            icon: const Icon(Icons.refresh, size: 18, color: AppColors.textPrimary),
             label: Text(
               'Retry',
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF1A1A2E),
+                color: AppColors.textPrimary,
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFFCC00),
+              backgroundColor: AppColors.primaryLight,
               elevation: 0,
               padding:
                   const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
@@ -136,7 +137,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: const Color(0xFFF2F2F7),
+              color: AppColors.lightGray,
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -152,7 +153,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 15),
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF1A1A2E),
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -176,7 +177,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
     String subtitle = '';
     IconData iconData = Icons.payment;
     Color iconBg = const Color(0xFFEDF4FF);
-    Color iconColor = const Color(0xFF2563EB);
+    Color iconColor = AppColors.accentBlue;
 
     if (isCard) {
       final network = method.cardNetwork ?? 'Card';
@@ -229,7 +230,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 14),
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 if (subtitle.isNotEmpty) ...[
@@ -258,13 +259,13 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: AppColors.lightGray,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF2F2F7),
+        backgroundColor: AppColors.lightGray,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -272,7 +273,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -302,7 +303,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 20),
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF1A1A2E),
+                                color: AppColors.textPrimary,
                               ),
                             );
                           },
@@ -325,7 +326,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                     errorBuilder: (_, __, ___) => const Icon(
                       Icons.account_balance_wallet,
                       size: 64,
-                      color: Color(0xFFFFB902),
+                      color: AppColors.starAmber,
                     ),
                   ),
                 ],
@@ -350,7 +351,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 14),
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF1A1A2E),
+                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 12),
@@ -365,7 +366,7 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 14),
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF1A1A2E),
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 4),
@@ -391,21 +392,21 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
                     color: const Color(0xFFEDF4FF),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.chat_bubble_outline, color: Color(0xFF2563EB), size: 20),
+                  child: const Icon(Icons.chat_bubble_outline, color: AppColors.accentBlue, size: 20),
                 ),
                 title: Text(
                   'Chat with support',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 14),
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 subtitle: Text(
                   'We usually reply in minutes',
                   style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: Colors.grey.shade500),
                 ),
-                trailing: const Icon(Icons.chevron_right, color: Color(0xFF2563EB)),
+                trailing: const Icon(Icons.chevron_right, color: AppColors.accentBlue),
                 onTap: () =>
                     AppSnackBar.comingSoon(context, 'Chat with support'),
               ),

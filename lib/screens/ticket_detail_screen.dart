@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -188,13 +189,13 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
   Widget build(BuildContext context) {
     final cat = HelpCategory.fromSlug(widget.ticket.category);
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: AppColors.lightGray,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF2F2F7),
+        backgroundColor: AppColors.lightGray,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Column(
@@ -209,7 +210,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 15),
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF1A1A2E),
+                color: AppColors.textPrimary,
               ),
             ),
             Text(
@@ -223,7 +224,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Color(0xFF1A1A2E)),
+            icon: const Icon(Icons.refresh, color: AppColors.textPrimary),
             onPressed: () {
               if (!_loadingInitial) _pollOnce();
             },
@@ -253,7 +254,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
     if (_loadingInitial) {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.accentBlue),
         ),
       );
     }
@@ -289,8 +290,8 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                   style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
                 ),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF2563EB),
-                  side: const BorderSide(color: Color(0xFF2563EB)),
+                  foregroundColor: AppColors.accentBlue,
+                  side: const BorderSide(color: AppColors.accentBlue),
                 ),
               ),
             ],
@@ -354,7 +355,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                     color: Colors.grey.shade400,
                   ),
                   filled: true,
-                  fillColor: const Color(0xFFF2F2F7),
+                  fillColor: AppColors.lightGray,
                   counterText: '',
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 14, vertical: 10),
@@ -368,7 +369,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
             ),
             const SizedBox(width: 6),
             Material(
-              color: const Color(0xFF2563EB),
+              color: AppColors.accentBlue,
               shape: const CircleBorder(),
               child: InkWell(
                 customBorder: const CircleBorder(),
@@ -425,8 +426,8 @@ class _Bubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mine = message.isFromCustomer;
-    final bg = mine ? const Color(0xFF2563EB) : Colors.white;
-    final fg = mine ? Colors.white : const Color(0xFF1A1A2E);
+    final bg = mine ? AppColors.accentBlue : Colors.white;
+    final fg = mine ? Colors.white : AppColors.textPrimary;
     final timeColor = mine ? Colors.white70 : Colors.grey.shade500;
 
     return Container(
@@ -464,7 +465,7 @@ class _Bubble extends StatelessWidget {
                         style: GoogleFonts.poppins(
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFF2563EB),
+                          color: AppColors.accentBlue,
                         ),
                       ),
                     ),
@@ -510,7 +511,7 @@ class _Bubble extends StatelessWidget {
       child: Icon(
         isSupport ? Icons.support_agent_rounded : Icons.person_outline,
         size: 16,
-        color: isSupport ? const Color(0xFF2563EB) : const Color(0xFFB45309),
+        color: isSupport ? AppColors.accentBlue : const Color(0xFFB45309),
       ),
     );
   }

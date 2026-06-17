@@ -185,7 +185,8 @@ class ExploreCategoriesGrid extends StatelessWidget {
 
   Widget _buildCategoryCard(BuildContext context, int index) {
     final category = categories[index];
-    final gradientColors = category['gradient'] as List<Color>;
+    final gradientColors = (category['gradient'] as List<Color>?) ??
+        const [Color(0xFFEFEFEF), Color(0xFFDFDFDF)];
     final imageInset = (category['imageInset'] as double?) ?? 6.0;
     final imageScale = (category['imageScale'] as double?) ?? 1.0;
 

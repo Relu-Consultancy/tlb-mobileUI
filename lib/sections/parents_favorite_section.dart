@@ -1,4 +1,5 @@
 import '../core/responsive.dart';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
 import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
@@ -20,6 +21,7 @@ class ParentsFavoriteSection extends StatelessWidget {
         // final items = HomeFeedState.section('parents_favorite');
         // if (items.isEmpty) return const SizedBox.shrink();
         final items = DummyData.parentsFavorite;
+        if (items.isEmpty) return const SizedBox.shrink();
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -27,7 +29,7 @@ class ParentsFavoriteSection extends StatelessWidget {
           title: "Parents' Favorite",
           topPadding: 30, // 30px gap from previous section's cards
           fontSize: 17,
-          textColor: Color(0xFF1A1A2E), // dark navy
+          textColor: AppColors.textPrimary, // dark navy
         ),
         SizedBox(
           height: Responsive.h(context, 400, min: 360),
@@ -132,7 +134,7 @@ class ParentsFavoriteSection extends StatelessWidget {
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 16),
                                     fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF1A1A2E),
+                                    color: AppColors.textPrimary,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -140,13 +142,13 @@ class ParentsFavoriteSection extends StatelessWidget {
                               ),
                               const SizedBox(width: 8),
                               const Icon(Icons.people_outline,
-                                  size: 14, color: Color(0xFF333333)),
+                                  size: 14, color: AppColors.textSecondary),
                               const SizedBox(width: 4),
                               Text(
                                 event.description ?? '4-12 Yrs',
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 13),
-                                  color: Color(0xFF333333),
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
                             ],
@@ -164,7 +166,7 @@ class ParentsFavoriteSection extends StatelessWidget {
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 13),
                                   fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF1A1A2E),
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                               const SizedBox(width: 4),
@@ -173,7 +175,7 @@ class ParentsFavoriteSection extends StatelessWidget {
                                   '(${event.reviewCount ?? '3.5k reviews'})',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 13),
-                                    color: Color(0xFF333333),
+                                    color: AppColors.textSecondary,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,

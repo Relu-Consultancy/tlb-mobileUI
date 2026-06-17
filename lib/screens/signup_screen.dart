@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -439,16 +440,16 @@ class _PrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: loading ? null : onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFFCC00),
+          backgroundColor: AppColors.primaryLight,
           foregroundColor: const Color(0xFF1A1A1A),
-          disabledBackgroundColor: const Color(0xFFFFCC00).withOpacity(0.7),
+          disabledBackgroundColor: AppColors.primaryLight.withOpacity(0.7),
           elevation: 0,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         ),
         child: loading
             ? const AppLoaderInline(
-                dotSize: 7, spacing: 4, color: Color(0xFF1A1A2E))
+                dotSize: 7, spacing: 4, color: AppColors.textPrimary)
             : Text(
                 label,
                 style: GoogleFonts.poppins(

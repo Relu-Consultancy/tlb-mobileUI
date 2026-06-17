@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
@@ -116,7 +117,7 @@ class _VenueBookingConfirmedScreenState
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 24),
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF1A1A2E),
+                                color: AppColors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 6),
@@ -157,7 +158,7 @@ class _VenueBookingConfirmedScreenState
                                   vertical: 14,
                                 ),
                                 decoration: const BoxDecoration(
-                                  color: Color(0xFFFFCC00),
+                                  color: AppColors.primaryLight,
                                   borderRadius: BorderRadius.vertical(
                                     top: Radius.circular(20),
                                   ),
@@ -166,7 +167,7 @@ class _VenueBookingConfirmedScreenState
                                   children: [
                                     const Icon(
                                       Icons.place_rounded,
-                                      color: Color(0xFF1A1A2E),
+                                      color: AppColors.textPrimary,
                                       size: 20,
                                     ),
                                     const SizedBox(width: 8),
@@ -177,7 +178,7 @@ class _VenueBookingConfirmedScreenState
                                           fontSize:
                                               Responsive.sp(context, 13),
                                           fontWeight: FontWeight.w500,
-                                          color: const Color(0xFF1A1A2E),
+                                          color: AppColors.textPrimary,
                                         ),
                                       ),
                                     ),
@@ -243,7 +244,7 @@ class _VenueBookingConfirmedScreenState
                                       'Booking Ref',
                                       widget.bookingReference,
                                       valueColor:
-                                          const Color(0xFF3B82F6),
+                                          AppColors.blue,
                                       mono: true,
                                     ),
                                   ],
@@ -270,7 +271,7 @@ class _VenueBookingConfirmedScreenState
                           children: [
                             const Icon(
                               Icons.info_outline_rounded,
-                              color: Color(0xFF3B82F6),
+                              color: AppColors.blue,
                               size: 20,
                             ),
                             const SizedBox(width: 10),
@@ -316,18 +317,18 @@ class _VenueBookingConfirmedScreenState
                             bookingId: widget.bookingId!,
                           ),
                           icon: const Icon(Icons.download_outlined,
-                              size: 18, color: Color(0xFF1A1A2E)),
+                              size: 18, color: AppColors.textPrimary),
                           label: Text(
                             'Download Ticket',
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 15),
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF1A1A2E),
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(
-                                color: Color(0xFF1A1A2E), width: 1.2),
+                                color: AppColors.textPrimary, width: 1.2),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(28),
                             ),
@@ -348,8 +349,8 @@ class _VenueBookingConfirmedScreenState
                           (route) => route.isFirst,
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFCC00),
-                          foregroundColor: const Color(0xFF1A1A2E),
+                          backgroundColor: AppColors.primaryLight,
+                          foregroundColor: AppColors.textPrimary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(28),
                           ),
@@ -377,7 +378,7 @@ class _VenueBookingConfirmedScreenState
                           (_) => false,
                         ),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF1A1A2E),
+                          foregroundColor: AppColors.textPrimary,
                           side: const BorderSide(
                             color: Color(0xFFDDDDDD),
                             width: 1.5,
@@ -443,13 +444,13 @@ class _VenueBookingConfirmedScreenState
                         fontFamily: 'monospace',
                         fontSize: Responsive.sp(context, 13),
                         fontWeight: FontWeight.w500,
-                        color: valueColor ?? const Color(0xFF1A1A2E),
+                        color: valueColor ?? AppColors.textPrimary,
                         letterSpacing: 0.5,
                       )
                     : GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 13),
                         fontWeight: FontWeight.w500,
-                        color: valueColor ?? const Color(0xFF1A1A2E),
+                        color: valueColor ?? AppColors.textPrimary,
                       ),
               ),
             ],

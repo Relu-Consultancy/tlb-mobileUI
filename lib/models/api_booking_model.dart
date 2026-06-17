@@ -73,12 +73,12 @@ class BookingInitiateResponse {
 
   factory BookingInitiateResponse.fromJson(Map<String, dynamic> json) =>
       BookingInitiateResponse(
-        bookingId: json['booking_id'] as String,
-        bookingReference: json['booking_reference'] as String,
-        razorpayOrderId: json['razorpay_order_id'] as String,
+        bookingId: (json['booking_id'] as String?) ?? '',
+        bookingReference: (json['booking_reference'] as String?) ?? '',
+        razorpayOrderId: (json['razorpay_order_id'] as String?) ?? '',
         razorpayCustomerId: json['razorpay_customer_id'] as String?,
         tokenId: json['token_id'] as String?,
-        amount: (json['amount'] as num).toDouble(),
+        amount: (json['amount'] as num?)?.toDouble() ?? 0,
         originalAmount: (json['original_amount'] as num?)?.toDouble(),
         discountAmount: (json['discount_amount'] as num?)?.toDouble() ?? 0.0,
         couponApplied: json['coupon_applied'] as String?,
@@ -285,8 +285,8 @@ class BookingConfirmResponse {
 
   factory BookingConfirmResponse.fromJson(Map<String, dynamic> json) =>
       BookingConfirmResponse(
-        id: json['id'] as String,
-        bookingReference: json['booking_reference'] as String,
+        id: (json['id'] as String?) ?? '',
+        bookingReference: (json['booking_reference'] as String?) ?? '',
         bookingType: (json['booking_type'] as String?) ?? '',
         status: (json['status'] as String?) ?? '',
         listingTitle: (json['listing_title'] as String?) ?? '',

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 
@@ -66,7 +67,7 @@ class _WalkthroughIntroOverlayState extends State<WalkthroughIntroOverlay>
                     Responsive.h(context, 24, min: 18),
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
@@ -75,7 +76,7 @@ class _WalkthroughIntroOverlayState extends State<WalkthroughIntroOverlay>
                         offset: const Offset(0, 20),
                       ),
                       BoxShadow(
-                        color: const Color(0xFFFFCC00).withOpacity(0.08),
+                        color: AppColors.primaryLight.withOpacity(0.08),
                         blurRadius: 60,
                         spreadRadius: 4,
                       ),
@@ -114,8 +115,8 @@ class _WalkthroughIntroOverlayState extends State<WalkthroughIntroOverlay>
                         child: ElevatedButton(
                           onPressed: _dismiss,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFFCC00),
-                            foregroundColor: const Color(0xFF1A1A2E),
+                            backgroundColor: AppColors.primaryLight,
+                            foregroundColor: AppColors.textPrimary,
                             elevation: 0,
                             padding: const EdgeInsets.symmetric(vertical: 15),
                             shape: RoundedRectangleBorder(
@@ -127,7 +128,7 @@ class _WalkthroughIntroOverlayState extends State<WalkthroughIntroOverlay>
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 15),
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF1A1A2E),
+                              color: AppColors.textPrimary,
                             ),
                           ),
                         ),
@@ -181,10 +182,10 @@ class _IconBadgeState extends State<_IconBadge>
         height: 76,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: const Color(0xFFFFCC00).withOpacity(0.12),
+          color: AppColors.primaryLight.withOpacity(0.12),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFFFFCC00).withOpacity(_glow.value),
+              color: AppColors.primaryLight.withOpacity(_glow.value),
               blurRadius: 28,
               spreadRadius: 2,
             ),
@@ -192,7 +193,7 @@ class _IconBadgeState extends State<_IconBadge>
         ),
         child: const Icon(
           Icons.explore_rounded,
-          color: Color(0xFFFFCC00),
+          color: AppColors.primaryLight,
           size: 38,
         ),
       ),

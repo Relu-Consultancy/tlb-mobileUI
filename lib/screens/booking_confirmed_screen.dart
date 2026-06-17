@@ -1,4 +1,5 @@
 import 'dart:math';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
@@ -277,7 +278,7 @@ class _TicketScreen extends StatelessWidget {
                 child: const Icon(
                   Icons.arrow_back_ios_new_rounded,
                   size: 16,
-                  color: Color(0xFF1A1A2E),
+                  color: AppColors.textPrimary,
                 ),
               ),
             ),
@@ -360,7 +361,7 @@ class _HeaderSection extends StatelessWidget {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF34C759).withOpacity(0.28),
+                        color: AppColors.successGreen.withOpacity(0.28),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),
@@ -371,7 +372,7 @@ class _HeaderSection extends StatelessWidget {
                       width: 50,
                       height: 50,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF34C759),
+                        color: AppColors.successGreen,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.check_rounded,
@@ -453,15 +454,28 @@ class _TicketCard extends StatelessWidget {
                 ),
                 child: AspectRatio(
                   aspectRatio: 16 / 9,
-                  child: Image.asset(
-                    event.imagePath,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: Colors.grey.shade200,
-                      child: const Icon(Icons.event,
-                          size: 40, color: Colors.grey),
-                    ),
-                  ),
+                  // The booked event's image is a network URL after a real
+                  // booking (and a bundled asset for mock data) — branch so the
+                  // confirmed ticket shows the real cover, not the placeholder.
+                  child: event.imagePath.startsWith('http')
+                      ? Image.network(
+                          event.imagePath,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: Colors.grey.shade200,
+                            child: const Icon(Icons.event,
+                                size: 40, color: Colors.grey),
+                          ),
+                        )
+                      : Image.asset(
+                          event.imagePath,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: Colors.grey.shade200,
+                            child: const Icon(Icons.event,
+                                size: 40, color: Colors.grey),
+                          ),
+                        ),
                 ),
               ),
             ),
@@ -490,7 +504,7 @@ class _TicketCard extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 13),
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF1A1A2E),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -543,7 +557,7 @@ class _TicketContent extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 16),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -570,7 +584,7 @@ class _TicketContent extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 12),
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF1A1A2E),
+                      color: AppColors.textPrimary,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -626,7 +640,7 @@ class _TicketContent extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 12),
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF1A1A2E),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ],
@@ -647,7 +661,7 @@ class _TicketContent extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 12),
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF1A1A2E),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ],
@@ -745,7 +759,7 @@ class _ActionBtn extends StatelessWidget {
                 size: 18,
                 color: disabled
                     ? const Color(0xFF9CA3AF)
-                    : const Color(0xFF1A1A2E)),
+                    : AppColors.textPrimary),
             const SizedBox(width: 8),
             Text(
               label,
@@ -754,7 +768,7 @@ class _ActionBtn extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 color: disabled
                     ? const Color(0xFF9CA3AF)
-                    : const Color(0xFF1A1A2E),
+                    : AppColors.textPrimary,
               ),
             ),
           ],

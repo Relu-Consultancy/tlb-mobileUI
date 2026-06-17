@@ -65,9 +65,9 @@ class ApiProgramMedia {
   });
 
   factory ApiProgramMedia.fromJson(Map<String, dynamic> json) => ApiProgramMedia(
-        id: json['id'] as int,
-        mediaType: json['media_type'] as String,
-        url: json['url'] as String,
+        id: (json['id'] as num?)?.toInt() ?? 0,
+        mediaType: (json['media_type'] as String?) ?? '',
+        url: (json['url'] as String?) ?? '',
       );
 }
 
@@ -225,7 +225,7 @@ class ApiProgramDetail extends ApiProgram {
       // In details response, they might return media array rather than 'cover' directly,
       // but if 'cover' is present we use it, otherwise fallback to finding the first cover media.
       cover: json['cover'] as String? ?? 
-        (json['media'] as List?)?.whereType<Map<String, dynamic>>().where((m) => m['media_type'] == 'cover').map((m) => m['url'] as String).firstOrNull,
+        (json['media'] as List?)?.whereType<Map<String, dynamic>>().where((m) => m['media_type'] == 'cover').map((m) => m['url'] as String?).whereType<String>().firstOrNull,
       feeFrom: json['fee_from']?.toString() ??
         (json['batches'] as List?)?.whereType<Map<String, dynamic>>().where((b) => b['is_active'] == true).map((b) => b['fee']?.toString()).firstOrNull,
       distanceKm: (json['distance_km'] as num?)?.toDouble(),

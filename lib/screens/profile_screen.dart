@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../core/app_snackbar.dart';
@@ -113,7 +114,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E), size: 22),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 22),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
@@ -122,7 +123,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 17),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -197,7 +198,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 20),
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1A1A2E),
+                            color: AppColors.textPrimary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -271,7 +272,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 12),
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFF1A1A2E),
+                          color: AppColors.textPrimary,
                         ),
                       ),
                     ],
@@ -282,7 +283,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: LinearProgressIndicator(
                       value: completion,
                       backgroundColor: Colors.grey.shade200,
-                      valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFCC00)),
+                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryLight),
                       minHeight: 6,
                     ),
                   ),
@@ -522,13 +523,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 16),
               ListTile(
-                leading: const Icon(Icons.account_circle_outlined, color: Color(0xFF1A1A2E)),
+                leading: const Icon(Icons.account_circle_outlined, color: AppColors.textPrimary),
                 title: Text(
                   'View Profile Picture',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 15),
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 onTap: () {
@@ -538,13 +539,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt_outlined,
-                    color: Color(0xFF1A1A2E)),
+                    color: AppColors.textPrimary),
                 title: Text(
                   'Take a Photo',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 15),
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 onTap: () {
@@ -554,13 +555,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library_outlined,
-                    color: Color(0xFF1A1A2E)),
+                    color: AppColors.textPrimary),
                 title: Text(
                   'Choose from Gallery',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 15),
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 onTap: () {

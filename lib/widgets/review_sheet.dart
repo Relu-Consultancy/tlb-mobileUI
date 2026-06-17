@@ -141,7 +141,7 @@ Widget buildReviewInlineSection(
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Reviews', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
+              Text('Reviews', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
               GestureDetector(
                 onTap: () async {
                   await showReviewSheet(context, listingId: listingId, listingTitle: listingTitle, listingImage: listingImage);
@@ -169,7 +169,7 @@ Widget buildReviewInlineSection(
               children: [
                 Text(
                   'Overall Rating: ${avg.toStringAsFixed(1)}',
-                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13.5), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E)),
+                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13.5), fontWeight: FontWeight.w500, color: AppColors.textPrimary),
                 ),
                 const SizedBox(width: 4),
                 const Icon(Icons.star, color: Colors.amber, size: 16),
@@ -374,7 +374,7 @@ class _ReviewListSheetState extends State<_ReviewListSheet> {
                       child: Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(color: Colors.grey.shade200, shape: BoxShape.circle),
-                        child: const Icon(Icons.close, size: 20, color: Color(0xFF1A1A2E)),
+                        child: const Icon(Icons.close, size: 20, color: AppColors.textPrimary),
                       ),
                     ),
                   ],
@@ -512,7 +512,7 @@ class _ReviewListSheetState extends State<_ReviewListSheet> {
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                                     decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(20)),
-                                    child: Text('Load more', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
+                                    child: Text('Load more', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
                                   ),
                                 ),
                         ),
@@ -729,9 +729,14 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
   }
 
   Future<void> _submit() async {
+    final token = AuthState.accessToken;
+    if (token == null) {
+      AppSnackBar.error(
+          context, 'Your session has expired. Please log in again.');
+      return;
+    }
     setState(() => _submitting = true);
     try {
-      final token = AuthState.accessToken!;
       final comment = _controller.text.trim();
       final imageFiles = _newImages.map((x) => File(x.path)).toList();
       final videoFiles = _newVideos.map((x) => File(x.path)).toList();
@@ -807,7 +812,7 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(color: Colors.grey.shade200, shape: BoxShape.circle),
-                      child: const Icon(Icons.close, size: 20, color: Color(0xFF1A1A2E)),
+                      child: const Icon(Icons.close, size: 20, color: AppColors.textPrimary),
                     ),
                   ),
                 ],
@@ -869,7 +874,7 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
                         hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
                         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade300)),
-                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFFFCC00))),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primaryLight)),
                         filled: true,
                         fillColor: AppColors.inputFill,
                       ),

@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:location/location.dart' as loc;
 import '../providers/location_state.dart';
 import '../core/app_colors.dart';
 
@@ -16,9 +17,14 @@ class LocationScreen extends StatefulWidget {
   State<LocationScreen> createState() => _LocationScreenState();
 }
 
-class _LocationScreenState extends State<LocationScreen> {
+class _LocationScreenState extends State<LocationScreen>
+    with WidgetsBindingObserver {
   final TextEditingController _searchController = TextEditingController();
   bool _isLoadingLocation = false;
+  // Set true right before we send the user to a system Settings page, so we can
+  // auto-retry the location fetch when they return (e.g. after enabling GPS or
+  // granting permission) instead of making them tap the button again.
+  bool _retryAfterSettings = false;
 
   final List<Map<String, dynamic>> _popularCities = [
     {'name': 'Delhi NCR', 'icon': Icons.account_balance, 'image': 'assets/images/new_home/india-gate.png'},
@@ -60,9 +66,27 @@ class _LocationScreenState extends State<LocationScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Returning from the system Settings page — if we sent the user there to
+    // enable GPS / grant permission, retry the fetch automatically so the
+    // button "just works" without a second tap.
+    if (state == AppLifecycleState.resumed && _retryAfterSettings) {
+      _retryAfterSettings = false;
+      _fetchCurrentLocation();
+    }
   }
 
   void _selectCity(String city) {
@@ -87,7 +111,7 @@ class _LocationScreenState extends State<LocationScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 17),
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
         content: Text(
@@ -115,8 +139,8 @@ class _LocationScreenState extends State<LocationScreen> {
               await onOpen();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFFCC00),
-              foregroundColor: const Color(0xFF1A1A2E),
+              backgroundColor: AppColors.primaryLight,
+              foregroundColor: AppColors.textPrimary,
               elevation: 0,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
@@ -136,17 +160,30 @@ class _LocationScreenState extends State<LocationScreen> {
     setState(() => _isLoadingLocation = true);
 
     try {
-      // Check if location services (GPS) are enabled device-wide. If not, send
-      // the user to the OS location settings to turn it on.
-      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      // Make sure device location services (GPS) are ON. On Android this shows
+      // the native in-app "Turn on device location" dialog via the `location`
+      // plugin — the user enables GPS without leaving the app and we carry
+      // straight on. iOS can't toggle location services from an app, so
+      // requestService() is effectively a no-op there and we fall back to
+      // routing the user to Settings.
+      final loc.Location locationService = loc.Location();
+      bool serviceEnabled = await locationService.serviceEnabled();
       if (!serviceEnabled) {
+        serviceEnabled = await locationService.requestService();
+      }
+      if (!serviceEnabled) {
+        // Still off (user declined the native dialog, or iOS) — offer the
+        // Settings route and auto-retry once they come back with it enabled.
         if (!mounted) return;
         setState(() => _isLoadingLocation = false);
         await _showSettingsDialog(
           title: 'Turn on location',
           message:
-              'Location services (GPS) are turned off. Enable them in settings to use your current location.',
-          onOpen: Geolocator.openLocationSettings,
+              'Location services (GPS) are turned off. Enable them to use your current location.',
+          onOpen: () async {
+            _retryAfterSettings = true;
+            return Geolocator.openLocationSettings();
+          },
         );
         return;
       }
@@ -166,7 +203,10 @@ class _LocationScreenState extends State<LocationScreen> {
           title: 'Location permission needed',
           message:
               'Location permission is blocked. Please enable it for TLB in app settings to use your current location.',
-          onOpen: Geolocator.openAppSettings,
+          onOpen: () async {
+            _retryAfterSettings = true;
+            return Geolocator.openAppSettings();
+          },
         );
         return;
       }
@@ -226,9 +266,14 @@ class _LocationScreenState extends State<LocationScreen> {
       if (city.toLowerCase() == lower) return city;
     }
 
-    // Substring match
+    // Whole-word match — handles geocoded names that carry a suffix
+    // ("Bengaluru Urban", "Mumbai Suburban") while AVOIDING false positives
+    // from a bare substring search: "Prayagraj" used to resolve to "Agra"
+    // because the letters "agra" sit inside "pray·AGRA·j". Requiring a word
+    // boundary on both sides means a known city must appear as its own word.
     for (final city in _allCities) {
-      if (lower.contains(city.toLowerCase()) || city.toLowerCase().contains(lower)) {
+      final c = city.toLowerCase();
+      if (RegExp('\\b${RegExp.escape(c)}\\b').hasMatch(lower)) {
         return city;
       }
     }
@@ -259,7 +304,7 @@ class _LocationScreenState extends State<LocationScreen> {
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 18),
                 fontWeight: FontWeight.w700,
-                color: const Color(0xFF1A1A2E),
+                color: AppColors.textPrimary,
                 letterSpacing: 0.2,
               ),
             ),
@@ -287,7 +332,7 @@ class _LocationScreenState extends State<LocationScreen> {
             shape: BoxShape.circle,
           ),
           child: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E), size: 20),
+            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 20),
             onPressed: () => Navigator.pop(context),
             splashRadius: 24,
           ),
@@ -297,7 +342,7 @@ class _LocationScreenState extends State<LocationScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
         centerTitle: true,
@@ -344,14 +389,14 @@ class _LocationScreenState extends State<LocationScreen> {
               child: ElevatedButton.icon(
                 onPressed: _isLoadingLocation ? null : _fetchCurrentLocation,
                 icon: _isLoadingLocation
-                    ? const AppLoaderInline(dotSize: 6, spacing: 3, color: Color(0xFF1A1A2E))
-                    : const Icon(Icons.my_location, color: Color(0xFF1A1A2E), size: 20),
+                    ? const AppLoaderInline(dotSize: 6, spacing: 3, color: AppColors.textPrimary)
+                    : const Icon(Icons.my_location, color: AppColors.textPrimary, size: 20),
                 label: Text(
                   _isLoadingLocation ? 'Fetching location...' : 'Use current location',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 14),
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -397,6 +442,11 @@ class _LocationScreenState extends State<LocationScreen> {
                             city['image'] as String,
                             color: const Color(0xFFE0A000),
                             height: 58,
+                            errorBuilder: (_, __, ___) => Icon(
+                              city['icon'] as IconData? ?? Icons.location_city,
+                              size: 50,
+                              color: const Color(0xFFE0A000),
+                            ),
                           )
                         else
                           Icon(
@@ -410,7 +460,7 @@ class _LocationScreenState extends State<LocationScreen> {
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 13),
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF1A1A2E),
+                            color: AppColors.textPrimary,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -446,7 +496,7 @@ class _LocationScreenState extends State<LocationScreen> {
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 14),
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF1A1A2E),
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ),

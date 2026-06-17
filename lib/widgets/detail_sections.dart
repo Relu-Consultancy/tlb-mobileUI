@@ -9,7 +9,7 @@ import 'auto_scroll_list.dart';
 // white with a slim black border, and section titles are bold.
 
 const Color kDetailBg = Color(0xFFFAFAFC); // lighter, near-white background
-const Color kDetailText = Color(0xFF333333);
+const Color kDetailText = AppColors.textSecondary;
 const Color kCardBorder = Color(0x14000000); // black @ ~8% — very light slim border
 const Color kRowDivider = Color(0x0F000000); // black @ ~6% — hairline between rows
 
@@ -126,7 +126,7 @@ class _ExpandableAboutCardState extends State<ExpandableAboutCard> {
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 13),
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF3B82F6),
+                          color: AppColors.blue,
                         ),
                       ),
                     ),
@@ -308,7 +308,7 @@ class DetailDirectionsCard extends StatelessWidget {
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 11.5),
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFFFFCC00),
+                          color: AppColors.primaryLight,
                         ),
                       ),
                     ],
@@ -329,7 +329,7 @@ class DetailDirectionsCard extends StatelessWidget {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFCC00),
+                    backgroundColor: AppColors.primaryLight,
                     foregroundColor: kDetailText,
                     elevation: 0,
                     padding:
@@ -385,7 +385,7 @@ class DetailTermsRow extends StatelessWidget {
                   ),
                 ),
                 const Icon(Icons.chevron_right,
-                    color: Color(0xFF3B82F6), size: 22),
+                    color: AppColors.blue, size: 22),
               ],
             ),
           ),

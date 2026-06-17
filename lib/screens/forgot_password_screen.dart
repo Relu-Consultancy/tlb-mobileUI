@@ -1,4 +1,5 @@
 import 'dart:math';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
 import '../widgets/app_loader.dart';
 import 'package:flutter/services.dart';
@@ -289,7 +290,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 13),
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF3B82F6),
+              color: AppColors.blue,
             ),
           ),
         ),
@@ -376,14 +377,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             height: 82,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
+                colors: [AppColors.blue, AppColors.accentBlue],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF3B82F6).withOpacity(0.35),
+                  color: AppColors.blue.withOpacity(0.35),
                   blurRadius: 18,
                   offset: const Offset(0, 8),
                 ),
@@ -567,16 +568,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       child: ElevatedButton(
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFFCC00),
+          backgroundColor: AppColors.primaryLight,
           foregroundColor: const Color(0xFF1A1A1A),
-          disabledBackgroundColor: const Color(0xFFFFCC00).withOpacity(0.7),
+          disabledBackgroundColor: AppColors.primaryLight.withOpacity(0.7),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
           ),
         ),
         child: loading
-            ? const AppLoaderInline(dotSize: 7, spacing: 4, color: Color(0xFF1A1A2E))
+            ? const AppLoaderInline(dotSize: 7, spacing: 4, color: AppColors.textPrimary)
             : Text(
                 label,
                 style: GoogleFonts.poppins(
@@ -715,8 +716,8 @@ class _PasswordResetSuccessDialogState
                         widget.onOkay();
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFCC00),
-                        foregroundColor: const Color(0xFF1A1A2E),
+                        backgroundColor: AppColors.primaryLight,
+                        foregroundColor: AppColors.textPrimary,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
@@ -755,7 +756,7 @@ class _Particle {
         rotation = rng.nextDouble() * 2 * pi,
         rotSpeed = (rng.nextDouble() - 0.5) * 6,
         color = [
-          const Color(0xFFFFCC00),
+          AppColors.primaryLight,
           const Color(0xFF60A5FA),
           const Color(0xFF34D399),
           const Color(0xFFF472B6),

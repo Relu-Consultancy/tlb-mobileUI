@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../models/api_provider_model.dart';
@@ -109,7 +110,7 @@ class _OrganizerCardState extends State<OrganizerCard> {
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 10),
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFFF5A623),
+                      color: AppColors.primary,
                       letterSpacing: 0.6,
                     ),
                   ),
@@ -130,7 +131,7 @@ class _OrganizerCardState extends State<OrganizerCard> {
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 15.5),
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1A1A2E),
+                            color: AppColors.textPrimary,
                           ),
                         ),
                 ],
@@ -164,7 +165,7 @@ class _OrganizerCardState extends State<OrganizerCard> {
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFFF5A623),
+              color: AppColors.primary,
             ),
           ),
         ),

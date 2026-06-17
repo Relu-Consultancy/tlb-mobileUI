@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_snackbar.dart';
 import '../models/api_venue_model.dart';
@@ -190,7 +191,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
             ),
             child: const Icon(
               Icons.arrow_back,
-              color: Color(0xFF1A1A2E),
+              color: AppColors.textPrimary,
               size: 20,
             ),
           ),
@@ -200,7 +201,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 16),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
         centerTitle: true,
@@ -230,7 +231,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 13),
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF1A1A2E),
+                                color: AppColors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -297,7 +298,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                     controller: _childNameController,
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 14),
-                      color: const Color(0xFF1A1A2E),
+                      color: AppColors.textPrimary,
                     ),
                     decoration: InputDecoration(
                       hintText: "Enter planner's name",
@@ -336,7 +337,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                   color: isSelected
-                                      ? const Color(0xFF1A1A2E)
+                                      ? AppColors.textPrimary
                                       : Colors.grey.shade400,
                                   width: 2,
                                 ),
@@ -348,7 +349,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                                         height: 9,
                                         decoration: const BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: Color(0xFF1A1A2E),
+                                          color: AppColors.textPrimary,
                                         ),
                                       ),
                                     )
@@ -360,7 +361,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 13),
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF1A1A2E),
+                                color: AppColors.textPrimary,
                               ),
                             ),
                           ],
@@ -387,7 +388,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 14),
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFF1A1A2E),
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 14),
@@ -432,12 +433,12 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                      ? const Color(0xFFFFCC00)
+                                      ? AppColors.primaryLight
                                       : Colors.white,
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
                                     color: isSelected
-                                        ? const Color(0xFFFFCC00)
+                                        ? AppColors.primaryLight
                                         : const Color(0xFFE0E0E0),
                                   ),
                                 ),
@@ -448,7 +449,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                                     fontWeight: isSelected
                                         ? FontWeight.w500
                                         : FontWeight.w500,
-                                    color: const Color(0xFF1A1A2E),
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
                               ),
@@ -478,7 +479,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 14),
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF1A1A2E),
+                            color: AppColors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 14),
@@ -498,12 +499,12 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                      ? const Color(0xFFFFCC00)
+                                      ? AppColors.primaryLight
                                       : Colors.white,
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
                                     color: isSelected
-                                        ? const Color(0xFFFFCC00)
+                                        ? AppColors.primaryLight
                                         : const Color(0xFFE0E0E0),
                                   ),
                                 ),
@@ -514,7 +515,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                                     fontWeight: isSelected
                                         ? FontWeight.w500
                                         : FontWeight.w500,
-                                    color: const Color(0xFF1A1A2E),
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
                               ),
@@ -558,7 +559,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                     keyboardType: TextInputType.number,
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 14),
-                      color: const Color(0xFF1A1A2E),
+                      color: AppColors.textPrimary,
                     ),
                     decoration: InputDecoration(
                       hintText: _capacityHint,
@@ -568,7 +569,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                       ),
                       prefixIcon: const Icon(
                         Icons.people_outline,
-                        color: Color(0xFF1A1A2E),
+                        color: AppColors.textPrimary,
                         size: 20,
                       ),
                       contentPadding: const EdgeInsets.symmetric(
@@ -615,8 +616,8 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                 child: ElevatedButton(
                   onPressed: _onContinue,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFCC00),
-                    foregroundColor: const Color(0xFF1A1A2E),
+                    backgroundColor: AppColors.primaryLight,
+                    foregroundColor: AppColors.textPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
@@ -641,14 +642,14 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
   Widget _sectionLabel(IconData icon, String label) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: const Color(0xFF1A1A2E)),
+        Icon(icon, size: 18, color: AppColors.textPrimary),
         const SizedBox(width: 8),
         Text(
           label,
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 14),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
       ],

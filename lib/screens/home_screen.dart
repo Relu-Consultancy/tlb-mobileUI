@@ -5,6 +5,7 @@ import '../data/dummy_data.dart';
 import '../providers/location_state.dart';
 import '../providers/saved_events_state.dart';
 import '../providers/notifications_state.dart';
+import '../services/push_notifications.dart';
 // import '../providers/home_feed_state.dart'; // commented out — home reverted to mock data
 import '../sections/home_header.dart';
 import '../widgets/banner_carousel.dart';
@@ -56,6 +57,11 @@ class _HomeScreenState extends State<HomeScreen> {
     // Pull the unread notification count so the header bell badge is accurate
     // as soon as the home screen appears (after login / session restore).
     NotificationsState.refreshFromApi();
+    // Mirror any new in-app notifications to the system tray, and make sure
+    // this device's push token is registered with the backend (covers the
+    // fresh-login path — main() only does this on a restored session).
+    NotificationsState.syncAndNotify();
+    PushNotifications.registerToken();
     // Load the real homepage feed (sections + hydrated cards). Sections render
     // reactively once this completes; empty sections hide themselves.
     // Commented out for now — home sections reverted to mock data.
@@ -273,7 +279,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     // ── Body: empty state OR full feed ──
                     if (!LocationState().isLocationSupported(city))
                       SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.6,
+                        // Fill the viewport beneath the header so the empty
+                        // state centres in the space that's left (no dead white
+                        // strip below it) and its CTA clears the floating
+                        // navbar. ~150 ≈ the greeting + search header height
+                        // above this point.
+                        height: (MediaQuery.of(context).size.height -
+                                MediaQuery.of(context).padding.top -
+                                150)
+                            .clamp(380.0, double.infinity)
+                            .toDouble(),
                         child: const EmptyLocationWidget(),
                       )
                     else ...[
@@ -310,6 +325,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           // Soft tinted backdrop that follows the current
                           // banner's colour, lerping smoothly between cards.
                           tintedBackground: true,
+                          // "Spotlight focus" treatment (dim/desat side cards,
+                          // centre glow + shadow, breathing pulse, swipe nudge,
+                          // bigger accent indicator). Reverted — disabled so the
+                          // carousel/side cards render exactly as before.
+                          spotlightEnhancements: false,
                           // Endless cycle — never rewinds to the first card.
                           infiniteScroll: true,
                         ),

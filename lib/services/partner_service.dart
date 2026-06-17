@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/api_followed_partner_model.dart';
+import 'auth_http.dart';
 
 class PartnerService {
   static const _base = 'https://tlb-api.reluconsultancy.in';
@@ -14,15 +15,15 @@ class PartnerService {
     required String partnerId,
   }) async {
     try {
-      final resp = await http
+      final resp = await AuthHttp.send((t) => http
           .post(
             Uri.parse('$_base/api/v1/partner/$partnerId/follow/'),
             headers: {
-              'Authorization': 'Bearer $token',
+              'Authorization': 'Bearer $t',
               'Content-Type': 'application/json',
             },
           )
-          .timeout(_timeout);
+          .timeout(_timeout));
 
       if (resp.statusCode == 200 || resp.statusCode == 201) return;
       if (resp.statusCode == 400) {
@@ -44,12 +45,12 @@ class PartnerService {
     required String partnerId,
   }) async {
     try {
-      final resp = await http
+      final resp = await AuthHttp.send((t) => http
           .delete(
             Uri.parse('$_base/api/v1/partner/$partnerId/unfollow/'),
-            headers: {'Authorization': 'Bearer $token'},
+            headers: {'Authorization': 'Bearer $t'},
           )
-          .timeout(_timeout);
+          .timeout(_timeout));
 
       if (resp.statusCode == 200) return;
       if (resp.statusCode == 404) return; // not following — treat as success
@@ -75,19 +76,19 @@ class PartnerService {
           'page_size': '$pageSize',
         },
       );
-      final resp = await http.get(
+      final resp = await AuthHttp.send((t) => http.get(
         uri,
         headers: {
-          'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer $t',
           'Accept': 'application/json',
         },
-      ).timeout(_timeout);
+      ).timeout(_timeout));
 
-      if (resp.statusCode == 401) throw Exception('Session expired. Please log in again.');
       if (resp.statusCode != 200) throw Exception('Failed to load followed partners (${resp.statusCode})');
 
-      final body = jsonDecode(resp.body);
-      final data = (body['data'] ?? body) as Map<String, dynamic>;
+      final decoded = jsonDecode(resp.body);
+      final data = (decoded is Map ? (decoded['data'] ?? decoded) : null);
+      if (data is! Map<String, dynamic>) return [];
       final results = (data['results'] as List<dynamic>? ?? []);
       return results
           .map((e) => ApiFollowedPartner.fromJson(e as Map<String, dynamic>))

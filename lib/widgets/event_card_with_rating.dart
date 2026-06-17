@@ -247,7 +247,7 @@ class EventCardWithRating extends StatelessWidget {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryLight,
-                          foregroundColor: const Color(0xFF1A1A2E),
+                          foregroundColor: AppColors.textPrimary,
                           elevation: 0,
                           padding: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(

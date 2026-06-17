@@ -109,7 +109,7 @@ class NewOnTlbCard extends StatelessWidget {
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                const Icon(Icons.star, size: 15, color: Color(0xFFFFB902)),
+                                const Icon(Icons.star, size: 15, color: AppColors.starAmber),
                                 const SizedBox(width: 4),
                                 Flexible(
                                   child: Text(
@@ -131,7 +131,7 @@ class NewOnTlbCard extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         child: Material(
-                          color: const Color(0xFFFFCC00),
+                          color: AppColors.primaryLight,
                           borderRadius: BorderRadius.circular(24),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(24),

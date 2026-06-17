@@ -130,6 +130,19 @@ class AuthState {
     }
   }
 
+  /// Replaces the access/refresh tokens after a successful silent refresh
+  /// (triggered by [AuthHttp] on a 401), persisting them while preserving the
+  /// current user/profile state.
+  static void updateTokens({required String access, required String refresh}) {
+    accessToken = access;
+    refreshToken = refresh;
+    TokenStorage.saveTokens(
+      access,
+      refresh,
+      userData != null ? jsonEncode(userData) : '{}',
+    ).catchError((_) {});
+  }
+
   static void logout() {
     userName.value = null;
     userEmail = null;

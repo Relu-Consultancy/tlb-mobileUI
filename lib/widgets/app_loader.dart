@@ -1,4 +1,5 @@
 import 'dart:math';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
 import '../core/responsive.dart';
 
@@ -47,7 +48,7 @@ class AppLoader extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const CircularProgressIndicator(
-              color: Color(0xFF1A1A2E),
+              color: AppColors.textPrimary,
               strokeWidth: 2.5,
             ),
             if (message != null) ...[
@@ -72,7 +73,7 @@ class AppLoader extends StatelessWidget {
           _StaggeredBounceDots(
             dotSize: dotSize,
             spacing: spacing,
-            color: color ?? const Color(0xFFFFCC00),
+            color: color ?? AppColors.primaryLight,
           ),
           if (message != null) ...[
             const SizedBox(height: 16),
@@ -112,7 +113,7 @@ class AppLoaderInline extends StatelessWidget {
         height: dotSize * 3,
         child: const CircularProgressIndicator(
           strokeWidth: 2.5,
-          color: Color(0xFF1A1A2E),
+          color: AppColors.textPrimary,
         ),
       );
     }
@@ -120,7 +121,7 @@ class AppLoaderInline extends StatelessWidget {
     return _StaggeredBounceDots(
       dotSize: dotSize,
       spacing: spacing,
-      color: color ?? const Color(0xFF1A1A2E),
+      color: color ?? AppColors.textPrimary,
     );
   }
 }
@@ -150,9 +151,9 @@ class _StaggeredBounceDotsState extends State<_StaggeredBounceDots>
 
   // Three brand-tinted dot colors (golden gradient palette)
   static const _dotColors = [
-    Color(0xFFFFCC00), // bright yellow
-    Color(0xFFFFB902), // golden amber
-    Color(0xFFF5A623), // warm orange
+    AppColors.primaryLight, // bright yellow
+    AppColors.starAmber, // golden amber
+    AppColors.primary, // warm orange
   ];
 
   @override
@@ -187,8 +188,8 @@ class _StaggeredBounceDotsState extends State<_StaggeredBounceDots>
             final scale = 0.5 + bounce * 0.5; // range 0.5 → 1.0
             final opacity = 0.4 + bounce * 0.6; // range 0.4 → 1.0
 
-            final dotColor = widget.color == const Color(0xFFFFCC00) ||
-                    widget.color == const Color(0xFF1A1A2E)
+            final dotColor = widget.color == AppColors.primaryLight ||
+                    widget.color == AppColors.textPrimary
                 ? _dotColors[i]
                 : widget.color;
 

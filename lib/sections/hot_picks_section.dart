@@ -1,4 +1,5 @@
 import '../core/responsive.dart';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
 import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
@@ -20,6 +21,7 @@ class HotPicksSection extends StatelessWidget {
         // final items = HomeFeedState.section('hot_picks');
         // if (items.isEmpty) return const SizedBox.shrink();
         final items = DummyData.hotPicks;
+        if (items.isEmpty) return const SizedBox.shrink();
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -28,7 +30,7 @@ class HotPicksSection extends StatelessWidget {
           topPadding: 30, // 30px gap from previous section's cards
           fontSize: 17,
           fontWeight: FontWeight.w600,
-          textColor: Color(0xFF1A1A2E), // dark navy
+          textColor: AppColors.textPrimary, // dark navy
         ),
         SizedBox(
           height: Responsive.h(context, 440, min: 395),
@@ -130,7 +132,7 @@ class HotPicksSection extends StatelessWidget {
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 16),
                                     fontWeight: FontWeight.w500,
-                                    color: const Color(0xFF1A1A2E),
+                                    color: AppColors.textPrimary,
                                   ),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -140,11 +142,11 @@ class HotPicksSection extends StatelessWidget {
                                 // Age Range Row
                                 Row(
                                   children: [
-                                    const Icon(Icons.people_outline, size: 14, color: Color(0xFF333333)),
+                                    const Icon(Icons.people_outline, size: 14, color: AppColors.textSecondary),
                                     const SizedBox(width: 6),
                                     Text(
                                       '3-5 Yrs', // Dummy age range
-                                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Color(0xFF333333)),
+                                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: AppColors.textSecondary),
                                     ),
                                   ],
                                 ),
@@ -165,7 +167,7 @@ class HotPicksSection extends StatelessWidget {
                                         event.reviewCount ?? '3.5k reviews',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Color(0xFF333333)),
+                                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: AppColors.textSecondary),
                                       ),
                                     ),
                                   ],
@@ -175,12 +177,12 @@ class HotPicksSection extends StatelessWidget {
                                 // Venue Row
                                 Row(
                                   children: [
-                                    const Icon(Icons.location_on_outlined, size: 14, color: Color(0xFF333333)),
+                                    const Icon(Icons.location_on_outlined, size: 14, color: AppColors.textSecondary),
                                     const SizedBox(width: 6),
                                     Expanded(
                                       child: Text(
                                         event.venue,
-                                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Color(0xFF333333)),
+                                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: AppColors.textSecondary),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:showcaseview/showcaseview.dart';
 import '../core/responsive.dart';
@@ -78,6 +79,7 @@ class HomeHeader extends StatelessWidget {
                   width: double.infinity,
                   fit: BoxFit.fitWidth,
                   alignment: Alignment.topCenter,
+                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                 ),
               ),
             ),
@@ -170,7 +172,7 @@ class HomeHeader extends StatelessWidget {
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 20),
                             fontWeight: FontWeight.w700, // header greeting — bold
-                            color: const Color(0xFF1A1A2E),
+                            color: AppColors.textPrimary,
                           ),
                         );
                       },
@@ -228,7 +230,7 @@ class HomeHeader extends StatelessWidget {
                         const Icon(
                           Icons.notifications_outlined,
                           size: 22,
-                          color: Color(0xFF1A1A2E),
+                          color: AppColors.textPrimary,
                         ),
                         if (unread > 0)
                           Positioned(
@@ -304,7 +306,7 @@ class HomeHeader extends StatelessWidget {
                   title: profileShowcaseConfig.title,
                   description: profileShowcaseConfig.description,
                   overlayOpacity: 0.78,
-                  tooltipBackgroundColor: const Color(0xFF1A1A2E),
+                  tooltipBackgroundColor: AppColors.textPrimary,
                   textColor: Colors.white,
                   scaleAnimationDuration: const Duration(milliseconds: 350),
                   scaleAnimationCurve: Curves.easeInOut,
@@ -332,7 +334,7 @@ class HomeHeader extends StatelessWidget {
       child: Row(
         children: [
           const Icon(Icons.location_on_outlined,
-              size: 14, color: Color(0xFF1A1A2E)),
+              size: 14, color: AppColors.textPrimary),
           const SizedBox(width: 3),
           ValueListenableBuilder<String>(
             valueListenable: LocationState().selectedCity,
@@ -344,14 +346,14 @@ class HomeHeader extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 12),
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF1A1A2E),
+                  color: AppColors.textPrimary,
                 ),
               );
             },
           ),
           const SizedBox(width: 2),
           const Icon(Icons.keyboard_arrow_down,
-              size: 16, color: Color(0xFF1A1A2E)),
+              size: 16, color: AppColors.textPrimary),
         ],
       ),
     );
@@ -363,21 +365,29 @@ class HomeHeader extends StatelessWidget {
       title: locationShowcaseConfig.title,
       description: locationShowcaseConfig.description,
       overlayOpacity: 0.78,
-      tooltipBackgroundColor: const Color(0xFF1A1A2E),
+      tooltipBackgroundColor: AppColors.textPrimary,
       textColor: Colors.white,
       scaleAnimationDuration: const Duration(milliseconds: 350),
       scaleAnimationCurve: Curves.easeInOut,
       movingAnimationDuration: const Duration(milliseconds: 350),
       targetPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      // Tapping the location chip opens LocationScreen; tour advances on pop.
-      // `disposeOnTap` is required by showcaseview whenever `onTargetClick` is
-      // set; we handle navigation ourselves so dispose the showcase on tap.
+      // Tapping the location chip opens LocationScreen. `disposeOnTap` is
+      // required by showcaseview whenever `onTargetClick` is set; we dispose the
+      // running showcase first so its dark overlay doesn't cover LocationScreen.
+      // When the user returns we RESUME the tour from the navbar tabs through
+      // the profile avatar (a plain `.next()` here would be a no-op because the
+      // showcase was just disposed — which is what dropped those later steps).
       disposeOnTap: true,
       onTargetClick: () {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => const LocationScreen()),
-        ).then((_) => ShowcaseView.get().next());
+        ).then((_) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ShowcaseView.get()
+                .startShowCase(WalkthroughKeys.afterLocationKeys);
+          });
+        });
       },
       child: locationRow,
     );
@@ -417,7 +427,7 @@ class HomeHeader extends StatelessWidget {
         child: Row(
           children: [
             const SizedBox(width: 18),
-            const Icon(Icons.search, color: Color(0xFF1A1A2E), size: 22),
+            const Icon(Icons.search, color: AppColors.textPrimary, size: 22),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -425,17 +435,17 @@ class HomeHeader extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 14),
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF1A1A2E),
+                  color: AppColors.textPrimary,
                 ),
               ),
             ),
             Container(
               width: 1,
               height: 22,
-              color: const Color(0xFF1A1A2E).withOpacity(0.18),
+              color: AppColors.textPrimary.withOpacity(0.18),
             ),
             const SizedBox(width: 14),
-            const Icon(Icons.tune_rounded, color: Color(0xFF1A1A2E), size: 20),
+            const Icon(Icons.tune_rounded, color: AppColors.textPrimary, size: 20),
             const SizedBox(width: 18),
           ],
         ),

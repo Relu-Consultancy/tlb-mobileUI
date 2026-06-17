@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_state.dart';
@@ -31,13 +32,13 @@ class _RemindersScreenState extends State<RemindersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: AppColors.lightGray,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF2F2F7),
+        backgroundColor: AppColors.lightGray,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -45,7 +46,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -70,7 +71,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 22),
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF1A1A2E),
+                              color: AppColors.textPrimary,
                             ),
                           );
                         },
@@ -91,7 +92,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                   errorBuilder: (_, __, ___) => const Icon(
                     Icons.notifications_active,
                     size: 64,
-                    color: Color(0xFFFFB902),
+                    color: AppColors.starAmber,
                   ),
                 ),
               ],
@@ -104,7 +105,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 14),
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF1A1A2E),
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 10),
@@ -179,7 +180,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 14),
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF1A1A2E),
+                              color: AppColors.textPrimary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -242,7 +243,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                 child: OutlinedButton(
                   onPressed: () {},
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFFFFB902)),
+                    side: const BorderSide(color: AppColors.starAmber),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
@@ -251,7 +252,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 12),
                       fontWeight: FontWeight.w500,
-                      color: const Color(0xFF1A1A2E),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),

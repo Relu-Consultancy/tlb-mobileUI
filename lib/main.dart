@@ -4,12 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/app_theme.dart';
 import 'core/firebase_bootstrap.dart';
 import 'core/preview_mode.dart';
 import 'providers/auth_state.dart';
 import 'providers/follow_state.dart';
+import 'providers/notifications_state.dart';
 import 'providers/saved_events_state.dart';
+import 'services/push_notifications.dart';
 import 'services/avatar_storage.dart';
 import 'screens/home_screen.dart';
 import 'screens/splash_screen.dart';
@@ -26,6 +29,12 @@ void main() async {
   } catch (_) {
     /* swallowed — retried on-demand in Google sign-in flows */
   }
+  // Push notifications need Firebase. Register the background handler + set up
+  // FCM/local notifications only if Firebase actually came up.
+  if (FirebaseBootstrap.isInitialized) {
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    await PushNotifications.init();
+  }
   await PreviewMode.load();
   // Local profile picture survives across launches even though backend
   // profile API has no avatar field yet.
@@ -36,6 +45,10 @@ void main() async {
     SavedEventsState.loadFromApi(); // fire-and-forget
     final uid = AuthState.userId;
     if (uid != null) FollowState.loadForUser(uid); // fire-and-forget
+    if (FirebaseBootstrap.isInitialized) {
+      PushNotifications.registerToken(); // fire-and-forget
+    }
+    NotificationsState.syncAndNotify(); // mirror any new items to the tray
   }
   // Request highest refresh rate (90Hz / 120Hz depending on device)
   await FlutterDisplayMode.setHighRefreshRate();
@@ -102,6 +115,8 @@ class TLBApp extends StatelessWidget {
     return MaterialApp(
       title: 'TLB',
       debugShowCheckedModeBanner: false,
+      // Lets a tapped push/local notification route to the in-app screen.
+      navigatorKey: PushNotifications.navigatorKey,
       theme: AppTheme.lightTheme,
       // DevicePreview.locale / appBuilder require the DevicePreview ancestor
       // — which is only present in debug builds — so skip them in profile

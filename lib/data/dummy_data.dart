@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import '../models/event_model.dart';
 import '../models/category_model.dart';
 
@@ -87,7 +88,7 @@ class DummyData {
       'label': 'MasterClass',
       'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/masterclass.png',
       'formatSlug': 'masterclass',
-      'accentColor': Color(0xFF1A1A2E),
+      'accentColor': AppColors.textPrimary,
       'invertColors': true,
       'scale': 1.45, // 1 / 0.690
     },
@@ -746,7 +747,7 @@ class DummyData {
     {
       'sport': 'Climbing',
       'image': 'resources- tlb-ui/venues_page/getmoving/2.png',
-      'gradient': <Color>[Color(0xFF60A5FA), Color(0xFF3B82F6)],
+      'gradient': <Color>[Color(0xFF60A5FA), AppColors.blue],
       'slotsText': 'Slots Available today',
       'venues': <Map<String, dynamic>>[
         {'name': 'Rock Climb Zone', 'location': 'Andheri • 5 Kms', 'image': 'assets/images/new_home/hotpic3.png', 'slots': <String>['10:00 AM', '11:00 AM', '12:00 PM']},

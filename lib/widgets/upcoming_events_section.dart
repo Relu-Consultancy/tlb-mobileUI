@@ -98,7 +98,7 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 17),
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFF1A1A2E),
+                  color: AppColors.textPrimary,
                 ),
               ),
               Row(
@@ -160,7 +160,7 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
                   onPressed: _fetch,
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
-                    foregroundColor: const Color(0xFF3B82F6),
+                    foregroundColor: AppColors.blue,
                   ),
                   child: Text('Retry',
                       style: GoogleFonts.poppins(
@@ -228,7 +228,7 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 14.5),
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF1A1A2E),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 6),

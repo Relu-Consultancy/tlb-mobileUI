@@ -401,7 +401,7 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
         child: ElevatedButton(
           onPressed: _isValid ? _onContinue : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFFFCC00),
+            backgroundColor: AppColors.primaryLight,
             foregroundColor: AppColors.textPrimary,
             disabledBackgroundColor: Colors.grey.shade200,
             disabledForegroundColor: Colors.grey.shade400,

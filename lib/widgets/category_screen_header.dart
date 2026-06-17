@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 
@@ -60,7 +61,7 @@ class CategoryScreenHeader extends StatelessWidget {
                     child: const Icon(
                       Icons.arrow_back,
                       size: 22,
-                      color: Color(0xFF1A1A2E),
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -69,7 +70,7 @@ class CategoryScreenHeader extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 18),
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
@@ -108,7 +109,7 @@ class CategoryScreenHeader extends StatelessWidget {
                       ),
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 13),
-                        color: const Color(0xFF1A1A2E),
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ),
@@ -120,7 +121,7 @@ class CategoryScreenHeader extends StatelessWidget {
                         Icons.tune_rounded,
                         size: 20,
                         color: onFilterTap != null
-                            ? const Color(0xFF1A1A2E) // black
+                            ? AppColors.textPrimary // black
                             : const Color(0xFF8E8E93),
                       ),
                     ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../models/api_event_model.dart';
@@ -32,7 +33,7 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
   late List<String> _times;
 
   static const Color _bg = Color(0xFFF2F3F5);
-  static const Color _dark = Color(0xFF1A1A2E);
+  static const Color _dark = AppColors.textPrimary;
 
   static String _fmtDate(DateTime dt) {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -169,7 +170,7 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
                     }
                   : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFCC00),
+                backgroundColor: AppColors.primaryLight,
                 foregroundColor: _dark,
                 disabledBackgroundColor: Colors.grey.shade300,
                 elevation: 0,

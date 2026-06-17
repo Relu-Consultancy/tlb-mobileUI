@@ -20,7 +20,7 @@ class AboutUsScreen extends StatelessWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         titleSpacing: 0,
@@ -29,7 +29,7 @@ class AboutUsScreen extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -86,7 +86,7 @@ class AboutUsScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           child: Row(
             children: [
-              Icon(icon, size: 21, color: const Color(0xFF1A1A2E)),
+              Icon(icon, size: 21, color: AppColors.textPrimary),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(

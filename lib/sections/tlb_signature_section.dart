@@ -1,4 +1,5 @@
 import '../core/responsive.dart';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
 import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
@@ -21,6 +22,7 @@ class TlbSignatureSection extends StatelessWidget {
         // final items = HomeFeedState.section('tlb_signature');
         // if (items.isEmpty) return const SizedBox.shrink();
         final items = DummyData.tlbSignature;
+        if (items.isEmpty) return const SizedBox.shrink();
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -28,7 +30,7 @@ class TlbSignatureSection extends StatelessWidget {
           title: 'TLB Signature',
           topPadding: 30, // 30px gap from previous section's cards
           fontSize: 17,
-          textColor: Color(0xFF1A1A2E), // dark navy
+          textColor: AppColors.textPrimary, // dark navy
         ),
         SizedBox(
           height: Responsive.h(context, 480, min: 430),
@@ -103,7 +105,7 @@ class TlbSignatureSection extends StatelessWidget {
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 16),
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF1A1A2E),
+                              color: AppColors.textPrimary,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -113,7 +115,7 @@ class TlbSignatureSection extends StatelessWidget {
                             event.venue, // venue holds the subtitle/description
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 13),
-                              color: Color(0xFF333333),
+                              color: AppColors.textSecondary,
                               height: 1.4,
                             ),
                             maxLines: 2,
@@ -128,8 +130,8 @@ class TlbSignatureSection extends StatelessWidget {
                                 openListingDetail(context, event);
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFFFCC00),
-                                foregroundColor: const Color(0xFF1A1A2E),
+                                backgroundColor: AppColors.primaryLight,
+                                foregroundColor: AppColors.textPrimary,
                                 elevation: 0,
                                 // Let the SizedBox drive the height instead of the
                                 // default 48px padded tap target (which squished

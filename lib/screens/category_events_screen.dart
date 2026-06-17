@@ -3,7 +3,7 @@ import '../widgets/app_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
-import '../core/app_snackbar.dart';
+import '../widgets/error_retry_view.dart';
 import '../core/responsive.dart';
 import '../models/api_event_model.dart';
 import '../models/event_model.dart';
@@ -38,6 +38,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
   static const int _pageSize = 20;
   List<ApiEvent> _apiEvents = [];
   bool _isLoadingEvents = true;
+  String? _eventsError;
   bool _isLoadingMore = false;
   bool _hasMore = false;
   int _currentPage = 1;
@@ -45,7 +46,9 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedCategoryIndex = widget.initialCategoryIndex.clamp(0, widget.categories.length - 1);
+    _selectedCategoryIndex = widget.categories.isEmpty
+        ? 0
+        : widget.initialCategoryIndex.clamp(0, widget.categories.length - 1);
     _chipKeys = List.generate(widget.categories.length, (_) => GlobalKey());
     _listScrollController.addListener(_onScroll);
     _fetchEvents();
@@ -72,7 +75,10 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
     try {
       final next = await EventsListingService.fetchEvents(
         category: _categoryTitle,
-        subcategory: _selectedFilterIndex == 0 ? null : _filters[_selectedFilterIndex],
+        subcategory: _selectedFilterIndex <= 0 ||
+                _selectedFilterIndex >= _filters.length
+            ? null
+            : _filters[_selectedFilterIndex],
         city: LocationState().selectedCity.value,
         page: _currentPage + 1,
         pageSize: _pageSize,
@@ -93,6 +99,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
   Future<void> _fetchEvents({String? subcategory}) async {
     setState(() {
       _isLoadingEvents = true;
+      _eventsError = null;
       _currentPage = 1;
       _hasMore = false;
     });
@@ -115,9 +122,9 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
       final msg = e.toString().replaceFirst('Exception: ', '');
       setState(() {
         _apiEvents = [];
+        _eventsError = msg;
         _isLoadingEvents = false;
       });
-      AppSnackBar.error(context, 'Events: $msg');
     }
   }
 
@@ -242,18 +249,6 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                                     color: AppColors.textPrimary,
                                   ),
                                 ),
-                                const Spacer(),
-                                GestureDetector(
-                                  onTap: () {},
-                                  child: Text(
-                                    'See All >',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 12),
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColors.seeAllBlue,
-                                    ),
-                                  ),
-                                ),
                               ],
                             ),
                           ),
@@ -351,7 +346,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                       padding: const EdgeInsets.fromLTRB(16, 22, 16, 0),
                       child: Row(
                         children: [
-                          Expanded(child: Container(height: 1.5, color: const Color(0xFFFFB902))),
+                          Expanded(child: Container(height: 1.5, color: AppColors.starAmber)),
                           const SizedBox(width: 10),
                           Text(
                             'All $_categoryTitle',
@@ -362,7 +357,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                             ),
                           ),
                           const SizedBox(width: 10),
-                          Expanded(child: Container(height: 1.5, color: const Color(0xFFFFB902))),
+                          Expanded(child: Container(height: 1.5, color: AppColors.starAmber)),
                         ],
                       ),
                     ),
@@ -448,6 +443,19 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                     const SliverFillRemaining(
                       hasScrollBody: false,
                       child: AppLoader(),
+                    )
+                  else if (_eventsError != null)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: ErrorRetryView(
+                        message: _eventsError!,
+                        onRetry: () => _fetchEvents(
+                          subcategory: _selectedFilterIndex <= 0 ||
+                                  _selectedFilterIndex >= _filters.length
+                              ? null
+                              : _filters[_selectedFilterIndex],
+                        ),
+                      ),
                     )
                   else if (_filteredEvents.isEmpty)
                     SliverFillRemaining(

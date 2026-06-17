@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
@@ -57,7 +58,7 @@ class TrendingEventCard extends StatelessWidget {
                         event.imagePath,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
-                          color: const Color(0xFFFFCC00).withOpacity(0.15),
+                          color: AppColors.primaryLight.withOpacity(0.15),
                           child: const Icon(Icons.event, size: 40),
                         ),
                       ),
@@ -87,7 +88,7 @@ class TrendingEventCard extends StatelessWidget {
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 13),
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF1A1A2E),
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -132,7 +133,7 @@ class TrendingEventCard extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 16),
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF1A1A2E),
+                      color: AppColors.textPrimary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -212,8 +213,8 @@ class TrendingEventCard extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: openDetail,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFFCC00),
-                            foregroundColor: const Color(0xFF1A1A2E),
+                            backgroundColor: AppColors.primaryLight,
+                            foregroundColor: AppColors.textPrimary,
                             elevation: 0,
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 12),

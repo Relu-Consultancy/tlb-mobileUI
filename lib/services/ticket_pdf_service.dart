@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../core/app_colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -35,7 +36,7 @@ class TicketPdfService {
           height: 48,
           child: CircularProgressIndicator(
             strokeWidth: 3,
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFFCC00)),
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryLight),
           ),
         ),
       ),

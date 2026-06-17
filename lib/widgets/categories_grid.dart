@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
@@ -53,7 +54,7 @@ class CategoriesGrid extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 17),
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -156,7 +157,7 @@ class CategoriesGrid extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 14),
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF1A1A2E),
+                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 3),

@@ -229,7 +229,8 @@ class ApiVenueDetail extends ApiVenue {
         cover: (json['media'] as List?)
             ?.whereType<Map<String, dynamic>>()
             .where((m) => m['media_type'] == 'cover')
-            .map((m) => m['url'] as String)
+            .map((m) => m['url'] as String?)
+            .whereType<String>()
             .firstOrNull,
         distanceKm: (json['distance_km'] as num?)?.toDouble(),
         description: json['description'] as String?,

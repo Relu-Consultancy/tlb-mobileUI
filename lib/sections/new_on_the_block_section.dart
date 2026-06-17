@@ -1,4 +1,5 @@
 import '../core/responsive.dart';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
 import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
@@ -19,6 +20,7 @@ class NewOnTheBlockSection extends StatelessWidget {
         // final items = HomeFeedState.section('new_on_the_block');
         // if (items.isEmpty) return const SizedBox.shrink();
         final items = DummyData.newOnTheBlock;
+        if (items.isEmpty) return const SizedBox.shrink();
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -26,7 +28,7 @@ class NewOnTheBlockSection extends StatelessWidget {
           title: 'New on the Block',
           topPadding: 30, // 30px gap from previous section's cards
           fontSize: 17,
-          textColor: Color(0xFF1A1A2E), // dark navy
+          textColor: AppColors.textPrimary, // dark navy
         ),
         SizedBox(
           height: Responsive.h(context, 330, min: 290),
@@ -126,7 +128,7 @@ class NewOnTheBlockSection extends StatelessWidget {
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 16),
                               fontWeight: FontWeight.w600,
-                              color: const Color(0xFF1A1A2E),
+                              color: AppColors.textPrimary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -137,14 +139,14 @@ class NewOnTheBlockSection extends StatelessWidget {
                           Row(
                             children: [
                               const Icon(Icons.location_on_outlined,
-                                  size: 14, color: Color(0xFF333333)),
+                                  size: 14, color: AppColors.textSecondary),
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
                                   event.venue,
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 13),
-                                    color: Color(0xFF333333),
+                                    color: AppColors.textSecondary,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,

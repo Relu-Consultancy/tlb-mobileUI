@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_snackbar.dart';
 import '../core/avatar_image.dart';
@@ -14,13 +15,13 @@ class AccountSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: AppColors.lightGray,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF2F2F7),
+        backgroundColor: AppColors.lightGray,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -28,7 +29,7 @@ class AccountSettingsScreen extends StatelessWidget {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -84,7 +85,7 @@ class AccountSettingsScreen extends StatelessWidget {
                                     width: 22,
                                     height: 22,
                                     decoration: const BoxDecoration(
-                                      color: Color(0xFF1A1A2E),
+                                      color: AppColors.textPrimary,
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(Icons.camera_alt, size: 12, color: Colors.white),
@@ -109,7 +110,7 @@ class AccountSettingsScreen extends StatelessWidget {
                                     style: GoogleFonts.poppins(
                                       fontSize: Responsive.sp(context, 15),
                                       fontWeight: FontWeight.w500,
-                                      color: const Color(0xFF1A1A2E),
+                                      color: AppColors.textPrimary,
                                     ),
                                   ),
                                   Text(
@@ -124,7 +125,7 @@ class AccountSettingsScreen extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            const Icon(Icons.chevron_right, color: Color(0xFF2563EB)),
+                            const Icon(Icons.chevron_right, color: AppColors.accentBlue),
                           ],
                         ),
                       );
@@ -163,7 +164,7 @@ class AccountSettingsScreen extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 13),
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF1A1A2E),
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ),
@@ -306,7 +307,7 @@ class AccountSettingsScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
-              Icon(icon, size: 20, color: const Color(0xFF1A1A2E)),
+              Icon(icon, size: 20, color: AppColors.textPrimary),
               const SizedBox(width: 14),
               Expanded(
                 child: Text(
@@ -314,11 +315,11 @@ class AccountSettingsScreen extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 14.5),
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Color(0xFF2563EB)),
+              const Icon(Icons.chevron_right, color: AppColors.accentBlue),
             ],
           ),
         ),

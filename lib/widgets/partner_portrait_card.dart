@@ -89,7 +89,7 @@ class PartnerPortraitCard extends StatelessWidget {
                     width: double.infinity,
                     height: 40,
                     child: Material(
-                      color: const Color(0xFFFFCC00),
+                      color: AppColors.primaryLight,
                       borderRadius: BorderRadius.circular(24),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(24),

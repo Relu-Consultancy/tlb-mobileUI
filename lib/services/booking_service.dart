@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/api_booking_model.dart';
+import 'auth_http.dart';
 
 class BookingService {
   static const _base = 'https://tlb-api.reluconsultancy.in';
@@ -55,18 +56,18 @@ class BookingService {
     }
 
     try {
-      final resp = await http
+      final resp = await AuthHttp.send((t) => http
           .post(
             Uri.parse('$_base/api/v1/bookings/initiate/'),
             headers: {
-              'Authorization': 'Bearer $token',
+              'Authorization': 'Bearer $t',
               'Content-Type': 'application/json',
             },
             body: jsonEncode(body),
           )
-          .timeout(_timeout);
+          .timeout(_timeout));
 
-      final json = jsonDecode(resp.body) as Map<String, dynamic>;
+      final json = _decode(resp.body);
       final data = _unwrap(json);
 
       if (resp.statusCode == 201 && (json['success'] == true || json['success'] == null)) {
@@ -126,18 +127,18 @@ class BookingService {
     }
 
     try {
-      final resp = await http
+      final resp = await AuthHttp.send((t) => http
           .post(
             Uri.parse('$_base/api/v1/bookings/initiate-with-saved-method/'),
             headers: {
-              'Authorization': 'Bearer $token',
+              'Authorization': 'Bearer $t',
               'Content-Type': 'application/json',
             },
             body: jsonEncode(body),
           )
-          .timeout(_timeout);
+          .timeout(_timeout));
 
-      final json = jsonDecode(resp.body) as Map<String, dynamic>;
+      final json = _decode(resp.body);
       final data = _unwrap(json);
 
       if (resp.statusCode == 201 && (json['success'] == true || json['success'] == null)) {
@@ -171,18 +172,18 @@ class BookingService {
         body['save_method'] = saveMethod;
       }
 
-      final resp = await http
+      final resp = await AuthHttp.send((t) => http
           .post(
             Uri.parse('$_base/api/v1/bookings/$bookingId/verify-payment/'),
             headers: {
-              'Authorization': 'Bearer $token',
+              'Authorization': 'Bearer $t',
               'Content-Type': 'application/json',
             },
             body: jsonEncode(body),
           )
-          .timeout(_timeout);
+          .timeout(_timeout));
 
-      final json = jsonDecode(resp.body) as Map<String, dynamic>;
+      final json = _decode(resp.body);
       final data = _unwrap(json);
 
       if (resp.statusCode == 200 && (json['success'] == true || json['success'] == null)) {
@@ -207,15 +208,15 @@ class BookingService {
     if (status != null) params['status'] = status;
 
     try {
-      final resp = await http
+      final resp = await AuthHttp.send((t) => http
           .get(
             Uri.parse('$_base/api/v1/bookings/')
                 .replace(queryParameters: params),
-            headers: {'Authorization': 'Bearer $token'},
+            headers: {'Authorization': 'Bearer $t'},
           )
-          .timeout(_timeout);
+          .timeout(_timeout));
 
-      final json = jsonDecode(resp.body) as Map<String, dynamic>;
+      final json = _decode(resp.body);
 
       if (resp.statusCode == 200 && (json['success'] == true || json['success'] == null)) {
         final data = _unwrap(json);
@@ -236,14 +237,14 @@ class BookingService {
     required String bookingId,
   }) async {
     try {
-      final resp = await http
+      final resp = await AuthHttp.send((t) => http
           .get(
             Uri.parse('$_base/api/v1/bookings/$bookingId/'),
-            headers: {'Authorization': 'Bearer $token'},
+            headers: {'Authorization': 'Bearer $t'},
           )
-          .timeout(_timeout);
+          .timeout(_timeout));
 
-      final json = jsonDecode(resp.body) as Map<String, dynamic>;
+      final json = _decode(resp.body);
 
       if (resp.statusCode == 200 && (json['success'] == true || json['success'] == null)) {
         return ApiBookingItem.fromJson(_unwrap(json));
@@ -262,14 +263,14 @@ class BookingService {
     required String bookingId,
   }) async {
     try {
-      final resp = await http
+      final resp = await AuthHttp.send((t) => http
           .get(
             Uri.parse('$_base/api/v1/bookings/$bookingId/ticket/data/'),
-            headers: {'Authorization': 'Bearer $token'},
+            headers: {'Authorization': 'Bearer $t'},
           )
-          .timeout(_timeout);
+          .timeout(_timeout));
 
-      final json = jsonDecode(resp.body) as Map<String, dynamic>;
+      final json = _decode(resp.body);
 
       if (resp.statusCode == 200 && (json['success'] == true || json['success'] == null)) {
         return _unwrap(json);
@@ -289,12 +290,12 @@ class BookingService {
     required String bookingId,
   }) async {
     try {
-      final resp = await http
+      final resp = await AuthHttp.send((t) => http
           .get(
             Uri.parse('$_base/api/v1/bookings/$bookingId/ticket/'),
-            headers: {'Authorization': 'Bearer $token'},
+            headers: {'Authorization': 'Bearer $t'},
           )
-          .timeout(_timeout);
+          .timeout(_timeout));
 
       if (resp.statusCode == 200) {
         return resp.body;
@@ -314,12 +315,12 @@ class BookingService {
     required String bookingId,
   }) async {
     try {
-      final resp = await http
+      final resp = await AuthHttp.send((t) => http
           .get(
             Uri.parse('$_base/api/v1/bookings/$bookingId/invoice/'),
-            headers: {'Authorization': 'Bearer $token'},
+            headers: {'Authorization': 'Bearer $t'},
           )
-          .timeout(_timeout);
+          .timeout(_timeout));
 
       if (resp.statusCode == 200) {
         return resp.body;
@@ -338,14 +339,14 @@ class BookingService {
     required String razorpayOrderId,
   }) async {
     try {
-      final resp = await http
+      final resp = await AuthHttp.send((t) => http
           .get(
             Uri.parse('$_base/api/v1/bookings/payment/$razorpayOrderId/'),
-            headers: {'Authorization': 'Bearer $token'},
+            headers: {'Authorization': 'Bearer $t'},
           )
-          .timeout(_timeout);
+          .timeout(_timeout));
 
-      final json = jsonDecode(resp.body) as Map<String, dynamic>;
+      final json = _decode(resp.body);
 
       if (resp.statusCode == 200 && (json['success'] == true || json['success'] == null)) {
         return _unwrap(json);
@@ -368,18 +369,18 @@ class BookingService {
     if (reason != null && reason.isNotEmpty) body['reason'] = reason;
 
     try {
-      final resp = await http
+      final resp = await AuthHttp.send((t) => http
           .post(
             Uri.parse('$_base/api/v1/bookings/$bookingId/cancel/'),
             headers: {
-              'Authorization': 'Bearer $token',
+              'Authorization': 'Bearer $t',
               'Content-Type': 'application/json',
             },
             body: jsonEncode(body),
           )
-          .timeout(_timeout);
+          .timeout(_timeout));
 
-      final json = jsonDecode(resp.body) as Map<String, dynamic>;
+      final json = _decode(resp.body);
 
       if (resp.statusCode == 200 && (json['success'] == true || json['success'] == null)) {
         return ApiBookingItem.fromJson(_unwrap(json));
@@ -393,6 +394,18 @@ class BookingService {
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
+
+  /// Safely decodes a JSON object body. Returns {} for a non-object payload
+  /// (HTML error page, bare array, empty body) so an unexpected response
+  /// degrades to a clean "_extractError" message instead of a raw crash.
+  static Map<String, dynamic> _decode(String body) {
+    try {
+      final decoded = jsonDecode(body);
+      return decoded is Map<String, dynamic> ? decoded : <String, dynamic>{};
+    } catch (_) {
+      return <String, dynamic>{};
+    }
+  }
 
   static Map<String, dynamic> _unwrap(Map<String, dynamic> body) {
     final data = body['data'];

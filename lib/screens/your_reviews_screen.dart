@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -41,18 +42,18 @@ class _YourReviewsScreenState extends State<YourReviewsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: AppColors.lightGray,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF2F2F7),
+        backgroundColor: AppColors.lightGray,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Your Reviews',
-          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 18), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E)),
+          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 18), fontWeight: FontWeight.w500, color: AppColors.textPrimary),
         ),
       ),
       body: AppRefreshIndicator(
@@ -76,7 +77,7 @@ class _YourReviewsScreenState extends State<YourReviewsScreen> {
                           builder: (_, __, ___) => Text(
                             'Hi ${AuthState.firstName},',
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 22), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E),
+                              fontSize: Responsive.sp(context, 22), fontWeight: FontWeight.w500, color: AppColors.textPrimary,
                             ),
                           ),
                         ),
@@ -90,14 +91,14 @@ class _YourReviewsScreenState extends State<YourReviewsScreen> {
                   Image.asset(
                     'resources- tlb-ui/accounts_page/reviews.png',
                     width: 110,
-                    errorBuilder: (_, __, ___) => const Icon(Icons.star, size: 64, color: Color(0xFFFFB902)),
+                    errorBuilder: (_, __, ___) => const Icon(Icons.star, size: 64, color: AppColors.starAmber),
                   ),
                 ],
               ),
 
               const SizedBox(height: 20),
               Text('Activities Review',
-                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
+                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
               const SizedBox(height: 10),
 
               // ── Content ──
@@ -116,7 +117,7 @@ class _YourReviewsScreenState extends State<YourReviewsScreen> {
                         const SizedBox(height: 12),
                         TextButton(
                           onPressed: _load,
-                          child: Text('Retry', style: GoogleFonts.poppins(color: const Color(0xFFFFB902), fontWeight: FontWeight.w500)),
+                          child: Text('Retry', style: GoogleFonts.poppins(color: AppColors.starAmber, fontWeight: FontWeight.w500)),
                         ),
                       ],
                     ),
@@ -197,7 +198,7 @@ class _ReviewCard extends StatelessWidget {
                           child: Text(
                             title,
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E),
+                              fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w500, color: AppColors.textPrimary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -227,7 +228,7 @@ class _ReviewCard extends StatelessWidget {
             children: List.generate(5, (i) => Icon(
               i < review.rating ? Icons.star_rounded : Icons.star_outline_rounded,
               size: 20,
-              color: i < review.rating ? const Color(0xFFFFB902) : Colors.grey.shade300,
+              color: i < review.rating ? AppColors.starAmber : Colors.grey.shade300,
             )),
           ),
 
@@ -237,7 +238,7 @@ class _ReviewCard extends StatelessWidget {
             Text(
               '"${review.comment}"',
               style: GoogleFonts.poppins(
-                fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E), height: 1.4,
+                fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: AppColors.textPrimary, height: 1.4,
               ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
@@ -284,12 +285,12 @@ class _ReviewCard extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: () => _edit(context),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFFFFB902)),
+                    side: const BorderSide(color: AppColors.starAmber),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                   child: Text('Edit Review',
-                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
+                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
                 ),
               ),
               const SizedBox(width: 12),

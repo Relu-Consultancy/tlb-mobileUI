@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/api_notification_model.dart';
+import 'auth_http.dart';
 
 /// REST wrapper for the customer-side in-app notification endpoints
 /// (`/api/v1/notifications/...`). All calls use the customer's own JWT.
@@ -33,8 +34,8 @@ class NotificationService {
       };
       final uri = Uri.parse('$_base/api/v1/notifications/in-app/')
           .replace(queryParameters: params);
-      final res =
-          await http.get(uri, headers: _headers(token)).timeout(_timeout);
+      final res = await AuthHttp.send(
+          (t) => http.get(uri, headers: _headers(t)).timeout(_timeout));
 
       final body = _decode(res.body);
       if (res.statusCode == 200) {
@@ -69,12 +70,12 @@ class NotificationService {
   /// Returns the unread count, or null on any failure (caller keeps prior value).
   static Future<int?> unreadCount({required String token}) async {
     try {
-      final res = await http
+      final res = await AuthHttp.send((t) => http
           .get(
             Uri.parse('$_base/api/v1/notifications/in-app/unread-count/'),
-            headers: _headers(token),
+            headers: _headers(t),
           )
-          .timeout(_timeout);
+          .timeout(_timeout));
       if (res.statusCode != 200) return null;
       final body = _decode(res.body);
       final data = body['data'];
@@ -95,12 +96,12 @@ class NotificationService {
     required String id,
   }) async {
     try {
-      final res = await http
+      final res = await AuthHttp.send((t) => http
           .post(
             Uri.parse('$_base/api/v1/notifications/in-app/$id/read/'),
-            headers: _headers(token),
+            headers: _headers(t),
           )
-          .timeout(_timeout);
+          .timeout(_timeout));
       return res.statusCode == 200 || res.statusCode == 204;
     } catch (_) {
       return false;
@@ -113,12 +114,12 @@ class NotificationService {
   /// Returns the number marked read, or null on failure.
   static Future<int?> markAllRead({required String token}) async {
     try {
-      final res = await http
+      final res = await AuthHttp.send((t) => http
           .post(
             Uri.parse('$_base/api/v1/notifications/in-app/read-all/'),
-            headers: _headers(token),
+            headers: _headers(t),
           )
-          .timeout(_timeout);
+          .timeout(_timeout));
       if (res.statusCode != 200) return null;
       final body = _decode(res.body);
       final data = body['data'];
@@ -128,6 +129,38 @@ class NotificationService {
       return 0;
     } catch (_) {
       return null;
+    }
+  }
+
+  // ── Device token registration (for FCM push) ──────────────────────────────────
+
+  /// POST /api/v1/notifications/devices/ — registers this device's FCM token so
+  /// the backend can target it with push notifications.
+  ///
+  /// NOTE: the exact path + field names must be confirmed with the backend.
+  /// This sends `{registration_id, type, active}` (the django-push-notifications
+  /// convention). It fails silently — push is best-effort and must never block
+  /// the UI. Returns true on a 2xx response.
+  static Future<bool> registerDeviceToken({
+    required String token,
+    required String fcmToken,
+    required String platform, // 'android' | 'ios'
+  }) async {
+    try {
+      final res = await AuthHttp.send((t) => http
+          .post(
+            Uri.parse('$_base/api/v1/notifications/devices/'),
+            headers: _headers(t),
+            body: jsonEncode({
+              'registration_id': fcmToken,
+              'type': platform,
+              'active': true,
+            }),
+          )
+          .timeout(_timeout));
+      return res.statusCode >= 200 && res.statusCode < 300;
+    } catch (_) {
+      return false;
     }
   }
 

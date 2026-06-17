@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'auth_http.dart';
 
 class WishlistService {
   static const _base = 'https://tlb-api.reluconsultancy.in';
@@ -17,11 +18,9 @@ class WishlistService {
 
   static Future<List<Map<String, dynamic>>> fetchWishlist(String accessToken) async {
     try {
-      final res = await http
-          .get(Uri.parse('$_base/api/v1/wishlist/'), headers: _headers(accessToken))
-          .timeout(_timeout);
-
-      if (res.statusCode == 401) throw Exception('Session expired. Please log in again.');
+      final res = await AuthHttp.send((t) => http
+          .get(Uri.parse('$_base/api/v1/wishlist/'), headers: _headers(t))
+          .timeout(_timeout));
 
       if (res.body.isEmpty) return [];
       final body = jsonDecode(res.body);
@@ -55,15 +54,14 @@ class WishlistService {
   /// Returns the created/reactivated wishlist item (200 or 201 both succeed).
   static Future<void> add(String accessToken, String listingId) async {
     try {
-      final res = await http
+      final res = await AuthHttp.send((t) => http
           .post(
             Uri.parse('$_base/api/v1/wishlist/add/'),
-            headers: _headers(accessToken),
+            headers: _headers(t),
             body: jsonEncode({'listing_id': listingId}),
           )
-          .timeout(_timeout);
+          .timeout(_timeout));
 
-      if (res.statusCode == 401) throw Exception('Session expired. Please log in again.');
       if (res.statusCode == 404) throw Exception('Listing not found.');
       if (res.statusCode == 400) {
         // 400 = already in wishlist (API reactivates removed items, so this means it's already active)
@@ -83,14 +81,13 @@ class WishlistService {
 
   static Future<void> remove(String accessToken, String listingId) async {
     try {
-      final res = await http
+      final res = await AuthHttp.send((t) => http
           .delete(
             Uri.parse('$_base/api/v1/wishlist/remove/$listingId/'),
-            headers: _headers(accessToken),
+            headers: _headers(t),
           )
-          .timeout(_timeout);
+          .timeout(_timeout));
 
-      if (res.statusCode == 401) throw Exception('Session expired. Please log in again.');
       if (res.statusCode == 404) return; // Already removed — treat as success
       if (res.statusCode != 200) throw Exception('Failed to remove from wishlist.');
     } on SocketException {

@@ -20,8 +20,9 @@ class SubcategoryEmptyState extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.fromLTRB(hPad, 6, hPad, 40),
       // Nudge the whole empty state up so it sits higher in the viewport.
+      // (-55 instead of -75 → the image/content sits 20px lower than before.)
       child: Transform.translate(
-        offset: const Offset(0, -75),
+        offset: const Offset(0, -55),
         child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

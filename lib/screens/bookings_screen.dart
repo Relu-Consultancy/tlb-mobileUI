@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../models/api_booking_model.dart';
@@ -92,13 +93,13 @@ class _BookingsScreenState extends State<BookingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: AppColors.lightGray,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF2F2F7),
+        backgroundColor: AppColors.lightGray,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -106,7 +107,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 18),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -194,8 +195,8 @@ class _BookingsScreenState extends State<BookingsScreen> {
             ElevatedButton(
               onPressed: _loadBookings,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFCC00),
-                foregroundColor: const Color(0xFF1A1A2E),
+                backgroundColor: AppColors.primaryLight,
+                foregroundColor: AppColors.textPrimary,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 shape: RoundedRectangleBorder(
@@ -246,7 +247,7 @@ class _TabBar extends StatelessWidget {
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
-                    color: active ? const Color(0xFFFFCC00) : Colors.transparent,
+                    color: active ? AppColors.primaryLight : Colors.transparent,
                     borderRadius: BorderRadius.circular(26),
                   ),
                   child: Text(
@@ -255,7 +256,7 @@ class _TabBar extends StatelessWidget {
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 13),
                       fontWeight: active ? FontWeight.w500 : FontWeight.w500,
-                      color: active ? const Color(0xFF1A1A2E) : Colors.grey.shade500,
+                      color: active ? AppColors.textPrimary : Colors.grey.shade500,
                     ),
                   ),
                 ),
@@ -389,7 +390,7 @@ class _BookingCardState extends State<_BookingCard> {
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 14.5),
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                     height: 1.3,
                   ),
                   maxLines: 2,
@@ -428,7 +429,7 @@ class _BookingCardState extends State<_BookingCard> {
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 12.5),
                         fontWeight: FontWeight.w500,
-                        color: const Color(0xFF1A1A2E),
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ],
@@ -444,7 +445,7 @@ class _BookingCardState extends State<_BookingCard> {
                           horizontal: 16, vertical: 7),
                       decoration: BoxDecoration(
                         border: Border.all(
-                            color: const Color(0xFFFFB902), width: 1.5),
+                            color: AppColors.starAmber, width: 1.5),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
@@ -455,12 +456,12 @@ class _BookingCardState extends State<_BookingCard> {
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 12),
                               fontWeight: FontWeight.w500,
-                              color: const Color(0xFF1A1A2E),
+                              color: AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(width: 4),
                           const Icon(Icons.chevron_right,
-                              size: 16, color: Color(0xFF1A1A2E)),
+                              size: 16, color: AppColors.textPrimary),
                         ],
                       ),
                     ),
@@ -588,7 +589,7 @@ class _StatusBadge extends StatelessWidget {
       case 'hold':
         return const Color(0xFFF59E0B);
       case 'awaiting_payment':
-        return const Color(0xFF3B82F6);
+        return AppColors.blue;
       case 'payment_failed':
         return const Color(0xFFEF4444);
       case 'cancelled':

@@ -122,7 +122,7 @@ class BuildSkillCard extends StatelessWidget {
                             const SizedBox(height: 10),
                             Row(
                               children: [
-                                const Icon(Icons.star_rounded, size: 13, color: Color(0xFFFFB902)),
+                                const Icon(Icons.star_rounded, size: 13, color: AppColors.starAmber),
                                 const SizedBox(width: 3),
                                 Text(
                                   event.rating!.toStringAsFixed(1),
@@ -173,7 +173,7 @@ class BuildSkillCard extends StatelessWidget {
 
                       // CTA pinned to the bottom of the card.
                       Material(
-                        color: const Color(0xFFFFCC00),
+                        color: AppColors.primaryLight,
                         borderRadius: BorderRadius.circular(22),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(22),
@@ -193,7 +193,7 @@ class BuildSkillCard extends StatelessWidget {
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 12),
                                 fontWeight: FontWeight.w500,
-                                color: const Color(0xFF1A1A2E),
+                                color: AppColors.textPrimary,
                               ),
                             ),
                           ),

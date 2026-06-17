@@ -1,4 +1,5 @@
 import 'dart:math';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
 import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
@@ -180,7 +181,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 18),
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF1A1A2E),
+                            color: AppColors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -199,7 +200,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
                         color: Colors.grey.shade100,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.close, size: 18, color: Color(0xFF1A1A2E)),
+                      child: const Icon(Icons.close, size: 18, color: AppColors.textPrimary),
                     ),
                   ),
                 ],
@@ -283,7 +284,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
                         : null,
                     style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 13),
-                        color: const Color(0xFF1A1A2E)),
+                        color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       hintText: 'Ask anything...trail class? feess? timing?',
                       hintStyle: GoogleFonts.poppins(
@@ -325,10 +326,10 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFCC00),
-                    foregroundColor: const Color(0xFF1A1A2E),
+                    backgroundColor: AppColors.primaryLight,
+                    foregroundColor: AppColors.textPrimary,
                     disabledBackgroundColor:
-                        const Color(0xFFFFCC00).withOpacity(0.5),
+                        AppColors.primaryLight.withOpacity(0.5),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
                     elevation: 0,
@@ -340,7 +341,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                                Color(0xFF1A1A2E)),
+                                AppColors.textPrimary),
                           ),
                         )
                       : Text(
@@ -361,13 +362,13 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
   Widget _sectionHeader(IconData icon, String label, {bool required = false, bool optional = false}) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: const Color(0xFF1A1A2E)),
+        Icon(icon, size: 16, color: AppColors.textPrimary),
         const SizedBox(width: 6),
         Text.rich(
           TextSpan(children: [
             TextSpan(
               text: label,
-              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E)),
+              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: AppColors.textPrimary),
             ),
             if (required)
               TextSpan(
@@ -397,7 +398,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
       validator: validator,
       style: GoogleFonts.poppins(
           fontSize: Responsive.sp(context, 13),
-          color: const Color(0xFF1A1A2E)),
+          color: AppColors.textPrimary),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: GoogleFonts.poppins(
@@ -427,7 +428,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
       value: value,
       isExpanded: true,
       icon: const Icon(Icons.keyboard_arrow_down_rounded,
-          color: Color(0xFF1A1A2E), size: 20),
+          color: AppColors.textPrimary, size: 20),
       dropdownColor: Colors.white,
       hint: Text(
         'Select age*',
@@ -437,7 +438,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
       ),
       style: GoogleFonts.poppins(
           fontSize: Responsive.sp(context, 13),
-          color: const Color(0xFF1A1A2E)),
+          color: AppColors.textPrimary),
       items: ages
           .map((age) => DropdownMenuItem(
                 value: age,
@@ -502,7 +503,7 @@ class _EnquirySuccessDialogState extends State<_EnquirySuccessDialog>
   }
 
   static const _kConfettiColors = [
-    Color(0xFFFFCC00),
+    AppColors.primaryLight,
     Color(0xFFFF6B6B),
     Color(0xFF4ECDC4),
     Color(0xFF45B7D1),
@@ -575,8 +576,8 @@ class _EnquirySuccessDialogState extends State<_EnquirySuccessDialog>
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFCC00),
-                      foregroundColor: const Color(0xFF1A1A2E),
+                      backgroundColor: AppColors.primaryLight,
+                      foregroundColor: AppColors.textPrimary,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       elevation: 0,
                     ),

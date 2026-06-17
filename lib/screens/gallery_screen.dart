@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
@@ -55,7 +56,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
         surfaceTintColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
@@ -64,7 +65,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 17),
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -126,11 +127,11 @@ class _GalleryScreenState extends State<GalleryScreen> {
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 14),
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(width: 4),
-                const Icon(Icons.chevron_right, size: 18, color: Color(0xFF1A1A2E)),
+                const Icon(Icons.chevron_right, size: 18, color: AppColors.textPrimary),
               ],
             ),
           ),
@@ -154,7 +155,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       border: isActive
-                          ? Border.all(color: const Color(0xFFFFCC00), width: 2.5)
+                          ? Border.all(color: AppColors.primaryLight, width: 2.5)
                           : null,
                     ),
                     child: ClipRRect(

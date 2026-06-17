@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
@@ -87,7 +88,7 @@ class _PartnerFollowButtonState extends State<PartnerFollowButton> {
         height: 28,
         child: CircularProgressIndicator(
           strokeWidth: 2,
-          color: _isFollowing ? const Color(0xFFFFCC00) : Colors.grey,
+          color: _isFollowing ? AppColors.primaryLight : Colors.grey,
         ),
       );
     }
@@ -96,7 +97,7 @@ class _PartnerFollowButtonState extends State<PartnerFollowButton> {
       return ElevatedButton.icon(
         onPressed: _onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFFCC00),
+          backgroundColor: AppColors.primaryLight,
           foregroundColor: Colors.black,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
