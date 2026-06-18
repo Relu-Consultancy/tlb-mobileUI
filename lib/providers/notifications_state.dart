@@ -40,17 +40,24 @@ class NotificationsState {
   }
 
   static const _seenKey = 'seen_notification_ids';
+  static const _seenUserKey = 'seen_notification_user';
+  // Guards against overlapping runs (main() + home initState fire it almost
+  // together at startup) racing on the seen-set and double-posting to the tray.
+  static bool _syncing = false;
 
   /// Mirrors freshly-arrived in-app notifications to the device's system tray.
   ///
   /// Fetches the latest page, compares against the IDs we've already surfaced
   /// (persisted), and raises a local notification for each NEW unread item.
-  /// On the very first run it just seeds the seen-set so the user isn't blasted
-  /// with a tray full of pre-existing notifications. No-op when logged out /
-  /// offline. Call on app start and whenever the app returns to the foreground.
+  /// On a fresh seed (brand-new install OR a different user just signed in on
+  /// this device) it only records the current IDs WITHOUT notifying, so the
+  /// user isn't blasted with a tray full of pre-existing notifications. No-op
+  /// when logged out / offline. Call on app start and on foreground resume.
   static Future<void> syncAndNotify() async {
     final token = AuthState.accessToken;
     if (token == null || token.isEmpty) return;
+    if (_syncing) return;
+    _syncing = true;
     try {
       final page = await NotificationService.listInApp(
         token: token,
@@ -58,10 +65,16 @@ class NotificationsState {
         pageSize: 20,
       );
       final prefs = await SharedPreferences.getInstance();
-      final firstRun = !prefs.containsKey(_seenKey);
-      final seen = prefs.getStringList(_seenKey)?.toSet() ?? <String>{};
+      final currentUser = AuthState.userId ?? '';
+      // Re-seed (no notifications) on first launch OR when the signed-in user
+      // changed — otherwise switching accounts on a shared device would dump
+      // the new user's whole history into the tray at once.
+      final freshSeed = !prefs.containsKey(_seenKey) ||
+          prefs.getString(_seenUserKey) != currentUser;
+      final seen =
+          freshSeed ? <String>{} : (prefs.getStringList(_seenKey)?.toSet() ?? <String>{});
 
-      if (!firstRun) {
+      if (!freshSeed) {
         // Oldest-first so the tray ordering matches arrival order.
         for (final n in page.results.reversed) {
           if (n.id.isEmpty || n.isRead || seen.contains(n.id)) continue;
@@ -80,8 +93,11 @@ class NotificationsState {
         capped.removeRange(0, capped.length - 300);
       }
       await prefs.setStringList(_seenKey, capped);
+      await prefs.setString(_seenUserKey, currentUser);
     } catch (_) {
       // Best-effort — never disrupt the UI over a tray mirror.
+    } finally {
+      _syncing = false;
     }
   }
 }

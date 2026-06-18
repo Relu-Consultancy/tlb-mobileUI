@@ -71,39 +71,40 @@ class PushNotifications {
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(_channel);
 
-    // ── Permission (Android 13+ POST_NOTIFICATIONS prompt + iOS) ───────────
+    // ── FCM (real push) ────────────────────────────────────────────────────
+    // Entirely guarded: if Firebase didn't initialise, local notifications (set
+    // up above) must still work — the polled-item tray mirror depends only on
+    // the local plugin, never on FCM.
     try {
+      // Permission (Android 13+ POST_NOTIFICATIONS prompt + iOS).
       await FirebaseMessaging.instance.requestPermission();
-    } catch (e) {
-      if (kDebugMode) debugPrint('[Push] requestPermission failed: $e');
-    }
 
-    // Show foreground pushes ourselves (Android suppresses them otherwise).
-    FirebaseMessaging.onMessage.listen((message) {
-      final n = message.notification;
-      final title =
-          n?.title ?? message.data['title'] as String? ?? 'Notification';
-      final body = n?.body ?? message.data['body'] as String? ?? '';
-      if (title.isEmpty && body.isEmpty) return;
-      showLocal(title: title, body: body, payload: 'fcm');
-      // Keep the bell badge fresh.
-      NotificationsState.refreshFromApi();
-    });
+      // Show foreground pushes ourselves (Android suppresses them otherwise).
+      FirebaseMessaging.onMessage.listen((message) {
+        final n = message.notification;
+        final title =
+            n?.title ?? message.data['title'] as String? ?? 'Notification';
+        final body = n?.body ?? message.data['body'] as String? ?? '';
+        if (title.isEmpty && body.isEmpty) return;
+        showLocal(title: title, body: body, payload: 'fcm');
+        // Keep the bell badge fresh.
+        NotificationsState.refreshFromApi();
+      });
 
-    // Tapping a push that opened / resumed the app → in-app notifications.
-    FirebaseMessaging.onMessageOpenedApp.listen((_) => _openNotifications());
-    try {
+      // Tapping a push that opened / resumed the app → in-app notifications.
+      FirebaseMessaging.onMessageOpenedApp.listen((_) => _openNotifications());
       final initial = await FirebaseMessaging.instance.getInitialMessage();
       if (initial != null) {
         // Defer until the navigator is mounted.
         WidgetsBinding.instance
             .addPostFrameCallback((_) => _openNotifications());
       }
-    } catch (_) {/* ignore */}
 
-    // Re-register whenever FCM rotates the token.
-    FirebaseMessaging.instance.onTokenRefresh
-        .listen((_) => registerToken());
+      // Re-register whenever FCM rotates the token.
+      FirebaseMessaging.instance.onTokenRefresh.listen((_) => registerToken());
+    } catch (e) {
+      if (kDebugMode) debugPrint('[Push] FCM setup skipped: $e');
+    }
   }
 
   /// Sends the device's FCM token to the backend so it can target this device
