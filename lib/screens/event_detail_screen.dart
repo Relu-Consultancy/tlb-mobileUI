@@ -315,7 +315,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           ),
                           child: Text(
                             _tag,
-                            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w500, color: Colors.white),
+                            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                           ),
                         ),
                       ),

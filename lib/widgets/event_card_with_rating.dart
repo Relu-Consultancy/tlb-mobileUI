@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
@@ -151,7 +150,7 @@ class EventCardWithRating extends StatelessWidget {
                       Container(
                         margin: const EdgeInsets.only(bottom: 3),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
+                            horizontal: 12, vertical: 4),
                         decoration: BoxDecoration(
                           color: AppColors.primary,
                           borderRadius: BorderRadius.circular(6),
@@ -159,52 +158,13 @@ class EventCardWithRating extends StatelessWidget {
                         child: Text(
                           event.tag!,
                           style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 9),
-                            fontWeight: FontWeight.w500,
+                            fontSize: Responsive.sp(context, 11),
+                            fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
                         ),
                       ),
 
-                    // Age range
-                    if (event.reviewCount != null)
-                      Row(
-                        children: [
-                          const Icon(Icons.people_outline,
-                              size: 13, color: AppColors.textSecondary),
-                          const SizedBox(width: 3),
-                          Text(
-                            event.reviewCount!,
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 11),
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    const SizedBox(height: 8),
-
-                    // Rating row
-                    Row(
-                      children: [
-                        RatingBarIndicator(
-                          rating: event.rating ?? 0,
-                          itemBuilder: (_, __) =>
-                              const Icon(Icons.star, color: AppColors.starFilled),
-                          unratedColor: AppColors.starEmpty,
-                          itemCount: 5,
-                          itemSize: 14,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${event.rating?.toStringAsFixed(1) ?? '0'} reviews',
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 10),
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
                     const SizedBox(height: 8),
 
                     // Venue

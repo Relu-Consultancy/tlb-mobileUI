@@ -598,9 +598,6 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  if ((event.reviewCount ?? '').isNotEmpty)
-                    _iconRow(Icons.people_outline, event.reviewCount!),
                   const SizedBox(height: 10),
                   Row(
                     children: [
@@ -706,9 +703,6 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 9),
-                        if (event.reviewCount != null)
-                          _iconRow(Icons.people_outline, event.reviewCount!),
                         const SizedBox(height: 7),
                         _iconRow(Icons.location_on_outlined, event.venue),
                       ],
@@ -888,7 +882,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
   Widget _iconRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 14, color: Colors.grey.shade500),
+        Icon(icon, size: 14, color: AppColors.textPrimary),
         const SizedBox(width: 5),
         Expanded(
           child: Text(

@@ -130,22 +130,6 @@ class SpecialNeedsSection extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 8),
-                              // Rating
-                              Row(
-                                children: [
-                                  const Icon(Icons.star,
-                                      size: 15, color: Colors.amber),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    event.reviewCount ?? '4.5k reviews',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 13),
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
                               // Location
                               Row(
                                 children: [

@@ -17,10 +17,10 @@ class AppColors {
 
   // Text
   static const Color textPrimary = Color(0xFF1A1A2E);
-  // Darkened from 0xFF6B7280 → somewhat-dark grey for stronger, more legible
-  // secondary text on cards (age range, rating, venue, etc.).
-  static const Color textSecondary = Color(0xFF333333);   // card/secondary text — black @ ~0.80
-  static const Color textDescription = Color(0xFF333333); // card description body — black @ ~0.80
+  // Darkened progressively (0xFF6B7280 → 0xFF333333 → 0xFF262626) for stronger,
+  // more legible secondary text + leading icons on cards (age, venue, etc.).
+  static const Color textSecondary = Color(0xFF262626);   // card/secondary text — black @ ~0.85
+  static const Color textDescription = Color(0xFF262626); // card description body — black @ ~0.85
   static const Color textWhite = Colors.white;
 
   // Accent

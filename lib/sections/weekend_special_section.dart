@@ -193,25 +193,6 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
 
-                                  // Rating: 5 stars + review count
-                                  Row(
-                                    children: [
-                                      ...List.generate(
-                                        5,
-                                        (_) => const Icon(Icons.star,
-                                            size: 14, color: Colors.amber),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        event.reviewCount ?? '',
-                                        style: GoogleFonts.poppins(
-                                          fontSize: Responsive.sp(context, 13),
-                                          color: AppColors.textSecondary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
                                   // Venue + Book Now
                                   Row(
                                     children: [

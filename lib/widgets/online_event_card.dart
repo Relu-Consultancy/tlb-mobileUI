@@ -80,8 +80,8 @@ class OnlineEventCard extends StatelessWidget {
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
+                            horizontal: 14,
+                            vertical: 6,
                           ),
                           decoration: BoxDecoration(
                             color: const Color(0xFFE0F2FE),
@@ -90,8 +90,8 @@ class OnlineEventCard extends StatelessWidget {
                           child: Text(
                             event.tag!,
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 10.5),
-                              fontWeight: FontWeight.w500,
+                              fontSize: Responsive.sp(context, 12.5),
+                              fontWeight: FontWeight.w600,
                               color: const Color(0xFF0284C7),
                             ),
                           ),

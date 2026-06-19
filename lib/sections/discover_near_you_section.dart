@@ -139,7 +139,7 @@ class DiscoverNearYouSection extends StatelessWidget {
                               const SizedBox(width: 6),
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
+                                    horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
                                   color: Colors.grey.shade200,
                                   borderRadius: BorderRadius.circular(12),
@@ -147,8 +147,8 @@ class DiscoverNearYouSection extends StatelessWidget {
                                 child: Text(
                                   'Outdoor Play',
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 10),
-                                    fontWeight: FontWeight.w500,
+                                    fontSize: Responsive.sp(context, 12),
+                                    fontWeight: FontWeight.w600,
                                     color: AppColors.textPrimary,
                                   ),
                                 ),
@@ -174,54 +174,6 @@ class DiscoverNearYouSection extends StatelessWidget {
                                 ),
                               ),
                             ],
-                          ),
-                          const SizedBox(height: 8),
-
-                          // Reviews Row
-                          Row(
-                            children: [
-                              Row(
-                                children: List.generate(
-                                  5,
-                                  (index) => const Icon(Icons.star,
-                                      size: 14, color: Colors.amber),
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                event.reviewCount ?? '3.5k reviews',
-                                style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 13),
-                                    color: AppColors.textSecondary),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-
-                          // Description
-                          RichText(
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: 'Description – ',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 13),
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: event.description ??
-                                      'Slides, Splash Zone, Mini zipline & shaded picnic areas.',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 13),
-                                    color: Color(0xFF2D2D2D), // dark grey description
-                                  ),
-                                ),
-                              ],
-                            ),
                           ),
                         ],
                       ),

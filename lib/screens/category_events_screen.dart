@@ -13,6 +13,7 @@ import '../widgets/category_event_card.dart';
 import '../widgets/category_screen_header.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/subcategory_empty_state.dart';
+import '../widgets/all_categories_popup.dart';
 
 class CategoryEventsScreen extends StatefulWidget {
   final List<Map<String, dynamic>> categories;
@@ -126,6 +127,16 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
         _isLoadingEvents = false;
       });
     }
+  }
+
+  // "See All" — opens the full category grid; tapping one selects it here.
+  void _showAllCategories() {
+    AllCategoriesPopup.show(
+      context,
+      widget.categories,
+      onCategoryTap: (index) =>
+          _selectCategory(index.clamp(0, widget.categories.length - 1)),
+    );
   }
 
   void _selectCategory(int index) {
@@ -249,15 +260,27 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                                     color: AppColors.textPrimary,
                                   ),
                                 ),
+                                const Spacer(),
+                                GestureDetector(
+                                  onTap: _showAllCategories,
+                                  child: Text(
+                                    'See All >',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 12),
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.seeAllBlue,
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                           SizedBox(
-                            height: Responsive.h(context, 110),
+                            height: Responsive.h(context, 142),
                             child: ListView.builder(
                               controller: _chipScrollController,
                               scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+                              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                               itemCount: widget.categories.length,
                               itemBuilder: (context, index) {
                                 final cat = widget.categories[index];

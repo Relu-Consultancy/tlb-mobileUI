@@ -145,7 +145,7 @@ class TrendingEventCard extends StatelessWidget {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
+                            horizontal: 14, vertical: 6),
                         decoration: BoxDecoration(
                           color: const Color(0xFFE8EAFF), // light lavender
                           borderRadius: BorderRadius.circular(8),
@@ -153,37 +153,21 @@ class TrendingEventCard extends StatelessWidget {
                         child: Text(
                           event.tag ?? 'Workshop',
                           style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 11),
-                            fontWeight: FontWeight.w500,
+                            fontSize: Responsive.sp(context, 13),
+                            fontWeight: FontWeight.w600,
                             color: const Color(0xFF5B6CF0), // indigo
                           ),
                         ),
                       ),
                       const Spacer(),
                       const Icon(Icons.people_outline,
-                          size: 15, color: Colors.grey),
+                          size: 15, color: AppColors.textPrimary),
                       const SizedBox(width: 4),
                       Text(
                         event.description ?? '4-12 Yrs',
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 12),
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Rating
-                  Row(
-                    children: [
-                      const Icon(Icons.star, size: 15, color: Colors.amber),
-                      const SizedBox(width: 4),
-                      Text(
-                        event.reviewCount ?? '3.5k reviews',
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 12),
-                          color: Colors.grey,
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ],
@@ -194,14 +178,14 @@ class TrendingEventCard extends StatelessWidget {
                   Row(
                     children: [
                       const Icon(Icons.location_on_outlined,
-                          size: 15, color: Colors.grey),
+                          size: 15, color: AppColors.textPrimary),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           event.venue,
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 12),
-                            color: Colors.grey,
+                            color: AppColors.textSecondary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

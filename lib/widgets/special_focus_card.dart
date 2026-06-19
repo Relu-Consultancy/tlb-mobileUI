@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
@@ -93,21 +92,6 @@ class SpecialFocusCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 5),
 
-                      // Age group
-                      if ((event.reviewCount ?? '').isNotEmpty)
-                        Row(
-                          children: [
-                            Icon(Icons.people_outline_rounded, size: 13, color: accentColor),
-                            const SizedBox(width: 4),
-                            Text(
-                              event.reviewCount!,
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 11),
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
                       const SizedBox(height: 3),
 
                       // Venue
@@ -128,17 +112,6 @@ class SpecialFocusCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 3),
-
-                      // Rating
-                      if (event.rating != null)
-                        RatingBarIndicator(
-                          rating: event.rating!,
-                          itemBuilder: (_, __) => const Icon(Icons.star, color: AppColors.starFilled),
-                          unratedColor: AppColors.starEmpty,
-                          itemCount: 5,
-                          itemSize: 12,
-                        ),
 
                       // Description
                       if ((event.description ?? '').isNotEmpty) ...[

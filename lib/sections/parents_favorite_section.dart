@@ -153,36 +153,6 @@ class ParentsFavoriteSection extends StatelessWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
-
-                          // Rating: star + value + (reviews)
-                          Row(
-                            children: [
-                              const Icon(Icons.star,
-                                  size: 15, color: Colors.amber),
-                              const SizedBox(width: 4),
-                              Text(
-                                (event.rating ?? 4.8).toStringAsFixed(1),
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 13),
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Flexible(
-                                child: Text(
-                                  '(${event.reviewCount ?? '3.5k reviews'})',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 13),
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
                         ],
                       ),
                     ),

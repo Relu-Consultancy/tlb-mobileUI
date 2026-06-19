@@ -117,42 +117,13 @@ class BuildSkillCard extends StatelessWidget {
                             ],
                           ),
 
-                          // Rating + reviews
-                          if (event.rating != null) ...[
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                const Icon(Icons.star_rounded, size: 13, color: AppColors.starAmber),
-                                const SizedBox(width: 3),
-                                Text(
-                                  event.rating!.toStringAsFixed(1),
-                                  style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 11),
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                                if ((event.reviewCount ?? '').isNotEmpty) ...[
-                                  const SizedBox(width: 3),
-                                  Text(
-                                    event.reviewCount!,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 10.5),
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ],
-
                           // Tag chip
                           if ((event.tag ?? '').isNotEmpty) ...[
                             const SizedBox(height: 10),
                             Align(
                               alignment: Alignment.centerLeft,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFFCE7F3),
                                   borderRadius: BorderRadius.circular(20),
@@ -160,8 +131,8 @@ class BuildSkillCard extends StatelessWidget {
                                 child: Text(
                                   event.tag!,
                                   style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 10.5),
-                                    fontWeight: FontWeight.w500,
+                                    fontSize: Responsive.sp(context, 12.5),
+                                    fontWeight: FontWeight.w600,
                                     color: const Color(0xFFBE185D),
                                   ),
                                 ),

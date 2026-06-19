@@ -431,19 +431,10 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     ),
                     const SizedBox(height: 7),
                     Row(children: [
-                      Icon(Icons.location_on_outlined, size: 15, color: Colors.grey.shade500),
+                      Icon(Icons.location_on_outlined, size: 15, color: AppColors.textSecondary),
                       const SizedBox(width: 4),
                       Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary)),
                     ]),
-                    const SizedBox(height: 6),
-                    if (event.rating != null)
-                      Row(children: [
-                        const Icon(Icons.star_rounded, size: 16, color: AppColors.starAmber),
-                        const SizedBox(width: 4),
-                        Text('${event.rating}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                        const SizedBox(width: 4),
-                        Text('(${event.reviewCount})', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
-                      ]),
                     const Spacer(),
                     SizedBox(
                       width: double.infinity,
@@ -523,19 +514,10 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
                         const SizedBox(height: 8),
                         Row(children: [
-                          Icon(Icons.calendar_month_outlined, size: 15, color: Colors.grey.shade500),
+                          Icon(Icons.calendar_month_outlined, size: 15, color: AppColors.textSecondary),
                           const SizedBox(width: 5),
                           Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
                         ]),
-                        const SizedBox(height: 7),
-                        if (event.rating != null)
-                          Row(children: [
-                            const Icon(Icons.star_rounded, size: 16, color: AppColors.starAmber),
-                            const SizedBox(width: 4),
-                            Text('${event.rating}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                            const SizedBox(width: 4),
-                            Text('(${event.reviewCount})', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
-                          ]),
                       ],
                     ),
                     SizedBox(
@@ -611,7 +593,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     ),
                     const SizedBox(height: 9),
                     Row(children: [
-                      Icon(Icons.location_on_outlined, size: 15, color: Colors.grey.shade500),
+                      Icon(Icons.location_on_outlined, size: 15, color: AppColors.textSecondary),
                       const SizedBox(width: 4),
                       Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
                     ]),
@@ -801,7 +783,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                                 ),
                                 const SizedBox(height: 4),
                                 Row(children: [
-                                  Icon(Icons.location_on_outlined, size: 14, color: Colors.grey.shade500),
+                                  Icon(Icons.location_on_outlined, size: 14, color: AppColors.textSecondary),
                                   const SizedBox(width: 4),
                                   Expanded(
                                     child: Text(
@@ -895,7 +877,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 8),
                   Row(children: [
-                    Icon(Icons.location_on_outlined, size: 15, color: Colors.grey.shade500),
+                    Icon(Icons.location_on_outlined, size: 15, color: AppColors.textSecondary),
                     const SizedBox(width: 4),
                     Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
                   ]),
@@ -958,7 +940,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14.5), fontWeight: FontWeight.w600, color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 7),
                     Row(children: [
-                      Icon(Icons.location_on_outlined, size: 14, color: Colors.grey.shade500),
+                      Icon(Icons.location_on_outlined, size: 14, color: AppColors.textSecondary),
                       const SizedBox(width: 4),
                       Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
                     ]),
@@ -1026,19 +1008,10 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         Text(event.description!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: AppColors.textSecondary)),
                       ],
                     ]),
-                    const SizedBox(height: 6),
-                    if (event.rating != null)
-                      Row(children: [
-                        const Icon(Icons.star_rounded, size: 16, color: AppColors.starAmber),
-                        const SizedBox(width: 4),
-                        Text('${event.rating}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                        const SizedBox(width: 4),
-                        Text('(${event.reviewCount})', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
-                      ]),
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        Icon(Icons.location_on_outlined, size: 15, color: Colors.grey.shade500),
+                        Icon(Icons.location_on_outlined, size: 15, color: AppColors.textSecondary),
                         const SizedBox(width: 4),
                         Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
                         const SizedBox(width: 8),
@@ -1218,20 +1191,10 @@ class _VenuesScreenState extends State<VenuesScreen> {
               const SizedBox(height: 8),
               // ── Location ──
               Row(children: [
-                Icon(Icons.location_on_outlined, size: 15, color: Colors.grey.shade500),
+                Icon(Icons.location_on_outlined, size: 15, color: AppColors.textSecondary),
                 const SizedBox(width: 4),
                 Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
               ]),
-              const SizedBox(height: 7),
-              // ── Rating ──
-              if (event.rating != null)
-                Row(children: [
-                  const Icon(Icons.star_rounded, size: 16, color: AppColors.starAmber),
-                  const SizedBox(width: 4),
-                  Text('${event.rating}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                  const SizedBox(width: 4),
-                  Text('(${event.reviewCount})', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500)),
-                ]),
               const SizedBox(height: 12),
               // ── View Details button (full width) ──
               SizedBox(

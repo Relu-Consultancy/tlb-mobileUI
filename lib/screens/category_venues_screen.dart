@@ -308,11 +308,11 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                           ),
                           // ── Circle chip row ──
                           SizedBox(
-                            height: Responsive.h(context, 128),
+                            height: Responsive.h(context, 142),
                             child: ListView.builder(
                               controller: _chipScrollController,
                               scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                               itemCount: DummyData.venuesSeeAllCategories.length,
                               itemBuilder: (context, index) {
                                 final cat = DummyData.venuesSeeAllCategories[index];

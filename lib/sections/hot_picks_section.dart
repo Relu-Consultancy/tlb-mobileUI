@@ -151,29 +151,7 @@ class HotPicksSection extends StatelessWidget {
                                   ],
                                 ),
                                 const SizedBox(height: 8),
-                                
-                                // Reviews Row
-                                Row(
-                                  children: [
-                                    Row(
-                                      children: List.generate(
-                                        5,
-                                        (index) => const Icon(Icons.star, size: 12, color: Colors.amber),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Flexible(
-                                      child: Text(
-                                        event.reviewCount ?? '3.5k reviews',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: AppColors.textSecondary),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                
+
                                 // Venue Row
                                 Row(
                                   children: [

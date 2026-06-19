@@ -105,26 +105,6 @@ class NewOnTlbCard extends StatelessWidget {
                               ),
                             ],
                           ),
-                          if (event.reviewCount != null) ...[
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                const Icon(Icons.star, size: 15, color: AppColors.starAmber),
-                                const SizedBox(width: 4),
-                                Flexible(
-                                  child: Text(
-                                    event.reviewCount!,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 12.5),
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
                         ],
                       ),
                       const SizedBox(height: 14),

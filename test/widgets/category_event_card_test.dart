@@ -95,7 +95,11 @@ void main() {
             ),
           ),
         );
-        await tester.tap(find.byType(CategoryEventCard));
+        // Tap the title (a stable descendant of the card's GestureDetector)
+        // rather than the card's computed centre — the latter is sensitive to
+        // layout height and flakes under full-suite state, while this reliably
+        // validates that tapping the card content fires onTap.
+        await tester.tap(find.text('Summer Art Workshop'));
         expect(tapped, isTrue);
       });
     });

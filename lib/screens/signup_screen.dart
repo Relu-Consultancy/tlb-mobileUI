@@ -429,13 +429,6 @@ class _PrimaryButton extends StatelessWidget {
       height: Responsive.h(context, 52, min: 48),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFFFD014).withOpacity(0.5),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
-          ),
-        ],
       ),
       child: ElevatedButton(
         onPressed: loading ? null : onTap,

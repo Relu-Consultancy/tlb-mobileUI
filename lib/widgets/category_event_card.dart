@@ -103,7 +103,7 @@ class CategoryEventCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(Icons.location_on, size: 13, color: AppColors.textSecondary.withOpacity(0.7)),
+                    Icon(Icons.location_on, size: 13, color: AppColors.textPrimary),
                     const SizedBox(width: 2),
                     Expanded(
                       child: Text(
@@ -118,53 +118,6 @@ class CategoryEventCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                if ((event.reviewCount ?? '').isNotEmpty) ...[
-                  const SizedBox(height: 3),
-                  Row(
-                    children: [
-                      const Icon(Icons.star_rounded, size: 13, color: AppColors.starAmber),
-                      const SizedBox(width: 3),
-                      Expanded(
-                        child: Text(
-                          event.reviewCount!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 10.5),
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-                if ((event.description ?? '').isNotEmpty) ...[
-                  const SizedBox(height: 3),
-                  RichText(
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    text: TextSpan(
-                      style: GoogleFonts.poppins(
-                        fontSize: Responsive.sp(context, 10.5),
-                        color: AppColors.textDescription,
-                        height: 1.4,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: 'Description',
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 10.5),
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textPrimary,
-                            height: 1.4,
-                          ),
-                        ),
-                        TextSpan(text: ' \u2013 ${event.description!}'),
-                      ],
-                    ),
-                  ),
-                ],
               ],
             ),
           ),

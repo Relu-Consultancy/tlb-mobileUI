@@ -291,11 +291,11 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                             ),
                           ),
                           SizedBox(
-                            height: Responsive.h(context, 110),
+                            height: Responsive.h(context, 142),
                             child: ListView.builder(
                               controller: _chipScrollController,
                               scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+                              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                               itemCount: DummyData.classesCategories.length,
                               itemBuilder: (context, index) {
                                 final cat = DummyData.classesCategories[index];

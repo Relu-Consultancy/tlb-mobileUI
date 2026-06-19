@@ -145,7 +145,8 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                         _openNewTicket(category: const HelpCategory(value: 'booking_issue', label: 'Booking Issues')),
                     isFirst: true,
                   ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  const Divider(
+                      height: 1, indent: 16, endIndent: 16, color: Color(0xFFF0F0F0)),
                   _buildTopic(
                     context,
                     icon: Icons.credit_card_outlined,
@@ -156,7 +157,8 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                     onTap: () =>
                         _openNewTicket(category: const HelpCategory(value: 'payment_problem', label: 'Payment Problems')),
                   ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  const Divider(
+                      height: 1, indent: 16, endIndent: 16, color: Color(0xFFF0F0F0)),
                   _buildTopic(
                     context,
                     icon: Icons.swap_horiz_rounded,
@@ -201,7 +203,8 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                     onTap: _openMyTickets,
                     isFirst: true,
                   ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  const Divider(
+                      height: 1, indent: 16, endIndent: 16, color: Color(0xFFF0F0F0)),
                   _buildAction(
                     context,
                     icon: Icons.chat_bubble_outline,
