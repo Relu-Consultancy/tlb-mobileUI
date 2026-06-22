@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../core/app_colors.dart';
+import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 
 class ExploreFormatRow extends StatelessWidget {
@@ -78,7 +81,38 @@ class ExploreFormatRow extends StatelessWidget {
                   child: SizedBox(
                     width: size,
                     height: size,
-                    child: ClipOval(child: img),
+                    child: ClipOval(
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          img,
+                          // Format name engraved INSIDE the circle, near the
+                          // bottom. A soft white halo keeps it readable over the
+                          // artwork / coloured background.
+                          Positioned(
+                            left: size * 0.12,
+                            right: size * 0.12,
+                            bottom: size * 0.12,
+                            child: Text(
+                              format['label'] as String,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 10.5),
+                                fontWeight: FontWeight.w600,
+                                height: 1.1,
+                                color: AppColors.textPrimary,
+                                shadows: const [
+                                  Shadow(color: Colors.white, blurRadius: 4),
+                                  Shadow(color: Colors.white, blurRadius: 8),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               );
