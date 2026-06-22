@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
 import '../widgets/section_divider_widget.dart';
+import '../widgets/listing_meta_rows.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/home_feed_state.dart';
 import '../data/dummy_data.dart';
@@ -32,7 +33,7 @@ class FamilyFeelsSection extends StatelessWidget {
           textColor: AppColors.textPrimary, // dark navy
         ),
         SizedBox(
-          height: Responsive.h(context, 225, min: 195),
+          height: Responsive.h(context, 210, min: 196),
           child: AutoScrollList(
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
@@ -113,9 +114,12 @@ class FamilyFeelsSection extends StatelessWidget {
                                     ),
                                   ],
                                 ),
+                                const SizedBox(height: 8),
+                                // Age Group · Date & Time · Distance (mock data)
+                                ListingMetaRows(event: event),
                               ],
                             ),
-                            
+
                             // Button row
                             SizedBox(
                               width: double.infinity,

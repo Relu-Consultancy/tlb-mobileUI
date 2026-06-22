@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
+import 'listing_meta_rows.dart';
 import '../screens/class_detail_screen.dart';
 import '../screens/event_detail_screen.dart';
 import 'inquire_now_sheet.dart';
@@ -25,7 +26,7 @@ class BuildSkillCard extends StatelessWidget {
       onTap: () {
         if (ctaLabel == 'Send Enquiry') {
           Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event, buttonLabel: ctaLabel)));
-        } else if (ctaLabel == 'Check Availability') {
+        } else if (ctaLabel == 'Check Availability' || ctaLabel == 'View Details') {
           Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
         } else {
           Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
@@ -53,7 +54,8 @@ class BuildSkillCard extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(10, 10, 10, 18),
           child: SizedBox(
             // Fixed inner height so the CTA can be pinned to the bottom.
-            height: Responsive.h(context, 168, min: 156),
+            // Grown to fit the Age/Date·Time/Distance meta rows.
+            height: Responsive.h(context, 224, min: 210),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -117,6 +119,10 @@ class BuildSkillCard extends StatelessWidget {
                             ],
                           ),
 
+                          const SizedBox(height: 10),
+                          // Age Group · Date & Time · Distance (mock display data)
+                          ListingMetaRows(event: event),
+
                           // Tag chip
                           if ((event.tag ?? '').isNotEmpty) ...[
                             const SizedBox(height: 10),
@@ -151,7 +157,7 @@ class BuildSkillCard extends StatelessWidget {
                           onTap: () {
                             if (ctaLabel == 'Send Enquiry') {
                               showInquireNow(context, listingId: event.id);
-                            } else if (ctaLabel == 'Check Availability') {
+                            } else if (ctaLabel == 'Check Availability' || ctaLabel == 'View Details') {
                               Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
                             } else {
                               Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));

@@ -136,15 +136,40 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                 overlayDots: true, // dots overlaid on the banner
                               ),
                             ),
-                            const SectionDividerWidget(
-                              title: 'Pave Your Path',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        textColor: Color(0xFF3A3A3A), // charcoal
-                        lineLength: 100,
-                        lineThickness: 1.5,
-                        lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 30,
+                            // ── Pave Your Path (title left, See All right) ──
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 30, 16, 16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Pave Your Path',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 16),
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF3A3A3A), // charcoal
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () => _showAllCategoriesPopup(context),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          'See All',
+                                          style: GoogleFonts.poppins(
+                                            fontSize: Responsive.sp(context, 13),
+                                            fontWeight: FontWeight.w500,
+                                            color: AppColors.seeAllBlue,
+                                          ),
+                                        ),
+                                        const Icon(Icons.chevron_right,
+                                            size: 18, color: AppColors.seeAllBlue),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -183,7 +208,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         topPadding: 30,
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 475, min: 450),
+                        height: Responsive.h(context, 510, min: 485),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.hotPicks.length,
@@ -193,7 +218,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                               width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                               child: EventCardWithRating(
                                 event: DummyData.hotPicks[index],
-                                buttonLabel: 'Check Availability',
+                                buttonLabel: 'View Details',
                                 onTap: () => Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -218,7 +243,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         topPadding: 30,
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 220, min: 204),
+                        height: Responsive.h(context, 252, min: 236),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.weekendSpecial.length,
@@ -232,7 +257,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                 scheduleText: 'Sat & Sun, 10:00 AM',
                                 ageText: '8-12 Yrs',
                                 locationText: 'Online',
-                                buttonLabel: 'Book Now',
+                                buttonLabel: 'View Details',
                               ),
                             );
                           },
@@ -264,7 +289,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         topPadding: 30,
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 220, min: 204),
+                        height: Responsive.h(context, 252, min: 236),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.newOnTlb.length,
@@ -278,7 +303,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                 scheduleText: 'Start with basics of programming',
                                 ageText: '8+ Yrs',
                                 locationText: e.venue,
-                                buttonLabel: 'Check Availability',
+                                buttonLabel: 'View Details',
                                 smallButton: true,
                               ),
                             );
@@ -324,7 +349,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         topPadding: 30,
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 366, min: 342),
+                        height: Responsive.h(context, 434, min: 410),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesSpecialFocus.length,
@@ -351,7 +376,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       ),
                       SizedBox(
                         // +6 to absorb the larger 18px card bottom gap.
-                        height: Responsive.h(context, 380, min: 356),
+                        height: Responsive.h(context, 448, min: 424),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.categoryEventsExtra.length,
@@ -470,6 +495,9 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         _iconRow(Icons.people_outline, ageText),
                         const SizedBox(height: 7),
                         _iconRow(Icons.location_on_outlined, locationText),
+                        const SizedBox(height: 7),
+                        // Distance from the user (mock display data)
+                        _iconRow(Icons.near_me_outlined, event.distanceDisplay),
                       ],
                     ),
                     SizedBox(
@@ -599,6 +627,13 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
+                  // Age Group · Date & Time · Distance (mock display data)
+                  _iconRow(Icons.child_care_outlined, event.ageGroupDisplay),
+                  const SizedBox(height: 7),
+                  _iconRow(Icons.calendar_today_outlined, event.dateTimeDisplay),
+                  const SizedBox(height: 7),
+                  _iconRow(Icons.near_me_outlined, event.distanceDisplay),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(child: _iconRow(Icons.location_on_outlined, event.venue)),
@@ -615,7 +650,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 9),
                             child: Text(
-                              'View Now',
+                              'View Details',
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 12.5),
                                 fontWeight: FontWeight.w500,
@@ -705,6 +740,13 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         ),
                         const SizedBox(height: 7),
                         _iconRow(Icons.location_on_outlined, event.venue),
+                        const SizedBox(height: 7),
+                        // Age Group · Date & Time · Distance (mock display data)
+                        _iconRow(Icons.child_care_outlined, event.ageGroupDisplay),
+                        const SizedBox(height: 7),
+                        _iconRow(Icons.calendar_today_outlined, event.dateTimeDisplay),
+                        const SizedBox(height: 7),
+                        _iconRow(Icons.near_me_outlined, event.distanceDisplay),
                       ],
                     ),
                     SizedBox(
@@ -845,6 +887,13 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                     _iconRow(Icons.location_on_outlined, event.venue.split('\n').first),
                     const SizedBox(height: 7),
                     _iconRow(Icons.workspace_premium_outlined, 'Certificate Included'),
+                    const SizedBox(height: 7),
+                    // Age Group · Date & Time · Distance (mock display data)
+                    _iconRow(Icons.child_care_outlined, event.ageGroupDisplay),
+                    const SizedBox(height: 7),
+                    _iconRow(Icons.calendar_today_outlined, event.dateTimeDisplay),
+                    const SizedBox(height: 7),
+                    _iconRow(Icons.near_me_outlined, event.distanceDisplay),
                     const Spacer(),
                     SizedBox(
                       width: double.infinity,
@@ -864,7 +913,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           ),
                         ),
                         child: Text(
-                          'View Now',
+                          'View Details',
                           style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w500),
                         ),
                       ),

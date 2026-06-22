@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
 import '../widgets/section_divider_widget.dart';
+import '../widgets/listing_meta_rows.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/home_feed_state.dart';
 import '../data/dummy_data.dart';
@@ -138,19 +139,6 @@ class HotPicksSection extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 8),
-                                
-                                // Age Range Row
-                                Row(
-                                  children: [
-                                    const Icon(Icons.people_outline, size: 14, color: AppColors.textSecondary),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      '3-5 Yrs', // Dummy age range
-                                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: AppColors.textSecondary),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
 
                                 // Venue Row
                                 Row(
@@ -167,6 +155,9 @@ class HotPicksSection extends StatelessWidget {
                                     ),
                                   ],
                                 ),
+                                const SizedBox(height: 8),
+                                // Age Group · Date & Time · Distance (mock data)
+                                ListingMetaRows(event: event),
                               ],
                             ),
                           ],

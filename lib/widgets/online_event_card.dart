@@ -3,6 +3,7 @@ import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
+import 'listing_meta_rows.dart';
 import '../screens/event_detail_screen.dart';
 
 class OnlineEventCard extends StatelessWidget {
@@ -99,52 +100,9 @@ class OnlineEventCard extends StatelessWidget {
                       ],
                     ],
                   ),
-                  if ((event.description ?? '').isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.people_outline,
-                          size: 14,
-                          color: AppColors.textSecondary,
-                        ),
-                        const SizedBox(width: 6),
-                        Flexible(
-                          child: Text(
-                            event.description!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 11.5),
-                              color: AppColors.textDescription,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                  if ((event.eventDate ?? '').isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_today_outlined,
-                          size: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            event.eventDate!,
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 11.5),
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                  const SizedBox(height: 8),
+                  // Age Group · Date & Time · Distance (mock display data)
+                  ListingMetaRows(event: event),
                 ],
               ),
             ),

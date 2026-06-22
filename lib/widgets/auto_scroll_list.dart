@@ -20,6 +20,11 @@ class AutoScrollList extends StatefulWidget {
   /// Fraction of the viewport width to advance on each tick.
   final double advanceFraction;
 
+  /// Whether the list auto-advances. Disabled by default — section carousels
+  /// no longer auto-scroll (only the top image banners + Spotlight do). The
+  /// list still scrolls manually. Pass `true` to re-enable.
+  final bool autoScroll;
+
   const AutoScrollList({
     super.key,
     required this.itemCount,
@@ -29,6 +34,7 @@ class AutoScrollList extends StatefulWidget {
     this.addAutomaticKeepAlives = true,
     this.interval = const Duration(seconds: 3),
     this.advanceFraction = 0.85,
+    this.autoScroll = false,
   });
 
   @override
@@ -43,7 +49,9 @@ class _AutoScrollListState extends State<AutoScrollList> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(widget.interval, (_) => _tick());
+    if (widget.autoScroll) {
+      _timer = Timer.periodic(widget.interval, (_) => _tick());
+    }
   }
 
   @override

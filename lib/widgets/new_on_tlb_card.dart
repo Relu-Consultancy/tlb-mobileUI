@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
+import 'listing_meta_rows.dart';
 import '../screens/class_detail_screen.dart';
 import '../screens/event_detail_screen.dart';
 import 'inquire_now_sheet.dart';
@@ -23,7 +24,7 @@ class NewOnTlbCard extends StatelessWidget {
       onTap: () {
         if (buttonLabel == 'Send Enquiry') {
           Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event, buttonLabel: buttonLabel)));
-        } else if (buttonLabel == 'Check Availability') {
+        } else if (buttonLabel == 'Check Availability' || buttonLabel == 'View Details') {
           Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
         } else {
           Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
@@ -105,6 +106,14 @@ class NewOnTlbCard extends StatelessWidget {
                               ),
                             ],
                           ),
+                          const SizedBox(height: 8),
+                          // Age Group · Date & Time · Distance (mock display data)
+                          ListingMetaRows(
+                            event: event,
+                            iconSize: 14,
+                            fontSize: 12,
+                            rowGap: 6,
+                          ),
                         ],
                       ),
                       const SizedBox(height: 14),
@@ -118,7 +127,7 @@ class NewOnTlbCard extends StatelessWidget {
                             onTap: () {
                               if (buttonLabel == 'Send Enquiry') {
                                 showInquireNow(context, listingId: event.id);
-                              } else if (buttonLabel == 'Check Availability') {
+                              } else if (buttonLabel == 'Check Availability' || buttonLabel == 'View Details') {
                                 Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
                               } else {
                                 Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));

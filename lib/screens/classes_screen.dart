@@ -151,15 +151,40 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               ),
                             ),
 
-                            // ── Let's Begin Here ───────────────────────────
-                            const SectionDividerWidget(
-                              title: "Let's Begin Here",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        textColor: Color(0xFF3A3A3A), // charcoal
-                        lineLength: 100,
-                        lineThickness: 1.5,
-                        lineColor: Color(0xFFD4A537), // warm gold
+                            // ── Let's Begin Here (title left, See All right) ──
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 30, 16, 16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Let's Begin Here",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 16),
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF3A3A3A), // charcoal
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () => _showAllCategoriesPopup(context),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          'See All',
+                                          style: GoogleFonts.poppins(
+                                            fontSize: Responsive.sp(context, 13),
+                                            fontWeight: FontWeight.w500,
+                                            color: AppColors.seeAllBlue,
+                                          ),
+                                        ),
+                                        const Icon(Icons.chevron_right,
+                                            size: 18, color: AppColors.seeAllBlue),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -193,7 +218,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         lineColor: Color(0xFFD4A537), // warm gold
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 380, min: 340),
+                        height: Responsive.h(context, 442, min: 402),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesWhatEveryoneJoining.length,
@@ -204,7 +229,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                 width: Responsive.w(context, 240),
                                 child: EventCardWithRating(
                                   event: DummyData.classesWhatEveryoneJoining[index],
-                                  buttonLabel: 'Check Availability',
+                                  buttonLabel: 'View Details',
                                 ),
                               ),
                             );
@@ -223,8 +248,9 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         lineColor: Color(0xFFD4A537), // warm gold
                       ),
                       SizedBox(
-                        // Sized so exactly 3 circles fill the width (no 4th peek).
-                        height: (MediaQuery.of(context).size.width - 44) / 3 + 8,
+                        // Discs sized so two full circles + a half of the third
+                        // are visible, hinting the row scrolls.
+                        height: (MediaQuery.of(context).size.width - 32) / 2.5 + 8,
                         child: AutoScrollList(
                           padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
                           itemCount: DummyData.pickYourPace.length,
@@ -253,11 +279,12 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               }
                             }
 
-                            // Circle sized so exactly 3 fill the width.
+                            // Two full circles + a half peek of the third,
+                            // with tighter spacing between them.
                             final double paceSize =
-                                (MediaQuery.of(context).size.width - 44) / 3;
+                                (MediaQuery.of(context).size.width - 32) / 2.5;
                             return Padding(
-                              padding: const EdgeInsets.only(right: 14),
+                              padding: const EdgeInsets.only(right: 8),
                               child: Container(
                                 width: paceSize,
                                 height: paceSize,
@@ -334,7 +361,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         lineColor: Color(0xFFD4A537), // warm gold
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 350, min: 310),
+                        height: Responsive.h(context, 412, min: 372),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesRightAroundYou.length,
@@ -362,7 +389,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         lineColor: Color(0xFFD4A537), // warm gold
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 180, min: 160),
+                        height: Responsive.h(context, 255, min: 235),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesTopPicks.length,
@@ -373,7 +400,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                 width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                                 child: NewOnTlbCard(
                                   event: DummyData.classesTopPicks[index],
-                                  buttonLabel: 'Send Enquiry',
+                                  buttonLabel: 'View Details',
                                 ),
                               ),
                             );
@@ -417,7 +444,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                 child: HolidaySpecialCard(
                                   event: DummyData.classesHolidaySpecial[index],
                                   width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
-                                  buttonLabel: 'Send Enquiry',
+                                  buttonLabel: 'View Details',
                                 ),
                               ),
                             );
@@ -436,10 +463,10 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         lineColor: Color(0xFFD4A537), // warm gold
                       ),
                       SizedBox(
-                        // +8 vs the old 195 to absorb the larger 18px card
-                        // bottom gap (card inner height is fixed) — avoids a
-                        // BOTTOM OVERFLOW in the fixed-height list.
-                        height: Responsive.h(context, 203, min: 188),
+                        // Grown to fit the BuildSkillCard's taller inner height
+                        // (now carries the Age/Date·Time/Distance meta rows) —
+                        // avoids a BOTTOM OVERFLOW in the fixed-height list.
+                        height: Responsive.h(context, 259, min: 244),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesBuildNewSkills.length,
@@ -449,7 +476,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               child: BuildSkillCard(
                                 event: DummyData.classesBuildNewSkills[index],
                                 width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
-                                ctaLabel: 'Send Enquiry',
+                                ctaLabel: 'View Details',
                               ),
                             );
                           },
@@ -467,7 +494,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         lineColor: Color(0xFFD4A537), // warm gold
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 430, min: 390),
+                        height: Responsive.h(context, 490, min: 450),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesSpecialFocus.length,
@@ -485,7 +512,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                     event: DummyData.classesSpecialFocus[index],
                                     width: Responsive.cardWidth(context,
                                         fraction: 0.85, max: 360),
-                                    buttonLabel: 'Join Class',
+                                    buttonLabel: 'View Details',
                                     tagColor:
                                         tagColors[index % tagColors.length],
                                   ),

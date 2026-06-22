@@ -48,76 +48,57 @@ class ExploreCategoriesGrid extends StatelessWidget {
     const mainAxisSpacing = 12.0;
     const crossAxisSpacing = 12.0;
 
-    // Cap the scrollable item count to maxScrollRows rows when requested.
-    final int itemCount = maxScrollRows != null
-        ? (categories.length < maxScrollRows! * crossAxisCount
+    // Show exactly 2 complete rows of cards (no partial 3rd row peeking). The
+    // full category list is reachable from the section header's "See All".
+    const visibleRowCount = 2;
+    final int itemCount =
+        categories.length < visibleRowCount * crossAxisCount
             ? categories.length
-            : maxScrollRows! * crossAxisCount)
-        : categories.length;
+            : visibleRowCount * crossAxisCount;
 
-    Widget buildStack(double containerHeight) {
-      return Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          SizedBox(
-            height: containerHeight,
-            // Fade the bottom of the grid to transparent so the cut-off row
-            // dissolves softly (and hints there's more to scroll) instead of
-            // ending in a hard edge.
-            child: ShaderMask(
-              blendMode: BlendMode.dstIn,
-              shaderCallback: (rect) => const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.white, Colors.white, Colors.transparent],
-                stops: [0.0, 0.72, 1.0],
-              ).createShader(rect),
-              child: GridView.builder(
-                primary: false,
-                shrinkWrap: false,
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 48),
-                itemCount: itemCount,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  mainAxisSpacing: mainAxisSpacing,
-                  crossAxisSpacing: crossAxisSpacing,
-                  childAspectRatio: childAspectRatio,
-                ),
-                itemBuilder: (context, index) =>
-                    _buildCategoryCard(context, index),
-              ),
-            ),
-          ),
-          if (onViewAll != null)
-            Positioned(
-              bottom: 10,
-              child: GestureDetector(
-                onTap: onViewAll,
-                child: _viewAllChip(),
-              ),
-            ),
-        ],
-      );
-    }
-
-    // Fixed height path — used when caller knows exact height needed
-    if (scrollHeight != null) {
-      return buildStack(scrollHeight!);
-    }
-
-    // Dynamic height path — derives height from item dimensions
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final cellWidth =
-            (constraints.maxWidth - (crossAxisCount - 1) * crossAxisSpacing) /
-                crossAxisCount;
-        final cellHeight = cellWidth / childAspectRatio;
-        final containerHeight = visibleRows * cellHeight +
-            (visibleRows.ceil() - 1) * mainAxisSpacing;
-        return buildStack(containerHeight);
-      },
+    // A fixed, non-scrolling 2-row grid.
+    final grid = GridView.builder(
+      primary: false,
+      shrinkWrap: true,
+      // ── Scroll disabled (kept for reference) ───────────────────────────
+      // Previously this grid scrolled through up to `maxScrollRows` rows with a
+      // bouncing physics and a bottom fade hint; now it shows a fixed 2 rows
+      // and the rest opens from the header "See All". To restore scrolling,
+      // swap the physics back to `const BouncingScrollPhysics()`, restore the
+      // `maxScrollRows`-capped itemCount, and re-add the `bottom: 48` padding.
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      itemCount: itemCount,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        mainAxisSpacing: mainAxisSpacing,
+        crossAxisSpacing: crossAxisSpacing,
+        childAspectRatio: childAspectRatio,
+      ),
+      itemBuilder: (context, index) => _buildCategoryCard(context, index),
     );
+
+    // ── Seamless bottom-fade blend (kept for reference) ──────────────────
+    // The grid's bottom edge used to dissolve to transparent via a ShaderMask
+    // so the cut-off row blended into the background (hinting "scroll for
+    // more"). Disabled now that the grid shows a fixed 2 rows. To restore,
+    // wrap `grid` in the ShaderMask below and give it a fixed height
+    // (scrollHeight / visibleRows-derived, as before):
+    //
+    //   return ShaderMask(
+    //     blendMode: BlendMode.dstIn,
+    //     shaderCallback: (rect) => const LinearGradient(
+    //       begin: Alignment.topCenter,
+    //       end: Alignment.bottomCenter,
+    //       colors: [Colors.white, Colors.white, Colors.transparent],
+    //       stops: [0.0, 0.72, 1.0],
+    //     ).createShader(rect),
+    //     child: grid,
+    //   );
+    //
+    // The overlaid "View All" chip (_viewAllChip) that used to float at the
+    // bottom of the fade now lives in each screen's section header instead.
+    return grid;
   }
 
   // Fully expanded non-scrollable grid (used by Events / Classes screens)
@@ -196,6 +177,8 @@ class ExploreCategoriesGrid extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
+          // Very slight light hairline around each category card.
+          border: Border.all(color: Colors.black.withOpacity(0.06), width: 0.7),
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,

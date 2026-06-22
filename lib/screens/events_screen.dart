@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../widgets/auto_scroll_list.dart';
 import '../core/responsive.dart';
@@ -257,8 +258,41 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
-                      // ── Explore by Categories ─────────────────────────
-                      const SectionDividerWidget(topPadding: 30, title: 'Explore by Categories'),
+                      // ── Explore by Categories (title left, See All right) ──
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 30, 16, 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Explore by Categories',
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 16),
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF3A3A3A), // charcoal
+                              ),
+                            ),
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => _showAllCategoriesPopup(context),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    'See All',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 13),
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.seeAllBlue,
+                                    ),
+                                  ),
+                                  const Icon(Icons.chevron_right,
+                                      size: 18, color: AppColors.seeAllBlue),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),

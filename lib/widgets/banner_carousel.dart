@@ -666,14 +666,15 @@ class _BannerCarouselState extends State<BannerCarousel>
                 ),
                 ),
 
-                // Cool animated FX — drifting sparkles + a glossy light sweep
-                // (spotlight banner only).
+                // Cool animated FX — a glossy light sweep (spotlight banner
+                // only). The drifting "bubble" sparkles are disabled; re-add
+                // `Positioned.fill(child: _BannerSparkles())` below to restore.
                 if (widget.animateImages)
                   const Positioned.fill(
                     child: IgnorePointer(
                       child: Stack(
                         children: [
-                          Positioned.fill(child: _BannerSparkles()),
+                          // Positioned.fill(child: _BannerSparkles()),
                           Positioned.fill(child: _BannerShine()),
                         ],
                       ),

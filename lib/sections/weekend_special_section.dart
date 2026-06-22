@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/section_divider_widget.dart';
+import '../widgets/listing_meta_rows.dart';
 import '../providers/home_feed_state.dart';
 import '../data/dummy_data.dart';
 import '../core/listing_navigation.dart';
@@ -25,7 +26,9 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
   @override
   void initState() {
     super.initState();
-    _startAutoSlide();
+    // Auto-slide disabled — section carousels no longer auto-advance (only the
+    // top image banners + Spotlight do). The PageView is still swipeable.
+    // _startAutoSlide();
   }
 
   @override
@@ -35,19 +38,6 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
     super.dispose();
   }
 
-  void _startAutoSlide() {
-    _autoSlideTimer = Timer.periodic(const Duration(seconds: 4), (_) {
-      // final wk = HomeFeedState.section('weekend_specials');
-      final wk = DummyData.weekendSpecial;
-      if (!_pageController.hasClients || wk.isEmpty) return;
-      final nextPage = ((_pageController.page?.round() ?? 0) + 1) % wk.length;
-      _pageController.animateToPage(
-        nextPage,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
-      );
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +60,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
               textColor: AppColors.textPrimary, // dark navy
             ),
             SizedBox(
-              height: Responsive.h(context, 365, min: 340),
+              height: Responsive.h(context, 420, min: 390),
               child: PageView.builder(
                 controller: _pageController,
                 clipBehavior: Clip.hardEdge,
@@ -103,7 +93,9 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                         children: [
                           // ── Top image with date badge + heart ──
                           SizedBox(
-                            height: Responsive.h(context, 240, min: 222),
+                            // Taller image so it fills the card down to the
+                            // content (removes the white gap below the meta).
+                            height: Responsive.h(context, 290, min: 268),
                             width: double.infinity,
                             child: Stack(
                               fit: StackFit.expand,
@@ -181,16 +173,28 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  // Title
-                                  Text(
-                                    event.title,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 17),
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textPrimary,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                  // Title + meta (top group)
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        event.title,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: Responsive.sp(context, 17),
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      // Age Group + Distance (Date on image badge)
+                                      ListingMetaRows(
+                                        event: event,
+                                        showDateTime: false,
+                                      ),
+                                    ],
                                   ),
 
                                   // Venue + Book Now

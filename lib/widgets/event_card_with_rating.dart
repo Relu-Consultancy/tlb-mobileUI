@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
+import 'listing_meta_rows.dart';
 import 'wishlist_button.dart';
 import '../screens/class_detail_screen.dart';
 import '../screens/event_detail_screen.dart';
@@ -30,7 +31,7 @@ class EventCardWithRating extends StatelessWidget {
           onTap!();
         } else if (buttonLabel == 'Send Enquiry') {
           Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event, buttonLabel: buttonLabel)));
-        } else if (buttonLabel == 'Check Availability') {
+        } else if (buttonLabel == 'Check Availability' || buttonLabel == 'View Details') {
           Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
         } else {
           Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
@@ -187,6 +188,11 @@ class EventCardWithRating extends StatelessWidget {
                       ],
                     ),
 
+                    const SizedBox(height: 6),
+
+                    // Age Group · Date & Time · Distance (mock display data)
+                    ListingMetaRows(event: event),
+
                     const Spacer(),
 
                     // Book Now button
@@ -199,7 +205,7 @@ class EventCardWithRating extends StatelessWidget {
                             onTap!();
                           } else if (buttonLabel == 'Send Enquiry') {
                             showInquireNow(context, listingId: event.id);
-                          } else if (buttonLabel == 'Check Availability') {
+                          } else if (buttonLabel == 'Check Availability' || buttonLabel == 'View Details') {
                             Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
                           } else {
                             Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));

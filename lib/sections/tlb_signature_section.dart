@@ -5,6 +5,7 @@ import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/section_divider_widget.dart';
+import '../widgets/listing_meta_rows.dart';
 import '../providers/home_feed_state.dart';
 import '../data/dummy_data.dart';
 import '../core/listing_navigation.dart';
@@ -121,6 +122,9 @@ class TlbSignatureSection extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
+                          const SizedBox(height: 10),
+                          // Age Group · Date & Time · Distance (mock data)
+                          ListingMetaRows(event: event),
                           const SizedBox(height: 14),
                           SizedBox(
                             width: double.infinity,

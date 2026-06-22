@@ -8,10 +8,16 @@ class AllCategoriesPopup extends StatelessWidget {
   final List<Map<String, dynamic>> categories;
   final ValueChanged<int>? onCategoryTap;
 
+  /// When true, render each category as just its circular artwork + label
+  /// (no rectangular gradient card) — used by the Venues "What's the Plan?"
+  /// See All, whose images are already circular.
+  final bool circularImages;
+
   const AllCategoriesPopup({
     super.key,
     required this.categories,
     this.onCategoryTap,
+    this.circularImages = false,
   });
 
   /// Show this popup as a modal bottom sheet (tall, draggable).
@@ -19,6 +25,7 @@ class AllCategoriesPopup extends StatelessWidget {
     BuildContext context,
     List<Map<String, dynamic>> categories, {
     ValueChanged<int>? onCategoryTap,
+    bool circularImages = false,
   }) {
     showModalBottomSheet(
       context: context,
@@ -31,6 +38,7 @@ class AllCategoriesPopup extends StatelessWidget {
       builder: (_) => AllCategoriesPopup(
         categories: categories,
         onCategoryTap: onCategoryTap,
+        circularImages: circularImages,
       ),
     );
   }
@@ -143,9 +151,13 @@ class AllCategoriesPopup extends StatelessWidget {
           const SizedBox(height: 16),
 
           // ── Scrollable Grid ──
+          // shrinkWrap so the sheet only grows as tall as the grid needs
+          // (no trailing white space when there are few items); it still
+          // scrolls within the 0.85 max-height when there are many.
           Flexible(
             child: GridView.builder(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+              shrinkWrap: true,
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
               itemCount: categories.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
@@ -158,11 +170,51 @@ class AllCategoriesPopup extends StatelessWidget {
                 final gradientColors = (category['gradient'] as List<Color>?) ??
                     const [Color(0xFFEFEFEF), Color(0xFFDFDFDF)];
 
+                void handleTap() {
+                  Navigator.of(context).pop();
+                  onCategoryTap?.call(index);
+                }
+
+                // Circular variant — just the (already-circular) artwork +
+                // label, matching the section row's circles.
+                if (circularImages) {
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: handleTap,
+                    child: Column(
+                      children: [
+                        AspectRatio(
+                          aspectRatio: 1,
+                          child: Image.asset(
+                            category['image'],
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => Icon(
+                              Icons.place,
+                              size: 40,
+                              color: Colors.grey.shade400,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          category['label'],
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 11),
+                            fontWeight: FontWeight.w500,
+                            height: 1.15,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
                 return GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    onCategoryTap?.call(index);
-                  },
+                  onTap: handleTap,
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),

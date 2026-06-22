@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
 import '../widgets/section_divider_widget.dart';
+import '../widgets/listing_meta_rows.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/home_feed_state.dart';
 import '../data/dummy_data.dart';
@@ -153,6 +154,9 @@ class ParentsFavoriteSection extends StatelessWidget {
                               ),
                             ],
                           ),
+                          const SizedBox(height: 8),
+                          // Date & Time + Distance (Age shown inline above)
+                          ListingMetaRows(event: event, showAge: false),
                         ],
                       ),
                     ),

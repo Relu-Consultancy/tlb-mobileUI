@@ -10,6 +10,7 @@ import '../providers/saved_events_state.dart';
 import '../sections/home_header.dart';
 import '../widgets/banner_carousel.dart';
 import '../widgets/section_divider_widget.dart';
+import '../widgets/all_categories_popup.dart';
 import '../sections/app_footer.dart';
 import '../widgets/footer_quote_carousel.dart';
 import '../widgets/app_refresh_indicator.dart';
@@ -113,16 +114,41 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         ),
                       ),
 
-                      // ── What's the Plan? ──
-                      const SectionDividerWidget(
-                        title: "What's the Plan?",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        textColor: Color(0xFF3A3A3A), // charcoal
-                        lineLength: 100,
-                        lineThickness: 1.5,
-                        lineColor: Color(0xFFD4A537), // warm gold
-                        topPadding: 30,
+                      // ── What's the Plan? (title left, See All right) ──
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 30, 16, 0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              "What's the Plan?",
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 16),
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF3A3A3A), // charcoal
+                              ),
+                            ),
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => _showAllVenueCategories(context),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    'See All',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 13),
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.seeAllBlue,
+                                    ),
+                                  ),
+                                  const Icon(Icons.chevron_right,
+                                      size: 18, color: AppColors.seeAllBlue),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                             ),
                           ],
                         ),
@@ -288,6 +314,26 @@ class _VenuesScreenState extends State<VenuesScreen> {
   }
 
   // ── Section header — centered golden divider (home-screen ruleset). ──
+  // "See All" for What's the Plan? — opens the full venue-category picker;
+  // tapping a category opens that category's venues list.
+  void _showAllVenueCategories(BuildContext context) {
+    AllCategoriesPopup.show(
+      context,
+      // Match the section row — only the 6 circular categories (the 2 extra
+      // entries were showing here but not in the section).
+      DummyData.venuesSeeAllCategories.take(6).toList(),
+      circularImages: true, // round artwork, same as the section circles
+      onCategoryTap: (index) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CategoryVenuesScreen(initialCategoryIndex: index),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _sectionHeader(BuildContext context, String title) {
     return SectionDividerWidget(
       title: title,
@@ -322,9 +368,14 @@ class _VenuesScreenState extends State<VenuesScreen> {
               ),
             ),
             child: Padding(
-            padding: const EdgeInsets.only(right: 14),
+            // Cards sit flush; tighter packing comes from the narrow slot below.
+            padding: EdgeInsets.zero,
             child: SizedBox(
-              width: 158,
+              // Layout slot slightly narrower than the 152px circle canvas so
+              // neighbouring circles sit with just a ~2-3px gap; the circle
+              // overflows this slot (the list uses Clip.none) rather than
+              // shrinking.
+              width: 142,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -332,22 +383,31 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   // contains its own circular artwork. No clipping and
                   // BoxFit.contain so nothing is cropped or stretched.
                   SizedBox(
-                    width: 152,
+                    width: 142,
                     height: 152,
-                    child: Transform.translate(
-                      // Optional per-image vertical nudge to line the circles up.
-                      offset: Offset(0, (c['nudge'] as num?)?.toDouble() ?? 0.0),
-                      child: Padding(
-                        // Optional per-image inset to normalise sizes where an
-                        // artwork fills its canvas more than the others.
-                        padding: EdgeInsets.all(
-                          (c['inset'] as num?)?.toDouble() ?? 0.0,
-                        ),
-                        child: Image.asset(
-                          c['image'] as String,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => Icon(Icons.place,
-                              size: 58, color: AppColors.primary),
+                    child: OverflowBox(
+                      // Render the circle at its full 152px width even though the
+                      // slot is only 124px — it spills symmetrically into the
+                      // gaps so adjacent circles sit close.
+                      minWidth: 152,
+                      maxWidth: 152,
+                      minHeight: 152,
+                      maxHeight: 152,
+                      child: Transform.translate(
+                        // Optional per-image vertical nudge to line the circles up.
+                        offset: Offset(0, (c['nudge'] as num?)?.toDouble() ?? 0.0),
+                        child: Padding(
+                          // Optional per-image inset to normalise sizes where an
+                          // artwork fills its canvas more than the others.
+                          padding: EdgeInsets.all(
+                            (c['inset'] as num?)?.toDouble() ?? 0.0,
+                          ),
+                          child: Image.asset(
+                            c['image'] as String,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => Icon(Icons.place,
+                                size: 58, color: AppColors.primary),
+                          ),
                         ),
                       ),
                     ),

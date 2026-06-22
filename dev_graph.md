@@ -3,7 +3,7 @@
 **Stack:** Flutter (Dart) · Firebase Auth · Google Sign-In · REST API  
 **Package:** `com.thelittlebroadway.tlb_mobile_ui`  
 **API Base:** `https://tlb-api.reluconsultancy.in`  
-**Last Updated:** 2026-06-16 (Session 60)
+**Last Updated:** 2026-06-22 (Session 64)
 
 ---
 
@@ -875,6 +875,68 @@ share_plus: ^7.2.2           # Native share sheet for events/classes/programs/ve
 ---
 
 ## 12. Development Sessions Summary
+
+### Session 64 — Listing meta rows, category-grid redesign, circle spacing, Spotlight & format-image tweaks
+A broad screenshot-driven polish pass building on Session 63: section cards gained Age/Date·Time/Distance rows, the category grids moved to a left-title + See All header with a fixed 2-row non-scrolling body, and several circle rows / banners were retuned.
+
+#### Listing meta rows — Age Group · Date & Time · Distance (Home, Classes, Programs, Events)
+| Change | Files |
+|--------|-------|
+| **Three mock display getters** on `EventModel` (`ageGroupDisplay`, `dateTimeDisplay`, `distanceDisplay`) — deterministic from the listing's identity so each card shows a stable value without editing the mock catalog; `dateTimeDisplay` prefers the real `eventDate`/`eventTime`. Documented to swap for API fields later | `lib/models/event_model.dart` |
+| **New shared `ListingMetaRows` widget** — compact 3-line icon block (`child_care`/`calendar`/`near_me`) with per-row toggles + sizing; dropped into the space freed by the removed review/description rows | `lib/widgets/listing_meta_rows.dart` (NEW) |
+| **Added to the shared cards** (cover Events + parts of Classes/Programs/Home) | `event_card_with_rating.dart`, `new_on_tlb_card.dart`, `holiday_special_card.dart`, `class_nearby_card.dart`, `build_skill_card.dart`, `online_event_card.dart` |
+| **Added to all 9 Home section rails** and the 4 Programs inline cards (using their own `_iconRow` for style consistency; Distance-only where schedule/age/location already shown) | all `lib/sections/*`, `programs_screen.dart` |
+| **Fixed-height rails bumped** to fit the extra rows (no `RenderFlex` overflow — verified by the suite); cards with `Expanded` images absorb the rows automatically | `classes_screen.dart`, `programs_screen.dart`, `family_feels_section.dart`, `special_needs_section.dart`, `build_skill_card.dart` |
+
+#### Category grid (Explore by Categories — Events / Classes / Programs)
+| Change | Files |
+|--------|-------|
+| **Header → title-left + "See All"-right** (`seeAllBlue` + chevron), replacing the centered `SectionDividerWidget`; "See All" opens each screen's `_showAllCategoriesPopup` | `events_screen.dart`, `classes_screen.dart`, `programs_screen.dart` |
+| **Grid now a fixed 2-row, non-scrolling block** — the seamless bottom-fade `ShaderMask` and the bouncing-scroll physics are **commented out (kept for reference)**, not deleted; the overlaid "View All" chip moved to the header | `lib/widgets/explore_categories_grid.dart` |
+| **Faint hairline border** around each category card (`black @ 0.06`, 0.7px) | `lib/widgets/explore_categories_grid.dart` |
+| **Category screens' "Explore other Categories" cards** — unselected border changed `transparent`/`null` → faint `black @ 0.07` (kept 2.5px width so size doesn't shift on select) | `category_events/classes/programs/venues_screen.dart` |
+
+#### Venues "What's the Plan?"
+| Change | Files |
+|--------|-------|
+| **Restored the "See All"** header (was a centered divider with no action) — title-left/See-All-right, opens the venue-category picker | `venues_screen.dart` |
+| **Circle spacing retuned** — cards keep full 152px size but sit in a narrow 142px slot (via `OverflowBox`, list `Clip.none`) for an even ~2-3px gap | `venues_screen.dart` |
+| **See All popup** — `AllCategoriesPopup` gains a `circularImages` flag (Venues renders round artwork like the section; other screens unchanged) and now `shrinkWrap`s so the sheet sizes to its content (no trailing white space); Venues passes only the 6 section categories | `lib/widgets/all_categories_popup.dart`, `venues_screen.dart` |
+
+#### Circle rows / banners / images
+| Change | Files |
+|--------|-------|
+| **Classes "Pick Your Pace"** (inline) discs enlarged to `(w−32)/2.5` w/ 8px gap (two full + a half peek) — distinct from Programs' shared `PickYourPaceRow` (reverted to 3-per-row) | `classes_screen.dart`, `pick_your_pace_row.dart` |
+| **Weekend Specials** image height ↑ (240→290) to fill the gap below the meta; **Family Feels** rail tightened (285→210); **Stealers** rail ↑ (420→470) so the Expanded image stretches down | `weekend_special_section.dart`, `family_feels_section.dart`, `stealers_section.dart` |
+| **Spotlight banner** — drifting "bubble" sparkles (`_BannerSparkles`) disabled (commented; shine `_BannerShine` kept) | `lib/widgets/banner_carousel.dart` |
+| **Explore by Format** images replaced with new circular artwork; dropped the per-format `scale`/`invertColors` zoom hacks (new PNGs have their own circle bg) and matched `accentColor` to each circle | `lib/data/dummy_data.dart` |
+
+**`flutter analyze`: 0 errors (29 pre-existing info lints). All 130 widget tests pass.**
+
+### Session 63 — CTA label unification, section auto-carousel disabled, circle-row resizing
+Screenshot-driven polish. All Classes/Programs section CTAs now read a single "View Details", the auto-advancing carousels were switched off for every section rail (top image banners + Spotlight kept), and two circular category rows were re-sized to taste.
+
+#### CTA buttons → "View Details" (Classes & Programs)
+| Change | Files |
+|--------|-------|
+| **Every section CTA relabeled to "View Details"** regardless of booking type — replaced `Check Availability` / `Send Enquiry` / `Book Now` / `Join Class` / `View Now` across both screens | `classes_screen.dart`, `programs_screen.dart` |
+| **Navigation preserved** — the 5 shared cards route `'View Details'` the same as `'Check Availability'` → `ClassDetailScreen` (Classes), so the new label still opens the correct detail screen (not the generic event screen); Programs cards open `ProgramDetailScreen` via their explicit `onTap`/inline nav | `event_card_with_rating.dart`, `class_nearby_card.dart`, `build_skill_card.dart`, `new_on_tlb_card.dart`, `holiday_special_card.dart` |
+
+#### Auto-carousel disabled for section rails
+| Change | Files |
+|--------|-------|
+| **`AutoScrollList` auto-advance gated behind an `autoScroll` flag (default `false`)** — every horizontal section card row across all 5 screens stops auto-scrolling but stays manually swipeable | `lib/widgets/auto_scroll_list.dart` |
+| **`weekend_special_section` PageView auto-slide removed** (`_startAutoSlide()` call + method dropped); still swipeable | `lib/sections/weekend_special_section.dart` |
+| **Kept** (as requested) — top image banners on all screens + the Spotlight banner, which use `BannerCarousel` (untouched, still auto-slides). Footer quote rotator left auto-cycling | `lib/widgets/banner_carousel.dart` |
+
+#### Circle-row resizing
+| Change | Files |
+|--------|-------|
+| **Classes "Pick Your Pace"** (inline row) discs enlarged: circle size `(width − 44)/3` → `(width − 32)/2.5`, inter-card gap `14` → `8` — two full circles + a half peek visible | `lib/screens/classes_screen.dart` |
+| **Venues "What's the Plan?"** circles tightened: cell width `158` → `152` (matches the 152px image, removing hidden centering slack), inter-card gap `14` → `2` for an even, tight spacing | `lib/screens/venues_screen.dart` |
+| **`PickYourPaceRow`** (Programs "Find Your Fit") — briefly resized then reverted to the original 3-per-row / 14px after confirming Classes uses a separate inline implementation | `lib/widgets/pick_your_pace_row.dart` |
+
+**`flutter analyze`: 0 errors. All 130 widget tests pass.**
 
 ### Session 60 — Image-matched Spotlight border/background, floating banner motion, universal 18px card gap
 Continuation of the Spotlight/card polish. The Spotlight banner's accents now derive from the artwork itself, the banner image gained a floating (non-zoom) motion, and every section card across all 5 screens was normalised to an 18px bottom gap (with overflow-safe parent heights).

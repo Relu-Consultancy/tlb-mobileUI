@@ -357,7 +357,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                                                         ),
                                                         border: isSelected
                                                             ? Border.all(color: catGradient.last, width: 2.5)
-                                                            : null,
+                                                            : Border.all(color: Colors.black.withOpacity(0.07), width: 2.5),
                                                         boxShadow: [
                                                           BoxShadow(
                                                             color: catGradient.last.withOpacity(isSelected ? 0.50 : 0.20),

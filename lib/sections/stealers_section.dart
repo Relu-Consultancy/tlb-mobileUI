@@ -6,6 +6,7 @@ import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/section_divider_widget.dart';
+import '../widgets/listing_meta_rows.dart';
 import '../providers/home_feed_state.dart';
 import '../data/dummy_data.dart';
 import '../core/listing_navigation.dart';
@@ -33,7 +34,9 @@ class StealersSection extends StatelessWidget {
           textColor: AppColors.textPrimary, // dark navy
         ),
         SizedBox(
-          height: Responsive.h(context, 420, min: 380),
+          // Taller rail so the Expanded image stretches further down and fills
+          // the white space below the discount band.
+          height: Responsive.h(context, 470, min: 430),
           child: AutoScrollList(
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
@@ -169,6 +172,9 @@ class StealersSection extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 8),
+                          // Age Group · Date & Time · Distance (mock data)
+                          ListingMetaRows(event: event),
+                          const SizedBox(height: 10),
                           // Grab Deal button (price label removed)
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -5,6 +5,7 @@ import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/section_divider_widget.dart';
+import '../widgets/listing_meta_rows.dart';
 import '../providers/home_feed_state.dart';
 import '../data/dummy_data.dart';
 import '../core/listing_navigation.dart';
@@ -34,7 +35,7 @@ class SpecialNeedsSection extends StatelessWidget {
           textColor: AppColors.textPrimary, // dark navy
         ),
         SizedBox(
-          height: Responsive.h(context, 215, min: 195),
+          height: Responsive.h(context, 285, min: 258),
           child: AutoScrollList(
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
@@ -149,6 +150,9 @@ class SpecialNeedsSection extends StatelessWidget {
                                   ),
                                 ],
                               ),
+                              const SizedBox(height: 8),
+                              // Age Group · Date & Time · Distance (mock data)
+                              ListingMetaRows(event: event),
                             ],
                           ),
 

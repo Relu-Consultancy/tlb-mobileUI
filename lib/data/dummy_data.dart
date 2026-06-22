@@ -62,49 +62,47 @@ class DummyData {
     },
   ];
 
+  // New circular artwork — each PNG already has its own coloured circle baked
+  // in, so the old per-format `scale`/`invertColors` zoom hacks (needed for the
+  // transparent icons) are gone: the widget clips the square to an oval and
+  // BoxFit.cover fills it. `accentColor` (used by the format detail-screen
+  // header gradient) is matched to each new circle's background tone.
   static const List<Map<String, dynamic>> exploreFormats = [
     {
       'label': 'Workshop',
-      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/Workshops.png',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/Group 1000006597.png',
       'formatSlug': 'workshop',
-      'accentColor': Color(0xFF3D2817),
-      'scale': 1.41, // 1 / 0.709
+      'accentColor': Color(0xFF3E7CB1), // chalkboard / blue circle
     },
     {
       'label': 'Camp',
-      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/camp.png',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/Group 1000006598.png',
       'formatSlug': 'camp',
-      'accentColor': Color(0xFF1A9ED4),
-      'scale': 1.40, // 1 / 0.713
+      'accentColor': Color(0xFF7BA05B), // tent / green circle
     },
     {
       'label': 'Competition',
-      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/competition.png',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/Group 1000006599.png',
       'formatSlug': 'competition',
-      'accentColor': Color(0xFFD4A800),
-      'scale': 1.14, // 1 / 0.878
+      'accentColor': Color(0xFFE0859B), // trophy / pink circle
     },
     {
       'label': 'MasterClass',
-      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/masterclass.png',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/Group 1000006600.png',
       'formatSlug': 'masterclass',
-      'accentColor': AppColors.textPrimary,
-      'invertColors': true,
-      'scale': 1.45, // 1 / 0.690
+      'accentColor': Color(0xFFE3A23B), // book + cap / grey circle (gold accent)
     },
     {
       'label': 'Showcase Performance',
-      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/shocase.png',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/Group 1000006601.png',
       'formatSlug': 'showcase_performance',
-      'accentColor': Color(0xFF0D8DAA),
-      'scale': 1.66, // 1 / 0.603
+      'accentColor': Color(0xFFE8932E), // unveiling / orange circle
     },
     {
       'label': 'Demo',
-      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/demo.png',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/Group 1000006602.png',
       'formatSlug': 'demo',
-      'accentColor': Color(0xFF0E2B44),
-      'scale': 1.71, // 1 / 0.586
+      'accentColor': Color(0xFF3E78B0), // classroom / blue circle
     },
   ];
 

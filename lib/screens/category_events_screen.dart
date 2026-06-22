@@ -306,7 +306,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                                         borderRadius: BorderRadius.circular(14),
                                         border: isSelected
                                             ? Border.all(color: catGradient.last, width: 2.5)
-                                            : Border.all(color: Colors.transparent, width: 2.5),
+                                            : Border.all(color: Colors.black.withOpacity(0.07), width: 2.5),
                                         boxShadow: [
                                           BoxShadow(
                                             color: catGradient.last.withOpacity(isSelected ? 0.45 : 0.15),
