@@ -136,28 +136,13 @@ class NewOnTheBlockSection extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
 
-                          // Location • distance
-                          Row(
-                            children: [
-                              const Icon(Icons.location_on_outlined,
-                                  size: 14, color: AppColors.textSecondary),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  event.venue,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 13),
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
+                          // Two-column meta: Age + Date·Time left, Location +
+                          // Distance right.
+                          ListingMetaRows(
+                            event: event,
+                            showLocation: true,
+                            twoColumn: true,
                           ),
-                          const SizedBox(height: 8),
-                          // Age Group · Date & Time · Distance (mock display data)
-                          ListingMetaRows(event: event),
                         ],
                       ),
                     ),

@@ -101,8 +101,12 @@ class OnlineEventCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // Age Group · Date & Time · Distance (mock display data)
-                  ListingMetaRows(event: event),
+                  // Two-column meta: Age + Date·Time left, Location + Distance right.
+                  ListingMetaRows(
+                    event: event,
+                    showLocation: true,
+                    twoColumn: true,
+                  ),
                 ],
               ),
             ),

@@ -9,9 +9,9 @@ class ExploreFormatRow extends StatelessWidget {
 
   const ExploreFormatRow({super.key, this.onFormatTap});
 
-  /// Big circles: exactly 3 fill the width so each disc is large and no 4th
-  /// disc peeks in.
-  static const double _visibleCount = 3;
+  /// Bigger circles: ~2.5 fill the width (two full discs + a peek of the
+  /// third), so each disc is larger.
+  static const double _visibleCount = 2.5;
   static const double _sidePadding = 16;
   static const double _gap = 8;
 

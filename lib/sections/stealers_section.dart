@@ -172,8 +172,13 @@ class StealersSection extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 8),
-                          // Age Group · Date & Time · Distance (mock data)
-                          ListingMetaRows(event: event),
+                          // Two-column meta: Age + Date·Time left, Location +
+                          // Distance right.
+                          ListingMetaRows(
+                            event: event,
+                            showLocation: true,
+                            twoColumn: true,
+                          ),
                           const SizedBox(height: 10),
                           // Grab Deal button (price label removed)
                           Row(

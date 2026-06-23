@@ -208,7 +208,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         topPadding: 30,
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 510, min: 485),
+                        height: Responsive.h(context, 548, min: 523),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.hotPicks.length,
@@ -243,7 +243,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         topPadding: 30,
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 252, min: 236),
+                        height: Responsive.h(context, 214, min: 200),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.weekendSpecial.length,
@@ -289,7 +289,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         topPadding: 30,
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 252, min: 236),
+                        height: Responsive.h(context, 214, min: 200),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.newOnTlb.length,
@@ -349,7 +349,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         topPadding: 30,
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 434, min: 410),
+                        height: Responsive.h(context, 420, min: 400),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesSpecialFocus.length,
@@ -497,7 +497,8 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         _iconRow(Icons.location_on_outlined, locationText),
                         const SizedBox(height: 7),
                         // Distance from the user (mock display data)
-                        _iconRow(Icons.near_me_outlined, event.distanceDisplay),
+                        _iconRow(Icons.near_me_outlined, event.distanceDisplay,
+                        color: const Color(0xFF1FA85B)),
                       ],
                     ),
                     SizedBox(
@@ -632,7 +633,8 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                   const SizedBox(height: 7),
                   _iconRow(Icons.calendar_today_outlined, event.dateTimeDisplay),
                   const SizedBox(height: 7),
-                  _iconRow(Icons.near_me_outlined, event.distanceDisplay),
+                  _iconRow(Icons.near_me_outlined, event.distanceDisplay,
+                      color: const Color(0xFF1FA85B)),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -701,11 +703,11 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                   child: Image.asset(
                     event.imagePath,
-                    height: Responsive.h(context, 210, min: 180),
+                    height: Responsive.h(context, 280, min: 250),
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
-                      height: Responsive.h(context, 210, min: 180),
+                      height: Responsive.h(context, 280, min: 250),
                       color: AppColors.primary.withOpacity(0.15),
                       child: const Icon(Icons.event, size: 40),
                     ),
@@ -738,15 +740,40 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 7),
-                        _iconRow(Icons.location_on_outlined, event.venue),
-                        const SizedBox(height: 7),
-                        // Age Group · Date & Time · Distance (mock display data)
-                        _iconRow(Icons.child_care_outlined, event.ageGroupDisplay),
-                        const SizedBox(height: 7),
-                        _iconRow(Icons.calendar_today_outlined, event.dateTimeDisplay),
-                        const SizedBox(height: 7),
-                        _iconRow(Icons.near_me_outlined, event.distanceDisplay),
+                        const SizedBox(height: 8),
+                        // Two-column meta: Age + Date·Time left, Location +
+                        // Distance (green) right.
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _iconRow(Icons.child_care_outlined,
+                                      event.ageGroupDisplay),
+                                  const SizedBox(height: 7),
+                                  _iconRow(Icons.calendar_today_outlined,
+                                      event.dateTimeDisplay),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _iconRow(Icons.location_on_outlined,
+                                      event.venue),
+                                  const SizedBox(height: 7),
+                                  _iconRow(Icons.near_me_outlined,
+                                      event.distanceDisplay,
+                                      color: const Color(0xFF1FA85B)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                     SizedBox(
@@ -893,7 +920,8 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                     const SizedBox(height: 7),
                     _iconRow(Icons.calendar_today_outlined, event.dateTimeDisplay),
                     const SizedBox(height: 7),
-                    _iconRow(Icons.near_me_outlined, event.distanceDisplay),
+                    _iconRow(Icons.near_me_outlined, event.distanceDisplay,
+                        color: const Color(0xFF1FA85B)),
                     const Spacer(),
                     SizedBox(
                       width: double.infinity,
@@ -928,15 +956,19 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
     );
   }
 
-  Widget _iconRow(IconData icon, String text) {
+  Widget _iconRow(IconData icon, String text, {Color? color}) {
     return Row(
       children: [
-        Icon(icon, size: 14, color: AppColors.textPrimary),
+        Icon(icon, size: 14, color: color ?? AppColors.textPrimary),
         const SizedBox(width: 5),
         Expanded(
           child: Text(
             text,
-            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: AppColors.textSecondary),
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 11.5),
+              color: color ?? AppColors.textSecondary,
+              fontWeight: color != null ? FontWeight.w600 : FontWeight.w400,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

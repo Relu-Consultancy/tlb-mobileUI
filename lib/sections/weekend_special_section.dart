@@ -189,32 +189,20 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       const SizedBox(height: 8),
-                                      // Age Group + Distance (Date on image badge)
+                                      // Two-column meta: Age + Date·Time left,
+                                      // Location + Distance right.
                                       ListingMetaRows(
                                         event: event,
-                                        showDateTime: false,
+                                        showLocation: true,
+                                        twoColumn: true,
                                       ),
                                     ],
                                   ),
 
-                                  // Venue + Book Now
+                                  // Book Now (location now in the meta block above).
                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
-                                      const Icon(Icons.location_on_outlined,
-                                          size: 15, color: AppColors.textSecondary),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          event.venue,
-                                          style: GoogleFonts.poppins(
-                                            fontSize: Responsive.sp(context, 13),
-                                            color: AppColors.textSecondary,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
                                       SizedBox(
                                         height: Responsive.h(context, 30, min: 27),
                                         child: ElevatedButton(

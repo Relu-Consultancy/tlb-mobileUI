@@ -62,7 +62,9 @@ class ClassNearbyCard extends StatelessWidget {
               child: Stack(
                 children: [
                   AspectRatio(
-                    aspectRatio: 1.6,
+                    // Taller image (more coverage) — meta is now a compact
+                    // two-column block.
+                    aspectRatio: 1.15,
                     child: Image.asset(
                       event.imagePath,
                       fit: BoxFit.cover,
@@ -123,56 +125,43 @@ class ClassNearbyCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-
-                  // Venue
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on_outlined, size: 13, color: AppColors.textSecondary),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          event.venue,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 11.5),
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ],
+                  // Two-column meta: Age + Date·Time left, Location + Distance right.
+                  ListingMetaRows(
+                    event: event,
+                    showLocation: true,
+                    twoColumn: true,
                   ),
-                  const SizedBox(height: 8),
-                  // Age Group · Date & Time · Distance (mock display data)
-                  ListingMetaRows(event: event),
                   const SizedBox(height: 12),
 
-                  // Join Now button
+                  // Join Now button (right-aligned)
                   if (buttonLabel != null)
-                    Material(
-                      color: AppColors.primaryLight,
-                      borderRadius: BorderRadius.circular(24),
-                      child: InkWell(
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Material(
+                        color: AppColors.primaryLight,
                         borderRadius: BorderRadius.circular(24),
-                        onTap: () {
-                          if (onTap != null) {
-                            onTap!();
-                          } else if (buttonLabel == 'Send Enquiry') {
-                            showInquireNow(context, listingId: event.id);
-                          } else if (buttonLabel == 'Check Availability' || buttonLabel == 'View Details') {
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
-                          } else {
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
-                          }
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                          child: Text(
-                            buttonLabel!,
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 13),
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textPrimary,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(24),
+                          onTap: () {
+                            if (onTap != null) {
+                              onTap!();
+                            } else if (buttonLabel == 'Send Enquiry') {
+                              showInquireNow(context, listingId: event.id);
+                            } else if (buttonLabel == 'Check Availability' || buttonLabel == 'View Details') {
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
+                            } else {
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            child: Text(
+                              buttonLabel!,
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 13),
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
                           ),
                         ),

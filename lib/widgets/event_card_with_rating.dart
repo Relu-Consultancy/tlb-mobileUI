@@ -60,7 +60,9 @@ class EventCardWithRating extends StatelessWidget {
                   borderRadius:
                       const BorderRadius.vertical(top: Radius.circular(16)),
                   child: AspectRatio(
-                    aspectRatio: 1.15,
+                    // Taller image (more coverage) — the meta is now a compact
+                    // two-column block, which frees vertical room.
+                    aspectRatio: 0.85,
                     child: Image.asset(
                       event.imagePath,
                       fit: BoxFit.cover,
@@ -168,30 +170,13 @@ class EventCardWithRating extends StatelessWidget {
 
                     const SizedBox(height: 8),
 
-                    // Venue
-                    Row(
-                      children: [
-                        const Icon(Icons.location_on_outlined,
-                            size: 13, color: AppColors.textSecondary),
-                        const SizedBox(width: 3),
-                        Expanded(
-                          child: Text(
-                            event.venue,
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 11),
-                              color: AppColors.textSecondary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                    // Two-column meta: Age + Date·Time on the left, Location +
+                    // Distance on the right (location shifted to the right side).
+                    ListingMetaRows(
+                      event: event,
+                      showLocation: true,
+                      twoColumn: true,
                     ),
-
-                    const SizedBox(height: 6),
-
-                    // Age Group · Date & Time · Distance (mock display data)
-                    ListingMetaRows(event: event),
 
                     const Spacer(),
 

@@ -10,6 +10,7 @@ import '../providers/saved_events_state.dart';
 import '../sections/home_header.dart';
 import '../widgets/banner_carousel.dart';
 import '../widgets/section_divider_widget.dart';
+import '../widgets/listing_meta_rows.dart';
 import '../widgets/all_categories_popup.dart';
 import '../sections/app_footer.dart';
 import '../widgets/footer_quote_carousel.dart';
@@ -453,11 +454,11 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
                   child: Image.asset(
                     event.imagePath,
-                    height: Responsive.h(context, 250, min: 222),
+                    height: Responsive.h(context, 282, min: 254),
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
-                      height: Responsive.h(context, 250, min: 222),
+                      height: Responsive.h(context, 282, min: 254),
                       color: Colors.grey.shade200,
                     ),
                   ),
@@ -489,12 +490,14 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 7),
-                    Row(children: [
-                      Icon(Icons.location_on_outlined, size: 15, color: AppColors.textSecondary),
-                      const SizedBox(width: 4),
-                      Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary)),
-                    ]),
+                    const SizedBox(height: 8),
+                    // Two-column meta (like the other cards): Age + Date·Time
+                    // left, Location + Distance (green) right.
+                    ListingMetaRows(
+                      event: event,
+                      showLocation: true,
+                      twoColumn: true,
+                    ),
                     const Spacer(),
                     SizedBox(
                       width: double.infinity,

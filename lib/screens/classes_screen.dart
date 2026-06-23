@@ -218,7 +218,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         lineColor: Color(0xFFD4A537), // warm gold
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 442, min: 402),
+                        height: Responsive.h(context, 525, min: 495),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesWhatEveryoneJoining.length,
@@ -226,7 +226,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                             return Padding(
                               padding: const EdgeInsets.only(right: 16),
                               child: SizedBox(
-                                width: Responsive.w(context, 240),
+                                width: Responsive.w(context, 290),
                                 child: EventCardWithRating(
                                   event: DummyData.classesWhatEveryoneJoining[index],
                                   buttonLabel: 'View Details',
@@ -361,7 +361,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         lineColor: Color(0xFFD4A537), // warm gold
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 412, min: 372),
+                        height: Responsive.h(context, 385, min: 365),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesRightAroundYou.length,
@@ -389,7 +389,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         lineColor: Color(0xFFD4A537), // warm gold
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 255, min: 235),
+                        height: Responsive.h(context, 224, min: 210),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesTopPicks.length,
@@ -494,7 +494,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         lineColor: Color(0xFFD4A537), // warm gold
                       ),
                       SizedBox(
-                        height: Responsive.h(context, 490, min: 450),
+                        height: Responsive.h(context, 452, min: 428),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.classesSpecialFocus.length,

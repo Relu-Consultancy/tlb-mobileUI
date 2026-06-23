@@ -120,55 +120,17 @@ class HolidaySpecialCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
-                  if ((event.eventDate ?? '').isNotEmpty)
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.calendar_today_outlined,
-                          size: 13,
-                          color: AppColors.textSecondary,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            event.eventDate!,
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 11.5),
-                              color: AppColors.textSecondary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  const SizedBox(height: 8),
-                  // Age Group + Distance (Date already shown above; venue below)
+                  // Two-column meta: Age + Date·Time left, Location + Distance right.
                   ListingMetaRows(
                     event: event,
-                    showDateTime: false,
+                    showLocation: true,
+                    twoColumn: true,
                   ),
                   const SizedBox(height: 10),
-                  // Bottom row: venue + Book Now button
+                  // Book Now button (location now lives in the meta block above).
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      const Icon(
-                        Icons.location_on_outlined,
-                        size: 13,
-                        color: AppColors.textSecondary,
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          event.venue,
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 11.5),
-                            color: AppColors.textSecondary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
                       Material(
                         color: AppColors.primaryLight,
                         borderRadius: BorderRadius.circular(22),

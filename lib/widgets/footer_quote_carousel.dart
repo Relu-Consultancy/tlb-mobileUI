@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 
-/// A gently rotating, cursive "quote of the moment" shown just above the
-/// footer. A new quote fades/slides/scales in every 10 seconds.
+/// A gently rotating "quote of the moment" shown just above the footer. A new
+/// quote fades/slides in every 10 seconds. Uses a rounded, friendly display
+/// font (Fredoka) so the quotes stay playful but easy to read.
 class FooterQuoteCarousel extends StatefulWidget {
   const FooterQuoteCarousel({super.key});
 
@@ -114,12 +116,11 @@ class _FooterQuoteCarouselState extends State<FooterQuoteCarousel> {
               FooterQuoteCarousel.quotes[_index],
               key: ValueKey<int>(_index),
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'DancingScript',
-                fontSize: Responsive.sp(context, 18),
-                height: 1.25,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF5A4632), // warm bronze-brown
+              style: GoogleFonts.fredoka(
+                fontSize: Responsive.sp(context, 16.5),
+                height: 1.35,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF4A3A28), // deeper warm brown for contrast
               ),
             ),
           ),
