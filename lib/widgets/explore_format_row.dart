@@ -56,7 +56,9 @@ class ExploreFormatRow extends StatelessWidget {
                 format['image'],
                 width: size,
                 height: size,
-                fit: BoxFit.cover,
+                // Contain (not cover) + no oval clip below → the full artwork
+                // shows, including the parts that pop out of the disc.
+                fit: BoxFit.contain,
                 errorBuilder: (_, __, ___) => Container(
                   color: Colors.grey.shade200,
                   child: const Icon(Icons.category, color: Colors.grey),
@@ -81,37 +83,36 @@ class ExploreFormatRow extends StatelessWidget {
                   child: SizedBox(
                     width: size,
                     height: size,
-                    child: ClipOval(
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          img,
-                          // Format name engraved INSIDE the circle, near the
-                          // bottom. A soft white halo keeps it readable over the
-                          // artwork / coloured background.
-                          Positioned(
-                            left: size * 0.12,
-                            right: size * 0.12,
-                            bottom: size * 0.12,
-                            child: Text(
-                              format['label'] as String,
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 10.5),
-                                fontWeight: FontWeight.w600,
-                                height: 1.1,
-                                color: AppColors.textPrimary,
-                                shadows: const [
-                                  Shadow(color: Colors.white, blurRadius: 4),
-                                  Shadow(color: Colors.white, blurRadius: 8),
-                                ],
-                              ),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        // Whole image (no oval clip) so the artwork pops out of
+                        // the disc, like the reference.
+                        img,
+                        // Format name engraved INSIDE the artwork, near the
+                        // bottom. A soft white halo keeps it readable.
+                        Positioned(
+                          left: size * 0.14,
+                          right: size * 0.14,
+                          bottom: size * 0.10,
+                          child: Text(
+                            format['label'] as String,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, 9),
+                              fontWeight: FontWeight.w600,
+                              height: 1.1,
+                              color: AppColors.textPrimary,
+                              shadows: const [
+                                Shadow(color: Colors.white, blurRadius: 4),
+                                Shadow(color: Colors.white, blurRadius: 8),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

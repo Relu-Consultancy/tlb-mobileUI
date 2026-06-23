@@ -269,6 +269,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               lineThickness: 1.5,
                               lineColor: Color(0xFFD4A537),
                               topPadding: 6,
+                              showStars: true, // — ✦ Spotlight ✦ —
                             ),
                             const SizedBox(height: 6),
                           ],

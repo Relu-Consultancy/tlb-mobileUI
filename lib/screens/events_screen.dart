@@ -353,7 +353,9 @@ class _EventsScreenState extends State<EventsScreen> {
                       ),
                       const SectionDividerWidget(topPadding: 30, title: 'Happening This Weekend'),
                       SizedBox(
-                        height: Responsive.h(context, 190, min: 170),
+                        // Tightened so the card hugs its content (was 190 — left
+                        // ~30px of white below the Book Now button).
+                        height: Responsive.h(context, 162, min: 150),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.weekendSpecial.length,

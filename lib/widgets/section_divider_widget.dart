@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
@@ -36,6 +37,13 @@ class SectionDividerWidget extends StatelessWidget {
   /// Optional custom padding below the divider. Defaults to 16.
   final double bottomPadding;
 
+  /// When true, a small gold 4-point star sits between each accent line and
+  /// the title (`— ✦ Title ✦ —`). Used by the Spotlight header.
+  final bool showStars;
+
+  /// Colour of the flanking stars (defaults to a warm gold).
+  final Color starColor;
+
   const SectionDividerWidget({
     super.key,
     required this.title,
@@ -47,6 +55,8 @@ class SectionDividerWidget extends StatelessWidget {
     this.lineThickness = 1,
     this.topPadding = 30,
     this.bottomPadding = 16,
+    this.showStars = false,
+    this.starColor = const Color(0xFFE7A11A),
   });
 
   /// Titles longer than this many characters use the shorter accent line so
@@ -69,26 +79,41 @@ class SectionDividerWidget extends StatelessWidget {
         ? (lineLength < _kCompactLineLength ? lineLength : _kCompactLineLength)
         : lineLength;
 
+    final Widget titleText = Text(
+      title,
+      style: GoogleFonts.poppins(
+        fontSize: Responsive.sp(context, fontSize),
+        fontWeight: fontWeight,
+        color: textColor,
+        letterSpacing: 0.2,
+      ),
+    );
+
     return Padding(
       padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildLine(isLeft: true, length: effectiveLineLength),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              title,
-              style: GoogleFonts.poppins(
-                fontSize: Responsive.sp(context, fontSize),
-                fontWeight: fontWeight,
-                color: textColor,
-                letterSpacing: 0.2,
-              ),
-            ),
-          ),
-          _buildLine(isLeft: false, length: effectiveLineLength),
-        ],
+        children: showStars
+            // — ✦ Title ✦ — : a gold star between each line and the title.
+            ? [
+                _buildLine(isLeft: true, length: effectiveLineLength),
+                const SizedBox(width: 8),
+                _FourPointStar(size: 9, color: starColor),
+                const SizedBox(width: 8),
+                titleText,
+                const SizedBox(width: 8),
+                _FourPointStar(size: 9, color: starColor),
+                const SizedBox(width: 8),
+                _buildLine(isLeft: false, length: effectiveLineLength),
+              ]
+            : [
+                _buildLine(isLeft: true, length: effectiveLineLength),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: titleText,
+                ),
+                _buildLine(isLeft: false, length: effectiveLineLength),
+              ],
       ),
     );
   }
@@ -110,4 +135,53 @@ class SectionDividerWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A small solid 4-point star (sparkle ✦) used to flank the Spotlight title.
+class _FourPointStar extends StatelessWidget {
+  final double size;
+  final Color color;
+
+  const _FourPointStar({required this.size, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size.square(size),
+      painter: _FourPointStarPainter(color),
+    );
+  }
+}
+
+class _FourPointStarPainter extends CustomPainter {
+  final Color color;
+
+  _FourPointStarPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+
+    final Offset c = Offset(size.width / 2, size.height / 2);
+    final double outer = size.width / 2;
+    const double innerRatio = 0.34; // waist between the points
+    final Path path = Path();
+    for (int i = 0; i < 8; i++) {
+      final double radius = i.isEven ? outer : outer * innerRatio;
+      // Outer points at top / right / bottom / left.
+      final double angle = (math.pi / 4) * i - math.pi / 2;
+      final Offset p =
+          Offset(c.dx + radius * math.cos(angle), c.dy + radius * math.sin(angle));
+      i == 0 ? path.moveTo(p.dx, p.dy) : path.lineTo(p.dx, p.dy);
+    }
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_FourPointStarPainter oldDelegate) =>
+      oldDelegate.color != color;
 }
