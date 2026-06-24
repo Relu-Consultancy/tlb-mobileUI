@@ -66,7 +66,7 @@ class _SpotlightStageState extends State<SpotlightStage>
     )..repeat();
     _curtain = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 2100), // slow, graceful roll
     )..addStatusListener((status) {
         // Fully closed → swap to the next card, then re-open the curtain.
         if (status == AnimationStatus.completed) {
@@ -80,7 +80,7 @@ class _SpotlightStageState extends State<SpotlightStage>
   void _startAuto() {
     _auto?.cancel();
     if (widget.events.length < 2) return;
-    _auto = Timer.periodic(const Duration(seconds: 5), (_) {
+    _auto = Timer.periodic(const Duration(seconds: 6), (_) {
       if (!mounted) return;
       if (_curtain.status == AnimationStatus.dismissed) {
         _curtain.forward(from: 0); // close → swap → open
@@ -113,14 +113,17 @@ class _SpotlightStageState extends State<SpotlightStage>
     final double cardTop = titleBand;
     final double cardBottom = cardTop + cardH;
 
-    // Stage platform — the card sits ON it. The plate image is wide (≈3:2) and
-    // has transparent side margins, so it's drawn wider than the card to make
-    // the visible ellipse span the full card/banner width. Nudged up so it
-    // tucks closely under the card.
-    final double plateW = cardW * 1.24; // platform a bit narrower than before
-    final double plateH = plateW * (250.0 / 376.0);
-    final double plateTop = cardBottom - cardW * 0.04 - 85;
-    final double stageH = plateTop + plateH * 0.78; // ends nearer the plate
+    // Stage platform — the card sits ON it. The new plate art is a wide, thin
+    // ellipse (611×180) with a built-in left star + soft drop shadow and only
+    // small transparent side margins, so it's drawn just slightly wider than the
+    // card to make the visible ellipse span (and a touch overhang) the banner.
+    final double plateW = cardW * 1.2;
+    final double plateH = plateW * (180.0 / 611.0); // true art ratio
+    // Tuck the plate up so its bright orange top rim (≈34% down the art) lands
+    // right at the card's bottom edge → the banner appears to stand on it.
+    final double plateTop = cardBottom - plateH * 0.34;
+    // End the stage just past the plate's shadow, trimming the transparent tail.
+    final double stageH = plateTop + plateH * 0.9;
 
     final double lightSize = cardW * 0.19;
 
@@ -145,13 +148,42 @@ class _SpotlightStageState extends State<SpotlightStage>
                   child: _leaves(),
                 ),
 
+                // 2.5 — Thin warm scrim ONLY at the very top seam: full header
+                // cream at the join, gone within ~38px. This dissolves the hard
+                // line where the header meets the stage WITHOUT washing out the
+                // leaves (they stay fully visible just below).
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 38,
+                  child: const IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0xFFFBF3DE), // exact header cream at the seam
+                            Color(0x00FBF3DE), // gone almost immediately
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
                 // 3 — Floating stars.
                 ..._stars(stageH, screenW),
 
                 // 5 — Stage platform (drawn BEFORE the card → card sits on it).
+                // The art's disc spans x=46..594 in a 611 canvas → its geometric
+                // midpoint (320) sits ~2.4% right of the canvas centre, so nudge
+                // the image left by that fraction to seat the disc centre exactly
+                // under the (screen-centred) banner.
                 Positioned(
                   top: plateTop,
-                  left: (screenW - plateW) / 2,
+                  left: (screenW - plateW) / 2 - plateW * 0.024,
                   width: plateW,
                   child: Image.asset(
                     SpotlightStage._plate,
@@ -324,15 +356,21 @@ class _SpotlightStageState extends State<SpotlightStage>
           right: -40,
           child: _blob(const Color(0xFFB07BFF), 220, 0.4),
         ),
-        // 3 — Warm cream fade at the very top → seamless blend with the golden
-        //     header above the search bar.
+        // 3 — Warm golden fade at the top → seamless blend with the golden
+        //     header above the search bar. Held solid through the leaves + title
+        //     band, then dissolved into the teal stage, so the foliage sits over
+        //     warm gold (no green seam where it meets the header).
         const DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFFFBF3DE), Color(0x00FBF3DE)],
-              stops: [0.0, 0.16],
+              colors: [
+                Color(0xFFFBF3DE), // exact header-bottom cream (seamless join)
+                Color(0xFFFBF3DE), // hold solid behind the leaves/title
+                Color(0x00FBF3DE), // dissolve into the teal stage below
+              ],
+              stops: [0.0, 0.18, 0.40],
             ),
           ),
         ),
@@ -366,11 +404,16 @@ class _SpotlightStageState extends State<SpotlightStage>
   }
 
   // ── Leaves header ────────────────────────────────────────────────────────
+  // leaves.png is an OPAQUE green-bokeh photo, so on its own it reads as a
+  // distinct green block between the gold header and the card. To make it blend
+  // seamlessly we (a) soften + warm the photo so the gold shows through and the
+  // green leans golden-green, and (b) lay a golden wash over its top so the
+  // upper foliage melts directly into the header gold — no dividing line.
   Widget _leaves() {
     return ShaderMask(
       blendMode: BlendMode.dstIn,
-      // Fade BOTH ends — the top dissolves into the golden header above (no hard
-      // seam) and the bottom dissolves into the glow below.
+      // Alpha fade BOTH ends — top dissolves into the golden header, bottom into
+      // the stage glow.
       shaderCallback: (rect) => const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
@@ -380,16 +423,45 @@ class _SpotlightStageState extends State<SpotlightStage>
           Colors.white,
           Colors.transparent,
         ],
-        stops: [0.0, 0.42, 0.66, 1.0],
+        stops: [0.0, 0.34, 0.62, 1.0],
       ).createShader(rect),
-      child: Opacity(
-        opacity: 0.82,
-        child: Image.asset(
-          SpotlightStage._leaves,
-          fit: BoxFit.cover,
-          width: double.infinity,
-          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-        ),
+      child: Stack(
+        children: [
+          // Softened + warmed foliage → a gentle golden-green haze, not a block.
+          Opacity(
+            opacity: 0.6,
+            child: ColorFiltered(
+              colorFilter: ColorFilter.mode(
+                const Color(0xFFFFDFA0).withOpacity(0.5), // warm amber
+                BlendMode.softLight,
+              ),
+              child: Image.asset(
+                SpotlightStage._leaves,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              ),
+            ),
+          ),
+          // Golden wash strongest at the top, gone by mid-height → the foliage
+          // blends up INTO the header's gold rather than meeting it at a line.
+          const Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFFFBF3DE), // exact header cream at the very top
+                    Color(0x88FBF3DE),
+                    Color(0x00FBF3DE), // gone → foliage shows below
+                  ],
+                  stops: [0.0, 0.24, 0.52],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -763,17 +835,20 @@ class _BeamsPainter extends CustomPainter {
       oldDelegate.t != t || oldDelegate.sway != sway;
 }
 
-/// Theatrical red-velvet curtain that covers the banner. [value] 0 = fully open
-/// (off-screen), 1 = fully closed. Each half is anchored at its outer edge and
-/// changes WIDTH with [value] — so the pleated folds bunch up when open and
-/// stretch apart as it draws closed, reading like real gathered cloth.
+/// Theatrical red-velvet roller curtain that covers the banner. [value] 0 =
+/// fully open (rolled up out of sight), 1 = fully closed (rolled all the way
+/// down). The cloth hangs from a fixed top valance and its leading edge is a
+/// curled, cylinder-like roll that travels DOWN to cover and UP to reveal —
+/// reading like fabric rolling onto a pole.
 class _SpotlightCurtain extends StatelessWidget {
   final double value;
 
   const _SpotlightCurtain({required this.value});
 
-  // Vertical pleats — alternating light/dark reds give the folds; sized in
-  // *fraction of the half's width*, so they compress/expand with the cloth.
+  /// Thickness of the curled roll at the leading edge.
+  static const double _rollH = 30;
+
+  // Vertical velvet pleats — alternating light/dark reds give the draped folds.
   static const List<Color> _pleats = [
     Color(0xFF5E0E0E),
     Color(0xFFC24040),
@@ -795,115 +870,191 @@ class _SpotlightCurtain extends StatelessWidget {
     if (value <= 0.001) return const SizedBox.shrink();
     return LayoutBuilder(
       builder: (context, c) {
-        // Cloth stretches out from the edge: width grows with `value`.
-        final double w = c.maxWidth / 2 * value + 1;
+        final double h = c.maxHeight;
+        // Leading (bottom) edge of the descending cloth.
+        final double edge = h * value;
+        // How many times the roll has "turned" over the distance travelled — the
+        // cylinder circumference (≈π·_rollH) divided into the travel. Drives the
+        // scrolling surface highlights so the curl reads as physically rolling.
+        final double rotations = h / (math.pi * _rollH);
+        final double wrapPhase = value * rotations;
+        // A gentle squash that breathes with each turn → a livelier, springier
+        // curl rather than a rigid bar.
+        final double squash = 1.0 - 0.06 * math.sin(wrapPhase * 2 * math.pi).abs();
         return Stack(
+          clipBehavior: Clip.none,
           children: [
+            // 1 — Hanging cloth from the top valance down to just above the roll.
             Positioned(
-                left: 0, top: 0, bottom: 0, width: w, child: _half(left: true)),
+              top: 0,
+              left: 0,
+              right: 0,
+              height: math.max(0.0, edge - _rollH * 0.55),
+              child: _cloth(),
+            ),
+            // 2 — Soft shadow the roll casts onto the banner just beneath it.
             Positioned(
-                right: 0,
-                top: 0,
-                bottom: 0,
-                width: w,
-                child: _half(left: false)),
+              top: edge - 1,
+              left: 0,
+              right: 0,
+              height: 16,
+              child: const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0x55000000), Color(0x00000000)],
+                  ),
+                ),
+              ),
+            ),
+            // 3 — The curled roll at the leading edge (the part that "rolls").
+            Positioned(
+              top: edge - _rollH,
+              left: -2,
+              right: -2,
+              height: _rollH,
+              child: Transform.scale(
+                scaleY: squash,
+                child: _roll(wrapPhase),
+              ),
+            ),
           ],
         );
       },
     );
   }
 
-  Widget _half({required bool left}) {
-    return ClipPath(
-      clipper: _CurtainHemClipper(),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Pleated velvet — folds bunch when the half is narrow (gathered).
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: _pleats,
-              ),
+  /// The flat hanging velvet panel above the roll.
+  Widget _cloth() {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Pleated velvet folds.
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: _pleats,
             ),
           ),
-          // Vertical sheen — subtle top-light on the velvet.
-          DecoratedBox(
+        ),
+        // Top-light sheen fading to a soft shadow near the roll.
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.white.withOpacity(0.10),
+                Colors.transparent,
+                Colors.black.withOpacity(0.18),
+              ],
+              stops: const [0.0, 0.4, 1.0],
+            ),
+          ),
+        ),
+        // Gold valance trim fixed along the top.
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 7,
+          child: const DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
                 colors: [
-                  Colors.white.withOpacity(0.06),
-                  Colors.transparent,
-                  Colors.black.withOpacity(0.18),
+                  Color(0xFFE7B24A),
+                  Color(0xFFF6D98A),
+                  Color(0xFFC9942F),
                 ],
-                stops: const [0.0, 0.35, 1.0],
               ),
             ),
           ),
-          // Soft inner-edge shadow where the two halves meet.
-          Align(
-            alignment: left ? Alignment.centerRight : Alignment.centerLeft,
-            child: FractionallySizedBox(
-              widthFactor: 0.22,
-              child: DecoratedBox(
+        ),
+      ],
+    );
+  }
+
+  /// The curled cylinder of fabric at the leading edge — shaded top→bottom like
+  /// a lit horizontal roll, with the velvet pleats wrapping across it. The
+  /// [wrapPhase] (total turns travelled) scrolls the surface highlights so the
+  /// cylinder visibly spins as the curtain rolls up and down.
+  Widget _roll(double wrapPhase) {
+    // Two specular bands, half a turn apart, scrolling DOWN the cylinder face as
+    // it rolls. `% 1` wraps them around; the ClipRRect hides the overshoot.
+    final double f = wrapPhase % 1.0;
+    final double band1 = f * _rollH;
+    final double band2 = ((f + 0.5) % 1.0) * _rollH;
+    Widget specBand(double y) => Positioned(
+          top: y - 3,
+          left: 6,
+          right: 6,
+          height: 6,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(3),
+              gradient: LinearGradient(
+                colors: [
+                  Colors.white.withOpacity(0.0),
+                  Colors.white.withOpacity(0.6),
+                  Colors.white.withOpacity(0.0),
+                ],
+              ),
+            ),
+          ),
+        );
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(_rollH / 2),
+        // Cylinder shading: dark rim, bright specular band, deep shadow rim.
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFF4A0B0B), // dark top rim
+            Color(0xFFB23636),
+            Color(0xFFE86A6A), // bright specular highlight
+            Color(0xFF9A2A2A),
+            Color(0xFF360707), // deep bottom rim
+          ],
+          stops: [0.0, 0.24, 0.44, 0.7, 1.0],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.35),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(_rollH / 2),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Velvet pleats wrapping across the roll (low opacity so the
+            // cylinder shading still reads).
+            Opacity(
+              opacity: 0.35,
+              child: const DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: left ? Alignment.centerLeft : Alignment.centerRight,
-                    end: left ? Alignment.centerRight : Alignment.centerLeft,
-                    colors: [Colors.transparent, Colors.black.withOpacity(0.45)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: _pleats,
                   ),
                 ),
               ),
             ),
-          ),
-          // Gold trim along the top.
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 7,
-            child: const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xFFE7B24A),
-                    Color(0xFFF6D98A),
-                    Color(0xFFC9942F)
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
+            // Scrolling specular bands → the cylinder appears to spin.
+            specBand(band1),
+            specBand(band2),
+          ],
+        ),
       ),
     );
   }
-}
-
-/// Gentle scalloped hem at the bottom of a curtain half (draped cloth look).
-class _CurtainHemClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    const double dip = 12;
-    final int scallops = math.max(2, (size.width / 46).round());
-    final double w = size.width / scallops;
-    final Path p = Path()..lineTo(0, size.height - dip);
-    for (int i = 0; i < scallops; i++) {
-      p.quadraticBezierTo(
-        w * i + w / 2, size.height, // control point dips down
-        w * (i + 1), size.height - dip,
-      );
-    }
-    p
-      ..lineTo(size.width, 0)
-      ..close();
-    return p;
-  }
-
-  @override
-  bool shouldReclip(_CurtainHemClipper oldClipper) => false;
 }
