@@ -437,6 +437,9 @@ class _PrimaryButton extends StatelessWidget {
           foregroundColor: const Color(0xFF1A1A1A),
           disabledBackgroundColor: AppColors.primaryLight.withOpacity(0.7),
           elevation: 0,
+          // No drop shadow / tonal overlay (M3 paints these even at elevation 0).
+          shadowColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         ),

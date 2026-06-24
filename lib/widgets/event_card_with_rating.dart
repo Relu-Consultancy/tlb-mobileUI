@@ -16,11 +16,16 @@ class EventCardWithRating extends StatelessWidget {
   final String buttonLabel;
   final VoidCallback? onTap;
 
+  /// Image aspect ratio (width / height). Lower = taller image. Default 0.85;
+  /// pass a smaller value to grow the image down into the card's spare space.
+  final double imageAspectRatio;
+
   const EventCardWithRating({
     super.key,
     required this.event,
     this.buttonLabel = 'Book Now',
     this.onTap,
+    this.imageAspectRatio = 0.85,
   });
 
   @override
@@ -62,7 +67,7 @@ class EventCardWithRating extends StatelessWidget {
                   child: AspectRatio(
                     // Taller image (more coverage) — the meta is now a compact
                     // two-column block, which frees vertical room.
-                    aspectRatio: 0.85,
+                    aspectRatio: imageAspectRatio,
                     child: Image.asset(
                       event.imagePath,
                       fit: BoxFit.cover,

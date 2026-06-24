@@ -375,7 +375,9 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         topPadding: 30,
                       ),
                       SizedBox(
-                        // +6 to absorb the larger 18px card bottom gap.
+                        // Card height held constant — the taller image below
+                        // grows DOWN into the Spacer gap, filling the white
+                        // space between the meta rows and the button.
                         height: Responsive.h(context, 448, min: 424),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
@@ -839,11 +841,11 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                   child: Image.asset(
                     event.imagePath,
-                    height: Responsive.h(context, 210, min: 185),
+                    height: Responsive.h(context, 240, min: 212),
                     width: double.infinity,
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
-                      height: Responsive.h(context, 210, min: 185),
+                      height: Responsive.h(context, 240, min: 212),
                       color: AppColors.primary.withOpacity(0.15),
                       child: const Icon(Icons.event, size: 40),
                     ),

@@ -64,10 +64,11 @@ class ListingMetaRows extends StatelessWidget {
       ];
       final right = <Widget>[
         if (showLocation)
-          _row(context, Icons.location_on_outlined, event.venue),
+          _row(context, Icons.location_on_outlined, event.venue,
+              alignEnd: true),
         if (showDistance)
           _row(context, Icons.near_me_outlined, event.distanceDisplay,
-              color: _distanceGreen),
+              color: _distanceGreen, alignEnd: true),
       ];
       final int rowCount = left.length > right.length ? left.length : right.length;
 
@@ -118,24 +119,31 @@ class ListingMetaRows extends StatelessWidget {
     );
   }
 
-  Widget _row(BuildContext context, IconData icon, String text, {Color? color}) {
+  Widget _row(BuildContext context, IconData icon, String text,
+      {Color? color, bool alignEnd = false}) {
     final Color c = color ?? AppColors.textSecondary;
+    final Widget label = Text(
+      text,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      textAlign: alignEnd ? TextAlign.right : TextAlign.left,
+      style: GoogleFonts.poppins(
+        fontSize: Responsive.sp(context, fontSize),
+        color: c,
+        fontWeight: color != null ? FontWeight.w600 : FontWeight.w400,
+      ),
+    );
     return Row(
+      // When [alignEnd], the icon+text group hugs the right edge of its cell so
+      // the right column lines up flush with the CTA button's right edge.
+      mainAxisAlignment:
+          alignEnd ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
         Icon(icon, size: iconSize, color: c),
         const SizedBox(width: 4),
-        Expanded(
-          child: Text(
-            text,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.poppins(
-              fontSize: Responsive.sp(context, fontSize),
-              color: c,
-              fontWeight: color != null ? FontWeight.w600 : FontWeight.w400,
-            ),
-          ),
-        ),
+        // Flexible (not Expanded) when right-aligned so the group only takes the
+        // width it needs and stays pinned to the right, still ellipsising if long.
+        alignEnd ? Flexible(child: label) : Expanded(child: label),
       ],
     );
   }

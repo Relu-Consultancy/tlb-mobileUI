@@ -230,6 +230,9 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                 child: EventCardWithRating(
                                   event: DummyData.classesWhatEveryoneJoining[index],
                                   buttonLabel: 'View Details',
+                                  // Taller image grows down into the spare gap
+                                  // above the button, filling the white space.
+                                  imageAspectRatio: 0.80,
                                 ),
                               ),
                             );

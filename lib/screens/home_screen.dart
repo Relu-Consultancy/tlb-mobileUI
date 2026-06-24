@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:showcaseview/showcaseview.dart';
-import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../providers/location_state.dart';
 import '../providers/saved_events_state.dart';
@@ -8,9 +7,8 @@ import '../providers/notifications_state.dart';
 import '../services/push_notifications.dart';
 // import '../providers/home_feed_state.dart'; // commented out — home reverted to mock data
 import '../sections/home_header.dart';
-import '../widgets/banner_carousel.dart';
+import '../sections/spotlight_stage.dart';
 import '../widgets/categories_grid.dart';
-import '../widgets/section_divider_widget.dart';
 import '../widgets/empty_location_widget.dart';
 import '../sections/hot_picks_section.dart';
 import '../sections/weekend_special_section.dart';
@@ -214,7 +212,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             // header's blend layer fades into this exact cream,
                             // so it always lands on a flat colour — no gradient
                             // step to mismatch, hence no seam on any device.
-                            Colors.white, // fade to scaffold white at the end
+                            Color(0xFFFBF3DE), // exact match to the Spotlight
+                            // stage's top tone → seamless header→leaves blend
                           ],
                           stops: [0.0, 0.30, 0.55, 0.86, 1.0],
                         ),
@@ -258,21 +257,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               },
                             ),
                           */
-                          if (LocationState().isLocationSupported(city)) ...[
-                            const SizedBox(height: 4),
-                            const SectionDividerWidget(
-                              title: 'Spotlight',
-                              lineLength: 100,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              textColor: Color(0xFF3A3A3A),
-                              lineThickness: 1.5,
-                              lineColor: Color(0xFFD4A537),
-                              topPadding: 6,
-                              showStars: true, // — ✦ Spotlight ✦ —
-                            ),
-                            const SizedBox(height: 6),
-                          ],
+                          // Spotlight title now lives inside SpotlightStage
+                          // (the redesigned theatrical stage section below).
                         ],
                       ),
                     ),
@@ -309,31 +295,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       */
+                      // ── Redesigned theatrical Spotlight stage ──
                       RepaintBoundary(
-                        child: BannerCarousel(
-                          events: DummyData.bannerEvents,
-                          height: Responsive.h(context, 480.0),
-                          // Carousel peek — previous/next banners show at the
-                          // left & right edges.
-                          viewportFraction: 0.84,
-                          // Match the venues banner corner radius.
-                          cornerRadius: 28,
-                          // Deep gradient border whose colour is sampled from
-                          // each banner image (changes per card).
-                          animatedAccentBorder: true,
-                          // Gentle floating/parallax drift on the banner images.
-                          animateImages: true,
-                          // Soft tinted backdrop that follows the current
-                          // banner's colour, lerping smoothly between cards.
-                          tintedBackground: true,
-                          // "Spotlight focus" treatment (dim/desat side cards,
-                          // centre glow + shadow, breathing pulse, swipe nudge,
-                          // bigger accent indicator). Reverted — disabled so the
-                          // carousel/side cards render exactly as before.
-                          spotlightEnhancements: false,
-                          // Endless cycle — never rewinds to the first card.
-                          infiniteScroll: true,
-                        ),
+                        child: SpotlightStage(events: DummyData.bannerEvents),
                       ),
                       const RepaintBoundary(child: CategoriesGrid()),
 

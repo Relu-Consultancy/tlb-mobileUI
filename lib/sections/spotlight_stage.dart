@@ -1,0 +1,909 @@
+import 'dart:async';
+import 'dart:math' as math;
+import 'dart:ui' as ui;
+
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
+import '../core/responsive.dart';
+import '../models/event_model.dart';
+import '../screens/event_detail_screen.dart';
+import '../widgets/section_divider_widget.dart';
+
+/// Theatrical "stage" Spotlight section.
+///
+/// Layer order (back → front): ambient cyan→pink glow, decorative leaves
+/// header, floating stars, soft light beams, the stage platform (the card sits
+/// ON it), the single focused spotlight card, the centered title, and the two
+/// stage lights mounted at the top corners pointing down-inward. Data
+/// integration is unchanged — it renders the same [EventModel] list.
+class SpotlightStage extends StatefulWidget {
+  final List<EventModel> events;
+
+  const SpotlightStage({super.key, required this.events});
+
+  static const String _leaves = 'resources- tlb-ui/spotlight/leaves.png';
+  static const String _light = 'resources- tlb-ui/spotlight/lights.png';
+  static const String _plate = 'resources- tlb-ui/spotlight/plate.png';
+  static const String _star = 'resources- tlb-ui/spotlight/star.png';
+
+  @override
+  State<SpotlightStage> createState() => _SpotlightStageState();
+}
+
+class _SpotlightStageState extends State<SpotlightStage>
+    with TickerProviderStateMixin {
+  late final AnimationController _shimmer;
+  late final AnimationController _float;
+  late final AnimationController _border; // running golden border + star
+  late final AnimationController _curtain; // theatrical close/open transition
+  late final AnimationController _sway; // lights pan left/right
+  Timer? _auto;
+  int _index = 0;
+
+  /// Smooth −1..1 oscillation driving the light pan + beam sweep.
+  double get _swayValue => math.sin(_sway.value * 2 * math.pi);
+
+  @override
+  void initState() {
+    super.initState();
+    _shimmer = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat(reverse: true);
+    _float = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    )..repeat(reverse: true);
+    _border = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 9000), // slow, graceful loop
+    )..repeat();
+    _sway = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 4200), // gentle left/right pan
+    )..repeat();
+    _curtain = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..addStatusListener((status) {
+        // Fully closed → swap to the next card, then re-open the curtain.
+        if (status == AnimationStatus.completed) {
+          setState(() => _index = (_index + 1) % widget.events.length);
+          _curtain.reverse();
+        }
+      });
+    _startAuto();
+  }
+
+  void _startAuto() {
+    _auto?.cancel();
+    if (widget.events.length < 2) return;
+    _auto = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted) return;
+      if (_curtain.status == AnimationStatus.dismissed) {
+        _curtain.forward(from: 0); // close → swap → open
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _auto?.cancel();
+    _shimmer.dispose();
+    _float.dispose();
+    _border.dispose();
+    _curtain.dispose();
+    _sway.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.events.isEmpty) return const SizedBox.shrink();
+
+    final double screenW = MediaQuery.of(context).size.width;
+    final double cardW = math.min(screenW - 44, 350);
+    final double cardH = cardW * 1.26;
+
+    // Taller top band so the stage lights sit fully ABOVE the card (they no
+    // longer overlap its top corners).
+    const double titleBand = 84;
+    final double cardTop = titleBand;
+    final double cardBottom = cardTop + cardH;
+
+    // Stage platform — the card sits ON it. The plate image is wide (≈3:2) and
+    // has transparent side margins, so it's drawn wider than the card to make
+    // the visible ellipse span the full card/banner width. Nudged up so it
+    // tucks closely under the card.
+    final double plateW = cardW * 1.24; // platform a bit narrower than before
+    final double plateH = plateW * (250.0 / 376.0);
+    final double plateTop = cardBottom - cardW * 0.04 - 85;
+    final double stageH = plateTop + plateH * 0.78; // ends nearer the plate
+
+    final double lightSize = cardW * 0.19;
+
+    return RepaintBoundary(
+      child: Column(
+        children: [
+          SizedBox(
+            height: stageH,
+            width: double.infinity,
+            child: Stack(
+              clipBehavior: Clip.hardEdge,
+              children: [
+                // 1 — Ambient glow.
+                Positioned.fill(child: _glow()),
+
+                // 2 — Leaves header (starts at the very top → no white gap).
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: titleBand + 46,
+                  child: _leaves(),
+                ),
+
+                // 3 — Floating stars.
+                ..._stars(stageH, screenW),
+
+                // 5 — Stage platform (drawn BEFORE the card → card sits on it).
+                Positioned(
+                  top: plateTop,
+                  left: (screenW - plateW) / 2,
+                  width: plateW,
+                  child: Image.asset(
+                    SpotlightStage._plate,
+                    fit: BoxFit.fitWidth,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  ),
+                ),
+
+                // 6 — Single focused card with a theatrical curtain transition.
+                Positioned(
+                  top: cardTop,
+                  left: 0,
+                  right: 0,
+                  height: cardH,
+                  child: _SpotlightCard(
+                    event: widget.events[_index],
+                    width: cardW,
+                    shimmer: _shimmer,
+                    border: _border,
+                    curtain: _curtain,
+                  ),
+                ),
+
+                // 6.5 — Volumetric light beams (yellow polygon cones) cast from
+                // each light, drawn OVER the card so the light visibly falls on
+                // the banner.
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: AnimatedBuilder(
+                      animation: Listenable.merge([_shimmer, _sway]),
+                      builder: (_, __) => CustomPaint(
+                        painter: _BeamsPainter(
+                          t: _shimmer.value,
+                          lightSize: lightSize,
+                          length: cardH * 0.78,
+                          sway: _swayValue * 0.32, // beams track the lights
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // 7 — Centered title (over the leaves, between the lights).
+                Positioned(
+                  top: lightSize * 0.34,
+                  left: 0,
+                  right: 0,
+                  child: const SectionDividerWidget(
+                    title: 'Spotlight',
+                    lineLength: 64,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    textColor: Color(0xFF3A3A3A),
+                    lineThickness: 1.5,
+                    lineColor: Color(0xFFD4A537),
+                    topPadding: 0,
+                    bottomPadding: 0,
+                    showStars: true,
+                  ),
+                ),
+
+                // 8 — Stage lights mounted to the LEFT/RIGHT screen edges (base
+                // fixed at the side), heads angled down-inward toward the card.
+                Positioned(
+                  top: 10,
+                  left: -lightSize * 0.24, // base stuck to the left edge
+                  child: AnimatedBuilder(
+                    animation: _sway,
+                    builder: (_, __) =>
+                        _light(lightSize, left: true, sway: _swayValue * 0.13),
+                  ),
+                ),
+                Positioned(
+                  top: 10,
+                  right: -lightSize * 0.24, // base stuck to the right edge
+                  child: AnimatedBuilder(
+                    animation: _sway,
+                    builder: (_, __) =>
+                        _light(lightSize, left: false, sway: _swayValue * 0.13),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          if (widget.events.length > 1) ...[
+            const SizedBox(height: 6), // dots closer to the plate
+            AnimatedSmoothIndicator(
+              activeIndex: _index,
+              count: widget.events.length,
+              effect: const ExpandingDotsEffect(
+                dotHeight: 7,
+                dotWidth: 7,
+                expansionFactor: 3,
+                activeDotColor: Color(0xFFE8941A),
+                dotColor: Color(0xFFE2D6C2),
+                spacing: 5,
+              ),
+            ),
+          ],
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _lightImage(double size) => Image.asset(
+        SpotlightStage._light,
+        width: size,
+        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      );
+
+  /// Light oriented so its mounting base sits at the screen's side edge and the
+  /// head points down-inward, with a [sway] pan added to the head. Source PNG:
+  /// lens up-left, yoke at the bottom → flipX + 90° CW puts the yoke at the left
+  /// edge; the right light is `rotate(-90°)` (the horizontal mirror).
+  Widget _light(double size, {required bool left, required double sway}) {
+    if (left) {
+      return Transform.rotate(
+        angle: math.pi / 2 + sway,
+        child: Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.diagonal3Values(-1, 1, 1), // flipX
+          child: _lightImage(size),
+        ),
+      );
+    }
+    return Transform.rotate(
+      angle: -math.pi / 2 + sway,
+      child: _lightImage(size),
+    );
+  }
+
+  // ── Ambient glow background ──────────────────────────────────────────────
+  Widget _glow() {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // 1 — Rich diagonal multi-colour wash: deep teal/cyan (top-left) →
+        //     violet → magenta → pink (bottom-right). Matches the reference.
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF35C9C0), // deep teal
+                Color(0xFF49B6E6), // cyan-blue
+                Color(0xFF8A6FE0), // violet
+                Color(0xFFC24E9E), // magenta
+                Color(0xFFE86BA0), // pink
+              ],
+              stops: [0.0, 0.28, 0.52, 0.78, 1.0],
+            ),
+          ),
+        ),
+        // 2 — Radial glow blooms for depth.
+        Positioned(
+          top: -40,
+          left: -60,
+          child: _blob(const Color(0xFF5FF0E2), 260, 0.55),
+        ),
+        Positioned(
+          bottom: 40,
+          right: -60,
+          child: _blob(const Color(0xFFFF7DBE), 280, 0.5),
+        ),
+        Positioned(
+          top: 120,
+          right: -40,
+          child: _blob(const Color(0xFFB07BFF), 220, 0.4),
+        ),
+        // 3 — Warm cream fade at the very top → seamless blend with the golden
+        //     header above the search bar.
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFFFBF3DE), Color(0x00FBF3DE)],
+              stops: [0.0, 0.16],
+            ),
+          ),
+        ),
+        // 4 — White fade at the bottom → seamless blend into the white
+        //     "Explore the Stage" section below.
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0x00FFFFFF), Color(0x00FFFFFF), Colors.white],
+              stops: [0.0, 0.80, 1.0],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _blob(Color color, double size, double opacity) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [color.withOpacity(opacity), color.withOpacity(0.0)],
+        ),
+      ),
+    );
+  }
+
+  // ── Leaves header ────────────────────────────────────────────────────────
+  Widget _leaves() {
+    return ShaderMask(
+      blendMode: BlendMode.dstIn,
+      // Fade BOTH ends — the top dissolves into the golden header above (no hard
+      // seam) and the bottom dissolves into the glow below.
+      shaderCallback: (rect) => const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.transparent,
+          Colors.white,
+          Colors.white,
+          Colors.transparent,
+        ],
+        stops: [0.0, 0.42, 0.66, 1.0],
+      ).createShader(rect),
+      child: Opacity(
+        opacity: 0.82,
+        child: Image.asset(
+          SpotlightStage._leaves,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+        ),
+      ),
+    );
+  }
+
+
+  // ── Floating stars ───────────────────────────────────────────────────────
+  List<Widget> _stars(double stageH, double screenW) {
+    final specs = <List<double>>[
+      [0.05, 0.28, 22, 0.55, 0.0],
+      [0.02, 0.50, 15, 0.40, 0.4],
+      [0.09, 0.74, 18, 0.45, 0.8],
+      [0.92, 0.32, 22, 0.55, 0.2],
+      [0.95, 0.55, 15, 0.40, 0.6],
+      [0.88, 0.80, 20, 0.50, 1.0],
+    ];
+    return specs.map((s) {
+      return AnimatedBuilder(
+        animation: _float,
+        builder: (context, child) {
+          final double t = math.sin((_float.value + s[4]) * math.pi * 2);
+          return Positioned(
+            left: screenW * s[0],
+            top: stageH * s[1] + t * 4,
+            child: Opacity(
+              opacity: s[3],
+              child: Image.asset(
+                SpotlightStage._star,
+                width: s[2],
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              ),
+            ),
+          );
+        },
+      );
+    }).toList();
+  }
+}
+
+/// The single focused spotlight card.
+class _SpotlightCard extends StatelessWidget {
+  final EventModel event;
+  final double width;
+  final Animation<double> shimmer;
+  final Animation<double> border;
+  final Animation<double> curtain;
+
+  const _SpotlightCard({
+    required this.event,
+    required this.width,
+    required this.shimmer,
+    required this.border,
+    required this.curtain,
+  });
+
+  static const _cyan = Color(0xFF2FD2E0);
+  static const _violet = Color(0xFF8B5CF6);
+  static const _pink = Color(0xFFEC4899);
+  static const _orange = Color(0xFFF97316);
+  static const double _radius = 30;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: AnimatedBuilder(
+        animation: Listenable.merge([shimmer, border, curtain]),
+        builder: (context, child) {
+          final double glow = 0.32 + shimmer.value * 0.22;
+          // foregroundPainter draws the running border ON TOP of the card and
+          // is sized EXACTLY to the card's box, so the boundary always matches
+          // the visible banner (no oversized/drifting border).
+          return CustomPaint(
+            foregroundPainter:
+                _RunningBorderPainter(t: border.value, radius: _radius),
+            child: Container(
+              width: width,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(_radius),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [_cyan, _violet, _pink, _orange],
+                  stops: [0.0, 0.40, 0.74, 1.0],
+                ),
+                border: Border.all(
+                    color: Colors.white.withOpacity(0.55), width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: _pink.withOpacity(glow),
+                    blurRadius: 30,
+                    spreadRadius: 1,
+                    offset: const Offset(0, 8),
+                  ),
+                  BoxShadow(
+                    color: _cyan.withOpacity(glow * 0.7),
+                    blurRadius: 26,
+                    spreadRadius: 1,
+                    offset: const Offset(0, -6),
+                  ),
+                ],
+              ),
+              // Clip the content + curtain to the card's rounded shape.
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(_radius - 1.5),
+                child: Stack(
+                  children: [
+                    child!,
+                    // Theatrical curtain overlay (red velvet halves). Eased for
+                    // a smooth, fluid cloth motion.
+                    Positioned.fill(
+                      child: _SpotlightCurtain(
+                        value: Curves.easeInOutCubic.transform(curtain.value),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+        child: GestureDetector(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 26, 24, 26),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Frosted category icon (clean white glyph — like the design).
+                Container(
+                  width: width * 0.3,
+                  height: width * 0.3,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.18),
+                    border:
+                        Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+                  ),
+                  child: Icon(
+                    Icons.auto_awesome_rounded,
+                    color: Colors.white,
+                    size: width * 0.13,
+                  ),
+                ),
+                SizedBox(height: width * 0.06),
+
+                Text(
+                  event.title,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: 'DancingScript', // bundled script
+                    fontSize: Responsive.sp(context, 36),
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    height: 1.0,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                Text(
+                  event.venue,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 13.5),
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withOpacity(0.95),
+                    height: 1.3,
+                  ),
+                ),
+                SizedBox(height: width * 0.07),
+
+                Material(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(26),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(26),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => EventDetailScreen(event: event)),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 26, vertical: 13),
+                      child: Text(
+                        'Explore Now',
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 13.5),
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF2A2A3A),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Draws a faint golden border around the card with a bright "comet" highlight
+/// that runs around the perimeter, led by a shining star pointer.
+class _RunningBorderPainter extends CustomPainter {
+  final double t; // 0..1 progress around the perimeter
+  final double radius;
+
+  _RunningBorderPainter({required this.t, required this.radius});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const double stroke = 5.0; // thicker running highlight
+    final RRect rrect = RRect.fromRectAndRadius(
+      (Offset.zero & size).deflate(stroke / 2),
+      Radius.circular(radius - stroke / 2),
+    );
+    final Path path = Path()..addRRect(rrect);
+
+    final metrics = path.computeMetrics().toList();
+    if (metrics.isEmpty) return;
+    final ui.PathMetric metric = metrics.first;
+    final double len = metric.length;
+
+    // 1 — faint full golden border.
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3.0
+        ..color = const Color(0xFFFFE49B).withOpacity(0.32),
+    );
+
+    // 2 — bright comet trailing up to the running head, fading along its length.
+    final double head = (t * len) % len;
+    final double tailLen = len * 0.22;
+    final double start = head - tailLen;
+    final Path comet = Path();
+    if (start < 0) {
+      comet.addPath(metric.extractPath(len + start, len), Offset.zero);
+      comet.addPath(metric.extractPath(0, head), Offset.zero);
+    } else {
+      comet.addPath(metric.extractPath(start, head), Offset.zero);
+    }
+
+    final ui.Tangent? headTan = metric.getTangentForOffset(head);
+    final ui.Tangent? tailTan =
+        metric.getTangentForOffset(start < 0 ? len + start : start);
+    if (headTan == null || tailTan == null) return;
+
+    canvas.drawPath(
+      comet,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = stroke
+        ..strokeCap = StrokeCap.round
+        ..shader = ui.Gradient.linear(
+          tailTan.position,
+          headTan.position,
+          const [Color(0x00FFD66B), Color(0xFFFFE9A8)],
+        )
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.2),
+    );
+
+    // 3 — the shining star pointer leading the comet.
+    _drawSparkle(canvas, headTan.position);
+  }
+
+  void _drawSparkle(Canvas canvas, Offset c) {
+    // Soft golden glow halo.
+    canvas.drawCircle(
+      c,
+      8,
+      Paint()
+        ..color = const Color(0xFFFFECB3).withOpacity(0.9)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 7),
+    );
+    // 4-point sparkle.
+    const double outer = 7, inner = 2.2;
+    final Path p = Path();
+    for (int k = 0; k < 8; k++) {
+      final double r = k.isEven ? outer : inner;
+      final double a = (math.pi / 4) * k - math.pi / 2;
+      final Offset pt = Offset(c.dx + r * math.cos(a), c.dy + r * math.sin(a));
+      k == 0 ? p.moveTo(pt.dx, pt.dy) : p.lineTo(pt.dx, pt.dy);
+    }
+    p.close();
+    canvas.drawPath(p, Paint()..color = Colors.white);
+    canvas.drawCircle(c, 2.2, Paint()..color = const Color(0xFFFFF6D8));
+  }
+
+  @override
+  bool shouldRepaint(_RunningBorderPainter oldDelegate) => oldDelegate.t != t;
+}
+
+/// Draws the two volumetric light beams as soft yellow polygon cones spreading
+/// from each light's lens down onto the banner.
+class _BeamsPainter extends CustomPainter {
+  final double t; // shimmer 0..1 → gentle opacity pulse
+  final double lightSize;
+  final double length;
+  final double sway; // horizontal sweep that tracks the panning lights
+
+  _BeamsPainter({
+    required this.t,
+    required this.lightSize,
+    required this.length,
+    required this.sway,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double opacity = 0.5 + t * 0.22;
+    _beam(canvas, size, left: true, opacity: opacity);
+    _beam(canvas, size, left: false, opacity: opacity);
+  }
+
+  void _beam(Canvas canvas, Size size,
+      {required bool left, required double opacity}) {
+    // Lens (apex) just under each light fixture, near the inner edge.
+    final double lensY = 10 + lightSize * 0.66;
+    final double lensX =
+        left ? lightSize * 0.58 : size.width - lightSize * 0.58;
+    final Offset apex = Offset(lensX, lensY);
+
+    // Axis points down + inward; cone widens toward the banner. `sway` sweeps
+    // the beam horizontally in sync with the panning lights.
+    final Offset dir = Offset((left ? 0.42 : -0.42) + sway, 1.0);
+    final double dl = dir.distance;
+    final Offset n = Offset(dir.dx / dl, dir.dy / dl);
+    final Offset perp = Offset(-n.dy, n.dx);
+    final Offset base = apex + n * length;
+
+    const double apexHalf = 10;
+    const double baseHalf = 62;
+    Offset off(Offset p, Offset axisPerp, double w) =>
+        Offset(p.dx + axisPerp.dx * w, p.dy + axisPerp.dy * w);
+
+    final Path path = Path()
+      ..moveTo(off(apex, perp, apexHalf).dx, off(apex, perp, apexHalf).dy)
+      ..lineTo(off(apex, perp, -apexHalf).dx, off(apex, perp, -apexHalf).dy)
+      ..lineTo(off(base, perp, -baseHalf).dx, off(base, perp, -baseHalf).dy)
+      ..lineTo(off(base, perp, baseHalf).dx, off(base, perp, baseHalf).dy)
+      ..close();
+
+    final Paint paint = Paint()
+      ..shader = ui.Gradient.linear(
+        apex,
+        base,
+        [
+          const Color(0xFFFFF6BE).withOpacity(opacity), // bright at the lens
+          const Color(0xFFFFEFA0).withOpacity(opacity * 0.45),
+          const Color(0x00FFEFA0),
+        ],
+        const [0.0, 0.5, 1.0],
+      )
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 7);
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_BeamsPainter oldDelegate) =>
+      oldDelegate.t != t || oldDelegate.sway != sway;
+}
+
+/// Theatrical red-velvet curtain that covers the banner. [value] 0 = fully open
+/// (off-screen), 1 = fully closed. Each half is anchored at its outer edge and
+/// changes WIDTH with [value] — so the pleated folds bunch up when open and
+/// stretch apart as it draws closed, reading like real gathered cloth.
+class _SpotlightCurtain extends StatelessWidget {
+  final double value;
+
+  const _SpotlightCurtain({required this.value});
+
+  // Vertical pleats — alternating light/dark reds give the folds; sized in
+  // *fraction of the half's width*, so they compress/expand with the cloth.
+  static const List<Color> _pleats = [
+    Color(0xFF5E0E0E),
+    Color(0xFFC24040),
+    Color(0xFF6E1414),
+    Color(0xFFCE4A4A),
+    Color(0xFF6E1414),
+    Color(0xFFC24040),
+    Color(0xFF5E0E0E),
+    Color(0xFFC24040),
+    Color(0xFF6E1414),
+    Color(0xFFCE4A4A),
+    Color(0xFF6E1414),
+    Color(0xFFC24040),
+    Color(0xFF5E0E0E),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    if (value <= 0.001) return const SizedBox.shrink();
+    return LayoutBuilder(
+      builder: (context, c) {
+        // Cloth stretches out from the edge: width grows with `value`.
+        final double w = c.maxWidth / 2 * value + 1;
+        return Stack(
+          children: [
+            Positioned(
+                left: 0, top: 0, bottom: 0, width: w, child: _half(left: true)),
+            Positioned(
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: w,
+                child: _half(left: false)),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _half({required bool left}) {
+    return ClipPath(
+      clipper: _CurtainHemClipper(),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Pleated velvet — folds bunch when the half is narrow (gathered).
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: _pleats,
+              ),
+            ),
+          ),
+          // Vertical sheen — subtle top-light on the velvet.
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.white.withOpacity(0.06),
+                  Colors.transparent,
+                  Colors.black.withOpacity(0.18),
+                ],
+                stops: const [0.0, 0.35, 1.0],
+              ),
+            ),
+          ),
+          // Soft inner-edge shadow where the two halves meet.
+          Align(
+            alignment: left ? Alignment.centerRight : Alignment.centerLeft,
+            child: FractionallySizedBox(
+              widthFactor: 0.22,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: left ? Alignment.centerLeft : Alignment.centerRight,
+                    end: left ? Alignment.centerRight : Alignment.centerLeft,
+                    colors: [Colors.transparent, Colors.black.withOpacity(0.45)],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Gold trim along the top.
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 7,
+            child: const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFFE7B24A),
+                    Color(0xFFF6D98A),
+                    Color(0xFFC9942F)
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Gentle scalloped hem at the bottom of a curtain half (draped cloth look).
+class _CurtainHemClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    const double dip = 12;
+    final int scallops = math.max(2, (size.width / 46).round());
+    final double w = size.width / scallops;
+    final Path p = Path()..lineTo(0, size.height - dip);
+    for (int i = 0; i < scallops; i++) {
+      p.quadraticBezierTo(
+        w * i + w / 2, size.height, // control point dips down
+        w * (i + 1), size.height - dip,
+      );
+    }
+    p
+      ..lineTo(size.width, 0)
+      ..close();
+    return p;
+  }
+
+  @override
+  bool shouldReclip(_CurtainHemClipper oldClipper) => false;
+}
