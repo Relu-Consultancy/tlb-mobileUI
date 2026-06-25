@@ -167,8 +167,8 @@ class CategoriesGrid extends StatelessWidget {
                   cat['subtitle'] ?? '',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 11),
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF9E9E9E),
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF5C5C5C),
                   ),
                 ),
               ),

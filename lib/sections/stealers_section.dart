@@ -180,38 +180,33 @@ class StealersSection extends StatelessWidget {
                             twoColumn: true,
                           ),
                           const SizedBox(height: 10),
-                          // Grab Deal button (price label removed)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Spacer(),
-                              SizedBox(
-                                height: Responsive.h(context, 30, min: 27),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    openListingDetail(context, event);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primaryLight,
-                                    foregroundColor: AppColors.textPrimary,
-                                    elevation: 0,
-                                    minimumSize: Size.zero,
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    'View Now',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 12),
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
+                          // Grab Deal button — full-width like TLB Signature.
+                          SizedBox(
+                            width: double.infinity,
+                            height: Responsive.h(context, 30, min: 27),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                openListingDetail(context, event);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primaryLight,
+                                foregroundColor: AppColors.textPrimary,
+                                elevation: 0,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
                               ),
-                            ],
+                              child: Text(
+                                'View Now',
+                                style: GoogleFonts.poppins(
+                                  fontSize: Responsive.sp(context, 12),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),

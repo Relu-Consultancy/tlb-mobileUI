@@ -156,12 +156,14 @@ class ParentsFavoriteSection extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           // Two-column meta (Age is shown inline by the title):
-                          // Date·Time left, Location + Distance right.
+                          // Location left (under the title) + Distance lifted up
+                          // to the right; Date·Time below the location.
                           ListingMetaRows(
                             event: event,
                             showAge: false,
                             showLocation: true,
                             twoColumn: true,
+                            locationOnLeft: true,
                           ),
                         ],
                       ),

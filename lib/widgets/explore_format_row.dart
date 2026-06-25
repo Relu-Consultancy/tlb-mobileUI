@@ -101,7 +101,7 @@ class ExploreFormatRow extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 9),
+                              fontSize: Responsive.sp(context, 11.5),
                               fontWeight: FontWeight.w600,
                               height: 1.1,
                               color: AppColors.textPrimary,

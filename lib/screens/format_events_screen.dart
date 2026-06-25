@@ -117,7 +117,7 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
     final bool isSelected = index == _selectedIndex;
     final double scale = (fmt['scale'] as double?) ?? 1.0;
     final bool invert = fmt['invertColors'] == true;
-    const double size = 64;
+    const double size = 82;
 
     Widget img = Image.asset(
       fmt['image'],
@@ -274,7 +274,7 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
 
                   // Format circles row
                   SizedBox(
-                    height: 96,
+                    height: 118,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 16),

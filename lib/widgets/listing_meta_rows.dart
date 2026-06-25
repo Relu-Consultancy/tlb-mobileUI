@@ -35,6 +35,11 @@ class ListingMetaRows extends StatelessWidget {
   /// left, Location/Distance on the right).
   final bool twoColumn;
 
+  /// In the two-column layout, anchor Location to the LEFT column (under the
+  /// title) and lift Distance up to the right column's top row. Default keeps
+  /// Location on the right.
+  final bool locationOnLeft;
+
   /// Green used for the distance "tag".
   static const Color _distanceGreen = Color(0xFF1FA85B);
 
@@ -49,21 +54,27 @@ class ListingMetaRows extends StatelessWidget {
     this.showDistance = true,
     this.showLocation = false,
     this.twoColumn = false,
+    this.locationOnLeft = false,
   });
 
   @override
   Widget build(BuildContext context) {
     if (twoColumn) {
-      // Left column cells (Age, Date·Time) paired row-by-row with the right
-      // column cells (Location, Distance) so the two columns stay aligned.
+      // Left column cells paired row-by-row with the right column cells so the
+      // two columns stay aligned.
       final left = <Widget>[
+        // When [locationOnLeft], Location leads the left column (under title).
+        if (locationOnLeft && showLocation)
+          _row(context, Icons.location_on_outlined, event.venue),
         if (showAge)
           _row(context, Icons.child_care_outlined, event.ageGroupDisplay),
         if (showDateTime)
           _row(context, Icons.calendar_today_outlined, event.dateTimeDisplay),
       ];
       final right = <Widget>[
-        if (showLocation)
+        // Default: Location on the right. With [locationOnLeft], Distance lifts
+        // up to the right column's top row instead.
+        if (!locationOnLeft && showLocation)
           _row(context, Icons.location_on_outlined, event.venue,
               alignEnd: true),
         if (showDistance)

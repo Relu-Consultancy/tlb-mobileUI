@@ -133,10 +133,10 @@ class ClassNearbyCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
 
-                  // Join Now button (right-aligned)
+                  // Join Now button — full-width like TLB Signature.
                   if (buttonLabel != null)
-                    Align(
-                      alignment: Alignment.centerRight,
+                    SizedBox(
+                      width: double.infinity,
                       child: Material(
                         color: AppColors.primaryLight,
                         borderRadius: BorderRadius.circular(24),
@@ -154,9 +154,10 @@ class ClassNearbyCard extends StatelessWidget {
                             }
                           },
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
                             child: Text(
                               buttonLabel!,
+                              textAlign: TextAlign.center,
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 13),
                                 fontWeight: FontWeight.w500,

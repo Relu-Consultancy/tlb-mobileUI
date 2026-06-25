@@ -39,6 +39,7 @@ class _SpotlightStageState extends State<SpotlightStage>
   late final AnimationController _border; // running golden border + star
   late final AnimationController _curtain; // theatrical close/open transition
   late final AnimationController _sway; // lights pan left/right
+  late final AnimationController _orbit; // plate star circular motion
   Timer? _auto;
   int _index = 0;
 
@@ -63,6 +64,10 @@ class _SpotlightStageState extends State<SpotlightStage>
     _sway = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 4200), // gentle left/right pan
+    )..repeat();
+    _orbit = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 5500), // slow-medium circular orbit
     )..repeat();
     _curtain = AnimationController(
       vsync: this,
@@ -96,6 +101,7 @@ class _SpotlightStageState extends State<SpotlightStage>
     _border.dispose();
     _curtain.dispose();
     _sway.dispose();
+    _orbit.dispose();
     super.dispose();
   }
 
@@ -192,6 +198,15 @@ class _SpotlightStageState extends State<SpotlightStage>
                   ),
                 ),
 
+                // 5.5 — Continuously-shining star on the plate's LEFT corner
+                // (sits over the star baked into the art, pulsing scale+glow).
+                _plateStar(
+                  plateLeft: (screenW - plateW) / 2 - plateW * 0.024,
+                  plateW: plateW,
+                  plateTop: plateTop,
+                  plateH: plateH,
+                ),
+
                 // 6 — Single focused card with a theatrical curtain transition.
                 Positioned(
                   top: cardTop,
@@ -206,6 +221,9 @@ class _SpotlightStageState extends State<SpotlightStage>
                     curtain: _curtain,
                   ),
                 ),
+
+                // 6.2 — Twinkling star images flanking the banner (left + right).
+                ..._sideStars(cardTop, cardH, screenW),
 
                 // 6.5 — Volumetric light beams (yellow polygon cones) cast from
                 // each light, drawn OVER the card so the light visibly falls on
@@ -317,44 +335,124 @@ class _SpotlightStageState extends State<SpotlightStage>
     );
   }
 
+  // ── Plate corner star ────────────────────────────────────────────────────
+  /// A vector sparkle attached at the plate's left corner that slowly travels
+  /// in a small circle ([_orbit]) while twinkling brighter/dimmer ([_shimmer]),
+  /// like a real star sparkle.
+  Widget _plateStar({
+    required double plateLeft,
+    required double plateW,
+    required double plateTop,
+    required double plateH,
+  }) {
+    const double sparkBox = 42; // box holding one sparkle (+ its glow)
+    const double orbitR = 9; // radius of the circular travel
+    final double boxSize = sparkBox + orbitR * 2;
+    // Anchor at the plate's left tip (~7.5% across, ~33% down the art).
+    final double cx = plateLeft + plateW * 0.075;
+    final double cy = plateTop + plateH * 0.33;
+    return Positioned(
+      left: cx - boxSize / 2,
+      top: cy - boxSize / 2,
+      width: boxSize,
+      height: boxSize,
+      child: IgnorePointer(
+        child: AnimatedBuilder(
+          animation: Listenable.merge([_orbit, _shimmer]),
+          builder: (_, __) {
+            final double ang = _orbit.value * 2 * math.pi; // round motion
+            final Offset off =
+                Offset(math.cos(ang) * orbitR, math.sin(ang) * orbitR);
+            final double twinkle = 0.4 + 0.6 * _shimmer.value; // brightness
+            return Center(
+              child: Transform.translate(
+                offset: off,
+                child: SizedBox(
+                  width: sparkBox,
+                  height: sparkBox,
+                  child: CustomPaint(painter: _StarPainter(twinkle)),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  // ── Side stars ───────────────────────────────────────────────────────────
+  /// Two star.png images sitting at the banner's left + right edges, gently
+  /// twinkling (opacity + scale) in counter-phase so they sparkle alternately.
+  List<Widget> _sideStars(double cardTop, double cardH, double screenW) {
+    final double y = cardTop + cardH * 0.5; // vertically centred on the banner
+    const double s = 50;
+
+    Widget sideStar(double cx, bool invert) => Positioned(
+          left: cx - s / 2,
+          top: y - s / 2,
+          width: s,
+          child: IgnorePointer(
+            child: AnimatedBuilder(
+              animation: _shimmer,
+              builder: (_, __) {
+                final double p = invert ? 1 - _shimmer.value : _shimmer.value;
+                return Opacity(
+                  opacity: 0.6 + 0.4 * p,
+                  child: Transform.scale(
+                    scale: 0.85 + 0.22 * p,
+                    child: Image.asset(
+                      SpotlightStage._star,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+
+    return [sideStar(26, false), sideStar(screenW - 26, true)];
+  }
+
   // ── Ambient glow background ──────────────────────────────────────────────
   Widget _glow() {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // 1 — Rich diagonal multi-colour wash: deep teal/cyan (top-left) →
-        //     violet → magenta → pink (bottom-right). Matches the reference.
+        // 1 — Light diagonal multi-colour wash (softened pastel version so the
+        //     darker banner card pops against it): pale teal → cyan → lilac →
+        //     soft magenta → light pink.
         const DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFF35C9C0), // deep teal
-                Color(0xFF49B6E6), // cyan-blue
-                Color(0xFF8A6FE0), // violet
-                Color(0xFFC24E9E), // magenta
-                Color(0xFFE86BA0), // pink
+                Color(0xFF8FE2DB), // pale teal
+                Color(0xFF9AD3F0), // light cyan
+                Color(0xFFBBAAEE), // lilac
+                Color(0xFFDD9AC6), // soft magenta
+                Color(0xFFF3AECB), // light pink
               ],
               stops: [0.0, 0.28, 0.52, 0.78, 1.0],
             ),
           ),
         ),
-        // 2 — Radial glow blooms for depth.
+        // 2 — Radial glow blooms for depth (softer now that the wash is light).
         Positioned(
           top: -40,
           left: -60,
-          child: _blob(const Color(0xFF5FF0E2), 260, 0.55),
+          child: _blob(const Color(0xFF9FF4E9), 260, 0.40),
         ),
         Positioned(
           bottom: 40,
           right: -60,
-          child: _blob(const Color(0xFFFF7DBE), 280, 0.5),
+          child: _blob(const Color(0xFFFFB0D6), 280, 0.36),
         ),
         Positioned(
           top: 120,
           right: -40,
-          child: _blob(const Color(0xFFB07BFF), 220, 0.4),
+          child: _blob(const Color(0xFFC9A6FF), 220, 0.30),
         ),
         // 3 — Warm golden fade at the top → seamless blend with the golden
         //     header above the search bar. Held solid through the leaves + title
@@ -404,64 +502,33 @@ class _SpotlightStageState extends State<SpotlightStage>
   }
 
   // ── Leaves header ────────────────────────────────────────────────────────
-  // leaves.png is an OPAQUE green-bokeh photo, so on its own it reads as a
-  // distinct green block between the gold header and the card. To make it blend
-  // seamlessly we (a) soften + warm the photo so the gold shows through and the
-  // green leans golden-green, and (b) lay a golden wash over its top so the
-  // upper foliage melts directly into the header gold — no dividing line.
+  // The foliage shows at full strength — ONLY its top edge is alpha-faded so it
+  // melts into the golden header above. The rest of the image is left intact
+  // (no warming/washing of the whole photo).
   Widget _leaves() {
     return ShaderMask(
       blendMode: BlendMode.dstIn,
-      // Alpha fade BOTH ends — top dissolves into the golden header, bottom into
-      // the stage glow.
       shaderCallback: (rect) => const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          Colors.transparent,
+          Colors.transparent, // top dissolves into the gold header
           Colors.white,
           Colors.white,
-          Colors.transparent,
+          Colors.transparent, // bottom dissolves into the stage glow
         ],
-        stops: [0.0, 0.34, 0.62, 1.0],
+        // Longer top fade-in so only the very top blends; the foliage stays
+        // fully visible through the middle.
+        stops: [0.0, 0.34, 0.74, 1.0],
       ).createShader(rect),
-      child: Stack(
-        children: [
-          // Softened + warmed foliage → a gentle golden-green haze, not a block.
-          Opacity(
-            opacity: 0.6,
-            child: ColorFiltered(
-              colorFilter: ColorFilter.mode(
-                const Color(0xFFFFDFA0).withOpacity(0.5), // warm amber
-                BlendMode.softLight,
-              ),
-              child: Image.asset(
-                SpotlightStage._leaves,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-              ),
-            ),
-          ),
-          // Golden wash strongest at the top, gone by mid-height → the foliage
-          // blends up INTO the header's gold rather than meeting it at a line.
-          const Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFFFBF3DE), // exact header cream at the very top
-                    Color(0x88FBF3DE),
-                    Color(0x00FBF3DE), // gone → foliage shows below
-                  ],
-                  stops: [0.0, 0.24, 0.52],
-                ),
-              ),
-            ),
-          ),
-        ],
+      child: Opacity(
+        opacity: 0.92,
+        child: Image.asset(
+          SpotlightStage._leaves,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+        ),
       ),
     );
   }
@@ -516,10 +583,12 @@ class _SpotlightCard extends StatelessWidget {
     required this.curtain,
   });
 
-  static const _cyan = Color(0xFF2FD2E0);
-  static const _violet = Color(0xFF8B5CF6);
-  static const _pink = Color(0xFFEC4899);
-  static const _orange = Color(0xFFF97316);
+  // Deeper jewel-toned gradient → a richer, darker banner that the content
+  // reads cleanly against.
+  static const _cyan = Color(0xFF0E8FA6);
+  static const _violet = Color(0xFF5B2BB0);
+  static const _pink = Color(0xFFB31C6C);
+  static const _orange = Color(0xFFC2520C);
   static const double _radius = 30;
 
   @override
@@ -567,9 +636,46 @@ class _SpotlightCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(_radius - 1.5),
                 child: Stack(
                   children: [
-                    child!,
-                    // Theatrical curtain overlay (red velvet halves). Eased for
-                    // a smooth, fluid cloth motion.
+                    // Depth scrim: darkens the top + bottom of the banner (so the
+                    // title/subtitle/CTA read crisply) while a soft radial glow
+                    // lifts the centre behind the icon → a richer, layered mix.
+                    const Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: RadialGradient(
+                            center: Alignment(0, -0.35),
+                            radius: 0.95,
+                            colors: [
+                              Color(0x33FFFFFF), // gentle centre lift
+                              Color(0x00000000),
+                              Color(0x4D000000), // darkened rim/bottom
+                            ],
+                            stops: [0.0, 0.55, 1.0],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Color(0x33000000), // top darken
+                              Color(0x00000000),
+                              Color(0x59000000), // stronger bottom darken (CTA)
+                            ],
+                            stops: [0.0, 0.42, 1.0],
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Fill the card so the Column's center alignment actually
+                    // centres the content (a bare Stack child sizes to its
+                    // widest line and pins top-left).
+                    Positioned.fill(child: child!),
+                    // Theatrical curtain overlay. Eased for a smooth, fluid roll.
                     Positioned.fill(
                       child: _SpotlightCurtain(
                         value: Curves.easeInOutCubic.transform(curtain.value),
@@ -671,8 +777,8 @@ class _SpotlightCard extends StatelessWidget {
   }
 }
 
-/// Draws a faint golden border around the card with a bright "comet" highlight
-/// that runs around the perimeter, led by a shining star pointer.
+/// Draws a faint golden border around the card with two bright "comet"
+/// highlights — on opposite corners — each led by an animated vector sparkle.
 class _RunningBorderPainter extends CustomPainter {
   final double t; // 0..1 progress around the perimeter
   final double radius;
@@ -702,8 +808,15 @@ class _RunningBorderPainter extends CustomPainter {
         ..color = const Color(0xFFFFE49B).withOpacity(0.32),
     );
 
-    // 2 — bright comet trailing up to the running head, fading along its length.
-    final double head = (t * len) % len;
+    // 2 — two comets + star pointers, half a lap apart (opposite corners).
+    _drawComet(canvas, metric, len, t, stroke);
+    _drawComet(canvas, metric, len, (t + 0.5) % 1.0, stroke);
+  }
+
+  /// One comet trail ending in a star pointer at fractional position [frac].
+  void _drawComet(Canvas canvas, ui.PathMetric metric, double len, double frac,
+      double stroke) {
+    final double head = (frac * len) % len;
     final double tailLen = len * 0.22;
     final double start = head - tailLen;
     final Path comet = Path();
@@ -733,7 +846,6 @@ class _RunningBorderPainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.2),
     );
 
-    // 3 — the shining star pointer leading the comet.
     _drawSparkle(canvas, headTan.position);
   }
 
@@ -762,6 +874,51 @@ class _RunningBorderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RunningBorderPainter oldDelegate) => oldDelegate.t != t;
+}
+
+/// The SAME sparkle the running-border pointers use (white 4-point star + soft
+/// golden glow halo + cream core), drawn centred in its box. [intensity] (0..1)
+/// scales the rays + glow so it can twinkle/pulse. A touch larger than the
+/// pointer as a focal corner accent.
+class _StarPainter extends CustomPainter {
+  final double intensity;
+
+  _StarPainter(this.intensity);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Offset c = size.center(Offset.zero);
+    // Pointer sparkle is outer≈7; here a hair larger and pulsing with intensity.
+    final double outer = 9.0 * (0.7 + intensity * 0.5);
+    final double inner = outer * 0.314; // same ratio as the pointer (2.2/7)
+
+    // Soft golden glow halo (matches the pointer).
+    canvas.drawCircle(
+      c,
+      outer * 1.14,
+      Paint()
+        ..color = const Color(0xFFFFECB3).withOpacity(0.9)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, outer),
+    );
+
+    // White 4-point star.
+    final Path p = Path();
+    for (int k = 0; k < 8; k++) {
+      final double r = k.isEven ? outer : inner;
+      final double a = (math.pi / 4) * k - math.pi / 2;
+      final Offset pt = Offset(c.dx + r * math.cos(a), c.dy + r * math.sin(a));
+      k == 0 ? p.moveTo(pt.dx, pt.dy) : p.lineTo(pt.dx, pt.dy);
+    }
+    p.close();
+    canvas.drawPath(p, Paint()..color = Colors.white);
+
+    // Cream core.
+    canvas.drawCircle(c, inner, Paint()..color = const Color(0xFFFFF6D8));
+  }
+
+  @override
+  bool shouldRepaint(_StarPainter oldDelegate) =>
+      oldDelegate.intensity != intensity;
 }
 
 /// Draws the two volumetric light beams as soft yellow polygon cones spreading

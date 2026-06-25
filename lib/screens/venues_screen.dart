@@ -187,8 +187,9 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       // ── Close to You ──
                       _sectionHeader(context, 'Close to you'),
                       SizedBox(
-                        // +6 to absorb the larger 18px card bottom gap.
-                        height: Responsive.h(context, 276, min: 262),
+                        // Taller so the image can extend further down while the
+                        // title/location below keep their room.
+                        height: Responsive.h(context, 312, min: 296),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.venuesCloseToYou.length,
@@ -216,7 +217,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       // ── Get Moving ──
                       _sectionHeader(context, 'Get Moving'),
                       SizedBox(
-                        height: Responsive.h(context, 446, min: 430),
+                        height: Responsive.h(context, 504, min: 488),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.venuesGetMoving.length,
@@ -627,8 +628,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  child: Image.asset(event.imagePath, height: Responsive.h(context, 188, min: 170), width: double.infinity, fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 188, min: 170), color: Colors.grey.shade200)),
+                  child: Image.asset(event.imagePath, height: Responsive.h(context, 230, min: 210), width: double.infinity, fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 230, min: 210), color: Colors.grey.shade200)),
                 ),
                 if ((event.tag ?? '').isNotEmpty)
                   Positioned(
@@ -899,6 +900,43 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     ],
                   );
                 }),
+                // Full-width CTA at the bottom (like TLB Signature).
+                SizedBox(
+                  width: double.infinity,
+                  height: 42,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final v = venues.first;
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => VenueDetailScreen(
+                            event: EventModel(
+                              title: data['sport'] as String,
+                              venue: v['location'] as String,
+                              imagePath: v['image'] as String,
+                              listingType: 'venue',
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryLight,
+                      foregroundColor: AppColors.textPrimary,
+                      elevation: 0,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(22)),
+                    ),
+                    child: Text(
+                      'View Now',
+                      style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 13.5),
+                          fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

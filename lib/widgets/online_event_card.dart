@@ -81,17 +81,17 @@ class OnlineEventCard extends StatelessWidget {
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 6,
+                            horizontal: 11,
+                            vertical: 5,
                           ),
                           decoration: BoxDecoration(
                             color: const Color(0xFFE0F2FE),
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(9),
                           ),
                           child: Text(
                             event.tag!,
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 12.5),
+                              fontSize: Responsive.sp(context, 11),
                               fontWeight: FontWeight.w600,
                               color: const Color(0xFF0284C7),
                             ),
