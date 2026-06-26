@@ -563,26 +563,28 @@ class DummyData {
     ),
   ];
 
+  // Full-design portrait hero banners for the Spotlight stage (each image is a
+  // self-contained design with its own logo + CTA, shown edge-to-edge).
   static const List<EventModel> bannerEvents = [
     EventModel(
-      title: 'Little Chefs',
-      venue: 'Easy & fun recipes for tiny hands!',
-      imagePath: 'assets/images/new_home/spotlight_banner.jpeg',
+      title: 'TLB Recommends',
+      venue: 'Our pick for little dreamers',
+      imagePath: 'resources- tlb-ui/spotlight/banners/banner1.png',
     ),
     EventModel(
-      title: 'World Book Day',
-      venue: 'Celebrate the joy of reading together!',
-      imagePath: 'resources- tlb-ui/worldbookday.png',
+      title: 'TLB Recommended',
+      venue: 'The best childhood memories begin with a story',
+      imagePath: 'resources- tlb-ui/spotlight/banners/banner2.png',
     ),
     EventModel(
-      title: 'Spotlight',
-      venue: 'Discover what\'s trending near you',
-      imagePath: 'resources- tlb-ui/spot.jpg',
+      title: 'Stories that stay',
+      venue: 'Memories that play',
+      imagePath: 'resources- tlb-ui/spotlight/banners/banner3.png',
     ),
     EventModel(
-      title: 'Halloween Fiesta',
-      venue: 'Spooky fun for the whole family!',
-      imagePath: 'resources- tlb-ui/hallowween.jpg',
+      title: 'For little dreamers',
+      venue: 'The best childhood memories begin with a story',
+      imagePath: 'resources- tlb-ui/spotlight/banners/banner4.png',
     ),
   ];
 

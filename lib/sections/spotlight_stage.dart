@@ -3,10 +3,8 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-import '../core/responsive.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
 import '../widgets/section_divider_widget.dart';
@@ -111,7 +109,9 @@ class _SpotlightStageState extends State<SpotlightStage>
 
     final double screenW = MediaQuery.of(context).size.width;
     final double cardW = math.min(screenW - 44, 350);
-    final double cardH = cardW * 1.26;
+    // Portrait banner art (~0.55 W/H) shown edge-to-edge → card takes that
+    // aspect so the full design (logo + CTA) is never cropped.
+    final double cardH = cardW * 1.8;
 
     // Taller top band so the stage lights sit fully ABOVE the card (they no
     // longer overlap its top corners).
@@ -216,6 +216,7 @@ class _SpotlightStageState extends State<SpotlightStage>
                   child: _SpotlightCard(
                     event: widget.events[_index],
                     width: cardW,
+                    height: cardH,
                     shimmer: _shimmer,
                     border: _border,
                     curtain: _curtain,
@@ -567,10 +568,13 @@ class _SpotlightStageState extends State<SpotlightStage>
   }
 }
 
-/// The single focused spotlight card.
+/// The single focused spotlight card — a full-design portrait banner image
+/// shown edge-to-edge, with the running golden border and the roller-curtain
+/// transition kept on top.
 class _SpotlightCard extends StatelessWidget {
   final EventModel event;
   final double width;
+  final double height;
   final Animation<double> shimmer;
   final Animation<double> border;
   final Animation<double> curtain;
@@ -578,17 +582,12 @@ class _SpotlightCard extends StatelessWidget {
   const _SpotlightCard({
     required this.event,
     required this.width,
+    required this.height,
     required this.shimmer,
     required this.border,
     required this.curtain,
   });
 
-  // Deeper jewel-toned gradient → a richer, darker banner that the content
-  // reads cleanly against.
-  static const _cyan = Color(0xFF0E8FA6);
-  static const _violet = Color(0xFF5B2BB0);
-  static const _pink = Color(0xFFB31C6C);
-  static const _orange = Color(0xFFC2520C);
   static const double _radius = 30;
 
   @override
@@ -597,84 +596,56 @@ class _SpotlightCard extends StatelessWidget {
       child: AnimatedBuilder(
         animation: Listenable.merge([shimmer, border, curtain]),
         builder: (context, child) {
-          final double glow = 0.32 + shimmer.value * 0.22;
+          final double glow = 0.30 + shimmer.value * 0.20;
           // foregroundPainter draws the running border ON TOP of the card and
-          // is sized EXACTLY to the card's box, so the boundary always matches
-          // the visible banner (no oversized/drifting border).
+          // is sized EXACTLY to the card's box, so it always matches the banner.
           return CustomPaint(
             foregroundPainter:
                 _RunningBorderPainter(t: border.value, radius: _radius),
             child: Container(
               width: width,
+              height: height,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(_radius),
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [_cyan, _violet, _pink, _orange],
-                  stops: [0.0, 0.40, 0.74, 1.0],
-                ),
-                border: Border.all(
-                    color: Colors.white.withOpacity(0.55), width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: _pink.withOpacity(glow),
+                    color: const Color(0xFFB31C6C).withOpacity(glow),
                     blurRadius: 30,
                     spreadRadius: 1,
                     offset: const Offset(0, 8),
                   ),
                   BoxShadow(
-                    color: _cyan.withOpacity(glow * 0.7),
+                    color: const Color(0xFF0E8FA6).withOpacity(glow * 0.7),
                     blurRadius: 26,
                     spreadRadius: 1,
                     offset: const Offset(0, -6),
                   ),
                 ],
               ),
-              // Clip the content + curtain to the card's rounded shape.
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(_radius - 1.5),
                 child: Stack(
+                  fit: StackFit.expand,
                   children: [
-                    // Depth scrim: darkens the top + bottom of the banner (so the
-                    // title/subtitle/CTA read crisply) while a soft radial glow
-                    // lifts the centre behind the icon → a richer, layered mix.
-                    const Positioned.fill(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: RadialGradient(
-                            center: Alignment(0, -0.35),
-                            radius: 0.95,
-                            colors: [
-                              Color(0x33FFFFFF), // gentle centre lift
-                              Color(0x00000000),
-                              Color(0x4D000000), // darkened rim/bottom
-                            ],
-                            stops: [0.0, 0.55, 1.0],
+                    // Full banner artwork (its own logo + CTA), edge-to-edge.
+                    GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => EventDetailScreen(event: event)),
+                      ),
+                      child: Image.asset(
+                        event.imagePath,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const ColoredBox(
+                          color: Color(0xFF2A1840),
+                          child: Center(
+                            child: Icon(Icons.image_outlined,
+                                color: Colors.white54, size: 48),
                           ),
                         ),
                       ),
                     ),
-                    const Positioned.fill(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Color(0x33000000), // top darken
-                              Color(0x00000000),
-                              Color(0x59000000), // stronger bottom darken (CTA)
-                            ],
-                            stops: [0.0, 0.42, 1.0],
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Fill the card so the Column's center alignment actually
-                    // centres the content (a bare Stack child sizes to its
-                    // widest line and pins top-left).
-                    Positioned.fill(child: child!),
                     // Theatrical curtain overlay. Eased for a smooth, fluid roll.
                     Positioned.fill(
                       child: _SpotlightCurtain(
@@ -687,91 +658,6 @@ class _SpotlightCard extends StatelessWidget {
             ),
           );
         },
-        child: GestureDetector(
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 26, 24, 26),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Frosted category icon (clean white glyph — like the design).
-                Container(
-                  width: width * 0.3,
-                  height: width * 0.3,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.18),
-                    border:
-                        Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
-                  ),
-                  child: Icon(
-                    Icons.auto_awesome_rounded,
-                    color: Colors.white,
-                    size: width * 0.13,
-                  ),
-                ),
-                SizedBox(height: width * 0.06),
-
-                Text(
-                  event.title,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: 'DancingScript', // bundled script
-                    fontSize: Responsive.sp(context, 36),
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    height: 1.0,
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                Text(
-                  event.venue,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.poppins(
-                    fontSize: Responsive.sp(context, 13.5),
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white.withOpacity(0.95),
-                    height: 1.3,
-                  ),
-                ),
-                SizedBox(height: width * 0.07),
-
-                Material(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(26),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(26),
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => EventDetailScreen(event: event)),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 26, vertical: 13),
-                      child: Text(
-                        'Explore Now',
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 13.5),
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF2A2A3A),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

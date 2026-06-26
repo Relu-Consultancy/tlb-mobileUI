@@ -73,6 +73,7 @@ flutter:
     - location_screen_resources/
     - resources- tlb-ui/
     - resources- tlb-ui/spotlight/
+    - resources- tlb-ui/spotlight/banners/
     - resources- tlb-ui/accounts_page/
     - resources- tlb-ui/venues_page/
     - resources- tlb-ui/venues_page/yourway/
