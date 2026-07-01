@@ -10,6 +10,7 @@ import '../providers/auth_state.dart';
 import '../providers/follow_state.dart';
 import '../services/partner_service.dart';
 import '../widgets/app_loader.dart';
+import '../widgets/app_dialog.dart';
 import '../widgets/app_refresh_indicator.dart';
 import 'organizer_profile_screen.dart';
 
@@ -55,49 +56,15 @@ class _FollowedPartnersScreenState extends State<FollowedPartnersScreen> {
   }
 
   Future<void> _confirmUnfollow(ApiFollowedPartner p) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: Text(
-          'Unfollow?',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w600,
-            fontSize: Responsive.sp(context, 16),
-            color: AppColors.textPrimary,
-          ),
-        ),
-        content: Text(
+    final ok = await showAppConfirmDialog(
+      context,
+      title: 'Unfollow?',
+      message:
           'Stop following ${p.profile.businessName}? You can follow them again anytime.',
-          style: GoogleFonts.poppins(
-            fontSize: Responsive.sp(context, 13),
-            color: Colors.grey.shade600,
-            height: 1.5,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel',
-                style: GoogleFonts.poppins(
-                    color: Colors.grey.shade600, fontWeight: FontWeight.w500)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryLight,
-              foregroundColor: AppColors.textPrimary,
-              elevation: 0,
-              shape:
-                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            ),
-            child: Text('Unfollow',
-                style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
-          ),
-        ],
-      ),
+      confirmLabel: 'Unfollow',
+      icon: Icons.person_remove_outlined,
     );
-    if (ok == true) {
+    if (ok) {
       HapticFeedback.mediumImpact();
       _unfollow(p);
     }

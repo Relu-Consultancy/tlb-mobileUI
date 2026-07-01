@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
+import 'app_dialog.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../core/app_colors.dart';
@@ -232,25 +233,15 @@ Future<void> _confirmDeleteReview(
   ApiReview review,
   VoidCallback? onSuccess,
 ) async {
-  final confirmed = await showDialog<bool>(
-    context: context,
-    builder: (_) => AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: Text('Delete Review', style: GoogleFonts.poppins(fontWeight: FontWeight.w500, fontSize: Responsive.sp(context, 16))),
-      content: Text('Are you sure you want to delete this review?', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14))),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: Text('Cancel', style: GoogleFonts.poppins(color: Colors.grey.shade600)),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, true),
-          child: Text('Delete', style: GoogleFonts.poppins(color: const Color(0xFFFF6B6B), fontWeight: FontWeight.w500)),
-        ),
-      ],
-    ),
+  final confirmed = await showAppConfirmDialog(
+    context,
+    title: 'Delete Review',
+    message: 'Are you sure you want to delete this review?',
+    confirmLabel: 'Delete',
+    icon: Icons.delete_outline_rounded,
+    destructive: true,
   );
-  if (confirmed != true) return;
+  if (!confirmed) return;
   final token = AuthState.accessToken;
   if (token == null) return;
   try {

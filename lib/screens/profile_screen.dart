@@ -22,6 +22,7 @@ import 'your_reviews_screen.dart';
 import 'followed_partners_screen.dart';
 import 'notification_screen.dart';
 import '../widgets/login_sheet.dart';
+import '../widgets/app_dialog.dart';
 // import 'reminders_screen.dart'; // Reminders entry temporarily hidden — restore when the feature is ready.
 
 class ProfileScreen extends StatefulWidget {
@@ -421,54 +422,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Log Out',
-            style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w500,
-                fontSize: Responsive.sp(context, 17))),
-        content: Text('Are you sure you want to log out?',
-            style: GoogleFonts.poppins(
-                fontSize: Responsive.sp(context, 14), color: Colors.grey.shade700)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel',
-                style: GoogleFonts.poppins(color: Colors.grey, fontSize: Responsive.sp(context, 14))),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final refresh = AuthState.refreshToken;
-              if (refresh != null) {
-                await AuthService.logout(refresh: refresh);
-              }
-              AuthState.logout();
-              SavedEventsState.savedEvents.value = [];
-              BookedEventsState.bookings.value = [];
-              await UserReviewsState.clear();
-              if (!context.mounted) return;
-              // Send the user to the login screen rather than a guest
-              // HomeScreen — matches the cold-start behaviour added in
-              // Session 47 and avoids a second HomeScreen instance being
-              // pushed when they log back in (which was racing the
-              // ShowcaseView register/unregister lifecycle and crashing).
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-                (route) => false,
-              );
-            },
-            child: Text('Log Out',
-                style: GoogleFonts.poppins(
-                    color: const Color(0xFFE53935),
-                    fontWeight: FontWeight.w500,
-                    fontSize: Responsive.sp(context, 14))),
-          ),
-        ],
-      ),
+  Future<void> _showLogoutDialog(BuildContext context) async {
+    final ok = await showAppConfirmDialog(
+      context,
+      title: 'Log Out',
+      message: 'Are you sure you want to log out?',
+      confirmLabel: 'Log Out',
+      icon: Icons.logout_rounded,
+      destructive: true,
+    );
+    if (!ok) return;
+
+    final refresh = AuthState.refreshToken;
+    if (refresh != null) {
+      await AuthService.logout(refresh: refresh);
+    }
+    AuthState.logout();
+    SavedEventsState.savedEvents.value = [];
+    BookedEventsState.bookings.value = [];
+    await UserReviewsState.clear();
+    if (!context.mounted) return;
+    // Send the user to the login screen rather than a guest HomeScreen —
+    // matches the cold-start behaviour (Session 47) and avoids a second
+    // HomeScreen racing the ShowcaseView register/unregister lifecycle.
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
     );
   }
 

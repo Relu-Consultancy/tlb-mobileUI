@@ -162,34 +162,70 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final unreadCount = _items.where((n) => !n.isRead).length;
     return Scaffold(
       backgroundColor: AppColors.lightGray,
       appBar: AppBar(
         backgroundColor: AppColors.lightGray,
         elevation: 0,
         scrolledUnderElevation: 0,
+        titleSpacing: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          'Notifications',
-          style: GoogleFonts.poppins(
-            fontSize: Responsive.sp(context, 18),
-            fontWeight: FontWeight.w500,
-            color: AppColors.textPrimary,
-          ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Notifications',
+              style: GoogleFonts.poppins(
+                fontSize: Responsive.sp(context, 18),
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            if (!_loading && _error == null && unreadCount > 0)
+              Text(
+                '$unreadCount unread',
+                style: GoogleFonts.poppins(
+                  fontSize: Responsive.sp(context, 11.5),
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.accentBlue,
+                ),
+              ),
+          ],
         ),
         actions: [
           if (!_loading && _error == null && _hasUnread)
-            TextButton(
-              onPressed: _markingAll ? null : _markAllRead,
-              child: Text(
-                'Mark all read',
-                style: GoogleFonts.poppins(
-                  fontSize: Responsive.sp(context, 12.5),
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.accentBlue,
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: TextButton.icon(
+                onPressed: _markingAll ? null : _markAllRead,
+                icon: _markingAll
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.done_all_rounded,
+                        size: 16, color: AppColors.accentBlue),
+                label: Text(
+                  'Mark all read',
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 12.5),
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.accentBlue,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  backgroundColor: AppColors.accentBlue.withOpacity(0.08),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 ),
               ),
             ),
@@ -210,16 +246,25 @@ class _NotificationScreenState extends State<NotificationScreen> {
     if (_error != null) return _buildError();
     if (_items.isEmpty) return _buildEmpty();
 
+    // Flatten notifications into a list of rows interleaved with date-group
+    // headers ("Today", "Yesterday", …) so the feed reads as tidy sections.
+    final rows = _buildRows();
+
     return AppRefreshIndicator(
       onRefresh: _load,
       child: ListView.separated(
         controller: _scrollCtrl,
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        itemCount: _items.length + (_hasNext ? 1 : 0),
-        separatorBuilder: (_, __) => const SizedBox(height: 10),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        itemCount: rows.length + (_hasNext ? 1 : 0),
+        separatorBuilder: (_, i) {
+          if (i + 1 >= rows.length) return const SizedBox(height: 10);
+          // Extra breathing room above a section header, tighter between cards.
+          final next = rows[i + 1];
+          return SizedBox(height: next is String ? 6 : 10);
+        },
         itemBuilder: (context, i) {
-          if (i >= _items.length) {
+          if (i >= rows.length) {
             return const Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
               child: Center(
@@ -231,11 +276,57 @@ class _NotificationScreenState extends State<NotificationScreen> {
               ),
             );
           }
+          final row = rows[i];
+          if (row is String) return _sectionHeader(context, row);
+          final n = row as ApiNotification;
           return _NotificationCard(
-            notification: _items[i],
-            onTap: () => _onTapNotification(_items[i]),
+            notification: n,
+            onTap: () => _onTapNotification(n),
           );
         },
+      ),
+    );
+  }
+
+  /// Builds the interleaved [String header, ApiNotification, …] row list.
+  List<Object> _buildRows() {
+    final rows = <Object>[];
+    String? currentBucket;
+    for (final n in _items) {
+      final bucket = _bucketFor(n.createdAt);
+      if (bucket != currentBucket) {
+        currentBucket = bucket;
+        rows.add(bucket);
+      }
+      rows.add(n);
+    }
+    return rows;
+  }
+
+  String _bucketFor(DateTime? dt) {
+    if (dt == null) return 'Earlier';
+    final now = DateTime.now();
+    final local = dt.toLocal();
+    final today = DateTime(now.year, now.month, now.day);
+    final that = DateTime(local.year, local.month, local.day);
+    final days = today.difference(that).inDays;
+    if (days <= 0) return 'Today';
+    if (days == 1) return 'Yesterday';
+    if (days < 7) return 'This Week';
+    return 'Earlier';
+  }
+
+  Widget _sectionHeader(BuildContext context, String label) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 10, 4, 2),
+      child: Text(
+        label.toUpperCase(),
+        style: GoogleFonts.poppins(
+          fontSize: Responsive.sp(context, 11),
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.6,
+          color: Colors.grey.shade500,
+        ),
       ),
     );
   }
@@ -253,8 +344,23 @@ class _NotificationScreenState extends State<NotificationScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.notifications_off_outlined,
-                      size: 72, color: Colors.grey.shade300),
+                  Container(
+                    width: 104,
+                    height: 104,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.accentBlue.withOpacity(0.12),
+                          AppColors.accentBlue.withOpacity(0.03),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.notifications_none_rounded,
+                        size: 52, color: AppColors.accentBlue.withOpacity(0.8)),
+                  ),
                   const SizedBox(height: 20),
                   Text(
                     'No Notifications Yet',
@@ -340,35 +446,52 @@ class _NotificationCard extends StatelessWidget {
     final n = notification;
     final unread = !n.isRead;
     final accent = _accentColor(n.notificationType);
+    final hasAction = n.actionUrl != null && n.actionUrl!.isNotEmpty;
 
     return Material(
-      color: unread ? const Color(0xFFF4F8FF) : Colors.white,
-      borderRadius: BorderRadius.circular(14),
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      clipBehavior: Clip.antiAlias,
+      shadowColor: Colors.black.withOpacity(0.06),
+      elevation: unread ? 3 : 1.5,
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(18),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: unread
-                  ? AppColors.accentBlue.withOpacity(0.18)
-                  : Colors.black.withOpacity(0.06),
-              width: 0.8,
+            borderRadius: BorderRadius.circular(18),
+            // Unread cards get a faint tinted wash + a colored leading strip.
+            gradient: unread
+                ? LinearGradient(
+                    colors: [accent.withOpacity(0.06), Colors.white],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  )
+                : null,
+            border: Border(
+              left: BorderSide(
+                color: unread ? accent : Colors.transparent,
+                width: 3.5,
+              ),
             ),
           ),
+          padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Gradient icon badge
               Container(
-                width: 42,
-                height: 42,
+                width: 46,
+                height: 46,
                 decoration: BoxDecoration(
-                  color: accent.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    colors: [accent.withOpacity(0.20), accent.withOpacity(0.08)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(_iconFor(n.notificationType), color: accent, size: 20),
+                child: Icon(_iconFor(n.notificationType), color: accent, size: 22),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -381,10 +504,11 @@ class _NotificationCard extends StatelessWidget {
                           child: Text(
                             n.title.isEmpty ? 'Notification' : n.title,
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 13.5),
+                              fontSize: Responsive.sp(context, 14),
                               fontWeight:
                                   unread ? FontWeight.w600 : FontWeight.w500,
                               color: AppColors.textPrimary,
+                              height: 1.25,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -393,52 +517,69 @@ class _NotificationCard extends StatelessWidget {
                         if (unread) ...[
                           const SizedBox(width: 8),
                           Container(
-                            width: 8,
-                            height: 8,
-                            margin: const EdgeInsets.only(top: 4),
-                            decoration: const BoxDecoration(
-                              color: AppColors.accentBlue,
+                            width: 9,
+                            height: 9,
+                            margin: const EdgeInsets.only(top: 5),
+                            decoration: BoxDecoration(
+                              color: accent,
                               shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: accent.withOpacity(0.4),
+                                  blurRadius: 5,
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ],
                     ),
                     if (n.body.isNotEmpty) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 5),
                       Text(
                         n.body,
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 12),
                           color: Colors.grey.shade600,
-                          height: 1.4,
+                          height: 1.45,
                         ),
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Row(
                       children: [
                         if (n.isBroadcast) ...[
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
+                                horizontal: 9, vertical: 3),
                             decoration: BoxDecoration(
                               color: const Color(0xFF7C3AED).withOpacity(0.10),
-                              borderRadius: BorderRadius.circular(6),
+                              borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Text(
-                              'From Admin',
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 9.5),
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF7C3AED),
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.verified_rounded,
+                                    size: 11, color: Color(0xFF7C3AED)),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'From Admin',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 9.5),
+                                    fontWeight: FontWeight.w500,
+                                    color: const Color(0xFF7C3AED),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(width: 8),
                         ],
+                        Icon(Icons.schedule_rounded,
+                            size: 12, color: Colors.grey.shade400),
+                        const SizedBox(width: 4),
                         Text(
                           _timeAgo(n.createdAt),
                           style: GoogleFonts.poppins(
@@ -446,10 +587,24 @@ class _NotificationCard extends StatelessWidget {
                             color: Colors.grey.shade500,
                           ),
                         ),
-                        if (n.actionUrl != null && n.actionUrl!.isNotEmpty) ...[
+                        if (hasAction) ...[
                           const Spacer(),
-                          Icon(Icons.open_in_new,
-                              size: 13, color: Colors.grey.shade400),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'View',
+                                style: GoogleFonts.poppins(
+                                  fontSize: Responsive.sp(context, 10.5),
+                                  fontWeight: FontWeight.w600,
+                                  color: accent,
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              Icon(Icons.arrow_forward_ios_rounded,
+                                  size: 10, color: accent),
+                            ],
+                          ),
                         ],
                       ],
                     ),

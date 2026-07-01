@@ -11,6 +11,7 @@ import '../providers/auth_state.dart';
 import '../services/booking_service.dart';
 import '../services/coupon_service.dart';
 import '../widgets/app_loader.dart';
+import '../widgets/app_dialog.dart';
 import 'booking_confirmed_screen.dart';
 import 'venue_booking_confirmed_screen.dart';
 import 'program_booking_confirmed_screen.dart';
@@ -370,30 +371,14 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
   }
 
   void _showVerificationFailureDialog(String ref) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Booking Pending',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
-        ),
-        content: Text(
+    showAppInfoDialog(
+      context,
+      title: 'Booking Pending',
+      message:
           'Your payment was received but we could not confirm the booking automatically.\n\n'
           'Reference: $ref\n\n'
           'Please contact support and share this reference number.',
-          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('OK',
-                style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textPrimary)),
-          ),
-        ],
-      ),
+      icon: Icons.hourglass_bottom_rounded,
     );
   }
 

@@ -351,7 +351,20 @@ class DetailDirectionsCard extends StatelessWidget {
 /// Simple "Terms & Conditions" row card with a slim black border.
 class DetailTermsRow extends StatelessWidget {
   final VoidCallback onTap;
-  const DetailTermsRow({super.key, required this.onTap});
+
+  /// Row title — defaults to "Terms & Conditions". Pass "FAQs" (etc.) to reuse
+  /// this row for other tappable popup sections.
+  final String title;
+
+  /// Leading icon — defaults to the T&C document icon.
+  final IconData icon;
+
+  const DetailTermsRow({
+    super.key,
+    required this.onTap,
+    this.title = 'Terms & Conditions',
+    this.icon = Icons.description_outlined,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -371,12 +384,11 @@ class DetailTermsRow extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.description_outlined,
-                    size: 24, color: kDetailText),
+                Icon(icon, size: 24, color: kDetailText),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Text(
-                    'Terms & Conditions',
+                    title,
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 14),
                       fontWeight: FontWeight.w600,
@@ -393,6 +405,86 @@ class DetailTermsRow extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Shared FAQs bottom sheet used by every detail screen — same look as the
+/// Terms & Conditions sheet, but lists question / answer pairs.
+void showListingFaqsSheet(
+  BuildContext context,
+  List<Map<String, dynamic>> faqs,
+) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (ctx) => Container(
+      constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.85),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('FAQs',
+                    style: GoogleFonts.poppins(
+                        fontSize: Responsive.sp(context, 17),
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textSecondary)),
+                GestureDetector(
+                  onTap: () => Navigator.pop(ctx),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                        color: Colors.grey.shade200, shape: BoxShape.circle),
+                    child: const Icon(Icons.close,
+                        size: 20, color: AppColors.textSecondary),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final faq in faqs)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(faq['question']?.toString() ?? '',
+                              style: GoogleFonts.poppins(
+                                  fontSize: Responsive.sp(context, 14),
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary)),
+                          const SizedBox(height: 6),
+                          Text(faq['answer']?.toString() ?? '',
+                              style: GoogleFonts.poppins(
+                                  fontSize: Responsive.sp(context, 13),
+                                  color: Colors.grey.shade700,
+                                  height: 1.5)),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 /// Paints a detailed stylised street-map background — land, water, parks,

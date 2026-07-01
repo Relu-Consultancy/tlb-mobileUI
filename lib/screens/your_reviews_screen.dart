@@ -9,6 +9,7 @@ import '../providers/user_reviews_state.dart';
 import '../services/review_service.dart';
 import '../widgets/app_loader.dart';
 import '../widgets/app_refresh_indicator.dart';
+import '../widgets/app_dialog.dart';
 import '../widgets/review_sheet.dart';
 
 class YourReviewsScreen extends StatefulWidget {
@@ -339,21 +340,15 @@ class _ReviewCard extends StatelessWidget {
   Future<void> _delete(BuildContext context) async {
     if (AuthState.accessToken == null) return;
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Delete Review', style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
-        content: Text('Are you sure you want to delete this review?', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14))),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Color(0xFFFF6B6B))),
-          ),
-        ],
-      ),
+    final confirmed = await showAppConfirmDialog(
+      context,
+      title: 'Delete Review',
+      message: 'Are you sure you want to delete this review?',
+      confirmLabel: 'Delete',
+      icon: Icons.delete_outline_rounded,
+      destructive: true,
     );
-    if (confirmed != true) return;
+    if (!confirmed) return;
 
     try {
       await ReviewService.deleteReview(AuthState.accessToken!, review.id);

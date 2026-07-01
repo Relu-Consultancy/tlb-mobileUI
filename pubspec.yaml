@@ -83,7 +83,8 @@ flutter:
     - resources- tlb-ui/homescreen_Explorethestage/
     - resources- tlb-ui/event_page_subcategoryicons/
     - resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/
-    - resources- tlb-ui/programs_findurfit/
+    # programs_findurfit/ (32 MB of 5–6 MB PNGs) unbundled — unused; code uses
+    # programs_findurfit_clean/ (optimized). Kept on disk as source only.
     - resources- tlb-ui/programs_findurfit_clean/
     - resources- tlb-ui/class_page/
     - google_fonts/

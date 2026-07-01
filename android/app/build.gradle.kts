@@ -38,6 +38,17 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+
+            // Shrink & obfuscate Java/Kotlin/plugin code (R8) and strip unused
+            // Android resources. Only affects native/Android code + res/ — it
+            // does NOT touch Flutter (Dart) assets in flutter_assets/. Keep
+            // rules for reflection-heavy plugins are in proguard-rules.pro.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

@@ -568,11 +568,21 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
 
                     if (_detail != null && (
                       (_cancellationPolicy?.isNotEmpty == true) ||
-                      (_refundPolicy?.isNotEmpty == true) ||
-                      (_detail!.faqs.isNotEmpty)
+                      (_refundPolicy?.isNotEmpty == true)
                     )) ...[
                       DetailTermsRow(
                         onTap: () => _showTermsBottomSheet(context),
+                      ),
+                      const SizedBox(height: 32),
+                    ],
+
+                    // FAQs
+                    if (_detail != null && _detail!.faqs.isNotEmpty) ...[
+                      DetailTermsRow(
+                        title: 'FAQs',
+                        icon: Icons.help_outline,
+                        onTap: () =>
+                            showListingFaqsSheet(context, _detail!.faqs),
                       ),
                       const SizedBox(height: 32),
                     ],
@@ -762,31 +772,12 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                       Text(_refundPolicy!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
                       const SizedBox(height: 20),
                     ],
-                    if (_detail?.faqs.isNotEmpty == true) ...[
-                      Text('FAQs', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
-                      const SizedBox(height: 10),
-                      ...(_detail!.faqs.map((faq) => _buildTermsBullet(faq['question'] ?? '', faq['answer'] ?? ''))),
-                    ],
                   ],
                 ),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildTermsBullet(String label, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
-          const SizedBox(height: 4),
-          Text(text, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
-        ],
       ),
     );
   }

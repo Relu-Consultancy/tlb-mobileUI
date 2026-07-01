@@ -47,6 +47,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Gradle caches (local only — can grow to hundreds of MB; never shipped)
+/android/.gradle/
+.gradle/
+
 # API documentation (local reference only)
 API_DOCUMENTATION.md
 frontend_api_integration_estimates.csv

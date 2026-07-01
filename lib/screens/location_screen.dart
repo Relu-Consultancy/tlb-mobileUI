@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
 import '../widgets/app_loader.dart';
+import '../widgets/app_dialog.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
@@ -102,58 +103,14 @@ class _LocationScreenState extends State<LocationScreen>
     required Future<bool> Function() onOpen,
   }) async {
     if (!mounted) return;
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(
-          title,
-          style: GoogleFonts.poppins(
-            fontSize: Responsive.sp(context, 17),
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        content: Text(
-          message,
-          style: GoogleFonts.poppins(
-            fontSize: Responsive.sp(context, 13.5),
-            color: const Color(0xFF5A5A6A),
-            height: 1.4,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF9E9E9E),
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await onOpen();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryLight,
-              foregroundColor: AppColors.textPrimary,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-            ),
-            child: Text(
-              'Open Settings',
-              style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
-            ),
-          ),
-        ],
-      ),
+    final ok = await showAppConfirmDialog(
+      context,
+      title: title,
+      message: message,
+      confirmLabel: 'Open Settings',
+      icon: Icons.location_on_outlined,
     );
+    if (ok) await onOpen();
   }
 
   Future<void> _fetchCurrentLocation() async {

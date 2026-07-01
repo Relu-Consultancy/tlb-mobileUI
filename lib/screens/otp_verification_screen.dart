@@ -374,19 +374,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   const SizedBox(height: 32),
 
                   // ── Verify button ──────────────────────────────────────────
-                  Container(
+                  SizedBox(
                     width: double.infinity,
                     height: 52,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFFFD014).withOpacity(0.5),
-                          blurRadius: 18,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
                     child: ElevatedButton(
                       onPressed: _loading ? null : _onVerify,
                       style: ElevatedButton.styleFrom(

@@ -215,10 +215,16 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(width: double.infinity, height: 150, child: image()),
+            // Image dominates the card — Expanded fills whatever height is
+            // left after the (natural-height) content, so there's no empty
+            // gap at the bottom.
+            Expanded(
+              child: SizedBox(width: double.infinity, child: image()),
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(

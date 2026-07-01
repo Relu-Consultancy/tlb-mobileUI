@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
+import '../widgets/app_dialog.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_state.dart';
 import '../services/payment_method_service.dart';
@@ -96,19 +97,17 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
   }
 
   Future<void> _deleteMethod(ApiPaymentMethod method) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Remove Payment Method?'),
-        content: Text('Are you sure you want to remove this ${method.methodType == 'card' ? 'card' : 'UPI ID'}?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Remove', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w500))),
-        ],
-      ),
+    final confirmed = await showAppConfirmDialog(
+      context,
+      title: 'Remove Payment Method?',
+      message:
+          'Are you sure you want to remove this ${method.methodType == 'card' ? 'card' : 'UPI ID'}?',
+      confirmLabel: 'Remove',
+      icon: Icons.credit_card_off_rounded,
+      destructive: true,
     );
 
-    if (confirmed != true) return;
+    if (!confirmed) return;
 
     try {
       final tokens = await TokenStorage.loadTokens();

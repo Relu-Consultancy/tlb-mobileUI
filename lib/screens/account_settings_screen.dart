@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/app_snackbar.dart';
 import '../core/avatar_image.dart';
 import '../core/responsive.dart';
+import '../widgets/app_dialog.dart';
 import '../providers/auth_state.dart';
 import '../services/auth_service.dart';
 import '../widgets/app_loader.dart';
@@ -198,55 +199,17 @@ class AccountSettingsScreen extends StatelessWidget {
   // ── Delete account ────────────────────────────────────────────────────────
 
   Future<void> _confirmDeleteAccount(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Text(
-          'Delete account?',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w500,
-            fontSize: Responsive.sp(context, 17),
-          ),
-        ),
-        content: Text(
+    final confirmed = await showAppConfirmDialog(
+      context,
+      title: 'Delete account?',
+      message:
           'Your account will be deactivated immediately and you will be signed out. Your booking history is retained for legal records. This action cannot be undone from the app.',
-          style: GoogleFonts.poppins(
-            fontSize: Responsive.sp(context, 13.5),
-            color: Colors.grey.shade700,
-            height: 1.45,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.poppins(
-                color: Colors.grey,
-                fontSize: Responsive.sp(context, 14),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              'Delete',
-              style: GoogleFonts.poppins(
-                color: const Color(0xFFE53935),
-                fontWeight: FontWeight.w500,
-                fontSize: Responsive.sp(context, 14),
-              ),
-            ),
-          ),
-        ],
-      ),
+      confirmLabel: 'Delete',
+      icon: Icons.person_off_rounded,
+      destructive: true,
     );
 
-    if (confirmed != true || !context.mounted) return;
+    if (!confirmed || !context.mounted) return;
     await _performDelete(context);
   }
 
