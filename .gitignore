@@ -51,6 +51,10 @@ app.*.map.json
 /android/.gradle/
 .gradle/
 
-# API documentation (local reference only)
+# Dev-context / documentation files (local reference only — not shipped in repo)
 API_DOCUMENTATION.md
+PROJECT_DOCUMENTATION.md
+pro_flutterdeveloper.md
+dev_graph.md
+testing_report.md
 frontend_api_integration_estimates.csv
