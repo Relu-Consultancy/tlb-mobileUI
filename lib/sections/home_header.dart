@@ -172,7 +172,7 @@ class HomeHeader extends StatelessWidget {
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 20),
                             fontWeight: FontWeight.w700, // header greeting — bold
-                            color: AppColors.textPrimary,
+                            color: Colors.white,
                           ),
                         );
                       },
@@ -206,7 +206,7 @@ class HomeHeader extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.55),
+                  color: Colors.white.withOpacity(0.12),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
@@ -230,7 +230,7 @@ class HomeHeader extends StatelessWidget {
                         const Icon(
                           Icons.notifications_outlined,
                           size: 22,
-                          color: AppColors.textPrimary,
+                          color: Colors.white,
                         ),
                         if (unread > 0)
                           Positioned(
@@ -334,7 +334,7 @@ class HomeHeader extends StatelessWidget {
       child: Row(
         children: [
           const Icon(Icons.location_on_outlined,
-              size: 14, color: AppColors.textPrimary),
+              size: 14, color: Colors.white),
           const SizedBox(width: 3),
           ValueListenableBuilder<String>(
             valueListenable: LocationState().selectedCity,
@@ -346,14 +346,14 @@ class HomeHeader extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 12),
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary,
+                  color: Colors.white70,
                 ),
               );
             },
           ),
           const SizedBox(width: 2),
           const Icon(Icons.keyboard_arrow_down,
-              size: 16, color: AppColors.textPrimary),
+              size: 16, color: Colors.white70),
         ],
       ),
     );
@@ -402,32 +402,16 @@ class HomeHeader extends StatelessWidget {
       child: Container(
         height: Responsive.h(context, 43, min: 37),
         decoration: BoxDecoration(
-          // Golden wash across the whole bar — slightly deeper so the dark
-          // text/icons read with more contrast.
-          gradient: const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFFFEDC4), // golden (top)
-              Color(0xFFFFE0A6), // deeper golden (bottom)
-            ],
-          ),
+          // Dark translucent field for the black header — a hairline light
+          // border so it reads as an input surface sitting on the backdrop.
+          color: Colors.white.withOpacity(0.08),
           borderRadius: BorderRadius.circular(30),
-          // 2px white border.
-          border: Border.all(color: Colors.white, width: 2),
-          // Soft drop shadow around the bar.
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.12),
-              blurRadius: 14,
-              offset: const Offset(0, 3),
-            ),
-          ],
+          border: Border.all(color: Colors.white.withOpacity(0.16), width: 1.2),
         ),
         child: Row(
           children: [
             const SizedBox(width: 18),
-            const Icon(Icons.search, color: AppColors.textPrimary, size: 22),
+            const Icon(Icons.search, color: Colors.white70, size: 22),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -435,17 +419,17 @@ class HomeHeader extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 14),
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary,
+                  color: Colors.white70,
                 ),
               ),
             ),
             Container(
               width: 1,
               height: 22,
-              color: AppColors.textPrimary.withOpacity(0.18),
+              color: Colors.white.withOpacity(0.18),
             ),
             const SizedBox(width: 14),
-            const Icon(Icons.tune_rounded, color: AppColors.textPrimary, size: 20),
+            const Icon(Icons.tune_rounded, color: Colors.white70, size: 20),
             const SizedBox(width: 18),
           ],
         ),

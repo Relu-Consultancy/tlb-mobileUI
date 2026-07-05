@@ -192,40 +192,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ── Unified header on a gradient background ──
-                    // Gradient extends past the search bar through the
-                    // Spotlight divider so the warm tone blends seamlessly
-                    // into the purple Spotlight banner that follows.
+                    // ── Unified header on a black theatrical backdrop ──
+                    // Solid black behind the greeting + search bar; the golden
+                    // cloud texture (screen-blended in HomeHeader) reads as a
+                    // warm glow at the top and fades into the black.
                     Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Color(0xFFFFD893), // vibrant warm yellow at top
-                            Color(0xFFFFE3AE),
-                            Color(0xFFFFF0D0), // ── flat cream band ──────────
-                            Color(0xFFFFF0D0), // Held CONSTANT across the whole
-                            // header-bottom zone so that wherever the header
-                            // ends (status-bar height varies per device) the
-                            // background colour there is the SAME cream. The
-                            // header's blend layer fades into this exact cream,
-                            // so it always lands on a flat colour — no gradient
-                            // step to mismatch, hence no seam on any device.
-                            Color(0xFFFBF3DE), // exact match to the Spotlight
-                            // stage's top tone → seamless header→leaves blend
-                          ],
-                          stops: [0.0, 0.30, 0.55, 0.86, 1.0],
-                        ),
-                      ),
+                      decoration: const BoxDecoration(color: Colors.black),
                       child: Column(
                         children: [
                           HomeHeader(
                             profileShowcaseConfig: kProfileShowcaseConfig,
                             locationShowcaseConfig: kLocationShowcaseConfig,
-                            // Hide the cloud ShaderMask's bottom fringe by
-                            // painting the header's flat cream band over it.
-                            seamCoverColor: const Color(0xFFFFF0D0),
+                            // Cover the cloud ShaderMask's bottom fringe with
+                            // black so no golden hairline shows on the backdrop.
+                            seamCoverColor: Colors.black,
                           ),
                           // Spotlight divider — reverted to always-shown (mock).
                           // API version (hide when spotlight section empty)
