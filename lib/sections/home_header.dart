@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -14,42 +15,87 @@ import '../widgets/login_sheet.dart';
 import '../providers/location_state.dart';
 import '../helpers/walkthrough_keys.dart';
 
+/// The greeting + search header shared across Home, Events, Classes,
+/// Programs and Venues.
+///
+/// Two visual modes:
+/// * [onDark] `true` — the Home screen's flat black backdrop styling: no cloud
+///   texture, light text/icons, an outlined bell ring, a gold avatar ring and
+///   a bigger dark translucent search field.
+/// * [onDark] `false` (default) — the original light-cream styling used by the
+///   other screens: a golden cloud texture behind the content, dark text and a
+///   golden search bar.
 class HomeHeader extends StatelessWidget {
   final ShowcaseProfileConfig? profileShowcaseConfig;
   final ShowcaseProfileConfig? locationShowcaseConfig;
 
-  /// When set, a thin cream strip is painted over the cloud's ShaderMask
-  /// bottom fringe (the faint 1px line that shows in the header's side
-  /// margins, beside the rounded search bar). Pass the screen's background
-  /// tone at that depth so the cover is invisible except for hiding the line.
+  /// Renders the flat black-backdrop styling when true (see class docs).
+  final bool onDark;
+
+  /// Light-mode only: paints the screen's flat background tone over the cloud
+  /// ShaderMask's 1px bottom fringe (the faint seam line). Ignored when
+  /// [onDark] is true (no cloud is drawn there).
   final Color? seamCoverColor;
 
   const HomeHeader({
     super.key,
     this.profileShowcaseConfig,
     this.locationShowcaseConfig,
+    this.onDark = false,
     this.seamCoverColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final content = SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          Responsive.w(context, onDark ? 20 : 16),
+          Responsive.h(context, 14, min: 10),
+          Responsive.w(context, onDark ? 20 : 16),
+          Responsive.h(context, onDark ? 18 : 20, min: onDark ? 14 : 16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Small TLB mark in the top-left corner (dark header only).
+            if (onDark) ...[
+              SvgPicture.asset(
+                'assets/icons/tlb_mark_yellow.svg',
+                height: Responsive.h(context, 30, min: 26),
+                fit: BoxFit.contain,
+              ),
+              SizedBox(height: Responsive.h(context, 14, min: 10)),
+            ],
+            _buildGreetingRow(
+              context,
+              profileShowcaseConfig: profileShowcaseConfig,
+              locationShowcaseConfig: locationShowcaseConfig,
+            ),
+            SizedBox(
+              height: onDark
+                  ? Responsive.h(context, 22, min: 18)
+                  : Responsive.h(context, 16, min: 12),
+            ),
+            _buildSearchBar(context),
+          ],
+        ),
+      ),
+    );
+
+    // Dark mode paints nothing of its own — the black backdrop comes from the
+    // parent container in HomeScreen.
+    if (onDark) return content;
+
+    // ── Light mode: golden cloud texture behind the content ──
+    // ColorFiltered tints the cloud image golden (screen blend); ShaderMask
+    // (dstIn) fades it to transparent toward the bottom so the screen's warm
+    // gradient shows through. `bottom: 28` tucks the ShaderMask's 1px bottom
+    // fringe behind the opaque search bar where it can't be seen.
     return Stack(
       clipBehavior: Clip.hardEdge,
       children: [
-        // ── Layer 1: Cloud image, golden-tinted, fading to transparent ──
-        // ColorFiltered tints the cloud image golden (screen blend);
-        // ShaderMask(dstIn) fades it to transparent toward the bottom so the
-        // home-screen warm gradient shows through.
-        //
-        // `bottom: 28` (instead of Positioned.fill) is what removes the thin
-        // seam. ShaderMask forces a saveLayer whose bottom edge leaves a 1px
-        // fringe of the screen-blended cloud RGB (a premultiplied-alpha buffer-
-        // edge artifact — independent of the mask's alpha, which is why fading
-        // the shader didn't help). Insetting the cloud's bottom by 28 tucks that
-        // edge BEHIND the opaque search bar, where it can't be seen. With the
-        // header at its full (original) padding, the cloud still fades out right
-        // around the search bar — visually full, exactly like the original — but
-        // the fringe is hidden. (Verified on-device: no seam, full cloud.)
         Positioned(
           top: 0,
           left: 0,
@@ -60,11 +106,7 @@ class HomeHeader extends StatelessWidget {
             shaderCallback: (bounds) => const LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Colors.white,
-                Colors.white,
-                Colors.transparent,
-              ],
+              colors: [Colors.white, Colors.white, Colors.transparent],
               stops: [0.0, 0.35, 1.0],
             ).createShader(bounds),
             child: ColorFiltered(
@@ -86,12 +128,8 @@ class HomeHeader extends StatelessWidget {
           ),
         ),
 
-        // ── Layer 1.5: Seam cover ───────────────────────────────────────
-        // Paints the flat background cream over the cloud's ShaderMask bottom
-        // fringe. It fades in from transparent (so it never creates its own
-        // edge) and is fully opaque only across the bottom band where the
-        // fringe sits — invisible against the matching cream, but it hides the
-        // 1px line that showed beside the rounded search bar on real devices.
+        // Seam cover — paints the flat background tone over the cloud's bottom
+        // fringe. Fades in from transparent so it never creates its own edge.
         if (seamCoverColor != null)
           Positioned(
             left: 0,
@@ -116,29 +154,7 @@ class HomeHeader extends StatelessWidget {
             ),
           ),
 
-        // ── Layer 2: Content ────────────────────────────────────────────
-        SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              Responsive.w(context, 16),
-              Responsive.h(context, 14, min: 10),
-              Responsive.w(context, 16),
-              Responsive.h(context, 20, min: 16),
-            ),
-            child: Column(
-              children: [
-                _buildGreetingRow(
-                  context,
-                  profileShowcaseConfig: profileShowcaseConfig,
-                  locationShowcaseConfig: locationShowcaseConfig,
-                ),
-                const SizedBox(height: 16),
-                _buildSearchBar(context),
-              ],
-            ),
-          ),
-        ),
+        content,
       ],
     );
   }
@@ -148,6 +164,8 @@ class HomeHeader extends StatelessWidget {
     ShowcaseProfileConfig? profileShowcaseConfig,
     ShowcaseProfileConfig? locationShowcaseConfig,
   }) {
+    final Color greetingColor = onDark ? Colors.white : AppColors.textPrimary;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -170,20 +188,21 @@ class HomeHeader extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 20),
-                            fontWeight: FontWeight.w700, // header greeting — bold
-                            color: Colors.white,
+                            fontSize: Responsive.sp(context, onDark ? 26 : 20),
+                            fontWeight: FontWeight.w700, // greeting — bold
+                            color: greetingColor,
                           ),
                         );
                       },
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: 8),
                   Image.asset(
                     'assets/images/wave_hand.png',
-                    width: Responsive.w(context, 24),
-                    height: Responsive.w(context, 24),
-                    errorBuilder: (_, __, ___) => Text('👋', style: TextStyle(fontSize: Responsive.sp(context, 20))),
+                    width: Responsive.w(context, onDark ? 27 : 24),
+                    height: Responsive.w(context, onDark ? 27 : 24),
+                    errorBuilder: (_, __, ___) => Text('👋',
+                        style: TextStyle(fontSize: Responsive.sp(context, 22))),
                   ),
                 ],
               ),
@@ -202,58 +221,7 @@ class HomeHeader extends StatelessWidget {
                 context,
                 MaterialPageRoute(builder: (_) => const NotificationScreen()),
               ),
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.12),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFFFB219).withOpacity(0.22),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                // Replaces the alert.png that had a red dot baked in. The
-                // dot is now a separate Positioned widget gated on
-                // NotificationsState.unreadCount so it only appears when
-                // there are real unread notifications.
-                child: ValueListenableBuilder<int>(
-                  valueListenable: NotificationsState.unreadCount,
-                  builder: (_, unread, __) {
-                    return Stack(
-                      alignment: Alignment.center,
-                      clipBehavior: Clip.none,
-                      children: [
-                        const Icon(
-                          Icons.notifications_outlined,
-                          size: 22,
-                          color: Colors.white,
-                        ),
-                        if (unread > 0)
-                          Positioned(
-                            top: 8,
-                            right: 9,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFEF4444),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 1.5,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    );
-                  },
-                ),
-              ),
+              child: _buildBell(context),
             ),
             const SizedBox(width: 10),
             ValueListenableBuilder<String?>(
@@ -269,18 +237,24 @@ class HomeHeader extends StatelessWidget {
                     }
                   },
                   child: Container(
-                    width: Responsive.w(context, 38),
-                    height: Responsive.w(context, 38),
+                    width: Responsive.w(context, onDark ? 46 : 38),
+                    height: Responsive.w(context, onDark ? 46 : 38),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2.5),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.12),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                      // Gold ring on dark; white ring on light.
+                      border: Border.all(
+                        color: onDark ? AppColors.amber : Colors.white,
+                        width: 2.5,
+                      ),
+                      boxShadow: onDark
+                          ? null
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.12),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                     ),
                     child: ClipOval(
                       child: Image(
@@ -322,10 +296,68 @@ class HomeHeader extends StatelessWidget {
     );
   }
 
+  /// The notification bell — an outlined ring on dark, a filled translucent
+  /// circle on light. The unread dot only shows when there are unread items.
+  Widget _buildBell(BuildContext context) {
+    final Color iconColor = onDark ? Colors.white : AppColors.textPrimary;
+    return Container(
+      width: Responsive.w(context, onDark ? 46 : 40),
+      height: Responsive.w(context, onDark ? 46 : 40),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: onDark ? null : Colors.white.withOpacity(0.55),
+        border: onDark
+            ? Border.all(color: Colors.white.withOpacity(0.22), width: 1.4)
+            : null,
+        boxShadow: onDark
+            ? null
+            : [
+                BoxShadow(
+                  color: const Color(0xFFFFB219).withOpacity(0.22),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+      ),
+      child: ValueListenableBuilder<int>(
+        valueListenable: NotificationsState.unreadCount,
+        builder: (_, unread, __) {
+          return Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: [
+              Icon(Icons.notifications_outlined, size: 22, color: iconColor),
+              if (unread > 0)
+                Positioned(
+                  top: onDark ? -1 : 8,
+                  right: onDark ? 0 : 9,
+                  child: Container(
+                    width: onDark ? 9 : 8,
+                    height: onDark ? 9 : 8,
+                    decoration: BoxDecoration(
+                      color: onDark ? AppColors.amber : const Color(0xFFEF4444),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: onDark ? Colors.black : Colors.white,
+                        width: onDark ? 1.6 : 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildLocationRow(
     BuildContext context,
     ShowcaseProfileConfig? locationShowcaseConfig,
   ) {
+    final Color iconColor = onDark ? Colors.white : AppColors.textPrimary;
+    final Color textColor = onDark ? Colors.white70 : AppColors.textPrimary;
+
     final locationRow = GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -333,8 +365,7 @@ class HomeHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.location_on_outlined,
-              size: 14, color: Colors.white),
+          Icon(Icons.location_on_outlined, size: 14, color: iconColor),
           const SizedBox(width: 3),
           ValueListenableBuilder<String>(
             valueListenable: LocationState().selectedCity,
@@ -346,14 +377,13 @@ class HomeHeader extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 12),
                   fontWeight: FontWeight.w500,
-                  color: Colors.white70,
+                  color: textColor,
                 ),
               );
             },
           ),
           const SizedBox(width: 2),
-          const Icon(Icons.keyboard_arrow_down,
-              size: 16, color: Colors.white70),
+          Icon(Icons.keyboard_arrow_down, size: 16, color: textColor),
         ],
       ),
     );
@@ -399,40 +429,86 @@ class HomeHeader extends StatelessWidget {
         context,
         MaterialPageRoute(builder: (_) => const SearchScreen()),
       ),
-      child: Container(
-        height: Responsive.h(context, 43, min: 37),
-        decoration: BoxDecoration(
-          // Dark translucent field for the black header — a hairline light
-          // border so it reads as an input surface sitting on the backdrop.
-          color: Colors.white.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: Colors.white.withOpacity(0.16), width: 1.2),
-        ),
-        child: Row(
-          children: [
-            const SizedBox(width: 18),
-            const Icon(Icons.search, color: Colors.white70, size: 22),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Search...',
-                style: GoogleFonts.poppins(
-                  fontSize: Responsive.sp(context, 14),
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white70,
-                ),
+      child: onDark ? _buildDarkSearchBar(context) : _buildLightSearchBar(context),
+    );
+  }
+
+  /// Bigger dark translucent field with a hairline light border, used on the
+  /// black backdrop.
+  Widget _buildDarkSearchBar(BuildContext context) {
+    return Container(
+      height: Responsive.h(context, 56, min: 50),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.2),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 20),
+          const Icon(Icons.search, color: Colors.white70, size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Search experiences, events...',
+              style: GoogleFonts.poppins(
+                fontSize: Responsive.sp(context, 14.5),
+                fontWeight: FontWeight.w400,
+                color: Colors.white.withOpacity(0.55),
               ),
             ),
-            Container(
-              width: 1,
-              height: 22,
-              color: Colors.white.withOpacity(0.18),
-            ),
-            const SizedBox(width: 14),
-            const Icon(Icons.tune_rounded, color: Colors.white70, size: 20),
-            const SizedBox(width: 18),
-          ],
+          ),
+          const Icon(Icons.tune_rounded, color: Colors.white70, size: 22),
+          const SizedBox(width: 20),
+        ],
+      ),
+    );
+  }
+
+  /// Golden gradient bar with a white border, used on the light cream header.
+  Widget _buildLightSearchBar(BuildContext context) {
+    return Container(
+      height: Responsive.h(context, 43, min: 37),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFFFEDC4), Color(0xFFFFE0A6)],
         ),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: Colors.white, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 14,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 18),
+          const Icon(Icons.search, color: AppColors.textPrimary, size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Search...',
+              style: GoogleFonts.poppins(
+                fontSize: Responsive.sp(context, 14),
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          Container(
+            width: 1,
+            height: 22,
+            color: AppColors.textPrimary.withOpacity(0.18),
+          ),
+          const SizedBox(width: 14),
+          const Icon(Icons.tune_rounded, color: AppColors.textPrimary, size: 20),
+          const SizedBox(width: 18),
+        ],
       ),
     );
   }

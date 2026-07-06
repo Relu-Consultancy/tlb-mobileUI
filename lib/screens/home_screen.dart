@@ -20,7 +20,6 @@ import '../sections/family_feels_section.dart';
 import '../sections/new_on_the_block_section.dart';
 import '../sections/parents_favorite_section.dart';
 import '../sections/app_footer.dart';
-import '../widgets/footer_quote_carousel.dart';
 import '../widgets/app_refresh_indicator.dart';
 import '../widgets/floating_navbar.dart';
 import '../helpers/walkthrough_keys.dart';
@@ -201,11 +200,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Column(
                         children: [
                           HomeHeader(
+                            onDark: true,
                             profileShowcaseConfig: kProfileShowcaseConfig,
                             locationShowcaseConfig: kLocationShowcaseConfig,
-                            // Cover the cloud ShaderMask's bottom fringe with
-                            // black so no golden hairline shows on the backdrop.
-                            seamCoverColor: Colors.black,
                           ),
                           // Spotlight divider — reverted to always-shown (mock).
                           // API version (hide when spotlight section empty)
@@ -293,11 +290,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       const RepaintBoundary(child: SpecialNeedsSection()),
                       const RepaintBoundary(child: TlbSignatureSection()),
 
-                      // Rotating cursive quote just above the footer.
-                      const RepaintBoundary(child: FooterQuoteCarousel()),
-
-                      // AppFooter — orange gradient stretched past the
-                      // floating navbar (bottomExtra) so there's no white gap.
+                      // AppFooter — the full black starry footer (quote, logo,
+                      // links) stretched past the floating navbar (bottomExtra)
+                      // so there's no gap at the screen bottom.
                       AppFooter(bottomExtra: navOverlap),
                     ],
                   ],

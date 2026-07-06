@@ -23,7 +23,6 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../widgets/weekend_event_card.dart';
 import '../sections/app_footer.dart';
-import '../widgets/footer_quote_carousel.dart';
 import '../widgets/app_refresh_indicator.dart';
 import '../widgets/floating_navbar.dart';
 import 'classes_screen.dart';
@@ -453,10 +452,7 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
-                // Rotating cursive quote just above the footer.
-                const FooterQuoteCarousel(),
-
-                // Footer orange stretched past the navbar (no white gap).
+                // The full black starry footer (quote, logo, links).
                 AppFooter(bottomExtra: FloatingNavbar.clearance(context)),
               ],
             ),

@@ -13,7 +13,6 @@ import '../widgets/section_divider_widget.dart';
 import '../widgets/listing_meta_rows.dart';
 import '../widgets/all_categories_popup.dart';
 import '../sections/app_footer.dart';
-import '../widgets/footer_quote_carousel.dart';
 import '../widgets/app_refresh_indicator.dart';
 import '../widgets/floating_navbar.dart';
 import 'events_screen.dart';
@@ -290,7 +289,6 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       ),
 
                       const SizedBox(height: 40),
-                      const FooterQuoteCarousel(),
                       AppFooter(
                           bottomExtra: FloatingNavbar.clearance(context)),
                     ],

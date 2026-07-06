@@ -15,7 +15,6 @@ import '../widgets/explore_categories_grid.dart';
 import '../widgets/pick_your_pace_row.dart';
 import '../widgets/event_card_with_rating.dart';
 import '../sections/app_footer.dart';
-import '../widgets/footer_quote_carousel.dart';
 import '../widgets/app_refresh_indicator.dart';
 import '../widgets/floating_navbar.dart';
 import '../widgets/all_categories_popup.dart';
@@ -393,7 +392,6 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       ),
 
                       const SizedBox(height: 40),
-                      const FooterQuoteCarousel(),
                       AppFooter(
                           bottomExtra: FloatingNavbar.clearance(context)),
                     ],

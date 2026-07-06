@@ -58,3 +58,6 @@ pro_flutterdeveloper.md
 dev_graph.md
 testing_report.md
 frontend_api_integration_estimates.csv
+
+# Android Gradle build output (never shipped)
+/android/build/

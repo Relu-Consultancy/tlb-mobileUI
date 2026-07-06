@@ -17,7 +17,6 @@ import '../widgets/new_on_tlb_card.dart';
 import '../widgets/holiday_special_card.dart';
 import '../widgets/build_skill_card.dart';
 import '../sections/app_footer.dart';
-import '../widgets/footer_quote_carousel.dart';
 import '../widgets/app_refresh_indicator.dart';
 import '../widgets/floating_navbar.dart';
 import '../widgets/all_categories_popup.dart';
@@ -533,7 +532,6 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      const FooterQuoteCarousel(),
                       AppFooter(
                           bottomExtra: FloatingNavbar.clearance(context)),
                     ],
