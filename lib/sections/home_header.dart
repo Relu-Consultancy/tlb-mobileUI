@@ -56,31 +56,7 @@ class HomeHeader extends StatelessWidget {
           Responsive.w(context, onDark ? 20 : 16),
           Responsive.h(context, onDark ? 18 : 20, min: onDark ? 14 : 16),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Small TLB mark in the top-left corner (dark header only).
-            if (onDark) ...[
-              SvgPicture.asset(
-                'assets/icons/tlb_mark_yellow.svg',
-                height: Responsive.h(context, 30, min: 26),
-                fit: BoxFit.contain,
-              ),
-              SizedBox(height: Responsive.h(context, 14, min: 10)),
-            ],
-            _buildGreetingRow(
-              context,
-              profileShowcaseConfig: profileShowcaseConfig,
-              locationShowcaseConfig: locationShowcaseConfig,
-            ),
-            SizedBox(
-              height: onDark
-                  ? Responsive.h(context, 22, min: 18)
-                  : Responsive.h(context, 16, min: 12),
-            ),
-            _buildSearchBar(context),
-          ],
-        ),
+        child: onDark ? _buildDarkLayout(context) : _buildLightLayout(context),
       ),
     );
 
@@ -159,63 +135,22 @@ class HomeHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildGreetingRow(
-    BuildContext context, {
-    ShowcaseProfileConfig? profileShowcaseConfig,
-    ShowcaseProfileConfig? locationShowcaseConfig,
-  }) {
-    final Color greetingColor = onDark ? Colors.white : AppColors.textPrimary;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+  /// Dark (Home) layout — matches the reference: a top row with the TLB logo on
+  /// the left and the bell + avatar on the right, then the greeting, the
+  /// location chip and the search bar stacked below.
+  Widget _buildDarkLayout(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Left: greeting + location — Expanded so it never pushes the icons
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Flexible(
-                    child: ValueListenableBuilder<String?>(
-                      valueListenable: AuthState.userName,
-                      builder: (context, name, _) {
-                        final greeting = name != null
-                            ? 'Hello ${name.split(' ').first}'
-                            : 'Hello There';
-                        return Text(
-                          greeting,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, onDark ? 26 : 20),
-                            fontWeight: FontWeight.w700, // greeting — bold
-                            color: greetingColor,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Image.asset(
-                    'assets/images/wave_hand.png',
-                    width: Responsive.w(context, onDark ? 27 : 24),
-                    height: Responsive.w(context, onDark ? 27 : 24),
-                    errorBuilder: (_, __, ___) => Text('👋',
-                        style: TextStyle(fontSize: Responsive.sp(context, 22))),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              _buildLocationRow(context, locationShowcaseConfig),
-            ],
-          ),
-        ),
-
-        // Right: bell + avatar — fixed width, always right-aligned
-        const SizedBox(width: 8),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            SvgPicture.asset(
+              'assets/icons/the_little_broadway_yellow.svg',
+              height: Responsive.h(context, 42, min: 34),
+              fit: BoxFit.contain,
+            ),
+            const Spacer(),
             GestureDetector(
               onTap: () => Navigator.push(
                 context,
@@ -224,75 +159,161 @@ class HomeHeader extends StatelessWidget {
               child: _buildBell(context),
             ),
             const SizedBox(width: 10),
-            ValueListenableBuilder<String?>(
-              valueListenable: AuthState.avatarUrl,
-              builder: (context, url, _) {
-                final avatarGesture = GestureDetector(
-                  onTap: () {
-                    if (AuthState.isLoggedIn.value) {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (_) => const ProfileScreen()));
-                    } else {
-                      showLoginSheet(context);
-                    }
-                  },
-                  child: Container(
-                    width: Responsive.w(context, onDark ? 46 : 38),
-                    height: Responsive.w(context, onDark ? 46 : 38),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      // Gold ring on dark; white ring on light.
-                      border: Border.all(
-                        color: onDark ? AppColors.amber : Colors.white,
-                        width: 2.5,
-                      ),
-                      boxShadow: onDark
-                          ? null
-                          : [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.12),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                    ),
-                    child: ClipOval(
-                      child: Image(
-                        image: avatarImageProvider(
-                          url,
-                          fallback: const AssetImage(
-                              'assets/images/new_home/profilepic.jpg'),
-                        ),
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Image.asset(
-                          'assets/images/new_home/profilepic.jpg',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-
-                if (profileShowcaseConfig == null) return avatarGesture;
-
-                return Showcase(
-                  key: profileShowcaseConfig.showcaseKey,
-                  title: profileShowcaseConfig.title,
-                  description: profileShowcaseConfig.description,
-                  overlayOpacity: 0.78,
-                  tooltipBackgroundColor: AppColors.textPrimary,
-                  textColor: Colors.white,
-                  scaleAnimationDuration: const Duration(milliseconds: 350),
-                  scaleAnimationCurve: Curves.easeInOut,
-                  movingAnimationDuration: const Duration(milliseconds: 350),
-                  targetPadding: const EdgeInsets.all(8),
-                  child: avatarGesture,
-                );
-              },
-            ),
+            _buildAvatar(context),
           ],
         ),
+        SizedBox(height: Responsive.h(context, 14, min: 10)),
+        _buildGreetingText(context),
+        const SizedBox(height: 6),
+        _buildLocationRow(context, locationShowcaseConfig),
+        SizedBox(height: Responsive.h(context, 16, min: 12)),
+        _buildSearchBar(context),
       ],
+    );
+  }
+
+  /// Light layout (Events/Classes/Programs/Venues) — greeting + location on the
+  /// left, bell + avatar on the right, then the search bar.
+  Widget _buildLightLayout(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildGreetingText(context),
+                  const SizedBox(height: 4),
+                  _buildLocationRow(context, locationShowcaseConfig),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const NotificationScreen()),
+              ),
+              child: _buildBell(context),
+            ),
+            const SizedBox(width: 10),
+            _buildAvatar(context),
+          ],
+        ),
+        SizedBox(height: Responsive.h(context, 16, min: 12)),
+        _buildSearchBar(context),
+      ],
+    );
+  }
+
+  /// Greeting text + waving hand. Dark shows a brand greeting; light greets the
+  /// signed-in user by name.
+  Widget _buildGreetingText(BuildContext context) {
+    final Color greetingColor = onDark ? Colors.white : AppColors.textPrimary;
+    final TextStyle style = GoogleFonts.poppins(
+      fontSize: Responsive.sp(context, onDark ? 21 : 20),
+      fontWeight: FontWeight.w700,
+      color: greetingColor,
+    );
+    final Widget greeting = onDark
+        ? Text('Welcome to TLB',
+            maxLines: 1, overflow: TextOverflow.ellipsis, style: style)
+        : ValueListenableBuilder<String?>(
+            valueListenable: AuthState.userName,
+            builder: (context, name, _) {
+              final text = name != null
+                  ? 'Hello ${name.split(' ').first}'
+                  : 'Hello There';
+              return Text(text,
+                  maxLines: 1, overflow: TextOverflow.ellipsis, style: style);
+            },
+          );
+
+    return Row(
+      children: [
+        Flexible(child: greeting),
+        const SizedBox(width: 8),
+        Image.asset(
+          'assets/images/wave_hand.png',
+          width: Responsive.w(context, onDark ? 22 : 24),
+          height: Responsive.w(context, onDark ? 22 : 24),
+          errorBuilder: (_, __, ___) => Text('👋',
+              style: TextStyle(fontSize: Responsive.sp(context, 22))),
+        ),
+      ],
+    );
+  }
+
+  /// The circular profile avatar (with optional onboarding showcase).
+  Widget _buildAvatar(BuildContext context) {
+    return ValueListenableBuilder<String?>(
+      valueListenable: AuthState.avatarUrl,
+      builder: (context, url, _) {
+        final avatarGesture = GestureDetector(
+          onTap: () {
+            if (AuthState.isLoggedIn.value) {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()));
+            } else {
+              showLoginSheet(context);
+            }
+          },
+          child: Container(
+            width: Responsive.w(context, onDark ? 40 : 38),
+            height: Responsive.w(context, onDark ? 40 : 38),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              // Gold ring on dark; white ring on light.
+              border: Border.all(
+                color: onDark ? AppColors.amber : Colors.white,
+                width: 2.5,
+              ),
+              boxShadow: onDark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.12),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+            ),
+            child: ClipOval(
+              child: Image(
+                image: avatarImageProvider(
+                  url,
+                  fallback: const AssetImage(
+                      'assets/images/new_home/profilepic.jpg'),
+                ),
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Image.asset(
+                  'assets/images/new_home/profilepic.jpg',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+        );
+
+        if (profileShowcaseConfig == null) return avatarGesture;
+
+        return Showcase(
+          key: profileShowcaseConfig!.showcaseKey,
+          title: profileShowcaseConfig!.title,
+          description: profileShowcaseConfig!.description,
+          overlayOpacity: 0.78,
+          tooltipBackgroundColor: AppColors.textPrimary,
+          textColor: Colors.white,
+          scaleAnimationDuration: const Duration(milliseconds: 350),
+          scaleAnimationCurve: Curves.easeInOut,
+          movingAnimationDuration: const Duration(milliseconds: 350),
+          targetPadding: const EdgeInsets.all(8),
+          child: avatarGesture,
+        );
+      },
     );
   }
 
@@ -301,8 +322,8 @@ class HomeHeader extends StatelessWidget {
   Widget _buildBell(BuildContext context) {
     final Color iconColor = onDark ? Colors.white : AppColors.textPrimary;
     return Container(
-      width: Responsive.w(context, onDark ? 46 : 40),
-      height: Responsive.w(context, onDark ? 46 : 40),
+      width: Responsive.w(context, onDark ? 40 : 40),
+      height: Responsive.w(context, onDark ? 40 : 40),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: onDark ? null : Colors.white.withOpacity(0.55),
@@ -326,7 +347,8 @@ class HomeHeader extends StatelessWidget {
             alignment: Alignment.center,
             clipBehavior: Clip.none,
             children: [
-              Icon(Icons.notifications_outlined, size: 22, color: iconColor),
+              Icon(Icons.notifications_outlined,
+                  size: onDark ? 19 : 22, color: iconColor),
               if (unread > 0)
                 Positioned(
                   top: onDark ? -1 : 8,
@@ -365,7 +387,8 @@ class HomeHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.location_on_outlined, size: 14, color: iconColor),
+          Icon(Icons.location_on_outlined,
+              size: onDark ? 12 : 14, color: iconColor),
           const SizedBox(width: 3),
           ValueListenableBuilder<String>(
             valueListenable: LocationState().selectedCity,
@@ -375,7 +398,7 @@ class HomeHeader extends StatelessWidget {
               return Text(
                 label,
                 style: GoogleFonts.poppins(
-                  fontSize: Responsive.sp(context, 12),
+                  fontSize: Responsive.sp(context, onDark ? 11 : 12),
                   fontWeight: FontWeight.w500,
                   color: textColor,
                 ),
@@ -383,7 +406,8 @@ class HomeHeader extends StatelessWidget {
             },
           ),
           const SizedBox(width: 2),
-          Icon(Icons.keyboard_arrow_down, size: 16, color: textColor),
+          Icon(Icons.keyboard_arrow_down,
+              size: onDark ? 14 : 16, color: textColor),
         ],
       ),
     );
@@ -437,29 +461,30 @@ class HomeHeader extends StatelessWidget {
   /// black backdrop.
   Widget _buildDarkSearchBar(BuildContext context) {
     return Container(
-      height: Responsive.h(context, 56, min: 50),
+      height: Responsive.h(context, 48, min: 44),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(18),
+        // Fully rounded (pill) — radius = half the bar height.
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.2),
       ),
       child: Row(
         children: [
-          const SizedBox(width: 20),
-          const Icon(Icons.search, color: Colors.white70, size: 24),
-          const SizedBox(width: 12),
+          const SizedBox(width: 18),
+          const Icon(Icons.search, color: Colors.white70, size: 20),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               'Search experiences, events...',
               style: GoogleFonts.poppins(
-                fontSize: Responsive.sp(context, 14.5),
+                fontSize: Responsive.sp(context, 13),
                 fontWeight: FontWeight.w400,
                 color: Colors.white.withOpacity(0.55),
               ),
             ),
           ),
-          const Icon(Icons.tune_rounded, color: Colors.white70, size: 22),
-          const SizedBox(width: 20),
+          const Icon(Icons.tune_rounded, color: Colors.white70, size: 19),
+          const SizedBox(width: 18),
         ],
       ),
     );

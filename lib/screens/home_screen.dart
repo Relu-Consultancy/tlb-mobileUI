@@ -7,7 +7,7 @@ import '../providers/notifications_state.dart';
 import '../services/push_notifications.dart';
 // import '../providers/home_feed_state.dart'; // commented out — home reverted to mock data
 import '../sections/home_header.dart';
-import '../sections/spotlight_stage.dart';
+import '../widgets/spotlight_banner.dart';
 import '../widgets/categories_grid.dart';
 import '../widgets/empty_location_widget.dart';
 import '../sections/hot_picks_section.dart';
@@ -191,12 +191,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ── Unified header on a black theatrical backdrop ──
-                    // Solid black behind the greeting + search bar; the golden
-                    // cloud texture (screen-blended in HomeHeader) reads as a
-                    // warm glow at the top and fades into the black.
+                    // ── Unified header on a black backdrop with a warm golden
+                    // radiance glowing from the top (behind the logo / status
+                    // bar) and fading into the black toward the search bar.
                     Container(
-                      decoration: const BoxDecoration(color: Colors.black),
+                      decoration: const BoxDecoration(
+                        gradient: RadialGradient(
+                          center: Alignment(0.0, -0.95),
+                          radius: 1.25,
+                          colors: [
+                            Color(0xFF7C591B), // warm amber glow at the top
+                            Color(0xFF2B1F0A),
+                            Colors.black,
+                          ],
+                          stops: [0.0, 0.45, 0.9],
+                        ),
+                      ),
                       child: Column(
                         children: [
                           HomeHeader(
@@ -234,8 +244,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               },
                             ),
                           */
-                          // Spotlight title now lives inside SpotlightStage
-                          // (the redesigned theatrical stage section below).
+                          // The Spotlight title + banner sit in the body below,
+                          // on the same black backdrop as this header.
                         ],
                       ),
                     ),
@@ -256,25 +266,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: const EmptyLocationWidget(),
                       )
                     else ...[
-                      // Spotlight banner — reverted to mock data.
-                      // API version (real 'spotlight' section) commented out:
-                      /*
+                      // ── Spotlight — poster cards on the black backdrop ──
                       RepaintBoundary(
-                        child: ValueListenableBuilder<int>(
-                          valueListenable: HomeFeedState.version,
-                          builder: (context, _, __) {
-                            return BannerCarousel(
-                              events: HomeFeedState.section('spotlight'),
-                              height: Responsive.h(context, 480.0),
-                              fixedCardWidth: Responsive.w(context, 345.0),
-                            );
-                          },
-                        ),
-                      ),
-                      */
-                      // ── Redesigned theatrical Spotlight stage ──
-                      RepaintBoundary(
-                        child: SpotlightStage(events: DummyData.bannerEvents),
+                        child: SpotlightBanner(events: DummyData.bannerEvents),
                       ),
                       const RepaintBoundary(child: CategoriesGrid()),
 

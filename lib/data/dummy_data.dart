@@ -6,25 +6,32 @@ import '../models/category_model.dart';
 class DummyData {
   DummyData._();
 
+  /// Home "Explore the Stage" categories. `icon` is the line-art glyph shown in
+  /// the row (shared with the floating navbar); `image`/`subtitle` are retained
+  /// for the card-style layouts that use them.
   static const List<Map<String, dynamic>> homeCategories = [
     {
       'label': 'Events',
       'subtitle': 'Join The Fun',
+      'icon': 'assets/icons/nav_events.svg',
       'image': 'resources- tlb-ui/homescreen_Explorethestage/image 264.png',
     },
     {
       'label': 'Classes',
       'subtitle': 'Build Your Skill',
+      'icon': 'assets/icons/nav_classes.svg',
       'image': 'resources- tlb-ui/homescreen_Explorethestage/image 295.png',
     },
     {
       'label': 'Programs',
       'subtitle': 'Master The Craft',
+      'icon': 'assets/icons/nav_program.svg',
       'image': 'resources- tlb-ui/homescreen_Explorethestage/image 267.png',
     },
     {
       'label': 'Venues',
       'subtitle': 'Find Your Space',
+      'icon': 'assets/icons/nav_spaces.svg',
       'image': 'resources- tlb-ui/homescreen_Explorethestage/image 296.png',
     },
   ];
@@ -567,23 +574,35 @@ class DummyData {
   // self-contained design with its own logo + CTA, shown edge-to-edge).
   static const List<EventModel> bannerEvents = [
     EventModel(
-      title: 'TLB Recommends',
-      venue: 'Our pick for little dreamers',
+      title: 'The Little Puppet Show',
+      venue: 'TLB Studio, Kharghar',
+      tag: 'LIVE SHOW',
+      eventDate: 'Sat, 24 May',
+      eventTime: '11:00 AM',
       imagePath: 'resources- tlb-ui/spotlight/banners/banner1.png',
     ),
     EventModel(
-      title: 'TLB Recommended',
-      venue: 'The best childhood memories begin with a story',
+      title: 'Story Time Theatre',
+      venue: 'TLB Studio, Vashi',
+      tag: 'LIVE SHOW',
+      eventDate: 'Sun, 25 May',
+      eventTime: '4:00 PM',
       imagePath: 'resources- tlb-ui/spotlight/banners/banner2.png',
     ),
     EventModel(
-      title: 'Stories that stay',
-      venue: 'Memories that play',
+      title: 'Stories That Stay',
+      venue: 'TLB Studio, Belapur',
+      tag: 'WORKSHOP',
+      eventDate: 'Sat, 31 May',
+      eventTime: '10:00 AM',
       imagePath: 'resources- tlb-ui/spotlight/banners/banner3.png',
     ),
     EventModel(
-      title: 'For little dreamers',
-      venue: 'The best childhood memories begin with a story',
+      title: 'For Little Dreamers',
+      venue: 'TLB Studio, Panvel',
+      tag: 'LIVE SHOW',
+      eventDate: 'Sun, 1 Jun',
+      eventTime: '5:00 PM',
       imagePath: 'resources- tlb-ui/spotlight/banners/banner4.png',
     ),
   ];

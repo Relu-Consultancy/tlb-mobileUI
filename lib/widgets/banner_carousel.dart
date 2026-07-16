@@ -22,6 +22,14 @@ class BannerCarousel extends StatefulWidget {
   /// banner. When null, falls back to 28 (overlay style) / 14.
   final double? cornerRadius;
 
+  /// Colour of the hairline border around each card. Defaults to a barely-there
+  /// black line, which suits light backgrounds; pass a light colour when the
+  /// banner sits on a dark backdrop. Ignored when [animatedAccentBorder] is on.
+  final Color? borderColor;
+
+  /// Thickness of that hairline border.
+  final double borderWidth;
+
   /// When true, the page-dot indicator is overlaid at the bottom of the banner
   /// image (and the external dots row below is removed).
   final bool overlayDots;
@@ -75,6 +83,8 @@ class BannerCarousel extends StatefulWidget {
     this.ctaText = 'Explore Event',
     this.fixedCardWidth,
     this.cornerRadius,
+    this.borderColor,
+    this.borderWidth = 0.5,
     this.overlayDots = false,
     this.animatedTransition = false,
     this.staticFade = false,
@@ -601,7 +611,10 @@ class _BannerCarouselState extends State<BannerCarousel>
             // animated accent border is drawn on top).
             border: widget.animatedAccentBorder
                 ? null
-                : Border.all(color: Colors.black.withOpacity(0.1), width: 0.5),
+                : Border.all(
+                    color: widget.borderColor ?? Colors.black.withOpacity(0.1),
+                    width: widget.borderWidth,
+                  ),
             // Deeper, softer drop shadow that lifts the card off the backdrop
             // (side cards inherit it but are dimmed, so only the centre pops).
             boxShadow: widget.spotlightEnhancements
