@@ -57,34 +57,30 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
   Widget build(BuildContext context) {
     if (widget.events.isEmpty) return const SizedBox.shrink();
 
-    final double screenW = MediaQuery.of(context).size.width;
-    final double cardW = screenW - 32; // 16 margin each side
-    final double imgH = cardW * 0.96;
-    const double footerH = 124;
-    final double cardH = imgH + footerH;
-
+    // The card flexes to fill whatever height this widget is given (it lives in
+    // an Expanded on the Home hero), so Spotlight + Explore the Stage both fit
+    // one screen without scrolling.
     return Container(
       // Warm golden radiance surrounding the spotlight card, fading into the
       // black at the section edges (matches the header glow).
       decoration: const BoxDecoration(
         gradient: RadialGradient(
           center: Alignment(0.0, -0.02),
-          radius: 0.95,
+          radius: 1.0,
           colors: [
-            Color(0xFF6E5018), // golden glow behind the card
-            Color(0xFF221809),
+            Color(0xFF9A6E1E), // brighter golden glow behind the card
+            Color(0xFF3A2A0E),
             Colors.black,
           ],
-          stops: [0.0, 0.5, 0.92],
+          stops: [0.0, 0.55, 0.95],
         ),
       ),
-      padding: const EdgeInsets.only(top: 22, bottom: 26),
+      padding: const EdgeInsets.only(top: 14, bottom: 10),
       child: Column(
         children: [
           _buildTitle(context),
-          const SizedBox(height: 18),
-          SizedBox(
-            height: cardH,
+          const SizedBox(height: 12),
+          Expanded(
             child: PageView.builder(
               controller: _controller,
               itemCount: widget.events.length,
@@ -93,7 +89,7 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
                   _buildCard(context, widget.events[i]),
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 10),
           AnimatedSmoothIndicator(
             activeIndex: _index,
             count: widget.events.length,
@@ -147,12 +143,19 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
           decoration: BoxDecoration(
             color: const Color(0xFF120D06),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: SpotlightBanner._gold, width: 1.6),
+            border: Border.all(color: SpotlightBanner._gold, width: 1.8),
             boxShadow: [
+              // Strong golden halo around the card — two layers: a wide soft
+              // spread plus a tighter brighter ring right at the border.
               BoxShadow(
-                color: const Color(0xFFFFB800).withOpacity(0.28),
-                blurRadius: 26,
-                spreadRadius: 1,
+                color: const Color(0xFFFFB800).withOpacity(0.60),
+                blurRadius: 44,
+                spreadRadius: 3,
+              ),
+              BoxShadow(
+                color: const Color(0xFFFFCE14).withOpacity(0.40),
+                blurRadius: 16,
+                spreadRadius: 0,
               ),
             ],
           ),

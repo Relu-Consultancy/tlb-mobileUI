@@ -52,7 +52,8 @@ class HomeHeader extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.fromLTRB(
           Responsive.w(context, onDark ? 20 : 16),
-          Responsive.h(context, 14, min: 10),
+          // Dark header sits tight to the status bar so the logo row is high up.
+          Responsive.h(context, onDark ? 2 : 14, min: onDark ? 0 : 10),
           Responsive.w(context, onDark ? 20 : 16),
           Responsive.h(context, onDark ? 18 : 20, min: onDark ? 14 : 16),
         ),
