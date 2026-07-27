@@ -462,21 +462,22 @@ class HomeHeader extends StatelessWidget {
   /// black backdrop.
   Widget _buildDarkSearchBar(BuildContext context) {
     return Container(
-      height: Responsive.h(context, 48, min: 44),
+      height: Responsive.h(context, 42, min: 38),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.06),
+        // Opaque off-black fill (solid, not translucent) with a hairline edge.
+        color: const Color(0xFF1C1A16),
         // Fully rounded (pill) — radius = half the bar height.
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.2),
+        borderRadius: BorderRadius.circular(21),
+        border: Border.all(color: Colors.white.withOpacity(0.07), width: 1),
       ),
       child: Row(
         children: [
-          const SizedBox(width: 18),
-          const Icon(Icons.search, color: Colors.white70, size: 20),
+          const SizedBox(width: 16),
+          const Icon(Icons.search, color: Colors.white70, size: 19),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Search experiences, events...',
+              'Search...',
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 13),
                 fontWeight: FontWeight.w400,
@@ -484,8 +485,8 @@ class HomeHeader extends StatelessWidget {
               ),
             ),
           ),
-          const Icon(Icons.tune_rounded, color: Colors.white70, size: 19),
-          const SizedBox(width: 18),
+          const Icon(Icons.tune_rounded, color: Colors.white70, size: 18),
+          const SizedBox(width: 16),
         ],
       ),
     );

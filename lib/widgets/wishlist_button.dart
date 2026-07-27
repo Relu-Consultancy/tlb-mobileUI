@@ -20,11 +20,14 @@ class WishlistButton extends StatelessWidget {
     this.iconSize = 20,
     this.iconType = WishlistIconType.favorite,
     this.showShadow = false,
+    this.backgroundColor = Colors.white,
+    this.borderColor,
+    this.unlikedColor,
   });
 
   final EventModel event;
 
-  /// Outer white circle diameter.
+  /// Outer circle diameter.
   final double containerSize;
 
   /// [LikeButton] tap‑target size.
@@ -37,6 +40,17 @@ class WishlistButton extends StatelessWidget {
 
   /// Add a subtle drop‑shadow behind the circle.
   final bool showShadow;
+
+  /// Fill of the circular container. Defaults to white; pass a dark/translucent
+  /// colour to blend the button into a dark card (e.g. the Spotlight banner).
+  final Color backgroundColor;
+
+  /// Optional hairline border around the circle.
+  final Color? borderColor;
+
+  /// Icon colour when NOT saved. Defaults to [AppColors.textPrimary]; pass a
+  /// light colour when the button sits on a dark background.
+  final Color? unlikedColor;
 
   @override
   Widget build(BuildContext context) {
@@ -61,8 +75,11 @@ class WishlistButton extends StatelessWidget {
                   alignment: Alignment.center,
                   clipBehavior: Clip.hardEdge,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: backgroundColor,
                     shape: BoxShape.circle,
+                    border: borderColor != null
+                        ? Border.all(color: borderColor!, width: 1)
+                        : null,
                     boxShadow: showShadow
                         ? [
                             BoxShadow(
@@ -104,8 +121,9 @@ class WishlistButton extends StatelessWidget {
                       likeBuilder: (bool isLiked) {
                         return Icon(
                           isLiked ? iconType.filled : iconType.outlined,
-                          color:
-                              isLiked ? Colors.red : AppColors.textPrimary,
+                          color: isLiked
+                              ? Colors.red
+                              : (unlikedColor ?? AppColors.textPrimary),
                           size: iconSize,
                         );
                       },

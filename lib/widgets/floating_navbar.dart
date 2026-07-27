@@ -34,6 +34,13 @@ class FloatingNavbar extends StatelessWidget {
     this.showcaseConfigs,
   });
 
+  // Dark "night theatre" navbar palette (matches the black home redesign).
+  static const Color _pillBg = Color(0xFF0D0D0D);      // near-black pill
+  static const Color _pillBorder = Color(0xFF2A2A2A);  // hairline edge
+  static const Color _activeChip = Color(0xFF262626);  // selected-tab chip
+  static const Color _gold = Color(0xFFF5C042);        // active icon + label
+  static const Color _inactiveIcon = Color(0xFF8A8A8A); // muted grey icons
+
   /// Rendered height of the white pill: icon (22) + item vertical padding
   /// (9·2) + item border (2·2) + pill vertical padding (6·2) + pill border
   /// (2·2) ≈ 60. Fixed in logical px — it does NOT shrink on small screens,
@@ -66,8 +73,8 @@ class FloatingNavbar extends StatelessWidget {
       width: screenWidth * 0.92,
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.white, width: 2),
-        color: Colors.white,
+        border: Border.all(color: _pillBorder, width: 1),
+        color: _pillBg,
         borderRadius: BorderRadius.circular(50),
         boxShadow: const [],
       ),
@@ -95,8 +102,10 @@ class FloatingNavbar extends StatelessWidget {
                     curve: Curves.easeOutCubic,
                     padding: EdgeInsets.symmetric(horizontal: isActive ? 16 : 14, vertical: 9),
                     decoration: BoxDecoration(
-                      color: isActive ? AppColors.primaryLight : Colors.transparent,
-                      border: isActive ? Border.all(color: Colors.white, width: 2) : null,
+                      color: isActive ? _activeChip : Colors.transparent,
+                      border: isActive
+                          ? Border.all(color: Colors.white.withOpacity(0.06), width: 1)
+                          : null,
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: null,
                     ),
@@ -108,8 +117,8 @@ class FloatingNavbar extends StatelessWidget {
                           item.iconPath,
                           width: 22,
                           height: 22,
-                          colorFilter: const ColorFilter.mode(
-                            Color(0xFF1E293B),
+                          colorFilter: ColorFilter.mode(
+                            isActive ? _gold : _inactiveIcon,
                             BlendMode.srcIn,
                           ),
                         ),
@@ -123,7 +132,7 @@ class FloatingNavbar extends StatelessWidget {
                                   child: Text(
                                     item.label,
                                     style: TextStyle(
-                                      color: Color(0xFF1E293B),
+                                      color: _gold,
                                       fontWeight: FontWeight.w600, // little bold
                                       fontSize: Responsive.sp(context, 14),
                                     ),

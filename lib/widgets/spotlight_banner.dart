@@ -61,20 +61,8 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
     // an Expanded on the Home hero), so Spotlight + Explore the Stage both fit
     // one screen without scrolling.
     return Container(
-      // Warm golden radiance surrounding the spotlight card, fading into the
-      // black at the section edges (matches the header glow).
-      decoration: const BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment(0.0, -0.02),
-          radius: 1.0,
-          colors: [
-            Color(0xFF9A6E1E), // brighter golden glow behind the card
-            Color(0xFF3A2A0E),
-            Colors.black,
-          ],
-          stops: [0.0, 0.55, 0.95],
-        ),
-      ),
+      // Plain black for now — the behind-the-banner glow will be added later.
+      decoration: const BoxDecoration(color: Colors.black),
       padding: const EdgeInsets.only(top: 14, bottom: 10),
       child: Column(
         children: [
@@ -135,41 +123,29 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
   }
 
   Widget _buildCard(BuildContext context, EventModel e) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: GestureDetector(
-        onTap: () => _openDetail(context, e),
-        child: Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFF120D06),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: SpotlightBanner._gold, width: 1.8),
-            boxShadow: [
-              // Strong golden halo around the card — two layers: a wide soft
-              // spread plus a tighter brighter ring right at the border.
-              BoxShadow(
-                color: const Color(0xFFFFB800).withOpacity(0.60),
-                blurRadius: 44,
-                spreadRadius: 3,
-              ),
-              BoxShadow(
-                color: const Color(0xFFFFCE14).withOpacity(0.40),
-                blurRadius: 16,
-                spreadRadius: 0,
-              ),
+    final Widget card = GestureDetector(
+      onTap: () => _openDetail(context, e),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF120D06),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: SpotlightBanner._gold, width: 1.8),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: Column(
+            children: [
+              Expanded(child: _buildPoster(context, e)),
+              _buildFooter(context, e),
             ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(22),
-            child: Column(
-              children: [
-                Expanded(child: _buildPoster(context, e)),
-                _buildFooter(context, e),
-              ],
-            ),
           ),
         ),
       ),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: card,
     );
   }
 
@@ -217,7 +193,16 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
         Positioned(
           top: 12,
           right: 12,
-          child: WishlistButton(event: e, containerSize: 34, iconSize: 18),
+          child: WishlistButton(
+            event: e,
+            containerSize: 34,
+            iconSize: 18,
+            // Dark translucent circle so it blends into the card (per design),
+            // with a hairline border and a light heart.
+            backgroundColor: Colors.black.withOpacity(0.35),
+            borderColor: Colors.white.withOpacity(0.45),
+            unlikedColor: Colors.white,
+          ),
         ),
       ],
     );

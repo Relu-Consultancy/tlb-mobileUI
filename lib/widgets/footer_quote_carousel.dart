@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 
 /// A "quote of the moment" shown at the top of the starry black footer: a
@@ -105,11 +104,16 @@ class _FooterQuoteCarouselState extends State<FooterQuoteCarousel> {
                   _clean(FooterQuoteCarousel.quotes[_index]),
                   key: ValueKey<int>(_index),
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    fontSize: Responsive.sp(context, 16),
+                  // Elegant italic serif to match the footer reference. Uses the
+                  // platform serif family (runtime Google-font fetching is off,
+                  // so a GoogleFonts serif wouldn't load).
+                  style: TextStyle(
+                    fontFamily: 'serif',
+                    fontSize: Responsive.sp(context, 18),
                     height: 1.5,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.white.withOpacity(0.92),
                   ),
                 ),
               ),

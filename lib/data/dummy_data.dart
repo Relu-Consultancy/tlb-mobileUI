@@ -13,26 +13,22 @@ class DummyData {
     {
       'label': 'Events',
       'subtitle': 'Join The Fun',
-      'icon': 'assets/icons/nav_events.svg',
-      'image': 'resources- tlb-ui/homescreen_Explorethestage/image 264.png',
+      'icon': 'resources- tlb-ui/homescreen_Explorethestage/events.png',
     },
     {
       'label': 'Classes',
       'subtitle': 'Build Your Skill',
-      'icon': 'assets/icons/nav_classes.svg',
-      'image': 'resources- tlb-ui/homescreen_Explorethestage/image 295.png',
+      'icon': 'resources- tlb-ui/homescreen_Explorethestage/classes.png',
     },
     {
       'label': 'Programs',
       'subtitle': 'Master The Craft',
-      'icon': 'assets/icons/nav_program.svg',
-      'image': 'resources- tlb-ui/homescreen_Explorethestage/image 267.png',
+      'icon': 'resources- tlb-ui/homescreen_Explorethestage/programs.png',
     },
     {
       'label': 'Venues',
       'subtitle': 'Find Your Space',
-      'icon': 'assets/icons/nav_spaces.svg',
-      'image': 'resources- tlb-ui/homescreen_Explorethestage/image 296.png',
+      'icon': 'resources- tlb-ui/homescreen_Explorethestage/venues.png',
     },
   ];
 

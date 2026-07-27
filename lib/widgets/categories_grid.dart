@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
@@ -9,8 +8,8 @@ import '../screens/programs_screen.dart';
 import '../screens/venues_screen.dart';
 
 /// The "Explore the Stage" section: a "✦ Explore the Stage ✦" header and a row
-/// of four dark, gold-bordered category cards (each a gold line-art glyph + a
-/// label) on the black backdrop, sitting at the bottom of the Home hero.
+/// of four dark cards — each a gold line-art glyph with sparkle accents, a
+/// golden glow bar beneath it and a label — on the black backdrop.
 class CategoriesGrid extends StatelessWidget {
   const CategoriesGrid({super.key});
 
@@ -43,41 +42,23 @@ class CategoriesGrid extends StatelessWidget {
 
     return ColoredBox(
       color: Colors.black,
-      child: Stack(
-        children: [
-          // Soft golden radiance behind the card row.
-          const Positioned.fill(
-            child: IgnorePointer(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    center: Alignment(0.0, 0.2),
-                    radius: 0.9,
-                    colors: [Color(0x33FFB020), Color(0x00FFB020)],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(10, 12, 10, 18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildTitle(context),
+            const SizedBox(height: 18),
+            Row(
               children: [
-                _buildTitle(context),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    for (var i = 0; i < categories.length; i++) ...[
-                      if (i > 0) const SizedBox(width: 11),
-                      Expanded(child: _buildCard(context, categories[i])),
-                    ],
-                  ],
-                ),
+                for (var i = 0; i < categories.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 8),
+                  Expanded(child: _buildCard(context, categories[i])),
+                ],
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -85,7 +66,7 @@ class CategoriesGrid extends StatelessWidget {
   Widget _buildTitle(BuildContext context) {
     Widget line() =>
         Container(width: 34, height: 1, color: const Color(0x66F5C042));
-    Widget star() => const Icon(Icons.auto_awesome, size: 13, color: _gold);
+    Widget star() => const Icon(Icons.auto_awesome, size: 14, color: _gold);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -96,8 +77,8 @@ class CategoriesGrid extends StatelessWidget {
         Text(
           'Explore the Stage',
           style: GoogleFonts.poppins(
-            fontSize: Responsive.sp(context, 15),
-            fontWeight: FontWeight.w600,
+            fontSize: Responsive.sp(context, 16.5),
+            fontWeight: FontWeight.w700,
             color: Colors.white,
           ),
         ),
@@ -115,40 +96,47 @@ class CategoriesGrid extends StatelessWidget {
       onTap: () => _navigateTo(context, label),
       child: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF2A1E0C), Color(0xFF150E06)],
-          ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF7A5A22), width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFFFB800).withOpacity(0.12),
-              blurRadius: 12,
-              spreadRadius: -2,
-            ),
-          ],
+          color: const Color(0xFF2B2823), // dark neutral card
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.08), width: 1),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 5),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SvgPicture.asset(
-              cat['icon'] as String,
-              width: Responsive.w(context, 26),
-              height: Responsive.w(context, 26),
-              colorFilter: const ColorFilter.mode(_gold, BlendMode.srcIn),
-              placeholderBuilder: (_) => const SizedBox(height: 26),
+            // Icon with small sparkle accents around it.
+            SizedBox(
+              width: 66,
+              height: Responsive.h(context, 42, min: 38),
+              child: Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.center,
+                children: [
+                  Positioned(top: 0, left: 4, child: _sparkle(12)),
+                  Positioned(top: 6, right: 2, child: _sparkle(9)),
+                  Image.asset(
+                    cat['icon'] as String,
+                    width: Responsive.w(context, 38),
+                    height: Responsive.w(context, 38),
+                    // Tint the black line-art PNG to gold.
+                    color: _gold,
+                    colorBlendMode: BlendMode.srcIn,
+                    filterQuality: FilterQuality.medium,
+                    errorBuilder: (_, __, ___) => const SizedBox(height: 38),
+                  ),
+                ],
+              ),
             ),
-            SizedBox(height: Responsive.h(context, 9, min: 7)),
+            const SizedBox(height: 6),
+            _glowBar(),
+            const SizedBox(height: 10),
             Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.poppins(
-                fontSize: Responsive.sp(context, 11.5),
-                fontWeight: FontWeight.w400,
+                fontSize: Responsive.sp(context, 13.5),
+                fontWeight: FontWeight.w500,
                 color: Colors.white,
               ),
             ),
@@ -157,4 +145,30 @@ class CategoriesGrid extends StatelessWidget {
       ),
     );
   }
+
+  /// A small light-grey sparkle used as a decorative accent near the icon.
+  Widget _sparkle(double size) => Icon(
+        Icons.auto_awesome,
+        size: size,
+        color: Colors.white.withOpacity(0.45),
+      );
+
+  /// The golden glow bar sitting under each icon (the reference light streak).
+  Widget _glowBar() => Container(
+        width: 48,
+        height: 3,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(2),
+          gradient: const LinearGradient(
+            colors: [Colors.transparent, _gold, Colors.transparent],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: _gold.withOpacity(0.65),
+              blurRadius: 9,
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+      );
 }

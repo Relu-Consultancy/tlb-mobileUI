@@ -191,15 +191,20 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _darkHeader() {
     return Container(
       decoration: const BoxDecoration(
+        // Subtle warm glow at top-center that fades seamlessly into black.
+        // Many closely-spaced stops keep the falloff smooth (no banding).
         gradient: RadialGradient(
-          center: Alignment(0.0, -0.95),
-          radius: 1.25,
+          center: Alignment(0.0, -0.9),
+          radius: 1.05,
           colors: [
-            Color(0xFF7C591B), // warm amber glow at the top
-            Color(0xFF2B1F0A),
+            Color(0xFF3E2E0F),
+            Color(0xFF2F240B),
+            Color(0xFF211906),
+            Color(0xFF150F05),
+            Color(0xFF0A0703),
             Colors.black,
           ],
-          stops: [0.0, 0.45, 0.9],
+          stops: [0.0, 0.2, 0.38, 0.56, 0.76, 1.0],
         ),
       ),
       child: HomeHeader(
@@ -278,14 +283,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
 
-                      // Transition from the black hero into the white feed below.
+                      // Long, smooth fade from the black hero into the white
+                      // feed below (holds black briefly, then eases to white).
                       Container(
-                        height: 48,
+                        height: 110,
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: [Colors.black, Colors.white],
+                            colors: [Colors.black, Colors.black, Colors.white],
+                            stops: [0.0, 0.22, 1.0],
                           ),
                         ),
                       ),
