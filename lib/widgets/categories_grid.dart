@@ -43,7 +43,7 @@ class CategoriesGrid extends StatelessWidget {
     return ColoredBox(
       color: Colors.black,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 12, 10, 18),
+        padding: const EdgeInsets.fromLTRB(8, 12, 8, 39),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -52,7 +52,7 @@ class CategoriesGrid extends StatelessWidget {
             Row(
               children: [
                 for (var i = 0; i < categories.length; i++) ...[
-                  if (i > 0) const SizedBox(width: 8),
+                  if (i > 0) const SizedBox(width: 12),
                   Expanded(child: _buildCard(context, categories[i])),
                 ],
               ],
@@ -77,7 +77,7 @@ class CategoriesGrid extends StatelessWidget {
         Text(
           'Explore the Stage',
           style: GoogleFonts.poppins(
-            fontSize: Responsive.sp(context, 16.5),
+            fontSize: Responsive.sp(context, 17.5),
             fontWeight: FontWeight.w700,
             color: Colors.white,
           ),
@@ -96,40 +96,40 @@ class CategoriesGrid extends StatelessWidget {
       onTap: () => _navigateTo(context, label),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF2B2823), // dark neutral card
-          borderRadius: BorderRadius.circular(20),
+          color: const Color(0xFF201D19), // darker grey-brown card
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(color: Colors.white.withOpacity(0.08), width: 1),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 5),
+        padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 5),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Icon with small sparkle accents around it.
             SizedBox(
-              width: 66,
-              height: Responsive.h(context, 42, min: 38),
+              width: 72,
+              height: Responsive.h(context, 38, min: 34),
               child: Stack(
                 clipBehavior: Clip.none,
                 alignment: Alignment.center,
                 children: [
-                  Positioned(top: 0, left: 4, child: _sparkle(12)),
-                  Positioned(top: 6, right: 2, child: _sparkle(9)),
+                  Positioned(top: 0, left: 2, child: _sparkle(12)),
+                  Positioned(top: 6, right: 0, child: _sparkle(9)),
                   Image.asset(
                     cat['icon'] as String,
-                    width: Responsive.w(context, 38),
-                    height: Responsive.w(context, 38),
+                    width: Responsive.w(context, 44),
+                    height: Responsive.w(context, 44),
                     // Tint the black line-art PNG to gold.
                     color: _gold,
                     colorBlendMode: BlendMode.srcIn,
                     filterQuality: FilterQuality.medium,
-                    errorBuilder: (_, __, ___) => const SizedBox(height: 38),
+                    errorBuilder: (_, __, ___) => const SizedBox(height: 44),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             _glowBar(),
-            const SizedBox(height: 10),
+            const SizedBox(height: 7),
             Text(
               label,
               maxLines: 1,
@@ -155,7 +155,7 @@ class CategoriesGrid extends StatelessWidget {
 
   /// The golden glow bar sitting under each icon (the reference light streak).
   Widget _glowBar() => Container(
-        width: 48,
+        width: 54,
         height: 3,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(2),

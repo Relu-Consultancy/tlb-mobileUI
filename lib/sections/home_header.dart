@@ -263,8 +263,8 @@ class HomeHeader extends StatelessWidget {
             }
           },
           child: Container(
-            width: Responsive.w(context, onDark ? 40 : 38),
-            height: Responsive.w(context, onDark ? 40 : 38),
+            width: Responsive.w(context, onDark ? 36 : 38),
+            height: Responsive.w(context, onDark ? 36 : 38),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               // Gold ring on dark; white ring on light.
@@ -323,8 +323,8 @@ class HomeHeader extends StatelessWidget {
   Widget _buildBell(BuildContext context) {
     final Color iconColor = onDark ? Colors.white : AppColors.textPrimary;
     return Container(
-      width: Responsive.w(context, onDark ? 40 : 40),
-      height: Responsive.w(context, onDark ? 40 : 40),
+      width: Responsive.w(context, onDark ? 36 : 40),
+      height: Responsive.w(context, onDark ? 36 : 40),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: onDark ? null : Colors.white.withOpacity(0.55),
@@ -349,7 +349,7 @@ class HomeHeader extends StatelessWidget {
             clipBehavior: Clip.none,
             children: [
               Icon(Icons.notifications_outlined,
-                  size: onDark ? 19 : 22, color: iconColor),
+                  size: onDark ? 17 : 22, color: iconColor),
               if (unread > 0)
                 Positioned(
                   top: onDark ? -1 : 8,
@@ -462,12 +462,12 @@ class HomeHeader extends StatelessWidget {
   /// black backdrop.
   Widget _buildDarkSearchBar(BuildContext context) {
     return Container(
-      height: Responsive.h(context, 42, min: 38),
+      height: Responsive.h(context, 37, min: 33),
       decoration: BoxDecoration(
         // Opaque off-black fill (solid, not translucent) with a hairline edge.
         color: const Color(0xFF1C1A16),
         // Fully rounded (pill) — radius = half the bar height.
-        borderRadius: BorderRadius.circular(21),
+        borderRadius: BorderRadius.circular(18.5),
         border: Border.all(color: Colors.white.withOpacity(0.07), width: 1),
       ),
       child: Row(

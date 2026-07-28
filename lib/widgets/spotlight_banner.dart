@@ -61,7 +61,6 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
     // an Expanded on the Home hero), so Spotlight + Explore the Stage both fit
     // one screen without scrolling.
     return Container(
-      // Plain black for now — the behind-the-banner glow will be added later.
       decoration: const BoxDecoration(color: Colors.black),
       padding: const EdgeInsets.only(top: 14, bottom: 10),
       child: Column(
@@ -69,8 +68,11 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
           _buildTitle(context),
           const SizedBox(height: 12),
           Expanded(
+            // Clip.none so the golden glow behind each card can spill past the
+            // page edges instead of being cut off at the viewport.
             child: PageView.builder(
               controller: _controller,
+              clipBehavior: Clip.none,
               itemCount: widget.events.length,
               onPageChanged: (i) => setState(() => _index = i),
               itemBuilder: (context, i) =>
@@ -122,6 +124,36 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
     );
   }
 
+  /// Golden light spilling out from behind the card — strong along the left &
+  /// right edges, deliberately softer at the bottom and softest at the top, so
+  /// it reads as real light glowing behind the poster (per the reference).
+  List<BoxShadow> _cardGlow() => [
+        BoxShadow(
+          color: SpotlightBanner._gold.withOpacity(0.50),
+          blurRadius: 30,
+          spreadRadius: -6,
+          offset: const Offset(-11, 0),
+        ),
+        BoxShadow(
+          color: SpotlightBanner._gold.withOpacity(0.50),
+          blurRadius: 30,
+          spreadRadius: -6,
+          offset: const Offset(11, 0),
+        ),
+        BoxShadow(
+          color: SpotlightBanner._gold.withOpacity(0.22),
+          blurRadius: 22,
+          spreadRadius: -12,
+          offset: const Offset(0, 10),
+        ),
+        BoxShadow(
+          color: SpotlightBanner._gold.withOpacity(0.13),
+          blurRadius: 20,
+          spreadRadius: -14,
+          offset: const Offset(0, -8),
+        ),
+      ];
+
   Widget _buildCard(BuildContext context, EventModel e) {
     final Widget card = GestureDetector(
       onTap: () => _openDetail(context, e),
@@ -130,6 +162,7 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
           color: const Color(0xFF120D06),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: SpotlightBanner._gold, width: 1.8),
+          boxShadow: _cardGlow(),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(22),

@@ -283,19 +283,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
 
-                      // Long, smooth fade from the black hero into the white
-                      // feed below (holds black briefly, then eases to white).
-                      Container(
-                        height: 110,
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Colors.black, Colors.black, Colors.white],
-                            stops: [0.0, 0.22, 1.0],
-                          ),
-                        ),
-                      ),
+                      // The black hero ends cleanly here — the white feed below
+                      // starts directly, with no grey black→white blend.
 
                       // Sections
                       const RepaintBoundary(child: HotPicksSection()),

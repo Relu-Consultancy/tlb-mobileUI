@@ -23,46 +23,17 @@ class AppFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     final double logoWidth = MediaQuery.of(context).size.width * 0.46;
 
-    // Height of the top fade zone: the page above melts into black over this
-    // many px before any footer content begins. Fixed px (not a % of the tall
-    // footer) keeps the fade long and gradual regardless of content height.
-    const double fadeHeight = 130;
-
-    return SizedBox(
-      width: double.infinity,
+    // Solid black from the top — a clean boundary with the section above, no
+    // white→black blend (per design). A transparent 20px gap above it shows the
+    // page background through, separating the last section from the footer.
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: ColoredBox(
+      color: Colors.black,
       child: Stack(
         children: [
-          // Solid black fill for everything below the fade zone.
           const Positioned(
-            top: fadeHeight,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: ColoredBox(color: Colors.black),
-          ),
-          // The fade itself: transparent at the very top (so the light section
-          // above shows through) easing down into black — no hard seam.
-          const Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: SizedBox(
-              height: fadeHeight,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black],
-                    stops: [0.0, 1.0],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Star field — sits below the fade so no stars land on the page.
-          const Positioned(
-            top: fadeHeight,
+            top: 30,
             left: 0,
             right: 0,
             bottom: 0,
@@ -71,8 +42,7 @@ class AppFooter extends StatelessWidget {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Clear the fade zone so the quote sits on solid black.
-              const SizedBox(height: fadeHeight + 8),
+              const SizedBox(height: 28),
               const FooterQuoteCarousel(),
               const SizedBox(height: 20),
               _buildLogo(context, logoWidth),
@@ -88,7 +58,7 @@ class AppFooter extends StatelessWidget {
                   fontSize: Responsive.sp(context, 12.5),
                   height: 1.5,
                   fontWeight: FontWeight.w400,
-                  color: Colors.white.withOpacity(0.60),
+                  color: Colors.white.withOpacity(0.78),
                 ),
               ),
               const SizedBox(height: 24),
@@ -101,6 +71,7 @@ class AppFooter extends StatelessWidget {
             ],
           ),
         ],
+      ),
       ),
     );
   }
@@ -158,7 +129,7 @@ class AppFooter extends StatelessWidget {
   /// DISCOVER · CONNECT · CREATE — gold, spaced, with bullet separators.
   Widget _buildBrandLine(BuildContext context) {
     final style = GoogleFonts.poppins(
-      fontSize: Responsive.sp(context, 12.5),
+      fontSize: Responsive.sp(context, 15),
       fontWeight: FontWeight.w600,
       letterSpacing: 1.5,
       color: _gold,
@@ -168,9 +139,14 @@ class AppFooter extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Text('•', style: style),
         );
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [word('DISCOVER'), dot(), word('CONNECT'), dot(), word('CREATE')],
+    // FittedBox scales the (now larger) line down on very narrow screens
+    // instead of overflowing.
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [word('DISCOVER'), dot(), word('CONNECT'), dot(), word('CREATE')],
+      ),
     );
   }
 
@@ -213,7 +189,7 @@ class AppFooter extends StatelessWidget {
     final style = GoogleFonts.poppins(
       fontSize: Responsive.sp(context, 12.5),
       fontWeight: FontWeight.w400,
-      color: Colors.white.withOpacity(0.75),
+      color: Colors.white.withOpacity(0.92),
     );
     Widget link(String label) => Text(label, style: style);
     Widget column(String a, String b) => Column(
