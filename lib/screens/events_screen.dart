@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../widgets/auto_scroll_list.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../models/api_category_model.dart';
 import '../providers/saved_events_state.dart';
-import '../sections/home_header.dart';
 import '../services/events_listing_service.dart';
 import '../widgets/banner_carousel.dart';
+import '../widgets/dark_category_section.dart';
+import '../widgets/dark_glow_header.dart';
 import '../widgets/section_divider_widget.dart';
 import '../widgets/explore_categories_grid.dart';
 import '../widgets/explore_format_row.dart';
@@ -103,6 +103,15 @@ class _EventsScreenState extends State<EventsScreen> {
   int _currentNavIndex = 1;
   final PageController _newOnTlbController = PageController(viewportFraction: 0.92);
 
+  // Scroll-driven floating navbar: hidden over the black hero (header → banner →
+  // Explore by Categories), then fades + slides into view as that region
+  // scrolls away — same behaviour as the Home screen. Thresholds are set from
+  // the viewport height in build() (the black region is roughly one screenful).
+  final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<double> _navReveal = ValueNotifier<double>(0.0);
+  double _navFadeStart = 400;
+  double _navFadeEnd = 700;
+
   // ── Explore by Categories ────────────────────────────────────────────────
   // Starts with dummy fallback so the section is always visible immediately.
   // API call in initState silently replaces with live data when available.
@@ -123,7 +132,15 @@ class _EventsScreenState extends State<EventsScreen> {
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     _loadCategories();
+  }
+
+  void _onScroll() {
+    final double offset = _scrollController.offset;
+    final double t = ((offset - _navFadeStart) / (_navFadeEnd - _navFadeStart))
+        .clamp(0.0, 1.0);
+    if (_navReveal.value != t) _navReveal.value = t;
   }
 
   Future<void> _loadCategories() async {
@@ -167,6 +184,9 @@ class _EventsScreenState extends State<EventsScreen> {
   @override
   void dispose() {
     _newOnTlbController.dispose();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _navReveal.dispose();
     super.dispose();
   }
 
@@ -204,6 +224,23 @@ class _EventsScreenState extends State<EventsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenH = MediaQuery.of(context).size.height;
+    final double safeBottom = MediaQuery.of(context).padding.bottom;
+    // Reveal the navbar once the tall black hero (~one screenful of banner +
+    // the categories below it) has scrolled away.
+    _navFadeStart = screenH * 0.70;
+    _navFadeEnd = screenH * 0.95;
+
+    // Tall banner height (matches the Venues page): fills the viewport minus the
+    // header block and the navbar area.
+    final double bannerH = (screenH -
+            MediaQuery.of(context).padding.top -
+            156 - // header content + gap below it
+            (safeBottom > 0 ? safeBottom + 15 : 30) -
+            140) // navbar pill + clear gap above it
+        .clamp(300.0, 700.0);
+    final double bannerCardWidth = MediaQuery.of(context).size.width - 32;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -213,109 +250,93 @@ class _EventsScreenState extends State<EventsScreen> {
           AppRefreshIndicator(
             onRefresh: _handleRefresh,
             child: SingleChildScrollView(
+              controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 children: [
-                Container(
-                  // Gradient now extends down to the first section title
-                  // (banner included), like the home screen's Spotlight header.
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0xFFFFF5E0),
-                        Color(0xFFFFF5E0),
-                        Color(0xFFFFFAF0),
-                        Color(0xFFFFFAF0),
-                        Colors.white,
-                      ],
-                      stops: [0.0, 0.35, 0.60, 0.95, 1.0],
-                    ),
-                  ),
+                // ── Black "night theatre" region: header → categories ──
+                // Same treatment as the Home hero (dark glow header on black).
+                ColoredBox(
+                  color: Colors.black,
                   child: Column(
                     children: [
-                      const HomeHeader(
-                        // Hide the cloud ShaderMask's 1px bottom fringe (the
-                        // faint seam line) by painting this screen's flat
-                        // background tone over it — same fix as the Home header.
-                        seamCoverColor: Color(0xFFFFF5E0),
-                      ),
-                      const SizedBox(height: 16),
-                      // Spotlight Banner — full-bleed (edge to edge).
-                      RepaintBoundary(
-                        child: BannerCarousel(
-                          events: DummyData.eventsScreenBanners,
-                          height: Responsive.h(context, 386, min: 286),
-                          showGlow: false,
-                          overlayStyle: true,
-                          // Full width — side edges touch the screen; only the
-                          // corners are rounded.
-                          fixedCardWidth: MediaQuery.of(context).size.width,
-                          cornerRadius: 22,
-                          overlayDots: true, // dots overlaid on the banner
-                        ),
-                      ),
-
-                      // ── Explore by Categories (title left, See All right) ──
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 30, 16, 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      const DarkGlowHeader(),
+                      const SizedBox(height: 14),
+                      // Banner — tall centered card (matches the Venues page
+                      // banner). Behind it, a transparent rounded box carries a
+                      // side-biased gold glow that spills out the card's left &
+                      // right edges (same look as the Home Spotlight card).
+                      SizedBox(
+                        height: bannerH,
+                        child: Stack(
+                          alignment: Alignment.center,
                           children: [
-                            Text(
-                              'Explore by Categories',
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 16),
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF3A3A3A), // charcoal
+                            Center(
+                              child: Container(
+                                width: bannerCardWidth,
+                                height: bannerH,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(22),
+                                  boxShadow: goldBannerSideGlow(),
+                                ),
                               ),
                             ),
-                            GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: () => _showAllCategoriesPopup(context),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    'See All',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 13),
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColors.seeAllBlue,
-                                    ),
-                                  ),
-                                  const Icon(Icons.chevron_right,
-                                      size: 18, color: AppColors.seeAllBlue),
-                                ],
+                            RepaintBoundary(
+                              child: BannerCarousel(
+                                events: DummyData.eventsScreenBanners,
+                                height: bannerH,
+                                showGlow: false,
+                                overlayStyle: true,
+                                fixedCardWidth: bannerCardWidth,
+                                cornerRadius: 22,
+                                overlayDots: true,
                               ),
                             ),
                           ],
                         ),
                       ),
+                      const SizedBox(height: 26),
+                      // Centered ornamental title (matches the Home sections).
+                      const DarkCategoryTitle('Explore by Categories'),
+                      const SizedBox(height: 18),
+                      // Grid with the "View All" pill floated over the bottom
+                      // row (seamlessly blended, per the reference).
+                      Stack(
+                        alignment: Alignment.bottomCenter,
+                        clipBehavior: Clip.none,
+                        children: [
+                          RepaintBoundary(
+                            child: ExploreCategoriesGrid(
+                              categories: _gridCategories,
+                              scrollable: true,
+                              scrollHeight: 260,
+                              maxScrollRows: 3, // scroll stops at the 3rd row
+                              childAspectRatio: 0.8,
+                              onCategoryTap: (index) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => CategoryEventsScreen(
+                                      categories: _gridCategories,
+                                      initialCategoryIndex: index,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          Positioned(
+                            bottom: -4,
+                            child: DarkViewAllButton(
+                              onTap: () => _showAllCategoriesPopup(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 30),
                     ],
                   ),
                 ),
-                      RepaintBoundary(
-                        child: ExploreCategoriesGrid(
-                          categories: _gridCategories,
-                          scrollable: true,
-                          scrollHeight: 260,
-                          maxScrollRows: 3, // scroll stops at the 3rd row
-                          childAspectRatio: 0.8,
-                          onViewAll: () => _showAllCategoriesPopup(context),
-                          onCategoryTap: (index) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => CategoryEventsScreen(
-                                  categories: _gridCategories,
-                                  initialCategoryIndex: index,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
 
                       const SectionDividerWidget(topPadding: 30, title: 'Trending Events'),
                       SizedBox(
@@ -462,12 +483,29 @@ class _EventsScreenState extends State<EventsScreen> {
             bottom: 0,
             left: 0,
             right: 0,
-            child: Align(
-              alignment: Alignment.center,
-              child: FloatingNavbar(
-                currentIndex: _currentNavIndex,
-                onTap: _onNavTapped,
-                bottomPadding: FloatingNavbar.bottomInset(context),
+            // Hidden over the black hero; fades + slides up into view as the
+            // Explore by Categories region scrolls away.
+            child: ValueListenableBuilder<double>(
+              valueListenable: _navReveal,
+              builder: (context, t, child) {
+                return IgnorePointer(
+                  ignoring: t < 0.05,
+                  child: Opacity(
+                    opacity: t,
+                    child: Transform.translate(
+                      offset: Offset(0, (1 - t) * 60),
+                      child: child,
+                    ),
+                  ),
+                );
+              },
+              child: Align(
+                alignment: Alignment.center,
+                child: FloatingNavbar(
+                  currentIndex: _currentNavIndex,
+                  onTap: _onNavTapped,
+                  bottomPadding: FloatingNavbar.bottomInset(context),
+                ),
               ),
             ),
           ),

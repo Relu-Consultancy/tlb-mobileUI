@@ -6,7 +6,7 @@ import '../providers/saved_events_state.dart';
 import '../providers/notifications_state.dart';
 import '../services/push_notifications.dart';
 // import '../providers/home_feed_state.dart'; // commented out — home reverted to mock data
-import '../sections/home_header.dart';
+import '../widgets/dark_glow_header.dart';
 import '../widgets/spotlight_banner.dart';
 import '../widgets/categories_grid.dart';
 import '../widgets/empty_location_widget.dart';
@@ -189,29 +189,9 @@ class _HomeScreenState extends State<HomeScreen> {
   /// with a warm golden radiance glowing from the top (behind the logo / status
   /// bar) and fading into the black toward the search bar.
   Widget _darkHeader() {
-    return Container(
-      decoration: const BoxDecoration(
-        // Subtle warm glow at top-center that fades seamlessly into black.
-        // Many closely-spaced stops keep the falloff smooth (no banding).
-        gradient: RadialGradient(
-          center: Alignment(0.0, -0.9),
-          radius: 1.05,
-          colors: [
-            Color(0xFF3E2E0F),
-            Color(0xFF2F240B),
-            Color(0xFF211906),
-            Color(0xFF150F05),
-            Color(0xFF0A0703),
-            Colors.black,
-          ],
-          stops: [0.0, 0.2, 0.38, 0.56, 0.76, 1.0],
-        ),
-      ),
-      child: HomeHeader(
-        onDark: true,
-        profileShowcaseConfig: kProfileShowcaseConfig,
-        locationShowcaseConfig: kLocationShowcaseConfig,
-      ),
+    return DarkGlowHeader(
+      profileShowcaseConfig: kProfileShowcaseConfig,
+      locationShowcaseConfig: kLocationShowcaseConfig,
     );
   }
 

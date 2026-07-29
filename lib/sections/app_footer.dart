@@ -1,9 +1,9 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../widgets/footer_quote_carousel.dart';
+import '../widgets/four_point_star.dart';
 
 /// The app-wide footer: a black "night sky" panel with a rotating italic quote,
 /// the glowing TLB wordmark, a DISCOVER · CONNECT · CREATE line, a tagline, a
@@ -29,21 +29,12 @@ class AppFooter extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 20),
       child: ColoredBox(
-      color: Colors.black,
-      child: Stack(
-        children: [
-          const Positioned(
-            top: 30,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: CustomPaint(painter: _StarFieldPainter()),
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 28),
-              const FooterQuoteCarousel(),
+        color: Colors.black,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 28),
+            const FooterQuoteCarousel(),
               const SizedBox(height: 20),
               _buildLogo(context, logoWidth),
               const SizedBox(height: 22),
@@ -70,9 +61,7 @@ class AppFooter extends StatelessWidget {
               SizedBox(height: 26 + bottomExtra),
             ],
           ),
-        ],
-      ),
-      ),
+        ),
     );
   }
 
@@ -169,7 +158,7 @@ class AppFooter extends StatelessWidget {
         line(fadeLeft: true),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 10),
-          child: Icon(Icons.auto_awesome, size: 14, color: _gold),
+          child: FourPointStar(size: 14, color: _gold),
         ),
         line(fadeLeft: false),
       ],
@@ -241,31 +230,4 @@ class AppFooter extends StatelessWidget {
       ],
     );
   }
-}
-
-/// Paints a sparse field of gold "stars" biased toward the top. Deterministic
-/// (fixed seed) so the stars hold still across rebuilds rather than twinkling.
-class _StarFieldPainter extends CustomPainter {
-  const _StarFieldPainter();
-
-  static const Color _star = Color(0xFFFFCE14);
-  static const int _count = 26;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rnd = math.Random(7);
-    final paint = Paint();
-    for (var i = 0; i < _count; i++) {
-      final x = rnd.nextDouble() * size.width;
-      // pow(...) < 1 pushes the value toward 0, clustering stars near the top.
-      final y = math.pow(rnd.nextDouble(), 1.8).toDouble() * size.height;
-      final radius = 0.5 + rnd.nextDouble() * 1.1;
-      final opacity = 0.15 + rnd.nextDouble() * 0.35;
-      paint.color = _star.withOpacity(opacity);
-      canvas.drawCircle(Offset(x, y), radius, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_StarFieldPainter oldDelegate) => false;
 }

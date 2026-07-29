@@ -7,6 +7,7 @@ import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
+import 'four_point_star.dart';
 import 'wishlist_button.dart';
 
 /// The Home "Spotlight" section: a "✦ Spotlight ✦" header and a swipeable set of
@@ -62,7 +63,7 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
     // one screen without scrolling.
     return Container(
       decoration: const BoxDecoration(color: Colors.black),
-      padding: const EdgeInsets.only(top: 14, bottom: 10),
+      padding: const EdgeInsets.only(top: 9, bottom: 10),
       child: Column(
         children: [
           _buildTitle(context),
@@ -97,60 +98,70 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
   }
 
   Widget _buildTitle(BuildContext context) {
-    Widget line() =>
-        Container(width: 40, height: 1, color: const Color(0x66F5C042));
-    Widget star() =>
-        const Icon(Icons.auto_awesome, size: 14, color: SpotlightBanner._gold);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        line(),
-        const SizedBox(width: 12),
-        star(),
-        const SizedBox(width: 10),
-        Text(
-          'Spotlight',
-          style: GoogleFonts.poppins(
-            fontSize: Responsive.sp(context, 16),
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
+    // A long gold rule that fills the width and fades to transparent at the
+    // outer (screen) edge — bright gold sits next to the sparkle, dissolving
+    // into the black toward the sides (matches the reference).
+    Widget line({required bool outerIsLeft}) => Container(
+          height: 1.2,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: outerIsLeft
+                  ? const [Colors.transparent, SpotlightBanner._gold]
+                  : const [SpotlightBanner._gold, Colors.transparent],
+              stops: const [0.0, 1.0],
+            ),
           ),
-        ),
-        const SizedBox(width: 10),
-        star(),
-        const SizedBox(width: 12),
-        line(),
-      ],
+        );
+    // A single clean 4-point star (Icons.auto_awesome renders a star *plus* a
+    // small secondary sparkle, which read as a cluster — the reference has one).
+    Widget star() =>
+        const FourPointStar(size: 15, color: SpotlightBanner._gold);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 22),
+      child: Row(
+        children: [
+          Expanded(child: line(outerIsLeft: true)),
+          const SizedBox(width: 12),
+          star(),
+          const SizedBox(width: 11),
+          Text(
+            'Spotlight',
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 17),
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(width: 11),
+          star(),
+          const SizedBox(width: 12),
+          Expanded(child: line(outerIsLeft: false)),
+        ],
+      ),
     );
   }
 
-  /// Golden light spilling out from behind the card — strong along the left &
-  /// right edges, deliberately softer at the bottom and softest at the top, so
-  /// it reads as real light glowing behind the poster (per the reference).
+  /// Golden light behind the card — strong on the left & right and across the
+  /// top, biased UPWARD (negative-y offsets) so the glow sits high and does not
+  /// pool at the bottom. There is no bottom shadow at all.
   List<BoxShadow> _cardGlow() => [
         BoxShadow(
-          color: SpotlightBanner._gold.withOpacity(0.50),
+          color: SpotlightBanner._gold.withOpacity(0.52),
           blurRadius: 30,
-          spreadRadius: -6,
-          offset: const Offset(-11, 0),
+          spreadRadius: -8,
+          offset: const Offset(-12, -16),
         ),
         BoxShadow(
-          color: SpotlightBanner._gold.withOpacity(0.50),
+          color: SpotlightBanner._gold.withOpacity(0.52),
           blurRadius: 30,
-          spreadRadius: -6,
-          offset: const Offset(11, 0),
+          spreadRadius: -8,
+          offset: const Offset(12, -16),
         ),
         BoxShadow(
-          color: SpotlightBanner._gold.withOpacity(0.22),
+          color: SpotlightBanner._gold.withOpacity(0.20),
           blurRadius: 22,
           spreadRadius: -12,
-          offset: const Offset(0, 10),
-        ),
-        BoxShadow(
-          color: SpotlightBanner._gold.withOpacity(0.13),
-          blurRadius: 20,
-          spreadRadius: -14,
-          offset: const Offset(0, -8),
+          offset: const Offset(0, -14),
         ),
       ];
 
@@ -189,6 +200,9 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
         Image.asset(
           e.imagePath,
           fit: BoxFit.cover,
+          // Anchor near the top so the poster's header isn't cropped and its
+          // content sits lower in the frame (looks nicer under the badge).
+          alignment: const Alignment(0.0, -0.75),
           errorBuilder: (_, __, ___) => Container(
             color: const Color(0xFF1E1710),
             alignment: Alignment.center,

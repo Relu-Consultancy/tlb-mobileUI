@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
+import 'four_point_star.dart';
 import '../screens/events_screen.dart';
 import '../screens/classes_screen.dart';
 import '../screens/programs_screen.dart';
@@ -66,7 +67,7 @@ class CategoriesGrid extends StatelessWidget {
   Widget _buildTitle(BuildContext context) {
     Widget line() =>
         Container(width: 34, height: 1, color: const Color(0x66F5C042));
-    Widget star() => const Icon(Icons.auto_awesome, size: 14, color: _gold);
+    Widget star() => const FourPointStar(size: 14, color: _gold);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [

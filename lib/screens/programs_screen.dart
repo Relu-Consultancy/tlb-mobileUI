@@ -8,8 +8,9 @@ import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../models/event_model.dart';
 import '../providers/saved_events_state.dart';
-import '../sections/home_header.dart';
 import '../widgets/banner_carousel.dart';
+import '../widgets/dark_category_section.dart';
+import '../widgets/dark_glow_header.dart';
 import '../widgets/section_divider_widget.dart';
 import '../widgets/explore_categories_grid.dart';
 import '../widgets/pick_your_pace_row.dart';
@@ -33,6 +34,34 @@ class ProgramsScreen extends StatefulWidget {
 
 class _ProgramsScreenState extends State<ProgramsScreen> {
   int _currentNavIndex = 3;
+
+  // Scroll-driven floating navbar: hidden over the black hero (header → banner →
+  // categories), then fades + slides into view as that region scrolls away.
+  final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<double> _navReveal = ValueNotifier<double>(0.0);
+  double _navFadeStart = 400;
+  double _navFadeEnd = 700;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final double offset = _scrollController.offset;
+    final double t = ((offset - _navFadeStart) / (_navFadeEnd - _navFadeStart))
+        .clamp(0.0, 1.0);
+    if (_navReveal.value != t) _navReveal.value = t;
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _navReveal.dispose();
+    super.dispose();
+  }
 
   void _showAllCategoriesPopup(BuildContext context) {
     AllCategoriesPopup.show(
@@ -83,6 +112,21 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenH = MediaQuery.of(context).size.height;
+    final double safeBottom = MediaQuery.of(context).padding.bottom;
+    _navFadeStart = screenH * 0.70;
+    _navFadeEnd = screenH * 0.95;
+
+    // Tall banner (matches the Venues page): fills the viewport minus the header
+    // block and the navbar area.
+    final double bannerH = (screenH -
+            MediaQuery.of(context).padding.top -
+            156 -
+            (safeBottom > 0 ? safeBottom + 15 : 30) -
+            140)
+        .clamp(300.0, 700.0);
+    final double bannerCardWidth = MediaQuery.of(context).size.width - 32;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -91,107 +135,86 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
           AppRefreshIndicator(
             onRefresh: _handleRefresh,
             child: SingleChildScrollView(
+                  controller: _scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
                     children: [
-                      Container(
-                        // Gradient now extends down to the first section title
-                        // (banner included), like the home Spotlight header.
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Color(0xFFFFF5E0),
-                              Color(0xFFFFF5E0),
-                              Color(0xFFFFFAF0),
-                              Color(0xFFFFFAF0),
-                              Colors.white,
-                            ],
-                            stops: [0.0, 0.35, 0.60, 0.95, 1.0],
-                          ),
-                        ),
+                      // ── Black "night theatre" region: header → categories ──
+                      ColoredBox(
+                        color: Colors.black,
                         child: Column(
                           children: [
-                            const HomeHeader(
-                              // Hide the cloud ShaderMask's 1px bottom fringe
-                              // (the faint seam line) by painting this screen's
-                              // flat background tone over it — same Home fix.
-                              seamCoverColor: Color(0xFFFFF5E0),
-                            ),
-                            const SizedBox(height: 16),
-                            // ── Programs Banner — full-bleed (edge to edge). ──
-                            RepaintBoundary(
-                              child: BannerCarousel(
-                                events: DummyData.programsScreenBanners,
-                                height: Responsive.h(context, 386, min: 286),
-                                showGlow: false,
-                                overlayStyle: true,
-                                ctaText: 'Explore Program',
-                                // Full width — side edges touch the screen; only
-                                // the corners are rounded.
-                                fixedCardWidth: MediaQuery.of(context).size.width,
-                                cornerRadius: 22,
-                                overlayDots: true, // dots overlaid on the banner
-                              ),
-                            ),
-                            // ── Pave Your Path (title left, See All right) ──
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 30, 16, 16),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            const DarkGlowHeader(),
+                            const SizedBox(height: 14),
+                            // Tall banner with a gold side-glow behind it.
+                            SizedBox(
+                              height: bannerH,
+                              child: Stack(
+                                alignment: Alignment.center,
                                 children: [
-                                  Text(
-                                    'Pave Your Path',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 16),
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF3A3A3A), // charcoal
+                                  Center(
+                                    child: Container(
+                                      width: bannerCardWidth,
+                                      height: bannerH,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(22),
+                                        boxShadow: goldBannerSideGlow(),
+                                      ),
                                     ),
                                   ),
-                                  GestureDetector(
-                                    behavior: HitTestBehavior.opaque,
-                                    onTap: () => _showAllCategoriesPopup(context),
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          'See All',
-                                          style: GoogleFonts.poppins(
-                                            fontSize: Responsive.sp(context, 13),
-                                            fontWeight: FontWeight.w500,
-                                            color: AppColors.seeAllBlue,
-                                          ),
-                                        ),
-                                        const Icon(Icons.chevron_right,
-                                            size: 18, color: AppColors.seeAllBlue),
-                                      ],
+                                  RepaintBoundary(
+                                    child: BannerCarousel(
+                                      events: DummyData.programsScreenBanners,
+                                      height: bannerH,
+                                      showGlow: false,
+                                      overlayStyle: true,
+                                      ctaText: 'Explore Program',
+                                      fixedCardWidth: bannerCardWidth,
+                                      cornerRadius: 22,
+                                      overlayDots: true,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                      RepaintBoundary(
-                        child: ExploreCategoriesGrid(
-                          categories: DummyData.programsCategories,
-                          // Match the card length of the Events screen's
-                          // "Explore by Categories" section.
-                          childAspectRatio: 0.8,
-                          scrollable: true,
-                          visibleRows: 2.3,
-                          maxScrollRows: 3, // scroll stops at the 3rd row
-                          imagesFlushBottom: true, // artwork sits at card bottom
-                          onViewAll: () => _showAllCategoriesPopup(context),
-                          onCategoryTap: (index) => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => CategoryProgramsScreen(
-                                initialCategoryIndex: index,
-                              ),
+                            const SizedBox(height: 26),
+                            const DarkCategoryTitle('Pave Your Path'),
+                            const SizedBox(height: 18),
+                            // Grid with the "View All" pill floated over the
+                            // bottom row (seamlessly blended).
+                            Stack(
+                              alignment: Alignment.bottomCenter,
+                              clipBehavior: Clip.none,
+                              children: [
+                                RepaintBoundary(
+                                  child: ExploreCategoriesGrid(
+                                    categories: DummyData.programsCategories,
+                                    childAspectRatio: 0.8,
+                                    scrollable: true,
+                                    visibleRows: 2.3,
+                                    maxScrollRows: 3,
+                                    imagesFlushBottom: true,
+                                    onCategoryTap: (index) => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => CategoryProgramsScreen(
+                                          initialCategoryIndex: index,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: -4,
+                                  child: DarkViewAllButton(
+                                    onTap: () =>
+                                        _showAllCategoriesPopup(context),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
+                            const SizedBox(height: 30),
+                          ],
                         ),
                       ),
 
@@ -402,12 +425,29 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
             bottom: 0,
             left: 0,
             right: 0,
-            child: Align(
-              alignment: Alignment.center,
-              child: FloatingNavbar(
-                currentIndex: _currentNavIndex,
-                onTap: _onNavTapped,
-                bottomPadding: FloatingNavbar.bottomInset(context),
+            // Hidden over the black hero; fades + slides up as the categories
+            // region scrolls away.
+            child: ValueListenableBuilder<double>(
+              valueListenable: _navReveal,
+              builder: (context, t, child) {
+                return IgnorePointer(
+                  ignoring: t < 0.05,
+                  child: Opacity(
+                    opacity: t,
+                    child: Transform.translate(
+                      offset: Offset(0, (1 - t) * 60),
+                      child: child,
+                    ),
+                  ),
+                );
+              },
+              child: Align(
+                alignment: Alignment.center,
+                child: FloatingNavbar(
+                  currentIndex: _currentNavIndex,
+                  onTap: _onNavTapped,
+                  bottomPadding: FloatingNavbar.bottomInset(context),
+                ),
               ),
             ),
           ),
