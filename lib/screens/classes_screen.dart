@@ -149,7 +149,9 @@ class _ClassesScreenState extends State<ClassesScreen> {
                           children: [
                             const DarkGlowHeader(),
                             const SizedBox(height: 14),
-                            // Tall banner with a gold side-glow behind it.
+                            // Tall banner (matches the Venues page). Black-filled
+                            // box behind casts the gold side-glow and backs the
+                            // image (no glow bleed through transparent areas).
                             SizedBox(
                               height: bannerH,
                               child: Stack(
@@ -160,6 +162,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                       width: bannerCardWidth,
                                       height: bannerH,
                                       decoration: BoxDecoration(
+                                        color: Colors.black,
                                         borderRadius: BorderRadius.circular(22),
                                         boxShadow: goldBannerSideGlow(),
                                       ),
@@ -206,7 +209,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                   ),
                                 ),
                                 Positioned(
-                                  bottom: -4,
+                                  bottom: -24,
                                   child: DarkViewAllButton(
                                     onTap: () =>
                                         _showAllCategoriesPopup(context),
@@ -214,7 +217,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 30),
+                            const SizedBox(height: 50),
                           ],
                         ),
                       ),

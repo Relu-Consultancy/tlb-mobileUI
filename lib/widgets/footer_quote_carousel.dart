@@ -87,10 +87,10 @@ class _FooterQuoteCarouselState extends State<FooterQuoteCarousel> {
             angle: math.pi,
             child: const Icon(Icons.format_quote, size: 44, color: _gold),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 2),
           // ── Quote in white, cross-fading between entries ──
           SizedBox(
-            height: Responsive.h(context, 92, min: 84),
+            height: Responsive.h(context, 76, min: 72),
             child: Center(
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 1200),
@@ -110,7 +110,7 @@ class _FooterQuoteCarouselState extends State<FooterQuoteCarousel> {
                   style: TextStyle(
                     fontFamily: 'serif',
                     fontSize: Responsive.sp(context, 18),
-                    height: 1.5,
+                    height: 1.35,
                     fontWeight: FontWeight.w500,
                     fontStyle: FontStyle.italic,
                     color: Colors.white.withOpacity(0.92),

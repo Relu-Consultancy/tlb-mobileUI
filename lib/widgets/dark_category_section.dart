@@ -9,8 +9,11 @@ import 'four_point_star.dart';
 const Color kDarkSectionGold = Color(0xFFF5C042);
 
 /// Golden light spilling out a banner's left & right edges (same side-glow look
-/// as the Home Spotlight card). Sides only — no top/bottom shadow. Apply to a
-/// transparent rounded box placed BEHIND the (opaque) banner card.
+/// as the Home Spotlight card). Sides only — no top/bottom shadow.
+///
+/// Apply to a rounded box placed BEHIND the banner that ALSO has an opaque fill
+/// (e.g. black) — the fill backs the image so the glow can't bleed through the
+/// banner's transparent areas; only the edge spill shows.
 List<BoxShadow> goldBannerSideGlow({double opacity = 0.40}) => [
       BoxShadow(
         color: kDarkSectionGold.withOpacity(opacity),
@@ -81,7 +84,7 @@ class DarkViewAllButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 11),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.55),
+            color: const Color(0xFF4D4D4D), // medium grey
             borderRadius: BorderRadius.circular(24),
             border: Border.all(color: Colors.white.withOpacity(0.22), width: 1),
             boxShadow: [

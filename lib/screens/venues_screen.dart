@@ -7,11 +7,11 @@ import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../models/event_model.dart';
 import '../providers/saved_events_state.dart';
-import '../sections/home_header.dart';
 import '../widgets/banner_carousel.dart';
+import '../widgets/dark_category_section.dart';
+import '../widgets/dark_glow_header.dart';
 import '../widgets/section_divider_widget.dart';
 import '../widgets/listing_meta_rows.dart';
-import '../widgets/all_categories_popup.dart';
 import '../sections/app_footer.dart';
 import '../widgets/app_refresh_indicator.dart';
 import '../widgets/floating_navbar.dart';
@@ -30,6 +30,34 @@ class VenuesScreen extends StatefulWidget {
 
 class _VenuesScreenState extends State<VenuesScreen> {
   final int _currentNavIndex = 4;
+
+  // Scroll-driven floating navbar: hidden over the black hero (header → banner →
+  // "What's the Plan?"), then fades + slides into view as it scrolls away.
+  final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<double> _navReveal = ValueNotifier<double>(0.0);
+  double _navFadeStart = 400;
+  double _navFadeEnd = 700;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    final double offset = _scrollController.offset;
+    final double t = ((offset - _navFadeStart) / (_navFadeEnd - _navFadeStart))
+        .clamp(0.0, 1.0);
+    if (_navReveal.value != t) _navReveal.value = t;
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _navReveal.dispose();
+    super.dispose();
+  }
 
   void _onNavTapped(int index) {
     if (index == 0) {
@@ -51,7 +79,18 @@ class _VenuesScreenState extends State<VenuesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenH = MediaQuery.of(context).size.height;
     final safeBottom = MediaQuery.of(context).padding.bottom;
+    _navFadeStart = screenH * 0.70;
+    _navFadeEnd = screenH * 0.95;
+
+    final double bannerH = (screenH -
+            MediaQuery.of(context).padding.top -
+            156 -
+            (safeBottom > 0 ? safeBottom + 15 : 30) -
+            140)
+        .clamp(300.0, 700.0);
+    final double bannerCardWidth = MediaQuery.of(context).size.width - 32;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -61,99 +100,59 @@ class _VenuesScreenState extends State<VenuesScreen> {
           AppRefreshIndicator(
             onRefresh: _handleRefresh,
             child: SingleChildScrollView(
+                  controller: _scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        // Gradient now extends down to the first section title
-                        // (banner included), like the home Spotlight header.
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Color(0xFFFFF5E0),
-                              Color(0xFFFFF5E0),
-                              Color(0xFFFFFAF0),
-                              Color(0xFFFFFAF0),
-                              Colors.white,
-                            ],
-                            stops: [0.0, 0.35, 0.60, 0.95, 1.0],
-                          ),
-                        ),
+                      // ── Black "night theatre" region: header → banner →
+                      //    What's the Plan? ──
+                      ColoredBox(
+                        color: Colors.black,
                         child: Column(
                           children: [
-                            const HomeHeader(
-                              // Hide the cloud ShaderMask's 1px bottom fringe
-                              // (the faint seam line) by painting this screen's
-                              // flat background tone over it — same Home fix.
-                              seamCoverColor: Color(0xFFFFF5E0),
-                            ),
-                            const SizedBox(height: 16),
-                      // ── Banner — Home-style Spotlight: a tall centered card
-                      //    that covers the majority of the screen, ending just
-                      //    above the floating navbar. Height is derived from the
-                      //    viewport minus the header block and the navbar area.
-                      RepaintBoundary(
-                        child: BannerCarousel(
-                          events: DummyData.venuesScreenBanners,
-                          height: (MediaQuery.of(context).size.height -
-                                  MediaQuery.of(context).padding.top - // status bar (header SafeArea)
-                                  156 - // HomeHeader content + 16 gap below it
-                                  (safeBottom > 0 ? safeBottom + 15 : 30) - // navbar bottom inset
-                                  140) // navbar pill + clear gap above it
-                              .clamp(300.0, 700.0),
-                          showGlow: false,
-                          overlayStyle: true,
-                          ctaText: 'Explore Now',
-                          // Match the search bar width (screen width − 16px side
-                          // padding each side).
-                          fixedCardWidth: MediaQuery.of(context).size.width - 32,
-                          overlayDots: true, // dots on the banner
-                        ),
-                      ),
-
-                      // ── What's the Plan? (title left, See All right) ──
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 30, 16, 0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              "What's the Plan?",
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 16),
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF3A3A3A), // charcoal
-                              ),
-                            ),
-                            GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: () => _showAllVenueCategories(context),
-                              child: Row(
+                            const DarkGlowHeader(),
+                            const SizedBox(height: 14),
+                            // Tall banner with a black backing + gold side-glow.
+                            SizedBox(
+                              height: bannerH,
+                              child: Stack(
+                                alignment: Alignment.center,
                                 children: [
-                                  Text(
-                                    'See All',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 13),
-                                      fontWeight: FontWeight.w500,
-                                      color: AppColors.seeAllBlue,
+                                  Center(
+                                    child: Container(
+                                      width: bannerCardWidth,
+                                      height: bannerH,
+                                      decoration: BoxDecoration(
+                                        color: Colors.black,
+                                        borderRadius: BorderRadius.circular(22),
+                                        boxShadow: goldBannerSideGlow(),
+                                      ),
                                     ),
                                   ),
-                                  const Icon(Icons.chevron_right,
-                                      size: 18, color: AppColors.seeAllBlue),
+                                  RepaintBoundary(
+                                    child: BannerCarousel(
+                                      events: DummyData.venuesScreenBanners,
+                                      height: bannerH,
+                                      showGlow: false,
+                                      overlayStyle: true,
+                                      ctaText: 'Explore Now',
+                                      fixedCardWidth: bannerCardWidth,
+                                      cornerRadius: 22,
+                                      overlayDots: true,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
-                            ),
+                            const SizedBox(height: 26),
+                            const DarkCategoryTitle("What's the Plan?"),
+                            const SizedBox(height: 18),
+                            _buildWhatsPlanRow(context),
+                            const SizedBox(height: 28),
                           ],
                         ),
                       ),
-                      _buildWhatsPlanRow(context),
 
                       // ── For the Big Days ──
                       _sectionHeader(context, 'For the Big days'),
@@ -299,38 +298,33 @@ class _VenuesScreenState extends State<VenuesScreen> {
             bottom: 0,
             left: 0,
             right: 0,
-            child: Align(
-              alignment: Alignment.center,
-              child: FloatingNavbar(
-                currentIndex: _currentNavIndex,
-                onTap: _onNavTapped,
-                bottomPadding: FloatingNavbar.bottomInset(context),
+            // Hidden over the black hero; fades + slides up as it scrolls away.
+            child: ValueListenableBuilder<double>(
+              valueListenable: _navReveal,
+              builder: (context, t, child) {
+                return IgnorePointer(
+                  ignoring: t < 0.05,
+                  child: Opacity(
+                    opacity: t,
+                    child: Transform.translate(
+                      offset: Offset(0, (1 - t) * 60),
+                      child: child,
+                    ),
+                  ),
+                );
+              },
+              child: Align(
+                alignment: Alignment.center,
+                child: FloatingNavbar(
+                  currentIndex: _currentNavIndex,
+                  onTap: _onNavTapped,
+                  bottomPadding: FloatingNavbar.bottomInset(context),
+                ),
               ),
             ),
           ),
         ],
       ),
-    );
-  }
-
-  // ── Section header — centered golden divider (home-screen ruleset). ──
-  // "See All" for What's the Plan? — opens the full venue-category picker;
-  // tapping a category opens that category's venues list.
-  void _showAllVenueCategories(BuildContext context) {
-    AllCategoriesPopup.show(
-      context,
-      // Match the section row — only the 6 circular categories (the 2 extra
-      // entries were showing here but not in the section).
-      DummyData.venuesSeeAllCategories.take(6).toList(),
-      circularImages: true, // round artwork, same as the section circles
-      onCategoryTap: (index) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => CategoryVenuesScreen(initialCategoryIndex: index),
-          ),
-        );
-      },
     );
   }
 
@@ -385,37 +379,59 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   SizedBox(
                     width: 142,
                     height: 152,
-                    child: OverflowBox(
-                      // Render the circle at its full 152px width even though the
-                      // slot is only 124px — it spills symmetrically into the
-                      // gaps so adjacent circles sit close.
-                      minWidth: 152,
-                      maxWidth: 152,
-                      minHeight: 152,
-                      maxHeight: 152,
-                      child: Transform.translate(
-                        // Optional per-image vertical nudge to line the circles up.
-                        offset: Offset(0, (c['nudge'] as num?)?.toDouble() ?? 0.0),
-                        child: Padding(
-                          // Optional per-image inset to normalise sizes where an
-                          // artwork fills its canvas more than the others.
-                          padding: EdgeInsets.all(
-                            (c['inset'] as num?)?.toDouble() ?? 0.0,
-                          ),
-                          child: Image.asset(
-                            c['image'] as String,
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => Icon(Icons.place,
-                                size: 58, color: AppColors.primary),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Soft golden glow behind the circle.
+                        Container(
+                          width: 128,
+                          height: 128,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFF5C042).withOpacity(0.38),
+                                blurRadius: 28,
+                                spreadRadius: -4,
+                              ),
+                            ],
                           ),
                         ),
-                      ),
+                        OverflowBox(
+                          // Render the circle at its full 152px width even though
+                          // the slot is only 142px — it spills symmetrically into
+                          // the gaps so adjacent circles sit close.
+                          minWidth: 152,
+                          maxWidth: 152,
+                          minHeight: 152,
+                          maxHeight: 152,
+                          child: Transform.translate(
+                            // Optional per-image vertical nudge to line them up.
+                            offset:
+                                Offset(0, (c['nudge'] as num?)?.toDouble() ?? 0.0),
+                            child: Padding(
+                              // Optional per-image inset to normalise sizes where
+                              // an artwork fills its canvas more than the others.
+                              padding: EdgeInsets.all(
+                                (c['inset'] as num?)?.toDouble() ?? 0.0,
+                              ),
+                              child: Image.asset(
+                                c['image'] as String,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, __, ___) => Icon(Icons.place,
+                                    size: 58, color: AppColors.primary),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 9),
                   Text(
                     c['label'] as String,
-                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w500, color: AppColors.textPrimary),
+                    // White — this row now sits on the black hero region.
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w500, color: Colors.white),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,

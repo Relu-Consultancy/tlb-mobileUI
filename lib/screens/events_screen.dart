@@ -262,10 +262,10 @@ class _EventsScreenState extends State<EventsScreen> {
                     children: [
                       const DarkGlowHeader(),
                       const SizedBox(height: 14),
-                      // Banner — tall centered card (matches the Venues page
-                      // banner). Behind it, a transparent rounded box carries a
-                      // side-biased gold glow that spills out the card's left &
-                      // right edges (same look as the Home Spotlight card).
+                      // Banner — tall centered card (matches the Venues page).
+                      // A black-filled box behind it casts the gold side-glow
+                      // AND backs the image so the glow can't bleed through the
+                      // banner's transparent areas.
                       SizedBox(
                         height: bannerH,
                         child: Stack(
@@ -276,6 +276,7 @@ class _EventsScreenState extends State<EventsScreen> {
                                 width: bannerCardWidth,
                                 height: bannerH,
                                 decoration: BoxDecoration(
+                                  color: Colors.black,
                                   borderRadius: BorderRadius.circular(22),
                                   boxShadow: goldBannerSideGlow(),
                                 ),
@@ -326,14 +327,14 @@ class _EventsScreenState extends State<EventsScreen> {
                             ),
                           ),
                           Positioned(
-                            bottom: -4,
+                            bottom: -24,
                             child: DarkViewAllButton(
                               onTap: () => _showAllCategoriesPopup(context),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 50),
                     ],
                   ),
                 ),
