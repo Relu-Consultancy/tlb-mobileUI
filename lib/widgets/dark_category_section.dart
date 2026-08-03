@@ -84,7 +84,17 @@ class DarkViewAllButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 11),
           decoration: BoxDecoration(
-            color: const Color(0xFF4D4D4D), // medium grey
+            // Grey up top fading into darkness at the bottom.
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                const Color(0xFF525252).withOpacity(0.88),
+                const Color(0xFF3A3A3A).withOpacity(0.90),
+                const Color(0xFF050505).withOpacity(0.97),
+              ],
+              stops: const [0.0, 0.45, 1.0],
+            ),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(color: Colors.white.withOpacity(0.22), width: 1),
             boxShadow: [
