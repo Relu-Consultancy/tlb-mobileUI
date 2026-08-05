@@ -140,7 +140,7 @@ class EventCardWithPrice extends StatelessWidget {
                         'Book Now',
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 13),
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),

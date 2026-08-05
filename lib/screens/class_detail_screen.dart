@@ -572,7 +572,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                           isDirectBooking ? 'Check Availability' : 'Enquire Now',
                           style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 15),
-                              fontWeight: FontWeight.w500),
+                              fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),

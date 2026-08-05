@@ -74,7 +74,9 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    child: Container(
+                    child: GestureDetector(
+                      onTap: () => openListingDetail(context, event),
+                      child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
@@ -95,7 +97,9 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                           SizedBox(
                             // Taller image so it fills the card down to the
                             // content (removes the white gap below the meta).
-                            height: Responsive.h(context, 290, min: 268),
+                            // Grown to fill the space freed by the removed CTA,
+                            // trimmed slightly to leave white space under meta.
+                            height: Responsive.h(context, 322, min: 300),
                             width: double.infinity,
                             child: Stack(
                               fit: StackFit.expand,
@@ -165,70 +169,34 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                             ),
                           ),
 
-                          // ── Content ──
+                          // ── Content (title + meta; CTA removed) ──
                           Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(14, 12, 14, 18),
+                              // ≥10px white space kept below the meta (bottom
+                              // padding + top-aligned content).
+                              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  // Title + meta (top group)
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        event.title,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: Responsive.sp(context, 17),
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.textPrimary,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      // Two-column meta: Age + Date·Time left,
-                                      // Location + Distance right.
-                                      ListingMetaRows(
-                                        event: event,
-                                        showLocation: true,
-                                        twoColumn: true,
-                                      ),
-                                    ],
+                                  Text(
+                                    event.title,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 17),
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-
-                                  // Book Now (location now in the meta block above).
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      SizedBox(
-                                        height: Responsive.h(context, 30, min: 27),
-                                        child: ElevatedButton(
-                                          onPressed: () =>
-                                              openListingDetail(context, event),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: AppColors.primaryLight,
-                                            foregroundColor: AppColors.textPrimary,
-                                            elevation: 0,
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 12),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                          ),
-                                          child: Text(
-                                            'Book Now',
-                                            style: GoogleFonts.poppins(
-                                              fontSize: Responsive.sp(context, 12),
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                  const SizedBox(height: 8),
+                                  // Two-column meta: Age + Date·Time left,
+                                  // Location + Distance right.
+                                  ListingMetaRows(
+                                    event: event,
+                                    showLocation: true,
+                                    twoColumn: true,
                                   ),
                                 ],
                               ),
@@ -236,6 +204,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                           ),
                         ],
                       ),
+                    ),
                     ),
                   );
                 },

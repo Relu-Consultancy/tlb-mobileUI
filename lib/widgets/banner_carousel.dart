@@ -795,7 +795,7 @@ class _BannerCarouselState extends State<BannerCarousel>
                                 widget.ctaText,
                                 style: GoogleFonts.poppins(
                                   fontSize: Responsive.sp(context, 14),
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                   color: AppColors.textPrimary,
                                 ),
                               ),

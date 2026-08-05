@@ -214,7 +214,7 @@ class EventCardWithRating extends StatelessWidget {
                           buttonLabel,
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 11),
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),

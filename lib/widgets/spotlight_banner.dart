@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
+import 'dark_category_section.dart';
 import 'four_point_star.dart';
+import 'primary_cta_button.dart';
 import 'wishlist_button.dart';
 
 /// The Home "Spotlight" section: a "✦ Spotlight ✦" header and a swipeable set of
@@ -18,8 +19,6 @@ class SpotlightBanner extends StatefulWidget {
   final List<EventModel> events;
 
   const SpotlightBanner({super.key, required this.events});
-
-  static const Color _gold = Color(0xFFF5C042);
 
   @override
   State<SpotlightBanner> createState() => _SpotlightBannerState();
@@ -66,7 +65,11 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
       padding: const EdgeInsets.only(top: 9, bottom: 10),
       child: Column(
         children: [
-          _buildTitle(context),
+          // Nudge the title up 10px (card position unchanged).
+          Transform.translate(
+            offset: const Offset(0, -10),
+            child: _buildTitle(context),
+          ),
           const SizedBox(height: 12),
           Expanded(
             // Clip.none so the golden glow behind each card can spill past the
@@ -88,7 +91,7 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
               dotHeight: 7,
               dotWidth: 7,
               spacing: 6,
-              activeDotColor: SpotlightBanner._gold,
+              activeDotColor: kDarkSectionGold,
               dotColor: Color(0x40FFFFFF),
             ),
           ),
@@ -106,8 +109,8 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: outerIsLeft
-                  ? const [Colors.transparent, SpotlightBanner._gold]
-                  : const [SpotlightBanner._gold, Colors.transparent],
+                  ? const [Colors.transparent, kDarkSectionGold]
+                  : const [kDarkSectionGold, Colors.transparent],
               stops: const [0.0, 1.0],
             ),
           ),
@@ -115,7 +118,7 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
     // A single clean 4-point star (Icons.auto_awesome renders a star *plus* a
     // small secondary sparkle, which read as a cluster — the reference has one).
     Widget star() =>
-        const FourPointStar(size: 15, color: SpotlightBanner._gold);
+        const FourPointStar(size: 15, color: kDarkSectionGold);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 22),
       child: Row(
@@ -146,19 +149,19 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
   /// pool at the bottom. There is no bottom shadow at all.
   List<BoxShadow> _cardGlow() => [
         BoxShadow(
-          color: SpotlightBanner._gold.withOpacity(0.52),
+          color: kDarkSectionGold.withOpacity(0.52),
           blurRadius: 30,
           spreadRadius: -8,
           offset: const Offset(-12, -16),
         ),
         BoxShadow(
-          color: SpotlightBanner._gold.withOpacity(0.52),
+          color: kDarkSectionGold.withOpacity(0.52),
           blurRadius: 30,
           spreadRadius: -8,
           offset: const Offset(12, -16),
         ),
         BoxShadow(
-          color: SpotlightBanner._gold.withOpacity(0.20),
+          color: kDarkSectionGold.withOpacity(0.20),
           blurRadius: 22,
           spreadRadius: -12,
           offset: const Offset(0, -14),
@@ -169,19 +172,37 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
     final Widget card = GestureDetector(
       onTap: () => _openDetail(context, e),
       child: Container(
+        // Gradient "frame": the border is drawn as a 1.8px gold gradient that
+        // is bright across the top & upper sides and dims to a dark brown at
+        // the bottom edge (matches the reference, where the frame fades low).
         decoration: BoxDecoration(
-          color: const Color(0xFF120D06),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: SpotlightBanner._gold, width: 1.8),
+          borderRadius: BorderRadius.circular(18),
+          gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              kDarkSectionGold,
+              kDarkSectionGold,
+              Color(0xFF3A2B0E),
+            ],
+            stops: [0.0, 0.55, 1.0],
+          ),
           boxShadow: _cardGlow(),
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(22),
-          child: Column(
-            children: [
-              Expanded(child: _buildPoster(context, e)),
-              _buildFooter(context, e),
-            ],
+        padding: const EdgeInsets.all(1.8),
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF120D06),
+            borderRadius: BorderRadius.circular(16.2),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: Column(
+              children: [
+                Expanded(child: _buildPoster(context, e)),
+                _buildFooter(context, e),
+              ],
+            ),
           ),
         ),
       ),
@@ -282,29 +303,9 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
             ],
           ),
           const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            child: Material(
-              color: AppColors.primaryLight,
-              borderRadius: BorderRadius.circular(30),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(30),
-                onTap: () => _openDetail(context, e),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 13),
-                  child: Center(
-                    child: Text(
-                      'Book Tickets',
-                      style: GoogleFonts.poppins(
-                        fontSize: Responsive.sp(context, 14),
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+          PrimaryCtaButton(
+            label: 'Book Tickets',
+            onTap: () => _openDetail(context, e),
           ),
         ],
       ),
@@ -330,7 +331,7 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 13, color: SpotlightBanner._gold),
+        Icon(icon, size: 13, color: kDarkSectionGold),
         const SizedBox(width: 4),
         flexible ? Flexible(child: label) : label,
       ],

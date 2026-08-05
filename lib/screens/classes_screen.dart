@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../widgets/auto_scroll_list.dart';
 import '../widgets/shining_star_badge.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
@@ -35,7 +34,6 @@ class ClassesScreen extends StatefulWidget {
 
 class _ClassesScreenState extends State<ClassesScreen> {
   int _currentNavIndex = 2;
-  late final PageController _topPicksController;
 
   // Scroll-driven floating navbar: hidden over the black hero (header → banner →
   // categories), then fades + slides into view as that region scrolls away.
@@ -47,7 +45,6 @@ class _ClassesScreenState extends State<ClassesScreen> {
   @override
   void initState() {
     super.initState();
-    _topPicksController = PageController();
     _scrollController.addListener(_onScroll);
   }
 
@@ -60,7 +57,6 @@ class _ClassesScreenState extends State<ClassesScreen> {
 
   @override
   void dispose() {
-    _topPicksController.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _navReveal.dispose();
@@ -117,8 +113,6 @@ class _ClassesScreenState extends State<ClassesScreen> {
   Widget build(BuildContext context) {
     final double screenH = MediaQuery.of(context).size.height;
     final double safeBottom = MediaQuery.of(context).padding.bottom;
-    _navFadeStart = screenH * 0.70;
-    _navFadeEnd = screenH * 0.95;
 
     // Tall banner (matches the Venues page): fills the viewport minus the header
     // block and the navbar area.
@@ -129,6 +123,12 @@ class _ClassesScreenState extends State<ClassesScreen> {
             140)
         .clamp(300.0, 700.0);
     final double bannerCardWidth = MediaQuery.of(context).size.width - 32;
+
+    // Reveal the navbar as the top banner scrolls away (tied to the banner
+    // height, not a fixed screen fraction).
+    final double heroTop = MediaQuery.of(context).padding.top + 169;
+    _navFadeStart = heroTop + bannerH * 0.65;
+    _navFadeEnd = heroTop + bannerH;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -188,28 +188,35 @@ class _ClassesScreenState extends State<ClassesScreen> {
                             const SizedBox(height: 18),
                             // Grid with the "View All" pill floated over the
                             // bottom row (seamlessly blended).
+                            // Reserve space so the floated pill stays INSIDE the
+                            // Stack bounds (a Positioned child hanging past the
+                            // Stack isn't hit-testable).
                             Stack(
                               alignment: Alignment.bottomCenter,
-                              clipBehavior: Clip.none,
                               children: [
-                                RepaintBoundary(
-                                  child: ExploreCategoriesGrid(
-                                    categories: DummyData.classesCategories,
-                                    scrollable: true,
-                                    visibleRows: 2.3,
-                                    maxScrollRows: 3,
-                                    onCategoryTap: (index) => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => CategoryClassesScreen(
-                                          initialCategoryIndex: index,
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 24),
+                                  child: RepaintBoundary(
+                                    child: ExploreCategoriesGrid(
+                                      categories: DummyData.classesCategories,
+                                      scrollable: true,
+                                      visibleRows: 2.3,
+                                      maxScrollRows: 3,
+                                      onCategoryTap: (index) => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => CategoryClassesScreen(
+                                            initialCategoryIndex: index,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
                                 Positioned(
-                                  bottom: -24,
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
                                   child: DarkViewAllButton(
                                     onTap: () =>
                                         _showAllCategoriesPopup(context),
@@ -217,7 +224,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 50),
+                            const SizedBox(height: 26),
                           ],
                         ),
                       ),
@@ -423,20 +430,6 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               ),
                             );
                           },
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Center(
-                        child: SmoothPageIndicator(
-                          controller: _topPicksController,
-                          count: DummyData.classesTopPicks.length,
-                          effect: const WormEffect(
-                            dotHeight: 7,
-                            dotWidth: 7,
-                            activeDotColor: AppColors.textPrimary,
-                            dotColor: Color(0xFFE0E0E0),
-                            spacing: 5,
-                          ),
                         ),
                       ),
 

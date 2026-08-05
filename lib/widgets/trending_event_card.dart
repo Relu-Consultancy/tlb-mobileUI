@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
+import 'primary_cta_button.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
 import 'wishlist_button.dart';
@@ -174,7 +175,7 @@ class TrendingEventCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
 
-                  // Location + Book Now
+                  // Location (own line)
                   Row(
                     children: [
                       const Icon(Icons.location_on_outlined,
@@ -191,32 +192,12 @@ class TrendingEventCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      SizedBox(
-                        height: Responsive.h(context, 38, min: 34),
-                        child: ElevatedButton(
-                          onPressed: openDetail,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryLight,
-                            foregroundColor: AppColors.textPrimary,
-                            elevation: 0,
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                          child: Text(
-                            'Book Now',
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 12),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
+                  const SizedBox(height: 12),
+
+                  // Book Now (shared canonical full-width CTA)
+                  PrimaryCtaButton(label: 'Book Now', onTap: openDetail),
                 ],
               ),
             ),

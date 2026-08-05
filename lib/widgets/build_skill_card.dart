@@ -169,7 +169,7 @@ class BuildSkillCard extends StatelessWidget {
                               ctaLabel,
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 12),
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
                                 color: AppColors.textPrimary,
                               ),
                             ),

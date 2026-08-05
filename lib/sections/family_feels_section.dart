@@ -141,7 +141,7 @@ class FamilyFeelsSection extends StatelessWidget {
                                   'Book Now',
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 12),
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),

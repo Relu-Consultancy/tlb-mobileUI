@@ -37,11 +37,13 @@ class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
       final token = tokens['access'];
       if (token == null) throw Exception('Not authenticated');
       final methods = await PaymentMethodService.listPaymentMethods(token: token);
+      if (!mounted) return;
       setState(() {
         _methods = methods;
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString().replaceFirst('Exception: ', '');
         _isLoading = false;

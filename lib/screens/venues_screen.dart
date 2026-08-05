@@ -12,6 +12,7 @@ import '../widgets/dark_category_section.dart';
 import '../widgets/dark_glow_header.dart';
 import '../widgets/section_divider_widget.dart';
 import '../widgets/listing_meta_rows.dart';
+import '../widgets/primary_cta_button.dart';
 import '../sections/app_footer.dart';
 import '../widgets/app_refresh_indicator.dart';
 import '../widgets/floating_navbar.dart';
@@ -81,8 +82,6 @@ class _VenuesScreenState extends State<VenuesScreen> {
   Widget build(BuildContext context) {
     final double screenH = MediaQuery.of(context).size.height;
     final safeBottom = MediaQuery.of(context).padding.bottom;
-    _navFadeStart = screenH * 0.70;
-    _navFadeEnd = screenH * 0.95;
 
     final double bannerH = (screenH -
             MediaQuery.of(context).padding.top -
@@ -91,6 +90,12 @@ class _VenuesScreenState extends State<VenuesScreen> {
             140)
         .clamp(300.0, 700.0);
     final double bannerCardWidth = MediaQuery.of(context).size.width - 32;
+
+    // Reveal the navbar as the top banner scrolls away (tied to the banner
+    // height, not a fixed screen fraction).
+    final double heroTop = MediaQuery.of(context).padding.top + 169;
+    _navFadeStart = heroTop + bannerH * 0.65;
+    _navFadeEnd = heroTop + bannerH;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -390,7 +395,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFFF5C042).withOpacity(0.38),
+                                color: kDarkSectionGold.withOpacity(0.38),
                                 blurRadius: 28,
                                 spreadRadius: -4,
                               ),
@@ -526,7 +531,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
                           padding: EdgeInsets.zero,
                         ),
-                        child: Text('Book Now', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13.5), fontWeight: FontWeight.w500)),
+                        child: Text('Book Now', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13.5), fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ],
@@ -610,7 +615,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
                           padding: EdgeInsets.zero,
                         ),
-                        child: Text('Inquire Now', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13.5), fontWeight: FontWeight.w500)),
+                        child: Text('Inquire Now', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13.5), fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ],
@@ -812,11 +817,15 @@ class _VenuesScreenState extends State<VenuesScreen> {
           ),
 
           // ── Venue list ──
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          // Expanded so this block fills the remaining fixed card height —
+          // otherwise the CTA trails the content with a large unclaimed gap
+          // beneath it instead of sitting at the card's bottom edge.
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                 ...List.generate(venues.length, (idx) {
                   final v = venues[idx];
                   final slots = (v['slots'] as List).cast<String>();
@@ -910,48 +919,35 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         Divider(color: Colors.grey.shade200, height: 1),
                         const SizedBox(height: 14),
                       ] else
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 20),
                     ],
                   );
                 }),
-                // Full-width CTA at the bottom (like TLB Signature).
-                SizedBox(
-                  width: double.infinity,
-                  height: 42,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      final v = venues.first;
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => VenueDetailScreen(
-                            event: EventModel(
-                              title: data['sport'] as String,
-                              venue: v['location'] as String,
-                              imagePath: v['image'] as String,
-                              listingType: 'venue',
-                            ),
+                // Spacer absorbs the remaining fixed-card height so the CTA
+                // pins to the bottom edge instead of trailing the content.
+                const Spacer(),
+                // Full-width CTA at the bottom (shared canonical CTA).
+                PrimaryCtaButton(
+                  label: 'View Now',
+                  onTap: () {
+                    final v = venues.first;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => VenueDetailScreen(
+                          event: EventModel(
+                            title: data['sport'] as String,
+                            venue: v['location'] as String,
+                            imagePath: v['image'] as String,
+                            listingType: 'venue',
                           ),
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryLight,
-                      foregroundColor: AppColors.textPrimary,
-                      elevation: 0,
-                      padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(22)),
-                    ),
-                    child: Text(
-                      'View Now',
-                      style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 13.5),
-                          fontWeight: FontWeight.w500),
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -1323,7 +1319,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                   ),
-                  child: Text('View Details', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w500)),
+                  child: Text('View Details', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w600)),
                 ),
               ),
             ],

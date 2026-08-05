@@ -608,7 +608,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       ),
                       child: Text(
                         _isFree ? 'Register Now' : 'Book Now',
-                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500),
+                        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600),
                       ),
                     ),
                   ),

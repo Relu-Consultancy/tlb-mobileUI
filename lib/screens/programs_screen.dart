@@ -114,8 +114,6 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
   Widget build(BuildContext context) {
     final double screenH = MediaQuery.of(context).size.height;
     final double safeBottom = MediaQuery.of(context).padding.bottom;
-    _navFadeStart = screenH * 0.70;
-    _navFadeEnd = screenH * 0.95;
 
     // Tall banner (matches the Venues page): fills the viewport minus the header
     // block and the navbar area.
@@ -126,6 +124,12 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
             140)
         .clamp(300.0, 700.0);
     final double bannerCardWidth = MediaQuery.of(context).size.width - 32;
+
+    // Reveal the navbar as the top banner scrolls away (tied to the banner
+    // height, not a fixed screen fraction).
+    final double heroTop = MediaQuery.of(context).padding.top + 169;
+    _navFadeStart = heroTop + bannerH * 0.65;
+    _navFadeEnd = heroTop + bannerH;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -185,30 +189,37 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                             const SizedBox(height: 18),
                             // Grid with the "View All" pill floated over the
                             // bottom row (seamlessly blended).
+                            // Reserve space so the floated pill stays INSIDE the
+                            // Stack bounds (a Positioned child hanging past the
+                            // Stack isn't hit-testable).
                             Stack(
                               alignment: Alignment.bottomCenter,
-                              clipBehavior: Clip.none,
                               children: [
-                                RepaintBoundary(
-                                  child: ExploreCategoriesGrid(
-                                    categories: DummyData.programsCategories,
-                                    childAspectRatio: 0.8,
-                                    scrollable: true,
-                                    visibleRows: 2.3,
-                                    maxScrollRows: 3,
-                                    imagesFlushBottom: true,
-                                    onCategoryTap: (index) => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => CategoryProgramsScreen(
-                                          initialCategoryIndex: index,
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 24),
+                                  child: RepaintBoundary(
+                                    child: ExploreCategoriesGrid(
+                                      categories: DummyData.programsCategories,
+                                      childAspectRatio: 0.8,
+                                      scrollable: true,
+                                      visibleRows: 2.3,
+                                      maxScrollRows: 3,
+                                      imagesFlushBottom: true,
+                                      onCategoryTap: (index) => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => CategoryProgramsScreen(
+                                            initialCategoryIndex: index,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
                                 Positioned(
-                                  bottom: -24,
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
                                   child: DarkViewAllButton(
                                     onTap: () =>
                                         _showAllCategoriesPopup(context),
@@ -216,7 +227,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 50),
+                            const SizedBox(height: 26),
                           ],
                         ),
                       ),
@@ -572,7 +583,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                             softWrap: false,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, smallButton ? 11.5 : 12.5),
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -698,7 +709,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                               'View Details',
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 12.5),
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
                                 color: AppColors.textPrimary,
                               ),
                             ),
@@ -838,7 +849,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         ),
                         child: Text(
                           'Enquire Now',
-                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w500),
+                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),
@@ -985,7 +996,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         ),
                         child: Text(
                           'View Details',
-                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w500),
+                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),

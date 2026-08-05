@@ -192,7 +192,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 11.5),
                   fontWeight: FontWeight.w500,
-                  color: AppColors.accentBlue,
+                  color: Colors.grey.shade500,
                 ),
               ),
           ],
@@ -209,18 +209,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         height: 14,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.done_all_rounded,
-                        size: 16, color: AppColors.accentBlue),
+                    : Icon(Icons.done_all_rounded,
+                        size: 16, color: Colors.grey.shade600),
                 label: Text(
                   'Mark all read',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 12.5),
                     fontWeight: FontWeight.w500,
-                    color: AppColors.accentBlue,
+                    color: Colors.grey.shade600,
                   ),
                 ),
                 style: TextButton.styleFrom(
-                  backgroundColor: AppColors.accentBlue.withOpacity(0.08),
+                  backgroundColor: Colors.black.withOpacity(0.04),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -448,172 +448,164 @@ class _NotificationCard extends StatelessWidget {
     final accent = _accentColor(n.notificationType);
     final hasAction = n.actionUrl != null && n.actionUrl!.isNotEmpty;
 
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      clipBehavior: Clip.antiAlias,
-      shadowColor: Colors.black.withOpacity(0.06),
-      elevation: unread ? 3 : 1.5,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            // Unread cards get a faint tinted wash + a colored leading strip.
-            gradient: unread
-                ? LinearGradient(
-                    colors: [accent.withOpacity(0.06), Colors.white],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  )
-                : null,
-            border: Border(
-              left: BorderSide(
-                color: unread ? accent : Colors.transparent,
-                width: 3.5,
-              ),
-            ),
+    // Flat white card with a hairline border and a whisper shadow. Unread is a
+    // quiet cue: a faint accent border + a small dot — no washes, strips or glow.
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: unread ? accent.withOpacity(0.28) : Colors.black.withOpacity(0.05),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.035),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
           ),
-          padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Gradient icon badge
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [accent.withOpacity(0.20), accent.withOpacity(0.08)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          splashColor: accent.withOpacity(0.05),
+          highlightColor: accent.withOpacity(0.03),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 15, 14, 15),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Soft round icon badge — flat tint, muted glyph.
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: accent.withOpacity(0.10),
+                    shape: BoxShape.circle,
                   ),
-                  borderRadius: BorderRadius.circular(14),
+                  child: Icon(_iconFor(n.notificationType),
+                      color: accent.withOpacity(0.9), size: 20),
                 ),
-                child: Icon(_iconFor(n.notificationType), color: accent, size: 22),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            n.title.isEmpty ? 'Notification' : n.title,
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 14),
-                              fontWeight:
-                                  unread ? FontWeight.w600 : FontWeight.w500,
-                              color: AppColors.textPrimary,
-                              height: 1.25,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (unread) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            width: 9,
-                            height: 9,
-                            margin: const EdgeInsets.only(top: 5),
-                            decoration: BoxDecoration(
-                              color: accent,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: accent.withOpacity(0.4),
-                                  blurRadius: 5,
-                                ),
-                              ],
+                const SizedBox(width: 13),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              n.title.isEmpty ? 'Notification' : n.title,
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 13.5),
+                                fontWeight:
+                                    unread ? FontWeight.w600 : FontWeight.w500,
+                                color: AppColors.textPrimary,
+                                height: 1.3,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          if (unread) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              width: 7,
+                              height: 7,
+                              margin: const EdgeInsets.only(top: 6),
+                              decoration: BoxDecoration(
+                                color: accent,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
-                    if (n.body.isNotEmpty) ...[
-                      const SizedBox(height: 5),
-                      Text(
-                        n.body,
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 12),
-                          color: Colors.grey.shade600,
-                          height: 1.45,
+                      ),
+                      if (n.body.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          n.body,
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 11.5),
+                            color: Colors.grey.shade500,
+                            height: 1.45,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
+                      ],
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          if (n.isBroadcast) ...[
+                            _adminPill(context),
+                            const SizedBox(width: 8),
+                          ],
+                          Icon(Icons.schedule_rounded,
+                              size: 12, color: Colors.grey.shade400),
+                          const SizedBox(width: 4),
+                          Text(
+                            _timeAgo(n.createdAt),
+                            style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, 10.5),
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
+                          if (hasAction) ...[
+                            const Spacer(),
+                            Text(
+                              'View',
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 10.5),
+                                fontWeight: FontWeight.w600,
+                                color: accent.withOpacity(0.9),
+                              ),
+                            ),
+                            const SizedBox(width: 3),
+                            Icon(Icons.arrow_forward_ios_rounded,
+                                size: 9, color: accent.withOpacity(0.9)),
+                          ],
+                        ],
                       ),
                     ],
-                    const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        if (n.isBroadcast) ...[
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 9, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF7C3AED).withOpacity(0.10),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.verified_rounded,
-                                    size: 11, color: Color(0xFF7C3AED)),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'From Admin',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 9.5),
-                                    fontWeight: FontWeight.w500,
-                                    color: const Color(0xFF7C3AED),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                        ],
-                        Icon(Icons.schedule_rounded,
-                            size: 12, color: Colors.grey.shade400),
-                        const SizedBox(width: 4),
-                        Text(
-                          _timeAgo(n.createdAt),
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 10.5),
-                            color: Colors.grey.shade500,
-                          ),
-                        ),
-                        if (hasAction) ...[
-                          const Spacer(),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'View',
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 10.5),
-                                  fontWeight: FontWeight.w600,
-                                  color: accent,
-                                ),
-                              ),
-                              const SizedBox(width: 2),
-                              Icon(Icons.arrow_forward_ios_rounded,
-                                  size: 10, color: accent),
-                            ],
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// A quiet "Admin" pill for broadcast notifications.
+  Widget _adminPill(BuildContext context) {
+    const purple = Color(0xFF7C3AED);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: purple.withOpacity(0.07),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.verified_rounded, size: 10.5, color: purple.withOpacity(0.85)),
+          const SizedBox(width: 4),
+          Text(
+            'Admin',
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 9.5),
+              fontWeight: FontWeight.w500,
+              color: purple.withOpacity(0.85),
+            ),
+          ),
+        ],
       ),
     );
   }

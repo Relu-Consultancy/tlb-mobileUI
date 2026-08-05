@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import 'primary_cta_button.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
 
@@ -88,7 +89,15 @@ class WeekendEventCard extends StatelessWidget {
                       ),
                     ],
                     const Spacer(),
-                    _BookNowButton(event: event),
+                    PrimaryCtaButton(
+                      label: 'Book Now',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => EventDetailScreen(event: event),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -129,37 +138,3 @@ class _IconLine extends StatelessWidget {
   }
 }
 
-class _BookNowButton extends StatelessWidget {
-  final EventModel event;
-
-  const _BookNowButton({required this.event});
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Material(
-        color: AppColors.primaryLight,
-        borderRadius: BorderRadius.circular(24),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(24),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-            child: Text(
-              'Book Now',
-              style: GoogleFonts.poppins(
-                fontSize: Responsive.sp(context, 13),
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

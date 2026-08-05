@@ -226,10 +226,6 @@ class _EventsScreenState extends State<EventsScreen> {
   Widget build(BuildContext context) {
     final double screenH = MediaQuery.of(context).size.height;
     final double safeBottom = MediaQuery.of(context).padding.bottom;
-    // Reveal the navbar once the tall black hero (~one screenful of banner +
-    // the categories below it) has scrolled away.
-    _navFadeStart = screenH * 0.70;
-    _navFadeEnd = screenH * 0.95;
 
     // Tall banner height (matches the Venues page): fills the viewport minus the
     // header block and the navbar area.
@@ -240,6 +236,14 @@ class _EventsScreenState extends State<EventsScreen> {
             140) // navbar pill + clear gap above it
         .clamp(300.0, 700.0);
     final double bannerCardWidth = MediaQuery.of(context).size.width - 32;
+
+    // Reveal the navbar as the top banner scrolls away, so it's visible by the
+    // time the first section (Explore by Categories) is in view — tied to the
+    // banner height, not a fixed fraction of the screen (the black hero is
+    // taller than one screenful, so a screen-fraction revealed it far too late).
+    final double heroTop = MediaQuery.of(context).padding.top + 169;
+    _navFadeStart = heroTop + bannerH * 0.65;
+    _navFadeEnd = heroTop + bannerH;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -302,39 +306,47 @@ class _EventsScreenState extends State<EventsScreen> {
                       const SizedBox(height: 18),
                       // Grid with the "View All" pill floated over the bottom
                       // row (seamlessly blended, per the reference).
+                      // Reserve space at the grid's bottom so the floated pill
+                      // stays INSIDE the Stack's bounds — a Positioned child
+                      // hanging past the Stack isn't hit-testable (taps on the
+                      // overhang are rejected), which left the button dead.
                       Stack(
                         alignment: Alignment.bottomCenter,
-                        clipBehavior: Clip.none,
                         children: [
-                          RepaintBoundary(
-                            child: ExploreCategoriesGrid(
-                              categories: _gridCategories,
-                              scrollable: true,
-                              scrollHeight: 260,
-                              maxScrollRows: 3, // scroll stops at the 3rd row
-                              childAspectRatio: 0.8,
-                              onCategoryTap: (index) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => CategoryEventsScreen(
-                                      categories: _gridCategories,
-                                      initialCategoryIndex: index,
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 24),
+                            child: RepaintBoundary(
+                              child: ExploreCategoriesGrid(
+                                categories: _gridCategories,
+                                scrollable: true,
+                                scrollHeight: 260,
+                                maxScrollRows: 3, // scroll stops at the 3rd row
+                                childAspectRatio: 0.8,
+                                onCategoryTap: (index) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => CategoryEventsScreen(
+                                        categories: _gridCategories,
+                                        initialCategoryIndex: index,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
+                                  );
+                                },
+                              ),
                             ),
                           ),
                           Positioned(
-                            bottom: -24,
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
                             child: DarkViewAllButton(
                               onTap: () => _showAllCategoriesPopup(context),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 50),
+                      const SizedBox(height: 26),
                     ],
                   ),
                 ),

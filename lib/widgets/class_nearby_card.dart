@@ -160,7 +160,7 @@ class ClassNearbyCard extends StatelessWidget {
                               textAlign: TextAlign.center,
                               style: GoogleFonts.poppins(
                                 fontSize: Responsive.sp(context, 13),
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
                                 color: AppColors.textPrimary,
                               ),
                             ),

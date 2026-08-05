@@ -348,7 +348,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
                           'Send Enquiry',
                           style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 16),
-                              fontWeight: FontWeight.w500),
+                              fontWeight: FontWeight.w600),
                         ),
                 ),
               ),

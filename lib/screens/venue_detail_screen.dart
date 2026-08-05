@@ -656,7 +656,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                               ? 'Send Enquiry'
                               : 'Check Availability',
                           style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500)),
+                              fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ],

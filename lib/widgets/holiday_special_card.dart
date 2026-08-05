@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import 'primary_cta_button.dart';
 import '../models/event_model.dart';
 import 'animated_gradient_tag.dart';
 import 'listing_meta_rows.dart';
@@ -127,37 +128,18 @@ class HolidaySpecialCard extends StatelessWidget {
                     twoColumn: true,
                   ),
                   const SizedBox(height: 10),
-                  // Book Now button — full-width like TLB Signature.
-                  SizedBox(
-                    width: double.infinity,
-                    child: Material(
-                    color: AppColors.primaryLight,
-                    borderRadius: BorderRadius.circular(22),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(22),
-                      onTap: () {
-                        if (buttonLabel == 'Send Enquiry') {
-                          showInquireNow(context, listingId: event.id);
-                        } else if (buttonLabel == 'Check Availability' || buttonLabel == 'View Details') {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
-                        } else {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
-                        }
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 9),
-                        child: Text(
-                          buttonLabel,
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 12),
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  // Book Now button — shared canonical CTA.
+                  PrimaryCtaButton(
+                    label: buttonLabel,
+                    onTap: () {
+                      if (buttonLabel == 'Send Enquiry') {
+                        showInquireNow(context, listingId: event.id);
+                      } else if (buttonLabel == 'Check Availability' || buttonLabel == 'View Details') {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
+                      } else {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
+                      }
+                    },
                   ),
                 ],
               ),

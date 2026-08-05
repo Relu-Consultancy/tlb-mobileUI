@@ -68,8 +68,14 @@ class DarkCategoryTitle extends StatelessWidget {
   }
 }
 
-/// The "View All →" pill — dark translucent so it blends over the bright bottom
-/// cards when floated on top of the category grid.
+/// The "View All →" pill with a dark shade band behind it. The band is a
+/// vertical gradient — transparent at the top fading to near-black at the
+/// bottom (the supplied white→dark gradient, drawn natively so it can't band
+/// or need scaling) — so the bright bottom category cards dissolve into black
+/// beneath the pill.
+///
+/// Render this full width: place it in a `Positioned(bottom:0, left:0, right:0)`
+/// (or any full-width slot) so the shade spans the row behind the pill.
 class DarkViewAllButton extends StatelessWidget {
   final VoidCallback onTap;
 
@@ -77,51 +83,81 @@ class DarkViewAllButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 11),
-          decoration: BoxDecoration(
-            // Grey up top fading into darkness at the bottom.
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                const Color(0xFF525252).withOpacity(0.88),
-                const Color(0xFF3A3A3A).withOpacity(0.90),
-                const Color(0xFF050505).withOpacity(0.97),
-              ],
-              stops: const [0.0, 0.45, 1.0],
-            ),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withOpacity(0.22), width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.35),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'View All',
-                style: GoogleFonts.poppins(
-                  fontSize: Responsive.sp(context, 13),
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        // Dark shade band behind the pill (fades the cards into black).
+        Positioned.fill(
+          child: IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withOpacity(0.62),
+                    Colors.black.withOpacity(0.96),
+                  ],
+                  stops: const [0.0, 0.55, 1.0],
                 ),
               ),
-              const SizedBox(width: 6),
-              const Icon(Icons.arrow_forward, size: 15, color: Colors.white),
-            ],
+            ),
           ),
         ),
-      ),
+        // The pill — its top padding gives the band height to fade over the
+        // bottom cards; the band is what supplies the "dark shade" now.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0, 44, 0, 12),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24, vertical: 11),
+              decoration: BoxDecoration(
+                // Grey up top fading into darkness at the bottom.
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFF525252).withOpacity(0.88),
+                    const Color(0xFF3A3A3A).withOpacity(0.90),
+                    const Color(0xFF050505).withOpacity(0.97),
+                  ],
+                  stops: const [0.0, 0.45, 1.0],
+                ),
+                borderRadius: BorderRadius.circular(24),
+                border:
+                    Border.all(color: Colors.white.withOpacity(0.22), width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.35),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'View All',
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 13),
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  const Icon(Icons.arrow_forward,
+                      size: 15, color: Colors.white),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
