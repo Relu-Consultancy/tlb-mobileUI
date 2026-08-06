@@ -218,17 +218,19 @@ class AllCategoriesPopup extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
+                      // Full-strength gradient (not a faded/opacity version)
+                      // so these cards match the vivid category-card look
+                      // used everywhere else in the app (ExploreCategoriesGrid).
+                      border: Border.all(
+                          color: Colors.black.withOpacity(0.06), width: 0.7),
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.white,
-                          gradientColors.last.withOpacity(0.3),
-                        ],
+                        colors: [Colors.white, gradientColors.last],
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: gradientColors.last.withOpacity(0.12),
+                          color: gradientColors.last.withOpacity(0.3),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),

@@ -819,19 +819,27 @@ class _VenuesScreenState extends State<VenuesScreen> {
           // ── Venue list ──
           // Expanded so this block fills the remaining fixed card height —
           // otherwise the CTA trails the content with a large unclaimed gap
-          // beneath it instead of sitting at the card's bottom edge.
+          // beneath it instead of sitting at the card's bottom edge. The rows
+          // themselves are wrapped in their own Expanded + scrollview so a
+          // future entry with more venues than fit scrolls internally instead
+          // of overflowing the card's fixed height.
           Expanded(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                ...List.generate(venues.length, (idx) {
-                  final v = venues[idx];
-                  final slots = (v['slots'] as List).cast<String>();
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: List.generate(venues.length, (idx) {
+                          final v = venues[idx];
+                          final slots = (v['slots'] as List).cast<String>();
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                       // Venue info row
                       Row(
                         children: [
@@ -914,19 +922,19 @@ class _VenuesScreenState extends State<VenuesScreen> {
                           );
                         }),
                       ),
-                      if (idx < venues.length - 1) ...[
-                        const SizedBox(height: 14),
-                        Divider(color: Colors.grey.shade200, height: 1),
-                        const SizedBox(height: 14),
-                      ] else
-                        const SizedBox(height: 20),
-                    ],
-                  );
-                }),
-                // Spacer absorbs the remaining fixed-card height so the CTA
-                // pins to the bottom edge instead of trailing the content.
-                const Spacer(),
-                // Full-width CTA at the bottom (shared canonical CTA).
+                              if (idx < venues.length - 1) ...[
+                                const SizedBox(height: 14),
+                                Divider(color: Colors.grey.shade200, height: 1),
+                                const SizedBox(height: 14),
+                              ],
+                            ],
+                          );
+                        }),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Full-width CTA at the bottom (shared canonical CTA).
                 PrimaryCtaButton(
                   label: 'View Now',
                   onTap: () {

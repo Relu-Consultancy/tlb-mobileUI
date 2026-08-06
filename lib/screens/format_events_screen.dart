@@ -119,11 +119,18 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
     final bool invert = fmt['invertColors'] == true;
     const double size = 82;
 
+    // The source badge art is flush against the left/right/bottom edges of
+    // its canvas, with a variable amount of empty padding above the circle
+    // only. Center-aligned cover crops that padding symmetrically (leaving
+    // some behind at the top), so the visible disc doesn't quite reach the
+    // ring — bottom-aligning crops the excess entirely from the top instead,
+    // so the disc fills the circular frame flush on every side.
     Widget img = Image.asset(
       fmt['image'],
       width: size,
       height: size,
       fit: BoxFit.cover,
+      alignment: Alignment.bottomCenter,
       errorBuilder: (_, __, ___) =>
           const Icon(Icons.category, color: Colors.white54),
     );

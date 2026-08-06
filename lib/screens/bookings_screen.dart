@@ -12,6 +12,19 @@ import '../widgets/app_loader.dart';
 import '../widgets/app_refresh_indicator.dart';
 import 'booking_detail_screen.dart';
 
+/// Muted gold-grey used to "discolor" Past-tab cards (attended/refunded) —
+/// their thumbnail, badge and CTA border fade to this instead of the vivid
+/// green/gold used for live bookings, reading as a washed-out memory.
+const Color _kPastMutedColor = Color(0xFFB8A57C);
+
+/// Sepia-style desaturation matrix applied to Past-tab thumbnails.
+const List<double> _kPastImageFilterMatrix = [
+  0.393, 0.769, 0.189, 0, 0,
+  0.349, 0.686, 0.168, 0, 0,
+  0.272, 0.534, 0.131, 0, 0,
+  0, 0, 0, 1, 0,
+];
+
 class BookingsScreen extends StatefulWidget {
   const BookingsScreen({super.key});
 
@@ -344,6 +357,26 @@ class _BookingCardState extends State<_BookingCard> {
   Widget build(BuildContext context) {
     final canViewTicket =
         booking.status == 'confirmed' || booking.status == 'attended';
+    // Past-tab bookings (attended/refunded) render "discolored" — a muted,
+    // sepia-toned look that reads as history rather than a live booking.
+    final isPast = booking.status == 'attended' || booking.status == 'refunded';
+
+    Widget thumbnail = (_coverUrl != null && _coverUrl!.isNotEmpty)
+        ? Image.network(
+            _coverUrl!,
+            width: 80,
+            height: 80,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) =>
+                _buildPlaceholder(context, booking.bookingType),
+          )
+        : _buildPlaceholder(context, booking.bookingType);
+    if (isPast) {
+      thumbnail = ColorFiltered(
+        colorFilter: const ColorFilter.matrix(_kPastImageFilterMatrix),
+        child: thumbnail,
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -364,16 +397,7 @@ class _BookingCardState extends State<_BookingCard> {
           // ── Thumbnail (cover image or placeholder) ──
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: (_coverUrl != null && _coverUrl!.isNotEmpty)
-                ? Image.network(
-                    _coverUrl!,
-                    width: 80,
-                    height: 80,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) =>
-                        _buildPlaceholder(context, booking.bookingType),
-                  )
-                : _buildPlaceholder(context, booking.bookingType),
+            child: thumbnail,
           ),
           const SizedBox(width: 14),
 
@@ -382,7 +406,7 @@ class _BookingCardState extends State<_BookingCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _StatusBadge(status: booking.status),
+                _StatusBadge(status: booking.status, muted: isPast),
                 const SizedBox(height: 6),
 
                 Text(
@@ -445,7 +469,10 @@ class _BookingCardState extends State<_BookingCard> {
                           horizontal: 16, vertical: 7),
                       decoration: BoxDecoration(
                         border: Border.all(
-                            color: AppColors.starAmber, width: 1.5),
+                            color: isPast
+                                ? _kPastMutedColor
+                                : AppColors.starAmber,
+                            width: 1.5),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
@@ -558,11 +585,12 @@ class _BookingCardState extends State<_BookingCard> {
 
 class _StatusBadge extends StatelessWidget {
   final String status;
-  const _StatusBadge({required this.status});
+  final bool muted;
+  const _StatusBadge({required this.status, this.muted = false});
 
   @override
   Widget build(BuildContext context) {
-    final color = _statusColor(status);
+    final color = muted ? _kPastMutedColor : _statusColor(status);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: BoxDecoration(
@@ -593,7 +621,7 @@ class _StatusBadge extends StatelessWidget {
       case 'payment_failed':
         return const Color(0xFFEF4444);
       case 'cancelled':
-        return const Color(0xFF9CA3AF);
+        return const Color(0xFFEF4444);
       case 'refunded':
         return const Color(0xFF6366F1);
       default:

@@ -1068,7 +1068,7 @@ class _HeaderSection extends StatelessWidget {
       case 'payment_failed':
         return const Color(0xFFEF4444);
       case 'cancelled':
-        return const Color(0xFF9CA3AF);
+        return const Color(0xFFEF4444);
       case 'refunded':
         return const Color(0xFF6366F1);
       default:
