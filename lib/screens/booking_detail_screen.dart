@@ -446,6 +446,17 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                         'Venue',
                                         _booking.listingTitle,
                                       ),
+                                      if (_booking.listingId != null &&
+                                          _booking.listingId!.isNotEmpty) ...[
+                                        _venueDivider(),
+                                        _venueDetailRow(
+                                          context,
+                                          Icons.badge_outlined,
+                                          'Listing ID',
+                                          _booking.listingId!,
+                                          mono: true,
+                                        ),
+                                      ],
                                       _venueDivider(),
                                       _venueDetailRow(
                                         context,
@@ -762,6 +773,17 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                         itemLabel,
                                         _booking.listingTitle,
                                       ),
+                                      if (_booking.listingId != null &&
+                                          _booking.listingId!.isNotEmpty) ...[
+                                        _venueDivider(),
+                                        _venueDetailRow(
+                                          context,
+                                          Icons.badge_outlined,
+                                          'Listing ID',
+                                          _booking.listingId!,
+                                          mono: true,
+                                        ),
+                                      ],
                                       _venueDivider(),
                                       _venueDetailRow(
                                         context,
@@ -1318,6 +1340,13 @@ class _TicketContent extends StatelessWidget {
             ),
           ],
         ),
+
+        // Listing ID — the booked listing's own DB id, distinct from the
+        // booking reference (the ticket id).
+        if (booking.listingId != null && booking.listingId!.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          _Field(label: 'Listing ID', value: booking.listingId!),
+        ],
 
         // Cancellation info
         if (booking.status == 'cancelled' &&

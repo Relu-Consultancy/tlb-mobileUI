@@ -78,6 +78,12 @@ class TicketPdfService {
         _asString(data['title']) ??
         'Booking Ticket';
     final ref = _asString(data['booking_reference']) ?? '';
+    final listing =
+        data['listing'] is Map ? data['listing'] as Map<String, dynamic> : null;
+    final listingId = _firstNonEmpty([
+      _asString(data['listing_id']),
+      _asString(listing?['id']),
+    ]);
     final bookingType = _asString(data['booking_type'])?.toUpperCase() ?? '';
     final dateLabel = _firstNonEmpty([
       _asString(data['date']),
@@ -190,6 +196,7 @@ class TicketPdfService {
 
               if (ref.isNotEmpty)
                 _row('Booking Reference', ref, mono: true, accent: true),
+              if (listingId != null) _row('Listing ID', listingId, mono: true),
               if (dateLabel != null) _row('Date', dateLabel),
               if (timeLabel != null) _row('Time', timeLabel),
               if (venue != null) _row('Venue', venue),
