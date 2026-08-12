@@ -10,7 +10,7 @@ import '../models/event_model.dart';
 import '../providers/location_state.dart';
 import '../services/events_listing_service.dart';
 import '../widgets/app_loader.dart';
-import '../widgets/category_event_card.dart';
+import '../widgets/trending_event_card.dart';
 import '../widgets/subcategory_empty_state.dart';
 
 class FormatEventsScreen extends StatefulWidget {
@@ -89,23 +89,25 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
     '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
   ];
+  static const _weekdays = [
+    '', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun',
+  ];
 
   EventModel _toEventModel(ApiEvent e) {
     final dt = e.startDatetime.toLocal();
     final dateLabel = '${dt.day} ${_months[dt.month]}';
+    final dayLabel = _weekdays[dt.weekday];
     final timeLabel =
         '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
 
     return EventModel(
       id: e.id,
       title: e.title,
-      // "Mumbai • 15 Jun" gives useful context at a glance
-      venue: '${e.city} • $dateLabel',
+      venue: e.city,
       imagePath: e.coverUrl ?? '',
-      // subcategory name first, fall back to category name
       tag: e.subcategory?.name ?? e.category.name,
-      description: null,
-      eventDate: dateLabel,
+      description: e.ageGroup?.displayRange,
+      eventDate: '$dayLabel, $dateLabel',
       eventTime: timeLabel,
       price: e.priceFrom != null ? double.tryParse(e.priceFrom!) : null,
       isFeatured: e.priceType == 'free',
@@ -117,20 +119,13 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
     final bool isSelected = index == _selectedIndex;
     final double scale = (fmt['scale'] as double?) ?? 1.0;
     final bool invert = fmt['invertColors'] == true;
-    const double size = 82;
+    const double size = 90;
 
-    // The source badge art is flush against the left/right/bottom edges of
-    // its canvas, with a variable amount of empty padding above the circle
-    // only. Center-aligned cover crops that padding symmetrically (leaving
-    // some behind at the top), so the visible disc doesn't quite reach the
-    // ring — bottom-aligning crops the excess entirely from the top instead,
-    // so the disc fills the circular frame flush on every side.
     Widget img = Image.asset(
       fmt['image'],
       width: size,
       height: size,
-      fit: BoxFit.cover,
-      alignment: Alignment.bottomCenter,
+      fit: BoxFit.contain,
       errorBuilder: (_, __, ___) =>
           const Icon(Icons.category, color: Colors.white54),
     );
@@ -153,45 +148,49 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AnimatedContainer(
+            // Image — no clip so artwork pops out of the disc
+            AnimatedScale(
               duration: const Duration(milliseconds: 220),
-              width: isSelected ? size + 8 : size,
-              height: isSelected ? size + 8 : size,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: isSelected
-                    ? Border.all(color: Colors.white, width: 2.5)
-                    : Border.all(
-                        color: Colors.white.withOpacity(0.25), width: 1.5),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        )
-                      ]
-                    : null,
-              ),
-              child: ClipOval(child: img),
-            ),
-            const SizedBox(height: 5),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 220),
-              style: GoogleFonts.poppins(
-                fontSize: isSelected ? Responsive.sp(context, 9.5) : Responsive.sp(context, 8.5),
-                fontWeight:
-                    isSelected ? FontWeight.w500 : FontWeight.w500,
-                color: isSelected
-                    ? Colors.white
-                    : Colors.white.withOpacity(0.7),
-                height: 1.2,
-              ),
-              child: Text(
-                fmt['label'] as String,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              scale: isSelected ? 1.12 : 1.0,
+              child: SizedBox(
+                width: size,
+                height: size,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    img,
+                    // Label engraved inside the disc
+                    Positioned(
+                      left: size * 0.10,
+                      right: size * 0.10,
+                      bottom: size * 0.06,
+                      child: Text(
+                        fmt['label'] as String,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 9.5),
+                          fontWeight: FontWeight.w600,
+                          height: 1.1,
+                          color: isSelected
+                              ? Colors.white
+                              : Colors.white.withOpacity(0.85),
+                          shadows: [
+                            Shadow(
+                              color: Colors.black.withOpacity(0.6),
+                              blurRadius: 4,
+                            ),
+                            Shadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -281,7 +280,7 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
 
                   // Format circles row
                   SizedBox(
-                    height: 118,
+                    height: 106,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -349,23 +348,21 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
                     SliverPadding(
                       padding:
                           const EdgeInsets.symmetric(horizontal: 16),
-                      sliver: SliverGrid(
+                      sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (_, i) {
                             if (i >= _events.length) return null;
-                            return CategoryEventCard(
-                              event: _toEventModel(_events[i]),
-                              badgeColor: _accentColor.withOpacity(0.85),
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 24),
+                              child: SizedBox(
+                                height: Responsive.h(context, 420, min: 400),
+                                child: TrendingEventCard(
+                                  event: _toEventModel(_events[i]),
+                                ),
+                              ),
                             );
                           },
                           childCount: _events.length,
-                        ),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 14,
-                          crossAxisSpacing: 14,
-                          childAspectRatio: 0.62,
                         ),
                       ),
                     ),

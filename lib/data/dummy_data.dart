@@ -32,36 +32,39 @@ class DummyData {
     },
   ];
 
+  // Card renders [Colors.white -> gradient.last], so `.last` is the visible
+  // bottom tone — deep/saturated, matching the same categories' colors in
+  // the "View All" popup (DummyData.allCategories) for consistency.
   static const List<Map<String, dynamic>> exploreCategories = [
     {
       'label': 'Arts & Crafts',
       'image': 'assets/images/event_subcategories/artcraft.png',
-      'gradient': [Color(0xFFE8E0FF), Color(0xFFD4BFFF)],
+      'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
     },
     {
       'label': 'Performing Arts',
       'image': 'assets/images/event_subcategories/performarts.png',
-      'gradient': [Color(0xFFFFE0E0), Color(0xFFFFB3B3)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
     },
     {
       'label': 'STEM &\nInnovation',
       'image': 'assets/images/event_subcategories/stem.png',
-      'gradient': [Color(0xFFFFF0D4), Color(0xFFFFDB99)],
+      'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
     },
     {
       'label': 'Sports &\nFitness',
       'image': 'assets/images/event_subcategories/sports.png',
-      'gradient': [Color(0xFFFFF8D4), Color(0xFFFFEDA1)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
     },
     {
       'label': 'Languages &\nCommunication',
       'image': 'assets/images/event_subcategories/lang.png',
-      'gradient': [Color(0xFFFFE8E0), Color(0xFFFFC2AD)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
     },
     {
       'label': 'Life Skills',
       'image': 'assets/images/event_subcategories/lifeskills.png',
-      'gradient': [Color(0xFFE0F0FF), Color(0xFFADD4FF)],
+      'gradient': [Color(0xFF38BDF8), Color(0xFF2563EB)], // sky/blue
     },
   ];
 
@@ -109,72 +112,75 @@ class DummyData {
     },
   ];
 
+  // Card renders [Colors.white -> gradient.last], so `.last` is the visible
+  // bottom tone — deep/saturated, matching the same categories' colors in
+  // the "View All" popup (DummyData.classesSeeAllCategories) for consistency.
   static const List<Map<String, dynamic>> classesCategories = [
     {
       'label': 'Academic',
       'apiName': 'Academic',
       'image': 'assets/images/class_page/academic.png',
-      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+      'gradient': [Color(0xFF6366F1), Color(0xFF312E81)], // indigo/navy
     },
     {
       'label': 'Creative Arts',
       'apiName': 'Creative Arts',
       'image': 'assets/images/class_page/creative.png',
-      'gradient': [Color(0xFFFFF0F0), Color(0xFFFFDBDB)],
+      'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
     },
     {
       'label': 'Tech & Innovation',
       'apiName': 'Tech & Innovation',
       'image': 'assets/images/class_page/tech.png',
-      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+      'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
     },
     {
       'label': 'Performing Arts',
       'apiName': 'Performing Arts',
       'image': 'assets/images/class_page/performing.png',
-      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
     },
     {
       'label': 'Sports & Fitness',
       'apiName': 'Sports & Fitness',
       'image': 'assets/images/class_page/sports.png',
-      'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
     },
     {
       'label': 'Speech &\nCommunication',
       'apiName': 'Speech & Communication',
       'image': 'assets/images/class_page/speech.png',
-      'gradient': [Color(0xFFFFE4E6), Color(0xFFFECDD3)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
     },
     {
       'label': 'Life Skills &\nPersonality Dev',
       'apiName': 'Life Skills & Personality Development',
       'image': 'assets/images/class_page/lifeskills.png',
-      'gradient': [Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
+      'gradient': [Color(0xFF38BDF8), Color(0xFF2563EB)], // sky/blue
     },
     {
       'label': 'Creative Media',
       'apiName': 'Creative Media',
       'image': 'assets/images/class_page/media.png',
-      'gradient': [Color(0xFFFEF3C7), Color(0xFFFDE68A)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFF97316)], // amber/orange
     },
     {
       'label': 'Outdoor &\nNature Learning',
       'apiName': 'Outdoor & Nature Learning',
       'image': 'assets/images/class_page/outdoor.png',
-      'gradient': [Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
+      'gradient': [Color(0xFF6EE7B7), Color(0xFF059669)], // green/emerald
     },
     {
       'label': 'Culinary',
       'apiName': 'Culinary',
       'image': 'assets/images/class_page/culinary.png',
-      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+      'gradient': [Color(0xFFFDA4AF), Color(0xFFE11D48)], // rose/red
     },
     {
       'label': 'Brain Boosters',
       'apiName': 'Brain Boosters',
       'image': 'assets/images/class_page/brainboosters.png',
-      'gradient': [Color(0xFFF5F3FF), Color(0xFFEDE9FE)],
+      'gradient': [Color(0xFF67E8F9), Color(0xFF0891B2)], // cyan/teal
     },
   ];
 
@@ -212,25 +218,28 @@ class DummyData {
   // NOTE: every entry carries `imageInset` + `imageScale` so the 3D character
   // art fills the (0.8-aspect) card consistently — without them the images
   // render small and float. Tuned for the "Pave Your Path" grid.
+  // Card renders [Colors.white -> gradient.last], so `.last` is the visible
+  // bottom tone — deep/saturated, matching the same categories' colors in
+  // the "View All" popup (DummyData.programsSeeAllCategories) for consistency.
   static const List<Map<String, dynamic>> programsCategories = [
     {
       'label': 'Future Tech & AI',
       'image': "resources- tlb-ui/events_page/futuretech'.png",
-      'gradient': [Color(0xFFDCFCE7), Color(0xFFBBF7D0)],
+      'gradient': [Color(0xFF67E8F9), Color(0xFF0891B2)], // cyan/teal
       'imageInset': 0.0,
       'imageScale': 1.2,
     },
     {
       'label': 'Design &\nInnovation',
       'image': 'resources- tlb-ui/events_page/design.png',
-      'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
       'imageInset': 0.0,
       'imageScale': 1.05,
     },
     {
       'label': 'Leadership &\nEntrepreneurship',
       'image': 'resources- tlb-ui/events_page/leadership.png',
-      'gradient': [Color(0xFFDBEAFE), Color(0xFFBFDBFE)],
+      'gradient': [Color(0xFF38BDF8), Color(0xFF2563EB)], // sky/blue
       'imageInset': 0.0,
       'imageScale': 0.9,
       // tall figure — already fills the card
@@ -238,21 +247,21 @@ class DummyData {
     {
       'label': 'Media & Content\nCreation',
       'image': 'resources- tlb-ui/events_page/media.png',
-      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+      'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
       'imageInset': 0.0,
       'imageScale': 1.05,
     },
     {
       'label': 'Stage Arts &\nPerformance',
       'image': 'resources- tlb-ui/events_page/stage.png',
-      'gradient': [Color(0xFFECFDF5), Color(0xFFD1FAE5)],
+      'gradient': [Color(0xFF6EE7B7), Color(0xFF059669)], // green/emerald
       'imageInset': 0.0,
       'imageScale': 1.1,
     },
     {
       'label': 'Active Sports\n& Training',
       'image': 'resources- tlb-ui/events_page/activesports.png',
-      'gradient': [Color(0xFFFEE2E2), Color(0xFFFECACA)],
+      'gradient': [Color(0xFFFDA4AF), Color(0xFFE11D48)], // rose/red
       'imageInset': 0.0,
       'imageScale': 0.85,
       // tall figure — already fills the card
@@ -260,35 +269,35 @@ class DummyData {
     {
       'label': 'Academics &\nCompetitive Prep',
       'image': 'assets/images/class_page/academic.png',
-      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
       'imageInset': 0.0,
       'imageScale': 1.0,
     },
     {
       'label': 'Analytical\nThinking',
       'image': 'assets/images/class_page/brainboosters.png',
-      'gradient': [Color(0xFFFEF9C3), Color(0xFFFDE68A)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFF97316)], // amber/orange
       'imageInset': 0.0,
       'imageScale': 1.0,
     },
     {
       'label': 'Language &\nCommunication',
       'image': 'assets/images/class_page/speech.png',
-      'gradient': [Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
       'imageInset': 0.0,
       'imageScale': 1.0,
     },
     {
       'label': 'Culinary &\nHospitality',
       'image': 'assets/images/class_page/culinary.png',
-      'gradient': [Color(0xFFFFFBEB), Color(0xFFFEF3C7)],
+      'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
       'imageInset': 0.0,
       'imageScale': 1.0,
     },
     {
       'label': 'Grooming &\nPersonality Dev',
       'image': 'assets/images/class_page/lifeskills.png',
-      'gradient': [Color(0xFFFAF5FF), Color(0xFFF3E8FF)],
+      'gradient': [Color(0xFF6366F1), Color(0xFF312E81)], // indigo/navy
       'imageInset': 0.0,
       'imageScale': 1.0,
     },
@@ -333,61 +342,63 @@ class DummyData {
     },
   ];
 
+  // Card renders [Colors.white -> gradient.last], so `.last` is the visible
+  // bottom tone — deep/saturated to match the "View All" reference.
   static const List<Map<String, dynamic>> classesSeeAllCategories = [
     {
       'label': 'Academic',
       'image': 'assets/images/class_page/academic.png',
-      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+      'gradient': [Color(0xFF6366F1), Color(0xFF312E81)], // indigo/navy
     },
     {
       'label': 'Creative Arts',
       'image': 'assets/images/class_page/creative.png',
-      'gradient': [Color(0xFFFFF0F0), Color(0xFFFFDBDB)],
+      'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
     },
     {
       'label': 'Tech & Innovation',
       'image': 'assets/images/class_page/tech.png',
-      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+      'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
     },
     {
       'label': 'Performing Arts',
       'image': 'assets/images/class_page/performing.png',
-      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
     },
     {
       'label': 'Sports & Fitness',
       'image': 'assets/images/class_page/sports.png',
-      'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
     },
     {
       'label': 'Speech & Communication',
       'image': 'assets/images/class_page/speech.png',
-      'gradient': [Color(0xFFFFE4E6), Color(0xFFFECDD3)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
     },
     {
       'label': 'Life Skills & Personality Development',
       'image': 'assets/images/class_page/lifeskills.png',
-      'gradient': [Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
+      'gradient': [Color(0xFF38BDF8), Color(0xFF2563EB)], // sky/blue
     },
     {
       'label': 'Creative Media',
       'image': 'assets/images/class_page/media.png',
-      'gradient': [Color(0xFFFEF3C7), Color(0xFFFDE68A)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFF97316)], // amber/orange
     },
     {
       'label': 'Outdoor and Nature Learning',
       'image': 'assets/images/class_page/outdoor.png',
-      'gradient': [Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
+      'gradient': [Color(0xFF6EE7B7), Color(0xFF059669)], // green/emerald
     },
     {
       'label': 'Culinary',
       'image': 'assets/images/class_page/culinary.png',
-      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+      'gradient': [Color(0xFFFDA4AF), Color(0xFFE11D48)], // rose/red
     },
     {
       'label': 'Brain Boosters',
       'image': 'assets/images/class_page/brainboosters.png',
-      'gradient': [Color(0xFFF5F3FF), Color(0xFFEDE9FE)],
+      'gradient': [Color(0xFF67E8F9), Color(0xFF0891B2)], // cyan/teal
     },
   ];
 
@@ -439,114 +450,118 @@ class DummyData {
     },
   ];
 
+  // Card renders [Colors.white -> gradient.last], so `.last` is the visible
+  // bottom tone — deep/saturated to match the "View All" reference.
   static const List<Map<String, dynamic>> programsSeeAllCategories = [
     {
       'label': 'Future Tech & AI',
       'image': "resources- tlb-ui/events_page/futuretech'.png",
-      'gradient': [Color(0xFFDCFCE7), Color(0xFFBBF7D0)],
+      'gradient': [Color(0xFF67E8F9), Color(0xFF0891B2)], // cyan/teal
     },
     {
       'label': 'Design & Innovation',
       'image': 'resources- tlb-ui/events_page/design.png',
-      'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
     },
     {
       'label': 'Leadership & Entrepreneurship',
       'image': 'resources- tlb-ui/events_page/leadership.png',
-      'gradient': [Color(0xFFDBEAFE), Color(0xFFBFDBFE)],
+      'gradient': [Color(0xFF38BDF8), Color(0xFF2563EB)], // sky/blue
     },
     {
       'label': 'Media & Content Creation',
       'image': 'resources- tlb-ui/events_page/media.png',
-      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+      'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
     },
     {
       'label': 'Stage Arts & Performance',
       'image': 'resources- tlb-ui/events_page/stage.png',
-      'gradient': [Color(0xFFECFDF5), Color(0xFFD1FAE5)],
+      'gradient': [Color(0xFF6EE7B7), Color(0xFF059669)], // green/emerald
     },
     {
       'label': 'Active Sports & Training',
       'image': 'resources- tlb-ui/events_page/activesports.png',
-      'gradient': [Color(0xFFFEE2E2), Color(0xFFFECACA)],
+      'gradient': [Color(0xFFFDA4AF), Color(0xFFE11D48)], // rose/red
     },
     {
       'label': 'Academics & Competitive Prep',
       'image': 'assets/images/class_page/academic.png',
-      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
     },
     {
       'label': 'Analytical Thinking',
       'image': 'assets/images/class_page/brainboosters.png',
-      'gradient': [Color(0xFFFEF9C3), Color(0xFFFDE68A)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFF97316)], // amber/orange
     },
     {
       'label': 'Language & Communication',
       'image': 'assets/images/class_page/speech.png',
-      'gradient': [Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
     },
     {
       'label': 'Culinary & Hospitality',
       'image': 'assets/images/class_page/culinary.png',
-      'gradient': [Color(0xFFFFFBEB), Color(0xFFFEF3C7)],
+      'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
     },
     {
       'label': 'Grooming & Personality Development',
       'image': 'assets/images/class_page/lifeskills.png',
-      'gradient': [Color(0xFFFAF5FF), Color(0xFFF3E8FF)],
+      'gradient': [Color(0xFF6366F1), Color(0xFF312E81)], // indigo/navy
     },
   ];
 
+  // Card renders [Colors.white -> gradient.last], so `.last` is the visible
+  // bottom tone — deep/saturated per the reference (was near-white pastel).
   static const List<Map<String, dynamic>> allCategories = [
     {
       'label': 'Arts & Crafts',
       'image': 'assets/images/event_subcategories/artcraft.png',
-      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+      'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
     },
     {
       'label': 'Performing Arts',
       'image': 'assets/images/event_subcategories/performarts.png',
-      'gradient': [Color(0xFFFFF0F0), Color(0xFFFFDBDB)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
     },
     {
       'label': 'STEM & Innovation',
       'image': 'assets/images/event_subcategories/stem.png',
-      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+      'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
     },
     {
       'label': 'Sports & Fitness',
       'image': 'assets/images/event_subcategories/sports.png',
-      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
     },
     {
       'label': 'Languages & Communication',
       'image': 'assets/images/event_subcategories/lang.png',
-      'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
     },
     {
       'label': 'Life Skills',
       'image': 'assets/images/event_subcategories/lifeskills.png',
-      'gradient': [Color(0xFFFFE4E6), Color(0xFFFECDD3)],
+      'gradient': [Color(0xFF38BDF8), Color(0xFF2563EB)], // sky/blue
     },
     {
       'label': 'Mind & Strategy Games',
       'image': 'assets/images/event_subcategories/mindstrat.png',
-      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+      'gradient': [Color(0xFF6366F1), Color(0xFF312E81)], // indigo/navy
     },
     {
       'label': 'Edutainment & Experiences',
       'image': 'assets/images/event_subcategories/Educainment.png',
-      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFF97316)], // amber/orange
     },
     {
       'label': 'Nature & Outdoors',
       'image': 'assets/images/event_subcategories/nature.png',
-      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+      'gradient': [Color(0xFF67E8F9), Color(0xFF0891B2)], // cyan/teal
     },
     {
       'label': 'Festivals & Celebrations',
       'image': 'assets/images/event_subcategories/festivals.png',
-      'gradient': [Color(0xFFFFE4E6), Color(0xFFFECDD3)],
+      'gradient': [Color(0xFFFDA4AF), Color(0xFFE11D48)], // rose/red
     },
   ];
 

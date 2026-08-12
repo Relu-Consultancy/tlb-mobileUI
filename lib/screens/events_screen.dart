@@ -34,52 +34,55 @@ import 'category_events_screen.dart';
 // Slug → local asset + gradient palette.
 // New API categories that don't yet have dedicated assets fall back to a
 // visually distinct colour + the closest existing image.
+// Card renders [Colors.white -> gradient.last], so `.last` is the visible
+// bottom tone — deep/saturated, matching DummyData.allCategories' colors
+// (the "View All" popup) for the same category labels.
 final _categoryAssets = <String, Map<String, dynamic>>{
   'arts-crafts': {
     'image': 'assets/images/event_subcategories/artcraft.png',
-    'gradient': <Color>[const Color(0xFFE8E0FF), const Color(0xFFD4BFFF)],
+    'gradient': <Color>[const Color(0xFFA78BFA), const Color(0xFF7C3AED)], // violet
   },
   'performing-arts': {
     'image': 'assets/images/event_subcategories/performarts.png',
-    'gradient': <Color>[const Color(0xFFFFE0E0), const Color(0xFFFFB3B3)],
+    'gradient': <Color>[const Color(0xFFF472B6), const Color(0xFFDB2777)], // pink
   },
   'stem-innovation': {
     'image': 'assets/images/event_subcategories/stem.png',
-    'gradient': <Color>[const Color(0xFFFFF0D4), const Color(0xFFFFDB99)],
+    'gradient': <Color>[const Color(0xFFFDBA74), const Color(0xFFEA580C)], // orange
   },
   'sports-fitness': {
     'image': 'assets/images/event_subcategories/sports.png',
-    'gradient': <Color>[const Color(0xFFFFF8D4), const Color(0xFFFFEDA1)],
+    'gradient': <Color>[const Color(0xFFFCD34D), const Color(0xFFD97706)], // amber/gold
   },
   'languages-communication': {
     'image': 'assets/images/event_subcategories/lang.png',
-    'gradient': <Color>[const Color(0xFFFFE8E0), const Color(0xFFFFC2AD)],
+    'gradient': <Color>[const Color(0xFFF472B6), const Color(0xFFC026D3)], // magenta/fuchsia
   },
   'life-skills': {
     'image': 'assets/images/event_subcategories/lifeskills.png',
-    'gradient': <Color>[const Color(0xFFE0F0FF), const Color(0xFFADD4FF)],
+    'gradient': <Color>[const Color(0xFF38BDF8), const Color(0xFF2563EB)], // sky/blue
   },
   'mind-strategy-games': {
     'image': 'assets/images/event_subcategories/lifeskills.png',
-    'gradient': <Color>[const Color(0xFFE8F5E9), const Color(0xFFA5D6A7)],
+    'gradient': <Color>[const Color(0xFF6366F1), const Color(0xFF312E81)], // indigo/navy
   },
   'edutainment-experiences': {
     'image': 'assets/images/event_subcategories/performarts.png',
-    'gradient': <Color>[const Color(0xFFFCE4EC), const Color(0xFFF48FB1)],
+    'gradient': <Color>[const Color(0xFFFCD34D), const Color(0xFFF97316)], // amber/orange
   },
   'nature-outdoors': {
     'image': 'assets/images/event_subcategories/sports.png',
-    'gradient': <Color>[const Color(0xFFE8F5E0), const Color(0xFFA5D6A0)],
+    'gradient': <Color>[const Color(0xFF67E8F9), const Color(0xFF0891B2)], // cyan/teal
   },
   'festivals-celebrations': {
     'image': 'assets/images/event_subcategories/artcraft.png',
-    'gradient': <Color>[const Color(0xFFFFF8E1), const Color(0xFFFFCC80)],
+    'gradient': <Color>[const Color(0xFFFDA4AF), const Color(0xFFE11D48)], // rose/red
   },
 };
 
 final _defaultCategoryAsset = <String, dynamic>{
   'image': 'assets/images/event_subcategories/artcraft.png',
-  'gradient': <Color>[const Color(0xFFE8E0FF), const Color(0xFFD4BFFF)],
+  'gradient': <Color>[const Color(0xFFA78BFA), const Color(0xFF7C3AED)], // violet
 };
 
 class EventsScreen extends StatefulWidget {

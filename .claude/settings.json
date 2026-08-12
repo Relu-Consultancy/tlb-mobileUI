@@ -7,7 +7,13 @@
       "PowerShell(flutter analyze lib/widgets/explore_format_row.dart 2>&1)",
       "PowerShell(flutter analyze lib/widgets/explore_format_row.dart lib/data/dummy_data.dart 2>&1)",
       "PowerShell(flutter analyze lib/screens/edit_profile_screen.dart 2>&1)",
-      "PowerShell(flutter test test/screens/edit_profile_screen_test.dart 2>&1)"
+      "PowerShell(flutter test test/screens/edit_profile_screen_test.dart 2>&1)",
+      "Read(//e/tlb-AdminPortal/tlb-super-admin-portal/src/shared/lib/api/marketing/**)",
+      "Read(//e/tlb-AdminPortal/tlb-super-admin-portal/src/shared/lib/api/support/**)",
+      "Read(//e/tlb-AdminPortal/tlb-super-admin-portal/src/shared/lib/api/audit/**)",
+      "Read(//e/tlb-AdminPortal/tlb-super-admin-portal/src/shared/lib/api/tlb/**)",
+      "Read(//e/tlb-AdminPortal/tlb-super-admin-portal/src/modules/home/**)",
+      "Read(//e/tlb-AdminPortal/tlb-super-admin-portal/src/modules/marketing/**)"
     ]
   }
 }
