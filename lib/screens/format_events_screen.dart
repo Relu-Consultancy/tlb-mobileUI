@@ -148,48 +148,29 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Image — no clip so artwork pops out of the disc
+            // Circle image
             AnimatedScale(
               duration: const Duration(milliseconds: 220),
               scale: isSelected ? 1.12 : 1.0,
               child: SizedBox(
                 width: size,
                 height: size,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    img,
-                    // Label engraved inside the disc
-                    Positioned(
-                      left: size * 0.10,
-                      right: size * 0.10,
-                      bottom: size * 0.06,
-                      child: Text(
-                        fmt['label'] as String,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 9.5),
-                          fontWeight: FontWeight.w600,
-                          height: 1.1,
-                          color: isSelected
-                              ? Colors.white
-                              : Colors.white.withOpacity(0.85),
-                          shadows: [
-                            Shadow(
-                              color: Colors.black.withOpacity(0.6),
-                              blurRadius: 4,
-                            ),
-                            Shadow(
-                              color: Colors.black.withOpacity(0.3),
-                              blurRadius: 8,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                child: img,
+              ),
+            ),
+            const SizedBox(height: 5),
+            // Label below the circle — black text, readable on any bg
+            SizedBox(
+              width: size,
+              child: Text(
+                fmt['label'] as String,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: Responsive.sp(context, 10.5),
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
                 ),
               ),
             ),
@@ -280,7 +261,7 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
 
                   // Format circles row
                   SizedBox(
-                    height: 106,
+                    height: 126,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 16),

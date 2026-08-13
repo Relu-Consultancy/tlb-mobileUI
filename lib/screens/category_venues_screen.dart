@@ -13,6 +13,7 @@ import '../providers/location_state.dart';
 import '../services/events_listing_service.dart';
 import '../widgets/category_event_card.dart';
 import '../widgets/category_screen_header.dart';
+import '../widgets/category_skeleton_card.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/subcategory_empty_state.dart';
 import 'venue_detail_screen.dart';
@@ -524,9 +525,20 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                   // ── Venue cards grid (API) ──
                   const SliverToBoxAdapter(child: SizedBox(height: 14)),
                   if (_isLoadingVenues)
-                    const SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: AppLoader(),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: SliverGrid(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => const CategorySkeletonCard(),
+                          childCount: 6,
+                        ),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 14,
+                          crossAxisSpacing: 14,
+                          childAspectRatio: 0.62,
+                        ),
+                      ),
                     )
                   else if (_venuesError != null)
                     SliverFillRemaining(

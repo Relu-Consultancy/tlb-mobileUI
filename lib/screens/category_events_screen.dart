@@ -14,6 +14,7 @@ import '../widgets/category_screen_header.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/subcategory_empty_state.dart';
 import '../widgets/all_categories_popup.dart';
+import '../widgets/category_skeleton_card.dart';
 
 class CategoryEventsScreen extends StatefulWidget {
   final List<Map<String, dynamic>> categories;
@@ -463,9 +464,20 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                   // Event grid
                   const SliverToBoxAdapter(child: SizedBox(height: 14)),
                   if (_isLoadingEvents)
-                    const SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: AppLoader(),
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: SliverGrid(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => const CategorySkeletonCard(),
+                          childCount: 6,
+                        ),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 14,
+                          crossAxisSpacing: 14,
+                          childAspectRatio: 0.62,
+                        ),
+                      ),
                     )
                   else if (_eventsError != null)
                     SliverFillRemaining(

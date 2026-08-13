@@ -307,13 +307,33 @@ class _VenuesScreenState extends State<VenuesScreen> {
             child: ValueListenableBuilder<double>(
               valueListenable: _navReveal,
               builder: (context, t, child) {
+                // Apply easing curves so the animation feels organic rather
+                // than mechanically linear. Opacity leads (appears early),
+                // scale and slide follow a slightly snappier curve.
+                final double easedOpacity =
+                    Curves.easeOutCubic.transform(t);
+                final double easedMotion =
+                    Curves.easeOutQuart.transform(t);
+
+                // Scale: the pill starts slightly smaller (0.92) and grows
+                // to full size, giving the feel of rising toward the viewer.
+                final double scale = 0.92 + 0.08 * easedMotion;
+
+                // Slide: 40px upward travel (down from 60) — enough motion
+                // to feel deliberate but not jarring.
+                final double slideY = (1 - easedMotion) * 40;
+
                 return IgnorePointer(
                   ignoring: t < 0.05,
                   child: Opacity(
-                    opacity: t,
+                    opacity: easedOpacity,
                     child: Transform.translate(
-                      offset: Offset(0, (1 - t) * 60),
-                      child: child,
+                      offset: Offset(0, slideY),
+                      child: Transform.scale(
+                        scale: scale,
+                        alignment: Alignment.bottomCenter,
+                        child: child,
+                      ),
                     ),
                   ),
                 );
@@ -1026,28 +1046,24 @@ class _VenuesScreenState extends State<VenuesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image inset inside the card with a margin all around and all
-            // corners rounded — so the banner is not cut at the card edges.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: Column(
-                  children: [
-                    Image.asset(event.imagePath, height: Responsive.h(context, 186, min: 172), width: double.infinity, fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 186, min: 172), color: Colors.grey.shade200)),
-                    // Full-width distance band — rounded bottom corners follow
-                    // the inset image.
-                    if ((event.tag ?? '').isNotEmpty)
-                      Container(
-                        width: double.infinity,
-                        color: bandColor,
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        alignment: Alignment.center,
-                        child: Text(event.tag!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: Colors.white, fontWeight: FontWeight.w500)),
-                      ),
-                  ],
-                ),
+            // Image fills the card edge-to-edge (top + sides); only the
+            // top corners are rounded to match the card shape.
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              child: Column(
+                children: [
+                  Image.asset(event.imagePath, height: Responsive.h(context, 186, min: 172), width: double.infinity, fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 186, min: 172), color: Colors.grey.shade200)),
+                  // Full-width distance band — flush against the image.
+                  if ((event.tag ?? '').isNotEmpty)
+                    Container(
+                      width: double.infinity,
+                      color: bandColor,
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      alignment: Alignment.center,
+                      child: Text(event.tag!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: Colors.white, fontWeight: FontWeight.w500)),
+                    ),
+                ],
               ),
             ),
             Expanded(
