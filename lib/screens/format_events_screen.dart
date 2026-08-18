@@ -139,42 +139,50 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
       img = Transform.scale(scale: scale, child: img);
     }
 
+    // Same card technique as ExploreFormatRow (home/events feed row): the
+    // label is engraved INSIDE the artwork near the bottom with a white
+    // halo, not set as separate text below — that mismatch was the "gap"
+    // between this screen's circles and the reference look.
     return GestureDetector(
       onTap: () => _selectFormat(index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeInOut,
         margin: const EdgeInsets.only(right: 14),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Circle image
-            AnimatedScale(
-              duration: const Duration(milliseconds: 220),
-              scale: isSelected ? 1.12 : 1.0,
-              child: SizedBox(
-                width: size,
-                height: size,
-                child: img,
-              ),
-            ),
-            const SizedBox(height: 5),
-            // Label below the circle — black text, readable on any bg
-            SizedBox(
-              width: size,
-              child: Text(
-                fmt['label'] as String,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.poppins(
-                  fontSize: Responsive.sp(context, 10.5),
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
+        child: AnimatedScale(
+          duration: const Duration(milliseconds: 220),
+          scale: isSelected ? 1.12 : 1.0,
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                img,
+                Positioned(
+                  left: size * 0.14,
+                  right: size * 0.14,
+                  bottom: size * 0.10,
+                  child: Text(
+                    fmt['label'] as String,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 10.5),
+                      fontWeight: FontWeight.w600,
+                      height: 1.1,
+                      color: Colors.black,
+                      shadows: const [
+                        Shadow(color: Colors.white, blurRadius: 4),
+                        Shadow(color: Colors.white, blurRadius: 8),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -259,9 +267,12 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
 
                   const SizedBox(height: 18),
 
-                  // Format circles row
+                  // Format circles row — the label is now engraved inside
+                  // each circle (see _formatCircle), so this only needs to
+                  // fit the circle itself plus its selected-state scale-up
+                  // (90 * 1.12 ≈ 101), not the old separate label line.
                   SizedBox(
-                    height: 126,
+                    height: 108,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 16),

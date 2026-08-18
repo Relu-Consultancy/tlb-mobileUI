@@ -183,7 +183,7 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                                   Text(
                                     event.title,
                                     style: GoogleFonts.poppins(
-                                      fontSize: Responsive.sp(context, 17),
+                                      fontSize: Responsive.sp(context, 16),
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.textPrimary,
                                     ),

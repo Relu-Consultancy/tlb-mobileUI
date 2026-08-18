@@ -41,7 +41,9 @@ class FamilyFeelsSection extends StatelessWidget {
             addAutomaticKeepAlives: false,
             itemBuilder: (context, index) {
               final event = items[index];
-              return Container(
+              return GestureDetector(
+                onTap: () => openListingDetail(context, event),
+                child: Container(
                 width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
@@ -74,83 +76,51 @@ class FamilyFeelsSection extends StatelessWidget {
                     // Right Content Area
                     Expanded(
                       child: Padding(
-                        // 18px gap below the CTA button (card bottom padding).
-                        padding: const EdgeInsets.fromLTRB(0, 12, 12, 18),
+                        padding: const EdgeInsets.fromLTRB(0, 12, 12, 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            Text(
+                              event.title,
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 16),
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 8),
+
+                            // Location Row
+                            Row(
                               children: [
-                                Text(
-                                  event.title,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 15),
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 8),
-                                
-                                // Location Row
-                                Row(
-                                  children: [
-                                    const Icon(Icons.location_on_outlined, size: 14, color: AppColors.textSecondary),
-                                    const SizedBox(width: 4),
-                                    Expanded(
-                                      child: Text(
-                                        event.venue,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: Responsive.sp(context, 13),
-                                          color: AppColors.textSecondary,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                                const Icon(Icons.location_on_outlined, size: 14, color: AppColors.textSecondary),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    event.venue,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 13),
+                                      color: AppColors.textSecondary,
+                                      fontWeight: FontWeight.w500,
                                     ),
-                                  ],
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                                const SizedBox(height: 8),
-                                // Age Group · Date & Time · Distance (mock data)
-                                ListingMetaRows(event: event),
                               ],
                             ),
-
-                            // Button row
-                            SizedBox(
-                              width: double.infinity,
-                              height: Responsive.h(context, 30, min: 27),
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  openListingDetail(context, event);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primaryLight,
-                                  foregroundColor: AppColors.textPrimary,
-                                  elevation: 0,
-                                  padding: EdgeInsets.zero,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                                child: Text(
-                                  'Book Now',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 12),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
+                            const SizedBox(height: 8),
+                            // Age Group · Date & Time · Distance (mock data)
+                            ListingMetaRows(event: event),
                           ],
                         ),
                       ),
                     ),
                   ],
+                ),
                 ),
               );
             },

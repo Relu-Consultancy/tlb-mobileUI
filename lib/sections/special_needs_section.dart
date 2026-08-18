@@ -45,7 +45,9 @@ class SpecialNeedsSection extends StatelessWidget {
             itemBuilder: (context, index) {
               final modelIndex = index % items.length;
               final event = items[modelIndex];
-              return Container(
+              return GestureDetector(
+                onTap: () => openListingDetail(context, event),
+                child: Container(
                 width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
                 margin: const EdgeInsets.only(right: 16),
                 // Clip the flush image to the card's rounded corners so it
@@ -90,103 +92,71 @@ class SpecialNeedsSection extends StatelessWidget {
                     // Right content
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 12, 14, 18),
+                        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // "Sensory Friendly" pill — animated pink→purple
-                              // gradient that slides continuously (medium pace).
-                              if (event.tag != null)
-                                AnimatedGradientTag(
-                                  text: event.tag!,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w500,
-                                  softWrap: false,
-                                  showChrome: false,
-                                  period: const Duration(seconds: 4),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 3),
-                                  borderRadius: BorderRadius.circular(20),
-                                  gradientColors: const [
-                                    Color(0xFFF53C9B), // pink
-                                    Color(0xFFB13CF5), // purple
-                                    Color(0xFFF53C9B), // pink (seamless loop)
-                                  ],
-                                ),
-                              const SizedBox(height: 8),
-                              // Title
-                              Text(
-                                event.title,
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 17),
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 8),
-                              // Location
-                              Row(
-                                children: [
-                                  const Icon(Icons.location_on_outlined,
-                                      size: 14, color: AppColors.textSecondary),
-                                  const SizedBox(width: 4),
-                                  Expanded(
-                                    child: Text(
-                                      event.venue,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: Responsive.sp(context, 13),
-                                        color: AppColors.textSecondary,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // "Sensory Friendly" pill — animated pink→purple
+                            // gradient that slides continuously (medium pace).
+                            if (event.tag != null)
+                              AnimatedGradientTag(
+                                text: event.tag!,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                softWrap: false,
+                                showChrome: false,
+                                period: const Duration(seconds: 4),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 3),
+                                borderRadius: BorderRadius.circular(20),
+                                gradientColors: const [
+                                  Color(0xFFF53C9B), // pink
+                                  Color(0xFFB13CF5), // purple
+                                  Color(0xFFF53C9B), // pink (seamless loop)
                                 ],
                               ),
-                              const SizedBox(height: 8),
-                              // Age Group · Date & Time · Distance (mock data)
-                              ListingMetaRows(event: event),
-                            ],
-                          ),
-
-                          // Explore button (left-aligned)
-                          SizedBox(
-                            width: Responsive.w(context, 104, min: 94),
-                            height: Responsive.h(context, 30, min: 27),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                openListingDetail(context, event);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primaryLight,
-                                foregroundColor: AppColors.textPrimary,
-                                elevation: 0,
-                                padding: EdgeInsets.zero,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
+                            const SizedBox(height: 8),
+                            // Title
+                            Text(
+                              event.title,
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 16),
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
                               ),
-                              child: Text(
-                                'View Now',
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 12),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                        ],
-                      ),
+                            const SizedBox(height: 8),
+                            // Location
+                            Row(
+                              children: [
+                                const Icon(Icons.location_on_outlined,
+                                    size: 14, color: AppColors.textSecondary),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    event.venue,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 13),
+                                      color: AppColors.textSecondary,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            // Age Group · Date & Time · Distance (mock data)
+                            ListingMetaRows(event: event),
+                          ],
+                        ),
                       ),
                     ),
                   ],
+                ),
                 ),
               );
             },

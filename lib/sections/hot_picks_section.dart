@@ -132,7 +132,7 @@ class HotPicksSection extends StatelessWidget {
                                   event.title,
                                   style: GoogleFonts.poppins(
                                     fontSize: Responsive.sp(context, 16),
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w600,
                                     color: AppColors.textPrimary,
                                   ),
                                   maxLines: 2,

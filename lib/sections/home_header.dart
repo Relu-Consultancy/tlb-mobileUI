@@ -164,8 +164,6 @@ class HomeHeader extends StatelessWidget {
           ],
         ),
         SizedBox(height: Responsive.h(context, 14, min: 10)),
-        _buildGreetingText(context),
-        const SizedBox(height: 6),
         _buildLocationRow(context, locationShowcaseConfig),
         SizedBox(height: Responsive.h(context, 16, min: 12)),
         _buildSearchBar(context),

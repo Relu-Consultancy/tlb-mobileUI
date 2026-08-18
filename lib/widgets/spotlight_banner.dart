@@ -72,18 +72,23 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
           ),
           const SizedBox(height: 12),
           Expanded(
-            // Clip.none so the golden glow behind each card can spill past the
-            // page edges instead of being cut off at the viewport.
-            child: PageView.builder(
-              controller: _controller,
-              clipBehavior: Clip.none,
-              itemCount: widget.events.length,
-              onPageChanged: (i) => setState(() => _index = i),
-              itemBuilder: (context, i) =>
-                  _buildCard(context, widget.events[i]),
+            // Nudge the poster card down 10px from its prior -20 offset
+            // (title above unaffected). The gap below (was 10px, now 0)
+            // is folded into the Expanded box, growing the card 10px taller.
+            child: Transform.translate(
+              offset: const Offset(0, -10),
+              // Clip.none so the golden glow behind each card can spill past
+              // the page edges instead of being cut off at the viewport.
+              child: PageView.builder(
+                controller: _controller,
+                clipBehavior: Clip.none,
+                itemCount: widget.events.length,
+                onPageChanged: (i) => setState(() => _index = i),
+                itemBuilder: (context, i) =>
+                    _buildCard(context, widget.events[i]),
+              ),
             ),
           ),
-          const SizedBox(height: 10),
           AnimatedSmoothIndicator(
             activeIndex: _index,
             count: widget.events.length,

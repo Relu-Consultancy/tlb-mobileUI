@@ -45,20 +45,30 @@ class CategoriesGrid extends StatelessWidget {
       color: Colors.black,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(8, 12, 8, 39),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildTitle(context),
-            const SizedBox(height: 18),
-            Row(
-              children: [
-                for (var i = 0; i < categories.length; i++) ...[
-                  if (i > 0) const SizedBox(width: 12),
-                  Expanded(child: _buildCard(context, categories[i])),
-                ],
-              ],
-            ),
-          ],
+        child: Transform.translate(
+          // Nudge the whole section (title + cards) up 5px.
+          offset: const Offset(0, -5),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Transform.translate(
+                offset: const Offset(0, -10),
+                child: _buildTitle(context),
+              ),
+              const SizedBox(height: 18),
+              Transform.translate(
+                offset: const Offset(0, -20),
+                child: Row(
+                  children: [
+                    for (var i = 0; i < categories.length; i++) ...[
+                      if (i > 0) const SizedBox(width: 12),
+                      Expanded(child: _buildCard(context, categories[i])),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

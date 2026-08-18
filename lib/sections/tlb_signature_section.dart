@@ -41,7 +41,9 @@ class TlbSignatureSection extends StatelessWidget {
             itemCount: items.length,
             itemBuilder: (context, index) {
               final event = items[index];
-              return Container(
+              return GestureDetector(
+                onTap: () => openListingDetail(context, event),
+                child: Container(
                 width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
@@ -95,8 +97,7 @@ class TlbSignatureSection extends StatelessWidget {
 
                     // Bottom Content — natural height.
                     Padding(
-                      // 18px gap below the CTA button (card bottom padding).
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,41 +126,11 @@ class TlbSignatureSection extends StatelessWidget {
                           const SizedBox(height: 10),
                           // Age Group · Date & Time · Distance (mock data)
                           ListingMetaRows(event: event),
-                          const SizedBox(height: 14),
-                          SizedBox(
-                            width: double.infinity,
-                            height: Responsive.h(context, 30, min: 27),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                openListingDetail(context, event);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primaryLight,
-                                foregroundColor: AppColors.textPrimary,
-                                elevation: 0,
-                                // Let the SizedBox drive the height instead of the
-                                // default 48px padded tap target (which squished
-                                // the button at the previous 32–36px height).
-                                minimumSize: Size.zero,
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                              child: Text(
-                                'View Now',
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 12),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ),
                   ],
+                ),
                 ),
               );
             },

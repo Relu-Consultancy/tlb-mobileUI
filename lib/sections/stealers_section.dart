@@ -43,7 +43,9 @@ class StealersSection extends StatelessWidget {
             itemCount: items.length,
             itemBuilder: (context, index) {
               final event = items[index];
-              return Container(
+              return GestureDetector(
+                onTap: () => openListingDetail(context, event),
+                child: Container(
                 width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
@@ -156,7 +158,7 @@ class StealersSection extends StatelessWidget {
                     // Bottom Content Area — kept tight so the image above
                     // stretches further down (less white space).
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
+                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,8 +166,8 @@ class StealersSection extends StatelessWidget {
                           Text(
                             event.title,
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 17),
-                              fontWeight: FontWeight.w500,
+                              fontSize: Responsive.sp(context, 16),
+                              fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
                             ),
                             maxLines: 1,
@@ -179,39 +181,11 @@ class StealersSection extends StatelessWidget {
                             showLocation: true,
                             twoColumn: true,
                           ),
-                          const SizedBox(height: 10),
-                          // Grab Deal button — full-width like TLB Signature.
-                          SizedBox(
-                            width: double.infinity,
-                            height: Responsive.h(context, 30, min: 27),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                openListingDetail(context, event);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primaryLight,
-                                foregroundColor: AppColors.textPrimary,
-                                elevation: 0,
-                                minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                              child: Text(
-                                'View Now',
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 12),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ),
                   ],
+                ),
                 ),
               );
             },
