@@ -57,6 +57,7 @@ class AppColors {
   static const Color lightGray = Color(0xFFF2F2F7);        // iOS surface color
   static const Color bookingBlue = Color(0xFF1A3A8F);      // booking confirmation header
   static const Color successGreen = Color(0xFF34C759);     // booking confirmed badge
+  static const Color distanceGreen = Color(0xFF1FA85B);    // "x km away" on cards
   static const Color starAmber = Color(0xFFFFB902);        // star/rating amber
   static const Color inputFill = Color(0xFFF8F9FA);        // text-field fill (review sheet)
 }

@@ -210,8 +210,8 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                             Text(
                               'About',
                               style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 16),
-                                fontWeight: FontWeight.w700,
+                                fontSize: Responsive.sp(context, 17),
+                                fontWeight: FontWeight.w600,
                                 color: AppColors.textPrimary,
                               ),
                             ),

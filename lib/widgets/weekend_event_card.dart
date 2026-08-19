@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
-import 'primary_cta_button.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
 
@@ -57,23 +56,23 @@ class WeekendEventCard extends StatelessWidget {
             ),
             Expanded(
               child: Padding(
-                // 18px gap below the CTA button (card bottom padding).
-                padding: const EdgeInsets.fromLTRB(14, 14, 12, 18),
+                padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  // Fills the height the removed CTA left behind.
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Text(
                       event.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.poppins(
-                        fontSize: Responsive.sp(context, 15),
-                        fontWeight: FontWeight.w500,
+                        fontSize: Responsive.sp(context, 16),
+                        fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
                         height: 1.2,
                       ),
                     ),
-                    const SizedBox(height: 10),
                     if (event.eventDate != null)
                       _IconLine(
                         icon: Icons.calendar_today_outlined,
@@ -82,22 +81,11 @@ class WeekendEventCard extends StatelessWidget {
                             : event.eventDate!,
                       ),
                     if (event.venue.isNotEmpty) ...[
-                      const SizedBox(height: 8),
                       _IconLine(
                         icon: Icons.location_on_outlined,
                         text: event.venue,
                       ),
                     ],
-                    const Spacer(),
-                    PrimaryCtaButton(
-                      label: 'Book Now',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => EventDetailScreen(event: event),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),

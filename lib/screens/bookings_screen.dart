@@ -412,8 +412,8 @@ class _BookingCardState extends State<_BookingCard> {
                 Text(
                   booking.listingTitle,
                   style: GoogleFonts.poppins(
-                    fontSize: Responsive.sp(context, 14.5),
-                    fontWeight: FontWeight.w500,
+                    fontSize: Responsive.sp(context, 16),
+                    fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                     height: 1.3,
                   ),

@@ -37,52 +37,78 @@ import 'category_events_screen.dart';
 // Card renders [Colors.white -> gradient.last], so `.last` is the visible
 // bottom tone — deep/saturated, matching DummyData.allCategories' colors
 // (the "View All" popup) for the same category labels.
+// `icon` + `circleColor` drive the line-art cards (see CategoryIconCard);
+// `image` + `gradient` are kept for the gradient variant. Both the circle tones
+// and the glyphs come from the approved design mock, and mirror
+// DummyData.allCategories so the grid and its "View All" popup stay in step.
 final _categoryAssets = <String, Map<String, dynamic>>{
   'arts-crafts': {
     'image': 'assets/images/event_subcategories/artcraft.png',
     'gradient': <Color>[const Color(0xFFA78BFA), const Color(0xFF7C3AED)], // violet
+    'icon': 'assets/images/event_categories/arts_crafts.png',
+    'circleColor': const Color(0xFFF4EFFD),
   },
   'performing-arts': {
     'image': 'assets/images/event_subcategories/performarts.png',
     'gradient': <Color>[const Color(0xFFF472B6), const Color(0xFFDB2777)], // pink
+    'icon': 'assets/images/event_categories/performing_arts.png',
+    'circleColor': const Color(0xFFFEF0F1),
   },
   'stem-innovation': {
     'image': 'assets/images/event_subcategories/stem.png',
     'gradient': <Color>[const Color(0xFFFDBA74), const Color(0xFFEA580C)], // orange
+    'icon': 'assets/images/event_categories/stem_innovation.png',
+    'circleColor': const Color(0xFFFEF4E6),
   },
   'sports-fitness': {
     'image': 'assets/images/event_subcategories/sports.png',
     'gradient': <Color>[const Color(0xFFFCD34D), const Color(0xFFD97706)], // amber/gold
+    'icon': 'assets/images/event_categories/sports_fitness.png',
+    'circleColor': const Color(0xFFFEF3DA),
   },
   'languages-communication': {
     'image': 'assets/images/event_subcategories/lang.png',
     'gradient': <Color>[const Color(0xFFF472B6), const Color(0xFFC026D3)], // magenta/fuchsia
+    'icon': 'assets/images/event_categories/language_communication.png',
+    'circleColor': const Color(0xFFFEEAEC),
   },
   'life-skills': {
     'image': 'assets/images/event_subcategories/lifeskills.png',
     'gradient': <Color>[const Color(0xFF38BDF8), const Color(0xFF2563EB)], // sky/blue
+    'icon': 'assets/images/event_categories/life_skills.png',
+    'circleColor': const Color(0xFFE6F1FD),
   },
   'mind-strategy-games': {
     'image': 'assets/images/event_subcategories/lifeskills.png',
     'gradient': <Color>[const Color(0xFF6366F1), const Color(0xFF312E81)], // indigo/navy
+    'icon': 'assets/images/event_categories/mind_strategy_games.png',
+    'circleColor': const Color(0xFFF2EAFD),
   },
   'edutainment-experiences': {
     'image': 'assets/images/event_subcategories/performarts.png',
     'gradient': <Color>[const Color(0xFFFCD34D), const Color(0xFFF97316)], // amber/orange
+    'icon': 'assets/images/event_categories/edutainment_experiences.png',
+    'circleColor': const Color(0xFFFDE6CA),
   },
   'nature-outdoors': {
     'image': 'assets/images/event_subcategories/sports.png',
     'gradient': <Color>[const Color(0xFF67E8F9), const Color(0xFF0891B2)], // cyan/teal
+    'icon': 'assets/images/event_categories/nature_outdoors.png',
+    'circleColor': const Color(0xFFE6F4E4),
   },
   'festivals-celebrations': {
     'image': 'assets/images/event_subcategories/artcraft.png',
     'gradient': <Color>[const Color(0xFFFDA4AF), const Color(0xFFE11D48)], // rose/red
+    'icon': 'assets/images/event_categories/festivals_celebrations.png',
+    'circleColor': const Color(0xFFFDEBEC),
   },
 };
 
 final _defaultCategoryAsset = <String, dynamic>{
   'image': 'assets/images/event_subcategories/artcraft.png',
   'gradient': <Color>[const Color(0xFFA78BFA), const Color(0xFF7C3AED)], // violet
+  'icon': 'assets/images/event_categories/arts_crafts.png',
+  'circleColor': const Color(0xFFF4EFFD),
 };
 
 class EventsScreen extends StatefulWidget {
@@ -167,6 +193,8 @@ class _EventsScreenState extends State<EventsScreen> {
         'label': _formatLabel(cat.name),
         'image': assets['image'] as String,
         'gradient': assets['gradient'] as List<Color>,
+        'icon': assets['icon'] as String,
+        'circleColor': assets['circleColor'] as Color,
         'slug': cat.slug,
         'id': cat.id,
         'subcategories': cat.subcategories.map((s) => s.name).toList(),
@@ -181,7 +209,27 @@ class _EventsScreenState extends State<EventsScreen> {
   // ────────────────────────────────────────────────────────────────────────
 
   void _showAllCategoriesPopup(BuildContext context) {
-    AllCategoriesPopup.show(context, DummyData.allCategories);
+    AllCategoriesPopup.show(
+      context,
+      DummyData.allCategories,
+      lineIcons: true,
+      darkBackground: true,
+      // Carry the popup's own list through, so the category screen's chip row
+      // shows the same set the user just tapped from (the in-page grid does the
+      // same with _gridCategories). CategoryEventsScreen filters by label, not
+      // slug, so this list is self-sufficient.
+      onCategoryTap: (index) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CategoryEventsScreen(
+              categories: DummyData.allCategories,
+              initialCategoryIndex: index,
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -324,7 +372,7 @@ class _EventsScreenState extends State<EventsScreen> {
                                 scrollable: true,
                                 scrollHeight: 260,
                                 maxScrollRows: 3, // scroll stops at the 3rd row
-                                childAspectRatio: 0.8,
+                                lineIcons: true,
                                 onCategoryTap: (index) {
                                   Navigator.push(
                                     context,
@@ -429,7 +477,10 @@ class _EventsScreenState extends State<EventsScreen> {
 
                       const SectionDividerWidget(topPadding: 30, title: 'Featured Partners'),
                       SizedBox(
-                        height: Responsive.h(context, 540, min: 520),
+                        // Poster (0.78) + title + strapline + the meta rows
+                        // comes to ~559pt on a 393pt screen; the old 540 left
+                        // the card's data clipped.
+                        height: Responsive.h(context, 575, min: 555),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
                           itemCount: DummyData.featuredPartners.length,

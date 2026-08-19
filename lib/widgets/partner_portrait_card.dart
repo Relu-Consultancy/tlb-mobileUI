@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
-import 'primary_cta_button.dart';
 import '../models/event_model.dart';
+import 'listing_meta_rows.dart';
 import '../screens/event_detail_screen.dart';
 
 class PartnerPortraitCard extends StatelessWidget {
@@ -58,8 +58,7 @@ class PartnerPortraitCard extends StatelessWidget {
             ),
             // Content block under the poster
             Padding(
-              // 18px gap below the CTA button (card bottom padding).
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -69,7 +68,7 @@ class PartnerPortraitCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 16),
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
                   ),
@@ -84,17 +83,11 @@ class PartnerPortraitCard extends StatelessWidget {
                       height: 1.3,
                     ),
                   ),
-                  const SizedBox(height: 14),
-                  // Full-width yellow pill Book Now (shared canonical CTA).
-                  PrimaryCtaButton(
-                    label: 'Book Now',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => EventDetailScreen(event: event),
-                      ),
-                    ),
-                  ),
+                  const SizedBox(height: 10),
+                  // Age Group · Date & Time · Distance, as the other section
+                  // cards show. Location is off: on this card `venue` carries
+                  // the partner's strapline, not a place.
+                  ListingMetaRows(event: event),
                 ],
               ),
             ),

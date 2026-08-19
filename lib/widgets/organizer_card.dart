@@ -129,8 +129,8 @@ class _OrganizerCardState extends State<OrganizerCard> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 15.5),
-                            fontWeight: FontWeight.w700,
+                            fontSize: Responsive.sp(context, 15),
+                            fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
                           ),
                         ),

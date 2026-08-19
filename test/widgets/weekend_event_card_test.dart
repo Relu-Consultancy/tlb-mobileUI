@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tlb_mobile_ui/models/event_model.dart';
 import 'package:tlb_mobile_ui/widgets/weekend_event_card.dart';
-import 'package:tlb_mobile_ui/widgets/primary_cta_button.dart';
 
 import '../helpers/test_setup.dart';
 
@@ -26,13 +25,13 @@ void main() {
       expect(find.text('Little Chef Studio'), findsOneWidget);
     });
 
-    testWidgets('TC_W_WEC_002 — uses the shared full-width Book Now CTA', (tester) async {
+    testWidgets('TC_W_WEC_002 — has no separate CTA; whole card is tappable', (tester) async {
       await pumpTLBApp(
         tester,
         const Scaffold(body: WeekendEventCard(event: testEvent)),
       );
-      expect(find.byType(PrimaryCtaButton), findsOneWidget);
-      expect(find.text('Book Now'), findsOneWidget);
+      expect(find.text('Book Now'), findsNothing);
+      expect(find.byType(GestureDetector), findsWidgets);
     });
 
     testWidgets('TC_W_WEC_003 — respects the width parameter', (tester) async {

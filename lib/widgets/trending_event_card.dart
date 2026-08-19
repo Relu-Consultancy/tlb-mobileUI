@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
-import 'primary_cta_button.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
 import 'wishlist_button.dart';
 
 /// Vertical "Trending Events" card:
 /// image-dominant (date badge top-left + heart top-right), then title,
-/// a [Workshop tag · age] row, rating, and a [location · Book Now] row.
+/// a [Workshop tag · age] row, and a location row. Whole card is tappable.
 class TrendingEventCard extends StatelessWidget {
   final EventModel event;
 
@@ -122,8 +121,7 @@ class TrendingEventCard extends StatelessWidget {
 
             // ── Content ──
             Padding(
-              // 18px gap below the CTA button (card bottom padding).
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 18),
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,7 +173,8 @@ class TrendingEventCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
 
-                  // Location (own line)
+                  // Location, with the distance tag filling the space to its
+                  // right (same treatment the other section cards use).
                   Row(
                     children: [
                       const Icon(Icons.location_on_outlined,
@@ -192,12 +191,20 @@ class TrendingEventCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.near_me_outlined,
+                          size: 15, color: AppColors.distanceGreen),
+                      const SizedBox(width: 4),
+                      Text(
+                        event.distanceDisplay,
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 12),
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.distanceGreen,
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-
-                  // Book Now (shared canonical full-width CTA)
-                  PrimaryCtaButton(label: 'Book Now', onTap: openDetail),
                 ],
               ),
             ),

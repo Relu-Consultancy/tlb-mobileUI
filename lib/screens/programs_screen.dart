@@ -12,6 +12,7 @@ import '../widgets/banner_carousel.dart';
 import '../widgets/dark_category_section.dart';
 import '../widgets/dark_glow_header.dart';
 import '../widgets/section_divider_widget.dart';
+import '../widgets/category_icon_card.dart';
 import '../widgets/explore_categories_grid.dart';
 import '../widgets/pick_your_pace_row.dart';
 import '../widgets/event_card_with_rating.dart';
@@ -67,6 +68,10 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
     AllCategoriesPopup.show(
       context,
       DummyData.programsSeeAllCategories,
+      lineIcons: true,
+      darkBackground: true,
+      cardMetrics: CategoryCardMetrics.programs,
+      lineIconLabelSize: 11,
       onCategoryTap: (index) {
         Navigator.push(
           context,
@@ -200,11 +205,15 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                   child: RepaintBoundary(
                                     child: ExploreCategoriesGrid(
                                       categories: DummyData.programsCategories,
-                                      childAspectRatio: 0.8,
                                       scrollable: true,
                                       visibleRows: 2.3,
                                       maxScrollRows: 3,
-                                      imagesFlushBottom: true,
+                                      lineIcons: true,
+                                      cardMetrics: CategoryCardMetrics.programs,
+                                      // Programs names are the longest in the
+                                      // app ("Leadership & Entrepreneurship"),
+                                      // so they need a step down from 12.
+                                      lineIconLabelSize: 11,
                                       onCategoryTap: (index) => Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -235,7 +244,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       // ── The Big Leagues ──
                       const SectionDividerWidget(
                         title: 'The Big Leagues',
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w600,
                         textColor: Color(0xFF3A3A3A), // charcoal
                         lineLength: 100,
@@ -270,7 +279,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       // ── Make Your Weekends Count ──
                       const SectionDividerWidget(
                         title: 'Make Your Weekends Count',
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w600,
                         textColor: Color(0xFF3A3A3A), // charcoal
                         lineLength: 100,
@@ -293,7 +302,6 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                 scheduleText: 'Sat & Sun, 10:00 AM',
                                 ageText: '8-12 Yrs',
                                 locationText: 'Online',
-                                buttonLabel: 'View Details',
                               ),
                             );
                           },
@@ -303,7 +311,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       // ── Find Your Fit ──
                       const SectionDividerWidget(
                         title: 'Find Your Fit',
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w600,
                         textColor: Color(0xFF3A3A3A), // charcoal
                         lineLength: 100,
@@ -316,7 +324,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       // ── Zero to Hero ──
                       const SectionDividerWidget(
                         title: 'Zero to Hero',
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w600,
                         textColor: Color(0xFF3A3A3A), // charcoal
                         lineLength: 100,
@@ -339,8 +347,6 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                                 scheduleText: 'Start with basics of programming',
                                 ageText: '8+ Yrs',
                                 locationText: e.venue,
-                                buttonLabel: 'View Details',
-                                smallButton: true,
                               ),
                             );
                           },
@@ -350,7 +356,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       // ── The Holiday Edit ──
                       const SectionDividerWidget(
                         title: 'The Holiday Edit',
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w600,
                         textColor: Color(0xFF3A3A3A), // charcoal
                         lineLength: 100,
@@ -376,7 +382,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       // ── For Unique Minds ──
                       const SectionDividerWidget(
                         title: 'For Unique Minds',
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w600,
                         textColor: Color(0xFF3A3A3A), // charcoal
                         lineLength: 100,
@@ -402,7 +408,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       // ── Level Up Your Profile ──
                       const SectionDividerWidget(
                         title: 'Level Up Your Profile',
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w600,
                         textColor: Color(0xFF3A3A3A), // charcoal
                         lineLength: 100,
@@ -497,8 +503,6 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
     required String scheduleText,
     required String ageText,
     required String locationText,
-    required String buttonLabel,
-    bool smallButton = false,
   }) {
     return GestureDetector(
       onTap: () => Navigator.push(
@@ -521,9 +525,8 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         ),
         child: Padding(
           // Inset so the image sits inside the card as a separate rounded
-          // component (not flush / cut at the card edges). 18px below the
-          // pinned CTA (universal card bottom gap).
-          padding: const EdgeInsets.fromLTRB(10, 10, 10, 18),
+          // component (not flush / cut at the card edges).
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 14),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -547,68 +550,28 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  // The CTA used to close this column; without it the data sat
+                  // at the top with the rest of the card blank. Spreading the
+                  // rows lets them occupy the card's full height.
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          event.title,
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 15),
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                            height: 1.25,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 10),
-                        _iconRow(Icons.calendar_month_outlined, scheduleText),
-                        const SizedBox(height: 7),
-                        _iconRow(Icons.people_outline, ageText),
-                        const SizedBox(height: 7),
-                        _iconRow(Icons.location_on_outlined, locationText),
-                        const SizedBox(height: 7),
-                        // Distance from the user (mock display data)
-                        _iconRow(Icons.near_me_outlined, event.distanceDisplay,
-                        color: const Color(0xFF1FA85B)),
-                      ],
-                    ),
-                    SizedBox(
-                      // Full-width pill; slightly shorter when [smallButton] is
-                      // set. The label always stays on one line (FittedBox
-                      // scales it down to fit the narrow content column).
-                      width: double.infinity,
-                      height: smallButton ? 34 : 38,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryLight,
-                          foregroundColor: AppColors.textPrimary,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(22),
-                          ),
-                        ),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            buttonLabel,
-                            maxLines: 1,
-                            softWrap: false,
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, smallButton ? 11.5 : 12.5),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
+                    Text(
+                      event.title,
+                      style: GoogleFonts.poppins(
+                        fontSize: Responsive.sp(context, 16),
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                        height: 1.25,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                    _iconRow(Icons.calendar_month_outlined, scheduleText),
+                    _iconRow(Icons.people_outline, ageText),
+                    _iconRow(Icons.location_on_outlined, locationText),
+                    // Distance from the user (mock display data)
+                    _iconRow(Icons.near_me_outlined, event.distanceDisplay,
+                    color: AppColors.distanceGreen),
                   ],
                 ),
               ),
@@ -696,44 +659,43 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
-                      fontSize: Responsive.sp(context, 15),
+                      fontSize: Responsive.sp(context, 16),
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 10),
-                  // Age Group · Date & Time · Distance (mock display data)
-                  _iconRow(Icons.child_care_outlined, event.ageGroupDisplay),
-                  const SizedBox(height: 7),
-                  _iconRow(Icons.calendar_today_outlined, event.dateTimeDisplay),
-                  const SizedBox(height: 7),
-                  _iconRow(Icons.near_me_outlined, event.distanceDisplay,
-                      color: const Color(0xFF1FA85B)),
-                  const SizedBox(height: 8),
+                  // Meta in two balanced columns (the CTA that used to close
+                  // this card is gone; the whole card is tappable). Age and
+                  // schedule sit left, place and distance right — each column
+                  // gets ~128pt of text, which clears the longest values.
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(child: _iconRow(Icons.location_on_outlined, event.venue)),
-                      const SizedBox(width: 8),
-                      Material(
-                        color: AppColors.primaryLight,
-                        borderRadius: BorderRadius.circular(22),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(22),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 9),
-                            child: Text(
-                              'View Details',
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 12.5),
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _iconRow(Icons.child_care_outlined,
+                                event.ageGroupDisplay),
+                            const SizedBox(height: 7),
+                            _iconRow(Icons.calendar_today_outlined,
+                                event.dateTimeDisplay),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _iconRow(
+                                Icons.location_on_outlined, event.venue),
+                            const SizedBox(height: 7),
+                            _iconRow(Icons.near_me_outlined,
+                                event.distanceDisplay,
+                                color: AppColors.distanceGreen),
+                          ],
                         ),
                       ),
                     ],
@@ -771,112 +733,83 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  child: Image.asset(
-                    event.imagePath,
-                    height: Responsive.h(context, 280, min: 250),
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      height: Responsive.h(context, 280, min: 250),
-                      color: AppColors.primary.withOpacity(0.15),
-                      child: const Icon(Icons.event, size: 40),
+            // Expanded so the image fills the space freed by the removed CTA.
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                    child: Image.asset(
+                      event.imagePath,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: AppColors.primary.withOpacity(0.15),
+                        child: const Icon(Icons.event, size: 40),
+                      ),
                     ),
                   ),
-                ),
-                const Positioned(
-                  top: 10,
-                  left: 10,
-                  child: ShiningStarBadge(size: 40),
-                ),
-              ],
+                  const Positioned(
+                    top: 10,
+                    left: 10,
+                    child: ShiningStarBadge(size: 40),
+                  ),
+                ],
+              ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 12, 14, 18),
+            Padding(
+                padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Column(
+                    Text(
+                      event.title,
+                      style: GoogleFonts.poppins(
+                        fontSize: Responsive.sp(context, 16),
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    // Two-column meta: Age + Date·Time left, Location +
+                    // Distance (green) right.
+                    Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          event.title,
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 15),
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _iconRow(Icons.child_care_outlined,
+                                  event.ageGroupDisplay),
+                              const SizedBox(height: 7),
+                              _iconRow(Icons.calendar_today_outlined,
+                                  event.dateTimeDisplay),
+                            ],
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 8),
-                        // Two-column meta: Age + Date·Time left, Location +
-                        // Distance (green) right.
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _iconRow(Icons.child_care_outlined,
-                                      event.ageGroupDisplay),
-                                  const SizedBox(height: 7),
-                                  _iconRow(Icons.calendar_today_outlined,
-                                      event.dateTimeDisplay),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _iconRow(Icons.location_on_outlined,
-                                      event.venue),
-                                  const SizedBox(height: 7),
-                                  _iconRow(Icons.near_me_outlined,
-                                      event.distanceDisplay,
-                                      color: const Color(0xFF1FA85B)),
-                                ],
-                              ),
-                            ),
-                          ],
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _iconRow(Icons.location_on_outlined,
+                                  event.venue),
+                              const SizedBox(height: 7),
+                              _iconRow(Icons.near_me_outlined,
+                                  event.distanceDisplay,
+                                  color: AppColors.distanceGreen),
+                            ],
+                          ),
                         ),
                       ],
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 38,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryLight,
-                          foregroundColor: AppColors.textPrimary,
-                          elevation: 0,
-                          padding: EdgeInsets.zero,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(22),
-                          ),
-                        ),
-                        child: Text(
-                          'Enquire Now',
-                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600),
-                        ),
-                      ),
                     ),
                   ],
                 ),
               ),
-            ),
           ],
         ),
       ),
@@ -907,48 +840,49 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  child: Image.asset(
-                    event.imagePath,
-                    height: Responsive.h(context, 240, min: 212),
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      height: Responsive.h(context, 240, min: 212),
-                      color: AppColors.primary.withOpacity(0.15),
-                      child: const Icon(Icons.event, size: 40),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 10,
-                  left: 10,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.accentBlue,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      'Portfolio Project : Yes',
-                      style: GoogleFonts.poppins(
-                        fontSize: Responsive.sp(context, 10),
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
+            // Expanded so the image fills the space freed by the removed CTA.
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                    child: Image.asset(
+                      event.imagePath,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: AppColors.primary.withOpacity(0.15),
+                        child: const Icon(Icons.event, size: 40),
                       ),
                     ),
                   ),
-                ),
-              ],
+                  Positioned(
+                    bottom: 10,
+                    left: 10,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.accentBlue,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        'Portfolio Project : Yes',
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 10),
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 10, 12, 18),
+            Padding(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(
                       children: [
@@ -956,7 +890,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           child: Text(
                             event.title,
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 15),
+                              fontSize: Responsive.sp(context, 16),
                               fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
                             ),
@@ -985,45 +919,46 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    _iconRow(Icons.location_on_outlined, event.venue.split('\n').first),
-                    const SizedBox(height: 7),
-                    _iconRow(Icons.workspace_premium_outlined, 'Certificate Included'),
-                    const SizedBox(height: 7),
-                    // Age Group · Date & Time · Distance (mock display data)
-                    _iconRow(Icons.child_care_outlined, event.ageGroupDisplay),
-                    const SizedBox(height: 7),
-                    _iconRow(Icons.calendar_today_outlined, event.dateTimeDisplay),
-                    const SizedBox(height: 7),
-                    _iconRow(Icons.near_me_outlined, event.distanceDisplay,
-                        color: const Color(0xFF1FA85B)),
-                    const Spacer(),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 38,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => ProgramDetailScreen(event: event)),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryLight,
-                          foregroundColor: AppColors.textPrimary,
-                          elevation: 0,
-                          padding: EdgeInsets.zero,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(22),
+                    // Meta in two balanced columns: format + age on the left,
+                    // certificate + distance on the right.
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _iconRow(Icons.location_on_outlined,
+                                  event.venue.split('\n').first),
+                              const SizedBox(height: 7),
+                              _iconRow(Icons.child_care_outlined,
+                                  event.ageGroupDisplay),
+                            ],
                           ),
                         ),
-                        child: Text(
-                          'View Details',
-                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), fontWeight: FontWeight.w600),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _iconRow(Icons.workspace_premium_outlined,
+                                  'Certificate Included'),
+                              const SizedBox(height: 7),
+                              _iconRow(Icons.near_me_outlined,
+                                  event.distanceDisplay,
+                                  color: AppColors.distanceGreen),
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                     ),
+                    const SizedBox(height: 7),
+                    // Date runs full width — at 155pt it is the one value that
+                    // will not fit a ~130pt half-column without being cut.
+                    _iconRow(Icons.calendar_today_outlined, event.dateTimeDisplay),
                   ],
                 ),
               ),
-            ),
           ],
         ),
       ),

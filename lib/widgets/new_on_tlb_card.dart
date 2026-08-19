@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
-import 'primary_cta_button.dart';
 import '../models/event_model.dart';
 import 'listing_meta_rows.dart';
 import '../screens/class_detail_screen.dart';
 import '../screens/event_detail_screen.dart';
-import 'inquire_now_sheet.dart';
 
 class NewOnTlbCard extends StatelessWidget {
   final EventModel event;
@@ -66,69 +64,51 @@ class NewOnTlbCard extends StatelessWidget {
               ),
               Expanded(
                 child: Padding(
-                  // 18px gap below the CTA button (card bottom padding).
-                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 14),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // The CTA used to close this column; without it the content
+                    // sat at the top with ~80pt blank underneath. Spreading the
+                    // blocks lets the data occupy the card's full height.
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Text(
+                        event.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 16),
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      Row(
                         children: [
-                          Text(
-                            event.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 17),
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
-                            ),
+                          const Icon(
+                            Icons.location_on_outlined,
+                            size: 15,
+                            color: AppColors.textSecondary,
                           ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.location_on_outlined,
-                                size: 15,
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              event.venue,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 12.5),
                                 color: AppColors.textSecondary,
                               ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  event.venue,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 12.5),
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          // Age Group · Date & Time · Distance (mock display data)
-                          ListingMetaRows(
-                            event: event,
-                            iconSize: 14,
-                            fontSize: 12,
-                            rowGap: 6,
+                            ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 14),
-                      PrimaryCtaButton(
-                        label: buttonLabel,
-                        onTap: () {
-                          if (buttonLabel == 'Send Enquiry') {
-                            showInquireNow(context, listingId: event.id);
-                          } else if (buttonLabel == 'Check Availability' || buttonLabel == 'View Details') {
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
-                          } else {
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
-                          }
-                        },
+                      // Age Group · Date & Time · Distance (mock display data)
+                      ListingMetaRows(
+                        event: event,
+                        iconSize: 14,
+                        fontSize: 12,
+                        rowGap: 6,
                       ),
                     ],
                   ),

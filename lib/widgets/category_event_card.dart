@@ -20,6 +20,12 @@ class CategoryEventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      // This card has no card-shaped background of its own (image + bare text
+      // below), so a deferToChild hit test would only catch the image and the
+      // glyphs — the gaps between the meta rows, and the space right of a
+      // short title, would silently do nothing. Opaque makes the card's whole
+      // rectangle tappable.
+      behavior: HitTestBehavior.opaque,
       onTap: onTap ?? () => Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
@@ -95,7 +101,7 @@ class CategoryEventCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 12.5),
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                     height: 1.3,
                   ),

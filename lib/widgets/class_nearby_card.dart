@@ -6,7 +6,6 @@ import '../models/event_model.dart';
 import 'listing_meta_rows.dart';
 import '../screens/class_detail_screen.dart';
 import '../screens/event_detail_screen.dart';
-import 'inquire_now_sheet.dart';
 
 class ClassNearbyCard extends StatelessWidget {
   final EventModel event;
@@ -100,8 +99,7 @@ class ClassNearbyCard extends StatelessWidget {
 
             // Content
             Padding(
-              // 18px gap below the CTA button (card bottom padding).
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 18),
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -115,8 +113,8 @@ class ClassNearbyCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 15),
-                            fontWeight: FontWeight.w500,
+                            fontSize: Responsive.sp(context, 16),
+                            fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
                             height: 1.2,
                           ),
@@ -131,43 +129,6 @@ class ClassNearbyCard extends StatelessWidget {
                     showLocation: true,
                     twoColumn: true,
                   ),
-                  const SizedBox(height: 12),
-
-                  // Join Now button — full-width like TLB Signature.
-                  if (buttonLabel != null)
-                    SizedBox(
-                      width: double.infinity,
-                      child: Material(
-                        color: AppColors.primaryLight,
-                        borderRadius: BorderRadius.circular(24),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(24),
-                          onTap: () {
-                            if (onTap != null) {
-                              onTap!();
-                            } else if (buttonLabel == 'Send Enquiry') {
-                              showInquireNow(context, listingId: event.id);
-                            } else if (buttonLabel == 'Check Availability' || buttonLabel == 'View Details') {
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
-                            } else {
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
-                            }
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: Text(
-                              buttonLabel!,
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 13),
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ),

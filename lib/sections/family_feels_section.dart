@@ -79,7 +79,8 @@ class FamilyFeelsSection extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(0, 12, 12, 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
+                          // Fills the height the removed CTA left behind.
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Text(
                               event.title,
@@ -91,7 +92,6 @@ class FamilyFeelsSection extends StatelessWidget {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 8),
 
                             // Location Row
                             Row(
@@ -112,7 +112,6 @@ class FamilyFeelsSection extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
                             // Age Group · Date & Time · Distance (mock data)
                             ListingMetaRows(event: event),
                           ],

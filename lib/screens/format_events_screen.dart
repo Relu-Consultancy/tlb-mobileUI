@@ -305,8 +305,8 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
                           Text(
                             'All $_formatLabel Events',
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 14),
-                              fontWeight: FontWeight.w500,
+                              fontSize: Responsive.sp(context, 17),
+                              fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
                             ),
                           ),

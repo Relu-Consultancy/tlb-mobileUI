@@ -70,7 +70,11 @@ class SpecialNeedsSection extends StatelessWidget {
                   children: [
                     // Left image with red circular star badge
                     SizedBox(
-                      width: Responsive.w(context, 215, min: 185),
+                      // Trimmed from 215: the content column was only 119pt
+                      // wide, which truncated the date/time row ("Sat & Sun ·
+                      // 4-6 P…"). At 185 the column gets 149pt and every meta
+                      // line fits whole.
+                      width: Responsive.w(context, 185, min: 160),
                       child: Stack(
                         clipBehavior: Clip.none,
                         children: [
@@ -95,7 +99,12 @@ class SpecialNeedsSection extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
+                          // The CTA used to sit at the bottom of this column;
+                          // without it the content bunched at the top and left
+                          // ~40% of the card blank. Spreading the blocks evenly
+                          // (rather than stacking them with fixed gaps) lets the
+                          // data occupy the full card height.
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             // "Sensory Friendly" pill — animated pink→purple
                             // gradient that slides continuously (medium pace).
@@ -116,7 +125,6 @@ class SpecialNeedsSection extends StatelessWidget {
                                   Color(0xFFF53C9B), // pink (seamless loop)
                                 ],
                               ),
-                            const SizedBox(height: 8),
                             // Title
                             Text(
                               event.title,
@@ -128,7 +136,6 @@ class SpecialNeedsSection extends StatelessWidget {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 8),
                             // Location
                             Row(
                               children: [
@@ -148,9 +155,16 @@ class SpecialNeedsSection extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
-                            // Age Group · Date & Time · Distance (mock data)
-                            ListingMetaRows(event: event),
+                            // Age Group · Date & Time · Distance (mock data).
+                            // Sized up from the defaults so the meta block
+                            // carries its share of the reclaimed height.
+                            ListingMetaRows(
+                              event: event,
+                              // Font stays at the default 11 — 12 pushed the
+                              // date/time line past the column width again.
+                              // Only the row gap opens up.
+                              rowGap: 8,
+                            ),
                           ],
                         ),
                       ),

@@ -9,6 +9,7 @@ import '../models/event_model.dart';
 import '../providers/location_state.dart';
 import '../widgets/category_event_card.dart';
 import '../widgets/all_categories_popup.dart';
+import '../widgets/category_icon_card.dart';
 import '../widgets/category_skeleton_card.dart';
 import '../widgets/category_screen_header.dart';
 import '../widgets/filter_bottom_sheet.dart';
@@ -148,6 +149,10 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
     AllCategoriesPopup.show(
       context,
       DummyData.programsSeeAllCategories,
+      lineIcons: true,
+      darkBackground: true,
+      cardMetrics: CategoryCardMetrics.programs,
+      lineIconLabelSize: 11,
       onCategoryTap: (index) {
         Navigator.pushReplacement(
           context,
@@ -339,7 +344,10 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                             ),
                           ),
                           SizedBox(
-                            height: Responsive.h(context, 142),
+                            // 98pt card at the shared 0.650 ratio is 151
+                            // tall; +24 for the list's vertical padding, which
+                            // also absorbs the selected card's 1.12 scale.
+                            height: Responsive.h(context, 175),
                             child: ListView.builder(
                               controller: _chipScrollController,
                               scrollDirection: Axis.horizontal,
@@ -348,73 +356,22 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                               itemBuilder: (context, index) {
                                 final cat = DummyData.programsCategories[index];
                                 final isSelected = index == _selectedCategoryIndex;
-                                final catGradient = cat['gradient'] as List<Color>;
                                 return AnimatedScale(
                                   scale: isSelected ? 1.12 : 1.0,
                                   duration: const Duration(milliseconds: 200),
                                   curve: Curves.easeInOut,
-                                  child: GestureDetector(
+                                  child: Container(
                                     key: _chipKeys[index],
-                                    onTap: () => _selectCategory(index),
-                                    child: AnimatedContainer(
-                                      duration: const Duration(milliseconds: 200),
-                                      width: 98,
-                                      margin: const EdgeInsets.only(right: 10),
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topCenter,
-                                          end: Alignment.bottomCenter,
-                                          colors: [Colors.white, catGradient.last],
-                                        ),
-                                        borderRadius: BorderRadius.circular(14),
-                                        border: isSelected
-                                            ? Border.all(color: catGradient.last, width: 2.5)
-                                            : Border.all(color: Colors.black.withOpacity(0.07), width: 2.5),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: catGradient.last.withOpacity(isSelected ? 0.45 : 0.15),
-                                            blurRadius: isSelected ? 10 : 5,
-                                            offset: const Offset(0, 3),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(6, 6, 6, 5),
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              (cat['label'] as String),
-                                              textAlign: TextAlign.center,
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: GoogleFonts.poppins(
-                                                fontSize: Responsive.sp(context, 9.5),
-                                                fontWeight: isSelected ? FontWeight.w500 : FontWeight.w500,
-                                                height: 1.2,
-                                                color: AppColors.textPrimary,
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: Column(
-                                                children: [
-                                                  Expanded(
-                                                    child: Image.asset(
-                                                      cat['image'] as String,
-                                                      fit: BoxFit.contain,
-                                                      errorBuilder: (_, __, ___) => const Icon(
-                                                        Icons.workspace_premium_outlined,
-                                                        color: Colors.grey,
-                                                        size: 28,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                    width: 98,
+                                    margin: const EdgeInsets.only(right: 10),
+                                    child: CategoryIconCard.fromCategory(
+                                      cat,
+                                      metrics: CategoryCardMetrics.programs,
+                                      // 98pt leaves 90.2pt of text width, which
+                                      // clears the longest word at this size.
+                                      labelFontSize: 9.5,
+                                      selected: isSelected,
+                                      onTap: () => _selectCategory(index),
                                     ),
                                   ),
                                 );
@@ -438,8 +395,8 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                           Text(
                             'All $_categoryTitle',
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 14.5),
-                              fontWeight: FontWeight.w500,
+                              fontSize: Responsive.sp(context, 17),
+                              fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
                             ),
                           ),

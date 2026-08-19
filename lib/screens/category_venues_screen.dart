@@ -423,8 +423,8 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                           Text(
                             'All $_categoryTitle',
                             style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 14.5),
-                              fontWeight: FontWeight.w500,
+                              fontSize: Responsive.sp(context, 17),
+                              fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
                             ),
                           ),

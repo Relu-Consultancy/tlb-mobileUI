@@ -496,8 +496,8 @@ class _SearchScreenState extends State<SearchScreen> {
           title: Text(
             item.title,
             style: GoogleFonts.poppins(
-              fontSize: Responsive.sp(context, 14),
-              fontWeight: FontWeight.w500,
+              fontSize: Responsive.sp(context, 16),
+              fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
             ),
             maxLines: 1,

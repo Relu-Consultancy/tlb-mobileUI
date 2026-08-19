@@ -223,7 +223,7 @@ class _TicketsListScreenState extends State<TicketsListScreen> {
             OutlinedButton.icon(
               onPressed: _load,
               icon: const Icon(Icons.refresh, size: 18),
-              label: const Text('Try again', style: TextStyle(fontWeight: FontWeight.w500)),
+              label: Text('Try again', style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.accentBlue,
                 side: const BorderSide(color: AppColors.accentBlue),
@@ -266,8 +266,8 @@ class _TicketCard extends StatelessWidget {
                     child: Text(
                       ticket.subject.isEmpty ? '(no subject)' : ticket.subject,
                       style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                        fontSize: Responsive.sp(context, 16),
+                        fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
                       ),
                       maxLines: 2,

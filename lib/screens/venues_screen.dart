@@ -12,7 +12,6 @@ import '../widgets/dark_category_section.dart';
 import '../widgets/dark_glow_header.dart';
 import '../widgets/section_divider_widget.dart';
 import '../widgets/listing_meta_rows.dart';
-import '../widgets/primary_cta_button.dart';
 import '../sections/app_footer.dart';
 import '../widgets/app_refresh_indicator.dart';
 import '../widgets/floating_navbar.dart';
@@ -356,7 +355,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
   Widget _sectionHeader(BuildContext context, String title) {
     return SectionDividerWidget(
       title: title,
-      fontSize: 16,
+      fontSize: 17,
       fontWeight: FontWeight.w600,
       textColor: const Color(0xFF3A3A3A), // charcoal
       lineLength: 100,
@@ -367,104 +366,114 @@ class _VenuesScreenState extends State<VenuesScreen> {
   }
 
   // ── What's the Plan? circles ──
+  /// Same hue, lower lightness — the bottom stop of each circle's wash.
+  static Color _deepenTint(Color c, double amount) {
+    final hsl = HSLColor.fromColor(c);
+    return hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0)).toColor();
+  }
+
   Widget _buildWhatsPlanRow(BuildContext context) {
     final cats = DummyData.venuesSeeAllCategories.take(6).toList();
+    // Circles trimmed from 152 and spaced a clean 10px apart (they used to
+    // overflow their slot to sit almost edge-to-edge).
+    const double circle = 120;
+    const double gap = 10;
+
     return SizedBox(
-      height: 205,
+      height: 174,
       child: AutoScrollList(
-        padding: const EdgeInsets.only(left: 14),
+        padding: const EdgeInsets.only(left: 16),
         clipBehavior: Clip.none,
         itemCount: cats.length,
         itemBuilder: (ctx, i) {
           final c = cats[i];
+          final Color tint =
+              (c['circleColor'] as Color?) ?? const Color(0xFFF3F4F6);
+
           return GestureDetector(
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => CategoryVenuesScreen(
-                  initialCategoryIndex: i,
-                ),
+                builder: (_) => CategoryVenuesScreen(initialCategoryIndex: i),
               ),
             ),
             child: Padding(
-            // Cards sit flush; tighter packing comes from the narrow slot below.
-            padding: EdgeInsets.zero,
-            child: SizedBox(
-              // Layout slot slightly narrower than the 152px circle canvas so
-              // neighbouring circles sit with just a ~2-3px gap; the circle
-              // overflows this slot (the list uses Clip.none) rather than
-              // shrinking.
-              width: 142,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Show the source image exactly as provided — it already
-                  // contains its own circular artwork. No clipping and
-                  // BoxFit.contain so nothing is cropped or stretched.
-                  SizedBox(
-                    width: 142,
-                    height: 152,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Soft golden glow behind the circle.
-                        Container(
-                          width: 128,
-                          height: 128,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: kDarkSectionGold.withOpacity(0.38),
-                                blurRadius: 28,
-                                spreadRadius: -4,
-                              ),
-                            ],
-                          ),
-                        ),
-                        OverflowBox(
-                          // Render the circle at its full 152px width even though
-                          // the slot is only 142px — it spills symmetrically into
-                          // the gaps so adjacent circles sit close.
-                          minWidth: 152,
-                          maxWidth: 152,
-                          minHeight: 152,
-                          maxHeight: 152,
-                          child: Transform.translate(
-                            // Optional per-image vertical nudge to line them up.
-                            offset:
-                                Offset(0, (c['nudge'] as num?)?.toDouble() ?? 0.0),
-                            child: Padding(
-                              // Optional per-image inset to normalise sizes where
-                              // an artwork fills its canvas more than the others.
-                              padding: EdgeInsets.all(
-                                (c['inset'] as num?)?.toDouble() ?? 0.0,
-                              ),
-                              child: Image.asset(
-                                c['image'] as String,
-                                fit: BoxFit.contain,
-                                errorBuilder: (_, __, ___) => Icon(Icons.place,
-                                    size: 58, color: AppColors.primary),
-                              ),
+              padding: EdgeInsets.only(right: i == cats.length - 1 ? 0 : gap),
+              child: SizedBox(
+                width: circle,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: circle,
+                      height: circle,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Soft golden glow behind the circle.
+                          Container(
+                            width: circle * 0.86,
+                            height: circle * 0.86,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: kDarkSectionGold.withOpacity(0.38),
+                                  blurRadius: 24,
+                                  spreadRadius: -4,
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      ],
+                          // The artwork carries its own circle, so the gradient
+                          // is laid over it: that deepens the pale fill toward
+                          // the bottom while leaving the dark line-work alone
+                          // (a plain overlay would wash the strokes out too).
+                          //
+                          // `modulate`, not `multiply`: both give src x dst
+                          // where the two overlap, but `multiply` composites
+                          // source-over outside the artwork, so the gradient
+                          // flooded the PNG's transparent corners and the
+                          // circles read as squares. `modulate` multiplies
+                          // alpha as well, so it can't paint outside the disc.
+                          ShaderMask(
+                            blendMode: BlendMode.modulate,
+                            shaderCallback: (rect) => LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.white,
+                                _deepenTint(tint, 0.10),
+                              ],
+                            ).createShader(rect),
+                            child: Image.asset(
+                              c['image'] as String,
+                              fit: BoxFit.contain,
+                              filterQuality: FilterQuality.high,
+                              errorBuilder: (_, __, ___) => Icon(Icons.place,
+                                  size: 48, color: AppColors.primary),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 9),
-                  Text(
-                    c['label'] as String,
-                    // White — this row now sits on the black hero region.
-                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w500, color: Colors.white),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                    const SizedBox(height: 9),
+                    Text(
+                      c['label'] as String,
+                      // White — this row sits on the black hero region.
+                      style: GoogleFonts.poppins(
+                        fontSize: Responsive.sp(context, 12),
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
           );
         },
       ),
@@ -487,75 +496,56 @@ class _VenuesScreenState extends State<VenuesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Large image with tag pills inside the bottom-left ──
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-                  child: Image.asset(
-                    event.imagePath,
-                    height: Responsive.h(context, 282, min: 254),
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      height: Responsive.h(context, 282, min: 254),
-                      color: Colors.grey.shade200,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 14,
-                  bottom: 12,
-                  child: Row(
-                    children: [
-                      if ((event.tag ?? '').isNotEmpty)
-                        _bigDayPill(event.tag!, const Color(0xFFDB2777), Colors.white, small: true),
-                      if ((event.tag ?? '').isNotEmpty) const SizedBox(width: 6),
-                      _bigDayPill('Premium', const Color(0xFFFFC107), AppColors.textPrimary, small: true),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
+            // ── Large image with tag pills inside the bottom-left — Expanded
+            // so it fills the space freed by the removed CTA button. ──
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 0, 14, 18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      event.title,
-                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+                    child: Image.asset(
+                      event.imagePath,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade200),
                     ),
-                    const SizedBox(height: 8),
-                    // Two-column meta (like the other cards): Age + Date·Time
-                    // left, Location + Distance (green) right.
-                    ListingMetaRows(
-                      event: event,
-                      showLocation: true,
-                      twoColumn: true,
+                  ),
+                  Positioned(
+                    left: 14,
+                    bottom: 12,
+                    child: Row(
+                      children: [
+                        if ((event.tag ?? '').isNotEmpty)
+                          _bigDayPill(event.tag!, const Color(0xFFDB2777), Colors.white, small: true),
+                        if ((event.tag ?? '').isNotEmpty) const SizedBox(width: 6),
+                        _bigDayPill('Premium', const Color(0xFFFFC107), AppColors.textPrimary, small: true),
+                      ],
                     ),
-                    const Spacer(),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 40,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryLight,
-                          foregroundColor: AppColors.textPrimary,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-                          padding: EdgeInsets.zero,
-                        ),
-                        child: Text('Book Now', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13.5), fontWeight: FontWeight.w600)),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    event.title,
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  // Two-column meta (like the other cards): Age + Date·Time
+                  // left, Location + Distance (green) right.
+                  ListingMetaRows(
+                    event: event,
+                    showLocation: true,
+                    twoColumn: true,
+                  ),
+                ],
               ),
             ),
           ],
@@ -603,41 +593,21 @@ class _VenuesScreenState extends State<VenuesScreen> {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 14, 14, 18),
+                padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if ((event.tag ?? '').isNotEmpty)
-                          _bigDayPill(event.tag!, const Color(0xFF16A34A), Colors.white),
-                        const SizedBox(height: 9),
-                        Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
-                        const SizedBox(height: 8),
-                        Row(children: [
-                          Icon(Icons.calendar_month_outlined, size: 15, color: AppColors.textSecondary),
-                          const SizedBox(width: 5),
-                          Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                        ]),
-                      ],
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 38,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryLight,
-                          foregroundColor: AppColors.textPrimary,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-                          padding: EdgeInsets.zero,
-                        ),
-                        child: Text('Inquire Now', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13.5), fontWeight: FontWeight.w600)),
-                      ),
-                    ),
+                    if ((event.tag ?? '').isNotEmpty)
+                      _bigDayPill(event.tag!, const Color(0xFF16A34A), Colors.white),
+                    const SizedBox(height: 9),
+                    Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    const SizedBox(height: 8),
+                    Row(children: [
+                      Icon(Icons.calendar_month_outlined, size: 15, color: AppColors.textSecondary),
+                      const SizedBox(width: 5),
+                      Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                    ]),
                   ],
                 ),
               ),
@@ -759,7 +729,21 @@ class _VenuesScreenState extends State<VenuesScreen> {
     final venues = (data['venues'] as List).cast<Map<String, dynamic>>();
     final gradientColors = (data['gradient'] as List).cast<Color>();
 
-    return Container(
+    void openVenue(Map<String, dynamic> v) => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => VenueDetailScreen(
+              event: EventModel(
+                title: data['sport'] as String,
+                venue: v['location'] as String,
+                imagePath: v['image'] as String,
+                listingType: 'venue',
+              ),
+            ),
+          ),
+        );
+
+    final card = Container(
       width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -837,27 +821,40 @@ class _VenuesScreenState extends State<VenuesScreen> {
           ),
 
           // ── Venue list ──
-          // Expanded so this block fills the remaining fixed card height —
-          // otherwise the CTA trails the content with a large unclaimed gap
-          // beneath it instead of sitting at the card's bottom edge. The rows
-          // themselves are wrapped in their own Expanded + scrollview so a
-          // future entry with more venues than fit scrolls internally instead
-          // of overflowing the card's fixed height.
+          // Expanded so this block fills the remaining fixed card height. Each
+          // row is individually tappable (no separate CTA); rows are wrapped
+          // in their own Expanded + scrollview so a future entry with more
+          // venues than fit scrolls internally instead of overflowing the
+          // card's fixed height.
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: SingleChildScrollView(
+                    // Fill the viewport when the venues are few (spreading them
+                    // instead of leaving the card's lower half blank), and
+                    // still scroll if an entry ever carries more than fits.
+                    child: LayoutBuilder(
+                      builder: (context, constraints) => SingleChildScrollView(
                       physics: const ClampingScrollPhysics(),
+                      child: ConstrainedBox(
+                        constraints:
+                            BoxConstraints(minHeight: constraints.maxHeight),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: List.generate(venues.length, (idx) {
                           final v = venues[idx];
                           final slots = (v['slots'] as List).cast<String>();
-                          return Column(
+                          return GestureDetector(
+                            // Opaque so the whole row responds — including the
+                            // gap beside a short venue name and the strip
+                            // above the divider.
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => openVenue(v),
+                            child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                       // Venue info row
@@ -867,12 +864,15 @@ class _VenuesScreenState extends State<VenuesScreen> {
                             borderRadius: BorderRadius.circular(10),
                             child: Image.asset(
                               v['image'] as String,
-                              width: 48,
-                              height: 48,
+                              // Sized up with the slot pills so the two venue
+                              // rows carry the card's height rather than
+                              // floating in it.
+                              width: 58,
+                              height: 58,
                               fit: BoxFit.cover,
                               errorBuilder: (_, __, ___) => Container(
-                                width: 48,
-                                height: 48,
+                                width: 58,
+                                height: 58,
                                 decoration: BoxDecoration(
                                   color: Colors.grey.shade100,
                                   borderRadius: BorderRadius.circular(10),
@@ -923,7 +923,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                               padding: EdgeInsets.only(right: s < slots.length - 1 ? 10 : 0),
                               child: Container(
                                 alignment: Alignment.center,
-                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFF5F5F5),
                                   borderRadius: BorderRadius.circular(6),
@@ -943,43 +943,34 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         }),
                       ),
                               if (idx < venues.length - 1) ...[
-                                const SizedBox(height: 14),
+                                const SizedBox(height: 18),
                                 Divider(color: Colors.grey.shade200, height: 1),
-                                const SizedBox(height: 14),
                               ],
                             ],
+                          ),
                           );
                         }),
                       ),
+                      ),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  // Full-width CTA at the bottom (shared canonical CTA).
-                PrimaryCtaButton(
-                  label: 'View Now',
-                  onTap: () {
-                    final v = venues.first;
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => VenueDetailScreen(
-                          event: EventModel(
-                            title: data['sport'] as String,
-                            venue: v['location'] as String,
-                            imagePath: v['image'] as String,
-                            listingType: 'venue',
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
                 ],
               ),
             ),
           ),
         ],
       ),
+    );
+
+    // This card lists two venues, so the row taps above stay authoritative —
+    // an inner detector wins the gesture arena over an outer one. This wrapper
+    // only catches what's left (the sport header, the padding), routing it to
+    // the first venue so no part of the card is inert.
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: venues.isEmpty ? null : () => openVenue(venues.first),
+      child: card,
     );
   }
 
@@ -1072,7 +1063,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14.5), fontWeight: FontWeight.w600, color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 7),
                     Row(children: [
                       Icon(Icons.location_on_outlined, size: 14, color: AppColors.textSecondary),
@@ -1149,21 +1140,6 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         Icon(Icons.location_on_outlined, size: 15, color: AppColors.textSecondary),
                         const SizedBox(width: 4),
                         Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                        const SizedBox(width: 8),
-                        SizedBox(
-                          height: 36,
-                          child: ElevatedButton(
-                            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryLight,
-                              foregroundColor: AppColors.textPrimary,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-                              padding: const EdgeInsets.symmetric(horizontal: 26),
-                            ),
-                            child: Text('Visit', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500)),
-                          ),
-                        ),
                       ],
                     ),
                   ],
@@ -1261,8 +1237,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
         ),
         child: Padding(
           // Inner padding so the image floats inside the card with rounded
-          // boundaries on all sides (per reference); 18px below the pinned CTA.
-          padding: const EdgeInsets.fromLTRB(10, 10, 10, 18),
+          // boundaries on all sides (per reference).
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1330,22 +1306,6 @@ class _VenuesScreenState extends State<VenuesScreen> {
                 const SizedBox(width: 4),
                 Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
               ]),
-              const SizedBox(height: 12),
-              // ── View Details button (full width) ──
-              SizedBox(
-                width: double.infinity,
-                height: 44,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDetailScreen(event: event))),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryLight,
-                    foregroundColor: AppColors.textPrimary,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                  ),
-                  child: Text('View Details', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w600)),
-                ),
-              ),
             ],
           ),
         ),

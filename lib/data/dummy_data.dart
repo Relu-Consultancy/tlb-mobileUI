@@ -35,36 +35,51 @@ class DummyData {
   // Card renders [Colors.white -> gradient.last], so `.last` is the visible
   // bottom tone — deep/saturated, matching the same categories' colors in
   // the "View All" popup (DummyData.allCategories) for consistency.
+  // `icon` + `circleColor` drive the line-art cards (see CategoryIconCard);
+  // `image` + `gradient` are kept for the gradient variant. Values mirror the
+  // matching entries in [allCategories].
   static const List<Map<String, dynamic>> exploreCategories = [
     {
       'label': 'Arts & Crafts',
       'image': 'assets/images/event_subcategories/artcraft.png',
       'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
+      'icon': 'assets/images/event_categories/arts_crafts.png',
+      'circleColor': Color(0xFFF4EFFD),
     },
     {
       'label': 'Performing Arts',
       'image': 'assets/images/event_subcategories/performarts.png',
       'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
+      'icon': 'assets/images/event_categories/performing_arts.png',
+      'circleColor': Color(0xFFFEF0F1),
     },
     {
       'label': 'STEM &\nInnovation',
       'image': 'assets/images/event_subcategories/stem.png',
       'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
+      'icon': 'assets/images/event_categories/stem_innovation.png',
+      'circleColor': Color(0xFFFEF4E6),
     },
     {
       'label': 'Sports &\nFitness',
       'image': 'assets/images/event_subcategories/sports.png',
       'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
+      'icon': 'assets/images/event_categories/sports_fitness.png',
+      'circleColor': Color(0xFFFEF3DA),
     },
     {
       'label': 'Languages &\nCommunication',
       'image': 'assets/images/event_subcategories/lang.png',
       'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
+      'icon': 'assets/images/event_categories/language_communication.png',
+      'circleColor': Color(0xFFFEEAEC),
     },
     {
       'label': 'Life Skills',
       'image': 'assets/images/event_subcategories/lifeskills.png',
       'gradient': [Color(0xFF38BDF8), Color(0xFF2563EB)], // sky/blue
+      'icon': 'assets/images/event_categories/life_skills.png',
+      'circleColor': Color(0xFFE6F1FD),
     },
   ];
 
@@ -121,66 +136,88 @@ class DummyData {
       'apiName': 'Academic',
       'image': 'assets/images/class_page/academic.png',
       'gradient': [Color(0xFF6366F1), Color(0xFF312E81)], // indigo/navy
+      'icon': 'assets/images/class_categories/academic.png',
+      'circleColor': Color(0xFFEEF3F8),
     },
     {
       'label': 'Creative Arts',
       'apiName': 'Creative Arts',
       'image': 'assets/images/class_page/creative.png',
       'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
+      'icon': 'assets/images/class_categories/creative_arts.png',
+      'circleColor': Color(0xFFF2EFF7),
     },
     {
       'label': 'Tech & Innovation',
       'apiName': 'Tech & Innovation',
       'image': 'assets/images/class_page/tech.png',
       'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
+      'icon': 'assets/images/class_categories/tech_innovation.png',
+      'circleColor': Color(0xFFFBF0EB),
     },
     {
       'label': 'Performing Arts',
       'apiName': 'Performing Arts',
       'image': 'assets/images/class_page/performing.png',
       'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
+      'icon': 'assets/images/class_categories/performing_arts.png',
+      'circleColor': Color(0xFFF9EDF0),
     },
     {
       'label': 'Sports & Fitness',
       'apiName': 'Sports & Fitness',
       'image': 'assets/images/class_page/sports.png',
       'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
+      'icon': 'assets/images/class_categories/sports_fitness.png',
+      'circleColor': Color(0xFFFBF5EB),
     },
     {
       'label': 'Speech &\nCommunication',
       'apiName': 'Speech & Communication',
       'image': 'assets/images/class_page/speech.png',
       'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
+      'icon': 'assets/images/class_categories/speech_communication.png',
+      'circleColor': Color(0xFFF2EFF7),
     },
     {
       'label': 'Life Skills &\nPersonality Dev',
       'apiName': 'Life Skills & Personality Development',
       'image': 'assets/images/class_page/lifeskills.png',
       'gradient': [Color(0xFF38BDF8), Color(0xFF2563EB)], // sky/blue
+      'icon': 'assets/images/class_categories/life_skills_personality.png',
+      'circleColor': Color(0xFFEFF3F7),
     },
     {
       'label': 'Creative Media',
       'apiName': 'Creative Media',
       'image': 'assets/images/class_page/media.png',
       'gradient': [Color(0xFFFCD34D), Color(0xFFF97316)], // amber/orange
+      'icon': 'assets/images/class_categories/creative_media.png',
+      'circleColor': Color(0xFFFBF0EB),
     },
     {
       'label': 'Outdoor &\nNature Learning',
       'apiName': 'Outdoor & Nature Learning',
       'image': 'assets/images/class_page/outdoor.png',
       'gradient': [Color(0xFF6EE7B7), Color(0xFF059669)], // green/emerald
+      'icon': 'assets/images/class_categories/outdoor_nature_learning.png',
+      'circleColor': Color(0xFFF4F7EF),
     },
     {
       'label': 'Culinary',
       'apiName': 'Culinary',
       'image': 'assets/images/class_page/culinary.png',
       'gradient': [Color(0xFFFDA4AF), Color(0xFFE11D48)], // rose/red
+      'icon': 'assets/images/class_categories/culinary.png',
+      'circleColor': Color(0xFFF9EDF0),
     },
     {
       'label': 'Brain Boosters',
       'apiName': 'Brain Boosters',
       'image': 'assets/images/class_page/brainboosters.png',
       'gradient': [Color(0xFF67E8F9), Color(0xFF0891B2)], // cyan/teal
+      'icon': 'assets/images/class_categories/brain_boosters.png',
+      'circleColor': Color(0xFFEFF2F7),
     },
   ];
 
@@ -228,6 +265,8 @@ class DummyData {
       'gradient': [Color(0xFF67E8F9), Color(0xFF0891B2)], // cyan/teal
       'imageInset': 0.0,
       'imageScale': 1.2,
+      'icon': 'assets/images/program_categories/future_tech_ai.png',
+      'circleColor': Color(0xFFEFF6FC),
     },
     {
       'label': 'Design &\nInnovation',
@@ -235,6 +274,8 @@ class DummyData {
       'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
       'imageInset': 0.0,
       'imageScale': 1.05,
+      'icon': 'assets/images/program_categories/design_innovation.png',
+      'circleColor': Color(0xFFFEF5EE),
     },
     {
       'label': 'Leadership &\nEntrepreneurship',
@@ -243,6 +284,8 @@ class DummyData {
       'imageInset': 0.0,
       'imageScale': 0.9,
       // tall figure — already fills the card
+      'icon': 'assets/images/program_categories/leadership_entrepreneurship.png',
+      'circleColor': Color(0xFFEFF1FE),
     },
     {
       'label': 'Media & Content\nCreation',
@@ -250,6 +293,8 @@ class DummyData {
       'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
       'imageInset': 0.0,
       'imageScale': 1.05,
+      'icon': 'assets/images/program_categories/media_content_creation.png',
+      'circleColor': Color(0xFFF4EEF8),
     },
     {
       'label': 'Stage Arts &\nPerformance',
@@ -257,6 +302,8 @@ class DummyData {
       'gradient': [Color(0xFF6EE7B7), Color(0xFF059669)], // green/emerald
       'imageInset': 0.0,
       'imageScale': 1.1,
+      'icon': 'assets/images/program_categories/stage_arts_performance.png',
+      'circleColor': Color(0xFFF3F9F7),
     },
     {
       'label': 'Active Sports\n& Training',
@@ -265,6 +312,8 @@ class DummyData {
       'imageInset': 0.0,
       'imageScale': 0.85,
       // tall figure — already fills the card
+      'icon': 'assets/images/program_categories/active_sports_training.png',
+      'circleColor': Color(0xFFFEEFF2),
     },
     {
       'label': 'Academics &\nCompetitive Prep',
@@ -272,6 +321,8 @@ class DummyData {
       'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
       'imageInset': 0.0,
       'imageScale': 1.0,
+      'icon': 'assets/images/program_categories/academics_competitive_prep.png',
+      'circleColor': Color(0xFFFCF0F4),
     },
     {
       'label': 'Analytical\nThinking',
@@ -279,6 +330,8 @@ class DummyData {
       'gradient': [Color(0xFFFCD34D), Color(0xFFF97316)], // amber/orange
       'imageInset': 0.0,
       'imageScale': 1.0,
+      'icon': 'assets/images/program_categories/analytical_thinking.png',
+      'circleColor': Color(0xFFFEF5EE),
     },
     {
       'label': 'Language &\nCommunication',
@@ -286,6 +339,8 @@ class DummyData {
       'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
       'imageInset': 0.0,
       'imageScale': 1.0,
+      'icon': 'assets/images/program_categories/language_communication.png',
+      'circleColor': Color(0xFFF5EDF8),
     },
     {
       'label': 'Culinary &\nHospitality',
@@ -293,6 +348,8 @@ class DummyData {
       'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
       'imageInset': 0.0,
       'imageScale': 1.0,
+      'icon': 'assets/images/program_categories/culinary_hospitality.png',
+      'circleColor': Color(0xFFFEF5ED),
     },
     {
       'label': 'Grooming &\nPersonality Dev',
@@ -300,6 +357,8 @@ class DummyData {
       'gradient': [Color(0xFF6366F1), Color(0xFF312E81)], // indigo/navy
       'imageInset': 0.0,
       'imageScale': 1.0,
+      'icon': 'assets/images/program_categories/grooming_personality.png',
+      'circleColor': Color(0xFFEFF1FD),
     },
   ];
 
@@ -349,104 +408,122 @@ class DummyData {
       'label': 'Academic',
       'image': 'assets/images/class_page/academic.png',
       'gradient': [Color(0xFF6366F1), Color(0xFF312E81)], // indigo/navy
+      'icon': 'assets/images/class_categories/academic.png',
+      'circleColor': Color(0xFFEEF3F8),
     },
     {
       'label': 'Creative Arts',
       'image': 'assets/images/class_page/creative.png',
       'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
+      'icon': 'assets/images/class_categories/creative_arts.png',
+      'circleColor': Color(0xFFF2EFF7),
     },
     {
       'label': 'Tech & Innovation',
       'image': 'assets/images/class_page/tech.png',
       'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
+      'icon': 'assets/images/class_categories/tech_innovation.png',
+      'circleColor': Color(0xFFFBF0EB),
     },
     {
       'label': 'Performing Arts',
       'image': 'assets/images/class_page/performing.png',
       'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
+      'icon': 'assets/images/class_categories/performing_arts.png',
+      'circleColor': Color(0xFFF9EDF0),
     },
     {
       'label': 'Sports & Fitness',
       'image': 'assets/images/class_page/sports.png',
       'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
+      'icon': 'assets/images/class_categories/sports_fitness.png',
+      'circleColor': Color(0xFFFBF5EB),
     },
     {
       'label': 'Speech & Communication',
       'image': 'assets/images/class_page/speech.png',
       'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
+      'icon': 'assets/images/class_categories/speech_communication.png',
+      'circleColor': Color(0xFFF2EFF7),
     },
     {
       'label': 'Life Skills & Personality Development',
       'image': 'assets/images/class_page/lifeskills.png',
       'gradient': [Color(0xFF38BDF8), Color(0xFF2563EB)], // sky/blue
+      'icon': 'assets/images/class_categories/life_skills_personality.png',
+      'circleColor': Color(0xFFEFF3F7),
     },
     {
       'label': 'Creative Media',
       'image': 'assets/images/class_page/media.png',
       'gradient': [Color(0xFFFCD34D), Color(0xFFF97316)], // amber/orange
+      'icon': 'assets/images/class_categories/creative_media.png',
+      'circleColor': Color(0xFFFBF0EB),
     },
     {
       'label': 'Outdoor and Nature Learning',
       'image': 'assets/images/class_page/outdoor.png',
       'gradient': [Color(0xFF6EE7B7), Color(0xFF059669)], // green/emerald
+      'icon': 'assets/images/class_categories/outdoor_nature_learning.png',
+      'circleColor': Color(0xFFF4F7EF),
     },
     {
       'label': 'Culinary',
       'image': 'assets/images/class_page/culinary.png',
       'gradient': [Color(0xFFFDA4AF), Color(0xFFE11D48)], // rose/red
+      'icon': 'assets/images/class_categories/culinary.png',
+      'circleColor': Color(0xFFF9EDF0),
     },
     {
       'label': 'Brain Boosters',
       'image': 'assets/images/class_page/brainboosters.png',
       'gradient': [Color(0xFF67E8F9), Color(0xFF0891B2)], // cyan/teal
+      'icon': 'assets/images/class_categories/brain_boosters.png',
+      'circleColor': Color(0xFFEFF2F7),
     },
   ];
 
   static const List<Map<String, dynamic>> venuesSeeAllCategories = [
     {
       'label': 'Play & Adventure',
-      'image': 'resources- tlb-ui/venues_page/1.png',
+      'image': 'assets/images/venue_categories/play_adventure.png',
       'gradient': <Color>[Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
+      'circleColor': Color(0xFFF5F9F6),
     },
     {
       'label': 'Sports & Active',
-      'image': 'resources- tlb-ui/venues_page/3.png',
+      'image': 'assets/images/venue_categories/sports_active.png',
       'gradient': <Color>[Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+      'circleColor': Color(0xFFFEF9F1),
     },
     {
       'label': 'Creative & DIY',
-      'image': 'resources- tlb-ui/venues_page/5.png',
+      'image': 'assets/images/venue_categories/creative_diy.png',
       'gradient': <Color>[Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
+      'circleColor': Color(0xFFF6F9FD),
     },
     {
       'label': 'Party & Celebration',
-      'image': 'resources- tlb-ui/venues_page/2.png',
+      'image': 'assets/images/venue_categories/party_celebration.png',
       'gradient': <Color>[Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
       // This artwork fills its canvas more than the others — inset it so it
       // renders at a similar visual size in the What's-the-Plan circles, and
       // nudge it down a touch so its circle lines up vertically with them.
       'inset': 7,
       'nudge': 4,
+      'circleColor': Color(0xFFF7F6FC),
     },
     {
       'label': 'Science & Discovery',
-      'image': 'resources- tlb-ui/venues_page/4.png',
+      'image': 'assets/images/venue_categories/science_discovery.png',
       'gradient': <Color>[Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+      'circleColor': Color(0xFFF8F7F6),
     },
     {
       'label': 'Nature & Animals',
-      'image': 'resources- tlb-ui/venues_page/6.png',
+      'image': 'assets/images/venue_categories/nature_animals.png',
       'gradient': <Color>[Color(0xFFECFDF5), Color(0xFFD1FAE5)],
-    },
-    {
-      'label': 'Reading & Study',
-      'image': 'assets/images/new_home/eventcategory2.png',
-      'gradient': <Color>[Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
-    },
-    {
-      'label': 'Dining & Cafes',
-      'image': 'assets/images/new_home/eventcategory3.png',
-      'gradient': <Color>[Color(0xFFF5F3FF), Color(0xFFEDE9FE)],
+      'circleColor': Color(0xFFF8F8F5),
     },
   ];
 
@@ -457,111 +534,158 @@ class DummyData {
       'label': 'Future Tech & AI',
       'image': "resources- tlb-ui/events_page/futuretech'.png",
       'gradient': [Color(0xFF67E8F9), Color(0xFF0891B2)], // cyan/teal
+      'icon': 'assets/images/program_categories/future_tech_ai.png',
+      'circleColor': Color(0xFFEFF6FC),
     },
     {
       'label': 'Design & Innovation',
       'image': 'resources- tlb-ui/events_page/design.png',
       'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
+      'icon': 'assets/images/program_categories/design_innovation.png',
+      'circleColor': Color(0xFFFEF5EE),
     },
     {
       'label': 'Leadership & Entrepreneurship',
       'image': 'resources- tlb-ui/events_page/leadership.png',
       'gradient': [Color(0xFF38BDF8), Color(0xFF2563EB)], // sky/blue
+      'icon': 'assets/images/program_categories/leadership_entrepreneurship.png',
+      'circleColor': Color(0xFFEFF1FE),
     },
     {
       'label': 'Media & Content Creation',
       'image': 'resources- tlb-ui/events_page/media.png',
       'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
+      'icon': 'assets/images/program_categories/media_content_creation.png',
+      'circleColor': Color(0xFFF4EEF8),
     },
     {
       'label': 'Stage Arts & Performance',
       'image': 'resources- tlb-ui/events_page/stage.png',
       'gradient': [Color(0xFF6EE7B7), Color(0xFF059669)], // green/emerald
+      'icon': 'assets/images/program_categories/stage_arts_performance.png',
+      'circleColor': Color(0xFFF3F9F7),
     },
     {
       'label': 'Active Sports & Training',
       'image': 'resources- tlb-ui/events_page/activesports.png',
       'gradient': [Color(0xFFFDA4AF), Color(0xFFE11D48)], // rose/red
+      'icon': 'assets/images/program_categories/active_sports_training.png',
+      'circleColor': Color(0xFFFEEFF2),
     },
     {
       'label': 'Academics & Competitive Prep',
       'image': 'assets/images/class_page/academic.png',
       'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
+      'icon': 'assets/images/program_categories/academics_competitive_prep.png',
+      'circleColor': Color(0xFFFCF0F4),
     },
     {
       'label': 'Analytical Thinking',
       'image': 'assets/images/class_page/brainboosters.png',
       'gradient': [Color(0xFFFCD34D), Color(0xFFF97316)], // amber/orange
+      'icon': 'assets/images/program_categories/analytical_thinking.png',
+      'circleColor': Color(0xFFFEF5EE),
     },
     {
       'label': 'Language & Communication',
       'image': 'assets/images/class_page/speech.png',
       'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
+      'icon': 'assets/images/program_categories/language_communication.png',
+      'circleColor': Color(0xFFF5EDF8),
     },
     {
       'label': 'Culinary & Hospitality',
       'image': 'assets/images/class_page/culinary.png',
       'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
+      'icon': 'assets/images/program_categories/culinary_hospitality.png',
+      'circleColor': Color(0xFFFEF5ED),
     },
     {
-      'label': 'Grooming & Personality Development',
+      'label': 'Grooming & Personality Dev.',
       'image': 'assets/images/class_page/lifeskills.png',
       'gradient': [Color(0xFF6366F1), Color(0xFF312E81)], // indigo/navy
+      'icon': 'assets/images/program_categories/grooming_personality.png',
+      'circleColor': Color(0xFFEFF1FD),
     },
   ];
 
   // Card renders [Colors.white -> gradient.last], so `.last` is the visible
   // bottom tone — deep/saturated per the reference (was near-white pastel).
+  //
+  // `icon` + `circleColor` drive the clean line-art treatment used by the
+  // "View All" popup (see CategoryIconCard); `image` + `gradient` remain for
+  // the in-page gradient cards. Circle tones are the exact values sampled
+  // from the approved design mock.
   static const List<Map<String, dynamic>> allCategories = [
     {
       'label': 'Arts & Crafts',
       'image': 'assets/images/event_subcategories/artcraft.png',
       'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
+      'icon': 'assets/images/event_categories/arts_crafts.png',
+      'circleColor': Color(0xFFF4EFFD), // lavender
     },
     {
       'label': 'Performing Arts',
       'image': 'assets/images/event_subcategories/performarts.png',
       'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
+      'icon': 'assets/images/event_categories/performing_arts.png',
+      'circleColor': Color(0xFFFEF0F1), // blush
     },
     {
       'label': 'STEM & Innovation',
       'image': 'assets/images/event_subcategories/stem.png',
       'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
+      'icon': 'assets/images/event_categories/stem_innovation.png',
+      'circleColor': Color(0xFFFEF4E6), // cream
     },
     {
       'label': 'Sports & Fitness',
       'image': 'assets/images/event_subcategories/sports.png',
       'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
+      'icon': 'assets/images/event_categories/sports_fitness.png',
+      'circleColor': Color(0xFFFEF3DA), // light amber
     },
     {
       'label': 'Languages & Communication',
       'image': 'assets/images/event_subcategories/lang.png',
       'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
+      'icon': 'assets/images/event_categories/language_communication.png',
+      'circleColor': Color(0xFFFEEAEC), // rose
     },
     {
       'label': 'Life Skills',
       'image': 'assets/images/event_subcategories/lifeskills.png',
       'gradient': [Color(0xFF38BDF8), Color(0xFF2563EB)], // sky/blue
+      'icon': 'assets/images/event_categories/life_skills.png',
+      'circleColor': Color(0xFFE6F1FD), // light blue
     },
     {
       'label': 'Mind & Strategy Games',
       'image': 'assets/images/event_subcategories/mindstrat.png',
       'gradient': [Color(0xFF6366F1), Color(0xFF312E81)], // indigo/navy
+      'icon': 'assets/images/event_categories/mind_strategy_games.png',
+      'circleColor': Color(0xFFF2EAFD), // lilac
     },
     {
       'label': 'Edutainment & Experiences',
       'image': 'assets/images/event_subcategories/Educainment.png',
       'gradient': [Color(0xFFFCD34D), Color(0xFFF97316)], // amber/orange
+      'icon': 'assets/images/event_categories/edutainment_experiences.png',
+      'circleColor': Color(0xFFFDE6CA), // peach
     },
     {
       'label': 'Nature & Outdoors',
       'image': 'assets/images/event_subcategories/nature.png',
       'gradient': [Color(0xFF67E8F9), Color(0xFF0891B2)], // cyan/teal
+      'icon': 'assets/images/event_categories/nature_outdoors.png',
+      'circleColor': Color(0xFFE6F4E4), // light green
     },
     {
       'label': 'Festivals & Celebrations',
       'image': 'assets/images/event_subcategories/festivals.png',
       'gradient': [Color(0xFFFDA4AF), Color(0xFFE11D48)], // rose/red
+      'icon': 'assets/images/event_categories/festivals_celebrations.png',
+      'circleColor': Color(0xFFFDEBEC), // pink
     },
   ];
 
@@ -817,8 +941,6 @@ class DummyData {
     ['All', 'Banquet Halls', 'Rooftop Venues', 'Private Cinemas', 'Party Suites', 'Garden Spaces'],                                                           // Party & Celebration
     ['All', 'Kids\' Museums', 'STEM Labs', 'Planetariums', 'Tech Exhibits', 'Nature Museums', 'Experience Centers'],                                           // Science & Discovery
     ['All', 'Petting Zoos', 'Organic Farms', 'Botanic Gardens', 'Stables', 'Bird Parks', 'Therapy Farms', 'Farm Stay'],                                       // Nature & Animals
-    ['All', 'Libraries', 'Book Cafes', 'Study Pods', 'Comic Lounges', 'Story Centers'],                                                                       // Reading & Study
-    ['All', 'Play Cafes', 'Character Dining', 'Board Game Cafes', 'Kids\' Bistros', 'Culinary Cafes'],                                                        // Dining & Cafes
   ];
 
   static const List<List<EventModel>> venuesByCategory = [
@@ -863,20 +985,6 @@ class DummyData {
       EventModel(title: 'Open Ground Park', venue: 'Malad • 2 kms', imagePath: 'assets/images/new_home/weekendspl4.png', rating: 4.3, reviewCount: '620 reviews', tag: 'Parks'),
       EventModel(title: 'Lakeside Farm', venue: 'Navi Mumbai • 15 kms', imagePath: 'assets/images/new_home/hotpic4.png', rating: 4.6, reviewCount: '980 reviews', tag: 'Farms'),
       EventModel(title: 'Aqua World', venue: 'Thane • 12 kms', imagePath: 'assets/images/new_home/hotpic3.png', rating: 4.7, reviewCount: '1.6k reviews', tag: 'Aquarium'),
-    ],
-    // Reading & Study
-    [
-      EventModel(title: 'Community Library', venue: 'Andheri • 4 kms', imagePath: 'assets/images/new_home/weekendspl2.png', rating: 4.4, reviewCount: '560 reviews', tag: 'Library'),
-      EventModel(title: 'Study Brew Cafe', venue: 'Bandra • 5 kms', imagePath: 'assets/images/new_home/weekendspl3.png', rating: 4.6, reviewCount: '1.0k reviews', tag: 'Study Cafe'),
-      EventModel(title: 'Tutoring Hub', venue: 'Powai • 6 kms', imagePath: 'assets/images/new_home/weekendspl1.png', rating: 4.5, reviewCount: '800 reviews', tag: 'Tutoring'),
-      EventModel(title: 'Olympiad Centre', venue: 'Dadar • 8 kms', imagePath: 'assets/images/new_home/hotpic4.png', rating: 4.7, reviewCount: '1.3k reviews', tag: 'Olympiad'),
-    ],
-    // Dining & Cafes
-    [
-      EventModel(title: 'Kid-Friendly Café', venue: 'Juhu • 3 kms', imagePath: 'assets/images/new_home/weekendspl1.png', rating: 4.7, reviewCount: '1.9k reviews', tag: 'Cafes'),
-      EventModel(title: 'Play Café & More', venue: 'Andheri • 5 kms', imagePath: 'assets/images/new_home/weekendspl4.png', rating: 4.6, reviewCount: '1.4k reviews', tag: 'Play Cafes'),
-      EventModel(title: 'Family Dine Inn', venue: 'Bandra • 4 kms', imagePath: 'assets/images/new_home/hotpic2.png', rating: 4.5, reviewCount: '1.0k reviews', tag: 'Kids Menu'),
-      EventModel(title: 'Event Kitchen', venue: 'Powai • 7 kms', imagePath: 'assets/images/new_home/hotpic3.png', rating: 4.4, reviewCount: '730 reviews', tag: 'Events'),
     ],
   ];
 

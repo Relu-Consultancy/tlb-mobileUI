@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -131,7 +132,7 @@ class FloatingNavbar extends StatelessWidget {
                                   padding: const EdgeInsets.only(left: 8.0),
                                   child: Text(
                                     item.label,
-                                    style: TextStyle(
+                                    style: GoogleFonts.poppins(
                                       color: _gold,
                                       fontWeight: FontWeight.w600, // little bold
                                       fontSize: Responsive.sp(context, 14),

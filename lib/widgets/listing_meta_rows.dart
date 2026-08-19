@@ -40,8 +40,6 @@ class ListingMetaRows extends StatelessWidget {
   /// Location on the right.
   final bool locationOnLeft;
 
-  /// Green used for the distance "tag".
-  static const Color _distanceGreen = Color(0xFF1FA85B);
 
   const ListingMetaRows({
     super.key,
@@ -79,7 +77,7 @@ class ListingMetaRows extends StatelessWidget {
               alignEnd: true),
         if (showDistance)
           _row(context, Icons.near_me_outlined, event.distanceDisplay,
-              color: _distanceGreen, alignEnd: true),
+              color: AppColors.distanceGreen, alignEnd: true),
       ];
       final int rowCount = left.length > right.length ? left.length : right.length;
 
@@ -113,7 +111,7 @@ class ListingMetaRows extends StatelessWidget {
         _row(context, Icons.calendar_today_outlined, event.dateTimeDisplay),
       if (showDistance)
         _row(context, Icons.near_me_outlined, event.distanceDisplay,
-            color: _distanceGreen),
+            color: AppColors.distanceGreen),
     ]);
   }
 

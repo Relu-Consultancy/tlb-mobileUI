@@ -160,5 +160,69 @@ void main() {
         expect(tester.takeException(), isNull);
       });
     });
+
+    // This card has no card-shaped background of its own (image + bare text on
+    // the page's white), so its tap target relies on HitTestBehavior.opaque.
+    // Without it a deferToChild hit test only catches the image and the
+    // glyphs, and the blank space between/beside the meta rows swallows taps.
+    testWidgets('TC_CEC_011 — a tap on the card\'s blank area still opens it',
+        (tester) async {
+      var taps = 0;
+      await mockNetworkImages(() async {
+        await pumpTLBApp(
+          tester,
+          Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 180,
+                child: CategoryEventCard(
+                  event: _fullEvent,
+                  badgeColor: const Color(0xFFFFA726),
+                  onTap: () => taps++,
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Aim right of the venue line: inside the card's bounds, but over
+        // blank space rather than any painted child.
+        final venueRight = tester.getTopRight(find.text('Delhi'));
+        final cardRight = tester.getTopRight(find.byType(CategoryEventCard));
+        expect(venueRight.dx, lessThan(cardRight.dx),
+            reason: 'need blank space right of the venue to aim at');
+
+        await tester.tapAt(Offset(
+          (venueRight.dx + cardRight.dx) / 2,
+          venueRight.dy + 6,
+        ));
+        await tester.pump();
+
+        expect(taps, 1);
+      });
+    });
+
+    testWidgets('TC_CEC_012 — card is opaque to hit testing', (tester) async {
+      await mockNetworkImages(() async {
+        await pumpTLBApp(
+          tester,
+          Scaffold(
+            body: CategoryEventCard(
+              event: _fullEvent,
+              badgeColor: const Color(0xFFFFA726),
+            ),
+          ),
+        );
+        final detector = tester.widget<GestureDetector>(
+          find
+              .descendant(
+                of: find.byType(CategoryEventCard),
+                matching: find.byType(GestureDetector),
+              )
+              .first,
+        );
+        expect(detector.behavior, HitTestBehavior.opaque);
+      });
+    });
   });
 }

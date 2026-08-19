@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../core/app_colors.dart';
+import 'category_icon_card.dart';
 
 class ExploreCategoriesGrid extends StatelessWidget {
   final List<Map<String, dynamic>> categories;
@@ -22,6 +23,24 @@ class ExploreCategoriesGrid extends StatelessWidget {
   /// padding) so the artwork sits flush at the bottom instead of floating.
   final bool imagesFlushBottom;
 
+  /// When true, render the clean line-art treatment from the design mock — a
+  /// pastel circle holding an outline glyph on a white card ([CategoryIconCard])
+  /// — instead of the gradient artwork cards. Requires each category to carry
+  /// `icon` and `circleColor`. Used by the Events screen.
+  ///
+  /// Note this also pins the grid's aspect ratio (see [_effectiveAspectRatio]).
+  final bool lineIcons;
+
+  /// Which mock's proportions the line-icon cards use. Only consulted when
+  /// [lineIcons] is true. Events glyphs sit on a pastel circle; Classes glyphs
+  /// are bare and the card is a touch narrower.
+  final CategoryCardMetrics cardMetrics;
+
+  /// Label size for the line-icon cards. Only consulted when [lineIcons] is
+  /// true. Sections with long category names need a smaller value than the
+  /// default so nothing spills past two lines.
+  final double lineIconLabelSize;
+
   const ExploreCategoriesGrid({
     super.key,
     required this.categories,
@@ -33,7 +52,17 @@ class ExploreCategoriesGrid extends StatelessWidget {
     this.scrollHeight,
     this.maxScrollRows,
     this.imagesFlushBottom = false,
+    this.lineIcons = false,
+    this.cardMetrics = CategoryCardMetrics.events,
+    this.lineIconLabelSize = 12,
   });
+
+  /// [CategoryIconCard] lays its icon, gap and label out as fractions of a card
+  /// whose width/height is [CategoryCardMetrics.aspectRatio], so in line-icon
+  /// mode the grid pins that ratio rather than trusting the caller's
+  /// [childAspectRatio] — a mismatch would silently distort those bands.
+  double get _effectiveAspectRatio =>
+      lineIcons ? cardMetrics.aspectRatio : childAspectRatio;
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +102,7 @@ class ExploreCategoriesGrid extends StatelessWidget {
         crossAxisCount: crossAxisCount,
         mainAxisSpacing: mainAxisSpacing,
         crossAxisSpacing: crossAxisSpacing,
-        childAspectRatio: childAspectRatio,
+        childAspectRatio: _effectiveAspectRatio,
       ),
       itemBuilder: (context, index) => _buildCategoryCard(context, index),
     );
@@ -116,7 +145,7 @@ class ExploreCategoriesGrid extends StatelessWidget {
             crossAxisCount: 3,
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
-            childAspectRatio: childAspectRatio,
+            childAspectRatio: _effectiveAspectRatio,
           ),
           itemBuilder: (context, index) => _buildCategoryCard(context, index),
         ),
@@ -166,6 +195,17 @@ class ExploreCategoriesGrid extends StatelessWidget {
 
   Widget _buildCategoryCard(BuildContext context, int index) {
     final category = categories[index];
+
+    // Clean line-art variant — pastel circle + outline glyph on a white card.
+    if (lineIcons) {
+      return CategoryIconCard.fromCategory(
+        category,
+        metrics: cardMetrics,
+        labelFontSize: lineIconLabelSize,
+        onTap: () => onCategoryTap?.call(index),
+      );
+    }
+
     final gradientColors = (category['gradient'] as List<Color>?) ??
         const [Color(0xFFEFEFEF), Color(0xFFDFDFDF)];
     final imageInset = (category['imageInset'] as double?) ?? 6.0;

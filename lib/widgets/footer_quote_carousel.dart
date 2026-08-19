@@ -85,7 +85,7 @@ class _FooterQuoteCarouselState extends State<FooterQuoteCarousel> {
           // ── Opening (top) quote mark ──
           Transform.rotate(
             angle: math.pi,
-            child: const Icon(Icons.format_quote, size: 44, color: _gold),
+            child: const _CommaQuoteMarks(height: 26, color: _gold),
           ),
           const SizedBox(height: 2),
           // ── Quote in white, cross-fading between entries ──
@@ -121,9 +121,81 @@ class _FooterQuoteCarouselState extends State<FooterQuoteCarousel> {
           ),
           const SizedBox(height: 2),
           // ── Closing (bottom) quote mark ──
-          const Icon(Icons.format_quote, size: 44, color: _gold),
+          const _CommaQuoteMarks(height: 26, color: _gold),
         ],
       ),
     );
   }
+}
+
+/// A pair of solid "comma" quotation marks — a round head with a tapering tail
+/// that hooks back under it.
+///
+/// Drawn rather than set as a glyph: Material's `Icons.format_quote` is an
+/// angular double-prime, and a text glyph like ❝ renders differently on each
+/// platform (runtime font fetching is off, so we can't pin one).
+class _CommaQuoteMarks extends StatelessWidget {
+  /// Height of a single mark; the pair is ~1.52x this wide.
+  final double height;
+  final Color color;
+
+  const _CommaQuoteMarks({required this.height, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: height * 1.52,
+      height: height,
+      child: CustomPaint(painter: _CommaQuotePainter(color)),
+    );
+  }
+}
+
+class _CommaQuotePainter extends CustomPainter {
+  final Color color;
+
+  const _CommaQuotePainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..isAntiAlias = true
+      ..style = PaintingStyle.fill;
+    final s = size.height;
+    // Second mark sits 0.80 of a mark-height to the right of the first.
+    for (final dx in <double>[0, 0.80 * s]) {
+      _drawMark(canvas, paint, dx, s);
+    }
+  }
+
+  void _drawMark(Canvas canvas, Paint paint, double x, double s) {
+    final double r = 0.30 * s;
+    final double cx = x + 0.42 * s;
+    final double cy = 0.32 * s;
+
+    Offset onCircle(double degrees) {
+      final a = degrees * math.pi / 180;
+      return Offset(cx + r * math.cos(a), cy + r * math.sin(a));
+    }
+
+    // Head, then the tail sweeping down-left. Filling both as one colour unions
+    // them into the comma; the second curve is pulled inward so the tail's
+    // inner edge hooks back under the head instead of bulging into a teardrop.
+    canvas.drawCircle(Offset(cx, cy), r, paint);
+
+    final start = onCircle(195);
+    final end = onCircle(80);
+    final tip = Offset(x + 0.08 * s, 0.99 * s);
+    final tail = Path()
+      ..moveTo(start.dx, start.dy)
+      ..quadraticBezierTo(cx - 0.85 * r, cy + 1.45 * r, tip.dx, tip.dy)
+      ..quadraticBezierTo(cx + 0.05 * r, cy + 0.75 * r, end.dx, end.dy)
+      ..close();
+    canvas.drawPath(tail, paint);
+  }
+
+  @override
+  bool shouldRepaint(_CommaQuotePainter oldDelegate) =>
+      oldDelegate.color != color;
 }

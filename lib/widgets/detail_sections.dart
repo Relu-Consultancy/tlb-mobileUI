@@ -37,7 +37,7 @@ class DetailSectionTitle extends StatelessWidget {
             text,
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 17),
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
               color: kDetailText,
             ),
           ),
@@ -435,7 +435,7 @@ void showListingFaqsSheet(
                 Text('FAQs',
                     style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 17),
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                         color: AppColors.textSecondary)),
                 GestureDetector(
                   onTap: () => Navigator.pop(ctx),

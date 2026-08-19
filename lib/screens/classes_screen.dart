@@ -10,6 +10,7 @@ import '../widgets/banner_carousel.dart';
 import '../widgets/dark_category_section.dart';
 import '../widgets/dark_glow_header.dart';
 import '../widgets/section_divider_widget.dart';
+import '../widgets/category_icon_card.dart';
 import '../widgets/explore_categories_grid.dart';
 import '../widgets/event_card_with_rating.dart';
 import '../widgets/class_nearby_card.dart';
@@ -67,6 +68,9 @@ class _ClassesScreenState extends State<ClassesScreen> {
     AllCategoriesPopup.show(
       context,
       DummyData.classesSeeAllCategories,
+      lineIcons: true,
+      darkBackground: true,
+      cardMetrics: CategoryCardMetrics.classes,
       onCategoryTap: (index) {
         Navigator.push(
           context,
@@ -202,6 +206,8 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                       scrollable: true,
                                       visibleRows: 2.3,
                                       maxScrollRows: 3,
+                                      lineIcons: true,
+                                      cardMetrics: CategoryCardMetrics.classes,
                                       onCategoryTap: (index) => Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -232,7 +238,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       // ── What's Everyone Joining? ──────────────────────────
                       const SectionDividerWidget(
                         title: "What's Everyone Joining?",
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w600,
                         textColor: Color(0xFF3A3A3A), // charcoal
                         lineLength: 100,
@@ -252,9 +258,6 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                 child: EventCardWithRating(
                                   event: DummyData.classesWhatEveryoneJoining[index],
                                   buttonLabel: 'View Details',
-                                  // Taller image grows down into the spare gap
-                                  // above the button, filling the white space.
-                                  imageAspectRatio: 0.80,
                                 ),
                               ),
                             );
@@ -265,7 +268,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       // ── Pick Your Pace ────────────────────────────────────
                       const SectionDividerWidget(
                         title: 'Pick Your Pace',
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w600,
                         textColor: Color(0xFF3A3A3A), // charcoal
                         lineLength: 100,
@@ -378,7 +381,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       // ── Right Around You ──────────────────────────────────
                       const SectionDividerWidget(
                         title: 'Right Around You',
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w600,
                         textColor: Color(0xFF3A3A3A), // charcoal
                         lineLength: 100,
@@ -406,7 +409,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       // ── Top Picks For You ─────────────────────────────────
                       const SectionDividerWidget(
                         title: 'Top Picks For You',
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w600,
                         textColor: Color(0xFF3A3A3A), // charcoal
                         lineLength: 100,
@@ -436,7 +439,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       // ── Holiday Special ───────────────────────────────────
                       const SectionDividerWidget(
                         title: 'Holiday Special',
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w600,
                         textColor: Color(0xFF3A3A3A), // charcoal
                         lineLength: 100,
@@ -466,7 +469,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       // ── Build New Skills ──────────────────────────────────
                       const SectionDividerWidget(
                         title: 'Build New Skills',
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w600,
                         textColor: Color(0xFF3A3A3A), // charcoal
                         lineLength: 100,
@@ -497,7 +500,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       // ── Special Focus ─────────────────────────────────────
                       const SectionDividerWidget(
                         title: 'Special Focus',
-                        fontSize: 16,
+                        fontSize: 17,
                         fontWeight: FontWeight.w600,
                         textColor: Color(0xFF3A3A3A), // charcoal
                         lineLength: 100,

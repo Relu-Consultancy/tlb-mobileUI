@@ -66,6 +66,10 @@ flutter:
     - assets/images/
     - assets/images/new_home/
     - assets/images/event_subcategories/
+    - assets/images/event_categories/
+    - assets/images/class_categories/
+    - assets/images/program_categories/
+    - assets/images/venue_categories/
     - assets/images/explore_formats/
     - assets/images/featured_partners/
     - assets/images/class_page/
