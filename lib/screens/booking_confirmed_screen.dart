@@ -1,8 +1,8 @@
-import 'dart:math';
 import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
+import '../widgets/booking_qr.dart';
 import '../providers/booked_events_state.dart';
 import '../models/event_model.dart';
 import '../services/ticket_pdf_service.dart';
@@ -28,13 +28,8 @@ class BookingConfirmedScreen extends StatefulWidget {
   State<BookingConfirmedScreen> createState() => _BookingConfirmedScreenState();
 }
 
-class _BookingConfirmedScreenState extends State<BookingConfirmedScreen>
-    with SingleTickerProviderStateMixin {
+class _BookingConfirmedScreenState extends State<BookingConfirmedScreen> {
   late final String _bookingId;
-  bool _revealed = false;
-  late final AnimationController _animCtrl;
-  late final Animation<double> _flipAnimation;
-  late final Animation<double> _scaleAnimation;
 
   @override
   void initState() {
@@ -46,136 +41,26 @@ class _BookingConfirmedScreenState extends State<BookingConfirmedScreen>
       date: widget.selectedDate,
       time: widget.selectedTime,
     );
-
-    _animCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-
-    _flipAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _animCtrl, curve: Curves.easeInOutCubic),
-    );
-
-    _scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.92), weight: 30),
-      TweenSequenceItem(tween: Tween(begin: 0.92, end: 1.0), weight: 70),
-    ]).animate(CurvedAnimation(parent: _animCtrl, curve: Curves.easeInOutCubic));
-  }
-
-  @override
-  void dispose() {
-    _animCtrl.dispose();
-    super.dispose();
-  }
-
-  void _onReveal() {
-    if (_revealed) return;
-    _animCtrl.forward().then((_) {
-      if (!mounted) return;
-      setState(() => _revealed = true);
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_revealed) {
-      return _TicketScreen(
-        event: widget.event,
-        bookingId: _bookingId,
-        apiBookingId: widget.bookingId,
-        selectedDate: widget.selectedDate,
-        selectedTime: widget.selectedTime,
-        showConfirmation: true,
-        onBack: () {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (_) => EventDetailScreen(event: widget.event),
-            ),
-            (route) => route.isFirst,
-          );
-        },
-      );
-    }
-
-    return _ClickHereTeaser(
-      flipAnimation: _flipAnimation,
-      scaleAnimation: _scaleAnimation,
-      onTap: _onReveal,
-      child: _TicketScreen(
-        event: widget.event,
-        bookingId: _bookingId,
-        apiBookingId: widget.bookingId,
-        selectedDate: widget.selectedDate,
-        selectedTime: widget.selectedTime,
-        showConfirmation: true,
-        onBack: () {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (_) => EventDetailScreen(event: widget.event),
-            ),
-            (route) => route.isFirst,
-          );
-        },
-      ),
-    );
-  }
-}
-
-// ── Teaser flip animation ────────────────────────────────────────────────────
-
-class _ClickHereTeaser extends StatelessWidget {
-  final Animation<double> flipAnimation;
-  final Animation<double> scaleAnimation;
-  final VoidCallback onTap;
-  final Widget child;
-
-  const _ClickHereTeaser({
-    required this.flipAnimation,
-    required this.scaleAnimation,
-    required this.onTap,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final safeTop = MediaQuery.of(context).padding.top;
-
-    return AnimatedBuilder(
-      animation: flipAnimation,
-      builder: (context, _) {
-        final progress = flipAnimation.value;
-        final showBack = progress > 0.5;
-
-        return Stack(
-          children: [
-            if (showBack) child,
-            if (!showBack)
-              Scaffold(
-                backgroundColor: const Color(0xFFD6E4F7),
-                body: GestureDetector(
-                  onTap: onTap,
-                  child: Center(
-                    child: Transform.scale(
-                      scale: scaleAnimation.value,
-                      child: Opacity(
-                        opacity: (1.0 - progress * 2).clamp(0.0, 1.0),
-                        child: Padding(
-                          padding: EdgeInsets.only(top: safeTop),
-                          child: Image.asset(
-                            'assets/images/click_here_ticket.png',
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => const Icon(
-                                Icons.confirmation_num,
-                                size: 60,
-                                color: Colors.grey),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
+    // Straight to the ticket. A "Click Here" card used to sit in front of this
+    // with a flip animation; the venue and program confirmations never had one,
+    // so this now matches them.
+    return _TicketScreen(
+      event: widget.event,
+      bookingId: _bookingId,
+      apiBookingId: widget.bookingId,
+      selectedDate: widget.selectedDate,
+      selectedTime: widget.selectedTime,
+      showConfirmation: true,
+      onBack: () {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (_) => EventDetailScreen(event: widget.event),
+          ),
+          (route) => route.isFirst,
         );
       },
     );
@@ -235,6 +120,7 @@ class _TicketScreen extends StatelessWidget {
                           child: _TicketCard(
                             event: event,
                             bookingId: bookingId,
+                            apiBookingId: apiBookingId,
                             selectedDate: selectedDate,
                             selectedTime: selectedTime,
                           ),
@@ -413,12 +299,18 @@ class _HeaderSection extends StatelessWidget {
 class _TicketCard extends StatelessWidget {
   final EventModel event;
   final String bookingId;
+
+  /// API booking uuid — what the ticket/QR endpoint is keyed on. [bookingId]
+  /// above is the human-readable reference and can't be used for the fetch.
+  final String? apiBookingId;
+
   final String selectedDate;
   final String selectedTime;
 
   const _TicketCard({
     required this.event,
     required this.bookingId,
+    this.apiBookingId,
     required this.selectedDate,
     required this.selectedTime,
   });
@@ -518,7 +410,7 @@ class _TicketCard extends StatelessWidget {
                           Border.all(color: Colors.grey.shade200, width: 1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: CustomPaint(painter: _QRCodePainter()),
+                    child: BookingQr(bookingId: apiBookingId, size: qrSize - 12),
                   ),
                 ],
               ),
@@ -854,50 +746,4 @@ class _TicketShapePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _TicketShapePainter old) =>
       old.bgColor != bgColor;
-}
-
-class _QRCodePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final p = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.fill;
-
-    final rand = Random(42);
-    const cell = 8.0;
-    final cols = (size.width / cell).floor();
-    final rows = (size.height / cell).floor();
-
-    // Finder patterns (3 corners)
-    _drawFinder(canvas, p, 0, 0, cell);
-    _drawFinder(canvas, p, (cols - 7) * cell, 0, cell);
-    _drawFinder(canvas, p, 0, (rows - 7) * cell, cell);
-
-    // Random data cells
-    for (int r = 0; r < rows; r++) {
-      for (int c = 0; c < cols; c++) {
-        if ((r < 8 && c < 8) ||
-            (r < 8 && c >= cols - 8) ||
-            (r >= rows - 8 && c < 8)) {
-          continue;
-        }
-        if (rand.nextBool()) {
-          canvas.drawRect(
-            Rect.fromLTWH(c * cell, r * cell, cell - 1, cell - 1),
-            p,
-          );
-        }
-      }
-    }
-  }
-
-  void _drawFinder(Canvas c, Paint p, double x, double y, double s) {
-    c.drawRect(Rect.fromLTWH(x, y, s * 7, s * 7), p);
-    final w = Paint()..color = Colors.white;
-    c.drawRect(Rect.fromLTWH(x + s, y + s, s * 5, s * 5), w);
-    c.drawRect(Rect.fromLTWH(x + s * 2, y + s * 2, s * 3, s * 3), p);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

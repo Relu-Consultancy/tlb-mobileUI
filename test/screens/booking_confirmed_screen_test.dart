@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail_image_network/mocktail_image_network.dart';
 import 'package:tlb_mobile_ui/models/event_model.dart';
@@ -16,7 +15,11 @@ void main() {
   );
 
   group('BookingConfirmedScreen Tests', () {
-    testWidgets('renders teaser initially, reveals ticket on tap', (WidgetTester tester) async {
+    // The ticket used to sit behind a "Click Here" card that had to be tapped
+    // and flipped through first. That step is gone, matching the venue and
+    // program confirmations, so the ticket is the first thing shown.
+    testWidgets('shows the ticket immediately, with no reveal step',
+        (WidgetTester tester) async {
       await mockNetworkImages(() async {
         await pumpTLBApp(
           tester,
@@ -26,28 +29,13 @@ void main() {
             selectedTime: '3:00 PM',
           ),
         );
-
-        // Wait for animations to settle
         await tester.pumpAndSettle();
 
-        // 1. Initial State
-        // The teaser should be visible, so "Booking Confirmed!" shouldn't be immediately tappable/visible
-        // Invoke onTap directly to bypass any hit test issues
-        final gestureDetector = tester.widget<GestureDetector>(find.byType(GestureDetector).first);
-        gestureDetector.onTap!();
-        
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 900)); // The animation is 800ms
-        await tester.pumpAndSettle();
-
-        // 2. Revealed State
-        // The ticket details should now be visible
+        // No tap, no waiting out an animation — the details are already here.
         expect(find.text('Booking Confirmed!'), findsOneWidget);
         expect(find.text('Awesome Kids Event'), findsOneWidget);
         expect(find.text('Sat, 21 Mar'), findsOneWidget);
         expect(find.text('3:00 PM'), findsOneWidget);
-        
-        // The Booking ID should be visible
         expect(find.textContaining('Booking ID:'), findsOneWidget);
       });
     });
