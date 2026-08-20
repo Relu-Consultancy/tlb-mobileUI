@@ -1,3 +1,4 @@
+import 'api_listing_terms.dart';
 class ApiVenueCategory {
   final int id;
   final String name;
@@ -173,6 +174,15 @@ class ApiVenueDetail extends ApiVenue {
   final ApiVenueOrganizer? organizer;
   final String? cancellationPolicy;
   final String? refundPolicy;
+
+  /// Terms & Conditions object returned by the API. Null when the
+  /// partner has not set any.
+  final ApiListingTerms? terms;
+
+  /// Partner-set label shown before booking. Defaults to true when the API
+  /// omits it. Informational only — it does not decide whether a cancellation
+  /// actually issues a refund.
+  final bool isRefundable;
   final List<Map<String, String>> faqs;
 
   /// `'direct_booking'` → user can book/check availability; `'enquiry'` → user
@@ -205,6 +215,8 @@ class ApiVenueDetail extends ApiVenue {
     this.organizer,
     this.cancellationPolicy,
     this.refundPolicy,
+    this.terms,
+    this.isRefundable = true,
     this.faqs = const [],
     this.bookingType = 'direct_booking',
   });
@@ -262,6 +274,8 @@ class ApiVenueDetail extends ApiVenue {
             : null,
         cancellationPolicy: json['cancellation_policy'] as String?,
         refundPolicy: json['refund_policy'] as String?,
+        terms: ApiListingTerms.fromJson(json['terms']),
+        isRefundable: (json['is_refundable'] as bool?) ?? true,
         bookingType: (json['booking_type'] as String?) ?? 'direct_booking',
         faqs: (json['faqs'] as List?)
                 ?.map((e) => {

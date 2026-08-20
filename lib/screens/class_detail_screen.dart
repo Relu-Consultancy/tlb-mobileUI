@@ -8,6 +8,7 @@ import '../providers/auth_state.dart';
 import '../providers/location_state.dart';
 import '../widgets/login_sheet.dart';
 import '../core/responsive.dart';
+import '../widgets/refundable_badge.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/review_sheet.dart';
 import '../widgets/organizer_card.dart';
@@ -50,6 +51,14 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
   bool get _hasApiId => widget.event.id.isNotEmpty;
 
   // ── Derived display helpers ──
+  /// True when there is anything to put in the Terms & Conditions sheet.
+  /// The API returns a single `terms` object; `cancellation_policy` and
+  /// `refund_policy` are only present on classes, so both are checked.
+  bool get _hasTerms =>
+      (_detail?.terms?.hasContent ?? false) ||
+      (_detail?.cancellationPolicy?.isNotEmpty == true) ||
+      (_detail?.refundPolicy?.isNotEmpty == true);
+
   String get _title => _detail?.title ?? widget.event.title;
   String get _tag => _detail?.subcategory?.name ?? _detail?.category.name ?? widget.event.tag ?? 'Class';
   String get _coverUrl => _detail?.coverUrl ?? widget.event.imagePath;
@@ -458,19 +467,24 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
 
                     const SizedBox(height: 32),
 
+                    // ── Refundable label ──────────────────────────────────
+                    // Informational only: it does not decide whether a
+                    // cancellation actually issues a refund.
+                    if (_detail != null) ...[
+                      const SizedBox(height: 24),
+                      RefundableBadge(isRefundable: _detail!.isRefundable),
+                      // Same 16pt rhythm the FAQs row uses when it follows
+                      // another card in this stack.
+                      const SizedBox(height: 16),
+                    ],
+
                     // Terms & Conditions
-                    if (_detail != null && (
-                      (_detail!.cancellationPolicy?.isNotEmpty == true) ||
-                      (_detail!.refundPolicy?.isNotEmpty == true)
-                    )) DetailTermsRow(
+                    if (_hasTerms) DetailTermsRow(
                       onTap: () => _showTermsBottomSheet(context),
                     ),
 
                     // FAQs
-                    if (_detail != null &&
-                        _detail!.faqs.isNotEmpty &&
-                        ((_detail!.cancellationPolicy?.isNotEmpty == true) ||
-                            (_detail!.refundPolicy?.isNotEmpty == true)))
+                    if (_detail != null && _detail!.faqs.isNotEmpty && _hasTerms)
                       const SizedBox(height: 16),
                     if (_detail != null && _detail!.faqs.isNotEmpty)
                       DetailTermsRow(
@@ -627,6 +641,10 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (_detail?.terms?.content?.trim().isNotEmpty == true) ...[
+                      Text(_detail!.terms!.content!.trim(), style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
+                      const SizedBox(height: 20),
+                    ],
                     if (_detail?.cancellationPolicy?.isNotEmpty == true) ...[
                       Text('Cancellation Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
                       const SizedBox(height: 10),

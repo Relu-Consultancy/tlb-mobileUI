@@ -1,4 +1,5 @@
 import 'api_category_model.dart';
+import 'api_listing_terms.dart';
 
 class ApiProgramTag {
   final int id;
@@ -171,6 +172,15 @@ class ApiProgramDetail extends ApiProgram {
   final String? cancellationPolicy;
   final String? refundPolicy;
 
+  /// Terms & Conditions object returned by the API. Null when the
+  /// partner has not set any.
+  final ApiListingTerms? terms;
+
+  /// Partner-set label shown before booking. Defaults to true when the API
+  /// omits it. Informational only — it does not decide whether a cancellation
+  /// actually issues a refund.
+  final bool isRefundable;
+
   const ApiProgramDetail({
     required super.id,
     required super.title,
@@ -204,6 +214,8 @@ class ApiProgramDetail extends ApiProgram {
     this.organizer,
     this.cancellationPolicy,
     this.refundPolicy,
+    this.terms,
+    this.isRefundable = true,
   });
 
   factory ApiProgramDetail.fromJson(Map<String, dynamic> json) {
@@ -267,6 +279,8 @@ class ApiProgramDetail extends ApiProgram {
           : null,
       cancellationPolicy: json['cancellation_policy'] as String?,
       refundPolicy: json['refund_policy'] as String?,
+      terms: ApiListingTerms.fromJson(json['terms']),
+      isRefundable: (json['is_refundable'] as bool?) ?? true,
     );
   }
 }

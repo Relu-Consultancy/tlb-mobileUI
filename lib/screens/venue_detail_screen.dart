@@ -8,6 +8,7 @@ import '../core/share_helper.dart';
 import '../providers/auth_state.dart';
 import '../providers/location_state.dart';
 import '../core/responsive.dart';
+import '../widgets/refundable_badge.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/review_sheet.dart';
 import '../widgets/organizer_card.dart';
@@ -85,6 +86,14 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
   }
 
   // ── Data getters ──────────────────────────────────────────────────────────
+
+  /// True when there is anything to put in the Terms & Conditions sheet.
+  /// The API returns a single `terms` object; `cancellation_policy` and
+  /// `refund_policy` are only present on classes, so both are checked.
+  bool get _hasTerms =>
+      (_detail?.terms?.hasContent ?? false) ||
+      (_detail?.cancellationPolicy?.isNotEmpty == true) ||
+      (_detail?.refundPolicy?.isNotEmpty == true);
 
   String get _title => _detail?.title ?? widget.event.title;
 
@@ -517,11 +526,19 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                     ),
                     const SizedBox(height: 32),
 
+                    // ── Refundable label ──────────────────────────────────
+                    // Informational only: it does not decide whether a
+                    // cancellation actually issues a refund.
+                    if (_detail != null) ...[
+                      const SizedBox(height: 24),
+                      RefundableBadge(isRefundable: _detail!.isRefundable),
+                      // Same 16pt rhythm the FAQs row uses when it follows
+                      // another card in this stack.
+                      const SizedBox(height: 16),
+                    ],
+
                     // ── Terms & Conditions ────────────────────────────────
-                    if (_detail != null && (
-                      (_detail!.cancellationPolicy?.isNotEmpty == true) ||
-                      (_detail!.refundPolicy?.isNotEmpty == true)
-                    )) ...[
+                    if (_hasTerms) ...[
                       DetailTermsRow(
                         onTap: () => _showTermsBottomSheet(context),
                       ),
@@ -726,6 +743,10 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (_detail?.terms?.content?.trim().isNotEmpty == true) ...[
+                      Text(_detail!.terms!.content!.trim(), style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
+                      const SizedBox(height: 20),
+                    ],
                     if (_detail?.cancellationPolicy?.isNotEmpty == true) ...[
                       Text('Cancellation Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
                       const SizedBox(height: 10),

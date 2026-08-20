@@ -1,3 +1,4 @@
+import 'api_listing_terms.dart';
 class ApiEventCategory {
   final int id;
   final String name;
@@ -166,6 +167,15 @@ class ApiEventDetail extends ApiEvent {
   final ApiEventOrganizer? organizer;
   final String? cancellationPolicy;
   final String? refundPolicy;
+
+  /// Terms & Conditions object returned by the API. Null when the
+  /// partner has not set any.
+  final ApiListingTerms? terms;
+
+  /// Partner-set label shown before booking. Defaults to true when the API
+  /// omits it. Informational only — it does not decide whether a cancellation
+  /// actually issues a refund.
+  final bool isRefundable;
   final List<Map<String, String>> faqs;
 
   const ApiEventDetail({
@@ -193,6 +203,8 @@ class ApiEventDetail extends ApiEvent {
     this.organizer,
     this.cancellationPolicy,
     this.refundPolicy,
+    this.terms,
+    this.isRefundable = true,
     this.faqs = const [],
   });
 
@@ -244,6 +256,8 @@ class ApiEventDetail extends ApiEvent {
             : null,
         cancellationPolicy: json['cancellation_policy'] as String?,
         refundPolicy: json['refund_policy'] as String?,
+        terms: ApiListingTerms.fromJson(json['terms']),
+        isRefundable: (json['is_refundable'] as bool?) ?? true,
         faqs: (json['faqs'] as List?)
                 ?.map((e) => {
                       'question': (e['question'] as String?) ?? '',

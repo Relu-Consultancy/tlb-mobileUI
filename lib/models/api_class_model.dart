@@ -1,4 +1,5 @@
 import 'api_category_model.dart';
+import 'api_listing_terms.dart';
 
 class ApiClassAgeGroup {
   final int? minAge;
@@ -139,6 +140,15 @@ class ApiClassDetail extends ApiClass {
   final String? teaserVideoUrl;
   final String? cancellationPolicy;
   final String? refundPolicy;
+
+  /// Terms & Conditions object returned by the API. Null when the
+  /// partner has not set any.
+  final ApiListingTerms? terms;
+
+  /// Partner-set label shown before booking. Defaults to true when the API
+  /// omits it. Informational only — it does not decide whether a cancellation
+  /// actually issues a refund.
+  final bool isRefundable;
   final List<Map<String, String>> faqs;
   final String bookingType;
   final double? price;
@@ -170,6 +180,8 @@ class ApiClassDetail extends ApiClass {
     this.teaserVideoUrl,
     this.cancellationPolicy,
     this.refundPolicy,
+    this.terms,
+    this.isRefundable = true,
     required this.faqs,
     required this.bookingType,
     this.price,
@@ -218,6 +230,8 @@ class ApiClassDetail extends ApiClass {
       teaserVideoUrl: service['teaser_video_url'] as String?,
       cancellationPolicy: service['cancellation_policy'] as String?,
       refundPolicy: service['refund_policy'] as String?,
+      terms: ApiListingTerms.fromJson(json['terms']),
+      isRefundable: (json['is_refundable'] as bool?) ?? true,
       faqs: (service['faqs'] as List?)
               ?.map((e) => {
                     'question': (e['question'] as String?) ?? '',
