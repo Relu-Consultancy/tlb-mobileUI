@@ -1,10 +1,11 @@
-import 'dart:math';
 import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
+import '../widgets/booking_qr.dart';
 import '../core/app_snackbar.dart';
 import '../models/api_booking_model.dart';
+import 'refund_tracking_screen.dart';
 import '../providers/auth_state.dart';
 import '../services/booking_service.dart';
 import '../services/ticket_pdf_service.dart';
@@ -64,7 +65,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
     if (widget.booking.listingCover != null) {
       _coverUrl = widget.booking.listingCover;
     }
-    _loadCover();
+    _refreshBooking();
   }
 
   @override
@@ -73,7 +74,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
     super.dispose();
   }
 
-  Future<void> _loadCover() async {
+  /// Re-reads the booking from the server: refund lifecycle, live status,
+  /// and the cover image the list response may not carry.
+  Future<void> _refreshBooking() async {
     final token = AuthState.accessToken;
     if (token == null) return;
 
@@ -82,6 +85,20 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
       final detail = await BookingService.getBookingDetail(
           token: token, bookingId: _booking.id);
       if (!mounted) return;
+
+      // The detail response carries the refund lifecycle, which the list
+      // response this screen is usually opened from does not. Adopt those
+      // fields rather than reading only the cover, or the refund tracker
+      // would never appear. Copied field-by-field so nothing the list item
+      // supplied gets dropped.
+      setState(() => _booking = _booking.copyWith(
+            status: detail.status,
+            paymentStatus: detail.paymentStatus,
+            refund: detail.refund,
+            refundAmount: detail.refundAmount,
+            cancelledAt: detail.cancelledAt,
+            cancellationReason: detail.cancellationReason,
+          ));
 
       if (detail.listingCover != null) {
         setState(() => _coverUrl = detail.listingCover);
@@ -157,6 +174,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
         context,
         e.toString().replaceFirst('Exception: ', ''),
       );
+
+      // Cancelling can partly succeed: the server cancels the booking but the
+      // refund fails to initiate, and reports that as an error. Without this
+      // the screen kept showing "Confirmed" while the message said the booking
+      // was cancelled. Re-reading the booking makes the screen state match the
+      // server's either way, rather than trusting the error text.
+      await _refreshBooking();
+      if (mounted) widget.onUpdated?.call(_booking);
     }
   }
 
@@ -274,6 +299,14 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                               booking: _booking, coverUrl: _coverUrl),
                         ),
                       ),
+                      if (_booking.refund != null)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(18, 0, 18, 0),
+                          child: RefundStatusRow(
+                            booking: _booking,
+                            onReturned: _refreshBooking,
+                          ),
+                        ),
                       const SizedBox(height: 16),
                     ],
                   ),
@@ -521,6 +554,15 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                         ),
 
                         const SizedBox(height: 24),
+
+                        // ── Refund tracking ───────────────────────────────────
+                        if (_booking.refund != null) ...[
+                          RefundStatusRow(
+                            booking: _booking,
+                            onReturned: _refreshBooking,
+                          ),
+                          const SizedBox(height: 24),
+                        ],
 
                         // ── Info note ─────────────────────────────────────────
                         FadeTransition(
@@ -847,6 +889,15 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                         ),
 
                         const SizedBox(height: 24),
+
+                        // ── Refund tracking ────────────────────────────────────
+                        if (_booking.refund != null) ...[
+                          RefundStatusRow(
+                            booking: _booking,
+                            onReturned: _refreshBooking,
+                          ),
+                          const SizedBox(height: 24),
+                        ],
 
                         // ── Info note ──────────────────────────────────────────
                         FadeTransition(
@@ -1196,7 +1247,7 @@ class _TicketCard extends StatelessWidget {
                           Border.all(color: Colors.grey.shade200, width: 1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: CustomPaint(painter: _QRCodePainter()),
+                    child: BookingQr(bookingId: booking.id, size: qrSize - 12),
                   ),
                 ],
               ),
@@ -1626,45 +1677,4 @@ class _TicketShapePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _TicketShapePainter old) =>
       old.bgColor != bgColor;
-}
-
-class _QRCodePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final p = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.fill;
-    final rand = Random(42);
-    const cell = 8.0;
-    final cols = (size.width / cell).floor();
-    final rows = (size.height / cell).floor();
-
-    _drawFinder(canvas, p, 0, 0, cell);
-    _drawFinder(canvas, p, (cols - 7) * cell, 0, cell);
-    _drawFinder(canvas, p, 0, (rows - 7) * cell, cell);
-
-    for (int r = 0; r < rows; r++) {
-      for (int c = 0; c < cols; c++) {
-        if ((r < 8 && c < 8) ||
-            (r < 8 && c >= cols - 8) ||
-            (r >= rows - 8 && c < 8)) continue;
-        if (rand.nextBool()) {
-          canvas.drawRect(
-            Rect.fromLTWH(c * cell, r * cell, cell - 1, cell - 1),
-            p,
-          );
-        }
-      }
-    }
-  }
-
-  void _drawFinder(Canvas c, Paint p, double x, double y, double s) {
-    c.drawRect(Rect.fromLTWH(x, y, s * 7, s * 7), p);
-    final w = Paint()..color = Colors.white;
-    c.drawRect(Rect.fromLTWH(x + s, y + s, s * 5, s * 5), w);
-    c.drawRect(Rect.fromLTWH(x + s * 2, y + s * 2, s * 3, s * 3), p);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
