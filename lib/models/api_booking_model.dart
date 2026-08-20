@@ -1,4 +1,5 @@
 import 'api_payment_method_model.dart';
+import 'api_refund.dart';
 
 /// Request model — one selected ticket type with a quantity.
 class BookingLineItem {
@@ -117,7 +118,12 @@ class ApiBookingItem {
   final String? cancelledAt;
   final String? cancellationReason;
   final double? refundAmount;
-  
+
+  /// Live refund lifecycle for this booking. Null when no refund was ever
+  /// initiated. [refundAmount] above is the older snapshot figure and is
+  /// unchanged — this carries the actual status of the money.
+  final ApiRefund? refund;
+
   // Extended fields — from full detail response
   final String? customerNotes;
   final List<dynamic>? lineItems;
@@ -148,6 +154,7 @@ class ApiBookingItem {
     this.cancelledAt,
     this.cancellationReason,
     this.refundAmount,
+    this.refund,
     this.customerNotes,
     this.lineItems,
     this.attendees,
@@ -182,6 +189,7 @@ class ApiBookingItem {
         cancelledAt: json['cancelled_at'] as String?,
         cancellationReason: json['cancellation_reason'] as String?,
         refundAmount: (json['refund_amount'] as num?)?.toDouble(),
+        refund: ApiRefund.fromJson(json['refund']),
         customerNotes: json['customer_notes'] as String?,
         lineItems: json['line_items'] as List<dynamic>?,
         attendees: json['attendees'] as List<dynamic>?,
@@ -202,6 +210,7 @@ class ApiBookingItem {
     String? cancelledAt,
     String? cancellationReason,
     double? refundAmount,
+    ApiRefund? refund,
     String? listingId,
     String? listingCover,
   }) =>
@@ -224,6 +233,7 @@ class ApiBookingItem {
         cancelledAt: cancelledAt ?? this.cancelledAt,
         cancellationReason: cancellationReason ?? this.cancellationReason,
         refundAmount: refundAmount ?? this.refundAmount,
+        refund: refund ?? this.refund,
         customerNotes: customerNotes,
         lineItems: lineItems,
         attendees: attendees,
