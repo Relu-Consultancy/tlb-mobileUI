@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
+import '../widgets/booking_qr.dart';
 import '../models/event_model.dart';
 import '../services/ticket_pdf_service.dart';
 import 'home_screen.dart';
@@ -262,6 +263,18 @@ class _ProgramBookingConfirmedScreenState
                       ),
 
                       const SizedBox(height: 24),
+
+                      // ── Check-in QR ─────────────────────────────────────────
+                      // Classes and programs land here too; only the events
+                      // confirmation used to show a QR at all.
+                      FadeTransition(
+                        opacity: _fadeAnim,
+                        child: BookingQrCard(bookingId: widget.bookingId),
+                      ),
+
+                      if (widget.bookingId != null &&
+                          widget.bookingId!.isNotEmpty)
+                        const SizedBox(height: 24),
 
                       // ── Info note ───────────────────────────────────────────
                       FadeTransition(

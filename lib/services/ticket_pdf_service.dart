@@ -1,4 +1,3 @@
-import 'dart:convert';
 import '../core/app_colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +6,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../core/app_snackbar.dart';
+import '../core/qr_payload.dart';
 import '../providers/auth_state.dart';
 import 'booking_service.dart';
 
@@ -118,7 +118,9 @@ class TicketPdfService {
       _asString(data['amount']),
     ]);
 
-    final qrBytes = _decodeQr(data['qr_code']);
+    // Was data['qr_code'] — the API's field is qr_code_b64, so the PDF
+    // shipped without a QR too. Shared with the on-screen ticket.
+    final qrBytes = QrPayload.decode(QrPayload.extract(data));
     final coverBytes = await _maybeFetchImage(
       _firstNonEmpty([
         _asString(data['cover_url']),
@@ -373,18 +375,6 @@ class TicketPdfService {
       out.add(_LineItem(label: label, value: '$qtyLabel$priceLabel'.trim()));
     }
     return out;
-  }
-
-  static Uint8List? _decodeQr(Object? raw) {
-    if (raw is! String || raw.isEmpty) return null;
-    try {
-      // Accept both "data:image/png;base64,..." and bare base64.
-      final cleaned = raw.contains(',') ? raw.substring(raw.indexOf(',') + 1) : raw;
-      return base64Decode(cleaned);
-    } catch (e) {
-      debugPrint('QR decode failed: $e');
-      return null;
-    }
   }
 
   static Future<Uint8List?> _maybeFetchImage(String? url) async {
