@@ -447,6 +447,21 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
                         GoogleFonts.poppins(fontSize: Responsive.sp(context, 13))),
               ))
           .toList(),
+      // The closed field would otherwise show a bare number with nothing to
+      // say it's an age. No leading icon here, unlike the checkout form —
+      // none of this sheet's fields have one.
+      selectedItemBuilder: (context) => ages
+          .map((age) => Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  age == '1' ? '1 year' : '$age years',
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 13),
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ))
+          .toList(),
       onChanged: onChanged,
       validator: (v) => (v == null || v.isEmpty) ? 'Please select an age.' : null,
       decoration: InputDecoration(

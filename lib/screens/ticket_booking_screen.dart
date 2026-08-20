@@ -211,6 +211,30 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
     );
   }
 
+  /// "7 years", but "1 year" — a bare number in the closed field reads as a
+  /// quantity rather than an age.
+  static String _ageLabel(String age) => age == '1' ? '1 year' : '$age years';
+
+  /// The age field's contents, shared by the placeholder and the selected
+  /// value so the row keeps the same shape either way — matching the text
+  /// fields around it, whose prefix icon never disappears.
+  Widget _ageFieldRow(BuildContext context, String label,
+      {bool placeholder = false}) {
+    return Row(
+      children: [
+        Icon(Icons.cake_outlined, size: 18, color: Colors.grey.shade500),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, placeholder ? 13 : 14),
+            color: placeholder ? Colors.grey.shade400 : AppColors.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _imageFallback(BuildContext context) => Container(
         width: Responsive.w(context, 100, min: 80),
         height: Responsive.h(context, 110, min: 90),
@@ -573,6 +597,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           const SizedBox(height: 16),
           // Child name
           TextField(
+            key: const ValueKey('childNameField'),
             controller: _childNameController,
             style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14)),
             decoration: InputDecoration(
@@ -603,17 +628,10 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _selectedAge,
-                hint: Row(
-                  children: [
-                    Icon(Icons.cake_outlined,
-                        size: 18, color: Colors.grey.shade500),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Select age',
-                      style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
-                    ),
-                  ],
+                hint: _ageFieldRow(
+                  context,
+                  'Select age',
+                  placeholder: true,
                 ),
                 isExpanded: true,
                 icon: Icon(Icons.keyboard_arrow_down,
@@ -625,6 +643,14 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                               style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14))),
                         ))
                     .toList(),
+                // Without this the closed field renders the raw menu item — a
+                // bare number with no icon and no clue it means an age, unlike
+                // the two text fields either side of it, which keep their
+                // prefix icon whether or not they hold a value.
+                selectedItemBuilder: (context) => List.generate(
+                  18,
+                  (i) => _ageFieldRow(context, _ageLabel('${i + 1}')),
+                ),
                 onChanged: (value) => setState(() => _selectedAge = value),
               ),
             ),
@@ -633,6 +659,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           // Parents contact number
           TextField(
             controller: _parentPhoneController,
+            key: const ValueKey('parentPhoneField'),
             keyboardType: TextInputType.phone,
             style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14)),
             decoration: InputDecoration(
