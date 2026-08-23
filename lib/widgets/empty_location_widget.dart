@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
+import '../providers/location_state.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../screens/location_screen.dart';
 import 'floating_navbar.dart';
 
 class EmptyLocationWidget extends StatelessWidget {
-  const EmptyLocationWidget({super.key});
+  /// Names what is missing, so each tab says its own thing rather than every
+  /// screen claiming there are no "events or bookings".
+  final String title;
+
+  const EmptyLocationWidget({
+    super.key,
+    this.title = 'No events or bookings',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +58,7 @@ class EmptyLocationWidget extends StatelessWidget {
                     const SizedBox(height: 28),
 
                     Text(
-                      'No events or bookings',
+                      title,
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 19),
                         fontWeight: FontWeight.w500,
@@ -109,6 +117,40 @@ class EmptyLocationWidget extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+/// Wraps a tab's body so an unserviced city shows [EmptyLocationWidget]
+/// instead of the tab's content.
+///
+/// Previously only the Home screen checked this, so switching to Events,
+/// Classes, Programs or Venues in a city TLB does not serve showed those tabs
+/// as though they simply had nothing on — with no explanation and no route to
+/// fixing it.
+///
+/// Listens to the selected city, so changing it from anywhere updates every
+/// tab without those screens each needing their own listener.
+class LocationGate extends StatelessWidget {
+  /// Shown when the city is not served. Name the tab's own content.
+  final String emptyTitle;
+
+  final Widget child;
+
+  const LocationGate({
+    super.key,
+    required this.emptyTitle,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<String>(
+      valueListenable: LocationState().selectedCity,
+      builder: (context, city, _) {
+        if (LocationState().isLocationSupported(city)) return child;
+        return EmptyLocationWidget(title: emptyTitle);
+      },
     );
   }
 }

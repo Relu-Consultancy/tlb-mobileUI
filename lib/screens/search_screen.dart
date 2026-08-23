@@ -3,6 +3,8 @@ import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
+import '../providers/location_state.dart';
+import '../widgets/empty_location_widget.dart';
 import '../models/event_model.dart';
 import '../services/events_listing_service.dart';
 import '../services/classes_listing_service.dart';
@@ -557,6 +559,12 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildBody() {
+    // Searching an unserviced city returns nothing, and "No results for X"
+    // blames the query for it. Say what is actually wrong, and offer the fix.
+    if (!LocationState().isLocationSupported(
+        LocationState().selectedCity.value)) {
+      return const EmptyLocationWidget(title: 'Nothing to search here yet');
+    }
     if (_query.isEmpty) {
       return Center(
         child: Padding(

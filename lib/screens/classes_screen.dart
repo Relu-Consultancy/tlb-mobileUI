@@ -4,6 +4,7 @@ import '../widgets/shining_star_badge.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
+import '../widgets/empty_location_widget.dart';
 import '../data/dummy_data.dart';
 import '../providers/saved_events_state.dart';
 import '../widgets/banner_carousel.dart';
@@ -136,7 +137,11 @@ class _ClassesScreenState extends State<ClassesScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
+      // An unserviced city shows the empty state in place of this tab's whole
+      // body, matching Home — which used to be the only screen that checked.
+      body: LocationGate(
+        emptyTitle: 'No classes here yet',
+        child: Stack(
         children: [
           // Single scroll view — header scrolls with body (Session-48 fix).
           AppRefreshIndicator(
@@ -601,6 +606,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }
