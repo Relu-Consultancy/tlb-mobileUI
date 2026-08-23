@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import '../widgets/app_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/phone_validation.dart';
 import '../core/responsive.dart';
 import '../core/app_snackbar.dart';
 import '../providers/auth_state.dart';
@@ -29,6 +30,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _loading = false;
   bool _fetchingProfile = false;
   bool _prefetchFailed = false;
+
+  /// True while the picker is on +91, which is the default. Indian validation
+  /// applies only then — the picker exists so a customer abroad can still save
+  /// a reachable number.
+  bool get _isIndia => _selectedCountry.$1 == IndianPhone.dialCode;
 
   // Country code picker state — defaults to India
   (String, String, String) _selectedCountry = _countryCodes[0];
@@ -74,6 +80,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
+    // errorText only repaints on rebuild, so the field has to drive one as the
+    // number is typed.
+    _phoneCtrl.addListener(() => setState(() {}));
     _prefillFromAuthState();
     _fetchAndPrefill();
   }
@@ -169,6 +178,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (firstName.isEmpty) {
       AppSnackBar.show(context, 'First name is required');
       return;
+    }
+
+    // Stop an unreachable number being saved. Only applies on +91; other dial
+    // codes have their own formats and are left to the server.
+    if (_isIndia) {
+      final phoneError =
+          IndianPhone.validate(_phoneCtrl.text, required: false);
+      if (phoneError != null) {
+        AppSnackBar.show(context, phoneError);
+        return;
+      }
     }
 
     final token = AuthState.accessToken;
@@ -531,8 +551,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             child: TextField(
               controller: _phoneCtrl,
               keyboardType: TextInputType.phone,
+              // Only constrain the input when India is the selected country —
+              // this field has a picker, and other dial codes have their own
+              // lengths and leading digits.
+              inputFormatters: _isIndia ? IndianPhone.inputFormatters : null,
               style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF424242)),
               decoration: InputDecoration(
+                errorText: _isIndia
+                    ? IndianPhone.validate(_phoneCtrl.text, required: false)
+                    : null,
                 hintText: 'Phone number',
                 hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12),

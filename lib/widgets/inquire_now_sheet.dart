@@ -1,7 +1,9 @@
 import 'dart:math';
 import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../core/app_snackbar.dart';
+import '../core/phone_validation.dart';
 import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/classes_listing_service.dart';
@@ -76,15 +78,10 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
     return null;
   }
 
-  String? _mobileValidator(String? v) {
-    final t = (v ?? '').trim();
-    if (t.isEmpty) return 'Please enter a mobile number.';
-    final digits = t.replaceAll(RegExp(r'[\s\-()]'), '');
-    if (digits.length < 7 || !RegExp(r'^[+]?\d+$').hasMatch(digits)) {
-      return 'Enter a valid mobile number.';
-    }
-    return null;
-  }
+  /// Indian mobile rules, shared with the checkout and attendee forms — the
+  /// previous rule accepted any 7+ digits, so a short or malformed number
+  /// reached the organiser.
+  String? _mobileValidator(String? v) => IndianPhone.validate(v);
 
   Future<void> _submit() async {
     final ok = _formKey.currentState?.validate() ?? false;
@@ -236,6 +233,8 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
                       _mobile,
                       'Mobile number*',
                       keyboardType: TextInputType.phone,
+                      inputFormatters: IndianPhone.inputFormatters,
+                      dialPrefix: true,
                       validator: _mobileValidator,
                     ),
                   ),
@@ -391,15 +390,21 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
     String hint, {
     TextInputType? keyboardType,
     String? Function(String?)? validator,
+    List<TextInputFormatter>? inputFormatters,
+    bool dialPrefix = false,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       validator: validator,
+      inputFormatters: inputFormatters,
       style: GoogleFonts.poppins(
           fontSize: Responsive.sp(context, 13),
           color: AppColors.textPrimary),
       decoration: InputDecoration(
+        prefixIcon: dialPrefix ? const IndianDialPrefix() : null,
+        prefixIconConstraints:
+            dialPrefix ? const BoxConstraints(minWidth: 0, minHeight: 0) : null,
         hintText: hint,
         hintStyle: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),

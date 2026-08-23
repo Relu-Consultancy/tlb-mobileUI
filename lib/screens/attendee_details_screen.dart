@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/phone_validation.dart';
 import '../core/responsive.dart';
 import '../models/api_program_model.dart';
 import '../models/event_model.dart';
@@ -35,7 +36,7 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
   bool get _isValid =>
       _nameController.text.trim().isNotEmpty &&
       _selectedAge != null &&
-      _phoneController.text.trim().isNotEmpty;
+      IndianPhone.isValid(_phoneController.text);
 
   double get _fee {
     final batchFee = double.tryParse(widget.batch.fee ?? '');
@@ -295,7 +296,10 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
           icon: Icons.phone_outlined,
           hint: 'Contact number',
           keyboardType: TextInputType.phone,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          inputFormatters: IndianPhone.inputFormatters,
+          dialPrefix: true,
+          errorText:
+              IndianPhone.validate(_phoneController.text, required: false),
         ),
       ],
     );
@@ -307,6 +311,8 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
     required String hint,
     TextInputType keyboardType = TextInputType.text,
     List<TextInputFormatter>? inputFormatters,
+    bool dialPrefix = false,
+    String? errorText,
   }) {
     return TextField(
       controller: controller,
@@ -317,7 +323,12 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
         color: AppColors.textPrimary,
       ),
       decoration: InputDecoration(
-        prefixIcon: Icon(icon, size: 20, color: Colors.grey.shade500),
+        prefixIcon: dialPrefix
+            ? const IndianDialPrefix(icon: Icons.phone_outlined)
+            : Icon(icon, size: 20, color: Colors.grey.shade500),
+        prefixIconConstraints:
+            dialPrefix ? const BoxConstraints(minWidth: 0, minHeight: 0) : null,
+        errorText: errorText,
         hintText: hint,
         hintStyle: GoogleFonts.poppins(
           fontSize: Responsive.sp(context, 13),

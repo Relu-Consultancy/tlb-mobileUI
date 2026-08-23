@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/phone_validation.dart';
 import '../core/responsive.dart';
 import '../models/api_event_model.dart';
 import '../models/event_model.dart';
@@ -52,7 +53,8 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
       _totalTickets > 0 &&
       _childNameController.text.trim().isNotEmpty &&
       _selectedAge != null &&
-      _parentPhoneController.text.trim().isNotEmpty;
+      // Was only a non-empty check, so a half-typed number could reach payment.
+      IndianPhone.isValid(_parentPhoneController.text);
 
   void _addTicket(int index) {
     setState(() {
@@ -661,10 +663,18 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             controller: _parentPhoneController,
             key: const ValueKey('parentPhoneField'),
             keyboardType: TextInputType.phone,
+            inputFormatters: IndianPhone.inputFormatters,
             style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14)),
             decoration: InputDecoration(
-              prefixIcon: Icon(Icons.phone_outlined,
-                  size: 20, color: Colors.grey.shade500),
+              // Fixed +91 rather than a picker: this is a local contact number
+              // for the organiser, and the app is India-only.
+              prefixIcon: const IndianDialPrefix(icon: Icons.phone_outlined),
+              prefixIconConstraints:
+                  const BoxConstraints(minWidth: 0, minHeight: 0),
+              errorText: IndianPhone.validate(
+                _parentPhoneController.text,
+                required: false,
+              ),
               hintText: 'Parents contact number',
               hintStyle: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
