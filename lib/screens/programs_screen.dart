@@ -143,6 +143,21 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
       // body, matching Home — which used to be the only screen that checked.
       body: LocationGate(
         emptyTitle: 'No programs here yet',
+        // The header and navbar sit in the same Stack as the feed, so they
+        // are handed to the gate separately — swapping the Stack wholesale
+        // stripped both, leaving no location chip and no way to change tab.
+        header: const ColoredBox(
+          color: Colors.black,
+          child: SafeArea(bottom: false, child: DarkGlowHeader()),
+        ),
+        footer: Align(
+          alignment: Alignment.bottomCenter,
+          child: FloatingNavbar(
+            currentIndex: 3,
+            onTap: _onNavTapped,
+            bottomPadding: FloatingNavbar.bottomInset(context),
+          ),
+        ),
         child: Stack(
         children: [
           // Single scroll view — header scrolls with body (Session-48 fix).

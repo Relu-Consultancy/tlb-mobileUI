@@ -70,6 +70,72 @@ void main() {
       }
     });
 
+    // The regression: the gate replaced the tab's whole Stack, which also
+    // held the header and the floating navbar — so an unserved city lost the
+    // location chip and the ability to change tab at all.
+    testWidgets('TC_W_LG_005 — the header survives an unserved city',
+        (tester) async {
+      LocationState().setCity('Agra');
+      await pumpTLBApp(
+        tester,
+        const Scaffold(
+          body: LocationGate(
+            emptyTitle: 'No events here yet',
+            header: Text('screen header'),
+            child: Text('tab content'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('screen header'), findsOneWidget);
+      expect(find.text('No events here yet'), findsOneWidget);
+      expect(find.text('tab content'), findsNothing);
+    });
+
+    testWidgets('TC_W_LG_006 — the navbar survives, so tabs stay reachable',
+        (tester) async {
+      LocationState().setCity('Agra');
+      await pumpTLBApp(
+        tester,
+        const Scaffold(
+          body: LocationGate(
+            emptyTitle: 'No events here yet',
+            header: Text('screen header'),
+            footer: Text('screen navbar'),
+            child: Text('tab content'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('screen navbar'), findsOneWidget);
+      expect(find.text('screen header'), findsOneWidget);
+    });
+
+    testWidgets('TC_W_LG_007 — header and footer are not shown when served',
+        (tester) async {
+      LocationState().setCity('Mumbai');
+      await pumpTLBApp(
+        tester,
+        const Scaffold(
+          body: LocationGate(
+            emptyTitle: 'No events here yet',
+            header: Text('screen header'),
+            footer: Text('screen navbar'),
+            child: Text('tab content'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // The tab renders its own header and navbar in this state; the gate
+      // must not draw a second set on top.
+      expect(find.text('tab content'), findsOneWidget);
+      expect(find.text('screen header'), findsNothing);
+      expect(find.text('screen navbar'), findsNothing);
+    });
+
     // Changing the city anywhere must update every gated tab, without each
     // screen keeping its own listener.
     testWidgets('TC_W_LG_004 — reacts to the city changing beneath it',

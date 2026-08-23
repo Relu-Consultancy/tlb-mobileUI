@@ -135,12 +135,24 @@ class LocationGate extends StatelessWidget {
   /// Shown when the city is not served. Name the tab's own content.
   final String emptyTitle;
 
+  /// Kept above the empty state. Without it the screen loses its header —
+  /// and with it the location chip, search and profile — leaving the customer
+  /// with nothing but the CTA. Home always kept its header here.
+  final Widget? header;
+
+  /// Kept below the empty state, for the floating navbar. The tabs hold theirs
+  /// in the same Stack as the body, so gating the body alone would strip the
+  /// bottom navigation and trap the customer on the tab.
+  final Widget? footer;
+
   final Widget child;
 
   const LocationGate({
     super.key,
     required this.emptyTitle,
     required this.child,
+    this.header,
+    this.footer,
   });
 
   @override
@@ -149,7 +161,16 @@ class LocationGate extends StatelessWidget {
       valueListenable: LocationState().selectedCity,
       builder: (context, city, _) {
         if (LocationState().isLocationSupported(city)) return child;
-        return EmptyLocationWidget(title: emptyTitle);
+
+        final empty = Column(
+          children: [
+            ?header,
+            Expanded(child: EmptyLocationWidget(title: emptyTitle)),
+          ],
+        );
+
+        if (footer == null) return empty;
+        return Stack(children: [empty, footer!]);
       },
     );
   }

@@ -303,6 +303,21 @@ class _EventsScreenState extends State<EventsScreen> {
       // body, matching Home — which used to be the only screen that checked.
       body: LocationGate(
         emptyTitle: 'No events here yet',
+        // The header and navbar sit in the same Stack as the feed, so they
+        // are handed to the gate separately — swapping the Stack wholesale
+        // stripped both, leaving no location chip and no way to change tab.
+        header: const ColoredBox(
+          color: Colors.black,
+          child: SafeArea(bottom: false, child: DarkGlowHeader()),
+        ),
+        footer: Align(
+          alignment: Alignment.bottomCenter,
+          child: FloatingNavbar(
+            currentIndex: 1,
+            onTap: _onNavTapped,
+            bottomPadding: FloatingNavbar.bottomInset(context),
+          ),
+        ),
         child: Stack(
         children: [
           // Single scroll view — header scrolls with the rest of the page
