@@ -72,8 +72,15 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
     return v < 0 ? 0 : v;
   }
 
-  double get _bookingFee => _effectiveSubtotal * 0.0826;
-  double get _totalAmount => _effectiveSubtotal + _bookingFee;
+  /// What the customer is actually charged.
+  ///
+  /// This used to add a hard-coded 8.26% "Booking Fee" invented in the app.
+  /// The backend knows nothing about it: initiate returns the real amount and
+  /// creates the Razorpay order for that, so the screen advertised a total
+  /// 8.26% higher than what would be taken — on a 500 ticket, 541.30 shown
+  /// against 500.00 charged. Until the API returns a fee, the total is the
+  /// subtotal.
+  double get _totalAmount => _effectiveSubtotal;
 
   @override
   void initState() {
@@ -630,7 +637,6 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
             ),
           ],
           const SizedBox(height: 8),
-          _priceRow('Booking Fee', '₹${_bookingFee.toStringAsFixed(2)}'),
           const SizedBox(height: 16),
           Divider(color: Colors.grey.shade200, thickness: 1),
           const SizedBox(height: 16),
