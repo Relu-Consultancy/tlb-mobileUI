@@ -251,18 +251,28 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
               const SizedBox(height: 20),
 
               // ── Locality ──
-              _sectionHeader(Icons.location_on_outlined, 'Locality / Area', optional: true),
+              // Required for every listing type. The published schema marks
+              // `area` optional (and programs/venues don't declare it at all),
+              // but an enquiry without it isn't actionable for the organiser.
+              _sectionHeader(Icons.location_on_outlined, 'Locality / Area',
+                  required: true),
               const SizedBox(height: 10),
-              _field(_locality, 'Enter your locality (e.g. Bandra)'),
+              _field(
+                _locality,
+                'Enter your locality (e.g. Bandra)',
+                validator: (v) => _requiredValidator(v, 'your locality'),
+              ),
 
               const SizedBox(height: 20),
 
               // ── Message ──
+              // Required everywhere now, not just on programs — the schema
+              // only mandates `message` for programs, but the form asks for it
+              // on every type.
               _sectionHeader(
                 Icons.chat_bubble_outline,
                 'Message',
-                required: widget.isProgram,
-                optional: !widget.isProgram,
+                required: true,
               ),
               const SizedBox(height: 10),
 
@@ -278,9 +288,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
                             maxLength}) =>
                         null,
                     onChanged: (v) => setState(() => _msgLen = v.length),
-                    validator: widget.isProgram
-                        ? (v) => _requiredValidator(v, 'a short message')
-                        : null,
+                    validator: (v) => _requiredValidator(v, 'a short message'),
                     style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 13),
                         color: AppColors.textPrimary),
@@ -358,7 +366,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
     );
   }
 
-  Widget _sectionHeader(IconData icon, String label, {bool required = false, bool optional = false}) {
+  Widget _sectionHeader(IconData icon, String label, {bool required = false}) {
     return Row(
       children: [
         Icon(icon, size: 16, color: AppColors.textPrimary),
@@ -373,11 +381,6 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
               TextSpan(
                 text: '*',
                 style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: Colors.red),
-              ),
-            if (optional)
-              TextSpan(
-                text: ' (Optional)',
-                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500),
               ),
           ]),
         ),
