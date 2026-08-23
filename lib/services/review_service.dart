@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -118,8 +119,45 @@ class ReviewService {
         return ApiReview.fromJson(body);
       }
     }
-    final errMsg = _extractError(body) ?? 'Failed to submit review (${res.statusCode})';
-    throw Exception(errMsg);
+    throw Exception(_reviewError(body, res.statusCode));
+  }
+
+  /// Test seam for [_reviewError].
+  @visibleForTesting
+  static String debugReviewError(dynamic body, int statusCode) =>
+      _reviewError(body, statusCode);
+
+  /// A message the customer can act on.
+  ///
+  /// The create endpoint rejects with 403 when the account may not review this
+  /// listing — the backend requires a booking for it — and with 400 when a
+  /// review already exists. Left to the generic fallback these read as
+  /// "Failed to submit review (403)", which says nothing about what to do.
+  static String _reviewError(dynamic body, int statusCode) {
+    final server = _extractError(body);
+    if (server != null && server.trim().isNotEmpty) return server;
+
+    final code = (body is Map<String, dynamic> && body['error'] is Map)
+        ? (body['error'] as Map)['code'] as String?
+        : null;
+
+    switch (code) {
+      case 'PROFILE_INCOMPLETE':
+        return 'Complete your profile before writing a review.';
+      case 'FORBIDDEN':
+        return 'You can review this only after booking it.';
+    }
+
+    switch (statusCode) {
+      case 400:
+        return "You've already reviewed this listing.";
+      case 401:
+        return 'Please log in again to post your review.';
+      case 403:
+        return 'You can review this only after booking it.';
+      default:
+        return 'Failed to submit review ($statusCode).';
+    }
   }
 
   // 7.3 Update review — all fields optional; remove_media_ids[] sent as repeated multipart fields

@@ -656,6 +656,12 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
 
   bool _submitting = false;
 
+  /// Last submit failure, shown inside the sheet. A snackbar cannot be
+  /// used on its own here: this is a modal bottom sheet on the navigator
+  /// overlay, so a ScaffoldMessenger toast renders behind it and the
+  /// customer sees nothing happen at all.
+  String? _submitError;
+
   bool get _isEdit => widget.existing != null || _isEditMode;
 
   // Media already on server that are still kept (not marked for removal)
@@ -726,7 +732,10 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
           context, 'Your session has expired. Please log in again.');
       return;
     }
-    setState(() => _submitting = true);
+    setState(() {
+      _submitting = true;
+      _submitError = null;
+    });
     try {
       final comment = _controller.text.trim();
       final imageFiles = _newImages.map((x) => File(x.path)).toList();
@@ -769,8 +778,14 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
       AppSnackBar.success(context, _isEdit ? 'Review updated!' : 'Review submitted!');
     } catch (e) {
       if (!mounted) return;
-      setState(() => _submitting = false);
-      AppSnackBar.error(context, e.toString().replaceFirst('Exception: ', ''));
+      final message = e.toString().replaceFirst('Exception: ', '');
+      setState(() {
+        _submitting = false;
+        _submitError = message;
+      });
+      // Also toasted, for the case where the sheet is dismissed before it is
+      // read.
+      AppSnackBar.error(context, message);
     }
   }
 
@@ -924,6 +939,38 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
                     ),
 
                     const SizedBox(height: 24),
+
+                    // ── Submit failure ──
+                    if (_submitError != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFDECEC),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                              color: const Color(0xFFDC2626).withOpacity(0.25)),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.error_outline,
+                                size: 18, color: Color(0xFFDC2626)),
+                            const SizedBox(width: 9),
+                            Expanded(
+                              child: Text(
+                                _submitError!,
+                                style: GoogleFonts.poppins(
+                                  fontSize: Responsive.sp(context, 12.5),
+                                  color: const Color(0xFF991B1B),
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                    ],
 
                     // ── Submit ──
                     SizedBox(
