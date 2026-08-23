@@ -22,9 +22,11 @@ void main() {
     testWidgets('renders screen and calculates total correctly',
         (WidgetTester tester) async {
       await mockNetworkImages(() async {
+        // The total is the subtotal. A hard-coded 8.26% "Booking Fee" used to
+        // be added here in the app, so the screen advertised a total the
+        // backend never charged.
         const double subtotal = 399.0;
-        final double bookingFee = subtotal * 0.0826;
-        final double expectedTotal = subtotal + bookingFee;
+        const double expectedTotal = subtotal;
 
         await pumpTLBApp(
           tester,
@@ -49,9 +51,9 @@ void main() {
         // Ticket details
         expect(find.text('Standard (₹360) × 1'), findsOneWidget);
 
-        // Pricing math
+        // Pricing math — no invented fee, and no fee row at all.
         expect(find.text('₹399'), findsOneWidget);
-        expect(find.text('₹${bookingFee.toStringAsFixed(2)}'), findsOneWidget);
+        expect(find.text('Booking Fee'), findsNothing);
         expect(
             find.text('₹${expectedTotal.toStringAsFixed(2)}'), findsOneWidget);
 
@@ -80,8 +82,9 @@ void main() {
           ),
         );
 
-        final payBtn = find.widgetWithText(ElevatedButton,
-            'Pay ₹${(100.0 + 100.0 * 0.0826).toStringAsFixed(2)}');
+        // The button must quote what will actually be charged.
+        final payBtn = find.widgetWithText(
+            ElevatedButton, 'Pay ₹${(100.0).toStringAsFixed(2)}');
         expect(payBtn, findsOneWidget);
       });
     });
