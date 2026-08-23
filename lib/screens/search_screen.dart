@@ -353,8 +353,204 @@ class _SearchScreenState extends State<SearchScreen> {
               },
             ),
           ),
+          _buildActiveFilterRow(),
           const SizedBox(height: 8),
           Expanded(child: _buildBody()),
+        ],
+      ),
+    );
+  }
+
+  // ── Active filters ─────────────────────────────────────────────────────────
+
+  /// One selected filter, with the means to undo it.
+  ///
+  /// Built fresh on each build so the row cannot fall out of step with the
+  /// sheet's state.
+  List<({String label, VoidCallback remove})> get _activeFilters {
+    final out = <({String label, VoidCallback remove})>[];
+
+    if (_selectedChip != 0) {
+      out.add((
+        label: _chips[_selectedChip],
+        remove: () => setState(() => _selectedChip = 0),
+      ));
+    }
+    for (final age in _ageGroupSelected.toList()) {
+      out.add((
+        label: age,
+        remove: () => setState(() => _ageGroupSelected.remove(age)),
+      ));
+    }
+    if (_selectedMode != null) {
+      out.add((
+        label: _selectedMode!,
+        remove: () => setState(() => _selectedMode = null),
+      ));
+    }
+    if (_selectedCity != null) {
+      out.add((
+        label: _selectedCity!,
+        // Area belongs to a city, so it cannot outlive one.
+        remove: () => setState(() {
+          _selectedCity = null;
+          _selectedArea = null;
+        }),
+      ));
+    }
+    if (_selectedArea != null) {
+      out.add((
+        label: _selectedArea!,
+        remove: () => setState(() => _selectedArea = null),
+      ));
+    }
+    for (final d in _dateSelected.toList()) {
+      out.add((
+        label: d,
+        remove: () => setState(() => _dateSelected.remove(d)),
+      ));
+    }
+    return out;
+  }
+
+  void _clearAllFilters() {
+    setState(() {
+      _selectedChip = 0;
+      _ageGroupSelected.clear();
+      _dateSelected.clear();
+      _selectedMode = null;
+      _selectedCity = null;
+      _selectedArea = null;
+    });
+  }
+
+  /// The selected filters, shown under the search bar so what is narrowing the
+  /// results is visible without reopening the sheet. Each carries its own
+  /// remove control.
+  Widget _buildActiveFilterRow() {
+    final active = _activeFilters;
+    if (active.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: SizedBox(
+        height: 34,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: active.length + 1,
+          separatorBuilder: (_, __) => const SizedBox(width: 8),
+          itemBuilder: (context, i) {
+            // "Clear all" trails the list so it can't be hit by accident when
+            // reaching for the first chip's cross.
+            if (i == active.length) {
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _clearAllFilters,
+                child: Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  child: Text(
+                    'Clear all',
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 12.5),
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.seeAllBlue,
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            final f = active[i];
+            return Container(
+              padding: const EdgeInsets.only(left: 14, right: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F1F5),
+                borderRadius: BorderRadius.circular(17),
+                border: Border.all(color: const Color(0xFFE0E0E6)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    f.label,
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 12.5),
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: f.remove,
+                    child: Padding(
+                      // Widens a small cross into a reachable target.
+                      padding: const EdgeInsets.all(6),
+                      child: Icon(Icons.close,
+                          size: 13, color: Colors.grey.shade700),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Listing-type picker shown at the head of the filter sheet, mirroring the
+  /// chip row on the screen behind it. Both drive [_selectedChip], so the two
+  /// always agree.
+  Widget _buildTypeSection(StateSetter setModalState) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Show',
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 14),
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: List.generate(_chips.length, (i) {
+              final selected = _selectedChip == i;
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => setModalState(() => _selectedChip = i),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+                  decoration: BoxDecoration(
+                    color: selected ? AppColors.textPrimary : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: selected
+                          ? AppColors.textPrimary
+                          : const Color(0xFFE0E0E6),
+                    ),
+                  ),
+                  child: Text(
+                    _chips[i],
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 13),
+                      fontWeight: FontWeight.w500,
+                      color: selected ? Colors.white : AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
         ],
       ),
     );
@@ -554,6 +750,9 @@ class _SearchScreenState extends State<SearchScreen> {
       );
 
   void _showFiltersBottomSheet(BuildContext context) {
+    // The sheet mutates this screen's state directly through setModalState,
+    // which rebuilds only the sheet. Without this the results and the active
+    // filter row kept the pre-Apply state until something else rebuilt them.
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -615,6 +814,9 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                        // ── Listing type ─────────────────────────────────────
+                        _buildTypeSection(setModalState),
                         const Divider(height: 1, color: Color(0xFFEEEEEE)),
                         // ── Age Group ────────────────────────────────────────
                         Padding(
@@ -719,6 +921,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => setModalState(() {
+                            _selectedChip = 0;
                             _ageGroupSelected.clear();
                             _dateSelected.clear();
                             _selectedMode = null;
@@ -755,7 +958,9 @@ class _SearchScreenState extends State<SearchScreen> {
           );
         },
       ),
-    );
+    ).whenComplete(() {
+      if (mounted) setState(() {});
+    });
   }
 
   Widget _buildRadioOption({required String label, required bool isSelected, required VoidCallback onTap}) {
