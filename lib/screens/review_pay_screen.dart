@@ -250,10 +250,30 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
       _pendingBookingId = resp.bookingId;
       _pendingBookingRef = resp.bookingReference;
 
+      // Razorpay's checkout is a native activity. Handed an empty order id or
+      // a zero amount it opens and renders nothing — a black screen with no
+      // error, no back affordance and nothing in the Flutter logs. Refuse the
+      // handoff instead, so the failure is legible.
+      final orderId = resp.razorpayOrderId.trim();
+      final amountPaise = (resp.amount * 100).toInt();
+      if (orderId.isEmpty || amountPaise <= 0) {
+        debugPrint('Razorpay handoff refused — '
+            'order_id="$orderId" amount=$amountPaise '
+            'currency=${resp.currency} status=${resp.status}');
+        if (mounted) {
+          AppSnackBar.error(
+            context,
+            "Payment couldn't be started for this booking. "
+            'Please try again, or contact support if it keeps happening.',
+          );
+        }
+        return;
+      }
+
       final options = <String, dynamic>{
         'key': AppConfig.razorpayKeyId,
-        'order_id': resp.razorpayOrderId,
-        'amount': (resp.amount * 100).toInt(), // Razorpay expects paise
+        'order_id': orderId,
+        'amount': amountPaise, // Razorpay expects paise
         'currency': resp.currency,
         'name': 'TLB Events',
         'description': resp.bookingReference,
@@ -264,7 +284,16 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
         'theme': {'color': '#FFCC00'},
       };
 
-      _razorpay.open(options);
+      try {
+        _razorpay.open(options);
+      } catch (e) {
+        // open() throwing leaves nothing on screen — say so.
+        debugPrint('Razorpay open() failed: $e');
+        if (mounted) {
+          AppSnackBar.error(
+            context, "Couldn't open the payment screen. Please try again.");
+        }
+      }
     } catch (e) {
       if (mounted) AppSnackBar.error(context, e.toString());
     } finally {
