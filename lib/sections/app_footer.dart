@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../widgets/footer_quote_carousel.dart';
 import '../widgets/four_point_star.dart';
+import '../screens/privacy_policy_screen.dart';
+import '../screens/terms_of_service_screen.dart';
 
 /// The app-wide footer: a black "night sky" panel with a rotating italic quote,
 /// the glowing TLB wordmark, a DISCOVER · CONNECT · CREATE line, a tagline, a
@@ -180,10 +182,32 @@ class AppFooter extends StatelessWidget {
       fontWeight: FontWeight.w400,
       color: Colors.white.withOpacity(0.92),
     );
-    Widget link(String label) => Text(label, style: style);
-    Widget column(String a, String b) => Column(
+    /// A tappable link. [onTap] is null for the entries that have no
+    /// destination yet — those stay plain text rather than looking tappable
+    /// and doing nothing.
+    Widget link(String label, {VoidCallback? onTap}) {
+      final text = Text(label, style: style);
+      if (onTap == null) return text;
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        // Padding widens the tap target: the label alone is a thin strip on
+        // a dark panel, and these sit close together.
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          child: text,
+        ),
+      );
+    }
+
+    Widget column(Widget a, Widget b) => Column(
           mainAxisSize: MainAxisSize.min,
-          children: [link(a), const SizedBox(height: 18), link(b)],
+          children: [a, const SizedBox(height: 18), b],
+        );
+
+    void open(Widget screen) => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => screen),
         );
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -191,7 +215,16 @@ class AppFooter extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(child: Center(child: column('Privacy Policy', 'Terms & Conditions'))),
+            Expanded(
+              child: Center(
+                child: column(
+                  link('Privacy Policy',
+                      onTap: () => open(const PrivacyPolicyScreen())),
+                  link('Terms & Conditions',
+                      onTap: () => open(const TermsOfServiceScreen())),
+                ),
+              ),
+            ),
             VerticalDivider(
               width: 1,
               thickness: 1,
@@ -199,7 +232,16 @@ class AppFooter extends StatelessWidget {
               indent: 2,
               endIndent: 2,
             ),
-            Expanded(child: Center(child: column('Contact Us', 'Become a Partner'))),
+            Expanded(
+              child: Center(
+                child: column(
+                  // No destination for these two yet — left inert rather than
+                  // wired to a placeholder.
+                  link('Contact Us'),
+                  link('Become a Partner'),
+                ),
+              ),
+            ),
           ],
         ),
       ),
