@@ -255,7 +255,11 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
       // error, no back affordance and nothing in the Flutter logs. Refuse the
       // handoff instead, so the failure is legible.
       final orderId = resp.razorpayOrderId.trim();
-      final amountPaise = (resp.amount * 100).toInt();
+      // round(), not toInt(): the product is a double, so a total like
+      // 1234.35 lands on 123434.99999999999 and truncation sends a paise less
+      // than the order is for. Razorpay rejects an amount that does not match
+      // the order, which surfaces only as its generic "something went wrong".
+      final amountPaise = (resp.amount * 100).round();
       if (orderId.isEmpty || amountPaise <= 0) {
         debugPrint('Razorpay handoff refused — '
             'order_id="$orderId" amount=$amountPaise '
@@ -284,6 +288,8 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
         'theme': {'color': '#FFCC00'},
       };
 
+      debugPrint('Razorpay open -> order_id=$orderId amount=$amountPaise '
+          'currency=${resp.currency} key=${AppConfig.razorpayKeyId}');
       try {
         _razorpay.open(options);
       } catch (e) {
@@ -389,9 +395,19 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
+    // Razorpay's own sheet says only "Something went wrong". The code and the
+    // error payload name the real reason — an order/key mismatch, an amount
+    // that does not match the order, an expired order — so log them rather
+    // than discarding the one diagnostic available.
+    debugPrint('Razorpay payment error: code=${response.code} '
+        'message=${response.message} error=${response.error}');
+
     final msg = (response.message?.isNotEmpty == true)
         ? response.message!
-        : 'Payment failed. Please try again.';
+        // code 2 is a deliberate cancel; anything else is a real failure.
+        : (response.code == 2
+            ? 'Payment cancelled.'
+            : 'Payment failed. Please try again.');
     AppSnackBar.error(context, msg);
   }
 
