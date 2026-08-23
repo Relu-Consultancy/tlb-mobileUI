@@ -7,6 +7,7 @@ import '../core/app_snackbar.dart';
 import '../core/share_helper.dart';
 import '../providers/location_state.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/listing_schedule.dart';
 import '../core/responsive.dart';
 import '../widgets/refundable_badge.dart';
 import '../models/api_event_model.dart';
@@ -94,6 +95,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       (_detail?.terms?.hasContent ?? false) ||
       (_detail?.cancellationPolicy?.isNotEmpty == true) ||
       (_detail?.refundPolicy?.isNotEmpty == true);
+
+  /// True once the event's end datetime has passed. Only the detail response
+  /// carries `end_datetime`, so this cannot be known from a list card.
+  bool get _hasEnded => ListingSchedule.hasEnded(_detail?.endDatetime);
 
   String get _title => _detail?.title ?? widget.event.title;
   String get _tag => _detail?.subcategory?.name ?? _detail?.category.name ?? widget.event.tag ?? '';
@@ -591,6 +596,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         // — booking would otherwise navigate three screens
                         // deep just to hit "Booking unavailable for this
                         // listing." Surface that here with a clearer hint.
+                        if (_hasEnded) {
+                          AppSnackBar.show(
+                            context,
+                            'This event has already finished.',
+                          );
+                          return;
+                        }
                         if (!_hasApiId) {
                           AppSnackBar.show(
                             context,
@@ -611,14 +623,22 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryLight,
-                        foregroundColor: AppColors.textSecondary,
+                        backgroundColor: _hasEnded
+                            ? const Color(0xFFE4E4E8)
+                            : AppColors.primaryLight,
+                        foregroundColor: _hasEnded
+                            ? Colors.grey.shade600
+                            : AppColors.textSecondary,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         elevation: 0,
                       ),
                       child: Text(
-                        _isFree ? 'Register Now' : 'Book Now',
+                        _hasEnded
+                            ? 'Event ended'
+                            : _isFree
+                                ? 'Register Now'
+                                : 'Book Now',
                         style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600),
                       ),
                     ),
