@@ -15,7 +15,18 @@ class UpcomingEventsSection extends StatefulWidget {
   /// separate it from the stats).
   final bool showDivider;
 
-  const UpcomingEventsSection({super.key, this.showDivider = false});
+  /// Listing this section is embedded in, so it can leave itself out.
+  ///
+  /// Without it a detail screen advertised the very listing being viewed:
+  /// tapping it pushed an identical screen, and Back returned to what looked
+  /// like the same page — a loop with no way to tell how deep you were.
+  final String? excludeListingId;
+
+  const UpcomingEventsSection({
+    super.key,
+    this.showDivider = false,
+    this.excludeListingId,
+  });
 
   @override
   State<UpcomingEventsSection> createState() => _UpcomingEventsSectionState();
@@ -35,7 +46,11 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
     setState(() => _loading = true);
     try {
       final page = await EventsListingService.fetchEvents(pageSize: 10);
-      final items = page.results.map((e) {
+      final exclude = widget.excludeListingId;
+      final results = exclude == null || exclude.isEmpty
+          ? page.results
+          : page.results.where((e) => e.id != exclude).toList();
+      final items = results.map((e) {
         final badge = e.subcategory?.name ??
             (e.category.name.isNotEmpty ? e.category.name : 'Limited Seats');
         return _UpcomingItem(
@@ -65,7 +80,10 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
   }
 
   void _open(_UpcomingItem item) {
-    Navigator.push(
+    // Replace rather than push: hopping between related listings otherwise
+    // stacks a detail screen per tap, so Back walks the whole chain instead of
+    // returning to wherever the customer entered from.
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => EventDetailScreen(event: item.model)),
     );

@@ -619,7 +619,10 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                     ],
 
                     // ── Upcoming Events ───────────────────────────────────
-                    const UpcomingEventsSection(),
+                    UpcomingEventsSection(
+                      // Never advertise the listing being viewed.
+                      excludeListingId: widget.event.id,
+                    ),
 
                     SizedBox(height: Responsive.h(context, 100)),
                   ],

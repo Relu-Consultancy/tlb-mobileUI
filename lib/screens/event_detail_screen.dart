@@ -542,7 +542,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     // ),
 
                     // ── Upcoming Events ───────────────────────────────────
-                    const UpcomingEventsSection(),
+                    UpcomingEventsSection(
+                      // Never advertise the listing being viewed.
+                      excludeListingId: widget.event.id,
+                    ),
 
                     SizedBox(height: Responsive.h(context, 100)),
                   ],
