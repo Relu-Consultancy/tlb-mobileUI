@@ -4,6 +4,7 @@ import '../core/responsive.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/listing_schedule.dart';
 import '../data/dummy_data.dart';
 import '../models/api_event_model.dart';
 import '../models/event_model.dart';
@@ -64,7 +65,10 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
         _events = page.results
             .where((e) =>
                 e.format == slug &&
-                e.city.toLowerCase() == city)
+                e.city.toLowerCase() == city &&
+                // A finished event has nothing left to book; keeping it in a
+                // format-browse list just leads to a dead end when tapped.
+                !ListingSchedule.hasEnded(e.endDatetime))
             .toList();
         _isLoading = false;
       });

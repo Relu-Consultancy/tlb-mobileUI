@@ -110,6 +110,12 @@ class ApiEvent {
   final String priceType; // 'free' | 'paid'
   final String? priceFrom; // lowest ticket price as string, null for free
   final DateTime startDatetime;
+
+  /// Added to the list endpoint alongside `start_datetime` so a finished
+  /// event can be identified — and filtered — without fetching its detail.
+  /// See [ListingSchedule.hasEnded]. Null on the rare card missing it, which
+  /// [ListingSchedule.hasEnded] treats as "not ended" rather than guessing.
+  final DateTime? endDatetime;
   final String? coverUrl;
 
   const ApiEvent({
@@ -123,6 +129,7 @@ class ApiEvent {
     required this.priceType,
     this.priceFrom,
     required this.startDatetime,
+    this.endDatetime,
     this.coverUrl,
   });
 
@@ -147,6 +154,8 @@ class ApiEvent {
         startDatetime:
             DateTime.tryParse(json['start_datetime']?.toString() ?? '') ??
                 DateTime.now(),
+        endDatetime:
+            DateTime.tryParse(json['end_datetime']?.toString() ?? ''),
         coverUrl: json['cover_url'] as String?,
       );
 }
@@ -161,7 +170,6 @@ class ApiEventDetail extends ApiEvent {
   final int? capacity;
   final int? availableSeats;
   final DateTime? registrationDeadline;
-  final DateTime? endDatetime;
   final List<ApiEventTicket> tickets;
   final List<ApiEventMedia> media;
   final ApiEventOrganizer? organizer;
@@ -189,6 +197,7 @@ class ApiEventDetail extends ApiEvent {
     required super.priceType,
     super.priceFrom,
     required super.startDatetime,
+    super.endDatetime,
     super.coverUrl,
     this.description,
     this.area,
@@ -197,7 +206,6 @@ class ApiEventDetail extends ApiEvent {
     this.capacity,
     this.availableSeats,
     this.registrationDeadline,
-    this.endDatetime,
     required this.tickets,
     required this.media,
     this.organizer,

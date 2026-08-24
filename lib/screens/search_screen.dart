@@ -1,5 +1,6 @@
 import 'dart:async';
 import '../core/app_colors.dart';
+import '../core/listing_schedule.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
@@ -155,21 +156,25 @@ class _SearchScreenState extends State<SearchScreen> {
     try {
       final page = await EventsListingService.fetchEvents(search: q, pageSize: 10);
       return [
+        // Same reasoning as every other events list: a finished event has
+        // nothing left to book, tapping in from a search result is as much
+        // of a dead end as tapping in from a browse list.
         for (final e in page.results)
-          _SearchItem(
-            type: _EntityType.event,
-            eventModel: EventModel(
-              id: e.id,
+          if (!ListingSchedule.hasEnded(e.endDatetime))
+            _SearchItem(
+              type: _EntityType.event,
+              eventModel: EventModel(
+                id: e.id,
+                title: e.title,
+                venue: e.city,
+                imagePath: e.coverUrl ?? '',
+                tag: e.subcategory?.name,
+                price: e.priceFrom != null ? double.tryParse(e.priceFrom!) : null,
+              ),
               title: e.title,
-              venue: e.city,
-              imagePath: e.coverUrl ?? '',
-              tag: e.subcategory?.name,
-              price: e.priceFrom != null ? double.tryParse(e.priceFrom!) : null,
+              subtitle: e.city,
+              coverUrl: e.coverUrl,
             ),
-            title: e.title,
-            subtitle: e.city,
-            coverUrl: e.coverUrl,
-          ),
       ];
     } catch (_) {
       return null;

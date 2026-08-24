@@ -4,11 +4,14 @@
 /// programs and venues have no end date at all (they recur, or in the case of a
 /// venue simply exist), so nothing here applies to them.
 ///
-/// Note the public **list** endpoint returns `start_datetime` and `has_started`
-/// but **not** `end_datetime`; only the detail response carries it. So a
-/// finished event can only be identified once its detail has been fetched —
-/// see [hasEnded]. Hiding finished events from a list needs `end_datetime` (or
-/// a `has_ended` flag) on the list card.
+/// The public **list** endpoint now returns `end_datetime` on every card
+/// (confirmed live 2026-08-24), so a finished event can be filtered out of a
+/// list without fetching its detail — see [hasEnded]. The list also carries a
+/// field named `has_started`, but do not use it: live data shows it is
+/// actually `end_datetime < now` (an event that had visibly started but not
+/// yet ended came back `has_started: false`), the opposite of what its name
+/// says. Comparing `end_datetime` directly, as this class does, sidesteps
+/// that mislabelling entirely.
 class ListingSchedule {
   const ListingSchedule._();
 

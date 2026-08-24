@@ -3,6 +3,7 @@ import '../widgets/app_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/listing_schedule.dart';
 import '../widgets/error_retry_view.dart';
 import '../core/responsive.dart';
 import '../models/api_event_model.dart';
@@ -175,7 +176,13 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
     return ['All', ...subs];
   }
 
-  List<ApiEvent> get _filteredEvents => _apiEvents;
+  // Ended events are deliberately still returned by the API — the client
+  // decides whether to hide, grey out, or badge them. Hidden here: a
+  // finished event has nothing left to book, so surfacing it as if it were
+  // current just leads to a dead end when tapped.
+  List<ApiEvent> get _filteredEvents => _apiEvents
+      .where((e) => !ListingSchedule.hasEnded(e.endDatetime))
+      .toList();
 
   String get _categoryTitle =>
       (_currentCategory['label'] as String).replaceAll('\n', ' ');
