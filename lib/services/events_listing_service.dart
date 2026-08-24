@@ -273,7 +273,7 @@ class EventsListingService {
     }
   }
 
-  /// POST /api/v1/listings/venues/{id}/enquiries/ — submit a venue enquiry
+  /// POST /api/v1/listings/venues/{id}/enquiry/ — submit a venue enquiry
   /// (used for enquiry-only venues).
   static Future<void> submitVenueEnquiry({
     required String listingId,
@@ -285,11 +285,22 @@ class EventsListingService {
     String? area,
   }) async {
     try {
+      // Was /enquiries/ (plural) — that route only exists for partners
+      // viewing enquiries they've received. The customer-facing route is
+      // singular, and (unlike programs' /enquire/) uses the noun form.
       final url =
-          Uri.parse('$_base/api/v1/listings/venues/$listingId/enquiries/');
+          Uri.parse('$_base/api/v1/listings/venues/$listingId/enquiry/');
       final reqBody = {
-        'student_name': studentName,
+        // The venue schema's required contact-name field is `name`, not
+        // `student_name` — that key only exists on classes/programs, which
+        // are enquiring about a child attending. Sending `student_name` left
+        // this required field missing entirely, so the request would still
+        // have been rejected even once the URL was fixed.
+        'name': studentName,
         'mobile': mobile,
+        // parent_name, student_age and area are not fields on this endpoint
+        // (confirmed against the published schema); left harmless as extras
+        // rather than dropped, since the API ignores unknown keys.
         if (parentName != null && parentName.isNotEmpty) 'parent_name': parentName,
         if (studentAge != null) 'student_age': studentAge,
         if (message != null && message.isNotEmpty) 'message': message,

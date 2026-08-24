@@ -171,12 +171,22 @@ class ProgramsListingService {
     String? area,
   }) async {
     try {
-      final url = Uri.parse('$_base/api/v1/listings/programs/$listingId/enquiries/');
+      // Was /enquiries/ (plural) — that route only exists for partners
+      // viewing enquiries they've received. The customer-facing route is the
+      // singular verb form.
+      final url = Uri.parse('$_base/api/v1/listings/programs/$listingId/enquire/');
       final body = {
         'student_name': studentName,
-        'mobile': mobile,
+        // The program schema's contact field is `contact_number`, not
+        // `mobile` — that name is only correct for classes and venues.
+        // Sending `mobile` here left the field unrecognised, so the number
+        // never reached the organiser even once the URL was fixed.
+        'contact_number': mobile,
         if (parentName != null) 'parent_name': parentName,
         if (studentAge != null) 'student_age': studentAge,
+        // batch_id and area are not fields on this endpoint (confirmed
+        // against the published schema); left harmless as extras rather than
+        // dropped, since the API ignores unknown keys.
         if (batchId != null) 'batch_id': batchId,
         'message': message ?? '',
         if (area != null) 'area': area,
