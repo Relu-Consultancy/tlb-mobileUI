@@ -86,5 +86,19 @@ void main() {
       expect(find.text('Clear all'), findsNothing);
       expect(find.byIcon(Icons.close), findsNothing);
     });
+
+    // The Location section (City / Area dropdowns) was removed from the
+    // sheet — it was never wired to the search results in the first place.
+    testWidgets('TC_S_SF_006 — the Location section is gone', (tester) async {
+      await _openSearch(tester);
+      await _openFilters(tester);
+
+      expect(find.text('Location'), findsNothing);
+      expect(find.text('City'), findsNothing);
+      expect(find.text('Area/Locality'), findsNothing);
+      // Neighbouring sections still render either side of where it was.
+      expect(find.text('Mode'), findsOneWidget);
+      expect(find.text('Date'), findsOneWidget);
+    });
   });
 }

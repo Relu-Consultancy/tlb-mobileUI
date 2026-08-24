@@ -65,8 +65,6 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // Filter state (retained for future use — not yet wired to API)
   String? _selectedMode;
-  String? _selectedCity;
-  String? _selectedArea;
   final Set<String> _ageGroupSelected = {};
   final Set<String> _dateSelected = {};
 
@@ -74,8 +72,6 @@ class _SearchScreenState extends State<SearchScreen> {
 
   static const _ageGroups  = ['0-3 years', '3-5 years', '6-8 years', '9-12 years', '13-16 years'];
   static const _modes      = ['Offline', 'Hybrid', 'Online'];
-  static const _cities     = ['Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Pune'];
-  static const _areas      = ['Bandra', 'Juhu', 'Andheri', 'Powai', 'Thane', 'Worli', 'Lower Parel'];
   static const _dateOptions = ['Today', 'This Weekend', 'This Week', 'Upcoming'];
 
   List<_SearchItem> get _filteredResults {
@@ -185,21 +181,25 @@ class _SearchScreenState extends State<SearchScreen> {
     try {
       final page = await ClassesListingService.fetchClasses(search: q, pageSize: 10);
       return [
+        // Classes have no end date to filter by (open-ended recurring
+        // schedule) — is_paused is the partner-controlled "not currently
+        // bookable" signal instead.
         for (final c in page.results)
-          _SearchItem(
-            type: _EntityType.klass,
-            eventModel: EventModel(
-              id: c.id,
+          if (!c.isPaused)
+            _SearchItem(
+              type: _EntityType.klass,
+              eventModel: EventModel(
+                id: c.id,
+                title: c.title,
+                venue: c.category.name,
+                imagePath: c.coverUrl ?? '',
+                tag: c.category.name,
+                rating: c.averageRating,
+              ),
               title: c.title,
-              venue: c.category.name,
-              imagePath: c.coverUrl ?? '',
-              tag: c.category.name,
-              rating: c.averageRating,
+              subtitle: c.category.name,
+              coverUrl: c.coverUrl,
             ),
-            title: c.title,
-            subtitle: c.category.name,
-            coverUrl: c.coverUrl,
-          ),
       ];
     } catch (_) {
       return null;
@@ -210,21 +210,24 @@ class _SearchScreenState extends State<SearchScreen> {
     try {
       final page = await ProgramsListingService.fetchPrograms(search: q, pageSize: 10);
       return [
+        // Same reasoning as events: a finished program (every batch over)
+        // has nothing left to book.
         for (final p in page.results)
-          _SearchItem(
-            type: _EntityType.program,
-            eventModel: EventModel(
-              id: p.id,
+          if (!ListingSchedule.hasEnded(p.endDatetime))
+            _SearchItem(
+              type: _EntityType.program,
+              eventModel: EventModel(
+                id: p.id,
+                title: p.title,
+                venue: p.city ?? p.category?.name ?? '',
+                imagePath: p.cover ?? '',
+                tag: p.category?.name,
+                rating: p.averageRating,
+              ),
               title: p.title,
-              venue: p.city ?? p.category?.name ?? '',
-              imagePath: p.cover ?? '',
-              tag: p.category?.name,
-              rating: p.averageRating,
+              subtitle: p.city ?? p.category?.name ?? '',
+              coverUrl: p.cover,
             ),
-            title: p.title,
-            subtitle: p.city ?? p.category?.name ?? '',
-            coverUrl: p.cover,
-          ),
       ];
     } catch (_) {
       return null;
@@ -395,22 +398,6 @@ class _SearchScreenState extends State<SearchScreen> {
         remove: () => setState(() => _selectedMode = null),
       ));
     }
-    if (_selectedCity != null) {
-      out.add((
-        label: _selectedCity!,
-        // Area belongs to a city, so it cannot outlive one.
-        remove: () => setState(() {
-          _selectedCity = null;
-          _selectedArea = null;
-        }),
-      ));
-    }
-    if (_selectedArea != null) {
-      out.add((
-        label: _selectedArea!,
-        remove: () => setState(() => _selectedArea = null),
-      ));
-    }
     for (final d in _dateSelected.toList()) {
       out.add((
         label: d,
@@ -426,8 +413,6 @@ class _SearchScreenState extends State<SearchScreen> {
       _ageGroupSelected.clear();
       _dateSelected.clear();
       _selectedMode = null;
-      _selectedCity = null;
-      _selectedArea = null;
     });
   }
 
@@ -873,31 +858,6 @@ class _SearchScreenState extends State<SearchScreen> {
                           ),
                         ),
                         const Divider(height: 1, color: Color(0xFFEEEEEE)),
-                        // ── Location ─────────────────────────────────────────
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Location', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
-                              const SizedBox(height: 12),
-                              _buildDropdown(
-                                hint: 'City',
-                                value: _selectedCity,
-                                items: _cities,
-                                onChanged: (v) => setModalState(() { _selectedCity = v; _selectedArea = null; }),
-                              ),
-                              const SizedBox(height: 10),
-                              _buildDropdown(
-                                hint: 'Area/Locality',
-                                value: _selectedArea,
-                                items: _areas,
-                                onChanged: (v) => setModalState(() => _selectedArea = v),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Divider(height: 1, color: Color(0xFFEEEEEE)),
                         // ── Date ─────────────────────────────────────────────
                         Padding(
                           padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
@@ -938,8 +898,6 @@ class _SearchScreenState extends State<SearchScreen> {
                             _ageGroupSelected.clear();
                             _dateSelected.clear();
                             _selectedMode = null;
-                            _selectedCity = null;
-                            _selectedArea = null;
                           }),
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: Color(0xFFE0E0E0)),
@@ -1006,29 +964,6 @@ class _SearchScreenState extends State<SearchScreen> {
             const SizedBox(width: 12),
             Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDropdown({required String hint, required String? value, required List<String> items, required ValueChanged<String?> onChanged}) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(color: const Color(0xFFF5F5F5), borderRadius: BorderRadius.circular(12)),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          hint: Text(hint, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: Colors.grey.shade500)),
-          items: items.map((item) => DropdownMenuItem(
-            value: item,
-            child: Text(item, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: AppColors.textPrimary)),
-          )).toList(),
-          onChanged: onChanged,
-          isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textPrimary),
-          dropdownColor: Colors.white,
-          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: AppColors.textPrimary),
         ),
       ),
     );
