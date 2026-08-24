@@ -33,6 +33,25 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        getByName("debug") {
+            // Pinned to a keystore committed in this repo (debug.keystore,
+            // password "android", alias "androiddebugkey" — the standard
+            // Android debug defaults) rather than each machine's own
+            // auto-generated ~/.android/debug.keystore. Google Sign-In only
+            // works from a certificate whose SHA-1 is registered in
+            // Firebase; with a per-machine keystore that fingerprint differs
+            // on every developer's machine, so Sign-In breaks until someone
+            // registers that one machine's SHA-1. Pinning here means the
+            // whole team builds with the identical certificate, so one
+            // registered fingerprint covers everyone.
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

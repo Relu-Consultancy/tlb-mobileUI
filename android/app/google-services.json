@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "690253990877-bpgm4pudoeeolvdlkpem44p2t0f668mm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thelittlebroadway.tlb_mobile_ui",
+            "certificate_hash": "e6a29c6de845538c68cc8e131ee6022523d05616"
+          }
+        },
+        {
           "client_id": "690253990877-mejov1nq5erdrgipgbsvqct1h7t4hpan.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
