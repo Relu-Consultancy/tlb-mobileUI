@@ -106,6 +106,14 @@ class ApiProgram {
   final double averageRating;
   final int totalReviews;
 
+  /// Earliest active batch's start.
+  final DateTime? startDatetime;
+
+  /// Latest active batch's end — a program is over only once every batch is,
+  /// unlike an event's single start/end. Null if the program has no batches
+  /// with an end date. See [ListingSchedule.hasEnded].
+  final DateTime? endDatetime;
+
   const ApiProgram({
     required this.id,
     required this.title,
@@ -124,6 +132,8 @@ class ApiProgram {
     this.distanceKm,
     required this.averageRating,
     required this.totalReviews,
+    this.startDatetime,
+    this.endDatetime,
   });
 
   factory ApiProgram.fromJson(Map<String, dynamic> json) => ApiProgram(
@@ -146,6 +156,10 @@ class ApiProgram {
         distanceKm: (json['distance_km'] as num?)?.toDouble(),
         averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
         totalReviews: json['total_reviews'] as int? ?? 0,
+        startDatetime:
+            DateTime.tryParse(json['start_datetime']?.toString() ?? ''),
+        endDatetime:
+            DateTime.tryParse(json['end_datetime']?.toString() ?? ''),
       );
 
   String get displayAgeRange {
@@ -199,6 +213,8 @@ class ApiProgramDetail extends ApiProgram {
     super.distanceKm,
     required super.averageRating,
     required super.totalReviews,
+    super.startDatetime,
+    super.endDatetime,
     this.description,
     this.area,
     this.address,
@@ -243,6 +259,9 @@ class ApiProgramDetail extends ApiProgram {
       distanceKm: (json['distance_km'] as num?)?.toDouble(),
       averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
       totalReviews: json['total_reviews'] as int? ?? 0,
+      startDatetime:
+          DateTime.tryParse(json['start_datetime']?.toString() ?? ''),
+      endDatetime: DateTime.tryParse(json['end_datetime']?.toString() ?? ''),
       description: json['description'] as String?,
       area: json['area'] as String?,
       address: json['address'] as String?,

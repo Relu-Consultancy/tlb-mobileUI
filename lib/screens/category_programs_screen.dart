@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/listing_schedule.dart';
 import '../widgets/error_retry_view.dart';
 import '../core/responsive.dart';
 import '../data/dummy_data.dart';
@@ -236,7 +237,12 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
       ? ['All', ..._currentSubcategories.map((s) => s.name)]
       : DummyData.programsSubFilters[_selectedCategoryIndex];
 
-  List<ApiProgram> get _filteredPrograms => _apiPrograms;
+  // A program is over only once every batch is (its end_datetime is the
+  // latest active batch's end); a finished program has nothing left to
+  // book, so surfacing it just leads to a dead end when tapped.
+  List<ApiProgram> get _filteredPrograms => _apiPrograms
+      .where((p) => !ListingSchedule.hasEnded(p.endDatetime))
+      .toList();
 
   EventModel _toEventModel(ApiProgram prg) {
     return EventModel(

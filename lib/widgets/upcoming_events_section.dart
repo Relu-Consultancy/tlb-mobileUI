@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
-import '../core/listing_schedule.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
 import '../services/events_listing_service.dart';
@@ -46,14 +45,18 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
   Future<void> _fetch() async {
     setState(() => _loading = true);
     try {
-      final page = await EventsListingService.fetchEvents(pageSize: 10);
+      // date_preset: 'upcoming' does this filtering server-side. Fetching an
+      // unfiltered page and filtering client-side (the previous approach)
+      // broke this section entirely: the API's default ordering front-loads
+      // old seed events, so page 1 was often 10-for-10 already-ended — every
+      // one correctly stripped by the ended check, leaving nothing to show
+      // even though upcoming events existed a page or two further in.
+      final page = await EventsListingService.fetchEvents(
+        pageSize: 10,
+        datePreset: 'upcoming',
+      );
       final exclude = widget.excludeListingId;
-      final results = page.results
-          .where((e) => e.id != exclude)
-          // A section titled "Upcoming Events" showing one that has already
-          // ended is a direct contradiction of its own label.
-          .where((e) => !ListingSchedule.hasEnded(e.endDatetime))
-          .toList();
+      final results = page.results.where((e) => e.id != exclude).toList();
       final items = results.map((e) {
         final badge = e.subcategory?.name ??
             (e.category.name.isNotEmpty ? e.category.name : 'Limited Seats');

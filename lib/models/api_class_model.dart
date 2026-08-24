@@ -98,6 +98,13 @@ class ApiClass {
   final double averageRating;
   final int totalReviews;
 
+  /// A class has no end date — ClassBatch carries a daily start_time/end_time
+  /// but no end_date column, so there is no date on which a class finishes
+  /// (it is an open-ended recurring schedule). The partner-controlled signal
+  /// for "not currently bookable" is this flag instead: true when they have
+  /// paused the listing.
+  final bool isPaused;
+
   const ApiClass({
     required this.id,
     required this.title,
@@ -109,6 +116,7 @@ class ApiClass {
     this.coverUrl,
     required this.averageRating,
     required this.totalReviews,
+    this.isPaused = false,
   });
 
   factory ApiClass.fromJson(Map<String, dynamic> json) => ApiClass(
@@ -122,6 +130,7 @@ class ApiClass {
         coverUrl: json['cover_url'] as String?,
         averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
         totalReviews: json['total_reviews'] as int? ?? 0,
+        isPaused: json['is_paused'] as bool? ?? false,
       );
 }
 
@@ -166,6 +175,7 @@ class ApiClassDetail extends ApiClass {
     super.coverUrl,
     required super.averageRating,
     required super.totalReviews,
+    super.isPaused,
     this.description,
     this.organizer,
     this.subcategory,
@@ -198,6 +208,9 @@ class ApiClassDetail extends ApiClass {
       shortDescription: json['short_description'] as String?,
       status: json['status'] as String,
       isLive: json['is_live'] as bool? ?? false,
+      // Top-level on the detail response, unlike most other class fields
+      // which are nested under `service`.
+      isPaused: json['is_paused'] as bool? ?? false,
       category: service['category'] != null
           ? ApiCategory.fromJson(service['category'] as Map<String, dynamic>)
           : const ApiCategory(id: 0, name: '', slug: '', sortOrder: 0, subcategories: []),

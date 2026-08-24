@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../core/listing_schedule.dart';
 import '../models/event_model.dart';
 import '../services/home_feed_service.dart';
 
@@ -29,7 +30,12 @@ class HomeFeedState {
       final sections = await HomeFeedService.fetchSections();
       final map = <String, List<EventModel>>{};
       for (final s in sections) {
-        map[s.section] = s.listings.map((l) => l.toEventModel()).toList();
+        map[s.section] = s.listings
+            // A finished event or program has nothing left to book. A no-op
+            // for classes/venues, whose end_datetime is always null here.
+            .where((l) => !ListingSchedule.hasEnded(l.endDatetime))
+            .map((l) => l.toEventModel())
+            .toList();
       }
       _sections
         ..clear()

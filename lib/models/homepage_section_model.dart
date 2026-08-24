@@ -18,6 +18,17 @@ class HomepageListing {
   final String? rating;
   final String? totalReviews;
 
+  /// Present for every listing_type on this feed, but only ever non-null for
+  /// events and programs — a class's end_datetime is always null (open-ended
+  /// recurring schedule, no such date exists) and a venue carries neither
+  /// field at all. See ListingSchedule's doc for the per-type breakdown.
+  ///
+  /// This feed does not carry a class's `is_paused` flag, so an ended-style
+  /// filter here can only catch finished events/programs — a paused class
+  /// still appears. Filtering that too would need the field added here.
+  final DateTime? startDatetime;
+  final DateTime? endDatetime;
+
   const HomepageListing({
     required this.id,
     required this.title,
@@ -32,6 +43,8 @@ class HomepageListing {
     this.priceType,
     this.rating,
     this.totalReviews,
+    this.startDatetime,
+    this.endDatetime,
   });
 
   static String? _str(dynamic v) {
@@ -55,6 +68,10 @@ class HomepageListing {
         priceType: _str(json['price_type']),
         rating: _str(json['rating']),
         totalReviews: _str(json['total_reviews']),
+        startDatetime:
+            DateTime.tryParse(json['start_datetime']?.toString() ?? ''),
+        endDatetime:
+            DateTime.tryParse(json['end_datetime']?.toString() ?? ''),
       );
 
   /// Build the card model used by the existing home-section / banner widgets.

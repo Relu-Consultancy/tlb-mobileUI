@@ -66,4 +66,54 @@ void main() {
       expect(detail.bookingType, 'enquiry');
     });
   });
+
+  // A class has no end_date column at all (it's an open-ended recurring
+  // schedule, confirmed against ClassBatch's actual columns), so is_paused —
+  // not a date — is the partner-controlled "not currently bookable" signal.
+  // Verified live: it's a top-level field on the list endpoint, not nested
+  // under `service` like most other class fields.
+  group('ApiClass.isPaused (list endpoint)', () {
+    Map<String, dynamic> listJson({bool? isPaused}) => {
+          'id': '47e3be6c-8d2a-4a8b-8fd9-0ffefdf330fa',
+          'title': 'Hip-Hop Dance Classes',
+          'status': 'published',
+          'is_live': true,
+          'category': {'id': 4, 'name': 'Performing Arts', 'slug': 'pa', 'sort_order': 1},
+          'average_rating': 0,
+          'total_reviews': 0,
+          'is_paused': isPaused,
+        };
+
+    test('parses is_paused: true', () {
+      final c = ApiClass.fromJson(listJson(isPaused: true));
+      expect(c.isPaused, isTrue);
+    });
+
+    test('parses is_paused: false', () {
+      final c = ApiClass.fromJson(listJson(isPaused: false));
+      expect(c.isPaused, isFalse);
+    });
+
+    test('defaults to false when is_paused is absent', () {
+      final c = ApiClass.fromJson(listJson());
+      expect(c.isPaused, isFalse);
+    });
+  });
+
+  group('ApiClassDetail.isPaused', () {
+    // is_paused sits top-level on the detail response, unlike category/mode/
+    // city/etc which are nested under `service` — a mistake here would read
+    // it from the wrong place and silently default to false.
+    test('reads from the top level, not from service', () {
+      final json = _baseJson();
+      json['is_paused'] = true;
+      final detail = ApiClassDetail.fromJson(json);
+      expect(detail.isPaused, isTrue);
+    });
+
+    test('defaults to false when absent', () {
+      final detail = ApiClassDetail.fromJson(_baseJson());
+      expect(detail.isPaused, isFalse);
+    });
+  });
 }

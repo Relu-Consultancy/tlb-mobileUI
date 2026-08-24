@@ -76,9 +76,18 @@ void main() {
       expect(src, contains('ListingSchedule.hasEnded(e.endDatetime)'));
     });
 
-    test('TC_S_EEF_007 — upcoming_events_section filters alongside self-exclusion', () {
+    // Superseded: this section originally filtered client-side, the same as
+    // the other three. That broke it outright — fetching an unfiltered page
+    // and stripping ended events afterward could legitimately zero out the
+    // whole page (the API's default ordering front-loads old seed data; 10/10
+    // events on page 1 were already-ended, hiding 11 genuinely upcoming ones
+    // sitting on page 2+). date_preset: 'upcoming' filters server-side
+    // instead, so pagination can't hide anything — see
+    // upcoming_events_section_test.dart's TC_W_UE_003 for this guard now.
+    test('TC_S_EEF_007 — upcoming_events_section filters server-side, not client-side', () {
       final src = read('lib/widgets/upcoming_events_section.dart');
-      expect(src, contains('ListingSchedule.hasEnded(e.endDatetime)'));
+      expect(src, contains("datePreset: 'upcoming'"));
+      expect(src, isNot(contains('ListingSchedule.hasEnded')));
     });
 
     test('TC_S_EEF_008 — search_screen filters event results', () {

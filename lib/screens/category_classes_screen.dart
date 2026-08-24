@@ -183,7 +183,12 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
   List<String> get _filters =>
       DummyData.classesSubFilters[_selectedCategoryIndex];
 
-  List<ApiClass> get _filteredClasses => _apiClasses;
+  // Classes have no end date to filter by — they're an open-ended recurring
+  // schedule, not a run with a finish line (see ListingSchedule's doc). The
+  // partner-controlled "not currently bookable" signal here is is_paused
+  // instead.
+  List<ApiClass> get _filteredClasses =>
+      _apiClasses.where((c) => !c.isPaused).toList();
 
   String get _categoryTitle {
     return (_currentCategory['label'] as String).replaceAll('\n', ' ');
