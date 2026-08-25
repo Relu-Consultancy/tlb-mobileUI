@@ -218,6 +218,11 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
                             selectedDate: _fmtDate(_days[_selectedDateIndex!]),
                             selectedTime: _timeOptions[_selectedTimeIndex!],
                             apiTickets: widget.apiTickets,
+                            // Carried through so Checkout's pencil "Edit" can
+                            // reopen this exact screen with real data rather
+                            // than falling back to placeholder dates.
+                            eventDateTime: widget.eventDateTime,
+                            eventEndDateTime: widget.eventEndDateTime,
                           ),
                         ),
                       );

@@ -16,6 +16,15 @@ class TicketBookingScreen extends StatefulWidget {
   final String bookingType;
   final int? batchId;
 
+  /// The real event window, carried through from DateTimeSelectionScreen so
+  /// the pencil "Edit" button below can reopen that exact same screen.
+  /// Without these, editing fell back to DateTimeSelectionScreen's dummy-data
+  /// path (a fixed 6 fake days from today with placeholder hourly slots)
+  /// instead of the real multi-day, real-hours screen the customer had
+  /// actually just used.
+  final DateTime? eventDateTime;
+  final DateTime? eventEndDateTime;
+
   const TicketBookingScreen({
     super.key,
     required this.event,
@@ -24,6 +33,8 @@ class TicketBookingScreen extends StatefulWidget {
     this.apiTickets,
     this.bookingType = 'event',
     this.batchId,
+    this.eventDateTime,
+    this.eventEndDateTime,
   });
 
   @override
@@ -308,12 +319,21 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                     const SizedBox(width: 4),
                     GestureDetector(
                       onTap: () {
-                        // Go back to date/time selection
+                        // Go back to date/time selection. Carrying the real
+                        // event window and tickets through — without them
+                        // this reopened DateTimeSelectionScreen's dummy-data
+                        // fallback (6 fake days from today, placeholder
+                        // hourly slots) instead of the real screen the
+                        // customer had just used to get here.
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                DateTimeSelectionScreen(event: event),
+                            builder: (_) => DateTimeSelectionScreen(
+                              event: event,
+                              apiTickets: widget.apiTickets,
+                              eventDateTime: widget.eventDateTime,
+                              eventEndDateTime: widget.eventEndDateTime,
+                            ),
                           ),
                         );
                       },
