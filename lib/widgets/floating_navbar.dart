@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:showcaseview/showcaseview.dart';
 import '../helpers/walkthrough_keys.dart';
+import 'walkthrough_tooltip.dart';
 
 class NavbarItemData {
   final String label;
@@ -150,17 +150,26 @@ class FloatingNavbar extends StatelessWidget {
               final config = showcaseConfigs?[index];
               if (config == null) return navItemWidget;
 
-              return Showcase(
+              return Showcase.withWidget(
                 key: config.showcaseKey,
-                title: config.title,
-                description: config.description,
-                overlayOpacity: 0.78,
-                tooltipBackgroundColor: AppColors.textPrimary,
-                textColor: Colors.white,
-                scaleAnimationDuration: const Duration(milliseconds: 350),
-                scaleAnimationCurve: Curves.easeInOut,
-                movingAnimationDuration: const Duration(milliseconds: 350),
+                // Matches the pill's own shape (borderRadius: 30 above) so the
+                // spotlight cutout hugs the real target instead of the
+                // package's generic rounded-rect default.
+                targetShapeBorder:
+                    const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(30))),
+                blurValue: 3,
+                overlayOpacity: 0.6,
                 targetPadding: const EdgeInsets.all(6),
+                targetTooltipGap: 14,
+                container: WalkthroughTooltip(
+                  icon: config.icon,
+                  title: config.title,
+                  description: config.description,
+                  stepIndex: config.stepIndex,
+                  totalSteps: WalkthroughKeys.totalSteps,
+                  onNext: () => ShowcaseView.get().next(),
+                  onSkip: () => ShowcaseView.get().dismiss(),
+                ),
                 child: navItemWidget,
               );
             }),

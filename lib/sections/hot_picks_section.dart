@@ -9,6 +9,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../providers/home_feed_state.dart';
 import '../data/dummy_data.dart';
 import '../core/listing_navigation.dart';
+import 'package:showcaseview/showcaseview.dart';
+import '../helpers/walkthrough_keys.dart';
+import '../widgets/walkthrough_tooltip.dart';
 
 class HotPicksSection extends StatelessWidget {
   const HotPicksSection({super.key});
@@ -42,7 +45,7 @@ class HotPicksSection extends StatelessWidget {
             addAutomaticKeepAlives: false,
             itemBuilder: (context, index) {
               final event = items[index];
-              return GestureDetector(
+              final card = GestureDetector(
                 onTap: () => openListingDetail(context, event),
                 child: Container(
                 width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
@@ -156,6 +159,38 @@ class HotPicksSection extends StatelessWidget {
                 ),
                 ),
               );
+
+              // The tour's "Tap Any Card" step points at the very first
+              // card — teaching the interaction once, on a concrete example,
+              // rather than on every card in every section.
+              if (index == 0) {
+                return Showcase.withWidget(
+                  key: WalkthroughKeys.firstSectionCard,
+                  targetShapeBorder: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  blurValue: 3,
+                  overlayOpacity: 0.6,
+                  targetPadding: const EdgeInsets.all(4),
+                  targetTooltipGap: 14,
+                  // The card lives below the hero, off-screen at tour start —
+                  // scroll it into view rather than requiring the card to
+                  // already be visible for its own step to make sense.
+                  enableAutoScroll: true,
+                  scrollAlignment: 0.3,
+                  container: WalkthroughTooltip(
+                    icon: kSectionCardShowcaseConfig.icon,
+                    title: kSectionCardShowcaseConfig.title,
+                    description: kSectionCardShowcaseConfig.description,
+                    stepIndex: kSectionCardShowcaseConfig.stepIndex,
+                    totalSteps: WalkthroughKeys.totalSteps,
+                    onNext: () => ShowcaseView.get().next(),
+                    onSkip: () => ShowcaseView.get().dismiss(),
+                  ),
+                  child: card,
+                );
+              }
+              return card;
             },
           ),
         ),

@@ -14,6 +14,7 @@ import '../screens/location_screen.dart';
 import '../widgets/login_sheet.dart';
 import '../providers/location_state.dart';
 import '../helpers/walkthrough_keys.dart';
+import '../widgets/walkthrough_tooltip.dart';
 
 /// The greeting + search header shared across Home, Events, Classes,
 /// Programs and Venues.
@@ -299,17 +300,24 @@ class HomeHeader extends StatelessWidget {
 
         if (profileShowcaseConfig == null) return avatarGesture;
 
-        return Showcase(
+        return Showcase.withWidget(
           key: profileShowcaseConfig!.showcaseKey,
-          title: profileShowcaseConfig!.title,
-          description: profileShowcaseConfig!.description,
-          overlayOpacity: 0.78,
-          tooltipBackgroundColor: AppColors.textPrimary,
-          textColor: Colors.white,
-          scaleAnimationDuration: const Duration(milliseconds: 350),
-          scaleAnimationCurve: Curves.easeInOut,
-          movingAnimationDuration: const Duration(milliseconds: 350),
+          // The avatar is a circle (BoxShape.circle above) — spotlight it as
+          // one instead of the package's default rounded-rect cutout.
+          targetShapeBorder: const CircleBorder(),
+          blurValue: 3,
+          overlayOpacity: 0.6,
           targetPadding: const EdgeInsets.all(8),
+          targetTooltipGap: 14,
+          container: WalkthroughTooltip(
+            icon: profileShowcaseConfig!.icon,
+            title: profileShowcaseConfig!.title,
+            description: profileShowcaseConfig!.description,
+            stepIndex: profileShowcaseConfig!.stepIndex,
+            totalSteps: WalkthroughKeys.totalSteps,
+            onNext: () => ShowcaseView.get().next(),
+            onSkip: () => ShowcaseView.get().dismiss(),
+          ),
           child: avatarGesture,
         );
       },
@@ -413,17 +421,14 @@ class HomeHeader extends StatelessWidget {
 
     if (locationShowcaseConfig == null) return locationRow;
 
-    return Showcase(
+    return Showcase.withWidget(
       key: locationShowcaseConfig.showcaseKey,
-      title: locationShowcaseConfig.title,
-      description: locationShowcaseConfig.description,
-      overlayOpacity: 0.78,
-      tooltipBackgroundColor: AppColors.textPrimary,
-      textColor: Colors.white,
-      scaleAnimationDuration: const Duration(milliseconds: 350),
-      scaleAnimationCurve: Curves.easeInOut,
-      movingAnimationDuration: const Duration(milliseconds: 350),
+      targetShapeBorder:
+          const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+      blurValue: 3,
+      overlayOpacity: 0.6,
       targetPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      targetTooltipGap: 14,
       // Tapping the location chip opens LocationScreen. `disposeOnTap` is
       // required by showcaseview whenever `onTargetClick` is set; we dispose the
       // running showcase first so its dark overlay doesn't cover LocationScreen.
@@ -442,6 +447,15 @@ class HomeHeader extends StatelessWidget {
           });
         });
       },
+      container: WalkthroughTooltip(
+        icon: locationShowcaseConfig.icon,
+        title: locationShowcaseConfig.title,
+        description: locationShowcaseConfig.description,
+        stepIndex: locationShowcaseConfig.stepIndex,
+        totalSteps: WalkthroughKeys.totalSteps,
+        onNext: () => ShowcaseView.get().next(),
+        onSkip: () => ShowcaseView.get().dismiss(),
+      ),
       child: locationRow,
     );
   }

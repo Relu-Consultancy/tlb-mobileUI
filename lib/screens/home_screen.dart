@@ -115,17 +115,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _launchWalkthrough() async {
-    await showGeneralDialog<void>(
+    // true = "Take the Tour", false/null = "Skip for now" or dismissed. Only
+    // the former should actually start the coach-mark sequence — the intro
+    // used to have no way out at all, so every path led into the tour.
+    final wantsTour = await showGeneralDialog<bool>(
       context: context,
       barrierDismissible: false,
       barrierLabel: '',
       barrierColor: Colors.transparent,
       transitionDuration: Duration.zero,
       pageBuilder: (ctx, _, __) => WalkthroughIntroOverlay(
-        onNext: () => Navigator.of(ctx).pop(),
+        onNext: () => Navigator.of(ctx).pop(true),
+        onSkip: () => Navigator.of(ctx).pop(false),
       ),
     );
-    if (!mounted) return;
+    if (!mounted || wantsTour != true) return;
     // Reveal the floating navbar for the onboarding tour (it starts hidden at
     // the top of the page, but the walkthrough highlights the nav tabs).
     _navReveal.value = 1.0;
