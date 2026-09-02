@@ -251,52 +251,23 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
     );
   }
 
-  // ── Address (dark) + rating ──
+  // ── Address (dark) ──
   Widget _buildHeader(BuildContext context, EventModel event) {
     return SizedBox(
       width: double.infinity,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Full width now: the address used to be held to 240pt to keep it
-            // clear of a decorative map that sat in the top-right corner.
-            Text(
-              event.venue,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.poppins(
-                fontSize: Responsive.sp(context, 13.5),
-                fontWeight: FontWeight.w500,
-                color: _dark, // dark coloured address
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                ...List.generate(
-                  5,
-                  (i) => Icon(
-                    i < (event.rating?.round() ?? 4)
-                        ? Icons.star
-                        : Icons.star_border,
-                    size: 16,
-                    color: Colors.amber,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  '(${event.reviewCount ?? "124 reviews"})',
-                  style: GoogleFonts.poppins(
-                    fontSize: Responsive.sp(context, 12),
-                    color: Colors.grey.shade500,
-                  ),
-                ),
-              ],
-            ),
-          ],
+        // Full width now: the address used to be held to 240pt to keep it
+        // clear of a decorative map that sat in the top-right corner.
+        child: Text(
+          event.venue,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 13.5),
+            fontWeight: FontWeight.w500,
+            color: _dark, // dark coloured address
+          ),
         ),
       ),
     );
