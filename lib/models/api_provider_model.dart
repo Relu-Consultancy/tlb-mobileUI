@@ -7,7 +7,14 @@ class ApiProvider {
   final double averageRating;
   final int totalReviews;
   final int experienceYears;
-  final int totalFollowers;
+  /// Follower count, or null when the API did not send one.
+  ///
+  /// `/listings/{id}/provider/` returns no follower field of any name today —
+  /// only `/partner/followed/` carries one, as `follower_count`. Null means
+  /// "unknown", which the profile screen renders as nothing rather than as a
+  /// confident zero: showing "0 Followers" to somebody who is themselves
+  /// following reads as a broken app, not as missing data.
+  final int? totalFollowers;
 
   const ApiProvider({
     required this.id,
@@ -18,7 +25,7 @@ class ApiProvider {
     required this.averageRating,
     required this.totalReviews,
     required this.experienceYears,
-    this.totalFollowers = 0,
+    this.totalFollowers,
   });
 
   factory ApiProvider.fromJson(Map<String, dynamic> json) => ApiProvider(
@@ -30,8 +37,11 @@ class ApiProvider {
         averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
         totalReviews: (json['total_reviews'] as num?)?.toInt() ?? 0,
         experienceYears: (json['experience_years'] as num?)?.toInt() ?? 0,
-        totalFollowers: (json['total_followers'] as num?)?.toInt() ??
-            (json['followers_count'] as num?)?.toInt() ??
-            0,
+        // `follower_count` first: that is the spelling the backend already
+        // uses on `/partner/followed/`, so it is the one the provider
+        // endpoint will most likely adopt when it starts sending the field.
+        totalFollowers: (json['follower_count'] as num?)?.toInt() ??
+            (json['total_followers'] as num?)?.toInt() ??
+            (json['followers_count'] as num?)?.toInt(),
       );
 }

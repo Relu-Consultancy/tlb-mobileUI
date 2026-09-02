@@ -142,14 +142,20 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${_formatCount(_provider?.totalFollowers ?? 0)} Followers',
-                      style: GoogleFonts.poppins(
-                        fontSize: Responsive.sp(context, 13),
-                        color: Colors.grey.shade500,
+                    // Only when the API actually sent a count. It does not
+                    // today, and a hard-coded "0 Followers" beside a
+                    // "Following" button reads as a bug rather than as an
+                    // unpopulated field.
+                    if (_provider?.totalFollowers != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        '${_formatCount(_provider!.totalFollowers!)} Followers',
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 13),
+                          color: Colors.grey.shade500,
+                        ),
                       ),
-                    ),
+                    ],
 
                     const SizedBox(height: 18),
                     Divider(
