@@ -440,7 +440,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     ),
 
                     // ── Terms & Conditions ──────────────────────────────
+                    // Leading spacer, like the FAQs row below: trailing ones
+                    // stack up into a double gap when the section that would
+                    // have followed is absent.
                     if (_hasTerms) ...[
+                      const SizedBox(height: 32),
                       DetailTermsRow(
                         onTap: () => _showTermsConditionsBottomSheet(context),
                       ),
