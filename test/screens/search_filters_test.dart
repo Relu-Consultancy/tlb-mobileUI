@@ -87,6 +87,25 @@ void main() {
       expect(find.byIcon(Icons.close), findsNothing);
     });
 
+    // No HTTP is available in a widget test, so every taxonomy endpoint
+    // fails — the same state a user sees offline. The section must say so and
+    // offer a retry rather than rendering an empty "Category" heading, and it
+    // must not take the rest of the sheet down with it.
+    testWidgets('TC_S_SF_007 — an unloadable taxonomy degrades to a retry',
+        (tester) async {
+      await _openSearch(tester);
+      await _openFilters(tester);
+
+      expect(find.text("Categories couldn't be loaded"), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
+      // A heading with no chips under it would read as a broken filter.
+      expect(find.text('Category'), findsNothing);
+      expect(find.text('Subcategory'), findsNothing);
+      // Everything else still works.
+      expect(find.text('Age Group'), findsOneWidget);
+      expect(find.text('Apply Filters'), findsOneWidget);
+    });
+
     // The Location section (City / Area dropdowns) was removed from the
     // sheet — it was never wired to the search results in the first place.
     testWidgets('TC_S_SF_006 — the Location section is gone', (tester) async {

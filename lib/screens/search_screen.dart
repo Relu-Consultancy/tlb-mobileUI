@@ -4,6 +4,7 @@ import '../core/listing_schedule.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
+import '../providers/listing_taxonomy_state.dart';
 import '../providers/location_state.dart';
 import '../widgets/empty_location_widget.dart';
 import '../models/event_model.dart';
@@ -15,10 +16,8 @@ import 'class_detail_screen.dart';
 import 'program_detail_screen.dart';
 import 'venue_detail_screen.dart';
 
-enum _EntityType { event, klass, program, venue }
-
 class _SearchItem {
-  final _EntityType type;
+  final ListingKind type;
   final EventModel eventModel;
   final String title;
   final String subtitle;
@@ -33,17 +32,17 @@ class _SearchItem {
   });
 
   Color get typeColor => switch (type) {
-    _EntityType.event   => const Color(0xFF3949AB),
-    _EntityType.klass   => const Color(0xFF7B2FBE),
-    _EntityType.program => const Color(0xFF0F9D58),
-    _EntityType.venue   => const Color(0xFFE53935),
+    ListingKind.event   => const Color(0xFF3949AB),
+    ListingKind.klass   => const Color(0xFF7B2FBE),
+    ListingKind.program => const Color(0xFF0F9D58),
+    ListingKind.venue   => const Color(0xFFE53935),
   };
 
   String get typeLabel => switch (type) {
-    _EntityType.event   => 'Event',
-    _EntityType.klass   => 'Class',
-    _EntityType.program => 'Program',
-    _EntityType.venue   => 'Venue',
+    ListingKind.event   => 'Event',
+    ListingKind.klass   => 'Class',
+    ListingKind.program => 'Program',
+    ListingKind.venue   => 'Venue',
   };
 }
 
@@ -68,6 +67,23 @@ class _SearchScreenState extends State<SearchScreen> {
   final Set<String> _ageGroupSelected = {};
   final Set<String> _dateSelected = {};
 
+  // Category filter — unlike the three above, this one IS sent to the APIs.
+  TaxonomyNode? _selectedCategory;
+  TaxonomyNode? _selectedSubcategory;
+
+  /// Incremented per dispatched search so a slower earlier request cannot
+  /// overwrite a newer one. Applying a filter makes the *new* request the
+  /// fast one — it queries only the sources that can express the filter — so
+  /// without this the older unfiltered response routinely lands last and
+  /// replaces the filtered results the user just asked for.
+  int _searchGeneration = 0;
+
+  /// True when a filter that narrows the request itself is set, as opposed to
+  /// the decorative ones. Such a filter is meaningful on its own, so it makes
+  /// a search worth running even with an empty query.
+  bool get _hasServerFilter =>
+      _selectedCategory != null || _selectedSubcategory != null;
+
   final List<String> _chips = ['All', 'Events', 'Classes', 'Programs', 'Venues'];
 
   static const _ageGroups  = ['0-3 years', '3-5 years', '6-8 years', '9-12 years', '13-16 years'];
@@ -76,8 +92,17 @@ class _SearchScreenState extends State<SearchScreen> {
 
   List<_SearchItem> get _filteredResults {
     if (_selectedChip == 0) return _allResults;
-    final target = const [null, _EntityType.event, _EntityType.klass, _EntityType.program, _EntityType.venue][_selectedChip];
+    final target = const [null, ListingKind.event, ListingKind.klass, ListingKind.program, ListingKind.venue][_selectedChip];
     return _allResults.where((r) => r.type == target).toList();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Warm the category vocabulary so the filter sheet has something to show
+    // the first time it is opened. Never throws, and the sheet copes with it
+    // still being in flight, so this is deliberately not awaited.
+    ListingTaxonomyState.load();
   }
 
   @override
@@ -93,7 +118,11 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<void> _doSearch(String q) async {
-    if (q.isEmpty) {
+    // A category on its own is a perfectly good query ("show me everything in
+    // Performing Arts"), so only an empty box AND no server-side filter means
+    // there is nothing to ask for.
+    final generation = ++_searchGeneration;
+    if (q.isEmpty && !_hasServerFilter) {
       setState(() { _query = ''; _allResults = []; _loading = false; _hasError = false; });
       return;
     }
@@ -111,10 +140,18 @@ class _SearchScreenState extends State<SearchScreen> {
       _fetchVenueItems(q),
     ]);
 
-    if (!mounted) return;
+    // A newer search was dispatched while this one was in flight — its
+    // results are the ones the user is waiting for, so drop these.
+    if (!mounted || generation != _searchGeneration) return;
 
+    // The denominator is the sources the filter actually left in play, not
+    // all four. A source excluded by the category filter returns an empty
+    // list rather than null, so counting it as a success would mask the case
+    // where every source that COULD have answered failed — showing a bare
+    // "no results" for what was really a network failure.
+    final inPlay = ListingKind.values.where(_sourceMatchesFilter).length;
     final failureCount = lists.where((l) => l == null).length;
-    if (failureCount == lists.length) {
+    if (inPlay > 0 && failureCount == inPlay) {
       // Nothing could be reached at all — genuine connectivity problem.
       setState(() { _loading = false; _hasError = true; });
       return;
@@ -146,11 +183,33 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() { _allResults = relevant; _loading = false; });
   }
 
+  /// Whether the active category filter can be expressed to [kind] at all.
+  ///
+  /// A source that does not offer the selected category would otherwise be
+  /// asked for it unfiltered and return everything, which reads as the filter
+  /// having been ignored. Excluding it is the honest answer: that listing type
+  /// genuinely has nothing under this category.
+  bool _sourceMatchesFilter(ListingKind kind) {
+    final sub = _selectedSubcategory;
+    if (sub != null) return sub.has(kind);
+    final cat = _selectedCategory;
+    if (cat != null) return cat.has(kind);
+    return true;
+  }
+
   /// Returns the mapped items for a source, or `null` if that source's request
   /// failed — so the caller can distinguish "no matches" from "couldn't fetch".
   Future<List<_SearchItem>?> _fetchEventItems(String q) async {
+    if (!_sourceMatchesFilter(ListingKind.event)) return const [];
     try {
-      final page = await EventsListingService.fetchEvents(search: q, pageSize: 10);
+      final page = await EventsListingService.fetchEvents(
+        search: q.isEmpty ? null : q,
+        // Events match on the exact category NAME — a slug or an id returns
+        // zero rows rather than an error.
+        category: _selectedCategory?.names[ListingKind.event],
+        subcategory: _selectedSubcategory?.names[ListingKind.event],
+        pageSize: 10,
+      );
       return [
         // Same reasoning as every other events list: a finished event has
         // nothing left to book, tapping in from a search result is as much
@@ -158,7 +217,7 @@ class _SearchScreenState extends State<SearchScreen> {
         for (final e in page.results)
           if (!ListingSchedule.hasEnded(e.endDatetime))
             _SearchItem(
-              type: _EntityType.event,
+              type: ListingKind.event,
               eventModel: EventModel(
                 id: e.id,
                 title: e.title,
@@ -178,8 +237,16 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<List<_SearchItem>?> _fetchClassItems(String q) async {
+    if (!_sourceMatchesFilter(ListingKind.klass)) return const [];
     try {
-      final page = await ClassesListingService.fetchClasses(search: q, pageSize: 10);
+      final page = await ClassesListingService.fetchClasses(
+        search: q.isEmpty ? null : q,
+        // Classes match on the exact name too — and on the FULL name, not the
+        // truncated display label the category screens show.
+        category: _selectedCategory?.names[ListingKind.klass],
+        subcategory: _selectedSubcategory?.names[ListingKind.klass],
+        pageSize: 10,
+      );
       return [
         // Classes have no end date to filter by (open-ended recurring
         // schedule) — is_paused is the partner-controlled "not currently
@@ -187,7 +254,7 @@ class _SearchScreenState extends State<SearchScreen> {
         for (final c in page.results)
           if (!c.isPaused)
             _SearchItem(
-              type: _EntityType.klass,
+              type: ListingKind.klass,
               eventModel: EventModel(
                 id: c.id,
                 title: c.title,
@@ -207,15 +274,23 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<List<_SearchItem>?> _fetchProgramItems(String q) async {
+    if (!_sourceMatchesFilter(ListingKind.program)) return const [];
     try {
-      final page = await ProgramsListingService.fetchPrograms(search: q, pageSize: 10);
+      final page = await ProgramsListingService.fetchPrograms(
+        search: q.isEmpty ? null : q,
+        // Programs are the mirror image of events/classes: the backend
+        // ignores the name and honours only the integer id.
+        categoryId: _selectedCategory?.ids[ListingKind.program],
+        subcategoryId: _selectedSubcategory?.ids[ListingKind.program],
+        pageSize: 10,
+      );
       return [
         // Same reasoning as events: a finished program (every batch over)
         // has nothing left to book.
         for (final p in page.results)
           if (!ListingSchedule.hasEnded(p.endDatetime))
             _SearchItem(
-              type: _EntityType.program,
+              type: ListingKind.program,
               eventModel: EventModel(
                 id: p.id,
                 title: p.title,
@@ -235,12 +310,19 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<List<_SearchItem>?> _fetchVenueItems(String q) async {
+    if (!_sourceMatchesFilter(ListingKind.venue)) return const [];
     try {
-      final page = await EventsListingService.fetchVenues(search: q, pageSize: 10);
+      final page = await EventsListingService.fetchVenues(
+        search: q.isEmpty ? null : q,
+        // Venues filter by integer id at both levels, like programs.
+        categoryId: _selectedCategory?.ids[ListingKind.venue],
+        subcategoryId: _selectedSubcategory?.ids[ListingKind.venue],
+        pageSize: 10,
+      );
       return [
         for (final v in page.results)
           _SearchItem(
-            type: _EntityType.venue,
+            type: ListingKind.venue,
             eventModel: EventModel(
               id: v.id,
               title: v.title,
@@ -260,10 +342,10 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _onTap(_SearchItem item) {
     final Widget screen = switch (item.type) {
-      _EntityType.event   => EventDetailScreen(event: item.eventModel),
-      _EntityType.klass   => ClassDetailScreen(event: item.eventModel),
-      _EntityType.program => ProgramDetailScreen(event: item.eventModel),
-      _EntityType.venue   => VenueDetailScreen(event: item.eventModel),
+      ListingKind.event   => EventDetailScreen(event: item.eventModel),
+      ListingKind.klass   => ClassDetailScreen(event: item.eventModel),
+      ListingKind.program => ProgramDetailScreen(event: item.eventModel),
+      ListingKind.venue   => VenueDetailScreen(event: item.eventModel),
     };
     Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
   }
@@ -386,6 +468,32 @@ class _SearchScreenState extends State<SearchScreen> {
         remove: () => setState(() => _selectedChip = 0),
       ));
     }
+    // Category before subcategory, matching the order they were picked in.
+    final cat = _selectedCategory;
+    if (cat != null) {
+      out.add((
+        label: cat.label,
+        // Clearing the category clears the subcategory with it — a subcategory
+        // is only meaningful under its parent.
+        remove: () {
+          setState(() {
+            _selectedCategory = null;
+            _selectedSubcategory = null;
+          });
+          _rerunSearch();
+        },
+      ));
+    }
+    final sub = _selectedSubcategory;
+    if (sub != null) {
+      out.add((
+        label: sub.label,
+        remove: () {
+          setState(() => _selectedSubcategory = null);
+          _rerunSearch();
+        },
+      ));
+    }
     for (final age in _ageGroupSelected.toList()) {
       out.add((
         label: age,
@@ -408,12 +516,28 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _clearAllFilters() {
-    setState(() {
-      _selectedChip = 0;
-      _ageGroupSelected.clear();
-      _dateSelected.clear();
-      _selectedMode = null;
-    });
+    final hadServerFilter = _hasServerFilter;
+    setState(_resetFilters);
+    // Only the category filter reaches the API, so only it needs a refetch.
+    if (hadServerFilter) _rerunSearch();
+  }
+
+  /// The single definition of "no filters", so the chip row's Clear all and
+  /// the sheet's own Clear All button cannot drift apart.
+  void _resetFilters() {
+    _selectedChip = 0;
+    _ageGroupSelected.clear();
+    _dateSelected.clear();
+    _selectedMode = null;
+    _selectedCategory = null;
+    _selectedSubcategory = null;
+  }
+
+  /// Re-queries with the current text and filters. Used whenever a
+  /// server-side filter changes outside the debounced text field.
+  void _rerunSearch() {
+    _debounce?.cancel();
+    _doSearch(_searchController.text.trim());
   }
 
   /// The selected filters, shown under the search bar so what is narrowing the
@@ -548,6 +672,231 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  /// Category + subcategory picker, built from the merged taxonomy of all four
+  /// listing types.
+  ///
+  /// Renders nothing at all when the taxonomy is unavailable (every metadata
+  /// endpoint failed, or we are offline) — an empty "Category" heading would
+  /// read as a broken filter rather than an absent one.
+  Widget _buildCategorySection(
+    BuildContext sheetContext,
+    StateSetter setModalState,
+  ) {
+    // The taxonomy is usually still in flight when the sheet is opened right
+    // after launch, so the section has to repaint when it lands rather than
+    // leaving a spinner up until the sheet is reopened.
+    return ValueListenableBuilder<int>(
+      valueListenable: ListingTaxonomyState.version,
+      builder: (_, __, ___) => _buildCategoryBody(sheetContext, setModalState),
+    );
+  }
+
+  Widget _buildCategoryBody(
+    BuildContext sheetContext,
+    StateSetter setModalState,
+  ) {
+    if (ListingTaxonomyState.isLoading && !ListingTaxonomyState.isLoaded) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+        child: Row(
+          children: [
+            _sectionHeading('Category'),
+            const SizedBox(width: 12),
+            const SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.primaryLight,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final categories = ListingTaxonomyState.categories;
+    if (categories.isEmpty) {
+      // Every metadata endpoint failed. The repo's habit elsewhere is to fall
+      // back to DummyData, but those entries carry labels and no ids — they
+      // could never be resolved for programs or venues, so the filter would
+      // look like it works and quietly do nothing. Say so and offer a retry.
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                "Categories couldn't be loaded",
+                style: GoogleFonts.poppins(
+                  fontSize: Responsive.sp(context, 13),
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () async {
+                await ListingTaxonomyState.load(force: true);
+                // The sheet can be dismissed mid-retry; setModalState on a
+                // torn-down StatefulBuilder throws. The ValueListenableBuilder
+                // above repaints it anyway if it survived, so this is only a
+                // nudge for the case where `version` did not change.
+                if (sheetContext.mounted) setModalState(() {});
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Text(
+                  'Retry',
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 13),
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.seeAllBlue,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final selected = _selectedCategory;
+    final subcategories = selected?.children ?? const <TaxonomyNode>[];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _sectionHeading('Category'),
+              ..._buildGroupedChips(
+                nodes: categories,
+                isSelected: (cat) => selected == cat,
+                onTap: (cat) => setModalState(() {
+                  _selectedCategory = selected == cat ? null : cat;
+                  // The old subcategory belongs to the old parent.
+                  _selectedSubcategory = null;
+                }),
+              ),
+            ],
+          ),
+        ),
+        // Subcategories only exist under a chosen category, so the section
+        // appears with the parent rather than sitting there empty.
+        if (selected != null && subcategories.isNotEmpty) ...[
+          const Divider(height: 1, color: Color(0xFFEEEEEE)),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _sectionHeading('Subcategory'),
+                // Grouped too: the two cross-type categories carry
+                // near-duplicate subcategories from each backend ("Singing"
+                // from events beside "Singing / Vocal Music" from classes),
+                // which read as synonyms but return disjoint results.
+                ..._buildGroupedChips(
+                  nodes: subcategories,
+                  isSelected: (sub) => _selectedSubcategory == sub,
+                  onTap: (sub) => setModalState(() {
+                    _selectedSubcategory =
+                        _selectedSubcategory == sub ? null : sub;
+                  }),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  /// Chips grouped by the listing types that actually offer them.
+  ///
+  /// The four taxonomies barely overlap — of 38 merged categories only two
+  /// ("Performing Arts", "Sports & Fitness") exist in more than one listing
+  /// type. A flat alphabetical list therefore files near-synonyms from
+  /// different backends next to each other with nothing to separate them:
+  /// "Arts & Crafts" (events), "Creative Arts" (classes), "Design &
+  /// Innovation" (programs) and "Creative & DIY" (venues) are four different
+  /// chips that a parent reads as one idea. Grouping states the listing type
+  /// once per group instead of annotating 36 chips individually, and makes
+  /// "which categories does each type offer" answerable at a glance.
+  List<Widget> _buildGroupedChips({
+    required List<TaxonomyNode> nodes,
+    required bool Function(TaxonomyNode) isSelected,
+    required void Function(TaxonomyNode) onTap,
+  }) {
+    // Grouped by the exact set of sources, so a shared node is listed once
+    // under a heading naming every type it covers rather than duplicated.
+    final groups = <String, List<TaxonomyNode>>{};
+    for (final node in nodes) {
+      final key = ListingKind.values
+          .where(node.has)
+          .map(_kindLabel)
+          .join(' · ');
+      if (key.isEmpty) continue;
+      groups.putIfAbsent(key, () => []).add(node);
+    }
+
+    // Shared groups first (they cover the most ground), then by listing-type
+    // order, so the sequence is stable between opens.
+    final keys = groups.keys.toList()
+      ..sort((a, b) {
+        final spanA = a.split(' · ').length;
+        final spanB = b.split(' · ').length;
+        if (spanA != spanB) return spanB.compareTo(spanA);
+        return a.compareTo(b);
+      });
+
+    return [
+      for (final key in keys) ...[
+        const SizedBox(height: 12),
+        Text(
+          key,
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 11.5),
+            fontWeight: FontWeight.w600,
+            color: Colors.grey.shade600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: groups[key]!
+              .map((node) => _buildFilterChip(
+                    label: node.label,
+                    isSelected: isSelected(node),
+                    onTap: () => onTap(node),
+                  ))
+              .toList(),
+        ),
+      ],
+    ];
+  }
+
+  static String _kindLabel(ListingKind kind) => switch (kind) {
+        ListingKind.event => 'Events',
+        ListingKind.klass => 'Classes',
+        ListingKind.program => 'Programs',
+        ListingKind.venue => 'Venues',
+      };
+
+  /// The sheet's section heading style, shared by every section.
+  Widget _sectionHeading(String text) => Text(
+        text,
+        style: GoogleFonts.poppins(
+          fontSize: Responsive.sp(context, 14),
+          fontWeight: FontWeight.w500,
+          color: AppColors.textPrimary,
+        ),
+      );
+
   Widget _buildBody() {
     // Searching an unserviced city returns nothing, and "No results for X"
     // blames the query for it. Say what is actually wrong, and offer the fix.
@@ -555,7 +904,9 @@ class _SearchScreenState extends State<SearchScreen> {
         LocationState().selectedCity.value)) {
       return const EmptyLocationWidget(title: 'Nothing to search here yet');
     }
-    if (_query.isEmpty) {
+    // A category filter is a query in its own right, so the prompt only
+    // belongs here when there is genuinely nothing to show results for.
+    if (_query.isEmpty && !_hasServerFilter) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -618,7 +969,9 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
               const SizedBox(height: 20),
               GestureDetector(
-                onTap: () => _doSearch(_query),
+                // Reads the live text and current filters, not the stale
+                // _query, so a retry after a filter change re-issues both.
+                onTap: _rerunSearch,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
                   decoration: BoxDecoration(
@@ -649,8 +1002,13 @@ class _SearchScreenState extends State<SearchScreen> {
           children: [
             Icon(Icons.search_off_rounded, size: 56, color: Colors.grey.shade300),
             const SizedBox(height: 16),
+            // With a filter on, an empty list is at least as likely to be the
+            // filter's doing as the query's — pointing at the search term
+            // would send the user to fix the wrong thing.
             Text(
-              'No results for "$_query"',
+              _query.isEmpty
+                  ? 'No results for these filters'
+                  : 'No results for "$_query"',
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 15),
                 fontWeight: FontWeight.w500,
@@ -659,7 +1017,9 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Try a different search term',
+              _hasServerFilter
+                  ? 'Try removing a filter'
+                  : 'Try a different search term',
               style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey),
             ),
           ],
@@ -748,6 +1108,14 @@ class _SearchScreenState extends State<SearchScreen> {
       );
 
   void _showFiltersBottomSheet(BuildContext context) {
+    // Apply, the X and a swipe-dismiss all land in the same completion
+    // callback and cannot be told apart, so rather than hanging the refetch
+    // off Apply alone, compare the category selection across the sheet's whole
+    // lifetime and requery whenever it actually moved. Clearing the category
+    // and swiping away then refreshes the results just like Apply does.
+    final categoryBefore = _selectedCategory;
+    final subcategoryBefore = _selectedSubcategory;
+
     // The sheet mutates this screen's state directly through setModalState,
     // which rebuilds only the sheet. Without this the results and the active
     // filter row kept the pre-Apply state until something else rebuilt them.
@@ -815,6 +1183,9 @@ class _SearchScreenState extends State<SearchScreen> {
                         const Divider(height: 1, color: Color(0xFFEEEEEE)),
                         // ── Listing type ─────────────────────────────────────
                         _buildTypeSection(setModalState),
+                        const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                        // ── Category / Subcategory ───────────────────────────
+                        _buildCategorySection(context, setModalState),
                         const Divider(height: 1, color: Color(0xFFEEEEEE)),
                         // ── Age Group ────────────────────────────────────────
                         Padding(
@@ -893,12 +1264,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: () => setModalState(() {
-                            _selectedChip = 0;
-                            _ageGroupSelected.clear();
-                            _dateSelected.clear();
-                            _selectedMode = null;
-                          }),
+                          onPressed: () => setModalState(_resetFilters),
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: Color(0xFFE0E0E0)),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -930,7 +1296,12 @@ class _SearchScreenState extends State<SearchScreen> {
         },
       ),
     ).whenComplete(() {
-      if (mounted) setState(() {});
+      if (!mounted) return;
+      setState(() {});
+      if (_selectedCategory != categoryBefore ||
+          _selectedSubcategory != subcategoryBefore) {
+        _rerunSearch();
+      }
     });
   }
 

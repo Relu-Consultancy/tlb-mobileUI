@@ -20,38 +20,29 @@ class ClassesListingService {
           )
           .timeout(_timeout);
 
-      final body = jsonDecode(res.body) as Map<String, dynamic>;
-      
-      // The class categories API returns a plain list or a wrapped list? 
-      // Based on docs: Returns categories with nested subcategories. 
-      // Wait, doc says: 
-      // [ { "id": 1, "name": "Music" ... } ] 
-      // But standard API might wrap it like { "success": true, "data": [...] }
-      // I'll check both.
-      if (body.containsKey('success') && body['success'] == true) {
+      // Decoded as `dynamic` on purpose: this endpoint has been seen both
+      // bare (`[ {...} ]`) and wrapped (`{success, data}`), and casting to a
+      // Map up front would make the bare case an unreachable branch.
+      final dynamic body = jsonDecode(res.body);
+
+      if (body is Map && body['success'] == true) {
         return (body['data'] as List)
             .map((e) => ApiCategory.fromJson(e as Map<String, dynamic>))
             .toList();
-      } else if (body is List) {
-        return (body as List)
+      }
+      if (body is List) {
+        return body
             .map((e) => ApiCategory.fromJson(e as Map<String, dynamic>))
             .toList();
       }
-      
-      throw Exception(body['error'] ?? 'Failed to load class categories');
+
+      throw Exception(
+        (body is Map ? body['error'] : null) ?? 'Failed to load class categories',
+      );
     } on SocketException {
       throw Exception('Cannot reach server. Check your connection.');
     } on TimeoutException {
       throw Exception('Request timed out. Please try again.');
-    } catch (e) {
-      // In case it was a raw list at root
-      try {
-        final rawBody = jsonDecode(e.toString());
-        if (rawBody is List) {
-          return rawBody.map((e) => ApiCategory.fromJson(e as Map<String, dynamic>)).toList();
-        }
-      } catch (_) {}
-      rethrow;
     }
   }
 

@@ -159,6 +159,7 @@ class EventsListingService {
 
   static Future<ApiVenuesPage> fetchVenues({
     int? categoryId,
+    int? subcategoryId,
     String? city,
     String? area,
     String? locationType,
@@ -174,6 +175,9 @@ class EventsListingService {
         'page': page.toString(),
         'page_size': pageSize.toString(),
         if (categoryId != null) 'category_id': categoryId.toString(),
+        // Venues filter by integer id, like programs — the name form is
+        // ignored (`?subcategory=Soft Play` returns the unfiltered count).
+        if (subcategoryId != null) 'subcategory_id': subcategoryId.toString(),
         if (city != null) 'city': city,
         if (area != null) 'area': area,
         if (locationType != null) 'location_type': locationType,
