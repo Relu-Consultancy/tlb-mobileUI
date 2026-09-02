@@ -129,6 +129,169 @@ class DetailRowIcon extends StatelessWidget {
   }
 }
 
+/// The address row near the top of a detail screen: a pin, the listing's full
+/// street address, and a button that routes to it from wherever the user is.
+///
+/// This row replaced the "Location" map card. That card was the only place the
+/// full street address appeared and the only way to reach directions, so the
+/// row now carries both. The address is clamped to one line so the row stays
+/// the same height as the date/time row beneath it, with "See more" sitting
+/// inline after the ellipsis — putting the toggle on its own line would make
+/// this row two lines tall and break that symmetry.
+class DetailLocationRow extends StatefulWidget {
+  /// Full street address when the API returned one, else the area/city
+  /// summary the row used to show on its own.
+  final String text;
+
+  /// Leading glyph — a pin for physical listings, a camera for online ones.
+  final IconData icon;
+
+  /// Route-to-listing action, wired to the same handler the map card's
+  /// "Get Direction" button used. Null for online listings, which have
+  /// nowhere to navigate to; the button is then omitted rather than shown
+  /// inert.
+  final VoidCallback? onNavigate;
+
+  const DetailLocationRow({
+    super.key,
+    required this.text,
+    this.icon = Icons.location_on_outlined,
+    this.onNavigate,
+  });
+
+  @override
+  State<DetailLocationRow> createState() => _DetailLocationRowState();
+}
+
+class _DetailLocationRowState extends State<DetailLocationRow> {
+  bool _expanded = false;
+
+  Widget _toggle(BuildContext context, String label) => GestureDetector(
+        onTap: () => setState(() => _expanded = !_expanded),
+        behavior: HitTestBehavior.opaque,
+        child: Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 12),
+            fontWeight: FontWeight.w600,
+            color: AppColors.blue,
+          ),
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = GoogleFonts.poppins(
+      fontSize: Responsive.sp(context, 13),
+      color: AppColors.textSecondary,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        // Collapsed, the row is a single line and centres exactly like the
+        // date/time row below it. Expanded, the pin and the button ride up to
+        // the first line instead of floating beside a paragraph.
+        crossAxisAlignment:
+            _expanded ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        children: [
+          DetailRowIcon(widget.icon),
+          const SizedBox(width: 12),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Measured rather than assumed: "See more" must appear only
+                // when the address genuinely does not fit the width it has.
+                final overflows = (TextPainter(
+                  text: TextSpan(text: widget.text, style: textStyle),
+                  maxLines: 1,
+                  textDirection: TextDirection.ltr,
+                )..layout(maxWidth: constraints.maxWidth))
+                    .didExceedMaxLines;
+
+                if (_expanded) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(widget.text, style: textStyle),
+                      const SizedBox(height: 2),
+                      _toggle(context, 'See less'),
+                    ],
+                  );
+                }
+                if (!overflows) return Text(widget.text, style: textStyle);
+                return Row(
+                  children: [
+                    // Flexible, not Expanded: the address gives up width to
+                    // the toggle so "See more" always lands right after the
+                    // ellipsis on the same line.
+                    Flexible(
+                      child: Text(
+                        widget.text,
+                        style: textStyle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    _toggle(context, 'See more'),
+                  ],
+                );
+              },
+            ),
+          ),
+          if (widget.onNavigate != null) ...[
+            const SizedBox(width: 8),
+            _NavigateButton(onTap: widget.onNavigate!),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Round "navigate to this address" button that opens the map from the user's
+/// position to the listing.
+///
+/// Sized to exactly match the leading pin (36px) so the two ends of the row
+/// balance; the hit area is widened to 44px without growing the row's height,
+/// which would otherwise push this row out of step with the date/time row.
+class _NavigateButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _NavigateButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Get directions',
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.seeAllBlue.withOpacity(0.10),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              // Material's navigation arrow — the same up-right paper-plane
+              // glyph as the reference design.
+              Icons.near_me,
+              size: 20,
+              color: AppColors.seeAllBlue,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// White "About" card with a slim black border. Clamps the body to 3 lines
 /// and reveals the rest behind a "See more" / "See less" toggle when it
 /// overflows.
@@ -313,122 +476,6 @@ class DetailGallery extends StatelessWidget {
   }
 }
 
-/// "Location" card with a stylised map-art background, the venue name, an
-/// optional note, and a gold "Get Direction" button — matches the reference.
-class DetailDirectionsCard extends StatelessWidget {
-  final String locationText;
-  final String? note;
-  final VoidCallback onGetDirection;
-
-  const DetailDirectionsCard({
-    super.key,
-    required this.locationText,
-    this.note,
-    required this.onGetDirection,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const DetailSectionTitle('Location'),
-        const SizedBox(height: 12),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          height: Responsive.h(context, 190, min: 160),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: kCardBorder, width: 0.7),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              CustomPaint(painter: _MapArtPainter()),
-              // Centre pin.
-              const Align(
-                alignment: Alignment(0.35, -0.25),
-                child: Icon(Icons.location_on, size: 38, color: Color(0xFFD32F2F)),
-              ),
-              // Left-to-right dark gradient for text legibility.
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Colors.black.withOpacity(0.82),
-                      Colors.black.withOpacity(0.35),
-                      Colors.transparent,
-                    ],
-                    stops: const [0.0, 0.5, 1.0],
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 16,
-                right: 80,
-                top: 18,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      locationText,
-                      style: GoogleFonts.poppins(
-                        fontSize: Responsive.sp(context, 14),
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                        height: 1.3,
-                      ),
-                    ),
-                    if ((note ?? '').isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        note!,
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 11.5),
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.primaryLight,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              Positioned(
-                left: 16,
-                bottom: 16,
-                child: ElevatedButton.icon(
-                  onPressed: onGetDirection,
-                  icon: const Icon(Icons.directions, size: 16),
-                  label: Text(
-                    'Get Direction',
-                    style: GoogleFonts.poppins(
-                      fontSize: Responsive.sp(context, 12.5),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryLight,
-                    foregroundColor: kDetailText,
-                    elevation: 0,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(22),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 /// Simple "Terms & Conditions" row card with a slim black border.
 class DetailTermsRow extends StatelessWidget {
   final VoidCallback onTap;
@@ -566,150 +613,4 @@ void showListingFaqsSheet(
       ),
     ),
   );
-}
-
-/// Paints a detailed stylised street-map background — land, water, parks,
-/// city blocks, a layered road network (with casings), a highlighted route,
-/// and POI dots. Deterministic so it doesn't flicker on repaint.
-class _MapArtPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width, h = size.height;
-
-    Rect rel(double l, double t, double rw, double rh) =>
-        Rect.fromLTWH(l * w, t * h, rw * w, rh * h);
-
-    // ── Land base ──
-    canvas.drawRect(Rect.fromLTWH(0, 0, w, h),
-        Paint()..color = const Color(0xFFEEEBE3));
-
-    // ── Water: a bay in the top-right + a thin river feeding it ──
-    final water = Paint()..color = const Color(0xFFA9C6E2);
-    final bay = Path()
-      ..moveTo(w * 0.70, 0)
-      ..lineTo(w, 0)
-      ..lineTo(w, h * 0.30)
-      ..quadraticBezierTo(w * 0.88, h * 0.26, w * 0.82, h * 0.12)
-      ..quadraticBezierTo(w * 0.78, h * 0.04, w * 0.70, 0)
-      ..close();
-    canvas.drawPath(bay, water);
-    canvas.drawPath(
-      Path()
-        ..moveTo(w * 0.80, h * 0.16)
-        ..quadraticBezierTo(w * 0.66, h * 0.30, w * 0.60, h * 0.5)
-        ..quadraticBezierTo(w * 0.56, h * 0.7, w * 0.46, h),
-      Paint()
-        ..color = const Color(0xFFA9C6E2)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 7
-        ..strokeCap = StrokeCap.round,
-    );
-
-    // ── Parks (green) ──
-    final park = Paint()..color = const Color(0xFFC4DCA4);
-    canvas.drawRRect(
-        RRect.fromRectAndRadius(rel(0.03, 0.60, 0.24, 0.30), const Radius.circular(7)), park);
-    canvas.drawRRect(
-        RRect.fromRectAndRadius(rel(0.62, 0.66, 0.22, 0.26), const Radius.circular(7)), park);
-
-    // ── City blocks (buildings) in a loose grid, skipping water/parks ──
-    final block = Paint()..color = const Color(0xFFE2DED3);
-    final blockEdge = Paint()
-      ..color = const Color(0xFFD2CCBE)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-    const cols = [0.05, 0.27, 0.49];
-    const rows = [0.07, 0.26, 0.45];
-    for (final cx in cols) {
-      for (final ry in rows) {
-        // Skip the bay region (top-right) — handled by water.
-        if (cx >= 0.49 && ry <= 0.26) continue;
-        final r = RRect.fromRectAndRadius(
-            rel(cx, ry, 0.17, 0.13), const Radius.circular(3));
-        canvas.drawRRect(r, block);
-        canvas.drawRRect(r, blockEdge);
-      }
-    }
-    // A couple of blocks on the right-lower land.
-    for (final ry in [0.45, 0.62]) {
-      final r = RRect.fromRectAndRadius(
-          rel(0.70, ry, 0.17, 0.12), const Radius.circular(3));
-      canvas.drawRRect(r, block);
-      canvas.drawRRect(r, blockEdge);
-    }
-
-    // ── Roads — draw a darker casing first, then the lighter fill on top ──
-    void road(List<Offset> pts, double width, Color fill) {
-      final path = Path()..moveTo(pts.first.dx, pts.first.dy);
-      for (final p in pts.skip(1)) {
-        path.lineTo(p.dx, p.dy);
-      }
-      canvas.drawPath(
-        path,
-        Paint()
-          ..color = const Color(0xFFCDC8BC)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = width + 3
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round,
-      );
-      canvas.drawPath(
-        path,
-        Paint()
-          ..color = fill
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = width
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round,
-      );
-    }
-
-    // Minor grid roads (thin, white).
-    for (final y in [0.20, 0.42, 0.62, 0.84]) {
-      road([Offset(0, y * h), Offset(w, (y - 0.03) * h)], 3.5, Colors.white);
-    }
-    for (final x in [0.22, 0.46, 0.70]) {
-      road([Offset(x * w, 0), Offset((x - 0.04) * w, h)], 3.5, Colors.white);
-    }
-
-    // Major arterials (wider, white with casing).
-    road([Offset(0, h * 0.50), Offset(w * 0.5, h * 0.46), Offset(w, h * 0.40)],
-        9, Colors.white);
-    road([Offset(w * 0.44, 0), Offset(w * 0.40, h * 0.5), Offset(w * 0.36, h)],
-        9, Colors.white);
-    // A warm avenue running diagonally.
-    road([Offset(0, h * 0.94), Offset(w * 0.5, h * 0.5), Offset(w, h * 0.08)],
-        6, const Color(0xFFF6D690));
-
-    // ── Highlighted route towards the pin (blue) ──
-    final routePath = Path()
-      ..moveTo(w * 0.12, h * 0.90)
-      ..lineTo(w * 0.32, h * 0.64)
-      ..lineTo(w * 0.52, h * 0.52)
-      ..lineTo(w * 0.63, h * 0.40);
-    canvas.drawPath(
-      routePath,
-      Paint()
-        ..color = const Color(0xFF4C8DF6)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 4.5
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round,
-    );
-
-    // ── POI dots ──
-    final poi = Paint()..color = const Color(0xFFEF7C57);
-    for (final o in [
-      Offset(w * 0.18, h * 0.30),
-      Offset(w * 0.40, h * 0.78),
-      Offset(w * 0.78, h * 0.58),
-    ]) {
-      canvas.drawCircle(o, 3.5, poi);
-      canvas.drawCircle(
-          o, 3.5, Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 1.2);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -117,6 +117,13 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
 
   String? get _address => _detail?.address;
 
+  /// What the location row shows. Prefers the full street address — the map
+  /// card that used to carry it is gone, so this row is now its only home.
+  String get _addressText {
+    final address = _address?.trim();
+    return (address != null && address.isNotEmpty) ? address : _locationText;
+  }
+
   String? get _description => _detail?.description ?? widget.event.description;
 
   String get _coverUrl {
@@ -175,8 +182,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
       if (mounted) AppSnackBar.show(context, 'Please set your current location');
       return;
     }
-    final loc = _address ?? _locationText;
-    final destination = Uri.encodeComponent(loc);
+    final destination = Uri.encodeComponent(_addressText);
     final url = Uri.parse(
         'https://www.google.com/maps/dir/?api=1&destination=$destination');
     try {
@@ -381,25 +387,10 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                     const SizedBox(height: 20),
 
                     // ── Location ──
-                    if (_locationText.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(color: Colors.grey.shade100, shape: BoxShape.circle),
-                              child: const Icon(Icons.location_on_outlined, size: 20, color: Colors.grey),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                _locationText,
-                                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: AppColors.textSecondary),
-                              ),
-                            ),
-                          ],
-                        ),
+                    if (_addressText.isNotEmpty)
+                      DetailLocationRow(
+                        text: _addressText,
+                        onNavigate: _openDirections,
                       ),
 
                     // ── First availability slot ──
@@ -484,14 +475,6 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
 
                     const SizedBox(height: 32),
 
-                    // ── Location map ──
-                    DetailDirectionsCard(
-                      locationText: _address ?? _locationText,
-                      onGetDirection: _openDirections,
-                    ),
-
-                    const SizedBox(height: 32),
-
                     // ── Organizer ──
                     OrganizerCard(
                       listingId: widget.event.id,
@@ -502,6 +485,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                       listingType: 'venue',
                     ),
                     const SizedBox(height: 32),
+
 
                     // ── Terms & Conditions ────────────────────────────────
                     if (_hasTerms) ...[

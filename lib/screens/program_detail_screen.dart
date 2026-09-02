@@ -163,7 +163,9 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
       if (mounted) AppSnackBar.show(context, 'Please set your current location');
       return;
     }
-    final destination = Uri.encodeComponent(_locationText);
+    // The full street address, not the area/city summary: it routes to the
+    // actual door rather than the middle of the neighbourhood.
+    final destination = Uri.encodeComponent(_addressText);
     final url = Uri.parse(
         'https://www.google.com/maps/dir/?api=1&destination=$destination');
     try {
@@ -200,6 +202,17 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
   String? get _formatText {
     if (_detail == null) return null;
     return _detail!.programFormat;
+  }
+
+  bool get _isOnline => _modeText == 'online';
+
+  /// What the location row shows. Prefers the full street address — the map
+  /// card that used to carry it is gone, so this row is now its only home —
+  /// and falls back to the area/city summary (or "Online") otherwise.
+  String get _addressText {
+    if (_isOnline) return _locationText;
+    final address = _detail?.address?.trim();
+    return (address != null && address.isNotEmpty) ? address : _locationText;
   }
 
   String? get _modeText {
@@ -385,34 +398,13 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                     const SizedBox(height: 20),
 
                     // Location
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              _modeText == 'online' ? Icons.videocam_outlined : Icons.location_on_outlined,
-                              size: 20,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              _locationText,
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 13),
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    DetailLocationRow(
+                      text: _addressText,
+                      icon: _isOnline
+                          ? Icons.videocam_outlined
+                          : Icons.location_on_outlined,
+                      // Fully-online programmes have no address to route to.
+                      onNavigate: _isOnline ? null : _openDirections,
                     ),
 
                     const Padding(
@@ -528,16 +520,6 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
 
                     const SizedBox(height: 32),
 
-                    // Location map (Only if not online entirely)
-                    if (_modeText != 'online') ...[
-                      DetailDirectionsCard(
-                        locationText: _locationText,
-                        note: _detail?.address,
-                        onGetDirection: _openDirections,
-                      ),
-                      const SizedBox(height: 32),
-                    ],
-
                     // Organizer
                     OrganizerCard(
                       listingId: widget.event.id,
@@ -548,6 +530,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                     ),
 
                     const SizedBox(height: 32),
+
 
                     if (_hasTerms) ...[
                       DetailTermsRow(

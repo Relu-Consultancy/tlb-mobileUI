@@ -123,6 +123,14 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     return '$date, $startTime';
   }
 
+  /// What the location row shows. Prefers the full street address — the map
+  /// card that used to carry it is gone, so this row is now its only home —
+  /// and falls back to the area/city summary when the API has no address.
+  String get _addressText {
+    final address = _detail?.address?.trim();
+    return (address != null && address.isNotEmpty) ? address : _locationText;
+  }
+
   String? get _description => _detail?.description ?? widget.event.description;
 
   String get _coverUrl => _detail?.coverUrl ?? widget.event.imagePath;
@@ -165,7 +173,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       if (mounted) AppSnackBar.show(context, 'Please set your current location');
       return;
     }
-    final destination = Uri.encodeComponent(_locationText);
+    // The full street address, not the area/city summary: it routes to the
+    // actual door rather than the middle of the neighbourhood.
+    final destination = Uri.encodeComponent(_addressText);
     final url = Uri.parse(
         'https://www.google.com/maps/dir/?api=1&destination=$destination');
     try {
@@ -337,24 +347,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     const SizedBox(height: 20),
 
                     // ── Location ──────────────────────────────────────────
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(color: Colors.grey.shade100, shape: BoxShape.circle),
-                            child: const Icon(Icons.location_on_outlined, size: 20, color: Colors.grey),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              _locationText,
-                              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: AppColors.textSecondary),
-                            ),
-                          ),
-                        ],
-                      ),
+                    DetailLocationRow(
+                      text: _addressText,
+                      onNavigate: _openDirections,
                     ),
 
                     const Padding(
@@ -431,15 +426,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       images: _galleryImages,
                       onSeeAll: () => Navigator.push(context,
                           MaterialPageRoute(builder: (_) => GalleryScreen(event: _eventForSheets))),
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // ── Location map ──────────────────────────────────────
-                    DetailDirectionsCard(
-                      locationText: _locationText,
-                      note: _detail?.address,
-                      onGetDirection: _openDirections,
                     ),
 
                     const SizedBox(height: 32),
