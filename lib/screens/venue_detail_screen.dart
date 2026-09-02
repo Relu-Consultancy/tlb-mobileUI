@@ -453,19 +453,6 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                       const SizedBox(height: 32),
                     ],
 
-                    // ── Packages ──
-                    if (_detail != null && _detail!.packages.isNotEmpty) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('Packages',
-                            style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
-                      ),
-                      const SizedBox(height: 12),
-                      ..._detail!.packages.map((pkg) => _buildPackageCard(pkg)),
-                      const SizedBox(height: 32),
-                    ],
-
                     // ── Gallery ──
                     DetailGallery(
                       images: _galleryImages,
@@ -723,63 +710,5 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
       ),
     );
   }
-
-  Widget _buildPackageCard(ApiVenuePackage pkg) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8F9FA),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFEEEEEE)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(pkg.name,
-                    style: GoogleFonts.poppins(
-                        fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
-                if (pkg.description?.isNotEmpty == true) ...[
-                  const SizedBox(height: 4),
-                  Text(pkg.description!,
-                      style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 11.5), color: Colors.grey.shade600, height: 1.4)),
-                ],
-                if (pkg.durationMinutes != null || pkg.maxGuests != null) ...[
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      if (pkg.durationMinutes != null) ...[
-                        const Icon(Icons.timer_outlined, size: 13, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Text('${pkg.durationMinutes} min',
-                            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade600)),
-                        const SizedBox(width: 12),
-                      ],
-                      if (pkg.maxGuests != null) ...[
-                        const Icon(Icons.people_outline, size: 13, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Text('Up to ${pkg.maxGuests} guests',
-                            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11), color: Colors.grey.shade600)),
-                      ],
-                    ],
-                  ),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text('₹${pkg.price.toInt()}',
-              style: GoogleFonts.poppins(
-                  fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
-        ],
-      ),
-    );
-  }
-
 
 }
