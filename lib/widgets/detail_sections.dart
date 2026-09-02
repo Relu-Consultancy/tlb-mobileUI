@@ -48,6 +48,55 @@ class DetailSectionTitle extends StatelessWidget {
   }
 }
 
+/// The category / subcategory label that sits above a detail screen's title.
+///
+/// Deliberately quiet. It used to be a solid `primaryLight` block, which made
+/// it the loudest element on the screen: it out-shouted the title it exists to
+/// introduce, and it wore the same saturated yellow as the "Book Now" CTA,
+/// which blunts the one fill that should mean "tap me". A soft wash with a
+/// hairline edge still reads as a tag without competing for the eye.
+///
+/// Follows the tinted-chip treatment already used by the booking status badge:
+/// fill at 12% of the accent, hairline at 28%.
+class DetailCategoryTag extends StatelessWidget {
+  final String text;
+  final EdgeInsetsGeometry padding;
+
+  const DetailCategoryTag(
+    this.text, {
+    super.key,
+    this.padding = const EdgeInsets.symmetric(horizontal: 16),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: padding,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: AppColors.primary.withOpacity(0.28)),
+        ),
+        child: Text(
+          text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 11.5),
+            fontWeight: FontWeight.w500,
+            // Dark neutral rather than amber-on-amber: amber text over this
+            // wash measures ~2.4:1 against the page, well under the 4.5:1
+            // that 11.5sp needs to stay readable.
+            color: kDetailText,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// White "About" card with a slim black border. Clamps the body to 3 lines
 /// and reveals the rest behind a "See more" / "See less" toggle when it
 /// overflows.

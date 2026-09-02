@@ -337,25 +337,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                     const SizedBox(height: 16),
 
                     // Tag
-                    if (_tag.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryLight,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            _tag,
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 12),
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                      ),
+                    if (_tag.isNotEmpty) DetailCategoryTag(_tag),
 
                     const SizedBox(height: 12),
 
