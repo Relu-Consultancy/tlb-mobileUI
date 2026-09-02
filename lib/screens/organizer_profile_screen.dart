@@ -207,13 +207,24 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'About',
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 17),
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
-                              ),
+                            // Follow sits on the heading line rather than at
+                            // the foot of the page: down there it was below
+                            // the fold on any profile with events, so the
+                            // primary action on this screen was the one thing
+                            // you had to scroll to find.
+                            Row(
+                              children: [
+                                Text(
+                                  'About',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 17),
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const Spacer(),
+                                PartnerFollowButton(partnerId: _provider?.id),
+                              ],
                             ),
                             const SizedBox(height: 8),
                             Text(
@@ -273,8 +284,6 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                     if (widget.listingType != null)
                       const UpcomingEventsSection(showDivider: true),
 
-                    const SizedBox(height: 26),
-                    PartnerFollowButton(partnerId: _provider?.id),
                   ],
                 ),
               ),

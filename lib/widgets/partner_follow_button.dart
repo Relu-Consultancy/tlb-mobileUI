@@ -88,7 +88,7 @@ class _PartnerFollowButtonState extends State<PartnerFollowButton> {
         height: 28,
         child: CircularProgressIndicator(
           strokeWidth: 2,
-          color: _isFollowing ? AppColors.primaryLight : Colors.grey,
+          color: _isFollowing ? AppColors.textPrimary : Colors.grey,
         ),
       );
     }
@@ -97,8 +97,13 @@ class _PartnerFollowButtonState extends State<PartnerFollowButton> {
       return ElevatedButton.icon(
         onPressed: _onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryLight,
-          foregroundColor: Colors.black,
+          // Near-black rather than the brand yellow. A saturated fill on a
+          // secondary control competed with the yellow "Book Now" CTA and,
+          // on the profile screen, was the loudest thing on an otherwise
+          // white page.
+          backgroundColor: AppColors.textPrimary,
+          foregroundColor: Colors.white,
+          elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           minimumSize: Size.zero,
@@ -118,8 +123,10 @@ class _PartnerFollowButtonState extends State<PartnerFollowButton> {
     return OutlinedButton(
       onPressed: _onTap,
       style: OutlinedButton.styleFrom(
-        foregroundColor: Colors.grey.shade700,
-        side: BorderSide(color: Colors.grey.shade400),
+        // The unfollowed twin of the filled state, so the two read as one
+        // control in two positions rather than two different buttons.
+        foregroundColor: AppColors.textPrimary,
+        side: BorderSide(color: AppColors.textPrimary.withOpacity(0.35)),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         minimumSize: Size.zero,
