@@ -28,6 +28,11 @@ class AnimatedGradientTag extends StatefulWidget {
   /// Inner padding around the text.
   final EdgeInsets padding;
 
+  /// Where the label sits inside the tag. Only meaningful when the tag is
+  /// given a fixed size — e.g. stretched across a rotated diagonal sash — as a
+  /// self-sizing pill hugs its text either way.
+  final AlignmentGeometry? alignment;
+
   /// White border + drop shadow (the TLB-Signature look). Set false for a flat
   /// tag that keeps only its gradient.
   final bool showChrome;
@@ -47,6 +52,7 @@ class AnimatedGradientTag extends StatefulWidget {
     this.gradientColors,
     this.borderRadius,
     this.padding = const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+    this.alignment,
     this.showChrome = true,
     this.fontWeight = FontWeight.w600,
     this.softWrap = true,
@@ -105,6 +111,7 @@ class _AnimatedGradientTagState extends State<AnimatedGradientTag>
 
         return Container(
           padding: widget.padding,
+          alignment: widget.alignment,
           decoration: BoxDecoration(
             borderRadius: widget.borderRadius ?? BorderRadius.circular(20),
             gradient: gradient,
