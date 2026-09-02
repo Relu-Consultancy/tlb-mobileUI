@@ -444,7 +444,9 @@ class DetailGallery extends StatelessWidget {
         const SizedBox(height: 12),
         SizedBox(
           // Longer + wider cards than before, matching the reference.
-          height: Responsive.h(context, 140, min: 120),
+          // The floor moves with the base so the extra 5px survives on small
+          // screens too, where the scaled value clamps to `min`.
+          height: Responsive.h(context, 145, min: 125),
           child: AutoScrollList(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: images.isEmpty ? 1 : images.length,
