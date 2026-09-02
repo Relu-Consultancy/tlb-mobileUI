@@ -48,27 +48,76 @@ class FooterQuoteCarousel extends StatefulWidget {
   State<FooterQuoteCarousel> createState() => _FooterQuoteCarouselState();
 }
 
-class _FooterQuoteCarouselState extends State<FooterQuoteCarousel> {
+class _FooterQuoteCarouselState extends State<FooterQuoteCarousel>
+    with SingleTickerProviderStateMixin {
   int _index = 0;
   Timer? _timer;
+
+  /// How long a quote rests before the next one replaces it.
+  static const Duration _hold = Duration(seconds: 10);
+  static const Duration _outDuration = Duration(milliseconds: 420);
+  static const Duration _inDuration = Duration(milliseconds: 560);
+
+  /// Settle level of the quote on screen: 1 = fully in place, 0 = fully gone.
+  late final AnimationController _settle;
+
+  /// True while the current quote is on its way out, which flips the drift
+  /// direction so the old line keeps rising as the new one rises in after it,
+  /// rather than reversing back down the way it came.
+  bool _leaving = false;
+
+  /// Guards against a tick landing on top of a transition still in flight.
+  bool _animating = false;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 10), (_) {
+    _settle = AnimationController(
+      vsync: this,
+      duration: _inDuration,
+      value: 1,
+    );
+    _timer = Timer.periodic(_hold, (_) => _cycle());
+  }
+
+  /// Swaps in the next quote: the current one leaves *completely* before the
+  /// next arrives. Only one quote is ever built, so the two can never be
+  /// visible at the same time — which is what a cross-fade cannot avoid.
+  Future<void> _cycle() async {
+    if (!mounted || _animating) return;
+    _animating = true;
+    try {
+      setState(() => _leaving = true);
+      await _settle.animateTo(0, duration: _outDuration, curve: Curves.easeIn);
       if (!mounted) return;
-      setState(() => _index = (_index + 1) % FooterQuoteCarousel.quotes.length);
-    });
+
+      setState(() {
+        _index = (_index + 1) % FooterQuoteCarousel.quotes.length;
+        _leaving = false;
+      });
+      await _settle.animateTo(1,
+          duration: _inDuration, curve: Curves.easeOutCubic);
+    } on TickerCanceled {
+      // The widget was disposed mid-transition; nothing to finish.
+    } finally {
+      _animating = false;
+    }
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _settle.dispose();
     super.dispose();
   }
 
   /// Warm gold used for the quote marks.
   static const Color _gold = Color(0xFFE8B11E);
+
+  /// Vertical distance a quote travels as it leaves or arrives. Small on
+  /// purpose — enough to give the swap a direction without the text visibly
+  /// sliding around inside the footer.
+  static const double _travel = 14;
 
   /// Strip the surrounding curly quotes from a quote (explicit quote-mark
   /// glyphs are shown above and below instead).
@@ -77,39 +126,62 @@ class _FooterQuoteCarouselState extends State<FooterQuoteCarousel> {
 
   @override
   Widget build(BuildContext context) {
+    // Sized against the type, not against the box: a quote mark reads as
+    // punctuation at roughly twice the text size. Deriving it from the panel
+    // height instead is what previously produced 67px marks beside 15sp text.
+    final markHeight = Responsive.h(context, 30, min: 26);
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(30, 6, 30, 4),
+      padding: const EdgeInsets.fromLTRB(28, 10, 28, 10),
+      // A Column rather than a fraction-positioned Stack: each row reserves
+      // its own space, so the marks and the text cannot overlap however long
+      // the quote runs or however the text scales.
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Opening (top) quote mark ──
-          Transform.rotate(
-            angle: math.pi,
-            child: const _CommaQuoteMarks(height: 26, color: _gold),
+          // Opening marks — rotated 180° into true opening quotes. The
+          // artwork is drawn as a closing pair (bowl above, tail descending);
+          // an opening pair is its point reflection.
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Transform.rotate(
+              angle: math.pi,
+              child: _CommaQuoteMarks(height: markHeight, color: _gold),
+            ),
           ),
-          const SizedBox(height: 2),
-          // ── Quote in white, cross-fading between entries ──
+          const SizedBox(height: 8),
           SizedBox(
-            height: Responsive.h(context, 76, min: 72),
+            height: Responsive.h(context, 74, min: 70),
             child: Center(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 1200),
-                switchInCurve: Curves.easeOutCubic,
-                switchOutCurve: Curves.easeInCubic,
-                transitionBuilder: (child, animation) => FadeTransition(
-                  opacity: animation,
-                  child: child,
-                ),
+              child: AnimatedBuilder(
+                animation: _settle,
+                builder: (context, child) {
+                  final t = _settle.value;
+                  // One continuous upward travel: the outgoing line lifts away
+                  // and the incoming one rises into the space it left, so the
+                  // motion reads as a single cycle rather than two crossing
+                  // fades.
+                  final dy = _leaving ? -(1 - t) * _travel : (1 - t) * _travel;
+                  return Opacity(
+                    opacity: t.clamp(0.0, 1.0),
+                    child: Transform.translate(
+                      offset: Offset(0, dy),
+                      child: child,
+                    ),
+                  );
+                },
                 child: Text(
                   _clean(FooterQuoteCarousel.quotes[_index]),
-                  key: ValueKey<int>(_index),
                   textAlign: TextAlign.center,
-                  // Elegant italic serif to match the footer reference. Uses the
-                  // platform serif family (runtime Google-font fetching is off,
-                  // so a GoogleFonts serif wouldn't load).
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  // Elegant italic serif to match the footer reference. Uses
+                  // the platform serif family (runtime Google-font fetching is
+                  // off, so a GoogleFonts serif wouldn't load).
                   style: TextStyle(
                     fontFamily: 'serif',
-                    fontSize: Responsive.sp(context, 18),
+                    fontSize: Responsive.sp(context, 15),
                     height: 1.35,
                     fontWeight: FontWeight.w500,
                     fontStyle: FontStyle.italic,
@@ -119,83 +191,48 @@ class _FooterQuoteCarouselState extends State<FooterQuoteCarousel> {
               ),
             ),
           ),
-          const SizedBox(height: 2),
-          // ── Closing (bottom) quote mark ──
-          const _CommaQuoteMarks(height: 26, color: _gold),
+          const SizedBox(height: 8),
+          // Closing marks — the artwork as drawn, diagonally opposite the
+          // opening pair.
+          Align(
+            alignment: Alignment.centerRight,
+            child: _CommaQuoteMarks(height: markHeight, color: _gold),
+          ),
         ],
       ),
     );
   }
 }
 
-/// A pair of solid "comma" quotation marks — a round head with a tapering tail
-/// that hooks back under it.
+/// The pair of quotation marks used in the footer, from the supplied artwork
+/// (`assets/icons/quote_marks.png` — a 491x363 transparent PNG, cropped to the
+/// glyphs so [height] maps directly onto the marks with no dead margin).
 ///
-/// Drawn rather than set as a glyph: Material's `Icons.format_quote` is an
-/// angular double-prime, and a text glyph like ❝ renders differently on each
-/// platform (runtime font fetching is off, so we can't pin one).
+/// The source art is black; it is tinted at draw time with a `srcIn` colour
+/// filter so the same asset can take the footer's gold, and would take any
+/// other colour without a second file.
 class _CommaQuoteMarks extends StatelessWidget {
-  /// Height of a single mark; the pair is ~1.52x this wide.
+  /// Height of the pair. Width follows the artwork's own aspect ratio.
   final double height;
   final Color color;
+
+  /// Width : height of the cropped artwork.
+  static const double _aspect = 491 / 363;
 
   const _CommaQuoteMarks({required this.height, required this.color});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: height * 1.52,
-      height: height,
-      child: CustomPaint(painter: _CommaQuotePainter(color)),
+    return ColorFiltered(
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+      child: Image.asset(
+        'assets/icons/quote_marks.png',
+        height: height,
+        width: height * _aspect,
+        fit: BoxFit.contain,
+        // The marks are decorative; the quote itself carries the meaning.
+        excludeFromSemantics: true,
+      ),
     );
   }
-}
-
-class _CommaQuotePainter extends CustomPainter {
-  final Color color;
-
-  const _CommaQuotePainter(this.color);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..isAntiAlias = true
-      ..style = PaintingStyle.fill;
-    final s = size.height;
-    // Second mark sits 0.80 of a mark-height to the right of the first.
-    for (final dx in <double>[0, 0.80 * s]) {
-      _drawMark(canvas, paint, dx, s);
-    }
-  }
-
-  void _drawMark(Canvas canvas, Paint paint, double x, double s) {
-    final double r = 0.30 * s;
-    final double cx = x + 0.42 * s;
-    final double cy = 0.32 * s;
-
-    Offset onCircle(double degrees) {
-      final a = degrees * math.pi / 180;
-      return Offset(cx + r * math.cos(a), cy + r * math.sin(a));
-    }
-
-    // Head, then the tail sweeping down-left. Filling both as one colour unions
-    // them into the comma; the second curve is pulled inward so the tail's
-    // inner edge hooks back under the head instead of bulging into a teardrop.
-    canvas.drawCircle(Offset(cx, cy), r, paint);
-
-    final start = onCircle(195);
-    final end = onCircle(80);
-    final tip = Offset(x + 0.08 * s, 0.99 * s);
-    final tail = Path()
-      ..moveTo(start.dx, start.dy)
-      ..quadraticBezierTo(cx - 0.85 * r, cy + 1.45 * r, tip.dx, tip.dy)
-      ..quadraticBezierTo(cx + 0.05 * r, cy + 0.75 * r, end.dx, end.dy)
-      ..close();
-    canvas.drawPath(tail, paint);
-  }
-
-  @override
-  bool shouldRepaint(_CommaQuotePainter oldDelegate) =>
-      oldDelegate.color != color;
 }
