@@ -323,6 +323,11 @@ class _ExpandableAboutCardState extends State<ExpandableAboutCard> {
     );
 
     return Container(
+      // Fixed to the screen's 16px gutters rather than hugging its text: a
+      // card that resized itself to whatever the description happened to say
+      // sat out of line with every other block on the page, and changed width
+      // between one listing and the next.
+      width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
