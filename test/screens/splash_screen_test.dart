@@ -12,9 +12,10 @@ void main() {
 
       await pumpTLBApp(tester, const SplashScreen(nextScreen: mockNextScreen));
 
-      // Logo now rendered as the TLB SVG, with the cursive tagline.
+      // Logo is rendered as the TLB SVG. The cursive tagline that used to sit
+      // below it was removed — guard against it coming back by accident.
       expect(find.byType(SvgPicture), findsOneWidget);
-      expect(find.text('Where every star shines'), findsOneWidget);
+      expect(find.text('Where every star shines'), findsNothing);
 
       // Animation progresses
       await tester.pump(const Duration(milliseconds: 1000));

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../core/app_colors.dart';
+
 class SplashScreen extends StatefulWidget {
   final Widget nextScreen;
 
@@ -18,8 +20,6 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _logoScale;
   late Animation<double> _logoFade;
   late Animation<double> _glowScale;
-  late Animation<double> _taglineFade;
-  late Animation<Offset> _taglineSlide;
   late Animation<double> _dotsFade;
   late Animation<double> _fadeOut;
 
@@ -53,23 +53,6 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(
         parent: _controller,
         curve: const Interval(0.0, 0.31, curve: Curves.easeOutCubic),
-      ),
-    );
-
-    // Cursive tagline slides up + fades in after the logo.
-    _taglineFade = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.22, 0.35, curve: Curves.easeOut),
-      ),
-    );
-    _taglineSlide = Tween<Offset>(
-      begin: const Offset(0, 0.45),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.22, 0.35, curve: Curves.easeOutCubic),
       ),
     );
 
@@ -126,19 +109,9 @@ class _SplashScreenState extends State<SplashScreen>
               body: Container(
                 width: double.infinity,
                 height: double.infinity,
-                decoration: const BoxDecoration(
-                  // Brand golden gradient (matches the header/footer palette).
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFFFFE08A), // light gold (top)
-                      Color(0xFFFFC93C),
-                      Color(0xFFFFB219), // deep golden tint (bottom)
-                    ],
-                    stops: [0.0, 0.55, 1.0],
-                  ),
-                ),
+                // Flat golden ground — the same colour the native splash
+                // paints, so the handoff into Flutter is invisible.
+                color: AppColors.splashGold,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -161,38 +134,17 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                     ),
 
-                    // Logo + tagline.
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Opacity(
-                          opacity: _logoFade.value.clamp(0.0, 1.0),
-                          child: Transform.scale(
-                            scale: _logoScale.value,
-                            child: SvgPicture.asset(
-                              'assets/icons/the_little_broadway_logo.svg',
-                              width: logoSize,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
+                    // Logo.
+                    Opacity(
+                      opacity: _logoFade.value.clamp(0.0, 1.0),
+                      child: Transform.scale(
+                        scale: _logoScale.value,
+                        child: SvgPicture.asset(
+                          'assets/icons/the_little_broadway_logo.svg',
+                          width: logoSize,
+                          fit: BoxFit.contain,
                         ),
-                        const SizedBox(height: 18),
-                        FadeTransition(
-                          opacity: _taglineFade,
-                          child: SlideTransition(
-                            position: _taglineSlide,
-                            child: Text(
-                              'Where every star shines',
-                              style: const TextStyle(
-                                fontFamily: 'DancingScript',
-                                fontSize: 26,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF3A2A12),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
 
                     // Loading dots near the bottom.

@@ -10,6 +10,12 @@ class AppColors {
   static const Color amber = Color(0xFFFFB800);
 
   // Background
+  /// Flat golden ground of the splash screen.
+  ///
+  /// Must stay in sync with `color` in `flutter_native_splash.yaml` — the
+  /// native splash hands off to the Flutter one, and any difference between
+  /// the two shows up as a colour flash on cold start.
+  static const Color splashGold = Color(0xFFFFC93C);
   static const Color background = Color(0xFFFFF8EE);
   static const Color cardBackground = Colors.white;
   static const Color headerGradientTop = Color(0xFFFFCC02);
