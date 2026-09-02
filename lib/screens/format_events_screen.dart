@@ -144,42 +144,40 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
       img = Transform.scale(scale: scale, child: img);
     }
 
-    // Same card technique as ExploreFormatRow (home/events feed row): the
-    // label is engraved INSIDE the artwork near the bottom with a white
-    // halo, not set as separate text below — that mismatch was the "gap"
-    // between this screen's circles and the reference look.
     return GestureDetector(
       onTap: () => _selectFormat(index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeInOut,
+      child: Container(
+        width: size,
         margin: const EdgeInsets.only(right: 14),
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: Stack(
-            fit: StackFit.expand,
-            // The selected circle's artwork grows past the tile; letting it
-            // spill is the point.
-            clipBehavior: Clip.none,
-            children: [
-              // Only the artwork scales. Scaling the whole tile carried the
-              // engraved label with it, so the selected format's name sat
-              // lower and larger than its neighbours' — the row never lined
-              // up while one item was always selected.
-              AnimatedScale(
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeInOut,
-                scale: isSelected ? 1.12 : 1.0,
-                child: img,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: size,
+              height: size,
+              // Clip.none so the selected disc's artwork may spill past the
+              // tile; that growth is the selection cue.
+              child: OverflowBox(
+                maxWidth: size * 1.2,
+                maxHeight: size * 1.2,
+                child: AnimatedScale(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeInOut,
+                  scale: isSelected ? 1.12 : 1.0,
+                  child: SizedBox(width: size, height: size, child: img),
+                ),
               ),
-              FormatCircleLabel(
-                label: fmt['label'] as String,
-                diameter: size,
-                fontSize: 10.5,
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 8),
+            // Below the disc, not engraved on it: the artwork's middle left
+            // only ~65px of usable width, which is what broke "Competition"
+            // across two lines mid-word.
+            FormatCircleLabel(
+              label: fmt['label'] as String,
+              fontSize: 11,
+              selected: isSelected,
+            ),
+          ],
         ),
       ),
     );
@@ -264,12 +262,13 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
 
                   const SizedBox(height: 18),
 
-                  // Format circles row — the label is now engraved inside
-                  // each circle (see _formatCircle), so this only needs to
-                  // fit the circle itself plus its selected-state scale-up
-                  // (90 * 1.12 ≈ 101), not the old separate label line.
+                  // Disc (90) + gap (8) + a two-line label. The selected
+                  // disc scales inside its own box rather than growing the
+                  // tile, so this height does not have to allow for it.
                   SizedBox(
-                    height: 108,
+                    height: 90 +
+                        8 +
+                        FormatCircleLabel.boxHeight(context, 11),
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 16),

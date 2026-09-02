@@ -81,19 +81,18 @@ class ExploreFormatRow extends StatelessWidget {
                   onTap: () => onFormatTap?.call(index),
                   child: SizedBox(
                     width: size,
-                    height: size,
-                    child: Stack(
-                      fit: StackFit.expand,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Whole image (no oval clip) so the artwork pops out of
-                        // the disc, like the reference.
-                        img,
-                        // Format name engraved INSIDE the artwork, near the
-                        // bottom. A soft white halo keeps it readable.
+                        // Whole image (no oval clip) so the artwork pops out
+                        // of the disc, like the reference.
+                        SizedBox(width: size, height: size, child: img),
+                        const SizedBox(height: 8),
+                        // Below the disc rather than engraved on it — see
+                        // FormatCircleLabel for why.
                         FormatCircleLabel(
                           label: format['label'] as String,
-                          diameter: size,
-                          fontSize: 11.5,
+                          fontSize: 12,
                           color: AppColors.textPrimary,
                         ),
                       ],
