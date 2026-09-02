@@ -9,7 +9,6 @@ import '../providers/location_state.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/listing_schedule.dart';
 import '../core/responsive.dart';
-import '../widgets/refundable_badge.dart';
 import '../models/api_event_model.dart';
 import '../models/event_model.dart';
 import '../providers/auth_state.dart';
@@ -471,17 +470,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       initialLogoUrl: _detail?.organizer?.logoUrl,
                       listingType: 'event',
                     ),
-
-                    // ── Refundable label ──────────────────────────────────
-                    // Informational only: it does not decide whether a
-                    // cancellation actually issues a refund.
-                    if (_detail != null) ...[
-                      const SizedBox(height: 24),
-                      RefundableBadge(isRefundable: _detail!.isRefundable),
-                      // Same 16pt rhythm the FAQs row uses when it follows
-                      // another card in this stack.
-                      const SizedBox(height: 16),
-                    ],
 
                     // ── Terms & Conditions ──────────────────────────────
                     if (_hasTerms) ...[

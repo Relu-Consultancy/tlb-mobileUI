@@ -8,7 +8,6 @@ import '../core/share_helper.dart';
 import '../providers/auth_state.dart';
 import '../providers/location_state.dart';
 import '../core/responsive.dart';
-import '../widgets/refundable_badge.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/review_sheet.dart';
 import '../widgets/organizer_card.dart';
@@ -525,17 +524,6 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                       listingType: 'venue',
                     ),
                     const SizedBox(height: 32),
-
-                    // ── Refundable label ──────────────────────────────────
-                    // Informational only: it does not decide whether a
-                    // cancellation actually issues a refund.
-                    if (_detail != null) ...[
-                      const SizedBox(height: 24),
-                      RefundableBadge(isRefundable: _detail!.isRefundable),
-                      // Same 16pt rhythm the FAQs row uses when it follows
-                      // another card in this stack.
-                      const SizedBox(height: 16),
-                    ],
 
                     // ── Terms & Conditions ────────────────────────────────
                     if (_hasTerms) ...[

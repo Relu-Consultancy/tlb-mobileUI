@@ -8,7 +8,6 @@ import '../providers/auth_state.dart';
 import '../providers/location_state.dart';
 import '../widgets/login_sheet.dart';
 import '../core/responsive.dart';
-import '../widgets/refundable_badge.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/review_sheet.dart';
 import '../widgets/organizer_card.dart';
@@ -574,16 +573,6 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                     ),
 
                     const SizedBox(height: 32),
-
-                    // ── Refundable label ──────────────────────────────────
-                    // Informational only: it does not decide whether a
-                    // cancellation actually issues a refund.
-                    if (_detail != null) ...[
-                      RefundableBadge(isRefundable: _detail!.isRefundable),
-                      // Same 16pt rhythm the FAQs row uses when it follows
-                      // another card in this stack.
-                      const SizedBox(height: 16),
-                    ],
 
                     if (_hasTerms) ...[
                       DetailTermsRow(
