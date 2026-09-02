@@ -97,6 +97,38 @@ class DetailCategoryTag extends StatelessWidget {
   }
 }
 
+/// The circled leading glyph on a detail screen's info rows (the address pin,
+/// the date calendar).
+///
+/// Both the ground and the glyph are a step stronger than the grey-100 /
+/// grey-500 pair these rows used to carry, which measured ~2.5:1 against the
+/// page and read as disabled rather than quiet. This lands near 5:1 — clearly
+/// present, still subordinate to the values it labels.
+///
+/// Shared so the pin and the calendar cannot drift apart: they sit one above
+/// the other and any difference between them is immediately visible.
+class DetailRowIcon extends StatelessWidget {
+  final IconData icon;
+
+  const DetailRowIcon(this.icon, {super.key});
+
+  /// Outer diameter. The navigate button matches it so the two ends of the
+  /// address row balance.
+  static const double diameter = 36;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, size: 20, color: Colors.grey.shade700),
+    );
+  }
+}
+
 /// White "About" card with a slim black border. Clamps the body to 3 lines
 /// and reveals the rest behind a "See more" / "See less" toggle when it
 /// overflows.

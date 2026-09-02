@@ -412,11 +412,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Row(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(color: Colors.grey.shade100, shape: BoxShape.circle),
-                              child: const Icon(Icons.calendar_today_outlined, size: 20, color: Colors.grey),
-                            ),
+                            const DetailRowIcon(Icons.calendar_today_outlined),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
@@ -663,7 +659,9 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: Colors.grey.shade600),
+          // A shade darker than the label beside it, so the left rail of
+          // glyphs reads as present rather than disabled.
+          Icon(icon, size: 20, color: Colors.grey.shade700),
           const SizedBox(width: 12),
           Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600)),
           const Spacer(),
