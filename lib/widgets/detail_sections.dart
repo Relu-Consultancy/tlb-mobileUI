@@ -352,6 +352,7 @@ class _ExpandableAboutCardState extends State<ExpandableAboutCard> {
               final tp = TextPainter(
                 text: TextSpan(text: widget.text, style: bodyStyle),
                 maxLines: 3,
+                textAlign: TextAlign.justify,
                 textDirection: TextDirection.ltr,
               )..layout(maxWidth: constraints.maxWidth);
               final overflows = tp.didExceedMaxLines;
@@ -362,6 +363,10 @@ class _ExpandableAboutCardState extends State<ExpandableAboutCard> {
                   Text(
                     widget.text,
                     style: bodyStyle,
+                    // Both edges flush. Ragged-right left the card looking
+                    // unaligned against its own border, which sits only 16px
+                    // past the end of the longest line.
+                    textAlign: TextAlign.justify,
                     maxLines: _expanded ? null : 3,
                     overflow:
                         _expanded ? TextOverflow.visible : TextOverflow.ellipsis,

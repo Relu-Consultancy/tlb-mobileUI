@@ -50,7 +50,21 @@ void main() {
       expect(widths[0], screenWidth);
     });
 
-    testWidgets('TC_W_EAC_003 — a short body shows no See more',
+    testWidgets('TC_W_EAC_003 — the body is justified, not ragged',
+        (tester) async {
+      // Ragged-right left the paragraph looking unaligned against the card's
+      // own border, which sits only 16px past the end of the longest line.
+      await pumpTLBApp(
+        tester,
+        const Scaffold(
+          body: ExpandableAboutCard(title: 'About Event', text: _kLongBody),
+        ),
+      );
+      expect(tester.widget<Text>(find.text(_kLongBody)).textAlign,
+          TextAlign.justify);
+    });
+
+    testWidgets('TC_W_EAC_004 — a short body shows no See more',
         (tester) async {
       await pumpTLBApp(
         tester,
@@ -61,7 +75,7 @@ void main() {
       expect(find.text('See more'), findsNothing);
     });
 
-    testWidgets('TC_W_EAC_004 — a long body clamps to three lines behind '
+    testWidgets('TC_W_EAC_005 — a long body clamps to three lines behind '
         'See more', (tester) async {
       await pumpTLBApp(
         tester,
