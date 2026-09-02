@@ -7,6 +7,7 @@ import '../models/api_provider_model.dart';
 import '../services/events_listing_service.dart';
 import '../widgets/app_loader.dart';
 import '../widgets/partner_follow_button.dart';
+import '../widgets/social_links_row.dart';
 import '../widgets/upcoming_events_section.dart';
 
 class OrganizerProfileScreen extends StatefulWidget {
@@ -142,6 +143,13 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                         color: AppColors.textPrimary,
                       ),
                     ),
+                    const SizedBox(height: 6),
+                    SocialLinksRow(
+                      instagramUrl: _provider?.instagramUrl,
+                      facebookUrl: _provider?.facebookUrl,
+                      linkedinUrl: _provider?.linkedinUrl,
+                    ),
+
                     // Only when the API actually sent a count. It does not
                     // today, and a hard-coded "0 Followers" beside a
                     // "Following" button reads as a bug rather than as an
