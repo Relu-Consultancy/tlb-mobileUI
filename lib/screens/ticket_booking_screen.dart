@@ -8,6 +8,22 @@ import '../models/event_model.dart';
 import 'date_time_selection_screen.dart';
 import 'review_pay_screen.dart';
 
+/// Height of every field in the Attendee Details form, and the padding that
+/// produces it. The three fields are read as one column, so they share their
+/// vertical metrics as well as the horizontal ones on [IndianDialPrefix].
+const double _kFieldHeight = 52;
+const EdgeInsets _kFieldContentPadding =
+    EdgeInsets.only(left: 0, right: 14, top: 15, bottom: 15);
+
+/// Material's InputDecorator inserts a fixed gap between `prefixIcon` and the
+/// input that no decoration property exposes. A plain Text beside an icon has
+/// no such gap, so the age dropdown and the "+91" — both plain Rows — sit that
+/// much further left than a TextField's placeholder. Taking it back out of the
+/// icon's own padding lands all three on one column. Measured, not guessed,
+/// and pinned by TC_S_TB_ALIGN so a Flutter upgrade that changes it fails
+/// loudly rather than drifting.
+const double _kDecoratorPrefixGap = 4;
+
 class TicketBookingScreen extends StatefulWidget {
   final EventModel event;
   final String selectedDate;
@@ -235,8 +251,11 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
       {bool placeholder = false}) {
     return Row(
       children: [
-        Icon(Icons.cake_outlined, size: 18, color: Colors.grey.shade500),
-        const SizedBox(width: 8),
+        // Icon size and gap match the other two fields; at 18 this one sat
+        // a couple of pixels off the column they share.
+        Icon(Icons.cake_outlined,
+            size: IndianDialPrefix.iconSize, color: Colors.grey.shade500),
+        const SizedBox(width: IndianDialPrefix.gap),
         Text(
           label,
           style: GoogleFonts.poppins(
@@ -623,9 +642,21 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             controller: _childNameController,
             style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14)),
             decoration: InputDecoration(
-              prefixIcon: Icon(Icons.person_outline,
-                  size: 20, color: Colors.grey.shade500),
-              hintText: 'Child name',
+              // Same geometry as the phone field below. Left at Material's
+              // default the icon gets a 48x48 box and this placeholder lands
+              // several pixels right of the "+91" beneath it.
+              prefixIcon: const Padding(
+                padding: EdgeInsets.only(
+                  left: IndianDialPrefix.inset,
+                  right: IndianDialPrefix.gap - _kDecoratorPrefixGap,
+                ),
+                child: Icon(Icons.person_outline,
+                    size: IndianDialPrefix.iconSize, color: Color(0xFF9E9E9E)),
+              ),
+              prefixIconConstraints:
+                  const BoxConstraints(minWidth: 0, minHeight: 0),
+              constraints: const BoxConstraints(minHeight: _kFieldHeight),
+              hintText: 'Attendee name',
               hintStyle: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
               filled: true,
@@ -634,15 +665,15 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              contentPadding: _kFieldContentPadding,
             ),
           ),
           const SizedBox(height: 12),
           // Age dropdown
           Container(
-            height: 52,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            height: _kFieldHeight,
+            padding: const EdgeInsets.only(
+                left: IndianDialPrefix.inset, right: 12),
             decoration: BoxDecoration(
               color: const Color(0xFFF5F5F5),
               borderRadius: BorderRadius.circular(12),
@@ -704,8 +735,8 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              constraints: const BoxConstraints(minHeight: _kFieldHeight),
+              contentPadding: _kFieldContentPadding,
             ),
           ),
         ],

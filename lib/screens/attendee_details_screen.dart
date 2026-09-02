@@ -8,6 +8,14 @@ import '../models/api_program_model.dart';
 import '../models/event_model.dart';
 import 'review_pay_screen.dart';
 
+/// Field metrics shared with the Attendee Details form on the checkout
+/// screen, so the two forms present the same shape. See
+/// ticket_booking_screen.dart for what the decorator gap compensates for.
+const double _kFieldHeight = 52;
+const EdgeInsets _kFieldContentPadding =
+    EdgeInsets.only(left: 0, right: 14, top: 15, bottom: 15);
+const double _kDecoratorPrefixGap = 4;
+
 class AttendeeDetailsScreen extends StatefulWidget {
   final EventModel event;
   final ApiProgramBatch batch;
@@ -323,11 +331,24 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
         color: AppColors.textPrimary,
       ),
       decoration: InputDecoration(
+        // Both branches use the same geometry and both zero the constraints.
+        // Leaving them at Material's default on the plain branch gives that
+        // icon a 48x48 box, which pushed its placeholder off the column the
+        // "+91" below it sits on.
         prefixIcon: dialPrefix
             ? const IndianDialPrefix(icon: Icons.phone_outlined)
-            : Icon(icon, size: 20, color: Colors.grey.shade500),
+            : Padding(
+                padding: const EdgeInsets.only(
+                  left: IndianDialPrefix.inset,
+                  right: IndianDialPrefix.gap - _kDecoratorPrefixGap,
+                ),
+                child: Icon(icon,
+                    size: IndianDialPrefix.iconSize,
+                    color: Colors.grey.shade500),
+              ),
         prefixIconConstraints:
-            dialPrefix ? const BoxConstraints(minWidth: 0, minHeight: 0) : null,
+            const BoxConstraints(minWidth: 0, minHeight: 0),
+        constraints: const BoxConstraints(minHeight: _kFieldHeight),
         errorText: errorText,
         hintText: hint,
         hintStyle: GoogleFonts.poppins(
@@ -345,16 +366,16 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
           borderSide:
               const BorderSide(color: Color(0xFF0284C7), width: 1.5),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: _kFieldContentPadding,
       ),
     );
   }
 
   Widget _ageDropdown(BuildContext context) {
     return Container(
-      height: 52,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      height: _kFieldHeight,
+      padding: const EdgeInsets.only(
+          left: IndianDialPrefix.inset, right: 12),
       decoration: BoxDecoration(
         color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(12),
@@ -369,8 +390,9 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
           hint: Row(
             children: [
               Icon(Icons.cake_outlined,
-                  size: 18, color: Colors.grey.shade500),
-              const SizedBox(width: 8),
+                  size: IndianDialPrefix.iconSize,
+                  color: Colors.grey.shade500),
+              const SizedBox(width: IndianDialPrefix.gap),
               Text(
                 'Age',
                 style: GoogleFonts.poppins(

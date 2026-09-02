@@ -79,16 +79,38 @@ class IndianDialPrefix extends StatelessWidget {
 
   const IndianDialPrefix({super.key, this.color, this.icon});
 
+  /// Geometry a plain field's leading icon must copy to line up with this one.
+  ///
+  /// A phone field zeroes `prefixIconConstraints` so the dial code can sit
+  /// flush; a sibling field that leaves them at Material's default gets a
+  /// 48x48 icon box instead, and its placeholder lands several pixels further
+  /// right than the "+91" beside it. Sharing the numbers is what keeps a
+  /// stack of fields reading as one column.
+  static const double inset = 14;
+  static const double gap = 8;
+  static const double iconSize = 20;
+
+  /// The x at which the first glyph of text sits in any field using this
+  /// geometry — the "+91" here, a placeholder in a plain field.
+  static const double textOffset = inset + iconSize + gap;
+
+  /// A leading icon positioned to match. Pair with
+  /// `prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0)`.
+  static Widget fieldIcon(IconData icon) => Padding(
+        padding: const EdgeInsets.only(left: inset, right: gap),
+        child: Icon(icon, size: iconSize, color: Colors.grey.shade500),
+      );
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 14, right: 10),
+      padding: const EdgeInsets.only(left: inset, right: 10),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 20, color: Colors.grey.shade500),
-            const SizedBox(width: 8),
+            Icon(icon, size: iconSize, color: Colors.grey.shade500),
+            const SizedBox(width: gap),
           ],
           Text(
             IndianPhone.dialCode,
