@@ -544,15 +544,17 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
   late final AnimationController _ctrl;
   late final List<_WbParticle> _particles;
 
+  /// Confetti in the app's own colours. The previous rainbow -- teal, coral,
+  /// mint, violet -- belonged to no part of this product. Deliberately mixes
+  /// light and dark: the burst crosses both the gold card and the dark scrim
+  /// behind it, and a single-tone palette would vanish over one or the other.
   static const _kColors = [
-    AppColors.primaryLight,
-    Color(0xFFFF6B6B),
-    Color(0xFF4ECDC4),
-    Color(0xFF45B7D1),
-    Color(0xFF96CEB4),
-    Color(0xFFFF9A3C),
-    Color(0xFFA78BFA),
+    AppColors.textPrimary,
     Colors.white,
+    Color(0xFFFFE9A8), // pale gold
+    AppColors.primaryLight,
+    AppColors.primary,
+    AppColors.primaryDark,
   ];
 
   @override
@@ -595,8 +597,25 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
           Container(
             padding: const EdgeInsets.fromLTRB(24, 36, 24, 28),
             decoration: BoxDecoration(
-              color: const Color(0xFF7C3AED),
+              // The app's own header gradient -- the one the home header and
+              // the organizer profile already wear. The card was a hard-coded
+              // violet that appeared nowhere else in the product.
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.headerGradientTop,
+                  AppColors.headerGradientBottom,
+                ],
+              ),
               borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryDark.withOpacity(0.38),
+                  blurRadius: 30,
+                  offset: const Offset(0, 14),
+                ),
+              ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -605,8 +624,14 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
                   width: 120,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.18),
+                    // White, not the old black wash: a dark disc on gold reads
+                    // as a hole punched in the card.
+                    color: Colors.white.withOpacity(0.30),
                     shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.55),
+                      width: 1.5,
+                    ),
                   ),
                   child: Center(
                     child: Text('👋', style: TextStyle(fontSize: Responsive.sp(context, 58))),
@@ -617,8 +642,10 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
                   'Welcome Back!',
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 22),
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    // Navy on gold measures ~11:1. White on this gradient
+                    // would be ~1.8:1 -- unreadable at the light end.
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -627,7 +654,7 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 13),
-                    color: Colors.white.withOpacity(0.82),
+                    color: AppColors.textPrimary.withOpacity(0.78),
                     height: 1.55,
                   ),
                 ),
@@ -638,8 +665,10 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
                   child: ElevatedButton(
                     onPressed: widget.onDone,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryLight,
-                      foregroundColor: AppColors.textPrimary,
+                      // Inverted against the card. Yellow was the right call
+                      // on violet; on gold it disappears.
+                      backgroundColor: AppColors.textPrimary,
+                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -649,7 +678,7 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
                       "Let's Go!",
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 16),
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
