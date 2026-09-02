@@ -292,6 +292,86 @@ class _NavigateButton extends StatelessWidget {
   }
 }
 
+/// The price at the left of a detail screen's action bar.
+///
+/// Replaces three different treatments of the same thing: a bare amount, an
+/// amount with a dangling "/" that named no unit and read as unfinished, and
+/// an amount with " onwards". Only the last of those said anything true, so
+/// it is the one that survives.
+class DetailPriceLabel extends StatelessWidget {
+  /// Already formatted, e.g. `₹299`. Non-numeric stand-ins such as `Paid`
+  /// are rendered as-is.
+  final String amount;
+
+  /// Whether [amount] is the cheapest of several tickets or packages, which
+  /// earns the "onwards" qualifier. False for a single exact price -- a class
+  /// costs what it costs, and "onwards" there would be a lie.
+  final bool from;
+
+  const DetailPriceLabel(this.amount, {super.key, this.from = false});
+
+  @override
+  Widget build(BuildContext context) {
+    // Only qualify an actual amount: "Paid onwards" is nonsense, and the
+    // event screen falls back to "Paid" when no ticket carries a number.
+    final qualify = from && amount.startsWith('₹');
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: amount,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 20),
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          if (qualify)
+            TextSpan(
+              text: ' onwards',
+              style: GoogleFonts.poppins(
+                fontSize: Responsive.sp(context, 12),
+                fontWeight: FontWeight.w400,
+                color: Colors.grey.shade600,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "Free" in the action bar, as a soft green pill.
+///
+/// The event screen already used a pill here and the venue screen plain green
+/// text; the pill wins, so the two screens stop disagreeing about what free
+/// looks like.
+class DetailFreePill extends StatelessWidget {
+  const DetailFreePill({super.key});
+
+  static const Color _green = Color(0xFF16A34A);
+  static const Color _greenInk = Color(0xFF15803D);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: _green.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        'Free',
+        style: GoogleFonts.poppins(
+          fontSize: Responsive.sp(context, 16),
+          fontWeight: FontWeight.w600,
+          color: _greenInk,
+        ),
+      ),
+    );
+  }
+}
+
 /// White "About" card with a slim black border. Clamps the body to 3 lines
 /// and reveals the rest behind a "See more" / "See less" toggle when it
 /// overflows.

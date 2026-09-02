@@ -26,8 +26,10 @@ void main() {
         // Venue name may appear in multiple places (header, info row, etc.)
         expect(find.text('Magic Land'), findsWidgets);
         expect(find.text('Adventure'), findsOneWidget);
-        // Bottom bar: RichText '₹350' + '/' → use findRichText to match collapsed text
-        expect(find.text('₹350/', findRichText: true), findsOneWidget);
+        // Bottom bar: the amount plus its "onwards" qualifier, collapsed.
+        // It read '₹350/' until the trailing slash — which named no unit —
+        // was replaced.
+        expect(find.text('₹350 onwards', findRichText: true), findsOneWidget);
         expect(find.text('Check Availability'), findsOneWidget);
       });
     });

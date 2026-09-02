@@ -32,8 +32,10 @@ void main() {
         expect(find.text('Central Park'), findsWidgets);
         expect(find.text('Kids & Family'), findsOneWidget);
         expect(find.textContaining('A super fun event for kids.'), findsOneWidget);
-        // Bottom bar: RichText with '₹350' + '/' as separate spans → collapsed '₹350/'
-        expect(find.text('₹350/', findRichText: true), findsOneWidget);
+        // Bottom bar: the amount plus its "onwards" qualifier, collapsed.
+        // It read '₹350/' until the trailing slash — which named no unit —
+        // was replaced.
+        expect(find.text('₹350 onwards', findRichText: true), findsOneWidget);
         expect(find.text('Book Now'), findsOneWidget);
       });
     });

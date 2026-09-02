@@ -526,29 +526,17 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               child: Row(
                 children: [
                   if (_isFree)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF4CAF50).withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text('Free', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 18), fontWeight: FontWeight.w500, color: const Color(0xFF2E7D32))),
-                    )
+                    const DetailFreePill()
                   else
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: _priceDisplay,
-                            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 20), fontWeight: FontWeight.w500, color: AppColors.textSecondary),
-                          ),
-                          TextSpan(text: '/', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: Colors.grey)),
-                        ],
-                      ),
-                    ),
-                  const Spacer(),
+                    // `from: true` — _priceDisplay is the cheapest ticket,
+                    // not a flat fee.
+                    DetailPriceLabel(_priceDisplay, from: true),
+                  // Fixed gap, not a Spacer with a flex:2 button: that
+                  // split the leftover 1:2, so a wide price such as
+                  // "₹4999 onwards" starved the CTA and wrapped its
+                  // label onto two lines at 360-390px.
+                  const SizedBox(width: 16),
                   Expanded(
-                    flex: 2,
                     child: ElevatedButton(
                       onPressed: () {
                         if (!AuthState.isLoggedIn.value) {

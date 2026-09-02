@@ -487,17 +487,12 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                 return Row(
                   children: [
                     if (showPrice)
-                      Text(
-                        '₹${price.toStringAsFixed(0)}',
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 20),
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    if (showPrice) const Spacer(),
+                      // No `from:` — a class fee is exact, not a floor.
+                      DetailPriceLabel('₹${price.toStringAsFixed(0)}'),
+                    // Fixed gap, not a Spacer with a flex:2 button: that
+                    // split the leftover 1:2 and could starve the CTA.
+                    if (showPrice) const SizedBox(width: 16),
                     Expanded(
-                      flex: 2,
                       child: ElevatedButton(
                         onPressed: () {
                           if (!_hasApiId) {

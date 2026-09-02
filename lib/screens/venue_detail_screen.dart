@@ -543,31 +543,18 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
               child: Row(
                 children: [
                   if (_lowestPackagePrice != null && _lowestPackagePrice! > 0)
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: '₹${_lowestPackagePrice!.toInt()}',
-                            style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 20),
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textSecondary),
-                          ),
-                          TextSpan(
-                              text: '/',
-                              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: Colors.grey)),
-                        ],
-                      ),
-                    )
+                    // `from: true` — this is the cheapest package, not a
+                    // flat hire fee.
+                    DetailPriceLabel('₹${_lowestPackagePrice!.toInt()}',
+                        from: true)
                   else
-                    Text('Free',
-                        style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 20),
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF16A34A))),
-                  const Spacer(),
+                    const DetailFreePill(),
+                  // Fixed gap, not a Spacer with a flex:2 button: that
+                  // split the leftover 1:2, so a wide price such as
+                  // "₹4999 onwards" starved the CTA and wrapped its
+                  // label onto two lines at 360-390px.
+                  const SizedBox(width: 16),
                   Expanded(
-                    flex: 2,
                     child: ElevatedButton(
                       onPressed: () {
                         if (!AuthState.isLoggedIn.value) {

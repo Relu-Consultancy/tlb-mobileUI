@@ -598,24 +598,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
               child: Row(
                 children: [
                   if (_priceDisplay != 'Price TBA') ...[
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: _priceDisplay,
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 20),
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          TextSpan(
-                            text: ' onwards',
-                            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                    ),
+                    DetailPriceLabel(_priceDisplay, from: true),
                     const SizedBox(width: 16),
                   ],
                   Expanded(
