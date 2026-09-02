@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'format_circle_label.dart';
 import '../core/app_colors.dart';
-import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 
 class ExploreFormatRow extends StatelessWidget {
@@ -91,26 +90,11 @@ class ExploreFormatRow extends StatelessWidget {
                         img,
                         // Format name engraved INSIDE the artwork, near the
                         // bottom. A soft white halo keeps it readable.
-                        Positioned(
-                          left: size * 0.14,
-                          right: size * 0.14,
-                          bottom: size * 0.10,
-                          child: Text(
-                            format['label'] as String,
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 11.5),
-                              fontWeight: FontWeight.w600,
-                              height: 1.1,
-                              color: AppColors.textPrimary,
-                              shadows: const [
-                                Shadow(color: Colors.white, blurRadius: 4),
-                                Shadow(color: Colors.white, blurRadius: 8),
-                              ],
-                            ),
-                          ),
+                        FormatCircleLabel(
+                          label: format['label'] as String,
+                          diameter: size,
+                          fontSize: 11.5,
+                          color: AppColors.textPrimary,
                         ),
                       ],
                     ),

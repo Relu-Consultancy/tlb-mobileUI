@@ -11,6 +11,7 @@ import '../models/event_model.dart';
 import '../providers/location_state.dart';
 import '../services/events_listing_service.dart';
 import '../widgets/app_loader.dart';
+import '../widgets/format_circle_label.dart';
 import '../widgets/trending_event_card.dart';
 import '../widgets/subcategory_empty_state.dart';
 
@@ -153,39 +154,31 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeInOut,
         margin: const EdgeInsets.only(right: 14),
-        child: AnimatedScale(
-          duration: const Duration(milliseconds: 220),
-          scale: isSelected ? 1.12 : 1.0,
-          child: SizedBox(
-            width: size,
-            height: size,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                img,
-                Positioned(
-                  left: size * 0.14,
-                  right: size * 0.14,
-                  bottom: size * 0.10,
-                  child: Text(
-                    fmt['label'] as String,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.poppins(
-                      fontSize: Responsive.sp(context, 10.5),
-                      fontWeight: FontWeight.w600,
-                      height: 1.1,
-                      color: Colors.black,
-                      shadows: const [
-                        Shadow(color: Colors.white, blurRadius: 4),
-                        Shadow(color: Colors.white, blurRadius: 8),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+        child: SizedBox(
+          width: size,
+          height: size,
+          child: Stack(
+            fit: StackFit.expand,
+            // The selected circle's artwork grows past the tile; letting it
+            // spill is the point.
+            clipBehavior: Clip.none,
+            children: [
+              // Only the artwork scales. Scaling the whole tile carried the
+              // engraved label with it, so the selected format's name sat
+              // lower and larger than its neighbours' — the row never lined
+              // up while one item was always selected.
+              AnimatedScale(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeInOut,
+                scale: isSelected ? 1.12 : 1.0,
+                child: img,
+              ),
+              FormatCircleLabel(
+                label: fmt['label'] as String,
+                diameter: size,
+                fontSize: 10.5,
+              ),
+            ],
           ),
         ),
       ),
