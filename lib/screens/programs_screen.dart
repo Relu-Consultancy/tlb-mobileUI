@@ -175,38 +175,25 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           children: [
                             const DarkGlowHeader(),
                             const SizedBox(height: 14),
-                            // Tall banner (matches the Venues page). Black-filled
-                            // box behind casts the gold side-glow and backs the
-                            // image (no glow bleed through transparent areas).
-                            SizedBox(
-                              height: bannerH,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Center(
-                                    child: Container(
-                                      width: bannerCardWidth,
-                                      height: bannerH,
-                                      decoration: BoxDecoration(
-                                        color: Colors.black,
-                                        borderRadius: BorderRadius.circular(22),
-                                        boxShadow: goldBannerSideGlow(),
-                                      ),
-                                    ),
-                                  ),
-                                  RepaintBoundary(
-                                    child: BannerCarousel(
-                                      events: DummyData.programsScreenBanners,
-                                      height: bannerH,
-                                      showGlow: false,
-                                      overlayStyle: true,
-                                      ctaText: 'Explore Program',
-                                      fixedCardWidth: bannerCardWidth,
-                                      cornerRadius: 22,
-                                      overlayDots: true,
-                                    ),
-                                  ),
-                                ],
+                            // Tall banner. The black fill and gold side-glow
+                            // belong to each card, so they travel with it as
+                            // the carousel scrolls — a plate behind the
+                            // carousel would sit still while the banners slid
+                            // across it. The fill also backs the image, so the
+                            // glow can't bleed through the artwork's
+                            // transparent areas.
+                            RepaintBoundary(
+                              child: BannerCarousel(
+                                events: DummyData.programsScreenBanners,
+                                height: bannerH,
+                                showGlow: false,
+                                overlayStyle: true,
+                                ctaText: 'Explore Program',
+                                fixedCardWidth: bannerCardWidth,
+                                cornerRadius: 22,
+                                overlayDots: true,
+                                cardColor: Colors.black,
+                                cardShadow: goldBannerSideGlow(),
                               ),
                             ),
                             const SizedBox(height: 26),

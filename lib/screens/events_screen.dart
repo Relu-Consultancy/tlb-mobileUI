@@ -337,38 +337,23 @@ class _EventsScreenState extends State<EventsScreen> {
                     children: [
                       const DarkGlowHeader(),
                       const SizedBox(height: 14),
-                      // Banner — tall centered card (matches the Venues page).
-                      // A black-filled box behind it casts the gold side-glow
-                      // AND backs the image so the glow can't bleed through the
-                      // banner's transparent areas.
-                      SizedBox(
-                        height: bannerH,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Center(
-                              child: Container(
-                                width: bannerCardWidth,
-                                height: bannerH,
-                                decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(22),
-                                  boxShadow: goldBannerSideGlow(),
-                                ),
-                              ),
-                            ),
-                            RepaintBoundary(
-                              child: BannerCarousel(
-                                events: DummyData.eventsScreenBanners,
-                                height: bannerH,
-                                showGlow: false,
-                                overlayStyle: true,
-                                fixedCardWidth: bannerCardWidth,
-                                cornerRadius: 22,
-                                overlayDots: true,
-                              ),
-                            ),
-                          ],
+                      // Tall banner. The black fill and gold side-glow belong
+                      // to each card, so they travel with it as the carousel
+                      // scrolls — a plate behind the carousel would sit still
+                      // while the banners slid across it. The fill also backs
+                      // the image, so the glow can't bleed through the
+                      // artwork's transparent areas.
+                      RepaintBoundary(
+                        child: BannerCarousel(
+                          events: DummyData.eventsScreenBanners,
+                          height: bannerH,
+                          showGlow: false,
+                          overlayStyle: true,
+                          fixedCardWidth: bannerCardWidth,
+                          cornerRadius: 22,
+                          overlayDots: true,
+                          cardColor: Colors.black,
+                          cardShadow: goldBannerSideGlow(),
                         ),
                       ),
                       const SizedBox(height: 26),

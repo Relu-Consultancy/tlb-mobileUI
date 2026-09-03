@@ -11,9 +11,11 @@ const Color kDarkSectionGold = Color(0xFFF5C042);
 /// Golden light spilling out a banner's left & right edges (same side-glow look
 /// as the Home Spotlight card). Sides only — no top/bottom shadow.
 ///
-/// Apply to a rounded box placed BEHIND the banner that ALSO has an opaque fill
-/// (e.g. black) — the fill backs the image so the glow can't bleed through the
-/// banner's transparent areas; only the edge spill shows.
+/// Apply to the banner CARD itself, alongside an opaque fill (e.g. black) — the
+/// fill backs the image so the glow can't bleed through the banner's
+/// transparent areas; only the edge spill shows. Keeping it on the card rather
+/// than on a plate behind the carousel is what makes the glow travel with the
+/// banner as the carousel scrolls.
 List<BoxShadow> goldBannerSideGlow({double opacity = 0.40}) => [
       BoxShadow(
         color: kDarkSectionGold.withOpacity(opacity),

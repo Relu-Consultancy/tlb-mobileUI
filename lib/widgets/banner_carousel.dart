@@ -30,6 +30,13 @@ class BannerCarousel extends StatefulWidget {
   /// Thickness of that hairline border.
   final double borderWidth;
 
+  /// An opaque fill painted behind each card's image, and the shadow that card
+  /// casts. Both belong to the card itself, so they travel with it as the
+  /// carousel scrolls — unlike a backdrop plate placed behind the whole
+  /// carousel, which stays put while the banners slide across it.
+  final Color? cardColor;
+  final List<BoxShadow>? cardShadow;
+
   /// When true, the page-dot indicator is overlaid at the bottom of the banner
   /// image (and the external dots row below is removed).
   final bool overlayDots;
@@ -85,6 +92,8 @@ class BannerCarousel extends StatefulWidget {
     this.cornerRadius,
     this.borderColor,
     this.borderWidth = 0.5,
+    this.cardColor,
+    this.cardShadow,
     this.overlayDots = false,
     this.animatedTransition = false,
     this.staticFade = false,
@@ -607,6 +616,9 @@ class _BannerCarouselState extends State<BannerCarousel>
           height: widget.height,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(radius),
+            // Backs the image so a card's own glow can't bleed through the
+            // artwork's transparent areas.
+            color: widget.cardColor,
             // Very slim border around the spotlight banner (omitted when the
             // animated accent border is drawn on top).
             border: widget.animatedAccentBorder
@@ -617,16 +629,17 @@ class _BannerCarouselState extends State<BannerCarousel>
                   ),
             // Deeper, softer drop shadow that lifts the card off the backdrop
             // (side cards inherit it but are dimmed, so only the centre pops).
-            boxShadow: widget.spotlightEnhancements
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.22),
-                      blurRadius: 30,
-                      spreadRadius: -6,
-                      offset: const Offset(0, 16),
-                    ),
-                  ]
-                : null,
+            boxShadow: widget.cardShadow ??
+                (widget.spotlightEnhancements
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.22),
+                          blurRadius: 30,
+                          spreadRadius: -6,
+                          offset: const Offset(0, 16),
+                        ),
+                      ]
+                    : null),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(radius),
