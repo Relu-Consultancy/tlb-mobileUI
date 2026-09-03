@@ -64,66 +64,72 @@ class IndianPhone {
   static String e164(String? raw) => '$dialCode${normalise(raw)}';
 }
 
-/// The fixed "+91" shown at the head of a phone field.
+/// Shared geometry for a field's leading icon — inset from the field's own
+/// left edge, its size, and the gap before the text that follows it.
 ///
-/// Used on the fields that have no country picker of their own. Where a picker
-/// already exists (Edit Profile) that stays — this is not a replacement for it.
-class IndianDialPrefix extends StatelessWidget {
-  /// Matches the surrounding field's text colour.
-  final Color? color;
+/// A phone field using [IndianDialBadge] zeroes `prefixIconConstraints` so
+/// its icon can sit flush at these numbers; a sibling field that leaves them
+/// at Material's default gets a 48x48 icon box instead, and its placeholder
+/// lands several pixels further right. Sharing the numbers — and, per field,
+/// subtracting back out the extra gap Material's `InputDecorator` inserts
+/// between `prefixIcon` and the input (see `_kDecoratorPrefixGap` at each
+/// call site) — is what keeps a stack of fields reading as one column.
+class IndianDialPrefix {
+  const IndianDialPrefix._();
 
-  /// Optional leading glyph, kept so a field that already had a phone icon
-  /// does not lose it — its siblings keep theirs, and dropping it here alone
-  /// would make the row look unlike the fields around it.
-  final IconData? icon;
-
-  const IndianDialPrefix({super.key, this.color, this.icon});
-
-  /// Geometry a plain field's leading icon must copy to line up with this one.
-  ///
-  /// A phone field zeroes `prefixIconConstraints` so the dial code can sit
-  /// flush; a sibling field that leaves them at Material's default gets a
-  /// 48x48 icon box instead, and its placeholder lands several pixels further
-  /// right than the "+91" beside it. Sharing the numbers is what keeps a
-  /// stack of fields reading as one column.
   static const double inset = 14;
   static const double gap = 8;
   static const double iconSize = 20;
 
   /// The x at which the first glyph of text sits in any field using this
-  /// geometry — the "+91" here, a placeholder in a plain field.
+  /// geometry — a placeholder, a typed value, or the digits in a phone field
+  /// once [IndianDialBadge] moves "+91" out of this row entirely.
   static const double textOffset = inset + iconSize + gap;
+}
 
-  /// A leading icon positioned to match. Pair with
-  /// `prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0)`.
-  static Widget fieldIcon(IconData icon) => Padding(
-        padding: const EdgeInsets.only(left: inset, right: gap),
-        child: Icon(icon, size: iconSize, color: Colors.grey.shade500),
-      );
+/// Floats a "+91" badge over [child]'s top-left corner instead of showing the
+/// dial code inline before the digits.
+///
+/// A dial code shown inline unavoidably claims some of the field's own
+/// leading width — there is no size small enough to keep "+91" legible and
+/// still let the digits start where every sibling field's text does (at
+/// [IndianDialPrefix.textOffset]). [child] therefore carries no dial code at
+/// all; it is a plain field, with the exact same leading icon every other
+/// field in the form uses. This widget adds "+91" back as a small label
+/// overlapping the field's top border — visible, but outside the row that
+/// decides where the digits begin.
+class IndianDialBadge extends StatelessWidget {
+  final Widget child;
+
+  const IndianDialBadge({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: inset, right: 10),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: iconSize, color: Colors.grey.shade500),
-            const SizedBox(width: gap),
-          ],
-          Text(
-            IndianPhone.dialCode,
-            style: GoogleFonts.poppins(
-              fontSize: Responsive.sp(context, 14),
-              fontWeight: FontWeight.w500,
-              color: color ?? const Color(0xFF262626),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        child,
+        Positioned(
+          left: IndianDialPrefix.inset - 5,
+          top: -8,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: const Color(0xFFE0E0E0)),
+            ),
+            child: Text(
+              IndianPhone.dialCode,
+              style: GoogleFonts.poppins(
+                fontSize: Responsive.sp(context, 10.5),
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade600,
+              ),
             ),
           ),
-          const SizedBox(width: 10),
-          Container(width: 1, height: 20, color: const Color(0xFFDDDDE3)),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

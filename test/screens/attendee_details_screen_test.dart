@@ -162,5 +162,30 @@ void main() {
         expect(r.left, rects.first.left);
       }
     });
+
+    // "+91" is a floating badge over the field's top border (see
+    // IndianDialBadge), not part of this row — so a typed number, not just
+    // the hint, is what has to line up with the name field.
+    testWidgets(
+        'TC_S_AD_ALIGN3 — a typed phone number lines up with the name field',
+        (tester) async {
+      await _pump(
+        tester,
+        AttendeeDetailsScreen(
+          event: _event(price: 1500),
+          batch: _batch(fee: '500'),
+          selectedDate: '1 Jan',
+          selectedTime: '10:00',
+          bookingType: 'class',
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField).last, '8778974651');
+      await tester.pump();
+
+      final nameHintLeft = tester.getRect(find.text('Full name')).left;
+      final digitsLeft = tester.getRect(find.text('8778974651')).left;
+      expect(digitsLeft, nameHintLeft);
+    });
   });
 }

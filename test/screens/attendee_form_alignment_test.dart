@@ -27,11 +27,12 @@ void main() {
       await pumpTLBApp(tester, TicketBookingScreen(event: _event()));
       await tester.pumpAndSettle();
 
-      final lefts = ['Attendee name', 'Select age', '+91']
+      // "+91" is a floating badge now (see TC_S_TB_ALIGN5), not part of this
+      // row, so it is no longer one of the three columns being compared here.
+      final lefts = ['Attendee name', 'Select age']
           .map((t) => tester.getRect(find.text(t).first).left)
           .toList();
       expect(lefts[1], lefts[0], reason: 'age row off the name placeholder');
-      expect(lefts[2], lefts[0], reason: 'dial code off the name placeholder');
     });
 
     testWidgets('TC_S_TB_ALIGN2 — the three leading icons share one column',
@@ -76,6 +77,41 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Attendee name'), findsOneWidget);
       expect(find.text('Child name'), findsNothing);
+    });
+
+    // A "+91" shown inline before the number unavoidably eats into the
+    // field's own leading width — there is no size for it small enough to
+    // stay legible and still let the digits start where the name field's
+    // text does. Floating it above the border instead (see IndianDialBadge)
+    // is what makes an actually-typed number line up with the name, not just
+    // the empty placeholders.
+    testWidgets('TC_S_TB_ALIGN5 — a typed phone number lines up with the name',
+        (tester) async {
+      tester.view.physicalSize = const Size(430, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await pumpTLBApp(tester, TicketBookingScreen(event: _event()));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+          find.byKey(const ValueKey('parentPhoneField')), '8778974651');
+      await tester.pump();
+
+      final nameLeft = tester.getRect(find.text('Attendee name')).left;
+      final digitsLeft = tester.getRect(find.text('8778974651')).left;
+      expect(digitsLeft, nameLeft);
+    });
+
+    testWidgets('TC_S_TB_ALIGN6 — the +91 badge still shows, above the field',
+        (tester) async {
+      await pumpTLBApp(tester, TicketBookingScreen(event: _event()));
+      await tester.pumpAndSettle();
+
+      final badgeBottom = tester.getRect(find.text('+91')).bottom;
+      final fieldTop =
+          tester.getRect(find.byKey(const ValueKey('parentPhoneField'))).top;
+      expect(badgeBottom, lessThanOrEqualTo(fieldTop + 10));
     });
   });
 }

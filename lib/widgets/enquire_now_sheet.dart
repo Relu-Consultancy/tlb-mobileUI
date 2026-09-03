@@ -398,7 +398,7 @@ class _EnquireNowDialogState extends State<_EnquireNowDialog> {
     List<TextInputFormatter>? inputFormatters,
     bool dialPrefix = false,
   }) {
-    return TextFormField(
+    final field = TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       validator: validator,
@@ -407,9 +407,6 @@ class _EnquireNowDialogState extends State<_EnquireNowDialog> {
           fontSize: Responsive.sp(context, 13),
           color: AppColors.textPrimary),
       decoration: InputDecoration(
-        prefixIcon: dialPrefix ? const IndianDialPrefix() : null,
-        prefixIconConstraints:
-            dialPrefix ? const BoxConstraints(minWidth: 0, minHeight: 0) : null,
         hintText: hint,
         hintStyle: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
@@ -426,6 +423,11 @@ class _EnquireNowDialogState extends State<_EnquireNowDialog> {
             const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       ),
     );
+    // None of this sheet's fields carry a leading icon, so the mobile
+    // field's "+91" no longer needs to reserve a wider prefix for one
+    // either — it floats above the field instead, and the digits start
+    // flush with every other field's text (see IndianDialBadge).
+    return dialPrefix ? IndianDialBadge(child: field) : field;
   }
 
   Widget _ageDropdownFormField(

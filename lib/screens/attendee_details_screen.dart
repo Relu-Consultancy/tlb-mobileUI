@@ -326,7 +326,7 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
     bool dialPrefix = false,
     String? errorText,
   }) {
-    return TextField(
+    final field = TextField(
       controller: controller,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
@@ -335,21 +335,20 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
         color: AppColors.textPrimary,
       ),
       decoration: InputDecoration(
-        // Both branches use the same geometry and both zero the constraints.
-        // Leaving them at Material's default on the plain branch gives that
-        // icon a 48x48 box, which pushed its placeholder off the column the
-        // "+91" below it sits on.
-        prefixIcon: dialPrefix
-            ? const IndianDialPrefix(icon: Icons.phone_outlined)
-            : Padding(
-                padding: const EdgeInsets.only(
-                  left: IndianDialPrefix.inset,
-                  right: IndianDialPrefix.gap - _kDecoratorPrefixGap,
-                ),
-                child: Icon(icon,
-                    size: IndianDialPrefix.iconSize,
-                    color: Colors.grey.shade500),
-              ),
+        // Same icon, same geometry, on every field regardless of dialPrefix
+        // — a phone field showing "+91" inline here used to swap this for a
+        // wider icon+code+divider block, which pushed the digits well past
+        // where this icon (and the name/age text beside it) sit. The dial
+        // code is now a floating badge instead (see [IndianDialBadge]) so it
+        // no longer needs its own room in this row at all.
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(
+            left: IndianDialPrefix.inset,
+            right: IndianDialPrefix.gap - _kDecoratorPrefixGap,
+          ),
+          child: Icon(icon,
+              size: IndianDialPrefix.iconSize, color: Colors.grey.shade500),
+        ),
         prefixIconConstraints:
             const BoxConstraints(minWidth: 0, minHeight: 0),
         constraints: const BoxConstraints(minHeight: _kFieldHeight),
@@ -373,6 +372,7 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
         contentPadding: _kFieldContentPadding,
       ),
     );
+    return dialPrefix ? IndianDialBadge(child: field) : field;
   }
 
   Widget _ageDropdown(BuildContext context) {

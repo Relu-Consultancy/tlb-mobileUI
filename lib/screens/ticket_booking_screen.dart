@@ -710,33 +710,46 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           ),
           const SizedBox(height: 12),
           // Parents contact number
-          TextField(
-            controller: _parentPhoneController,
-            key: const ValueKey('parentPhoneField'),
-            keyboardType: TextInputType.phone,
-            inputFormatters: IndianPhone.inputFormatters,
-            style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14)),
-            decoration: InputDecoration(
-              // Fixed +91 rather than a picker: this is a local contact number
-              // for the organiser, and the app is India-only.
-              prefixIcon: const IndianDialPrefix(icon: Icons.phone_outlined),
-              prefixIconConstraints:
-                  const BoxConstraints(minWidth: 0, minHeight: 0),
-              errorText: IndianPhone.validate(
-                _parentPhoneController.text,
-                required: false,
+          IndianDialBadge(
+            child: TextField(
+              controller: _parentPhoneController,
+              key: const ValueKey('parentPhoneField'),
+              keyboardType: TextInputType.phone,
+              inputFormatters: IndianPhone.inputFormatters,
+              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14)),
+              decoration: InputDecoration(
+                // Same icon, same geometry as the name field above — "+91" is
+                // a floating badge now (see IndianDialBadge), not part of
+                // this row, so this field needs no wider prefix to make room
+                // for it.
+                prefixIcon: const Padding(
+                  padding: EdgeInsets.only(
+                    left: IndianDialPrefix.inset,
+                    right: IndianDialPrefix.gap - _kDecoratorPrefixGap,
+                  ),
+                  child: Icon(Icons.phone_outlined,
+                      size: IndianDialPrefix.iconSize,
+                      color: Color(0xFF9E9E9E)),
+                ),
+                prefixIconConstraints:
+                    const BoxConstraints(minWidth: 0, minHeight: 0),
+                errorText: IndianPhone.validate(
+                  _parentPhoneController.text,
+                  required: false,
+                ),
+                hintText: 'Parents contact number',
+                hintStyle: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 13),
+                    color: Colors.grey.shade400),
+                filled: true,
+                fillColor: const Color(0xFFF5F5F5),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                constraints: const BoxConstraints(minHeight: _kFieldHeight),
+                contentPadding: _kFieldContentPadding,
               ),
-              hintText: 'Parents contact number',
-              hintStyle: GoogleFonts.poppins(
-                  fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
-              filled: true,
-              fillColor: const Color(0xFFF5F5F5),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              constraints: const BoxConstraints(minHeight: _kFieldHeight),
-              contentPadding: _kFieldContentPadding,
             ),
           ),
         ],

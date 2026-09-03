@@ -71,6 +71,27 @@ void main() {
       expect(find.text('+91'), findsOneWidget);
     });
 
+    // "+91" floats above the field's border rather than sitting inline
+    // before the digits (see IndianDialBadge) — a venue enquiry's mobile
+    // field is full width, with no age dropdown beside it, so a typed
+    // number should land in exactly the same column as the attendee name
+    // field above it.
+    testWidgets(
+        'TC_W_IN_013 — a typed phone number lines up with the attendee name',
+        (tester) async {
+      await _openSheet(tester, isVenue: true);
+
+      await tester.enterText(
+          find.byType(TextFormField).first, 'Ravi Sharma');
+      await tester.enterText(
+          find.byType(TextFormField).at(1), '8778974651');
+      await tester.pump();
+
+      final nameLeft = tester.getRect(find.text('Ravi Sharma')).left;
+      final digitsLeft = tester.getRect(find.text('8778974651')).left;
+      expect(digitsLeft, nameLeft);
+    });
+
     // Everything else in this flow — the CTA that opens it, its own submit
     // button, the success dialog — says "Enquiry". The title said "Inquire".
     testWidgets('TC_W_IN_012 — the title is spelled Enquire', (tester) async {
