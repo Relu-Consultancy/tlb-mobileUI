@@ -469,7 +469,9 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                     DetailGallery(
                       images: _galleryImages,
                       onSeeAll: () => Navigator.push(context,
-                          MaterialPageRoute(builder: (_) => GalleryScreen(event: _eventForWidgets))),
+                          MaterialPageRoute(builder: (_) => GalleryScreen(
+                              event: _eventForWidgets,
+                              images: _galleryImages))),
                     ),
 
                     const SizedBox(height: 32),

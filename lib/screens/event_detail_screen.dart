@@ -434,7 +434,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     DetailGallery(
                       images: _galleryImages,
                       onSeeAll: () => Navigator.push(context,
-                          MaterialPageRoute(builder: (_) => GalleryScreen(event: _eventForSheets))),
+                          MaterialPageRoute(builder: (_) => GalleryScreen(
+                              event: _eventForSheets,
+                              images: _galleryImages))),
                     ),
 
                     const SizedBox(height: 32),
