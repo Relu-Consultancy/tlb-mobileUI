@@ -279,14 +279,22 @@ class EventsListingService {
 
   /// POST /api/v1/listings/venues/{id}/enquiry/ — submit a venue enquiry
   /// (used for enquiry-only venues).
+  ///
+  /// The endpoint was cut back to `attendee_name`, `mobile`,
+  /// `availability_slot_id` and `message`. The name field was renamed from
+  /// `name`, and the whole event-planning block — `email`, `guest_count`,
+  /// `occasion`, `event_date`, `budget`, `duration_hours`, `requirements` —
+  /// was removed from the schema. No age here: a venue enquiry is about
+  /// hiring a space, not about a particular child.
+  ///
+  /// `availability_slot_id` is still accepted but is not sent: the enquiry
+  /// sheet has no slot picker, and a preferred slot is asked for in the
+  /// message instead.
   static Future<void> submitVenueEnquiry({
     required String listingId,
-    required String studentName,
+    required String attendeeName,
     required String mobile,
-    String? parentName,
-    int? studentAge,
     String? message,
-    String? area,
   }) async {
     try {
       // Was /enquiries/ (plural) — that route only exists for partners
@@ -295,20 +303,9 @@ class EventsListingService {
       final url =
           Uri.parse('$_base/api/v1/listings/venues/$listingId/enquiry/');
       final reqBody = {
-        // The venue schema's required contact-name field is `name`, not
-        // `student_name` — that key only exists on classes/programs, which
-        // are enquiring about a child attending. Sending `student_name` left
-        // this required field missing entirely, so the request would still
-        // have been rejected even once the URL was fixed.
-        'name': studentName,
+        'attendee_name': attendeeName,
         'mobile': mobile,
-        // parent_name, student_age and area are not fields on this endpoint
-        // (confirmed against the published schema); left harmless as extras
-        // rather than dropped, since the API ignores unknown keys.
-        if (parentName != null && parentName.isNotEmpty) 'parent_name': parentName,
-        if (studentAge != null) 'student_age': studentAge,
         if (message != null && message.isNotEmpty) 'message': message,
-        if (area != null && area.isNotEmpty) 'area': area,
       };
 
       final res = await http

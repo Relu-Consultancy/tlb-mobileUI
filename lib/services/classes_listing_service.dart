@@ -139,26 +139,33 @@ class ClassesListingService {
 
   // ── Enquiry ───────────────────────────────────────────────────────────────
 
+  /// POST /api/v1/listings/classes/{id}/enquiries/
+  ///
+  /// The endpoint was cut back to a minimal, shared shape: `batch_id`,
+  /// `attendee_name`, `student_age`, `mobile`, `message`. The name field was
+  /// renamed from `student_name`, and `parent_name` and `area` were removed
+  /// from the schema outright — sending them now is not merely ignored, it is
+  /// data the customer was asked for and the organiser will never see, so the
+  /// form no longer collects them.
   static Future<void> submitEnquiry({
     required String listingId,
-    required String studentName,
+    required String attendeeName,
     required String mobile,
-    String? parentName,
     int? studentAge,
     int? batchId,
     String? message,
-    String? area,
   }) async {
     try {
       final url = Uri.parse('$_base/api/v1/listings/classes/$listingId/enquiries/');
       final body = {
-        'student_name': studentName,
+        'attendee_name': attendeeName,
         'mobile': mobile,
-        if (parentName != null && parentName.isNotEmpty) 'parent_name': parentName,
         if (studentAge != null) 'student_age': studentAge,
+        // Optional preferred batch. Unchanged by the trim, and still not
+        // surfaced in the enquiry sheet — a customer who wants a particular
+        // batch says so in the message.
         if (batchId != null) 'batch_id': batchId,
         if (message != null && message.isNotEmpty) 'message': message,
-        if (area != null && area.isNotEmpty) 'area': area,
       };
 
       final res = await http.post(

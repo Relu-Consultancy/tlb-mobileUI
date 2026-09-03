@@ -160,15 +160,19 @@ class ProgramsListingService {
 
   // ── Enquiry ───────────────────────────────────────────────────────────────
 
+  /// POST /api/v1/listings/programs/{id}/enquire/
+  ///
+  /// The endpoint was cut back to `attendee_name`, `contact_number`,
+  /// `student_age` and `message`. The name field was renamed from
+  /// `student_name`; `email` was removed, and with it the old
+  /// "contact_number or email, at least one" rule — a phone number is now
+  /// simply required. `parent_name`, `batch_id` and `area` are gone too.
   static Future<void> submitEnquiry({
     required String listingId,
-    required String studentName,
+    required String attendeeName,
     required String mobile,
-    String? parentName,
     int? studentAge,
-    int? batchId,
     String? message,
-    String? area,
   }) async {
     try {
       // Was /enquiries/ (plural) — that route only exists for partners
@@ -176,20 +180,14 @@ class ProgramsListingService {
       // singular verb form.
       final url = Uri.parse('$_base/api/v1/listings/programs/$listingId/enquire/');
       final body = {
-        'student_name': studentName,
+        'attendee_name': attendeeName,
         // The program schema's contact field is `contact_number`, not
         // `mobile` — that name is only correct for classes and venues.
         // Sending `mobile` here left the field unrecognised, so the number
         // never reached the organiser even once the URL was fixed.
         'contact_number': mobile,
-        if (parentName != null) 'parent_name': parentName,
         if (studentAge != null) 'student_age': studentAge,
-        // batch_id and area are not fields on this endpoint (confirmed
-        // against the published schema); left harmless as extras rather than
-        // dropped, since the API ignores unknown keys.
-        if (batchId != null) 'batch_id': batchId,
         'message': message ?? '',
-        if (area != null) 'area': area,
       };
 
       final res = await http.post(

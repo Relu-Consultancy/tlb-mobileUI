@@ -47,10 +47,8 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
   final _formKey = GlobalKey<FormState>();
   final _scrollCtrl = ScrollController();
 
-  final _childName = TextEditingController();
+  final _attendeeName = TextEditingController();
   final _mobile = TextEditingController();
-  final _parentName = TextEditingController();
-  final _locality = TextEditingController();
   final _message = TextEditingController();
   String? _selectedAge;
   int _msgLen = 0;
@@ -60,14 +58,17 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
   // so errors clear as fields are filled.
   AutovalidateMode _autoValidate = AutovalidateMode.disabled;
 
+  /// A venue enquiry carries no age. It is about hiring a space rather than
+  /// about a particular child attending, and the venue endpoint has no
+  /// `student_age` field to send one to.
+  bool get _asksAge => !widget.isVenue;
+
   static const _ages = ['4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'];
 
   @override
   void dispose() {
-    _childName.dispose();
+    _attendeeName.dispose();
     _mobile.dispose();
-    _parentName.dispose();
-    _locality.dispose();
     _message.dispose();
     _scrollCtrl.dispose();
     super.dispose();
@@ -89,7 +90,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
       setState(() => _autoValidate = AutovalidateMode.onUserInteraction);
       // Scroll to the top so the first error is visible — without this the
       // user might be focused on the Message field at the bottom and miss
-      // errors on the Student-Details fields above.
+      // errors on the Attendee-Details fields above.
       if (_scrollCtrl.hasClients) {
         _scrollCtrl.animateTo(
           0,
@@ -102,36 +103,30 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
 
     setState(() => _isSubmitting = true);
     try {
+      final age = _selectedAge == null ? null : int.tryParse(_selectedAge!);
+
       if (widget.isVenue) {
         await EventsListingService.submitVenueEnquiry(
           listingId: widget.listingId,
-          studentName: _childName.text.trim(),
+          attendeeName: _attendeeName.text.trim(),
           mobile: _mobile.text.trim(),
-          parentName: _parentName.text.trim(),
-          studentAge:
-              _selectedAge != null ? int.tryParse(_selectedAge!) : null,
           message: _message.text.trim(),
-          area: _locality.text.trim(),
         );
       } else if (widget.isProgram) {
         await ProgramsListingService.submitEnquiry(
           listingId: widget.listingId,
-          studentName: _childName.text.trim(),
+          attendeeName: _attendeeName.text.trim(),
           mobile: _mobile.text.trim(),
-          parentName: _parentName.text.trim(),
-          studentAge: int.tryParse(_selectedAge!) ?? 0,
+          studentAge: age,
           message: _message.text.trim(),
-          area: _locality.text.trim(),
         );
       } else {
         await ClassesListingService.submitEnquiry(
           listingId: widget.listingId,
-          studentName: _childName.text.trim(),
+          attendeeName: _attendeeName.text.trim(),
           mobile: _mobile.text.trim(),
-          parentName: _parentName.text.trim(),
-          studentAge: int.tryParse(_selectedAge!),
+          studentAge: age,
           message: _message.text.trim(),
-          area: _locality.text.trim(),
         );
       }
 
@@ -205,70 +200,53 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
 
               const SizedBox(height: 20),
 
-              // ── Student Details ──
-              _sectionHeader(Icons.school_outlined, 'Student Details', required: true),
-              const SizedBox(height: 10),
-
-              _field(
-                _childName,
-                'Child name*',
-                validator: (v) => _requiredValidator(v, 'the child name'),
-              ),
-              const SizedBox(height: 10),
-
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: _ageDropdownFormField(
-                      context,
-                      value: _selectedAge,
-                      onChanged: (v) => setState(() => _selectedAge = v),
-                      ages: _ages,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _field(
-                      _mobile,
-                      'Mobile number*',
-                      keyboardType: TextInputType.phone,
-                      inputFormatters: IndianPhone.inputFormatters,
-                      dialPrefix: true,
-                      validator: _mobileValidator,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              _field(
-                _parentName,
-                'Enter parent/guardian name*',
-                validator: (v) =>
-                    _requiredValidator(v, "the parent/guardian's name"),
-              ),
-
-              const SizedBox(height: 20),
-
-              // ── Locality ──
-              // Required for every listing type. The published schema marks
-              // `area` optional (and programs/venues don't declare it at all),
-              // but an enquiry without it isn't actionable for the organiser.
-              _sectionHeader(Icons.location_on_outlined, 'Locality / Area',
+              // ── Attendee Details ──
+              // Trimmed to the minimal shape the API now accepts: a name, an
+              // age where the listing type has one, and a single contact
+              // number. The parent/guardian name and the locality box went
+              // with it — `parent_name` and `area` no longer exist on any of
+              // the three enquiry endpoints, so asking for them only took
+              // something off the customer that would be thrown away.
+              _sectionHeader(Icons.person_outline, 'Attendee Details',
                   required: true),
               const SizedBox(height: 10),
+
               _field(
-                _locality,
-                'Enter your locality (e.g. Bandra)',
-                validator: (v) => _requiredValidator(v, 'your locality'),
+                _attendeeName,
+                'Attendee name*',
+                validator: (v) => _requiredValidator(v, "the attendee's name"),
               ),
+              const SizedBox(height: 10),
+
+              if (_asksAge)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _ageDropdownFormField(
+                        context,
+                        value: _selectedAge,
+                        onChanged: (v) => setState(() => _selectedAge = v),
+                        ages: _ages,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(child: _mobileField()),
+                  ],
+                )
+              else
+                // Full width rather than half of an otherwise empty row: with
+                // no age beside it, a half-width number box sits against dead
+                // space and reads as a field that failed to render.
+                _mobileField(),
 
               const SizedBox(height: 20),
 
               // ── Message ──
-              // Required everywhere now, not just on programs — the schema
-              // only mandates `message` for programs, but the form asks for it
-              // on every type.
+              // Required everywhere, not just on programs. `message` is a
+              // field on all three trimmed endpoints, and with the enquiry
+              // now down to a name and a number it is the only place the
+              // customer can say what they actually want.
               _sectionHeader(
                 Icons.chat_bubble_outline,
                 'Message',
@@ -387,6 +365,17 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
       ],
     );
   }
+
+  /// Shared by both layouts — beside the age dropdown, or full width on a
+  /// venue — so the two arrangements cannot drift apart.
+  Widget _mobileField() => _field(
+        _mobile,
+        'Mobile number*',
+        keyboardType: TextInputType.phone,
+        inputFormatters: IndianPhone.inputFormatters,
+        dialPrefix: true,
+        validator: _mobileValidator,
+      );
 
   Widget _field(
     TextEditingController controller,
