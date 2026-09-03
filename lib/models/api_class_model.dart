@@ -31,6 +31,11 @@ class ApiClassBatch {
   final bool isActive;
   final String? fee;
 
+  /// The date this batch actually begins, or null when the partner has not
+  /// set one. There is no matching `end_date` on this schema — a class batch
+  /// is an open-ended recurring schedule, not a bounded run.
+  final DateTime? startDate;
+
   const ApiClassBatch({
     required this.id,
     required this.name,
@@ -40,6 +45,7 @@ class ApiClassBatch {
     required this.capacity,
     required this.isActive,
     this.fee,
+    this.startDate,
   });
 
   factory ApiClassBatch.fromJson(Map<String, dynamic> json) => ApiClassBatch(
@@ -51,6 +57,7 @@ class ApiClassBatch {
         capacity: json['capacity'] as int,
         isActive: json['is_active'] as bool,
         fee: json['fee']?.toString(),
+        startDate: DateTime.tryParse((json['start_date'] as String?) ?? ''),
       );
 }
 

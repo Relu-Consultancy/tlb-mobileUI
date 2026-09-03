@@ -116,4 +116,51 @@ void main() {
       expect(detail.isPaused, isFalse);
     });
   });
+
+  group('ApiClassBatch.startDate', () {
+    // The only schedule-anchor field the API sends for a class batch — there
+    // is no matching end_date on this schema (unlike programs/venues, whose
+    // batches carry both). A batch with no start_date is a fully open-ended
+    // recurring schedule.
+    test('parses a date string', () {
+      final batch = ApiClassBatch.fromJson({
+        'id': 61,
+        'name': 'Morning Batch',
+        'days': ['mon', 'tue'],
+        'start_time': '16:00:00',
+        'end_time': '18:00:00',
+        'capacity': 25,
+        'is_active': true,
+        'start_date': '2026-09-10',
+      });
+      expect(batch.startDate, DateTime(2026, 9, 10));
+    });
+
+    test('is null when the API sends null', () {
+      final batch = ApiClassBatch.fromJson({
+        'id': 61,
+        'name': 'Morning Batch',
+        'days': ['mon', 'tue'],
+        'start_time': '16:00:00',
+        'end_time': '18:00:00',
+        'capacity': 25,
+        'is_active': true,
+        'start_date': null,
+      });
+      expect(batch.startDate, isNull);
+    });
+
+    test('is null when the API omits the field entirely', () {
+      final batch = ApiClassBatch.fromJson({
+        'id': 61,
+        'name': 'Morning Batch',
+        'days': ['mon', 'tue'],
+        'start_time': '16:00:00',
+        'end_time': '18:00:00',
+        'capacity': 25,
+        'is_active': true,
+      });
+      expect(batch.startDate, isNull);
+    });
+  });
 }

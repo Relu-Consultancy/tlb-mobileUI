@@ -40,13 +40,25 @@ String _fmtDate(DateTime d) {
 }
 
 List<String> _nextDates(ApiClassBatch batch, {int count = 5}) {
+  final startDate = batch.startDate;
+  // No real start date from the backend — this batch is an open-ended
+  // recurring schedule with no defined beginning, so there is nothing
+  // concrete to offer a date picker for. The dates this used to compute were
+  // just the next N weekday matches from today, invented client-side rather
+  // than sourced from the API.
+  if (startDate == null) return [];
+
   final weekdays = batch.days
       .map((d) => _kDayNum[d.toLowerCase()] ?? 0)
       .where((n) => n > 0)
       .toSet();
   if (weekdays.isEmpty) return [];
+
   final result = <String>[];
-  var cursor = DateTime.now();
+  final today = DateTime.now();
+  // Never a date before the batch's real start, and never one already past.
+  var cursor =
+      startDate.isAfter(today) ? startDate.subtract(const Duration(days: 1)) : today;
   while (result.length < count) {
     cursor = cursor.add(const Duration(days: 1));
     if (weekdays.contains(cursor.weekday)) result.add(_fmtDate(cursor));
