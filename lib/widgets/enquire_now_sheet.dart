@@ -10,7 +10,7 @@ import '../services/classes_listing_service.dart';
 import '../services/programs_listing_service.dart';
 import '../services/events_listing_service.dart';
 
-void showInquireNow(
+void showEnquireNow(
   BuildContext context, {
   required String listingId,
   bool isProgram = false,
@@ -19,7 +19,7 @@ void showInquireNow(
   showDialog(
     context: context,
     barrierDismissible: true,
-    builder: (_) => _InquireNowDialog(
+    builder: (_) => _EnquireNowDialog(
       listingId: listingId,
       isProgram: isProgram,
       isVenue: isVenue,
@@ -29,21 +29,21 @@ void showInquireNow(
 
 // ── Enquiry form dialog ────────────────────────────────────────────────────
 
-class _InquireNowDialog extends StatefulWidget {
+class _EnquireNowDialog extends StatefulWidget {
   final String listingId;
   final bool isProgram;
   final bool isVenue;
-  const _InquireNowDialog({
+  const _EnquireNowDialog({
     required this.listingId,
     this.isProgram = false,
     this.isVenue = false,
   });
 
   @override
-  State<_InquireNowDialog> createState() => _InquireNowDialogState();
+  State<_EnquireNowDialog> createState() => _EnquireNowDialogState();
 }
 
-class _InquireNowDialogState extends State<_InquireNowDialog> {
+class _EnquireNowDialogState extends State<_EnquireNowDialog> {
   final _formKey = GlobalKey<FormState>();
   final _scrollCtrl = ScrollController();
 
@@ -62,6 +62,19 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
   /// about a particular child attending, and the venue endpoint has no
   /// `student_age` field to send one to.
   bool get _asksAge => !widget.isVenue;
+
+  /// For the same reason, the person a venue enquiry names is whoever is
+  /// arranging the booking — not an attendee. The payload key stays
+  /// `attendee_name` on all three types; only the wording differs.
+  bool get _namesContact => widget.isVenue;
+
+  String get _sectionTitle => _namesContact ? 'Contact Person' : 'Attendee Details';
+
+  String get _nameHint =>
+      _namesContact ? 'Contact person name*' : 'Attendee name*';
+
+  String get _nameLabel =>
+      _namesContact ? "the contact person's name" : "the attendee's name";
 
   static const _ages = ['4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'];
 
@@ -169,7 +182,7 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Inquire Now',
+                          'Enquire Now',
                           style: GoogleFonts.poppins(
                             fontSize: Responsive.sp(context, 18),
                             fontWeight: FontWeight.w500,
@@ -207,14 +220,14 @@ class _InquireNowDialogState extends State<_InquireNowDialog> {
               // with it — `parent_name` and `area` no longer exist on any of
               // the three enquiry endpoints, so asking for them only took
               // something off the customer that would be thrown away.
-              _sectionHeader(Icons.person_outline, 'Attendee Details',
+              _sectionHeader(Icons.person_outline, _sectionTitle,
                   required: true),
               const SizedBox(height: 10),
 
               _field(
                 _attendeeName,
-                'Attendee name*',
-                validator: (v) => _requiredValidator(v, "the attendee's name"),
+                _nameHint,
+                validator: (v) => _requiredValidator(v, _nameLabel),
               ),
               const SizedBox(height: 10),
 

@@ -21,7 +21,7 @@ import '../models/api_review_model.dart';
 import '../widgets/app_loader.dart';
 import 'gallery_screen.dart';
 import 'select_program_batch_screen.dart';
-import '../widgets/inquire_now_sheet.dart';
+import '../widgets/enquire_now_sheet.dart';
 
 class ProgramDetailScreen extends StatefulWidget {
   final EventModel event;
@@ -638,7 +638,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                 ),
                               );
                             } else {
-                              showInquireNow(context,
+                              showEnquireNow(context,
                                   listingId: widget.event.id, isProgram: true);
                             }
                           },

@@ -21,7 +21,7 @@ import '../models/api_review_model.dart';
 import '../widgets/app_loader.dart';
 import 'gallery_screen.dart';
 import 'select_batch_screen.dart';
-import '../widgets/inquire_now_sheet.dart';
+import '../widgets/enquire_now_sheet.dart';
 
 class ClassDetailScreen extends StatefulWidget {
   final EventModel event;
@@ -524,7 +524,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                               ),
                             );
                           } else {
-                            showInquireNow(context,
+                            showEnquireNow(context,
                                 listingId: _detail?.id ?? widget.event.id);
                           }
                         },

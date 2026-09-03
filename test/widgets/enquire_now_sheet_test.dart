@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tlb_mobile_ui/widgets/inquire_now_sheet.dart';
+import 'package:tlb_mobile_ui/widgets/enquire_now_sheet.dart';
 
 import '../helpers/test_setup.dart';
 
@@ -15,7 +15,7 @@ Future<void> _openSheet(
       builder: (context) => Scaffold(
         body: Center(
           child: ElevatedButton(
-            onPressed: () => showInquireNow(
+            onPressed: () => showEnquireNow(
               context,
               listingId: 'l1',
               isVenue: isVenue,
@@ -32,7 +32,7 @@ Future<void> _openSheet(
 }
 
 void main() {
-  group('Inquire Now form', () {
+  group('Enquire Now form', () {
     // Locality and Message were labelled "(Optional)" but an enquiry is not
     // actionable without them.
     testWidgets('TC_W_IN_001 — no section is labelled Optional',
@@ -48,8 +48,9 @@ void main() {
       await tester.pumpAndSettle();
 
       // Still on the form — validation blocked it before any request.
-      expect(find.text('Inquire Now'), findsOneWidget);
-      expect(find.text("Please enter the attendee's name."), findsOneWidget);
+      expect(find.text('Enquire Now'), findsOneWidget);
+      expect(
+          find.text("Please enter the contact person's name."), findsOneWidget);
       expect(find.text('Please enter a short message.'), findsOneWidget);
     });
 
@@ -69,13 +70,21 @@ void main() {
       await _openSheet(tester, isVenue: true);
       expect(find.text('+91'), findsOneWidget);
     });
+
+    // Everything else in this flow — the CTA that opens it, its own submit
+    // button, the success dialog — says "Enquiry". The title said "Inquire".
+    testWidgets('TC_W_IN_012 — the title is spelled Enquire', (tester) async {
+      await _openSheet(tester, isVenue: true);
+      expect(find.text('Enquire Now'), findsOneWidget);
+      expect(find.textContaining('Inquire'), findsNothing);
+    });
   });
 
   // The backend cut all three enquiry endpoints down to a minimal shape on
   // 2026-09-03. `parent_name` and `area` are no longer fields on any of them,
   // so a form that still asks for them takes details off the customer that
   // the organiser will never receive.
-  group('Inquire Now — trimmed field set', () {
+  group('Enquire Now — trimmed field set', () {
     for (final type in const ['class', 'program', 'venue']) {
       testWidgets('TC_W_IN_006 — $type asks for no parent name or locality',
           (tester) async {
@@ -85,6 +94,10 @@ void main() {
           isProgram: type == 'program',
         );
 
+        if (type == 'venue') {
+          expect(find.textContaining('Attendee'), findsNothing);
+          expect(find.textContaining('attendee'), findsNothing);
+        }
         expect(find.textContaining('parent'), findsNothing);
         expect(find.textContaining('guardian'), findsNothing);
         expect(find.textContaining('Locality'), findsNothing);
@@ -99,11 +112,21 @@ void main() {
           isProgram: type == 'program',
         );
 
+        // A venue enquiry names whoever is arranging the booking, not an
+        // attendee — the payload key is `attendee_name` either way.
+        final venue = type == 'venue';
+
         // The two section headers are Text.rich with a red '*' span, so
         // an exact match against the label alone never hits them.
-        expect(find.textContaining('Attendee Details'), findsOneWidget);
+        expect(
+          find.textContaining(venue ? 'Contact Person' : 'Attendee Details'),
+          findsOneWidget,
+        );
         expect(find.textContaining('Message'), findsOneWidget);
-        expect(find.text('Attendee name*'), findsOneWidget);
+        expect(
+          find.text(venue ? 'Contact person name*' : 'Attendee name*'),
+          findsOneWidget,
+        );
         expect(find.text('Mobile number*'), findsOneWidget);
       });
     }

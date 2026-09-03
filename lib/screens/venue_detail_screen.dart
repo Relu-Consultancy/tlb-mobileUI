@@ -13,7 +13,7 @@ import '../widgets/review_sheet.dart';
 import '../widgets/organizer_card.dart';
 import '../widgets/detail_sections.dart';
 import '../widgets/upcoming_events_section.dart';
-import '../widgets/inquire_now_sheet.dart';
+import '../widgets/enquire_now_sheet.dart';
 import '../models/event_model.dart';
 import '../models/api_venue_model.dart';
 import '../services/events_listing_service.dart';
@@ -585,7 +585,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                         // Enquiry-only venues open the enquiry sheet; direct
                         // booking venues proceed to the booking flow.
                         if (_detail?.isEnquiry == true) {
-                          showInquireNow(
+                          showEnquireNow(
                             context,
                             listingId: widget.event.id,
                             isVenue: true,
