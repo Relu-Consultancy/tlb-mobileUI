@@ -206,6 +206,10 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
 
   bool get _isOnline => _modeText == 'online';
 
+  /// Languages the partner set on the listing, or null when they set none —
+  /// in which case the row is left off rather than shown blank.
+  String? get _languageText => _detail?.languageLabel;
+
   /// What the location row shows. Prefers the full street address — the map
   /// card that used to carry it is gone, so this row is now its only home —
   /// and falls back to the area/city summary (or "Online") otherwise.
@@ -485,6 +489,11 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                                 'Mode',
                                 _capitalize(_modeText!),
                               ),
+                              const Divider(height: 16, color: Color(0xFFEEEEEE)),
+                            ],
+                            if (_languageText != null) ...[
+                              _buildThingsToKnowRow(
+                                  Icons.translate, 'Language', _languageText!),
                               const Divider(height: 16, color: Color(0xFFEEEEEE)),
                             ],
                             if (_detail!.maxCapacity != null) ...[

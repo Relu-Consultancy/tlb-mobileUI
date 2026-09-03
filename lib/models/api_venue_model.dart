@@ -1,3 +1,4 @@
+import '../core/listing_languages.dart';
 import 'api_listing_terms.dart';
 class ApiVenueCategory {
   final int id;
@@ -162,6 +163,16 @@ class ApiVenueDetail extends ApiVenue {
   final String? description;
   final ApiVenueCategory? subcategory;
   final String? locationType;
+  /// Languages the listing is delivered in, as picked by the partner.
+  final List<String> languages;
+
+  /// Free text from the partner's "Other" language box; null when unused.
+  final String? otherLanguage;
+
+  /// Ready-to-show label, or null when no language was set at all.
+  String? get languageLabel =>
+      ListingLanguages.label(languages, otherLanguage);
+
   final String? address;
   final int? minAge;
   final int? maxAge;
@@ -204,6 +215,8 @@ class ApiVenueDetail extends ApiVenue {
     this.subcategory,
     this.locationType,
     this.address,
+    this.languages = const [],
+    this.otherLanguage,
     this.minAge,
     this.maxAge,
     this.minCapacity,
@@ -251,7 +264,9 @@ class ApiVenueDetail extends ApiVenue {
                 json['subcategory'] as Map<String, dynamic>)
             : null,
         locationType: json['location_type'] as String?,
-        address: json['address'] as String?,
+        languages: ListingLanguages.parse(json),
+      otherLanguage: ListingLanguages.parseOther(json),
+      address: json['address'] as String?,
         minAge: json['min_age'] as int?,
         maxAge: json['max_age'] as int?,
         minCapacity: json['min_capacity'] as int?,

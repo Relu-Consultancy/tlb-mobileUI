@@ -1,3 +1,4 @@
+import '../core/listing_languages.dart';
 import 'api_category_model.dart';
 import 'api_listing_terms.dart';
 
@@ -144,6 +145,16 @@ class ApiClassDetail extends ApiClass {
   final List<String> tags;
   final String city;
   final String? area;
+  /// Languages the listing is delivered in, as picked by the partner.
+  final List<String> languages;
+
+  /// Free text from the partner's "Other" language box; null when unused.
+  final String? otherLanguage;
+
+  /// Ready-to-show label, or null when no language was set at all.
+  String? get languageLabel =>
+      ListingLanguages.label(languages, otherLanguage);
+
   final String? address;
   final String? meetingLink;
   final String? teaserVideoUrl;
@@ -186,6 +197,8 @@ class ApiClassDetail extends ApiClass {
     required this.city,
     this.area,
     this.address,
+    this.languages = const [],
+    this.otherLanguage,
     this.meetingLink,
     this.teaserVideoUrl,
     this.cancellationPolicy,
@@ -238,6 +251,9 @@ class ApiClassDetail extends ApiClass {
       tags: (service['tags'] as List?)?.map((e) => e.toString()).toList() ?? [],
       city: (service['city'] as String?) ?? '',
       area: service['area'] as String?,
+      languages: ListingLanguages.parse(json, nested: service),
+      otherLanguage:
+          ListingLanguages.parseOther(json, nested: service),
       address: service['address'] as String?,
       meetingLink: service['meeting_link'] as String?,
       teaserVideoUrl: service['teaser_video_url'] as String?,

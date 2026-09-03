@@ -1,3 +1,4 @@
+import '../core/listing_languages.dart';
 import 'api_category_model.dart';
 import 'api_listing_terms.dart';
 
@@ -172,6 +173,16 @@ class ApiProgram {
 class ApiProgramDetail extends ApiProgram {
   final String? description;
   final String? area;
+  /// Languages the listing is delivered in, as picked by the partner.
+  final List<String> languages;
+
+  /// Free text from the partner's "Other" language box; null when unused.
+  final String? otherLanguage;
+
+  /// Ready-to-show label, or null when no language was set at all.
+  String? get languageLabel =>
+      ListingLanguages.label(languages, otherLanguage);
+
   final String? address;
   final int? maxCapacity;
   final int? totalHours;
@@ -218,6 +229,8 @@ class ApiProgramDetail extends ApiProgram {
     this.description,
     this.area,
     this.address,
+    this.languages = const [],
+    this.otherLanguage,
     this.maxCapacity,
     this.totalHours,
     this.moduleCount,
@@ -264,6 +277,8 @@ class ApiProgramDetail extends ApiProgram {
       endDatetime: DateTime.tryParse(json['end_datetime']?.toString() ?? ''),
       description: json['description'] as String?,
       area: json['area'] as String?,
+      languages: ListingLanguages.parse(json),
+      otherLanguage: ListingLanguages.parseOther(json),
       address: json['address'] as String?,
       maxCapacity: json['max_capacity'] as int?,
       totalHours: json['total_hours'] as int?,

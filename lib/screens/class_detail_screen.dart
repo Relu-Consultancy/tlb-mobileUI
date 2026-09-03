@@ -104,6 +104,10 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
 
   bool get _isOnline => _detail?.mode == 'online';
 
+  /// Languages the partner set on the listing, or null when they set none —
+  /// in which case the row is left off rather than shown blank.
+  String? get _languageText => _detail?.languageLabel;
+
   /// What the location row shows. Prefers the full street address — the map
   /// card that used to carry it is gone, so this row is now its only home —
   /// and falls back to the area/city summary (or "Online") otherwise.
@@ -396,6 +400,11 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                             )
                           else
                             _buildInfoRow(Icons.event_seat_outlined, 'Slots Available', '12 Slots available'),
+                          if (_languageText != null) ...[
+                            const Divider(height: 16, color: Color(0xFFEEEEEE)),
+                            _buildInfoRow(
+                                Icons.translate, 'Language', _languageText!),
+                          ],
                         ],
                       ),
                     ),

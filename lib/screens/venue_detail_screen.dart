@@ -117,6 +117,10 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
 
   String? get _address => _detail?.address;
 
+  /// Languages the partner set on the listing, or null when they set none —
+  /// in which case the row is left off rather than shown blank.
+  String? get _languageText => _detail?.languageLabel;
+
   /// What the location row shows. Prefers the full street address — the map
   /// card that used to carry it is gone, so this row is now its only home.
   String get _addressText {
@@ -447,6 +451,14 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                             ],
                             if (_locationTypeText != null)
                               _buildInfoRow(Icons.home_outlined, 'Venue Type', _locationTypeText!),
+                            if (_languageText != null) ...[
+                              if (_ageGroupText != null ||
+                                  _capacityText != null ||
+                                  _locationTypeText != null)
+                                const Divider(height: 16, color: Color(0xFFEEEEEE)),
+                              _buildInfoRow(
+                                  Icons.translate, 'Language', _languageText!),
+                            ],
                           ],
                         ),
                       ),

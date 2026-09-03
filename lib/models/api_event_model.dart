@@ -1,3 +1,4 @@
+import '../core/listing_languages.dart';
 import 'api_listing_terms.dart';
 class ApiEventCategory {
   final int id;
@@ -165,6 +166,16 @@ class ApiEvent {
 class ApiEventDetail extends ApiEvent {
   final String? description;
   final String? area;
+  /// Languages the listing is delivered in, as picked by the partner.
+  final List<String> languages;
+
+  /// Free text from the partner's "Other" language box; null when unused.
+  final String? otherLanguage;
+
+  /// Ready-to-show label, or null when no language was set at all.
+  String? get languageLabel =>
+      ListingLanguages.label(languages, otherLanguage);
+
   final String? address;
   final String mode; // 'offline' | 'online' | 'hybrid'
   final int? capacity;
@@ -202,6 +213,8 @@ class ApiEventDetail extends ApiEvent {
     this.description,
     this.area,
     this.address,
+    this.languages = const [],
+    this.otherLanguage,
     required this.mode,
     this.capacity,
     this.availableSeats,
@@ -244,7 +257,9 @@ class ApiEventDetail extends ApiEvent {
             .firstOrNull,
         description: json['description'] as String?,
         area: json['area'] as String?,
-        address: json['address'] as String?,
+        languages: ListingLanguages.parse(json),
+      otherLanguage: ListingLanguages.parseOther(json),
+      address: json['address'] as String?,
         mode: json['mode'] as String,
         capacity: json['capacity'] as int?,
         availableSeats: json['available_seats'] as int?,

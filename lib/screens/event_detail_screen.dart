@@ -123,6 +123,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     return '$date, $startTime';
   }
 
+  /// Languages the partner set on the listing, or null when they set none —
+  /// in which case the row is left off rather than shown blank.
+  String? get _languageText => _detail?.languageLabel;
+
   /// What the location row shows. Prefers the full street address — the map
   /// card that used to carry it is gone, so this row is now its only home —
   /// and falls back to the area/city summary when the API has no address.
@@ -404,6 +408,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                               'Mode',
                               _capitalize(_detail!.mode),
                             ),
+                            if (_languageText != null) ...[
+                              const Divider(height: 16, color: Color(0xFFEEEEEE)),
+                              _buildThingsToKnowRow(
+                                  Icons.translate, 'Language', _languageText!),
+                            ],
                             if (_detail!.availableSeats != null) ...[
                               const Divider(height: 16, color: Color(0xFFEEEEEE)),
                               _buildThingsToKnowRow(Icons.check_circle_outline, 'Available', '${_detail!.availableSeats} spots'),

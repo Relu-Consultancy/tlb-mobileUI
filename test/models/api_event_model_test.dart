@@ -57,5 +57,43 @@ void main() {
       final ApiEvent asBase = d;
       expect(asBase.endDatetime, d.endDatetime);
     });
+
+    // The partner form now sets these two on every listing type; the customer
+    // API returns them alongside the rest of the detail.
+    test('TC_M_AE_004 — the detail model carries languages / other_language',
+        () {
+      final d = ApiEventDetail.fromJson({
+        'id': '1b98e204-b813-4c1c-87ce-15ccc2667a3a',
+        'title': 'Summer Arts Festival',
+        'category': {'id': 10, 'name': 'Festivals & Celebrations'},
+        'format': 'meetup',
+        'city': 'Mumbai',
+        'price_type': 'paid',
+        'start_datetime': '2026-08-20T23:00:00Z',
+        'mode': 'offline',
+        'languages': ['english', 'hindi'],
+        'other_language': '',
+      });
+      expect(d.languages, ['english', 'hindi']);
+      // "" is what the API sends for an unused Other box, not null.
+      expect(d.otherLanguage, isNull);
+      expect(d.languageLabel, 'English, Hindi');
+    });
+
+    test('TC_M_AE_005 — a listing with no languages shows no label', () {
+      // Older listings predate the field entirely.
+      final d = ApiEventDetail.fromJson({
+        'id': 'a379ee9f-f44b-450e-b714-8f1e5c66b533',
+        'title': 'Monsoon Special Art Festival',
+        'category': {'id': 10, 'name': 'Festivals & Celebrations'},
+        'format': 'meetup',
+        'city': 'Mumbai',
+        'price_type': 'paid',
+        'start_datetime': '2026-08-20T23:00:00Z',
+        'mode': 'offline',
+      });
+      expect(d.languages, isEmpty);
+      expect(d.languageLabel, isNull);
+    });
   });
 }
