@@ -126,5 +126,33 @@ void main() {
       expect(find.bySemanticsLabel('Get directions'), findsOneWidget);
       handle.dispose();
     });
+
+    testWidgets('TC_W_DLR_010 — the expanded address is justified',
+        (tester) async {
+      // A long address wraps over three or four lines; ragged-right left them
+      // looking unaligned against the pin and the navigate button either
+      // side. Same treatment as the About card body.
+      await pumpTLBApp(
+        tester,
+        Scaffold(body: DetailLocationRow(text: _kLongAddress, onNavigate: () {})),
+      );
+      await tester.tap(find.text('See more'));
+      await tester.pumpAndSettle();
+      expect(tester.widget<Text>(find.text(_kLongAddress)).textAlign,
+          TextAlign.justify);
+    });
+
+    testWidgets('TC_W_DLR_011 — pin, address and toggle share a left edge',
+        (tester) async {
+      await pumpTLBApp(
+        tester,
+        Scaffold(body: DetailLocationRow(text: _kLongAddress, onNavigate: () {})),
+      );
+      await tester.tap(find.text('See more'));
+      await tester.pumpAndSettle();
+      final text = tester.getRect(find.text(_kLongAddress)).left;
+      final toggle = tester.getRect(find.text('See less')).left;
+      expect(toggle, text);
+    });
   });
 }

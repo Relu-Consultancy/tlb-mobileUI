@@ -205,6 +205,7 @@ class _DetailLocationRowState extends State<DetailLocationRow> {
                 final overflows = (TextPainter(
                   text: TextSpan(text: widget.text, style: textStyle),
                   maxLines: 1,
+                  textAlign: TextAlign.justify,
                   textDirection: TextDirection.ltr,
                 )..layout(maxWidth: constraints.maxWidth))
                     .didExceedMaxLines;
@@ -214,7 +215,15 @@ class _DetailLocationRowState extends State<DetailLocationRow> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(widget.text, style: textStyle),
+                      Text(
+                        widget.text,
+                        style: textStyle,
+                        // Both edges flush, as the About card body is. A long
+                        // address wraps over three or four lines here, and
+                        // ragged-right left them looking unaligned against
+                        // the pin and the navigate button either side.
+                        textAlign: TextAlign.justify,
+                      ),
                       const SizedBox(height: 2),
                       _toggle(context, 'See less'),
                     ],
