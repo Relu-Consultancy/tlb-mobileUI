@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../core/share_helper.dart';
 import '../models/api_provider_model.dart';
+import '../providers/auth_state.dart';
 import '../services/events_listing_service.dart';
 import '../widgets/app_loader.dart';
 import '../widgets/partner_follow_button.dart';
@@ -59,7 +60,13 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
       _error = null;
     });
     try {
-      final p = await EventsListingService.fetchProvider(widget.listingId);
+      // Sent whenever the customer is logged in. Without it the endpoint
+      // still answers in full, but `is_following` comes back false — which
+      // reads as a bug to anyone who has already followed this partner.
+      final p = await EventsListingService.fetchProvider(
+        widget.listingId,
+        token: AuthState.accessToken,
+      );
       if (!mounted) return;
       setState(() {
         _provider = p;
@@ -85,6 +92,32 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
   String _formatCount(int n) {
     if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}k';
     return '$n';
+  }
+
+  /// Only trustworthy when the fetch carried a token: an anonymous call gets
+  /// `is_following: false` whether or not the customer follows, so passing
+  /// that straight through would show "Follow" on a partner they follow.
+  bool? get _serverIsFollowing =>
+      (_provider != null && AuthState.accessToken != null)
+          ? _provider!.isFollowing
+          : null;
+
+  /// Moves the tally with the button rather than waiting for a re-fetch this
+  /// screen never does — following a partner and watching the count sit still
+  /// looks like the tap did not register.
+  void _onFollowChanged(bool following) {
+    final p = _provider;
+    final current = p?.totalFollowers;
+    if (p == null || current == null || !mounted) return;
+    setState(() {
+      _provider = p.copyWith(
+        // Never below zero: the count was fetched before this tap, so a stale
+        // one plus an unfollow could otherwise show "-1 Followers".
+        totalFollowers:
+            following ? current + 1 : (current - 1).clamp(0, current),
+        isFollowing: following,
+      );
+    });
   }
 
   // ── Build ─────────────────────────────────────────────────────────────────
@@ -143,27 +176,35 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    SocialLinksRow(
-                      instagramUrl: _provider?.instagramUrl,
-                      facebookUrl: _provider?.facebookUrl,
-                      linkedinUrl: _provider?.linkedinUrl,
-                    ),
-
-                    // Only when the API actually sent a count. It does not
-                    // today, and a hard-coded "0 Followers" beside a
-                    // "Following" button reads as a bug rather than as an
-                    // unpopulated field.
+                    // Directly under the name, above the social marks: it is
+                    // the one number that says how well known this partner
+                    // is, so it belongs with their identity rather than
+                    // among the stats further down.
+                    //
+                    // Shown only when the API actually sent a count — a
+                    // hard-coded "0 Followers" beside a "Following" button
+                    // reads as a bug rather than as an unpopulated field.
                     if (_provider?.totalFollowers != null) ...[
                       const SizedBox(height: 4),
                       Text(
-                        '${_formatCount(_provider!.totalFollowers!)} Followers',
+                        '${_formatCount(_provider!.totalFollowers!)} '
+                        '${_provider!.totalFollowers == 1 ? 'Follower' : 'Followers'}',
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 13),
                           color: Colors.grey.shade500,
                         ),
                       ),
                     ],
+
+                    const SizedBox(height: 6),
+                    // Draws only the profiles the partner has actually set,
+                    // and takes no height when they have set none.
+                    SocialLinksRow(
+                      instagramUrl: _provider?.instagramUrl,
+                      facebookUrl: _provider?.facebookUrl,
+                      linkedinUrl: _provider?.linkedinUrl,
+                      websiteUrl: _provider?.websiteUrl,
+                    ),
 
                     const SizedBox(height: 18),
                     Divider(
@@ -237,7 +278,11 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
                                   ),
                                 ),
                                 const Spacer(),
-                                PartnerFollowButton(partnerId: _provider?.id),
+                                PartnerFollowButton(
+                                  partnerId: _provider?.id,
+                                  initialIsFollowing: _serverIsFollowing,
+                                  onChanged: _onFollowChanged,
+                                ),
                               ],
                             ),
                             const SizedBox(height: 8),

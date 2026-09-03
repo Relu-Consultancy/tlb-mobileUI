@@ -219,12 +219,25 @@ class EventsListingService {
 
   /// Returns the public partner profile for the provider who owns [listingId].
   /// Response may arrive as a direct object or wrapped in `{"success", "data"}`.
-  static Future<ApiProvider> fetchProvider(String listingId) async {
+  /// GET /api/v1/listings/{listingId}/provider/
+  ///
+  /// Auth is optional. Pass [token] whenever the customer is logged in:
+  /// without it the endpoint still returns 200 with the full payload, but
+  /// `is_following` comes back false, which looks exactly like a bug once
+  /// they have followed the partner.
+  static Future<ApiProvider> fetchProvider(
+    String listingId, {
+    String? token,
+  }) async {
     try {
       final res = await http
           .get(
             Uri.parse('$_base/api/v1/listings/$listingId/provider/'),
-            headers: {'Accept': 'application/json'},
+            headers: {
+              'Accept': 'application/json',
+              if (token != null && token.isNotEmpty)
+                'Authorization': 'Bearer $token',
+            },
           )
           .timeout(_timeout);
 

@@ -3,6 +3,7 @@ import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../models/api_provider_model.dart';
+import '../providers/auth_state.dart';
 import '../screens/organizer_profile_screen.dart';
 import '../services/events_listing_service.dart';
 import 'partner_follow_button.dart';
@@ -51,7 +52,10 @@ class _OrganizerCardState extends State<OrganizerCard> {
   Future<void> _fetch() async {
     setState(() => _loading = true);
     try {
-      final p = await EventsListingService.fetchProvider(widget.listingId);
+      final p = await EventsListingService.fetchProvider(
+        widget.listingId,
+        token: AuthState.accessToken,
+      );
       if (!mounted) return;
       setState(() {
         _provider = p;
@@ -67,6 +71,13 @@ class _OrganizerCardState extends State<OrganizerCard> {
   String? get _logoUrl => _provider?.logoUrl ?? widget.initialLogoUrl;
   String? get _effectivePartnerId =>
       (widget.partnerId?.isNotEmpty == true) ? widget.partnerId : _provider?.id;
+
+  /// Only meaningful when the fetch carried a token — see
+  /// [PartnerFollowButton.initialIsFollowing].
+  bool? get _serverIsFollowing =>
+      (_provider != null && AuthState.accessToken != null)
+          ? _provider!.isFollowing
+          : null;
 
   @override
   Widget build(BuildContext context) {
@@ -138,7 +149,10 @@ class _OrganizerCardState extends State<OrganizerCard> {
               ),
             ),
             const SizedBox(width: 8),
-            PartnerFollowButton(partnerId: _effectivePartnerId),
+            PartnerFollowButton(
+              partnerId: _effectivePartnerId,
+              initialIsFollowing: _serverIsFollowing,
+            ),
           ],
         ),
       ),

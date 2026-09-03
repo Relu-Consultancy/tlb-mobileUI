@@ -11,7 +11,27 @@ import 'login_sheet.dart';
 class PartnerFollowButton extends StatefulWidget {
   final String? partnerId;
 
-  const PartnerFollowButton({super.key, required this.partnerId});
+  /// The server's `is_following`, when the caller fetched it with a valid
+  /// bearer token. Null means "not known" — either the user is logged out or
+  /// the payload predates the field — in which case the locally persisted
+  /// [FollowState] is used instead.
+  ///
+  /// Only the caller can tell the difference: the provider endpoint returns
+  /// `is_following: false` for an anonymous request just as it does for a
+  /// customer who genuinely does not follow, so a bare bool here would make
+  /// every logged-out profile claim it is not followed.
+  final bool? initialIsFollowing;
+
+  /// Fired after a follow or unfollow lands, with the new state — so a
+  /// follower count next to the button can move with it.
+  final ValueChanged<bool>? onChanged;
+
+  const PartnerFollowButton({
+    super.key,
+    required this.partnerId,
+    this.initialIsFollowing,
+    this.onChanged,
+  });
 
   @override
   State<PartnerFollowButton> createState() => _PartnerFollowButtonState();
@@ -24,22 +44,35 @@ class _PartnerFollowButtonState extends State<PartnerFollowButton> {
   @override
   void initState() {
     super.initState();
-    final pid = widget.partnerId;
-    if (pid != null && pid.isNotEmpty) {
-      _isFollowing = FollowState.isFollowing(pid);
-    }
+    _isFollowing = _resolve();
   }
 
   @override
   void didUpdateWidget(PartnerFollowButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // partnerId can change when OrganizerCard loads provider data late
-    if (oldWidget.partnerId != widget.partnerId) {
-      final pid = widget.partnerId;
-      if (pid != null && pid.isNotEmpty) {
-        setState(() => _isFollowing = FollowState.isFollowing(pid));
-      }
+    // Both can arrive late: OrganizerCard and the profile screen build once
+    // before their provider fetch returns.
+    if (oldWidget.partnerId != widget.partnerId ||
+        oldWidget.initialIsFollowing != widget.initialIsFollowing) {
+      setState(() => _isFollowing = _resolve());
     }
+  }
+
+  /// The server's answer wins when there is one; otherwise fall back to what
+  /// this device last recorded.
+  bool _resolve() {
+    final pid = widget.partnerId;
+    if (pid == null || pid.isEmpty) return false;
+
+    final server = widget.initialIsFollowing;
+    if (server == null) return FollowState.isFollowing(pid);
+
+    // Keep the device in step with the account, so the followed-partners
+    // list and every other follow button agree with this one.
+    if (server != FollowState.isFollowing(pid)) {
+      FollowState.set(pid, following: server).catchError((_) {});
+    }
+    return server;
   }
 
   Future<void> _onTap() async {
@@ -62,10 +95,12 @@ class _PartnerFollowButtonState extends State<PartnerFollowButton> {
       if (!wasFollowing) {
         await PartnerService.follow(token: token, partnerId: pid);
         FollowState.set(pid, following: true).catchError((_) {});
+        widget.onChanged?.call(true);
         if (mounted) AppSnackBar.success(context, 'You are now following this partner.');
       } else {
         await PartnerService.unfollow(token: token, partnerId: pid);
         FollowState.set(pid, following: false).catchError((_) {});
+        widget.onChanged?.call(false);
         if (mounted) AppSnackBar.show(context, 'Unfollowed.');
       }
     } catch (e) {
