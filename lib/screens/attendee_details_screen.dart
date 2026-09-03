@@ -16,6 +16,10 @@ const EdgeInsets _kFieldContentPadding =
     EdgeInsets.only(left: 0, right: 14, top: 15, bottom: 15);
 const double _kDecoratorPrefixGap = 4;
 
+/// Shared between `items` and `selectedItemBuilder` so the two lists cannot
+/// drift out of the matching order `DropdownButton` requires.
+final List<String> _kAges = List.generate(18, (i) => '${i + 1}');
+
 class AttendeeDetailsScreen extends StatefulWidget {
   final EventModel event;
   final ApiProgramBatch batch;
@@ -379,11 +383,20 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(12),
-        border: _selectedAge != null
-            ? const Border.fromBorderSide(
-                BorderSide(color: Color(0xFF0284C7), width: 1.5))
-            : null,
       ),
+      // A border here — unlike on the name/phone TextFields — is not tied to
+      // focus, it is permanent once a value is picked. `Container` insets its
+      // child by a `decoration`'s border width automatically, which pushed
+      // this field's icon 1.5px right of the other two the moment an age was
+      // selected. `foregroundDecoration` paints the same border on top
+      // without contributing to that inset, so the icon stays put.
+      foregroundDecoration: _selectedAge != null
+          ? BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: const Border.fromBorderSide(
+                  BorderSide(color: Color(0xFF0284C7), width: 1.5)),
+            )
+          : null,
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _selectedAge,
@@ -405,7 +418,7 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
           isExpanded: true,
           icon: Icon(Icons.keyboard_arrow_down,
               color: Colors.grey.shade500),
-          items: List.generate(18, (i) => '${i + 1}')
+          items: _kAges
               .map((age) => DropdownMenuItem(
                     value: age,
                     child: Text(
@@ -413,6 +426,29 @@ class _AttendeeDetailsScreenState extends State<AttendeeDetailsScreen> {
                       style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 14)),
                     ),
+                  ))
+              .toList(),
+          // The closed field renders this instead of `items`' child once a
+          // value is picked. Without it, the selected text sat flush against
+          // the container's own padding — no icon, no gap — so "11 years"
+          // started well left of "Vishesh" and the phone digits, which both
+          // sit past their icon. Mirrors the hint's Row exactly so the field
+          // reads the same whether it's showing the hint or a real value.
+          selectedItemBuilder: (context) => _kAges
+              .map((age) => Row(
+                    children: [
+                      Icon(Icons.cake_outlined,
+                          size: IndianDialPrefix.iconSize,
+                          color: Colors.grey.shade500),
+                      const SizedBox(width: IndianDialPrefix.gap),
+                      Text(
+                        '$age years',
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 14),
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
                   ))
               .toList(),
           onChanged: (v) => setState(() => _selectedAge = v),
