@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
+import '../core/time_format.dart';
 import '../models/api_program_model.dart';
 import '../models/event_model.dart';
 import 'attendee_details_screen.dart';
@@ -15,17 +16,6 @@ const List<Color> _kTagFg = [
   Color(0xFF0F766E), Color(0xFF6D28D9), Color(0xFF15803D),
   Color(0xFFB45309), Color(0xFFBE123C),
 ];
-
-String _fmt12h(String t) {
-  final parts = t.split(':');
-  if (parts.length < 2) return t;
-  var h = int.tryParse(parts[0]) ?? 0;
-  final m = parts[1];
-  final ampm = h >= 12 ? 'PM' : 'AM';
-  if (h > 12) h -= 12;
-  if (h == 0) h = 12;
-  return m == '00' ? '$h $ampm' : '$h:$m $ampm';
-}
 
 /// Parses "2026-05-25" → "25 May 2026"
 String _fmtApiDate(String? raw) {
@@ -62,7 +52,7 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
 
   String _timeRange(ApiProgramBatch b) {
     if (b.startTime != null && b.endTime != null) {
-      return '${_fmt12h(b.startTime!)} – ${_fmt12h(b.endTime!)}';
+      return '${TimeFormat.h12(b.startTime!)} – ${TimeFormat.h12(b.endTime!)}';
     }
     return 'Time TBA';
   }

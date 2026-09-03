@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
+import '../core/time_format.dart';
 import '../models/api_class_model.dart';
 import '../models/api_program_model.dart';
 import '../models/event_model.dart';
@@ -20,17 +21,6 @@ const List<Color> _kTagFg = [
 const Map<String, int> _kDayNum = {
   'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6, 'sun': 7,
 };
-
-String _fmt12h(String t) {
-  final parts = t.split(':');
-  if (parts.length < 2) return t;
-  var h = int.tryParse(parts[0]) ?? 0;
-  final m = parts[1];
-  final ampm = h >= 12 ? 'PM' : 'AM';
-  if (h > 12) h -= 12;
-  if (h == 0) h = 12;
-  return m == '00' ? '$h $ampm' : '$h:$m $ampm';
-}
 
 String _fmtDate(DateTime d) {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -101,7 +91,7 @@ class _SelectBatchScreenState extends State<SelectBatchScreen> {
   String get _startingFrom => _dates.isNotEmpty ? _dates[_dateIdx] : 'TBA';
 
   String _timeRange(ApiClassBatch b) =>
-      '${_fmt12h(b.startTime)} – ${_fmt12h(b.endTime)}';
+      '${TimeFormat.h12(b.startTime)} – ${TimeFormat.h12(b.endTime)}';
 
   String _dayLabel(ApiClassBatch b) => b.days
       .map((d) => d.length >= 3

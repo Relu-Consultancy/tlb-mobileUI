@@ -8,6 +8,7 @@ import '../providers/auth_state.dart';
 import '../providers/location_state.dart';
 import '../widgets/login_sheet.dart';
 import '../core/responsive.dart';
+import '../core/time_format.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/review_sheet.dart';
 import '../widgets/organizer_card.dart';
@@ -122,7 +123,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
     if (_detail!.batches.isNotEmpty) {
       final b = _detail!.batches.first;
       final days = b.days.map((d) => d.length >= 3 ? '${d[0].toUpperCase()}${d.substring(1)}' : d).join(', ');
-      return '$days • ${b.startTime} – ${b.endTime}';
+      return '$days • ${TimeFormat.h12(b.startTime)} – ${TimeFormat.h12(b.endTime)}';
     }
     return 'Schedule TBA';
   }

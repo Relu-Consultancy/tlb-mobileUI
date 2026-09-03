@@ -8,6 +8,7 @@ import '../providers/auth_state.dart';
 import '../providers/location_state.dart';
 import '../widgets/login_sheet.dart';
 import '../core/responsive.dart';
+import '../core/time_format.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/review_sheet.dart';
 import '../widgets/organizer_card.dart';
@@ -121,7 +122,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
       final b = batches.first;
       final days = b.daysOfWeek.join(', ');
       if (b.startTime != null && b.endTime != null) {
-        return '$days • ${b.startTime} - ${b.endTime}';
+        return '$days • ${TimeFormat.h12(b.startTime!)} - ${TimeFormat.h12(b.endTime!)}';
       }
       return days.isNotEmpty ? days : 'Schedule TBA';
     }
@@ -831,7 +832,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                             children: [
                               const Icon(Icons.access_time, size: 14, color: Colors.grey),
                               const SizedBox(width: 8),
-                              Text('${b.startTime} - ${b.endTime}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600)),
+                              Text('${TimeFormat.h12(b.startTime!)} - ${TimeFormat.h12(b.endTime!)}', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600)),
                             ],
                           ),
                         ],
