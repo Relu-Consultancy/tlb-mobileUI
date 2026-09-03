@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'pace_classes_screen.dart';
 import '../widgets/auto_scroll_list.dart';
 import '../widgets/shining_star_badge.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -333,7 +334,17 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                 (MediaQuery.of(context).size.width - 32) / 2.5;
                             return Padding(
                               padding: const EdgeInsets.only(right: 8),
-                              child: Container(
+                              child: GestureDetector(
+                                // The pace discs were inert artwork until now.
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => PaceClassesScreen(
+                                      initialPaceIndex: index,
+                                    ),
+                                  ),
+                                ),
+                                child: Container(
                                 width: paceSize,
                                 height: paceSize,
                                 decoration: BoxDecoration(
@@ -392,6 +403,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                                     const SizedBox(height: 12),
                                   ],
                                 ),
+                              ),
                               ),
                             );
                           },

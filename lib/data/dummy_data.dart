@@ -221,34 +221,61 @@ class DummyData {
     },
   ];
 
+  /// "Pick Your Pace" — how long a commitment a class asks for, browsed on
+  /// PaceClassesScreen.
+  ///
+  /// `paceSlug` is sent to the classes endpoint as its `format` query
+  /// parameter. The values follow the same snake_case convention as
+  /// [exploreFormats]' `formatSlug`, which the same backend accepts for
+  /// events. They could NOT be checked against live data: the classes
+  /// endpoint returns zero listings today, so a wrong slug and an empty
+  /// catalogue look identical — both come back HTTP 200 with no rows. If one
+  /// pace stays empty once classes are live, check its value against the
+  /// backend vocabulary before looking anywhere else.
+  ///
+  /// `accentColor` tints that screen's header, as it does for formats.
   static const List<Map<String, dynamic>> pickYourPace = [
     {
       'label': 'Weekly\nClasses',
       'image': 'assets/images/pick_pace/weeklyclasses.png',
+      'paceSlug': 'weekly_classes',
+      'accentColor': Color(0xFF5B8FD4),
     },
     {
       'label': 'Monthly\nPrograms',
       'image': 'assets/images/pick_pace/monthly.png',
+      'paceSlug': 'monthly_programs',
+      'accentColor': Color(0xFFE0A055),
     },
     {
       'label': 'Term Courses',
       'image': 'assets/images/pick_pace/term.png',
+      'paceSlug': 'term_course',
+      'accentColor': Color(0xFFB0A57A),
     },
     {
       'label': 'Bootcamps',
       'image': 'assets/images/pick_pace/bootcamp.png',
+      'paceSlug': 'bootcamp',
+      'accentColor': Color(0xFF4DBBFF),
     },
     {
       'label': 'Trial Class',
       'image': 'assets/images/pick_pace/trial.png',
+      'paceSlug': 'trial_class',
+      'accentColor': Color(0xFF5FCBAC),
     },
     {
       'label': 'Certification',
       'image': 'assets/images/pick_pace/certification.png',
+      'paceSlug': 'certification',
+      'accentColor': Color(0xFFE8955F),
     },
     {
       'label': 'Holiday\nCamps',
       'image': 'assets/images/pick_pace/holiday.png',
+      'paceSlug': 'holiday_camp',
+      'accentColor': Color(0xFF8FA6C4),
     },
   ];
 
