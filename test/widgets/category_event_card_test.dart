@@ -32,7 +32,7 @@ void main() {
       await mockNetworkImages(() async {
         await pumpTLBApp(
           tester,
-          Scaffold(body: CategoryEventCard(event: _fullEvent, badgeColor: const Color(0xFFFFA726))),
+          Scaffold(body: CategoryEventCard(event: _fullEvent)),
         );
         expect(find.text('Summer Art Workshop'), findsOneWidget);
       });
@@ -42,7 +42,7 @@ void main() {
       await mockNetworkImages(() async {
         await pumpTLBApp(
           tester,
-          Scaffold(body: CategoryEventCard(event: _fullEvent, badgeColor: const Color(0xFFFFA726))),
+          Scaffold(body: CategoryEventCard(event: _fullEvent)),
         );
         expect(find.text('Delhi'), findsOneWidget);
       });
@@ -52,7 +52,7 @@ void main() {
       await mockNetworkImages(() async {
         await pumpTLBApp(
           tester,
-          Scaffold(body: CategoryEventCard(event: _fullEvent, badgeColor: const Color(0xFFFFA726))),
+          Scaffold(body: CategoryEventCard(event: _fullEvent)),
         );
         expect(find.text('Arts & Crafts'), findsOneWidget);
       });
@@ -62,7 +62,7 @@ void main() {
       await mockNetworkImages(() async {
         await pumpTLBApp(
           tester,
-          Scaffold(body: CategoryEventCard(event: _fullEvent, badgeColor: const Color(0xFFFFA726))),
+          Scaffold(body: CategoryEventCard(event: _fullEvent)),
         );
         // Description is rendered as RichText (multi-span "Description – body")
         expect(find.byType(RichText), findsWidgets);
@@ -74,7 +74,7 @@ void main() {
       await mockNetworkImages(() async {
         await pumpTLBApp(
           tester,
-          Scaffold(body: CategoryEventCard(event: _minimalEvent, badgeColor: const Color(0xFFFFA726))),
+          Scaffold(body: CategoryEventCard(event: _minimalEvent)),
         );
         // No star icon should appear when reviewCount is absent
         expect(find.byIcon(Icons.star), findsNothing);
@@ -90,7 +90,6 @@ void main() {
           Scaffold(
             body: CategoryEventCard(
               event: _fullEvent,
-              badgeColor: const Color(0xFFFFA726),
               onTap: () => tapped = true,
             ),
           ),
@@ -109,7 +108,7 @@ void main() {
       await mockNetworkImages(() async {
         await pumpTLBApp(
           tester,
-          Scaffold(body: CategoryEventCard(event: _fullEvent, badgeColor: const Color(0xFFFFA726))),
+          Scaffold(body: CategoryEventCard(event: _fullEvent)),
         );
         await tester.tap(find.byType(CategoryEventCard));
         await tester.pump(); // start navigation — don't pumpAndSettle (network)
@@ -122,7 +121,7 @@ void main() {
       await mockNetworkImages(() async {
         await pumpTLBApp(
           tester,
-          Scaffold(body: CategoryEventCard(event: _minimalEvent, badgeColor: const Color(0xFFFFA726))),
+          Scaffold(body: CategoryEventCard(event: _minimalEvent)),
         );
         expect(find.text('Coding Bootcamp'), findsOneWidget);
         expect(tester.takeException(), isNull);
@@ -139,7 +138,7 @@ void main() {
       await mockNetworkImages(() async {
         await pumpTLBApp(
           tester,
-          Scaffold(body: CategoryEventCard(event: networkEvent, badgeColor: const Color(0xFFFFA726))),
+          Scaffold(body: CategoryEventCard(event: networkEvent)),
         );
         expect(tester.takeException(), isNull);
       });
@@ -155,7 +154,7 @@ void main() {
       await mockNetworkImages(() async {
         await pumpTLBApp(
           tester,
-          Scaffold(body: CategoryEventCard(event: longTitleEvent, badgeColor: const Color(0xFFFFA726))),
+          Scaffold(body: CategoryEventCard(event: longTitleEvent)),
         );
         expect(tester.takeException(), isNull);
       });
@@ -177,7 +176,6 @@ void main() {
                 width: 180,
                 child: CategoryEventCard(
                   event: _fullEvent,
-                  badgeColor: const Color(0xFFFFA726),
                   onTap: () => taps++,
                 ),
               ),
@@ -209,7 +207,6 @@ void main() {
           Scaffold(
             body: CategoryEventCard(
               event: _fullEvent,
-              badgeColor: const Color(0xFFFFA726),
             ),
           ),
         );

@@ -566,7 +566,6 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                             final em = _toEventModel(venue);
                             return CategoryEventCard(
                               event: em,
-                              badgeColor: _accentColor.withOpacity(0.9),
                               onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(

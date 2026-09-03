@@ -7,13 +7,11 @@ import '../screens/event_detail_screen.dart';
 
 class CategoryEventCard extends StatelessWidget {
   final EventModel event;
-  final Color badgeColor;
   final VoidCallback? onTap;
 
   const CategoryEventCard({
     super.key,
     required this.event,
-    required this.badgeColor,
     this.onTap,
   });
 

@@ -10,10 +10,20 @@ import '../models/api_event_model.dart';
 import '../models/event_model.dart';
 import '../providers/location_state.dart';
 import '../services/events_listing_service.dart';
-import '../widgets/app_loader.dart';
 import '../widgets/format_circle_label.dart';
-import '../widgets/trending_event_card.dart';
+import '../widgets/category_event_card.dart';
+import '../widgets/category_skeleton_card.dart';
 import '../widgets/subcategory_empty_state.dart';
+
+/// Listing grid shared with the category screens — two up, 0.62 ratio — so a
+/// format browse and a category browse present their results identically.
+const SliverGridDelegateWithFixedCrossAxisCount _kListingGrid =
+    SliverGridDelegateWithFixedCrossAxisCount(
+  crossAxisCount: 2,
+  mainAxisSpacing: 14,
+  crossAxisSpacing: 14,
+  childAspectRatio: 0.62,
+);
 
 class FormatEventsScreen extends StatefulWidget {
   final int initialFormatIndex;
@@ -320,9 +330,17 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
 
                   // Loading / empty / grid
                   if (_isLoading)
-                    const SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: AppLoader(),
+                    // Skeleton cards in the same grid, as on the category
+                    // screen, so the layout does not jump when results land.
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: SliverGrid(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => const CategorySkeletonCard(),
+                          childCount: 6,
+                        ),
+                        gridDelegate: _kListingGrid,
+                      ),
                     )
                   else if (_events.isEmpty)
                     SliverFillRemaining(
@@ -333,25 +351,22 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
                       ),
                     )
                   else
+                    // Same two-up grid the category screens use, so browsing
+                    // by format presents its results the same way browsing by
+                    // category does.
                     SliverPadding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 16),
-                      sliver: SliverList(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: SliverGrid(
                         delegate: SliverChildBuilderDelegate(
-                          (_, i) {
-                            if (i >= _events.length) return null;
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 24),
-                              child: SizedBox(
-                                height: Responsive.h(context, 420, min: 400),
-                                child: TrendingEventCard(
-                                  event: _toEventModel(_events[i]),
-                                ),
-                              ),
+                          (context, index) {
+                            if (index >= _events.length) return null;
+                            return CategoryEventCard(
+                              event: _toEventModel(_events[index]),
                             );
                           },
                           childCount: _events.length,
                         ),
+                        gridDelegate: _kListingGrid,
                       ),
                     ),
 

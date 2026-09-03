@@ -489,7 +489,6 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                             final eventModel = _toEventModel(classes[index]);
                             return CategoryEventCard(
                               event: eventModel,
-                              badgeColor: _accentColor.withOpacity(0.9),
                               onTap: () {
                                 Navigator.push(
                                   context,

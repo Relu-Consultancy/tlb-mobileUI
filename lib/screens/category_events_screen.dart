@@ -470,7 +470,6 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                             if (index >= events.length) return null;
                             return CategoryEventCard(
                               event: _toEventModel(events[index]),
-                              badgeColor: _accentColor.withOpacity(0.9),
                             );
                           },
                           childCount: _filteredEvents.length,

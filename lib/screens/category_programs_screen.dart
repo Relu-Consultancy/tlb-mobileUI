@@ -555,7 +555,6 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                             final eventModel = _toEventModel(prg);
                             return CategoryEventCard(
                               event: eventModel,
-                              badgeColor: _accentColor.withOpacity(0.9),
                               onTap: () {
                                 Navigator.push(
                                   context,
