@@ -6,6 +6,7 @@ import '../models/event_model.dart';
 import 'listing_meta_rows.dart';
 import '../screens/class_detail_screen.dart';
 import '../screens/event_detail_screen.dart';
+import '../core/listing_image.dart';
 
 class BuildSkillCard extends StatelessWidget {
   final EventModel event;
@@ -61,7 +62,7 @@ class BuildSkillCard extends StatelessWidget {
                 // card; widened so it covers more toward the right.
                 ClipRRect(
                   borderRadius: BorderRadius.circular(14),
-                  child: Image.asset(
+                  child: listingImageSource(
                     event.imagePath,
                     width: Responsive.w(context, 150, min: 124),
                     height: double.infinity,

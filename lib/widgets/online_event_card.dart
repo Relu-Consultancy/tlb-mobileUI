@@ -5,6 +5,7 @@ import '../core/app_colors.dart';
 import '../models/event_model.dart';
 import 'listing_meta_rows.dart';
 import '../screens/event_detail_screen.dart';
+import '../core/listing_image.dart';
 
 class OnlineEventCard extends StatelessWidget {
   final EventModel event;
@@ -46,7 +47,7 @@ class OnlineEventCard extends StatelessWidget {
             Expanded(
               child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-                child: Image.asset(
+                child: listingImageSource(
                   event.imagePath,
                   width: double.infinity,
                   height: double.infinity,

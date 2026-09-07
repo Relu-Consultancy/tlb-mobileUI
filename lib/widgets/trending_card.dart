@@ -7,6 +7,7 @@ import '../core/responsive.dart';
 import '../models/event_model.dart';
 import 'wishlist_button.dart';
 import '../screens/event_detail_screen.dart';
+import '../core/listing_image.dart';
 
 class TrendingCard extends StatefulWidget {
   final List<EventModel> events;
@@ -87,7 +88,7 @@ class _TrendingCardState extends State<TrendingCard> {
                             borderRadius: const BorderRadius.horizontal(
                               left: Radius.circular(16),
                             ),
-                            child: Image.asset(
+                            child: listingImageSource(
                               event.imagePath,
                               width: Responsive.w(context, 130, min: 100),
                               height: Responsive.h(context, 180, min: 150),

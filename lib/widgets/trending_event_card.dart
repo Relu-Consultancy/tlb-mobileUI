@@ -5,6 +5,7 @@ import '../core/responsive.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
 import 'wishlist_button.dart';
+import '../core/listing_image.dart';
 
 /// Vertical "Trending Events" card:
 /// image-dominant (date badge top-left + heart top-right), then title,
@@ -54,7 +55,7 @@ class TrendingEventCard extends StatelessWidget {
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(16),
                       ),
-                      child: Image.asset(
+                      child: listingImageSource(
                         event.imagePath,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(

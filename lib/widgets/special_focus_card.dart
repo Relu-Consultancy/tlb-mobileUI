@@ -4,6 +4,7 @@ import '../core/app_colors.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
+import '../core/listing_image.dart';
 
 class SpecialFocusCard extends StatelessWidget {
   final EventModel event;
@@ -135,7 +136,7 @@ class SpecialFocusCard extends StatelessWidget {
               // Right image
               ClipRRect(
                 borderRadius: const BorderRadius.horizontal(right: Radius.circular(20)),
-                child: Image.asset(
+                child: listingImageSource(
                   event.imagePath,
                   width: Responsive.w(context, 120, min: 96),
                   height: double.infinity,

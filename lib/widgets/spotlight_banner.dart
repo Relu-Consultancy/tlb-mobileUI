@@ -9,6 +9,7 @@ import '../screens/event_detail_screen.dart';
 import 'dark_category_section.dart';
 import 'four_point_star.dart';
 import 'wishlist_button.dart';
+import '../core/listing_image.dart';
 
 /// The Home "Spotlight" section: a "✦ Spotlight ✦" header and a swipeable set of
 /// poster cards on the black backdrop. Each card has a glowing gold border, a
@@ -222,7 +223,7 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Image.asset(
+        listingImageSource(
           e.imagePath,
           fit: BoxFit.cover,
           // Anchor near the top so the poster's header isn't cropped and its

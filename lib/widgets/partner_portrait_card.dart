@@ -5,6 +5,7 @@ import '../core/app_colors.dart';
 import '../models/event_model.dart';
 import 'listing_meta_rows.dart';
 import '../screens/event_detail_screen.dart';
+import '../core/listing_image.dart';
 
 class PartnerPortraitCard extends StatelessWidget {
   final EventModel event;
@@ -46,7 +47,7 @@ class PartnerPortraitCard extends StatelessWidget {
               borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
               child: AspectRatio(
                 aspectRatio: 0.78, // portrait poster
-                child: Image.asset(
+                child: listingImageSource(
                   event.imagePath,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(

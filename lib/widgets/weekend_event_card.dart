@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
+import '../core/listing_image.dart';
 
 class WeekendEventCard extends StatelessWidget {
   final EventModel event;
@@ -42,7 +43,7 @@ class WeekendEventCard extends StatelessWidget {
               borderRadius: const BorderRadius.horizontal(
                 left: Radius.circular(16),
               ),
-              child: Image.asset(
+              child: listingImageSource(
                 event.imagePath,
                 width: width * 0.42,
                 height: double.infinity,

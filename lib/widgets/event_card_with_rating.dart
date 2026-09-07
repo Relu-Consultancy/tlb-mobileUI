@@ -7,6 +7,7 @@ import 'listing_meta_rows.dart';
 import 'wishlist_button.dart';
 import '../screens/class_detail_screen.dart';
 import '../screens/event_detail_screen.dart';
+import '../core/listing_image.dart';
 
 /// Vertical event card matching the design:
 /// Image (with date badge + heart), title, tag pill, and the meta block.
@@ -65,7 +66,7 @@ class EventCardWithRating extends StatelessWidget {
                   ClipRRect(
                     borderRadius:
                         const BorderRadius.vertical(top: Radius.circular(16)),
-                    child: Image.asset(
+                    child: listingImageSource(
                       event.imagePath,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(

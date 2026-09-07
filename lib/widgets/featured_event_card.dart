@@ -5,6 +5,7 @@ import '../core/responsive.dart';
 import '../models/event_model.dart';
 import 'wishlist_button.dart';
 import '../screens/event_detail_screen.dart';
+import '../core/listing_image.dart';
 
 class FeaturedEventCard extends StatelessWidget {
   final EventModel event;
@@ -47,7 +48,7 @@ class FeaturedEventCard extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(16),
                 ),
-                child: Image.asset(
+                child: listingImageSource(
                   event.imagePath,
                   width: width ?? double.infinity,
                   height: Responsive.h(context, 180, min: 130),

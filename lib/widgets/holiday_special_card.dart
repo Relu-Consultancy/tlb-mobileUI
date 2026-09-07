@@ -7,6 +7,7 @@ import 'animated_gradient_tag.dart';
 import 'listing_meta_rows.dart';
 import '../screens/class_detail_screen.dart';
 import '../screens/event_detail_screen.dart';
+import '../core/listing_image.dart';
 
 class HolidaySpecialCard extends StatelessWidget {
   final EventModel event;
@@ -58,7 +59,7 @@ class HolidaySpecialCard extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.asset(
+                    listingImageSource(
                       event.imagePath,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(

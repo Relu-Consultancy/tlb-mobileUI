@@ -5,6 +5,7 @@ import '../core/app_colors.dart';
 import '../models/event_model.dart';
 import 'wishlist_button.dart';
 import '../screens/event_detail_screen.dart';
+import '../core/listing_image.dart';
 
 class EventCard extends StatelessWidget {
   final EventModel event;
@@ -51,7 +52,7 @@ class EventCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  child: Image.asset(
+                  child: listingImageSource(
                     event.imagePath,
                     width: width,
                     height: imageHeight,
