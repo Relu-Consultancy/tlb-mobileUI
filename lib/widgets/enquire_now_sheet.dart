@@ -8,6 +8,7 @@ import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/classes_listing_service.dart';
 import '../services/programs_listing_service.dart';
+import '../models/api_venue_model.dart';
 import '../services/events_listing_service.dart';
 
 void showEnquireNow(
@@ -15,6 +16,7 @@ void showEnquireNow(
   required String listingId,
   bool isProgram = false,
   bool isVenue = false,
+  List<ApiVenuePackage> packages = const [],
 }) {
   showDialog(
     context: context,
@@ -23,6 +25,7 @@ void showEnquireNow(
       listingId: listingId,
       isProgram: isProgram,
       isVenue: isVenue,
+      packages: packages,
     ),
   );
 }
@@ -33,10 +36,16 @@ class _EnquireNowDialog extends StatefulWidget {
   final String listingId;
   final bool isProgram;
   final bool isVenue;
+
+  /// The venue's packages, so the enquiry can say which one it is about.
+  /// Only venues have these; the other two types pass nothing.
+  final List<ApiVenuePackage> packages;
+
   const _EnquireNowDialog({
     required this.listingId,
     this.isProgram = false,
     this.isVenue = false,
+    this.packages = const [],
   });
 
   @override
@@ -51,6 +60,7 @@ class _EnquireNowDialogState extends State<_EnquireNowDialog> {
   final _mobile = TextEditingController();
   final _message = TextEditingController();
   String? _selectedAge;
+  ApiVenuePackage? _selectedPackage;
   int _msgLen = 0;
   bool _isSubmitting = false;
   // AutovalidateMode.disabled until first submit so the form doesn't show red
@@ -76,7 +86,42 @@ class _EnquireNowDialogState extends State<_EnquireNowDialog> {
   String get _nameLabel =>
       _namesContact ? "the contact person's name" : "the attendee's name";
 
+  /// Only shown when there is something to say: a venue with packages.
+  bool get _asksPackage => widget.packages.isNotEmpty;
+
+  /// A single package is not a choice — it is the answer. Showing it as a
+  /// one-option dropdown would ask the customer to pick the only thing on
+  /// the menu, so it is presented as a plain line instead and sent anyway.
+  bool get _picksPackage => widget.packages.length > 1;
+
+  String _packageLabel(ApiVenuePackage p) =>
+      p.price > 0 ? '${p.name} — ₹${p.price.toInt()}' : p.name;
+
+  /// The message as the partner will read it.
+  ///
+  /// The venue enquiry endpoint has no package field — its schema is
+  /// attendee_name, mobile, availability_slot_id and message — so the
+  /// chosen package is named at the top of the message instead. That is
+  /// the only channel available today; when the backend adds a package
+  /// id, send it properly and drop this prefix.
+  String _messageForApi() {
+    final typed = _message.text.trim();
+    final chosen = _selectedPackage;
+    if (chosen == null) return typed;
+    return 'Package: ${_packageLabel(chosen)}\n\n$typed';
+  }
+
   static const _ages = ['4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'];
+
+  @override
+  void initState() {
+    super.initState();
+    // With one package there is nothing to choose, so it is preselected
+    // and the enquiry still carries it.
+    if (_asksPackage && !_picksPackage) {
+      _selectedPackage = widget.packages.first;
+    }
+  }
 
   @override
   void dispose() {
@@ -123,7 +168,7 @@ class _EnquireNowDialogState extends State<_EnquireNowDialog> {
           listingId: widget.listingId,
           attendeeName: _attendeeName.text.trim(),
           mobile: _mobile.text.trim(),
-          message: _message.text.trim(),
+          message: _messageForApi(),
         );
       } else if (widget.isProgram) {
         await ProgramsListingService.submitEnquiry(
@@ -212,6 +257,22 @@ class _EnquireNowDialogState extends State<_EnquireNowDialog> {
               ),
 
               const SizedBox(height: 20),
+
+              // ── Package ──
+              // Sits above the contact fields because it is what the
+              // enquiry is about: the detail screen no longer shows a
+              // '₹50000 onwards' figure for an enquiry-only venue, since
+              // that price belongs to one particular package. This is
+              // where the real prices are, next to the package they buy.
+              if (_asksPackage) ...[
+                _sectionHeader(Icons.local_offer_outlined, 'Package'),
+                const SizedBox(height: 10),
+                if (_picksPackage)
+                  _packageDropdown()
+                else
+                  _packageSummary(widget.packages.first),
+                const SizedBox(height: 20),
+              ],
 
               // ── Attendee Details ──
               // Trimmed to the minimal shape the API now accepts: a name, an
@@ -428,6 +489,71 @@ class _EnquireNowDialogState extends State<_EnquireNowDialog> {
     // either — it floats above the field instead, and the digits start
     // flush with every other field's text (see IndianDialBadge).
     return dialPrefix ? IndianDialBadge(child: field) : field;
+  }
+
+  /// The chosen package, as a plain read-only line. Used when the venue
+  /// offers exactly one — see [_picksPackage].
+  Widget _packageSummary(ApiVenuePackage p) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        _packageLabel(p),
+        style: GoogleFonts.poppins(
+          fontSize: Responsive.sp(context, 13),
+          color: AppColors.textPrimary,
+        ),
+      ),
+    );
+  }
+
+  /// Optional on purpose. A venue enquiry is often exploratory — "what
+  /// would a birthday here cost?" — and demanding a package up front
+  /// would turn away the enquiries this form exists to collect.
+  Widget _packageDropdown() {
+    return DropdownButtonFormField<ApiVenuePackage>(
+      value: _selectedPackage,
+      isExpanded: true,
+      icon: const Icon(Icons.keyboard_arrow_down_rounded,
+          color: AppColors.textPrimary, size: 20),
+      dropdownColor: Colors.white,
+      hint: Text(
+        'Select a package (optional)',
+        style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 13),
+            color: Colors.grey.shade400),
+      ),
+      style: GoogleFonts.poppins(
+          fontSize: Responsive.sp(context, 13),
+          color: AppColors.textPrimary),
+      items: widget.packages
+          .map((p) => DropdownMenuItem(
+                value: p,
+                child: Text(
+                  _packageLabel(p),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 13)),
+                ),
+              ))
+          .toList(),
+      onChanged: (p) => setState(() => _selectedPackage = p),
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: const Color(0xFFF5F5F5),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      ),
+    );
   }
 
   Widget _ageDropdownFormField(

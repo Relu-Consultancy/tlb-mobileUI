@@ -610,7 +610,11 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
               ),
               child: Row(
                 children: [
-                  if (_priceDisplay != 'Price TBA') ...[
+                  // Only a direct-booking program quotes a price beside
+                  // its button. On an enquiry listing the figure is a
+                  // starting point the customer cannot act on, and it
+                  // reads as a rate they could book at.
+                  if (_isDirectBooking && _priceDisplay != 'Price TBA') ...[
                     DetailPriceLabel(_priceDisplay, from: true),
                     const SizedBox(width: 16),
                   ],

@@ -160,6 +160,9 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
     return lt[0].toUpperCase() + lt.substring(1);
   }
 
+  /// This venue takes enquiries rather than direct bookings.
+  bool get _isEnquiry => _detail?.isEnquiry == true;
+
   double? get _lowestPackagePrice {
     final pkgs = _detail?.packages;
     if (pkgs == null || pkgs.isEmpty) return widget.event.price;
@@ -546,18 +549,26 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
               ),
               child: Row(
                 children: [
-                  if (_lowestPackagePrice != null && _lowestPackagePrice! > 0)
-                    // `from: true` — this is the cheapest package, not a
-                    // flat hire fee.
-                    DetailPriceLabel('₹${_lowestPackagePrice!.toInt()}',
-                        from: true)
-                  else
-                    const DetailFreePill(),
-                  // Fixed gap, not a Spacer with a flex:2 button: that
-                  // split the leftover 1:2, so a wide price such as
-                  // "₹4999 onwards" starved the CTA and wrapped its
-                  // label onto two lines at 360-390px.
-                  const SizedBox(width: 16),
+                  // An enquiry-only venue shows no price here. The figure
+                  // is the cheapest package's, and quoting it beside a
+                  // "Send Enquiry" button implies a rate the customer can
+                  // just book at. The packages — with their real prices —
+                  // are listed inside the enquiry form instead.
+                  if (!_isEnquiry) ...[
+                    if (_lowestPackagePrice != null &&
+                        _lowestPackagePrice! > 0)
+                      // `from: true` — this is the cheapest package, not a
+                      // flat hire fee.
+                      DetailPriceLabel('₹${_lowestPackagePrice!.toInt()}',
+                          from: true)
+                    else
+                      const DetailFreePill(),
+                    // Fixed gap, not a Spacer with a flex:2 button: that
+                    // split the leftover 1:2, so a wide price such as
+                    // "₹4999 onwards" starved the CTA and wrapped its
+                    // label onto two lines at 360-390px.
+                    const SizedBox(width: 16),
+                  ],
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
@@ -574,11 +585,12 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                         }
                         // Enquiry-only venues open the enquiry sheet; direct
                         // booking venues proceed to the booking flow.
-                        if (_detail?.isEnquiry == true) {
+                        if (_isEnquiry) {
                           showEnquireNow(
                             context,
                             listingId: widget.event.id,
                             isVenue: true,
+                            packages: _detail?.packages ?? const [],
                           );
                           return;
                         }
@@ -600,7 +612,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                         elevation: 0,
                       ),
                       child: Text(
-                          _detail?.isEnquiry == true
+                          _isEnquiry
                               ? 'Send Enquiry'
                               : 'Check Availability',
                           style: GoogleFonts.poppins(

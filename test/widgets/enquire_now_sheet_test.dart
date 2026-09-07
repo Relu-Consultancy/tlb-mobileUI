@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tlb_mobile_ui/models/api_venue_model.dart';
 import 'package:tlb_mobile_ui/widgets/enquire_now_sheet.dart';
 
 import '../helpers/test_setup.dart';
+
+ApiVenuePackage _package(int id, String name, double price) =>
+    ApiVenuePackage(id: id, name: name, price: price);
 
 Future<void> _openSheet(
   WidgetTester tester, {
   bool isVenue = false,
   bool isProgram = false,
+  List<ApiVenuePackage> packages = const [],
 }) async {
   await pumpTLBApp(
     tester,
@@ -20,6 +25,7 @@ Future<void> _openSheet(
               listingId: 'l1',
               isVenue: isVenue,
               isProgram: isProgram,
+              packages: packages,
             ),
             child: const Text('open'),
           ),
@@ -185,6 +191,79 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Please select an age.'), findsOneWidget);
+    });
+  });
+
+  group('Enquire Now — venue package', () {
+    final two = [
+      _package(1, 'Birthday Basic', 25000),
+      _package(2, 'Premium Party', 50000),
+    ];
+
+    testWidgets('TC_W_IN_014 — the package sits above the contact fields',
+        (tester) async {
+      await _openSheet(tester, isVenue: true, packages: two);
+
+      expect(find.text('Package'), findsOneWidget);
+      // The contact header renders as rich text carrying its required
+      // asterisk, so it reads as "Contact Person*".
+      final contact = find.textContaining('Contact Person');
+      expect(contact, findsOneWidget);
+      // Above, not below: it is what the enquiry is about.
+      expect(
+        tester.getTopLeft(find.text('Package')).dy,
+        lessThan(tester.getTopLeft(contact).dy),
+      );
+    });
+
+    testWidgets('TC_W_IN_015 — several packages give a dropdown with prices',
+        (tester) async {
+      await _openSheet(tester, isVenue: true, packages: two);
+
+      expect(find.text('Select a package (optional)'), findsOneWidget);
+      await tester.tap(find.text('Select a package (optional)'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Birthday Basic — ₹25000'), findsWidgets);
+      expect(find.text('Premium Party — ₹50000'), findsWidgets);
+    });
+
+    testWidgets('TC_W_IN_016 — picking one shows it in the closed field',
+        (tester) async {
+      await _openSheet(tester, isVenue: true, packages: two);
+
+      await tester.tap(find.text('Select a package (optional)'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Premium Party — ₹50000').last);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Premium Party — ₹50000'), findsOneWidget);
+      expect(find.text('Select a package (optional)'), findsNothing);
+    });
+
+    testWidgets('TC_W_IN_017 — a lone package is stated, not offered as a '
+        'one-item choice', (tester) async {
+      await _openSheet(
+        tester,
+        isVenue: true,
+        packages: [_package(1, 'Whole Venue', 50000)],
+      );
+
+      expect(find.text('Whole Venue — ₹50000'), findsOneWidget);
+      expect(find.text('Select a package (optional)'), findsNothing);
+      expect(find.byType(DropdownButtonFormField<ApiVenuePackage>), findsNothing);
+    });
+
+    testWidgets('TC_W_IN_018 — no packages, no section', (tester) async {
+      await _openSheet(tester, isVenue: true);
+      expect(find.text('Package'), findsNothing);
+    });
+
+    testWidgets('TC_W_IN_019 — a class enquiry never shows packages',
+        (tester) async {
+      // Only venues have packages; the parameter defaults to empty elsewhere.
+      await _openSheet(tester);
+      expect(find.text('Package'), findsNothing);
     });
   });
 }
