@@ -120,4 +120,106 @@ void main() {
       expect(find.text('Date'), findsOneWidget);
     });
   });
+
+  group('Search filters — price and distance', () {
+    /// Scrolls the sheet until [label] is on screen; both new sections sit
+    /// below the fold on a phone-sized viewport.
+    Future<void> reveal(WidgetTester tester, String label) async {
+      await tester.dragUntilVisible(
+        find.text(label),
+        find.byType(SingleChildScrollView).last,
+        const Offset(0, -120),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('TC_S_SF_008 — the sheet offers price bands', (tester) async {
+      await _openSearch(tester);
+      await _openFilters(tester);
+      await reveal(tester, 'Price');
+
+      expect(find.text('Price'), findsOneWidget);
+      for (final band in ['Free', 'Under ₹500', 'Above ₹5,000']) {
+        expect(find.text(band), findsOneWidget, reason: band);
+      }
+    });
+
+    testWidgets('TC_S_SF_009 — the sheet offers distance options',
+        (tester) async {
+      await _openSearch(tester);
+      await _openFilters(tester);
+      await reveal(tester, 'Distance');
+
+      expect(find.text('Distance'), findsOneWidget);
+      expect(find.text('Nearest first'), findsOneWidget);
+      expect(find.text('Within 5 km'), findsOneWidget);
+    });
+
+    testWidgets('TC_S_SF_010 — a price band is single-select', (tester) async {
+      // Two bands at once would describe a range no listing can sit in.
+      await _openSearch(tester);
+      await _openFilters(tester);
+      await reveal(tester, 'Price');
+
+      await tester.tap(find.text('Under ₹500'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('₹500 – ₹1,000'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Apply Filters'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('₹500 – ₹1,000'), findsOneWidget);
+      expect(find.text('Under ₹500'), findsNothing);
+    });
+
+    testWidgets('TC_S_SF_011 — tapping the active band clears it',
+        (tester) async {
+      await _openSearch(tester);
+      await _openFilters(tester);
+      await reveal(tester, 'Price');
+
+      await tester.tap(find.text('Free'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Free'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Apply Filters'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Clear all'), findsNothing);
+    });
+
+    testWidgets('TC_S_SF_012 — both show as removable chips once applied',
+        (tester) async {
+      await _openSearch(tester);
+      await _openFilters(tester);
+      await reveal(tester, 'Price');
+      await tester.tap(find.text('Under ₹500'));
+      await tester.pumpAndSettle();
+      await reveal(tester, 'Distance');
+      await tester.tap(find.text('Within 5 km'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Apply Filters'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Under ₹500'), findsOneWidget);
+      expect(find.text('Within 5 km'), findsOneWidget);
+      expect(find.text('Clear all'), findsOneWidget);
+    });
+
+    testWidgets('TC_S_SF_013 — Clear all drops them too', (tester) async {
+      await _openSearch(tester);
+      await _openFilters(tester);
+      await reveal(tester, 'Price');
+      await tester.tap(find.text('Under ₹500'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Apply Filters'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Clear all'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Clear all'), findsNothing);
+      expect(find.text('Under ₹500'), findsNothing);
+    });
+  });
 }

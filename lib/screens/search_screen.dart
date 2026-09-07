@@ -64,8 +64,23 @@ class _SearchScreenState extends State<SearchScreen> {
   List<_SearchItem> _allResults = [];
   String _query = '';
 
-  // Filter state (retained for future use — not yet wired to API)
+  // Filter state (retained for future use — not yet wired to API).
+  //
+  // Price and distance join mode/age/date here rather than reaching the
+  // API, because nothing on the wire can carry them yet:
+  //   * No listing endpoint takes a price range. Events offer
+  //     price_type=free|paid and that is the whole of it, and the search
+  //     card carries no price at all, so the results cannot be narrowed
+  //     here either.
+  //   * venues/ and programs/ take lat & lng for geo-distance sorting,
+  //     but events/, classes/ and search/ do not, the app keeps only a
+  //     city name (see LocationState — the GPS fix is reverse-geocoded
+  //     and the coordinates dropped), and the search card carries no
+  //     coordinates to measure against.
+  // Both become one line each in the request the day those land.
   String? _selectedMode;
+  String? _selectedPrice;
+  String? _selectedDistance;
   final Set<String> _ageGroupSelected = {};
   final Set<String> _dateSelected = {};
 
@@ -91,6 +106,29 @@ class _SearchScreenState extends State<SearchScreen> {
   static const _ageGroups  = ['0-3 years', '3-5 years', '6-8 years', '9-12 years', '13-16 years'];
   static const _modes      = ['Offline', 'Hybrid', 'Online'];
   static const _dateOptions = ['Today', 'This Weekend', 'This Week', 'Upcoming'];
+
+  /// Single-select: the bands are ranges, so two of them at once would
+  /// describe a gap no listing can sit in. "Free" leads because it is the
+  /// one people scan for.
+  static const _priceBands = [
+    'Free',
+    'Under ₹500',
+    '₹500 – ₹1,000',
+    '₹1,000 – ₹2,500',
+    '₹2,500 – ₹5,000',
+    'Above ₹5,000',
+  ];
+
+  /// Also single-select. "Nearest first" reorders rather than excludes,
+  /// which is what the venues/programs endpoints' lat & lng actually do;
+  /// the radii below it are true filters.
+  static const _distanceOptions = [
+    'Nearest first',
+    'Within 2 km',
+    'Within 5 km',
+    'Within 10 km',
+    'Within 25 km',
+  ];
 
   /// The listing type each chip selects, `null` for "All". Indexes line up
   /// with [_chips].
@@ -572,6 +610,18 @@ class _SearchScreenState extends State<SearchScreen> {
         },
       ));
     }
+    if (_selectedPrice != null) {
+      out.add((
+        label: _selectedPrice!,
+        remove: () => setState(() => _selectedPrice = null),
+      ));
+    }
+    if (_selectedDistance != null) {
+      out.add((
+        label: _selectedDistance!,
+        remove: () => setState(() => _selectedDistance = null),
+      ));
+    }
     for (final age in _ageGroupSelected.toList()) {
       out.add((
         label: age,
@@ -609,6 +659,8 @@ class _SearchScreenState extends State<SearchScreen> {
     _ageGroupSelected.clear();
     _dateSelected.clear();
     _selectedMode = null;
+    _selectedPrice = null;
+    _selectedDistance = null;
     _selectedCategory = null;
     _selectedSubcategory = null;
   }
@@ -1267,6 +1319,15 @@ class _SearchScreenState extends State<SearchScreen> {
                         // ── Category / Subcategory ───────────────────────────
                         _buildCategorySection(context, setModalState),
                         const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                        // ── Price ────────────────────────────────────────────
+                        _buildSingleChoiceSection(
+                          title: 'Price',
+                          options: _priceBands,
+                          selected: _selectedPrice,
+                          onSelect: (v) =>
+                              setModalState(() => _selectedPrice = v),
+                        ),
+                        const Divider(height: 1, color: Color(0xFFEEEEEE)),
                         // ── Age Group ────────────────────────────────────────
                         Padding(
                           padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
@@ -1307,6 +1368,16 @@ class _SearchScreenState extends State<SearchScreen> {
                               )),
                             ],
                           ),
+                        ),
+                        const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                        // ── Distance ─────────────────────────────────────────
+                        _buildSingleChoiceSection(
+                          title: 'Distance',
+                          options: _distanceOptions,
+                          selected: _selectedDistance,
+                          subtitle: 'From ${LocationState().selectedCity.value}',
+                          onSelect: (v) =>
+                              setModalState(() => _selectedDistance = v),
                         ),
                         const Divider(height: 1, color: Color(0xFFEEEEEE)),
                         // ── Date ─────────────────────────────────────────────
@@ -1383,6 +1454,60 @@ class _SearchScreenState extends State<SearchScreen> {
         _rerunSearch();
       }
     });
+  }
+
+  /// A titled row of chips where exactly one may be active, and tapping
+  /// the active one clears it. Shared by Price and Distance — both are
+  /// ranges, where two selections at once would describe an impossible
+  /// listing.
+  Widget _buildSingleChoiceSection({
+    required String title,
+    required List<String> options,
+    required String? selected,
+    required void Function(String?) onSelect,
+    String? subtitle,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 14),
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          if (subtitle != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: GoogleFonts.poppins(
+                fontSize: Responsive.sp(context, 11.5),
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: options
+                .map((label) => _buildFilterChip(
+                      label: label,
+                      isSelected: selected == label,
+                      // Tapping the active chip clears it, so a single
+                      // choice can be undone without Clear All.
+                      onTap: () =>
+                          onSelect(selected == label ? null : label),
+                    ))
+                .toList(),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildRadioOption({required String label, required bool isSelected, required VoidCallback onTap}) {
