@@ -17,10 +17,8 @@ class NewOnTheBlockSection extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
-        // ── Reverted to mock data — API wiring commented out (re-enable later) ──
-        // final items = HomeFeedState.section('new_on_the_block');
-        // if (items.isEmpty) return const SizedBox.shrink();
-        final items = DummyData.newOnTheBlock;
+        // Real listings once the feed is in, the mock set until then.
+        final items = HomeFeedState.sectionOr('new_on_the_block', DummyData.newOnTheBlock);
         if (items.isEmpty) return const SizedBox.shrink();
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

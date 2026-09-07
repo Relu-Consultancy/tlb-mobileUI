@@ -17,10 +17,8 @@ class DiscoverNearYouSection extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
-        // ── Reverted to mock data — API wiring commented out (re-enable later) ──
-        // final items = HomeFeedState.section('discover_near_you');
-        // if (items.isEmpty) return const SizedBox.shrink();
-        final items = DummyData.discoverNearYou;
+        // Real listings once the feed is in, the mock set until then.
+        final items = HomeFeedState.sectionOr('discover_near_you', DummyData.discoverNearYou);
         if (items.isEmpty) return const SizedBox.shrink();
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

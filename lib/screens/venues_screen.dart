@@ -21,6 +21,7 @@ import 'classes_screen.dart';
 import 'programs_screen.dart';
 import 'category_venues_screen.dart';
 import 'venue_detail_screen.dart';
+import '../providers/discovery_feed_state.dart';
 
 class VenuesScreen extends StatefulWidget {
   const VenuesScreen({super.key});
@@ -42,7 +43,51 @@ class _VenuesScreenState extends State<VenuesScreen> {
   @override
   void initState() {
     super.initState();
+    DiscoveryFeedState.venues.version.addListener(_onFeedChanged);
+    DiscoveryFeedState.venues.load();
     _scrollController.addListener(_onScroll);
+  }
+
+  /// The cards for one curated rail.
+  ///
+  /// Real listings once the feed is in. Until then — and if the fetch
+  /// could not reach the API at all — the mock set stands in, so a slow
+  /// connection or an outage shows the screen it always did rather than
+  /// a blank page. A section the feed returns empty genuinely is empty,
+  /// and its rail is hidden.
+  List<EventModel> _rail(String key, List<EventModel> fallback) =>
+      DiscoveryFeedState.venues.isLoaded
+          ? DiscoveryFeedState.venues.section(key)
+          : fallback;
+
+  List<EventModel> get _bigDays =>
+      _rail('for_the_big_days', DummyData.venuesBigDays);
+  List<EventModel> get _weekendPlan =>
+      _rail('weekend_plan_sorted', DummyData.venuesWeekendPlan);
+  List<EventModel> get _closeToYou =>
+      _rail('close_to_you', DummyData.venuesCloseToYou);
+  List<EventModel> get _outAndAbout =>
+      _rail('out_and_about', DummyData.venuesOutAndAbout);
+  List<EventModel> get _handsOn =>
+      _rail('hands_on_space', DummyData.venuesHandsOn);
+  List<EventModel> get _easyPocket =>
+      _rail('easy_on_the_pocket', DummyData.venuesEasyPocket);
+  List<EventModel> get _headedMall =>
+      _rail('headed_to_the_mall', DummyData.venuesHeadedMall);
+  List<EventModel> get _thoughtful =>
+      _rail('thoughtful_spaces', DummyData.venuesThoughtful);
+
+  /// The slides for the top banner: the listings an admin flagged as
+  /// their sections' heroes. The mock banners stand in until the feed
+  /// is in, and whenever nothing is flagged.
+  List<EventModel> get _banners {
+    final feed = DiscoveryFeedState.venues;
+    if (!feed.isLoaded || feed.heroes.isEmpty) return DummyData.venuesScreenBanners;
+    return feed.heroes;
+  }
+
+  void _onFeedChanged() {
+    if (mounted) setState(() {});
   }
 
   void _onScroll() {
@@ -54,6 +99,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
 
   @override
   void dispose() {
+    DiscoveryFeedState.venues.version.removeListener(_onFeedChanged);
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _navReveal.dispose();
@@ -74,6 +120,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
 
   // Pull-to-refresh: reload live wishlist/saved state and rebuild the feed.
   Future<void> _handleRefresh() async {
+    await DiscoveryFeedState.venues.load(force: true);
     await SavedEventsState.loadFromApi();
     if (mounted) setState(() {});
   }
@@ -146,7 +193,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                             // transparent areas.
                             RepaintBoundary(
                               child: BannerCarousel(
-                                events: DummyData.venuesScreenBanners,
+                                events: _banners,
                                 height: bannerH,
                                 showGlow: false,
                                 overlayStyle: true,
@@ -168,34 +215,39 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       ),
 
                       // ── For the Big Days ──
+                      if (_bigDays.isNotEmpty) ...[
                       _sectionHeader(context, 'For the Big days'),
                       SizedBox(
                         height: Responsive.h(context, 420, min: 400),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.venuesBigDays.length,
+                          itemCount: _bigDays.length,
                           itemBuilder: (ctx, i) => Padding(
                             padding: const EdgeInsets.only(right: 14),
-                            child: _buildBigDaysCard(context, DummyData.venuesBigDays[i]),
+                            child: _buildBigDaysCard(context, _bigDays[i]),
                           ),
                         ),
                       ),
+                      ],
 
                       // ── Weekend Plan Sorted ──
+                      if (_weekendPlan.isNotEmpty) ...[
                       _sectionHeader(context, 'Weekend Plan Sorted'),
                       SizedBox(
                         height: Responsive.h(context, 196, min: 182),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.venuesWeekendPlan.length,
+                          itemCount: _weekendPlan.length,
                           itemBuilder: (ctx, i) => Padding(
                             padding: const EdgeInsets.only(right: 14),
-                            child: _buildWeekendPlanCard(context, DummyData.venuesWeekendPlan[i]),
+                            child: _buildWeekendPlanCard(context, _weekendPlan[i]),
                           ),
                         ),
                       ),
+                      ],
 
                       // ── Close to You ──
+                      if (_closeToYou.isNotEmpty) ...[
                       _sectionHeader(context, 'Close to you'),
                       SizedBox(
                         // Taller so the image can extend further down while the
@@ -203,27 +255,30 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         height: Responsive.h(context, 312, min: 296),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.venuesCloseToYou.length,
+                          itemCount: _closeToYou.length,
                           itemBuilder: (ctx, i) => Padding(
                             padding: const EdgeInsets.only(right: 14),
-                            child: _buildCloseToYouCard(context, DummyData.venuesCloseToYou[i]),
+                            child: _buildCloseToYouCard(context, _closeToYou[i]),
                           ),
                         ),
                       ),
+                      ],
 
                       // ── Out & About ──
+                      if (_outAndAbout.isNotEmpty) ...[
                       _sectionHeader(context, 'Out & About'),
                       SizedBox(
                         height: Responsive.h(context, 234, min: 218),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.venuesOutAndAbout.length,
+                          itemCount: _outAndAbout.length,
                           itemBuilder: (ctx, i) => Padding(
                             padding: const EdgeInsets.only(right: 12),
-                            child: _buildOutAndAboutCard(context, DummyData.venuesOutAndAbout[i]),
+                            child: _buildOutAndAboutCard(context, _outAndAbout[i]),
                           ),
                         ),
                       ),
+                      ],
 
                       // ── Get Moving ──
                       _sectionHeader(context, 'Get Moving'),
@@ -240,65 +295,73 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       ),
 
                       // ── Hand-On Spaces ──
+                      if (_handsOn.isNotEmpty) ...[
                       _sectionHeader(context, 'Hand-On Space'),
                       SizedBox(
                         height: Responsive.h(context, 304, min: 290),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.venuesHandsOn.length,
+                          itemCount: _handsOn.length,
                           itemBuilder: (ctx, i) => Padding(
                             padding: const EdgeInsets.only(right: 14),
-                            child: _buildHandsOnCard(context, DummyData.venuesHandsOn[i]),
+                            child: _buildHandsOnCard(context, _handsOn[i]),
                           ),
                         ),
                       ),
+                      ],
 
                       // ── Easy on the Pocket ──
+                      if (_easyPocket.isNotEmpty) ...[
                       _sectionHeader(context, 'Easy on the pocket'),
                       SizedBox(
                         // +8 to absorb the larger 18px card bottom gap.
                         height: Responsive.h(context, 304, min: 290),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.venuesEasyPocket.length,
+                          itemCount: _easyPocket.length,
                           itemBuilder: (ctx, i) => Padding(
                             padding: const EdgeInsets.only(right: 12),
-                            child: _buildEasyPocketCard(context, DummyData.venuesEasyPocket[i], i),
+                            child: _buildEasyPocketCard(context, _easyPocket[i], i),
                           ),
                         ),
                       ),
+                      ],
 
                       // ── Headed to the Mall? ──
+                      if (_headedMall.isNotEmpty) ...[
                       _sectionHeader(context, 'Headed to the Mall'),
                       SizedBox(
                         height: Responsive.h(context, 362, min: 344),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.venuesHeadedMall.length,
+                          itemCount: _headedMall.length,
                           itemBuilder: (ctx, i) => Padding(
                             padding: const EdgeInsets.only(right: 14),
-                            child: _buildMallCard(context, DummyData.venuesHeadedMall[i]),
+                            child: _buildMallCard(context, _headedMall[i]),
                           ),
                         ),
                       ),
+                      ],
 
                       // ── Your Way, Your Plan ──
                       _sectionHeader(context, 'Your Way, Your Plan'),
                       _buildYourWayRow(context),
 
                       // ── Thoughtful Spaces ──
+                      if (_thoughtful.isNotEmpty) ...[
                       _sectionHeader(context, 'Thoughtful Spaces'),
                       SizedBox(
                         height: Responsive.h(context, 432, min: 408),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.venuesThoughtful.length,
+                          itemCount: _thoughtful.length,
                           itemBuilder: (ctx, i) => Padding(
                             padding: const EdgeInsets.only(right: 14),
-                            child: _buildThoughtfulCard(context, DummyData.venuesThoughtful[i]),
+                            child: _buildThoughtfulCard(context, _thoughtful[i]),
                           ),
                         ),
                       ),
+                      ],
 
                       const SizedBox(height: 40),
                       AppFooter(

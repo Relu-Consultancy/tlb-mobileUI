@@ -5,7 +5,7 @@ import '../providers/location_state.dart';
 import '../providers/saved_events_state.dart';
 import '../providers/notifications_state.dart';
 import '../services/push_notifications.dart';
-// import '../providers/home_feed_state.dart'; // commented out — home reverted to mock data
+import '../providers/home_feed_state.dart';
 import '../widgets/dark_glow_header.dart';
 import '../widgets/spotlight_banner.dart';
 import '../widgets/categories_grid.dart';
@@ -70,14 +70,18 @@ class _HomeScreenState extends State<HomeScreen> {
     // fresh-login path — main() only does this on a restored session).
     NotificationsState.syncAndNotify();
     PushNotifications.registerToken();
-    // Load the real homepage feed (sections + hydrated cards). Sections render
-    // reactively once this completes; empty sections hide themselves.
-    // Commented out for now — home sections reverted to mock data.
-    // HomeFeedState.load();
+    // Load the real homepage feed (sections + hydrated cards). Sections
+    // render reactively once this completes; until then, and if it cannot be
+    // reached, they show their mock set.
+    // The section widgets watch HomeFeedState.version themselves; the
+    // spotlight banner is built here, so this screen has to repaint too.
+    HomeFeedState.version.addListener(_onFeedChanged);
+    HomeFeedState.load();
   }
 
   @override
   void dispose() {
+    HomeFeedState.version.removeListener(_onFeedChanged);
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _navReveal.dispose();
@@ -91,6 +95,10 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  void _onFeedChanged() {
+    if (mounted) setState(() {});
+  }
+
   void _onScroll() {
     final double offset = _scrollController.offset;
     final double t = ((offset - _navFadeStart) / (_navFadeEnd - _navFadeStart))
@@ -102,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _handleRefresh() async {
     await Future.wait([
       SavedEventsState.loadFromApi(),
-      // HomeFeedState.load(force: true), // commented out — sections use mock data
+      HomeFeedState.load(force: true),
     ]);
     if (mounted) setState(() {});
   }
@@ -259,7 +267,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     (MediaQuery.of(context).size.height * 0.62)
                                         .clamp(420.0, 660.0),
                                 child: SpotlightBanner(
-                                  events: DummyData.bannerEvents,
+                                  // The curated spotlight, or the mock
+                                  // posters until the feed is in.
+                                  events: HomeFeedState.sectionOr(
+                                    'spotlight',
+                                    DummyData.bannerEvents,
+                                  ),
                                 ),
                               ),
                             ),

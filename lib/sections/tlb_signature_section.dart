@@ -31,10 +31,8 @@ class TlbSignatureSection extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
-        // ── Reverted to mock data — API wiring commented out (re-enable later) ──
-        // final items = HomeFeedState.section('tlb_signature');
-        // if (items.isEmpty) return const SizedBox.shrink();
-        final items = DummyData.tlbSignature;
+        // Real listings once the feed is in, the mock set until then.
+        final items = HomeFeedState.sectionOr('tlb_signature', DummyData.tlbSignature);
         if (items.isEmpty) return const SizedBox.shrink();
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

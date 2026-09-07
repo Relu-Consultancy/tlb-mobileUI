@@ -44,10 +44,8 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
     return ValueListenableBuilder<int>(
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
-        // ── Reverted to mock data — API wiring commented out (re-enable later) ──
-        // final items = HomeFeedState.section('weekend_specials');
-        // if (items.isEmpty) return const SizedBox.shrink();
-        final items = DummyData.weekendSpecial;
+        // Real listings once the feed is in, the mock set until then.
+        final items = HomeFeedState.sectionOr('weekend_specials', DummyData.weekendSpecial);
         if (items.isEmpty) return const SizedBox.shrink();
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

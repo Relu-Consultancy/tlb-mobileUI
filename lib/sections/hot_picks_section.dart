@@ -21,10 +21,8 @@ class HotPicksSection extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
-        // ── Reverted to mock data — API wiring commented out (re-enable later) ──
-        // final items = HomeFeedState.section('hot_picks');
-        // if (items.isEmpty) return const SizedBox.shrink();
-        final items = DummyData.hotPicks;
+        // Real listings once the feed is in, the mock set until then.
+        final items = HomeFeedState.sectionOr('hot_picks', DummyData.hotPicks);
         if (items.isEmpty) return const SizedBox.shrink();
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

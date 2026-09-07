@@ -18,10 +18,8 @@ class FamilyFeelsSection extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
-        // ── Reverted to mock data — API wiring commented out (re-enable later) ──
-        // final items = HomeFeedState.section('family_feels');
-        // if (items.isEmpty) return const SizedBox.shrink();
-        final items = DummyData.familyFeels;
+        // Real listings once the feed is in, the mock set until then.
+        final items = HomeFeedState.sectionOr('family_feels', DummyData.familyFeels);
         if (items.isEmpty) return const SizedBox.shrink();
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

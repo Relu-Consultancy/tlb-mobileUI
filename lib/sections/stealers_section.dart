@@ -19,10 +19,8 @@ class StealersSection extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
-        // ── Reverted to mock data — API wiring commented out (re-enable later) ──
-        // final items = HomeFeedState.section('stealers');
-        // if (items.isEmpty) return const SizedBox.shrink();
-        final items = DummyData.stealers;
+        // Real listings once the feed is in, the mock set until then.
+        final items = HomeFeedState.sectionOr('stealers', DummyData.stealers);
         if (items.isEmpty) return const SizedBox.shrink();
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

@@ -27,6 +27,8 @@ import 'events_screen.dart';
 import 'programs_screen.dart';
 import 'venues_screen.dart';
 import 'category_classes_screen.dart';
+import '../providers/discovery_feed_state.dart';
+import '../models/event_model.dart';
 
 class ClassesScreen extends StatefulWidget {
   const ClassesScreen({super.key});
@@ -48,7 +50,47 @@ class _ClassesScreenState extends State<ClassesScreen> {
   @override
   void initState() {
     super.initState();
+    DiscoveryFeedState.classes.version.addListener(_onFeedChanged);
+    DiscoveryFeedState.classes.load();
     _scrollController.addListener(_onScroll);
+  }
+
+  /// The cards for one curated rail.
+  ///
+  /// Real listings once the feed is in. Until then — and if the fetch
+  /// could not reach the API at all — the mock set stands in, so a slow
+  /// connection or an outage shows the screen it always did rather than
+  /// a blank page. A section the feed returns empty genuinely is empty,
+  /// and its rail is hidden.
+  List<EventModel> _rail(String key, List<EventModel> fallback) =>
+      DiscoveryFeedState.classes.isLoaded
+          ? DiscoveryFeedState.classes.section(key)
+          : fallback;
+
+  List<EventModel> get _whatEveryoneJoining =>
+      _rail('whats_everyone_joining', DummyData.classesWhatEveryoneJoining);
+  List<EventModel> get _rightAroundYou =>
+      _rail('right_around_you', DummyData.classesRightAroundYou);
+  List<EventModel> get _topPicks =>
+      _rail('top_picks_for_you', DummyData.classesTopPicks);
+  List<EventModel> get _holidaySpecial =>
+      _rail('holiday_special', DummyData.classesHolidaySpecial);
+  List<EventModel> get _buildNewSkills =>
+      _rail('build_new_skills', DummyData.classesBuildNewSkills);
+  List<EventModel> get _specialFocus =>
+      _rail('special_focus', DummyData.classesSpecialFocus);
+
+  /// The slides for the top banner: the listings an admin flagged as
+  /// their sections' heroes. The mock banners stand in until the feed
+  /// is in, and whenever nothing is flagged.
+  List<EventModel> get _banners {
+    final feed = DiscoveryFeedState.classes;
+    if (!feed.isLoaded || feed.heroes.isEmpty) return DummyData.classesScreenBanners;
+    return feed.heroes;
+  }
+
+  void _onFeedChanged() {
+    if (mounted) setState(() {});
   }
 
   void _onScroll() {
@@ -60,6 +102,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
 
   @override
   void dispose() {
+    DiscoveryFeedState.classes.version.removeListener(_onFeedChanged);
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _navReveal.dispose();
@@ -111,6 +154,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
 
   // Pull-to-refresh: reload live wishlist/saved state and rebuild the feed.
   Future<void> _handleRefresh() async {
+    await DiscoveryFeedState.classes.load(force: true);
     await SavedEventsState.loadFromApi();
     if (mounted) setState(() {});
   }
@@ -183,7 +227,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                             // transparent areas.
                             RepaintBoundary(
                               child: BannerCarousel(
-                                events: DummyData.classesScreenBanners,
+                                events: _banners,
                                 height: bannerH,
                                 showGlow: false,
                                 overlayStyle: true,
@@ -244,6 +288,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
 
                       // ── What's Everyone Joining? ──────────────────────────
+                      if (_whatEveryoneJoining.isNotEmpty) ...[
                       const SectionDividerWidget(
                         title: "What's Everyone Joining?",
                         fontSize: 17,
@@ -257,14 +302,14 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         height: Responsive.h(context, 525, min: 495),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.classesWhatEveryoneJoining.length,
+                          itemCount: _whatEveryoneJoining.length,
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.only(right: 16),
                               child: SizedBox(
                                 width: Responsive.w(context, 290),
                                 child: EventCardWithRating(
-                                  event: DummyData.classesWhatEveryoneJoining[index],
+                                  event: _whatEveryoneJoining[index],
                                   buttonLabel: 'View Details',
                                 ),
                               ),
@@ -272,6 +317,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                           },
                         ),
                       ),
+                      ],
 
                       // ── Pick Your Pace ────────────────────────────────────
                       const SectionDividerWidget(
@@ -398,6 +444,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
 
                       // ── Right Around You ──────────────────────────────────
+                      if (_rightAroundYou.isNotEmpty) ...[
                       const SectionDividerWidget(
                         title: 'Right Around You',
                         fontSize: 17,
@@ -411,12 +458,12 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         height: Responsive.h(context, 385, min: 365),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.classesRightAroundYou.length,
+                          itemCount: _rightAroundYou.length,
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.only(right: 14),
                               child: ClassNearbyCard(
-                                event: DummyData.classesRightAroundYou[index],
+                                event: _rightAroundYou[index],
                                 width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                                 buttonLabel: null,
                               ),
@@ -424,8 +471,10 @@ class _ClassesScreenState extends State<ClassesScreen> {
                           },
                         ),
                       ),
+                      ],
 
                       // ── Top Picks For You ─────────────────────────────────
+                      if (_topPicks.isNotEmpty) ...[
                       const SectionDividerWidget(
                         title: 'Top Picks For You',
                         fontSize: 17,
@@ -439,14 +488,14 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         height: Responsive.h(context, 224, min: 210),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.classesTopPicks.length,
+                          itemCount: _topPicks.length,
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.only(right: 14),
                               child: SizedBox(
                                 width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                                 child: NewOnTlbCard(
-                                  event: DummyData.classesTopPicks[index],
+                                  event: _topPicks[index],
                                   buttonLabel: 'View Details',
                                 ),
                               ),
@@ -454,8 +503,10 @@ class _ClassesScreenState extends State<ClassesScreen> {
                           },
                         ),
                       ),
+                      ],
 
                       // ── Holiday Special ───────────────────────────────────
+                      if (_holidaySpecial.isNotEmpty) ...[
                       const SectionDividerWidget(
                         title: 'Holiday Special',
                         fontSize: 17,
@@ -469,13 +520,13 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         height: Responsive.h(context, 450, min: 410),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.classesHolidaySpecial.length,
+                          itemCount: _holidaySpecial.length,
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.only(right: 14),
                               child: RepaintBoundary(
                                 child: HolidaySpecialCard(
-                                  event: DummyData.classesHolidaySpecial[index],
+                                  event: _holidaySpecial[index],
                                   width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                                   buttonLabel: 'View Details',
                                 ),
@@ -484,8 +535,10 @@ class _ClassesScreenState extends State<ClassesScreen> {
                           },
                         ),
                       ),
+                      ],
 
                       // ── Build New Skills ──────────────────────────────────
+                      if (_buildNewSkills.isNotEmpty) ...[
                       const SectionDividerWidget(
                         title: 'Build New Skills',
                         fontSize: 17,
@@ -502,12 +555,12 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         height: Responsive.h(context, 259, min: 244),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.classesBuildNewSkills.length,
+                          itemCount: _buildNewSkills.length,
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.only(right: 14),
                               child: BuildSkillCard(
-                                event: DummyData.classesBuildNewSkills[index],
+                                event: _buildNewSkills[index],
                                 width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                                 ctaLabel: 'View Details',
                               ),
@@ -515,8 +568,10 @@ class _ClassesScreenState extends State<ClassesScreen> {
                           },
                         ),
                       ),
+                      ],
 
                       // ── Special Focus ─────────────────────────────────────
+                      if (_specialFocus.isNotEmpty) ...[
                       const SectionDividerWidget(
                         title: 'Special Focus',
                         fontSize: 17,
@@ -530,7 +585,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                         height: Responsive.h(context, 452, min: 428),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.classesSpecialFocus.length,
+                          itemCount: _specialFocus.length,
                           itemBuilder: (context, index) {
                             const tagColors = [
                               Color(0xFFDC2626),
@@ -542,7 +597,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                               child: Stack(
                                 children: [
                                   ClassNearbyCard(
-                                    event: DummyData.classesSpecialFocus[index],
+                                    event: _specialFocus[index],
                                     width: Responsive.cardWidth(context,
                                         fraction: 0.85, max: 360),
                                     buttonLabel: 'View Details',
@@ -561,6 +616,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
                           },
                         ),
                       ),
+                      ],
                       const SizedBox(height: 16),
 
                       AppFooter(

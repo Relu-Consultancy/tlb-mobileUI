@@ -22,6 +22,16 @@ class HomeFeedState {
   /// Cards for a section key (e.g. `'hot_picks'`, `'spotlight'`); empty when none.
   static List<EventModel> section(String key) => _sections[key] ?? const [];
 
+  /// True once a fetch has come back with a usable feed. Sections show their
+  /// mock set until then, and if the fetch could not reach the API at all, so
+  /// a slow connection or an outage shows the screen it always did rather
+  /// than a blank page.
+  static bool get isLoaded => _loaded;
+
+  /// The feed's cards for [key], or [fallback] while there is no feed.
+  static List<EventModel> sectionOr(String key, List<EventModel> fallback) =>
+      _loaded ? section(key) : fallback;
+
   static Future<void> load({bool force = false}) async {
     if (_loading) return;
     if (_loaded && !force) return;

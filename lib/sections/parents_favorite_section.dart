@@ -18,10 +18,8 @@ class ParentsFavoriteSection extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
-        // ── Reverted to mock data — API wiring commented out (re-enable later) ──
-        // final items = HomeFeedState.section('parents_favorite');
-        // if (items.isEmpty) return const SizedBox.shrink();
-        final items = DummyData.parentsFavorite;
+        // Real listings once the feed is in, the mock set until then.
+        final items = HomeFeedState.sectionOr('parents_favorite', DummyData.parentsFavorite);
         if (items.isEmpty) return const SizedBox.shrink();
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

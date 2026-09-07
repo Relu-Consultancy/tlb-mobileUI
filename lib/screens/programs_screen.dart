@@ -27,6 +27,7 @@ import 'classes_screen.dart';
 import 'venues_screen.dart';
 import 'category_programs_screen.dart';
 import 'format_programs_screen.dart';
+import '../providers/discovery_feed_state.dart';
 
 class ProgramsScreen extends StatefulWidget {
   const ProgramsScreen({super.key});
@@ -48,7 +49,47 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
   @override
   void initState() {
     super.initState();
+    DiscoveryFeedState.programs.version.addListener(_onFeedChanged);
+    DiscoveryFeedState.programs.load();
     _scrollController.addListener(_onScroll);
+  }
+
+  /// The cards for one curated rail.
+  ///
+  /// Real listings once the feed is in. Until then — and if the fetch
+  /// could not reach the API at all — the mock set stands in, so a slow
+  /// connection or an outage shows the screen it always did rather than
+  /// a blank page. A section the feed returns empty genuinely is empty,
+  /// and its rail is hidden.
+  List<EventModel> _rail(String key, List<EventModel> fallback) =>
+      DiscoveryFeedState.programs.isLoaded
+          ? DiscoveryFeedState.programs.section(key)
+          : fallback;
+
+  List<EventModel> get _bigLeagues =>
+      _rail('the_big_leagues', DummyData.hotPicks);
+  List<EventModel> get _weekendCount =>
+      _rail('make_your_weekend_count', DummyData.weekendSpecial);
+  List<EventModel> get _zeroToHero =>
+      _rail('zero_to_hero', DummyData.newOnTlb);
+  List<EventModel> get _holidayEdit =>
+      _rail('the_holiday_edit', DummyData.programsHolidayEdit);
+  List<EventModel> get _uniqueMinds =>
+      _rail('for_unique_minds', DummyData.classesSpecialFocus);
+  List<EventModel> get _levelUp =>
+      _rail('level_up_your_profile', DummyData.categoryEventsExtra);
+
+  /// The slides for the top banner: the listings an admin flagged as
+  /// their sections' heroes. The mock banners stand in until the feed
+  /// is in, and whenever nothing is flagged.
+  List<EventModel> get _banners {
+    final feed = DiscoveryFeedState.programs;
+    if (!feed.isLoaded || feed.heroes.isEmpty) return DummyData.programsScreenBanners;
+    return feed.heroes;
+  }
+
+  void _onFeedChanged() {
+    if (mounted) setState(() {});
   }
 
   void _onScroll() {
@@ -60,6 +101,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
 
   @override
   void dispose() {
+    DiscoveryFeedState.programs.version.removeListener(_onFeedChanged);
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _navReveal.dispose();
@@ -113,6 +155,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
 
   // Pull-to-refresh: reload live wishlist/saved state and rebuild the feed.
   Future<void> _handleRefresh() async {
+    await DiscoveryFeedState.programs.load(force: true);
     await SavedEventsState.loadFromApi();
     if (mounted) setState(() {});
   }
@@ -185,7 +228,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                             // transparent areas.
                             RepaintBoundary(
                               child: BannerCarousel(
-                                events: DummyData.programsScreenBanners,
+                                events: _banners,
                                 height: bannerH,
                                 showGlow: false,
                                 overlayStyle: true,
@@ -250,6 +293,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       ),
 
                       // ── The Big Leagues ──
+                      if (_bigLeagues.isNotEmpty) ...[
                       const SectionDividerWidget(
                         title: 'The Big Leagues',
                         fontSize: 17,
@@ -264,18 +308,18 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         height: Responsive.h(context, 548, min: 523),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.hotPicks.length,
+                          itemCount: _bigLeagues.length,
                           itemBuilder: (context, index) => Padding(
                             padding: const EdgeInsets.only(right: 16),
                             child: SizedBox(
                               width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                               child: EventCardWithRating(
-                                event: DummyData.hotPicks[index],
+                                event: _bigLeagues[index],
                                 buttonLabel: 'View Details',
                                 onTap: () => Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => ProgramDetailScreen(event: DummyData.hotPicks[index]),
+                                    builder: (_) => ProgramDetailScreen(event: _bigLeagues[index]),
                                   ),
                                 ),
                               ),
@@ -283,8 +327,10 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           ),
                         ),
                       ),
+                      ],
 
                       // ── Make Your Weekends Count ──
+                      if (_weekendCount.isNotEmpty) ...[
                       const SectionDividerWidget(
                         title: 'Make Your Weekends Count',
                         fontSize: 17,
@@ -299,9 +345,9 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         height: Responsive.h(context, 214, min: 200),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.weekendSpecial.length,
+                          itemCount: _weekendCount.length,
                           itemBuilder: (context, index) {
-                            final e = DummyData.weekendSpecial[index];
+                            final e = _weekendCount[index];
                             return Padding(
                               padding: const EdgeInsets.only(right: 14),
                               child: _buildSideBySideCard(
@@ -315,6 +361,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           },
                         ),
                       ),
+                      ],
 
                       // ── Find Your Fit ──
                       const SectionDividerWidget(
@@ -342,6 +389,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       ),
 
                       // ── Zero to Hero ──
+                      if (_zeroToHero.isNotEmpty) ...[
                       const SectionDividerWidget(
                         title: 'Zero to Hero',
                         fontSize: 17,
@@ -356,9 +404,9 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         height: Responsive.h(context, 214, min: 200),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.newOnTlb.length,
+                          itemCount: _zeroToHero.length,
                           itemBuilder: (context, index) {
-                            final e = DummyData.newOnTlb[index];
+                            final e = _zeroToHero[index];
                             return Padding(
                               padding: const EdgeInsets.only(right: 14),
                               child: _buildSideBySideCard(
@@ -372,8 +420,10 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           },
                         ),
                       ),
+                      ],
 
                       // ── The Holiday Edit ──
+                      if (_holidayEdit.isNotEmpty) ...[
                       const SectionDividerWidget(
                         title: 'The Holiday Edit',
                         fontSize: 17,
@@ -388,18 +438,20 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         height: Responsive.h(context, 348, min: 322),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.programsHolidayEdit.length,
+                          itemCount: _holidayEdit.length,
                           itemBuilder: (context, index) => Padding(
                             padding: const EdgeInsets.only(right: 14),
                             child: _buildHolidayCard(
                               context,
-                              event: DummyData.programsHolidayEdit[index],
+                              event: _holidayEdit[index],
                             ),
                           ),
                         ),
                       ),
+                      ],
 
                       // ── For Unique Minds ──
+                      if (_uniqueMinds.isNotEmpty) ...[
                       const SectionDividerWidget(
                         title: 'For Unique Minds',
                         fontSize: 17,
@@ -414,18 +466,20 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         height: Responsive.h(context, 420, min: 400),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.classesSpecialFocus.length,
+                          itemCount: _uniqueMinds.length,
                           itemBuilder: (context, index) => Padding(
                             padding: const EdgeInsets.only(right: 14),
                             child: _buildUniqueMindCard(
                               context,
-                              event: DummyData.classesSpecialFocus[index],
+                              event: _uniqueMinds[index],
                             ),
                           ),
                         ),
                       ),
+                      ],
 
                       // ── Level Up Your Profile ──
+                      if (_levelUp.isNotEmpty) ...[
                       const SectionDividerWidget(
                         title: 'Level Up Your Profile',
                         fontSize: 17,
@@ -443,16 +497,17 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         height: Responsive.h(context, 448, min: 424),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.categoryEventsExtra.length,
+                          itemCount: _levelUp.length,
                           itemBuilder: (context, index) => Padding(
                             padding: const EdgeInsets.only(right: 14),
                             child: _buildLevelUpCard(
                               context,
-                              event: DummyData.categoryEventsExtra[index],
+                              event: _levelUp[index],
                             ),
                           ),
                         ),
                       ),
+                      ],
 
                       const SizedBox(height: 40),
                       AppFooter(
