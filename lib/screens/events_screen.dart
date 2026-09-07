@@ -33,6 +33,7 @@ import '../widgets/all_categories_popup.dart';
 import 'category_events_screen.dart';
 import '../providers/discovery_feed_state.dart';
 import '../models/event_model.dart';
+import '../widgets/section_hero_card.dart';
 
 // Slug → local asset + gradient palette.
 // New API categories that don't yet have dedicated assets fall back to a
@@ -199,6 +200,26 @@ class _EventsScreenState extends State<EventsScreen> {
   List<EventModel> get _newOnTlb => _rail('new_on_tlb', DummyData.newOnTlb);
   List<EventModel> get _onlineEvents =>
       _rail('online_events', DummyData.onlineEvents);
+
+  /// The listing an admin flagged as this section's feature — the slot
+  /// the admin panel calls its "top banner". Null until the feed is in,
+  /// and for every section with none set.
+  EventModel? _hero(String key) => DiscoveryFeedState.events.isLoaded
+      ? DiscoveryFeedState.events.hero(key)
+      : null;
+
+  /// A section shows when it has a hero, listings, or both. The banner
+  /// sits above the rail, so a section with only a hero is still a
+  /// section worth drawing.
+  bool _hasSection(String key, List<EventModel> rail) =>
+      _hero(key) != null || rail.isNotEmpty;
+
+  /// The banner above a rail, or nothing when the section has no hero.
+  Widget _heroBanner(String key) {
+    final hero = _hero(key);
+    if (hero == null) return const SizedBox.shrink();
+    return SectionHeroCard(event: hero);
+  }
 
   void _onScroll() {
     final double offset = _scrollController.offset;
@@ -443,8 +464,12 @@ class _EventsScreenState extends State<EventsScreen> {
                   ),
                 ),
 
-                      if (_trending.isNotEmpty) ...[
+                      if (_hasSection('trending_events', _trending)) ...[
                       const SectionDividerWidget(topPadding: 30, title: 'Trending Events'),
+                      _heroBanner('trending_events'),
+                      // A section can hold only a hero; an empty rail
+                      // would still reserve its full height.
+                      if (_trending.isNotEmpty)
                       SizedBox(
                         height: Responsive.h(context, 420, min: 400),
                         child: AutoScrollList(
@@ -478,8 +503,12 @@ class _EventsScreenState extends State<EventsScreen> {
                           ),
                         ),
                       ),
-                      if (_thisWeekend.isNotEmpty) ...[
+                      if (_hasSection('happening_this_weekend', _thisWeekend)) ...[
                       const SectionDividerWidget(topPadding: 30, title: 'Happening This Weekend'),
+                      _heroBanner('happening_this_weekend'),
+                      // A section can hold only a hero; an empty rail
+                      // would still reserve its full height.
+                      if (_thisWeekend.isNotEmpty)
                       SizedBox(
                         // Tightened so the card hugs its content (was 190 — left
                         // ~30px of white below the Book Now button).
@@ -500,8 +529,12 @@ class _EventsScreenState extends State<EventsScreen> {
                       ),
 
                       ],
-                      if (_holiday.isNotEmpty) ...[
+                      if (_hasSection('holiday_special', _holiday)) ...[
                       const SectionDividerWidget(topPadding: 30, title: 'Holiday Special'),
+                      _heroBanner('holiday_special'),
+                      // A section can hold only a hero; an empty rail
+                      // would still reserve its full height.
+                      if (_holiday.isNotEmpty)
                       SizedBox(
                         height: Responsive.h(context, 460, min: 430),
                         child: AutoScrollList(
@@ -522,8 +555,12 @@ class _EventsScreenState extends State<EventsScreen> {
                       ),
 
                       ],
-                      if (_featuredPartners.isNotEmpty) ...[
+                      if (_hasSection('featured_partners', _featuredPartners)) ...[
                       const SectionDividerWidget(topPadding: 30, title: 'Featured Partners'),
+                      _heroBanner('featured_partners'),
+                      // A section can hold only a hero; an empty rail
+                      // would still reserve its full height.
+                      if (_featuredPartners.isNotEmpty)
                       SizedBox(
                         // Poster (0.78) + title + strapline + the meta rows
                         // comes to ~559pt on a 393pt screen; the old 540 left
@@ -542,8 +579,12 @@ class _EventsScreenState extends State<EventsScreen> {
                       ),
 
                       ],
-                      if (_newOnTlb.isNotEmpty) ...[
+                      if (_hasSection('new_on_tlb', _newOnTlb)) ...[
                       const SectionDividerWidget(topPadding: 30, title: 'New On TLB'),
+                      _heroBanner('new_on_tlb'),
+                      // A section can hold only a hero; an empty rail
+                      // would still reserve its full height, dots and all.
+                      if (_newOnTlb.isNotEmpty) ...[
                       SizedBox(
                         height: Responsive.h(context, 230, min: 210),
                         child: PageView.builder(
@@ -571,10 +612,15 @@ class _EventsScreenState extends State<EventsScreen> {
                           ),
                         ),
                       ),
+                      ],
 
                       ],
-                      if (_onlineEvents.isNotEmpty) ...[
+                      if (_hasSection('online_events', _onlineEvents)) ...[
                       const SectionDividerWidget(topPadding: 30, title: 'Online Events'),
+                      _heroBanner('online_events'),
+                      // A section can hold only a hero; an empty rail
+                      // would still reserve its full height.
+                      if (_onlineEvents.isNotEmpty)
                       SizedBox(
                         height: Responsive.h(context, 372, min: 342),
                         child: AutoScrollList(

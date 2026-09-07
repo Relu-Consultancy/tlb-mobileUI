@@ -48,7 +48,7 @@ void main() {
       }
     });
 
-    test('TC_S_EF_004 — an empty section hides its rail', () {
+    test('TC_S_EF_004 — an empty rail is not drawn', () {
       for (final rail in const [
         '_trending',
         '_thisWeekend',
@@ -59,6 +59,32 @@ void main() {
       ]) {
         expect(src, contains('if ($rail.isNotEmpty)'), reason: rail);
       }
+    });
+
+    test('TC_S_EF_006 — every section draws its hero as a banner', () {
+      // The admin panel calls this slot the section's "top banner" and
+      // previews it as a large featured card. Left in the rail it was just
+      // another identical card, which is the same as not being featured.
+      for (final slug in const [
+        'trending_events',
+        'happening_this_weekend',
+        'holiday_special',
+        'featured_partners',
+        'new_on_tlb',
+        'online_events',
+      ]) {
+        expect(src, contains("_heroBanner('$slug')"), reason: slug);
+      }
+      expect(src, contains('SectionHeroCard(event: hero)'));
+    });
+
+    test('TC_S_EF_007 — a hero-only section still shows', () {
+      // trending_events is exactly this today: a hero and no listings.
+      // Gating the section on the rail alone hid the hero entirely.
+      expect(src, contains('_hasSection('));
+      expect(src,
+          contains("bool _hasSection(String key, List<EventModel> rail) =>"));
+      expect(src, contains("_hero(key) != null || rail.isNotEmpty"));
     });
 
     test('TC_S_EF_005 — the screen repaints when the feed lands', () {
@@ -78,6 +104,8 @@ void main() {
 
     test('TC_P_DF_002 — an unknown section is empty, not null', () {
       expect(DiscoveryFeedState.venues.section('nope'), isEmpty);
+      expect(DiscoveryFeedState.venues.hero('nope'), isNull);
+      expect(DiscoveryFeedState.venues.isSectionEmpty('nope'), isTrue);
     });
 
     test('TC_P_DF_003 — a failed fetch is not reported as loaded', () async {

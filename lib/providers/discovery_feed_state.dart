@@ -27,6 +27,7 @@ class DiscoveryFeedState {
 
   final ValueNotifier<int> version = ValueNotifier<int>(0);
   final Map<String, List<EventModel>> _sections = {};
+  final Map<String, EventModel> _heroes = {};
   bool _loading = false;
   bool _loaded = false;
   bool _failed = false;
@@ -41,7 +42,18 @@ class DiscoveryFeedState {
 
   /// Cards for a section key (e.g. `'trending_events'`); empty when the
   /// section holds nothing or the feed has not loaded.
+  ///
+  /// Excludes the section's hero, which the API already keeps out of its
+  /// `listings` array — read [hero] for that one.
   List<EventModel> section(String key) => _sections[key] ?? const [];
+
+  /// The listing an admin flagged as this section's feature — the slot the
+  /// admin panel calls its "top banner" — or null when none is set.
+  EventModel? hero(String key) => _heroes[key];
+
+  /// True when the section has nothing to draw at all, hero included.
+  bool isSectionEmpty(String key) =>
+      hero(key) == null && section(key).isEmpty;
 
   Future<void> load({bool force = false}) async {
     if (_loading) return;
@@ -50,20 +62,25 @@ class DiscoveryFeedState {
     try {
       final sections = await HomeFeedService.fetchScreenSections(screen);
       final map = <String, List<EventModel>>{};
+      final heroes = <String, EventModel>{};
       for (final s in sections) {
-        map[s.section] = s
-            // Hero first, then the rest. Reading `listings` alone would drop
-            // the hero, which the API removes from that array.
-            .ordered
-            // A finished event or program has nothing left to book. A no-op
-            // for classes and venues, whose end_datetime is always null here.
+        // A finished event or program has nothing left to book. A no-op for
+        // classes and venues, whose end_datetime is always null here.
+        map[s.section] = s.listings
             .where((l) => !ListingSchedule.hasEnded(l.endDatetime))
             .map((l) => l.toEventModel())
             .toList();
+        final h = s.hero;
+        if (h != null && !ListingSchedule.hasEnded(h.endDatetime)) {
+          heroes[s.section] = h.toEventModel();
+        }
       }
       _sections
         ..clear()
         ..addAll(map);
+      _heroes
+        ..clear()
+        ..addAll(heroes);
       _loaded = true;
       _failed = false;
     } catch (_) {

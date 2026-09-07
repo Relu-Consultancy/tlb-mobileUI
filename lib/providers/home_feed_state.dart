@@ -30,7 +30,10 @@ class HomeFeedState {
       final sections = await HomeFeedService.fetchSections();
       final map = <String, List<EventModel>>{};
       for (final s in sections) {
-        map[s.section] = s.listings
+        // Hero first, then the rest. Home's rails have no banner slot, and
+        // reading `listings` alone would drop the hero outright — the API
+        // removes it from that array.
+        map[s.section] = s.ordered
             // A finished event or program has nothing left to book. A no-op
             // for classes/venues, whose end_datetime is always null here.
             .where((l) => !ListingSchedule.hasEnded(l.endDatetime))
