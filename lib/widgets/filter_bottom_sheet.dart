@@ -152,8 +152,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                         onTap: () => setState(() => _activeTab = i),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 180),
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 18, horizontal: 12),
+                          padding: EdgeInsets.symmetric(
+                            vertical: Responsive.h(context, 18, min: 14),
+                            // Scales with the rail it sits in. Fixed padding
+                            // ate a bigger share of a narrow rail, which is
+                            // what left "Categories" too little room.
+                            horizontal: Responsive.w(context, 12, min: 8),
+                          ),
                           decoration: BoxDecoration(
                             color: isActive ? Colors.white : Colors.transparent,
                             border: Border(
@@ -165,15 +170,28 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                               ),
                             ),
                           ),
-                          child: Text(
-                            _tabLabels[i],
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 14),
-                              fontWeight:
-                                  isActive ? FontWeight.w500 : FontWeight.w500,
-                              color: isActive
-                                  ? const Color(0xFF1A1A1A)
-                                  : const Color(0xFF757575),
+                          // The rail's width scales linearly with the screen
+                          // but the label's font size stops shrinking at 80%
+                          // (see Responsive.sp's clamp), so below roughly
+                          // 340dp the longest label no longer fits and used
+                          // to wrap — dropping the "s" of "Categories" onto a
+                          // second line. scaleDown gives up a little type
+                          // size instead, and only on the screens that need
+                          // it; everywhere else this changes nothing.
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: AlignmentDirectional.centerStart,
+                            child: Text(
+                              _tabLabels[i],
+                              maxLines: 1,
+                              softWrap: false,
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 14),
+                                fontWeight: FontWeight.w500,
+                                color: isActive
+                                    ? const Color(0xFF1A1A1A)
+                                    : const Color(0xFF757575),
+                              ),
                             ),
                           ),
                         ),
