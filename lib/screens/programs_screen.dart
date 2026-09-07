@@ -26,6 +26,7 @@ import 'events_screen.dart';
 import 'classes_screen.dart';
 import 'venues_screen.dart';
 import 'category_programs_screen.dart';
+import 'format_programs_screen.dart';
 
 class ProgramsScreen extends StatefulWidget {
   const ProgramsScreen({super.key});
@@ -326,7 +327,19 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         lineColor: Color(0xFFD4A537), // warm gold
                         topPadding: 30,
                       ),
-                      PickYourPaceRow(items: DummyData.findYourFit),
+                      // Each disc opens the same browse-a-slice screen the
+                      // Events tab's formats and the Classes tab's paces do.
+                      PickYourPaceRow(
+                        items: DummyData.findYourFit,
+                        onItemTap: (index) => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => FormatProgramsScreen(
+                              initialFormatIndex: index,
+                            ),
+                          ),
+                        ),
+                      ),
 
                       // ── Zero to Hero ──
                       const SectionDividerWidget(

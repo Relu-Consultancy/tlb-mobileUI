@@ -389,40 +389,59 @@ class DummyData {
     },
   ];
 
+  /// The Programs tab's "Find Your Fit" discs. `formatSlug` is the
+  /// `program_format` value the listings endpoint filters on (its enum is
+  /// batch / camp / holiday / regular / short_term / weekend / recorded —
+  /// one per disc), and `accentColor` tints the header of the screen the
+  /// disc opens, the way pickYourPace does for classes.
   static const List<Map<String, dynamic>> findYourFit = [
     {
       'label': 'Batch\nProgram',
+      'formatSlug': 'batch',
+      'accentColor': Color(0xFF5B8FD4),
       'image': 'resources- tlb-ui/programs_findurfit_clean/batchprogram.png',
       // Gradient sampled to match the reference discs.
       'bg': [Color(0xFFD2E8F6), Color(0xFFF5EFD9)], // sky blue → cream
     },
     {
       'label': 'Camp\nProgram',
+      'formatSlug': 'camp',
+      'accentColor': Color(0xFF3F9E8C),
       'image': 'resources- tlb-ui/programs_findurfit_clean/campprogram.png',
       'bg': [Color(0xFFCFE5F1), Color(0xFFE3F0F7)], // light blue
     },
     {
       'label': 'Holiday-\nbased',
+      'formatSlug': 'holiday',
+      'accentColor': Color(0xFFE0A055),
       'image': 'resources- tlb-ui/programs_findurfit_clean/holidaybased.png',
       'bg': [Color(0xFFE3F5F1), Color(0xFFF4FBF9)], // light cyan
     },
     {
       'label': 'Regular\nProgram',
+      'formatSlug': 'regular',
+      'accentColor': Color(0xFF6B7FA8),
       'image': 'resources- tlb-ui/programs_findurfit_clean/regularprogram.png',
       'bg': [Color(0xFFE8F0F7), Color(0xFFDBE7F1)], // light blue-grey
     },
     {
       'label': 'Short-Term\nProgram',
+      'formatSlug': 'short_term',
+      'accentColor': Color(0xFF8E7CC3),
       'image': 'resources- tlb-ui/programs_findurfit_clean/shorttermprogram.png',
       'bg': [Color(0xFFF7FAFC), Color(0xFFECF1F5)], // near-white
     },
     {
       'label': 'Weekend\nProgram',
+      'formatSlug': 'weekend',
+      'accentColor': Color(0xFF4DBBFF),
       'image': 'resources- tlb-ui/programs_findurfit_clean/weekendprogram.png',
       'bg': [Color(0xFFE2F5F6), Color(0xFFF1FBFB)], // light cyan
     },
     {
       'label': 'Recorded\nProgram',
+      'formatSlug': 'recorded',
+      'accentColor': Color(0xFFCB6A8E),
       'image': 'resources- tlb-ui/programs_findurfit_clean/recordedprogram.png',
       'bg': [Color(0xFFFCEFF4), Color(0xFFFADDE8)], // light pink
     },

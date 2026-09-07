@@ -5,9 +5,14 @@ import '../core/responsive.dart';
 class PickYourPaceRow extends StatelessWidget {
   final List<Map<String, dynamic>> items;
 
+  /// Called with the tapped disc's index. Optional: the row was inert
+  /// artwork before anything had a screen to open.
+  final ValueChanged<int>? onItemTap;
+
   const PickYourPaceRow({
     super.key,
     required this.items,
+    this.onItemTap,
   });
 
   static const double _sidePadding = 16;
@@ -38,9 +43,7 @@ class PickYourPaceRow extends StatelessWidget {
               final List<Color> bg = (item['bg'] as List?)?.cast<Color>() ??
                   const [Colors.white, Colors.white];
 
-              return Padding(
-                padding: EdgeInsets.only(right: isLast ? 0 : _gap),
-                child: Container(
+              final disc = Container(
                   width: circleSize,
                   height: circleSize,
                   decoration: BoxDecoration(
@@ -133,7 +136,17 @@ class PickYourPaceRow extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
+                );
+
+              return Padding(
+                padding: EdgeInsets.only(right: isLast ? 0 : _gap),
+                child: onItemTap == null
+                    ? disc
+                    : GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => onItemTap!(index),
+                        child: disc,
+                      ),
               );
             }).toList(),
           ),
