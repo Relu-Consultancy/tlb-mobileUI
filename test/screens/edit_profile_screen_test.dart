@@ -34,6 +34,49 @@ void main() {
       });
     });
 
+    testWidgets('TC_S_EP_NAME_001 — capitalises a lowercase name arriving from '
+        'the account (Google sign-in fills these)', (WidgetTester tester) async {
+      AuthState.userData = {
+        'profile': {'first_name': 'bit', 'last_name': 'forge'}
+      };
+      await mockNetworkImages(() async {
+        await pumpTLBApp(tester, const EditProfileScreen());
+
+        expect(find.widgetWithText(TextField, 'Bit'), findsOneWidget);
+        expect(find.widgetWithText(TextField, 'Forge'), findsOneWidget);
+        expect(find.widgetWithText(TextField, 'bit'), findsNothing);
+        expect(find.widgetWithText(TextField, 'forge'), findsNothing);
+      });
+    });
+
+    testWidgets('TC_S_EP_NAME_002 — capitalises the names as they are typed',
+        (WidgetTester tester) async {
+      await mockNetworkImages(() async {
+        await pumpTLBApp(tester, const EditProfileScreen());
+
+        await tester.enterText(
+            find.widgetWithText(TextField, 'John'), 'bit kumar');
+        await tester.enterText(find.widgetWithText(TextField, 'Doe'), 'forge');
+        await tester.pump();
+
+        expect(find.widgetWithText(TextField, 'Bit Kumar'), findsOneWidget);
+        expect(find.widgetWithText(TextField, 'Forge'), findsOneWidget);
+      });
+    });
+
+    testWidgets('TC_S_EP_NAME_003 — leaves non-name fields uncapitalised',
+        (WidgetTester tester) async {
+      await mockNetworkImages(() async {
+        await pumpTLBApp(tester, const EditProfileScreen());
+
+        await tester.enterText(
+            find.widgetWithText(TextField, 'Maharashtra'), 'navi mumbai');
+        await tester.pump();
+
+        expect(find.widgetWithText(TextField, 'navi mumbai'), findsOneWidget);
+      });
+    });
+
     testWidgets('shows error snackbar if first name is empty on save', (WidgetTester tester) async {
       await mockNetworkImages(() async {
         await pumpTLBApp(tester, const EditProfileScreen());

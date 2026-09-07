@@ -12,6 +12,38 @@ void main() {
   });
 
   group('AuthState Tests', () {
+    test('capitalises a lowercase name from the profile payload', () {
+      // Google sign-in returns whatever the account holds; the home greeting
+      // reads userName directly, so it must not show "bit forge".
+      AuthState.login(user: {
+        'profile': {'first_name': 'bit', 'last_name': 'forge'}
+      });
+
+      expect(AuthState.userName.value, 'Bit Forge');
+      expect(AuthState.firstName, 'Bit');
+    });
+
+    test('capitalises a lowercase display name from the provider', () {
+      AuthState.login(name: 'bit forge');
+
+      expect(AuthState.userName.value, 'Bit Forge');
+    });
+
+    test('updateProfileData capitalises the refreshed name', () {
+      AuthState.updateProfileData({'first_name': 'bit', 'last_name': 'forge'});
+
+      expect(AuthState.userName.value, 'Bit Forge');
+    });
+
+    test('the email fallback is left verbatim', () {
+      AuthState.updateUserProfile({
+        'email': 'bit.forge@example.com',
+        'profile': {'first_name': '', 'last_name': ''},
+      });
+
+      expect(AuthState.userName.value, 'bit.forge@example.com');
+    });
+
     test('login updates properties and tokens correctly', () async {
       final user = {
         'email': 'test@example.com',

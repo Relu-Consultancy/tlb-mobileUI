@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/avatar_storage.dart';
 import '../services/token_storage.dart';
 import '../services/auth_service.dart';
+import '../core/name_case.dart';
 import 'follow_state.dart';
 
 class AuthState {
@@ -26,10 +27,14 @@ class AuthState {
   }) {
     final profile = user?['profile'] as Map<String, dynamic>?;
     final profileName = profile != null
-        ? '${profile['first_name'] ?? ''} ${profile['last_name'] ?? ''}'.trim()
+        ? NameCase.of(
+            '${profile['first_name'] ?? ''} ${profile['last_name'] ?? ''}'.trim())
         : '';
+    // Google hands back whatever the account holds, which is often all
+    // lowercase — the greeting reads this, so capitalise it here rather than
+    // waiting for the user to open Edit Profile.
     final resolvedName = (name != null && name.trim().isNotEmpty)
-        ? name.trim()
+        ? NameCase.of(name.trim())
         : (profileName.isNotEmpty ? profileName : null);
     // Never fall back to email here — the home greeting reads this value
     // and showing "Hello user@example.com" is worse than "Hello There".
@@ -100,7 +105,7 @@ class AuthState {
     userData!['profile'] = profile;
     final first = profile['first_name'] as String? ?? '';
     final last = profile['last_name'] as String? ?? '';
-    final fullName = '$first $last'.trim();
+    final fullName = NameCase.of('$first $last'.trim());
     if (fullName.isNotEmpty) userName.value = fullName;
     if (accessToken != null && refreshToken != null) {
       TokenStorage.saveTokens(
@@ -120,7 +125,8 @@ class AuthState {
     if (profile != null) {
       final first = profile['first_name'] as String? ?? '';
       final last = profile['last_name'] as String? ?? '';
-      final fullName = '$first $last'.trim();
+      // Capitalise the name only — the email fallback is left verbatim.
+      final fullName = NameCase.of('$first $last'.trim());
       userName.value = fullName.isNotEmpty ? fullName : (updatedUser['email'] as String? ?? 'User');
     }
     if (accessToken != null && refreshToken != null) {

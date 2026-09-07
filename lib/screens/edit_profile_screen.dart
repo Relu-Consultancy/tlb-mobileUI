@@ -3,6 +3,7 @@ import '../core/app_colors.dart';
 import '../widgets/app_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/phone_validation.dart';
+import '../core/name_case.dart';
 import '../core/responsive.dart';
 import '../core/app_snackbar.dart';
 import '../providers/auth_state.dart';
@@ -111,8 +112,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void _prefillFromAuthState() {
     final profile = AuthState.userData?['profile'] as Map<String, dynamic>?;
     if (profile == null) return;
-    _firstNameCtrl.text = profile['first_name'] as String? ?? '';
-    _lastNameCtrl.text = profile['last_name'] as String? ?? '';
+    // Google sign-in fills these from the account, which often holds an
+    // all-lowercase name; show it the way it will be saved.
+    _firstNameCtrl.text = NameCase.of(profile['first_name'] as String? ?? '');
+    _lastNameCtrl.text = NameCase.of(profile['last_name'] as String? ?? '');
     final raw = profile['phone_number'] as String? ?? '';
     if (raw.startsWith('+')) {
       // Match longest dial code first so '+1' doesn't shadow '+1xxx' variants
@@ -173,8 +176,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (picked != null) setState(() => _birthdate = picked);
   }
 
+  /// The name as it should be stored — trimmed, with each word capitalised.
+  String _name(TextEditingController c) => NameCase.of(c.text.trim());
+
   Future<void> _onSave() async {
-    final firstName = _firstNameCtrl.text.trim();
+    final firstName = _name(_firstNameCtrl);
     if (firstName.isEmpty) {
       AppSnackBar.show(context, 'First name is required');
       return;
@@ -202,7 +208,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final result = await AuthService.updateProfile(
       accessToken: token,
       firstName: firstName,
-      lastName: _lastNameCtrl.text.trim().isNotEmpty ? _lastNameCtrl.text.trim() : null,
+      lastName: _name(_lastNameCtrl).isNotEmpty ? _name(_lastNameCtrl) : null,
       phoneNumber: _phoneCtrl.text.trim().isNotEmpty
           ? '${_selectedCountry.$1}${_phoneCtrl.text.trim().replaceAll(RegExp(r'[\s\-()]'), '')}'
           : null,
@@ -231,7 +237,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _skip() async {
-    final firstName = _firstNameCtrl.text.trim();
+    final firstName = _name(_firstNameCtrl);
     if (firstName.isEmpty) {
       AppSnackBar.show(
         context,
@@ -399,7 +405,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _buildLabel('First Name *'),
-                            _buildTextField(controller: _firstNameCtrl, hint: 'First name'),
+                            _buildTextField(controller: _firstNameCtrl, hint: 'First name', isName: true),
                           ],
                         ),
                       ),
@@ -409,7 +415,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _buildLabel('Last Name'),
-                            _buildTextField(controller: _lastNameCtrl, hint: 'Last name'),
+                            _buildTextField(controller: _lastNameCtrl, hint: 'Last name', isName: true),
                           ],
                         ),
                       ),
@@ -667,12 +673,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required TextEditingController controller,
     required String hint,
     TextInputType keyboardType = TextInputType.text,
+    bool isName = false,
   }) {
     return SizedBox(
       height: Responsive.h(context, 46, min: 40),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
+        // The keyboard only *suggests* capitals, and not at all when the text
+        // is pasted or autofilled — the formatter is what actually enforces it.
+        textCapitalization:
+            isName ? TextCapitalization.words : TextCapitalization.none,
+        inputFormatters: isName ? const [NameCaseFormatter()] : null,
         style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF424242)),
         decoration: InputDecoration(
           hintText: hint,
