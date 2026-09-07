@@ -19,7 +19,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   late Animation<double> _logoScale;
   late Animation<double> _logoFade;
-  late Animation<double> _glowScale;
   late Animation<double> _dotsFade;
   late Animation<double> _fadeOut;
 
@@ -45,14 +44,6 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(
         parent: _controller,
         curve: const Interval(0.0, 0.14, curve: Curves.easeOut),
-      ),
-    );
-
-    // Soft glow expands behind the logo.
-    _glowScale = Tween<double>(begin: 0.6, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.31, curve: Curves.easeOutCubic),
       ),
     );
 
@@ -115,25 +106,6 @@ class _SplashScreenState extends State<SplashScreen>
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Soft radial glow behind the logo.
-                    Transform.scale(
-                      scale: _glowScale.value,
-                      child: Container(
-                        width: logoSize * 1.9,
-                        height: logoSize * 1.9,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              Colors.white.withOpacity(0.45),
-                              Colors.white.withOpacity(0.0),
-                            ],
-                            stops: const [0.0, 1.0],
-                          ),
-                        ),
-                      ),
-                    ),
-
                     // Logo.
                     Opacity(
                       opacity: _logoFade.value.clamp(0.0, 1.0),
