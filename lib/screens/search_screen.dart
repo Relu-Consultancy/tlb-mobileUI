@@ -8,7 +8,9 @@ import '../providers/listing_taxonomy_state.dart';
 import '../providers/location_state.dart';
 import '../widgets/empty_location_widget.dart';
 import '../models/event_model.dart';
+import '../models/api_search_result_model.dart';
 import '../services/events_listing_service.dart';
+import '../services/search_service.dart';
 import '../services/classes_listing_service.dart';
 import '../services/programs_listing_service.dart';
 import 'event_detail_screen.dart';
@@ -90,10 +92,28 @@ class _SearchScreenState extends State<SearchScreen> {
   static const _modes      = ['Offline', 'Hybrid', 'Online'];
   static const _dateOptions = ['Today', 'This Weekend', 'This Week', 'Upcoming'];
 
+  /// The listing type each chip selects, `null` for "All". Indexes line up
+  /// with [_chips].
+  static const _chipKinds = <ListingKind?>[
+    null,
+    ListingKind.event,
+    ListingKind.klass,
+    ListingKind.program,
+    ListingKind.venue,
+  ];
+
+  ListingKind? get _selectedKind => _chipKinds[_selectedChip];
+
+  /// True when the search goes to the unified `/listings/search/` endpoint.
+  ///
+  /// That endpoint ranks across all four types and tolerates typos, so it is
+  /// the right answer for a plain keyword — but it takes no category
+  /// parameter, so a category filter still has to go type-by-type.
+  bool get _usesUnifiedSearch => !_hasServerFilter;
+
   List<_SearchItem> get _filteredResults {
     if (_selectedChip == 0) return _allResults;
-    final target = const [null, ListingKind.event, ListingKind.klass, ListingKind.program, ListingKind.venue][_selectedChip];
-    return _allResults.where((r) => r.type == target).toList();
+    return _allResults.where((r) => r.type == _selectedKind).toList();
   }
 
   @override
@@ -127,6 +147,11 @@ class _SearchScreenState extends State<SearchScreen> {
       return;
     }
     setState(() { _query = q; _loading = true; _hasError = false; });
+
+    if (_usesUnifiedSearch) {
+      await _runUnifiedSearch(q, generation);
+      return;
+    }
 
     // Each entity type is fetched independently and fault-tolerantly. A failure
     // in one source (e.g. the backend returns 404 / an error for a query that
@@ -181,6 +206,48 @@ class _SearchScreenState extends State<SearchScreen> {
     }).toList();
 
     setState(() { _allResults = relevant; _loading = false; });
+  }
+
+  /// One ranked, typo-tolerant call across all four listing types.
+  ///
+  /// Results are shown exactly as the server ordered them. They are
+  /// deliberately NOT re-filtered against the typed keyword the way the
+  /// per-type path is: this endpoint's whole point is that "robtics" matches
+  /// "Weekend Robotics Camp", and a contains-check would throw away precisely
+  /// those matches.
+  Future<void> _runUnifiedSearch(String q, int generation) async {
+    try {
+      final page = await SearchService.search(q, type: _selectedKind);
+      if (!mounted || generation != _searchGeneration) return;
+      setState(() {
+        _allResults = page.results.map(_itemFromSearchResult).toList();
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted || generation != _searchGeneration) return;
+      setState(() { _loading = false; _hasError = true; });
+    }
+  }
+
+  /// Maps a search card onto the shape the result list and the detail screens
+  /// expect. The card is lean by design — the detail screen re-fetches the
+  /// full listing from `id`, so only what the row itself shows is carried.
+  _SearchItem _itemFromSearchResult(ApiSearchResult r) {
+    final subtitle = r.city ?? r.category?.name ?? '';
+    return _SearchItem(
+      type: r.listingType,
+      eventModel: EventModel(
+        id: r.id,
+        title: r.title,
+        venue: subtitle,
+        imagePath: r.coverUrl ?? '',
+        tag: r.category?.name,
+        rating: r.averageRating,
+      ),
+      title: r.title,
+      subtitle: subtitle,
+      coverUrl: r.coverUrl,
+    );
   }
 
   /// Whether the active category filter can be expressed to [kind] at all.
@@ -424,7 +491,15 @@ class _SearchScreenState extends State<SearchScreen> {
               itemBuilder: (context, index) {
                 final isSelected = index == _selectedChip;
                 return GestureDetector(
-                  onTap: () => setState(() => _selectedChip = index),
+                  onTap: () {
+                    setState(() => _selectedChip = index);
+                    // On the unified endpoint the type is a query parameter,
+                    // so re-asking returns a full page of that type instead
+                    // of whatever slice of it the "All" page happened to
+                    // hold. The per-type path already fetched every type,
+                    // so there it stays a local filter.
+                    if (_usesUnifiedSearch) _rerunSearch();
+                  },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     decoration: BoxDecoration(
@@ -465,7 +540,10 @@ class _SearchScreenState extends State<SearchScreen> {
     if (_selectedChip != 0) {
       out.add((
         label: _chips[_selectedChip],
-        remove: () => setState(() => _selectedChip = 0),
+        remove: () {
+          setState(() => _selectedChip = 0);
+          if (_usesUnifiedSearch) _rerunSearch();
+        },
       ));
     }
     // Category before subcategory, matching the order they were picked in.
@@ -516,10 +594,12 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _clearAllFilters() {
-    final hadServerFilter = _hasServerFilter;
+    // Both of these reach the API — the category as a per-type parameter, the
+    // chip as the unified endpoint's listing_type — so either one having been
+    // set means the results on screen are narrower than "no filters".
+    final needsRefetch = _hasServerFilter || _selectedChip != 0;
     setState(_resetFilters);
-    // Only the category filter reaches the API, so only it needs a refetch.
-    if (hadServerFilter) _rerunSearch();
+    if (needsRefetch) _rerunSearch();
   }
 
   /// The single definition of "no filters", so the chip row's Clear all and
