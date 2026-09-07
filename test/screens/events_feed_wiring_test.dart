@@ -61,30 +61,34 @@ void main() {
       }
     });
 
-    test('TC_S_EF_006 — every section draws its hero as a banner', () {
-      // The admin panel calls this slot the section's "top banner" and
-      // previews it as a large featured card. Left in the rail it was just
-      // another identical card, which is the same as not being featured.
-      for (final slug in const [
-        'trending_events',
-        'happening_this_weekend',
-        'holiday_special',
-        'featured_partners',
-        'new_on_tlb',
-        'online_events',
-      ]) {
-        expect(src, contains("_heroBanner('$slug')"), reason: slug);
-      }
-      expect(src, contains('SectionHeroCard(event: hero)'));
+    test('TC_S_EF_006 — the featured listings fill the top banner', () {
+      // A hero is the screen's featured listing, shown in the banner
+      // carousel at the top — not a second style of card inside a rail,
+      // which reformatted the section it sat in.
+      expect(src, contains('events: _banners,'));
+      expect(src, contains('feed.heroes'));
+      expect(src, isNot(contains('SectionHeroCard')));
     });
 
-    test('TC_S_EF_007 — a hero-only section still shows', () {
-      // trending_events is exactly this today: a hero and no listings.
-      // Gating the section on the rail alone hid the hero entirely.
-      expect(src, contains('_hasSection('));
-      expect(src,
-          contains("bool _hasSection(String key, List<EventModel> rail) =>"));
-      expect(src, contains("_hero(key) != null || rail.isNotEmpty"));
+    test('TC_S_EF_007 — the banner falls back to the mock slides', () {
+      // No hero is flagged on most sections, and none before the feed
+      // lands; an empty carousel would leave the screen headless.
+      expect(src, contains('DummyData.eventsScreenBanners'));
+      expect(src, contains('feed.heroes.isEmpty'));
+    });
+
+    test('TC_S_EF_008 — the rails keep their own card widgets', () {
+      // Each section's card design is its own; nothing generic replaces it.
+      for (final card in const [
+        'TrendingEventCard(',
+        'WeekendEventCard(',
+        'HolidaySpecialCard(',
+        'PartnerPortraitCard(',
+        'NewOnTlbCard(',
+        'OnlineEventCard(',
+      ]) {
+        expect(src, contains(card), reason: card);
+      }
     });
 
     test('TC_S_EF_005 — the screen repaints when the feed lands', () {
@@ -106,6 +110,7 @@ void main() {
       expect(DiscoveryFeedState.venues.section('nope'), isEmpty);
       expect(DiscoveryFeedState.venues.hero('nope'), isNull);
       expect(DiscoveryFeedState.venues.isSectionEmpty('nope'), isTrue);
+      expect(DiscoveryFeedState.venues.heroes, isEmpty);
     });
 
     test('TC_P_DF_003 — a failed fetch is not reported as loaded', () async {

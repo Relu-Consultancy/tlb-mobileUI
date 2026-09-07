@@ -27,6 +27,8 @@ class DiscoveryFeedState {
 
   final ValueNotifier<int> version = ValueNotifier<int>(0);
   final Map<String, List<EventModel>> _sections = {};
+  /// Insertion-ordered, so [heroes] follows the order the API listed the
+  /// sections in.
   final Map<String, EventModel> _heroes = {};
   bool _loading = false;
   bool _loaded = false;
@@ -47,9 +49,15 @@ class DiscoveryFeedState {
   /// `listings` array — read [hero] for that one.
   List<EventModel> section(String key) => _sections[key] ?? const [];
 
-  /// The listing an admin flagged as this section's feature — the slot the
-  /// admin panel calls its "top banner" — or null when none is set.
+  /// The listing an admin flagged as this section's feature, or null when
+  /// none is set.
   EventModel? hero(String key) => _heroes[key];
+
+  /// Every section's hero, in the order the API listed the sections.
+  ///
+  /// These are what the screen's top banner carousel shows: a hero is the
+  /// screen's featured listing, not a second style of card inside a rail.
+  List<EventModel> get heroes => List.unmodifiable(_heroes.values);
 
   /// True when the section has nothing to draw at all, hero included.
   bool isSectionEmpty(String key) =>
