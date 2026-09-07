@@ -84,6 +84,40 @@ void main() {
     });
   });
 
+  group('The disc artwork fills its circle', () {
+    testWidgets('TC_S_FP_007 — the image covers the disc, no white ring',
+        (tester) async {
+      // The artwork is full-bleed illustration, drawn edge to edge in the
+      // Find Your Fit row on the Programs tab. Insetting it and fitting by
+      // `contain` left a white ring around every icon.
+      addTearDown(tester.view.reset);
+      await _pump(tester, 0);
+
+      final image = tester.widget<Image>(
+        find.descendant(of: find.byType(OverflowBox).first,
+            matching: find.byType(Image)).first,
+      );
+      expect(image.fit, BoxFit.cover);
+    });
+
+    testWidgets('TC_S_FP_008 — the artwork is as wide as the disc itself',
+        (tester) async {
+      addTearDown(tester.view.reset);
+      await _pump(tester, 0);
+
+      final disc = find.descendant(
+          of: find.byType(OverflowBox).first, matching: find.byType(Container));
+      final image = find.descendant(
+          of: find.byType(OverflowBox).first, matching: find.byType(Image));
+
+      // Same width means no inset — a padded icon would be narrower.
+      expect(
+        tester.getSize(image.first).width,
+        closeTo(tester.getSize(disc.first).width, 0.5),
+      );
+    });
+  });
+
   group('Find Your Fit data', () {
     test('TC_D_FYF_001 — every disc carries a slug and an accent', () {
       for (final fit in DummyData.findYourFit) {

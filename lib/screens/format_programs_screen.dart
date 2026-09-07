@@ -150,17 +150,26 @@ class _FormatProgramsScreenState extends State<FormatProgramsScreen> {
                   duration: const Duration(milliseconds: 220),
                   curve: Curves.easeInOut,
                   scale: isSelected ? FormatCircleLabel.selectedScale : 1.0,
+                  // The artwork fills the disc edge to edge, the way the same
+                  // images are drawn in the Find Your Fit row on the Programs
+                  // tab. Insetting them and fitting by `contain` left a white
+                  // ring around every icon. The white fill stays as the
+                  // backdrop for the fallback glyph, and is covered whenever
+                  // the image loads.
                   child: Container(
                     width: size,
                     height: size,
+                    clipBehavior: Clip.antiAlias,
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.white,
                     ),
-                    padding: const EdgeInsets.all(10),
+                    alignment: Alignment.center,
                     child: Image.asset(
                       format['image'] as String,
-                      fit: BoxFit.contain,
+                      width: size,
+                      height: size,
+                      fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => const Icon(
                         Icons.workspace_premium_outlined,
                         color: AppColors.textSecondary,
