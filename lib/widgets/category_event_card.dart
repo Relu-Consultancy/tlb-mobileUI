@@ -3,7 +3,7 @@ import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
-import '../screens/event_detail_screen.dart';
+import '../core/listing_navigation.dart';
 
 class CategoryEventCard extends StatelessWidget {
   final EventModel event;
@@ -24,10 +24,11 @@ class CategoryEventCard extends StatelessWidget {
       // short title, would silently do nothing. Opaque makes the card's whole
       // rectangle tappable.
       behavior: HitTestBehavior.opaque,
-      onTap: onTap ?? () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
-      ),
+      // Routes on the listing's own type rather than always opening the
+      // event detail screen. The grids that show classes, programs or venues
+      // used to have to pass their own onTap to avoid that, and the two that
+      // did not — the pace and fit screens — opened the wrong screen.
+      onTap: onTap ?? () => openListingDetail(context, event),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -132,6 +132,9 @@ class _PaceClassesScreenState extends State<PaceClassesScreen> {
             ? '${cls.averageRating} (${cls.totalReviews})'
             : null,
         description: cls.shortDescription,
+        // Without this the shared router treats the card as an event and
+        // opens the wrong detail screen.
+        listingType: 'class',
       );
 
   Widget _paceCircle(int index) {
