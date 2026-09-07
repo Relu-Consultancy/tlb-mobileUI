@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'secure_url.dart';
+
 /// Renders a listing cover that may be a **network URL** (real API data) or a
 /// bundled **asset path** (legacy/dummy), with a graceful grey fallback when
 /// the path is empty or fails to load. Use this anywhere a card shows an
@@ -10,12 +12,15 @@ import 'package:flutter/material.dart';
 /// balloon into tens of MB of RAM. A 4000×3000 photo decoded full-size costs
 /// ~48 MB; capped to the widget width it's a few hundred KB.
 Widget listingImage(
-  String path, {
+  String rawPath, {
   BoxFit fit = BoxFit.cover,
   double? width,
   double? height,
   int? cacheWidth,
 }) {
+  // Android blocks cleartext by default and the API serves media over http;
+  // without this every network cover falls back to the grey placeholder.
+  final path = secureUrl(rawPath) ?? rawPath;
   Widget fallback() => Container(
         width: width,
         height: height,

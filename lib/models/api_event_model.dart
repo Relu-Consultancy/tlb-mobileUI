@@ -1,5 +1,6 @@
 import '../core/listing_languages.dart';
 import 'api_listing_terms.dart';
+import '../core/secure_url.dart';
 class ApiEventCategory {
   final int id;
   final String name;
@@ -93,7 +94,7 @@ class ApiEventOrganizer {
   factory ApiEventOrganizer.fromJson(Map<String, dynamic> json) =>
       ApiEventOrganizer(
         businessName: json['business_name'] as String,
-        logoUrl: json['logo_url'] as String?,
+        logoUrl: secureUrl(json['logo_url'] as String?),
         partnerId: json['partner_id'] as String?,
       );
 }
@@ -157,7 +158,7 @@ class ApiEvent {
                 DateTime.now(),
         endDatetime:
             DateTime.tryParse(json['end_datetime']?.toString() ?? ''),
-        coverUrl: json['cover_url'] as String?,
+        coverUrl: secureUrl(json['cover_url'] as String?),
       );
 }
 

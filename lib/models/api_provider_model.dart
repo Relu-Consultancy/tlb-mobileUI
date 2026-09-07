@@ -1,3 +1,5 @@
+import '../core/secure_url.dart';
+
 class ApiProvider {
   final String id;
   final String name;
@@ -58,7 +60,7 @@ class ApiProvider {
         id: json['id'] as String,
         name: json['name'] as String,
         bio: json['bio'] as String?,
-        logoUrl: json['logo_url'] as String?,
+        logoUrl: secureUrl(json['logo_url'] as String?),
         totalListings: (json['total_listings'] as num?)?.toInt() ?? 0,
         averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
         totalReviews: (json['total_reviews'] as num?)?.toInt() ?? 0,

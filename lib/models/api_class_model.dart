@@ -1,6 +1,7 @@
 import '../core/listing_languages.dart';
 import 'api_category_model.dart';
 import 'api_listing_terms.dart';
+import '../core/secure_url.dart';
 
 class ApiClassAgeGroup {
   final int? minAge;
@@ -75,7 +76,7 @@ class ApiClassMedia {
   factory ApiClassMedia.fromJson(Map<String, dynamic> json) => ApiClassMedia(
         id: (json['id'] as num?)?.toInt() ?? 0,
         mediaType: (json['media_type'] as String?) ?? '',
-        url: (json['url'] as String?) ?? '',
+        url: secureUrl(json['url'] as String?) ?? '',
       );
 }
 
@@ -89,7 +90,7 @@ class ApiClassOrganizer {
   factory ApiClassOrganizer.fromJson(Map<String, dynamic> json) =>
       ApiClassOrganizer(
         businessName: json['business_name'] as String,
-        logoUrl: json['logo_url'] as String?,
+        logoUrl: secureUrl(json['logo_url'] as String?),
         partnerId: json['partner_id'] as String?,
       );
 }
@@ -135,7 +136,7 @@ class ApiClass {
         isLive: json['is_live'] as bool? ?? false,
         category: ApiCategory.fromJson(json['category'] as Map<String, dynamic>),
         activeBatchesCount: json['active_batches_count'] as int? ?? 0,
-        coverUrl: json['cover_url'] as String?,
+        coverUrl: secureUrl(json['cover_url'] as String?),
         averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
         totalReviews: json['total_reviews'] as int? ?? 0,
         isPaused: json['is_paused'] as bool? ?? false,

@@ -1,5 +1,6 @@
 import '../core/listing_languages.dart';
 import 'api_listing_terms.dart';
+import '../core/secure_url.dart';
 class ApiVenueCategory {
   final int id;
   final String name;
@@ -24,7 +25,7 @@ class ApiVenueMedia {
   factory ApiVenueMedia.fromJson(Map<String, dynamic> json) => ApiVenueMedia(
         id: (json['id'] as int?) ?? 0,
         mediaType: (json['media_type'] as String?) ?? '',
-        url: (json['url'] as String?) ?? '',
+        url: secureUrl(json['url'] as String?) ?? '',
       );
 }
 

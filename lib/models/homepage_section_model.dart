@@ -1,6 +1,7 @@
 import '../core/date_format.dart';
 import '../core/time_format.dart';
 import 'event_model.dart';
+import '../core/secure_url.dart';
 
 /// A single listing inside a homepage section. The homepage endpoint now
 /// returns the full card fields, so cards render directly from this — no
@@ -70,7 +71,7 @@ class HomepageListing {
         shortDescription: (json['short_description'] as String?) ?? '',
         listingType: (json['listing_type'] as String?) ?? 'event',
         isTlbSignature: json['is_tlb_signature'] == true,
-        coverUrl: _str(json['cover_url']),
+        coverUrl: secureUrl(_str(json['cover_url'])),
         category: _categoryName(json['category']),
         city: _str(json['city']),
         area: _str(json['area']),

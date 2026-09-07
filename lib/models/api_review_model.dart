@@ -1,3 +1,5 @@
+import '../core/secure_url.dart';
+
 class ApiReviewMedia {
   final int id;
   final String mediaType;
@@ -96,7 +98,8 @@ class ApiReview {
       createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
       listingId: (json['listing_id'] as String?) ?? listing?['id']?.toString(),
       listingTitle: listing?['title'] as String?,
-      listingImage: listing?['cover_url'] as String? ?? listing?['image'] as String?,
+      listingImage: secureUrl(listing?['cover_url'] as String?) ??
+          secureUrl(listing?['image'] as String?),
     );
   }
 }

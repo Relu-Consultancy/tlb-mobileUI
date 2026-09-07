@@ -1,6 +1,7 @@
 import '../core/listing_languages.dart';
 import 'api_category_model.dart';
 import 'api_listing_terms.dart';
+import '../core/secure_url.dart';
 
 class ApiProgramTag {
   final int id;
@@ -69,7 +70,7 @@ class ApiProgramMedia {
   factory ApiProgramMedia.fromJson(Map<String, dynamic> json) => ApiProgramMedia(
         id: (json['id'] as num?)?.toInt() ?? 0,
         mediaType: (json['media_type'] as String?) ?? '',
-        url: (json['url'] as String?) ?? '',
+        url: secureUrl(json['url'] as String?) ?? '',
       );
 }
 
@@ -83,7 +84,7 @@ class ApiProgramOrganizer {
   factory ApiProgramOrganizer.fromJson(Map<String, dynamic> json) =>
       ApiProgramOrganizer(
         businessName: json['business_name'] as String,
-        logoUrl: json['logo_url'] as String?,
+        logoUrl: secureUrl(json['logo_url'] as String?),
         partnerId: json['partner_id'] as String?,
       );
 }
@@ -152,7 +153,7 @@ class ApiProgram {
         isFeatured: json['is_featured'] as bool? ?? false,
         isNewThisWeek: json['is_new_this_week'] as bool? ?? false,
         isTopRated: json['is_top_rated'] as bool? ?? false,
-        cover: json['cover'] as String?,
+        cover: secureUrl(json['cover'] as String?),
         feeFrom: json['fee_from']?.toString(),
         distanceKm: (json['distance_km'] as num?)?.toDouble(),
         averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,

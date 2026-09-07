@@ -1,5 +1,6 @@
 import '../providers/listing_taxonomy_state.dart';
 import 'api_category_model.dart';
+import '../core/secure_url.dart';
 
 /// One row from `GET /listings/search/` — the unified keyword-search endpoint.
 ///
@@ -70,7 +71,7 @@ class ApiSearchResult {
           ? ApiCategory.fromJson(category)
           : null,
       city: _text(json['city']),
-      coverUrl: _text(json['cover_url']),
+      coverUrl: secureUrl(_text(json['cover_url'])),
       partnerName: _text(json['partner_name']),
       averageRating: (json['average_rating'] as num?)?.toDouble(),
       totalReviews: json['total_reviews'] as int?,

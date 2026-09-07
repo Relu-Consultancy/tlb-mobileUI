@@ -1,3 +1,5 @@
+import '../core/secure_url.dart';
+
 class ApiFollowedPartnerProfile {
   final String businessName;
   final String? businessType;
@@ -37,8 +39,8 @@ class ApiFollowedPartnerExtended {
         : oc?.toString();
     return ApiFollowedPartnerExtended(
       bio: j['bio'] as String?,
-      logoUrl: j['logo_url'] as String?,
-      coverImageUrl: j['cover_image_url'] as String?,
+      logoUrl: secureUrl(j['logo_url'] as String?),
+      coverImageUrl: secureUrl(j['cover_image_url'] as String?),
       operatingCities: operatingCities,
     );
   }

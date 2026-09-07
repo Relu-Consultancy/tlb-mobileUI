@@ -1,5 +1,6 @@
 import 'api_payment_method_model.dart';
 import 'api_refund.dart';
+import '../core/secure_url.dart';
 
 /// Request model — one selected ticket type with a quantity.
 class BookingLineItem {
@@ -198,9 +199,9 @@ class ApiBookingItem {
         paymentDetail: json['payment_detail'] as Map<String, dynamic>?,
         listingId: json['listing_id'] as String? ??
             (json['listing'] as Map?)?['id']?.toString(),
-        listingCover: json['listing_cover'] as String? ??
-            json['cover_url'] as String? ??
-            (json['listing'] as Map?)?['cover_url'] as String?,
+        listingCover: secureUrl(json['listing_cover'] as String?) ??
+            secureUrl(json['cover_url'] as String?) ??
+            secureUrl((json['listing'] as Map?)?['cover_url'] as String?),
       );
 
   ApiBookingItem copyWith({
