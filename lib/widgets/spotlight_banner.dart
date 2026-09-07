@@ -8,13 +8,12 @@ import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
 import 'dark_category_section.dart';
 import 'four_point_star.dart';
-import 'primary_cta_button.dart';
 import 'wishlist_button.dart';
 
 /// The Home "Spotlight" section: a "✦ Spotlight ✦" header and a swipeable set of
 /// poster cards on the black backdrop. Each card has a glowing gold border, a
-/// tag badge + wishlist heart over the poster, a date/time/venue meta row and a
-/// "Book Tickets" button.
+/// wishlist heart over the poster and a date/time/venue meta row; tapping the
+/// card anywhere opens the listing.
 class SpotlightBanner extends StatefulWidget {
   final List<EventModel> events;
 
@@ -227,7 +226,7 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
           e.imagePath,
           fit: BoxFit.cover,
           // Anchor near the top so the poster's header isn't cropped and its
-          // content sits lower in the frame (looks nicer under the badge).
+          // content sits lower in the frame.
           alignment: const Alignment(0.0, -0.75),
           errorBuilder: (_, __, ___) => Container(
             color: const Color(0xFF1E1710),
@@ -239,30 +238,9 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
             ),
           ),
         ),
-        // Tag badge (top-left)
-        if ((e.tag ?? '').isNotEmpty)
-          Positioned(
-            top: 14,
-            left: 14,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.55),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white.withOpacity(0.45)),
-              ),
-              child: Text(
-                e.tag!,
-                style: GoogleFonts.poppins(
-                  fontSize: Responsive.sp(context, 9.5),
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                  letterSpacing: 1.0,
-                ),
-              ),
-            ),
-          ),
-        // Wishlist heart (top-right)
+        // Wishlist heart (top-right) — the only thing over the poster; the
+        // artwork carries its own headline, so a category tag on top of it
+        // only competed with the art.
         Positioned(
           top: 12,
           right: 12,
@@ -284,33 +262,19 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
   Widget _buildFooter(BuildContext context, EventModel e) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
         children: [
-          Row(
-            children: [
-              _metaItem(
-                context,
-                Icons.calendar_today_rounded,
-                e.eventDate ?? '',
-              ),
-              const SizedBox(width: 12),
-              _metaItem(context, Icons.access_time_rounded, e.eventTime ?? ''),
-              const SizedBox(width: 12),
-              Flexible(
-                child: _metaItem(
-                  context,
-                  Icons.location_on_outlined,
-                  e.venue,
-                  flexible: true,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          PrimaryCtaButton(
-            label: 'Book Tickets',
-            onTap: () => _openDetail(context, e),
+          _metaItem(context, Icons.calendar_today_rounded, e.eventDate ?? ''),
+          const SizedBox(width: 12),
+          _metaItem(context, Icons.access_time_rounded, e.eventTime ?? ''),
+          const SizedBox(width: 12),
+          Flexible(
+            child: _metaItem(
+              context,
+              Icons.location_on_outlined,
+              e.venue,
+              flexible: true,
+            ),
           ),
         ],
       ),
