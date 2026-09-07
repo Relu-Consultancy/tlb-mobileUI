@@ -14,6 +14,7 @@ import '../widgets/format_circle_label.dart';
 import '../widgets/category_event_card.dart';
 import '../widgets/category_skeleton_card.dart';
 import '../widgets/subcategory_empty_state.dart';
+import '../core/date_format.dart';
 
 /// Listing grid shared with the category screens — two up, 0.62 ratio — so a
 /// format browse and a category browse present their results identically.
@@ -100,18 +101,8 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
     _fetchEvents();
   }
 
-  static const _months = [
-    '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
-  static const _weekdays = [
-    '', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun',
-  ];
-
   EventModel _toEventModel(ApiEvent e) {
     final dt = e.startDatetime.toLocal();
-    final dateLabel = '${dt.day} ${_months[dt.month]}';
-    final dayLabel = _weekdays[dt.weekday];
     final timeLabel =
         '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
 
@@ -122,7 +113,7 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
       imagePath: e.coverUrl ?? '',
       tag: e.subcategory?.name ?? e.category.name,
       description: e.ageGroup?.displayRange,
-      eventDate: '$dayLabel, $dateLabel',
+      eventDate: DateFormat.card(dt),
       eventTime: timeLabel,
       price: e.priceFrom != null ? double.tryParse(e.priceFrom!) : null,
       isFeatured: e.priceType == 'free',

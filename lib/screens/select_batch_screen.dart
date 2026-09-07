@@ -8,6 +8,7 @@ import '../models/api_class_model.dart';
 import '../models/api_program_model.dart';
 import '../models/event_model.dart';
 import 'attendee_details_screen.dart';
+import '../core/date_format.dart';
 
 const List<Color> _kTagBg = [
   Color(0xFFCCFBF1), Color(0xFFEDE9FE), Color(0xFFDCFCE7),
@@ -21,13 +22,6 @@ const List<Color> _kTagFg = [
 const Map<String, int> _kDayNum = {
   'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6, 'sun': 7,
 };
-
-String _fmtDate(DateTime d) {
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  return '${days[d.weekday - 1]} ${d.day} ${months[d.month - 1]}';
-}
 
 List<String> _nextDates(ApiClassBatch batch, {int count = 5}) {
   final startDate = batch.startDate;
@@ -51,7 +45,7 @@ List<String> _nextDates(ApiClassBatch batch, {int count = 5}) {
       startDate.isAfter(today) ? startDate.subtract(const Duration(days: 1)) : today;
   while (result.length < count) {
     cursor = cursor.add(const Duration(days: 1));
-    if (weekdays.contains(cursor.weekday)) result.add(_fmtDate(cursor));
+    if (weekdays.contains(cursor.weekday)) result.add(DateFormat.card(cursor));
   }
   return result;
 }
@@ -93,11 +87,9 @@ class _SelectBatchScreenState extends State<SelectBatchScreen> {
   String _timeRange(ApiClassBatch b) =>
       '${TimeFormat.h12(b.startTime)} – ${TimeFormat.h12(b.endTime)}';
 
-  String _dayLabel(ApiClassBatch b) => b.days
-      .map((d) => d.length >= 3
-          ? '${d[0].toUpperCase()}${d.substring(1, 3)}'
-          : d.toUpperCase())
-      .join(', ');
+  // Short form: these sit inside a narrow batch card beside the time range.
+  String _dayLabel(ApiClassBatch b) =>
+      DateFormat.weekdayList(b.days, short: true);
 
   @override
   Widget build(BuildContext context) {

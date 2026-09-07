@@ -22,6 +22,7 @@ import '../models/api_review_model.dart';
 import '../widgets/login_sheet.dart';
 import 'plan_party_screen.dart';
 import 'gallery_screen.dart';
+import '../core/date_format.dart';
 
 class VenueDetailScreen extends StatefulWidget {
   final EventModel event;
@@ -201,17 +202,6 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
     final av = _detail?.availability;
     if (av == null || av.isEmpty) return null;
     return av.first;
-  }
-
-  String _formatDate(String dateStr) {
-    try {
-      final dt = DateTime.parse(dateStr);
-      const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      return '${days[dt.weekday - 1]}, ${months[dt.month - 1]} ${dt.day}';
-    } catch (_) {
-      return dateStr;
-    }
   }
 
   String _formatTime(String timeStr) {
@@ -411,7 +401,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                '${_formatDate(_firstSlot!.date)}, ${_formatTime(_firstSlot!.startTime)} – ${_formatTime(_firstSlot!.endTime)}',
+                                '${DateFormat.cardFrom(_firstSlot!.date, fallback: _firstSlot!.date)}, ${_formatTime(_firstSlot!.startTime)} – ${_formatTime(_firstSlot!.endTime)}',
                                 style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: AppColors.textSecondary),
                               ),
                             ),

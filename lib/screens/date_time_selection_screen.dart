@@ -5,6 +5,7 @@ import '../core/responsive.dart';
 import '../models/api_event_model.dart';
 import '../models/event_model.dart';
 import 'ticket_booking_screen.dart';
+import '../core/date_format.dart';
 
 class DateTimeSelectionScreen extends StatefulWidget {
   final EventModel event;
@@ -44,14 +45,6 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
   static const Color _bg = Color(0xFFF2F3F5);
   static const Color _dark = AppColors.textPrimary;
 
-  static const _months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
-  static const _weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-  static String _fmtDate(DateTime dt) =>
-      '${_weekdays[dt.weekday - 1]} ${dt.day} ${_months[dt.month - 1]}';
 
   static String _fmtTime(DateTime dt) {
     final h = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
@@ -215,7 +208,7 @@ class _DateTimeSelectionScreenState extends State<DateTimeSelectionScreen> {
                         MaterialPageRoute(
                           builder: (_) => TicketBookingScreen(
                             event: event,
-                            selectedDate: _fmtDate(_days[_selectedDateIndex!]),
+                            selectedDate: DateFormat.card(_days[_selectedDateIndex!]),
                             selectedTime: _timeOptions[_selectedTimeIndex!],
                             apiTickets: widget.apiTickets,
                             // Carried through so Checkout's pencil "Edit" can
@@ -439,7 +432,7 @@ class _DateChip extends StatelessWidget {
             Text(
               isToday
                   ? 'Today'
-                  : _DateTimeSelectionScreenState._weekdays[day.weekday - 1],
+                  : DateFormat.weekdayOf(day),
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 10.5),
                 fontWeight: FontWeight.w500,
@@ -458,7 +451,7 @@ class _DateChip extends StatelessWidget {
             ),
             const SizedBox(height: 1),
             Text(
-              _DateTimeSelectionScreenState._months[day.month - 1],
+              DateFormat.monthOf(day),
               style: GoogleFonts.poppins(
                 fontSize: Responsive.sp(context, 10.5),
                 fontWeight: FontWeight.w500,

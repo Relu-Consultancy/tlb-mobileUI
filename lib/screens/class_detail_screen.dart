@@ -23,6 +23,7 @@ import '../widgets/app_loader.dart';
 import 'gallery_screen.dart';
 import 'select_batch_screen.dart';
 import '../widgets/enquire_now_sheet.dart';
+import '../core/date_format.dart';
 
 class ClassDetailScreen extends StatefulWidget {
   final EventModel event;
@@ -122,7 +123,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
     if (_detail == null) return widget.event.eventDate ?? 'Schedule TBA';
     if (_detail!.batches.isNotEmpty) {
       final b = _detail!.batches.first;
-      final days = b.days.map((d) => d.length >= 3 ? '${d[0].toUpperCase()}${d.substring(1)}' : d).join(', ');
+      final days = DateFormat.weekdayList(b.days);
       return '$days • ${TimeFormat.h12(b.startTime)} – ${TimeFormat.h12(b.endTime)}';
     }
     return 'Schedule TBA';

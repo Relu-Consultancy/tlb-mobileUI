@@ -13,6 +13,7 @@ import '../services/events_listing_service.dart';
 import '../services/classes_listing_service.dart';
 import '../services/programs_listing_service.dart';
 import '../widgets/app_loader.dart';
+import '../core/date_format.dart';
 
 class BookingDetailScreen extends StatefulWidget {
   final ApiBookingItem booking;
@@ -504,7 +505,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                         context,
                                         Icons.calendar_today_outlined,
                                         'Booked On',
-                                        _fmtDate(
+                                        DateFormat.card(
                                             _booking.createdAt.toLocal()),
                                       ),
                                       _venueDivider(),
@@ -525,7 +526,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                           context,
                                           Icons.cancel_outlined,
                                           'Cancelled On',
-                                          _fmtDate(DateTime.tryParse(
+                                          DateFormat.card(DateTime.tryParse(
                                                       _booking.cancelledAt!)
                                                   ?.toLocal() ??
                                               DateTime.now()),
@@ -840,7 +841,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                         context,
                                         Icons.calendar_today_outlined,
                                         'Booked On',
-                                        _fmtDate(_booking.createdAt.toLocal()),
+                                        DateFormat.card(_booking.createdAt.toLocal()),
                                       ),
                                       _venueDivider(),
                                       _venueDetailRow(
@@ -860,7 +861,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
                                           context,
                                           Icons.cancel_outlined,
                                           'Cancelled On',
-                                          _fmtDate(DateTime.tryParse(
+                                          DateFormat.card(DateTime.tryParse(
                                                       _booking.cancelledAt!)
                                                   ?.toLocal() ??
                                               DateTime.now()),
@@ -1005,14 +1006,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen>
         ),
       ),
     );
-  }
-
-  static String _fmtDate(DateTime dt) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
   }
 
   Widget _venueDivider() =>
@@ -1337,7 +1330,7 @@ class _TicketContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bookedDate = _fmtDate(booking.createdAt.toLocal());
+    final bookedDate = DateFormat.card(booking.createdAt.toLocal());
     final amount = booking.totalAmount == booking.totalAmount.truncateToDouble()
         ? '₹${booking.totalAmount.toInt()}'
         : '₹${booking.totalAmount.toStringAsFixed(2)}';
@@ -1405,7 +1398,7 @@ class _TicketContent extends StatelessWidget {
           const SizedBox(height: 14),
           _Field(
             label: 'Cancelled On',
-            value: _fmtDate(
+            value: DateFormat.card(
                 DateTime.tryParse(booking.cancelledAt!)?.toLocal() ??
                     DateTime.now()),
           ),
@@ -1419,14 +1412,6 @@ class _TicketContent extends StatelessWidget {
         ],
       ],
     );
-  }
-
-  static String _fmtDate(DateTime dt) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
   }
 
   static String _capitalize(String s) =>

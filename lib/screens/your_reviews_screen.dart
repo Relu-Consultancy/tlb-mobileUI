@@ -11,6 +11,7 @@ import '../widgets/app_loader.dart';
 import '../widgets/app_refresh_indicator.dart';
 import '../widgets/app_dialog.dart';
 import '../widgets/review_sheet.dart';
+import '../core/date_format.dart';
 
 class YourReviewsScreen extends StatefulWidget {
   const YourReviewsScreen({super.key});
@@ -162,7 +163,7 @@ class _ReviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasImage = (review.listingImage ?? '').isNotEmpty;
     final title = review.listingTitle ?? 'Review #${review.id}';
-    final dateStr = _formatDate(review.createdAt);
+    final dateStr = DateFormat.card(review.createdAt);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -319,11 +320,6 @@ class _ReviewCard extends StatelessWidget {
         decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(10)),
         child: const Icon(Icons.event, color: Colors.grey),
       );
-
-  String _formatDate(DateTime d) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return '${months[d.month - 1]} ${d.day}, ${d.year}';
-  }
 
   Future<void> _edit(BuildContext context) async {
     final listingId = review.listingId ?? '';

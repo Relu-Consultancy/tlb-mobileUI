@@ -9,6 +9,8 @@ import '../providers/auth_state.dart';
 import '../services/booking_service.dart';
 import '../widgets/app_refresh_indicator.dart';
 import 'help_centre_screen.dart';
+import '../core/date_format.dart';
+import '../core/time_format.dart';
 
 /// Tracks the real status of money coming back after a booking is cancelled.
 ///
@@ -178,18 +180,13 @@ String _money(double? amount, String currency) {
   return '$symbol${amount.toStringAsFixed(2)}';
 }
 
+/// The shared date label plus a clock time — a refund step is the one
+/// place the exact moment matters, not just the day.
 String _formatDate(DateTime? d) {
   if (d == null) return '';
-  const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
   final local = d.toLocal();
-  final hour12 = local.hour % 12 == 0 ? 12 : local.hour % 12;
   final minute = local.minute.toString().padLeft(2, '0');
-  final meridiem = local.hour < 12 ? 'AM' : 'PM';
-  return '${local.day} ${months[local.month - 1]} ${local.year}, '
-      '$hour12:$minute $meridiem';
+  return '${DateFormat.card(local)}, ${TimeFormat.h12('${local.hour}:$minute')}';
 }
 
 BoxDecoration _cardDecoration() => BoxDecoration(

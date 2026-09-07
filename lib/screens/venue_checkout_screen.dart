@@ -6,6 +6,7 @@ import '../core/responsive.dart';
 import '../models/api_venue_model.dart';
 import '../models/event_model.dart';
 import 'review_pay_screen.dart';
+import '../core/date_format.dart';
 
 class VenueCheckoutScreen extends StatefulWidget {
   final EventModel event;
@@ -61,19 +62,6 @@ class _VenueCheckoutScreenState extends State<VenueCheckoutScreen> {
     return null;
   }
 
-String _formatDate(String dateStr) {
-    try {
-      final dt = DateTime.parse(dateStr);
-      const months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-      ];
-      return '${dt.day} ${months[dt.month - 1]} ${dt.year}';
-    } catch (_) {
-      return dateStr;
-    }
-  }
-
   // "06:00:00" → "6:00 AM"
   String _fmtTime(String t) {
     try {
@@ -91,7 +79,7 @@ String _formatDate(String dateStr) {
   String get _displayDateTime {
     final slot = widget.selectedSlot;
     if (slot == null) return widget.occasion;
-    return '${_formatDate(slot.date)}, '
+    return '${DateFormat.cardFrom(slot.date, fallback: slot.date)}, '
         '${_fmtTime(slot.startTime)} – ${_fmtTime(slot.endTime)}';
   }
 
@@ -121,7 +109,7 @@ String _formatDate(String dateStr) {
       MaterialPageRoute(
         builder: (_) => ReviewPayScreen(
           event: widget.event,
-          selectedDate: _formatDate(slot.date),
+          selectedDate: DateFormat.cardFrom(slot.date, fallback: slot.date),
           selectedTime:
               '${_fmtTime(slot.startTime)} – ${_fmtTime(slot.endTime)}',
           ticketDetails: ticketDetails,

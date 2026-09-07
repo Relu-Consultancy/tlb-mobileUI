@@ -6,6 +6,7 @@ import '../models/api_venue_model.dart';
 import '../models/event_model.dart';
 import '../core/responsive.dart';
 import 'venue_checkout_screen.dart';
+import '../core/date_format.dart';
 
 class PlanPartyScreen extends StatefulWidget {
   final EventModel event;
@@ -138,21 +139,6 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
         ),
       ),
     );
-  }
-
-  // "2026-05-25" → "Sun 25 May"
-  String _formatDateChip(String dateStr) {
-    try {
-      final dt = DateTime.parse(dateStr);
-      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-      ];
-      return '${days[dt.weekday - 1]} ${dt.day} ${months[dt.month - 1]}';
-    } catch (_) {
-      return dateStr;
-    }
   }
 
   String _formatTimeSlot(ApiVenueAvailability slot) {
@@ -543,7 +529,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
               children: _availableDates
                   .map((d) => _choiceChip(
                         context,
-                        label: _formatDateChip(d),
+                        label: DateFormat.cardFrom(d, fallback: d),
                         selected: _selectedDateStr == d,
                         onTap: () => _selectDate(d),
                       ))

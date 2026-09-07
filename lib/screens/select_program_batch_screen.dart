@@ -7,6 +7,7 @@ import '../core/time_format.dart';
 import '../models/api_program_model.dart';
 import '../models/event_model.dart';
 import 'attendee_details_screen.dart';
+import '../core/date_format.dart';
 
 const List<Color> _kTagBg = [
   Color(0xFFCCFBF1), Color(0xFFEDE9FE), Color(0xFFDCFCE7),
@@ -16,21 +17,6 @@ const List<Color> _kTagFg = [
   Color(0xFF0F766E), Color(0xFF6D28D9), Color(0xFF15803D),
   Color(0xFFB45309), Color(0xFFBE123C),
 ];
-
-/// Parses "2026-05-25" → "25 May 2026"
-String _fmtApiDate(String? raw) {
-  if (raw == null || raw.isEmpty) return 'TBA';
-  final parts = raw.split('-');
-  if (parts.length != 3) return raw;
-  const months = [
-    '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
-  final month = int.tryParse(parts[1]) ?? 0;
-  final day = int.tryParse(parts[2]) ?? 0;
-  if (month < 1 || month > 12) return raw;
-  return '$day ${months[month]} ${parts[0]}';
-}
 
 class SelectProgramBatchScreen extends StatefulWidget {
   final EventModel event;
@@ -57,11 +43,9 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
     return 'Time TBA';
   }
 
-  String _dayLabel(ApiProgramBatch b) => b.daysOfWeek
-      .map((d) => d.length >= 3
-          ? '${d[0].toUpperCase()}${d.substring(1, 3)}'
-          : d.toUpperCase())
-      .join(', ');
+  // Short form: these sit inside a narrow batch card beside the time range.
+  String _dayLabel(ApiProgramBatch b) =>
+      DateFormat.weekdayList(b.daysOfWeek, short: true);
 
   @override
   Widget build(BuildContext context) {
@@ -419,7 +403,7 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
         ),
         const SizedBox(height: 2),
         Text(
-          _fmtApiDate(raw),
+          DateFormat.cardFrom(raw),
           style: GoogleFonts.poppins(
             fontSize: Responsive.sp(context, 13),
             fontWeight: FontWeight.w500,
@@ -450,7 +434,7 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
                       builder: (_) => AttendeeDetailsScreen(
                         event: widget.event,
                         batch: batch,
-                        selectedDate: _fmtApiDate(batch.startDate),
+                        selectedDate: DateFormat.cardFrom(batch.startDate),
                         selectedTime: _timeRange(batch),
                         bookingType: 'program',
                       ),

@@ -23,6 +23,7 @@ import '../widgets/detail_sections.dart';
 import '../widgets/upcoming_events_section.dart';
 import 'date_time_selection_screen.dart';
 import 'gallery_screen.dart';
+import '../core/date_format.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final EventModel event;
@@ -115,7 +116,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       return '${widget.event.eventDate ?? "TBD"}, ${widget.event.eventTime ?? ""}';
     }
     final start = _detail!.startDatetime.toLocal();
-    final date = _formatDate(start);
+    final date = DateFormat.card(start);
     final startTime = _formatTime(start);
     if (_detail!.endDatetime != null) {
       return '$date, $startTime – ${_formatTime(_detail!.endDatetime!.toLocal())}';
@@ -189,12 +190,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     }
   }
 
-  static String _formatDate(DateTime dt) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return '${days[dt.weekday - 1]}, ${months[dt.month - 1]} ${dt.day}';
-  }
-
   static String _formatTime(DateTime dt) {
     final h = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
     final m = dt.minute.toString().padLeft(2, '0');
@@ -215,7 +210,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         rating: widget.event.rating,
         reviewCount: widget.event.reviewCount,
         eventDate: _detail != null
-            ? _formatDate(_detail!.startDatetime.toLocal())
+            ? DateFormat.card(_detail!.startDatetime.toLocal())
             : widget.event.eventDate,
         eventTime: _detail != null
             ? _formatTime(_detail!.startDatetime.toLocal())

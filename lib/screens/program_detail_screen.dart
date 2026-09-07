@@ -23,6 +23,7 @@ import '../widgets/app_loader.dart';
 import 'gallery_screen.dart';
 import 'select_program_batch_screen.dart';
 import '../widgets/enquire_now_sheet.dart';
+import '../core/date_format.dart';
 
 class ProgramDetailScreen extends StatefulWidget {
   final EventModel event;
@@ -120,7 +121,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
         
     if (batches.isNotEmpty) {
       final b = batches.first;
-      final days = b.daysOfWeek.join(', ');
+      final days = DateFormat.weekdayList(b.daysOfWeek);
       if (b.startTime != null && b.endTime != null) {
         return '$days • ${TimeFormat.h12(b.startTime!)} - ${TimeFormat.h12(b.endTime!)}';
       }
@@ -806,7 +807,7 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final b = batches[index];
-                  final days = b.daysOfWeek.join(', ');
+                  final days = DateFormat.weekdayList(b.daysOfWeek);
                   return Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(

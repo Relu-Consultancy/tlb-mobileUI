@@ -12,6 +12,7 @@ import '../providers/user_reviews_state.dart';
 import '../services/review_service.dart';
 import 'app_loader.dart';
 import 'login_sheet.dart';
+import '../core/date_format.dart';
 
 // ── Public entry points ───────────────────────────────────────────────────────
 
@@ -529,9 +530,7 @@ class _ReviewTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    final d = review.createdAt;
-    final dateStr = '${months[d.month - 1]} ${d.day}, ${d.year}';
+    final dateStr = DateFormat.card(review.createdAt);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
