@@ -4,23 +4,35 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/homepage_section_model.dart';
 
-/// Fetches the homepage section → listings mapping
-/// (GET /api/v1/homepage/sections/). Public, no auth.
+/// Fetches a section → listings mapping. Public, no auth.
+///
+/// Two feeds share one response shape: the homepage
+/// (GET /api/v1/homepage/sections/) and each discovery screen
+/// (GET /api/v1/listings/{screen}/sections/).
 class HomeFeedService {
   static const String _base = 'https://tlb-api.reluconsultancy.in';
   static const _timeout = Duration(seconds: 30);
 
-  static Future<List<HomepageSection>> fetchSections() async {
+  /// The homepage feed.
+  static Future<List<HomepageSection>> fetchSections() =>
+      _fetch('$_base/api/v1/homepage/sections/');
+
+  /// One discovery screen's feed — [screen] is events, classes, programs
+  /// or venues.
+  static Future<List<HomepageSection>> fetchScreenSections(String screen) =>
+      _fetch('$_base/api/v1/listings/$screen/sections/');
+
+  static Future<List<HomepageSection>> _fetch(String url) async {
     try {
       final res = await http
           .get(
-            Uri.parse('$_base/api/v1/homepage/sections/'),
+            Uri.parse(url),
             headers: {'accept': 'application/json'},
           )
           .timeout(_timeout);
 
       if (res.statusCode != 200) {
-        throw Exception('Failed to load homepage (${res.statusCode})');
+        throw Exception('Failed to load sections (${res.statusCode})');
       }
       final decoded = jsonDecode(res.body);
       // Supports both the {success, data:[...]} envelope and a bare array.

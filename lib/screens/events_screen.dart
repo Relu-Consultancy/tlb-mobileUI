@@ -31,6 +31,8 @@ import 'programs_screen.dart';
 import 'venues_screen.dart';
 import '../widgets/all_categories_popup.dart';
 import 'category_events_screen.dart';
+import '../providers/discovery_feed_state.dart';
+import '../models/event_model.dart';
 
 // Slug → local asset + gradient palette.
 // New API categories that don't yet have dedicated assets fall back to a
@@ -164,7 +166,39 @@ class _EventsScreenState extends State<EventsScreen> {
     super.initState();
     _scrollController.addListener(_onScroll);
     _loadCategories();
+    // The rails are built before the fetch lands, so they have to repaint
+    // when it does.
+    DiscoveryFeedState.events.version.addListener(_onFeedChanged);
+    DiscoveryFeedState.events.load();
   }
+
+  void _onFeedChanged() {
+    if (mounted) setState(() {});
+  }
+
+  /// The cards for one curated rail.
+  ///
+  /// Real listings once the feed is in. Until then — and if the fetch
+  /// could not reach the API at all — the mock set stands in, so a slow
+  /// connection or an outage shows the screen it always did rather than a
+  /// blank page. A section the feed returns empty genuinely is empty, and
+  /// its rail is hidden.
+  List<EventModel> _rail(String key, List<EventModel> fallback) =>
+      DiscoveryFeedState.events.isLoaded
+          ? DiscoveryFeedState.events.section(key)
+          : fallback;
+
+  List<EventModel> get _trending =>
+      _rail('trending_events', DummyData.trendingEvents);
+  List<EventModel> get _thisWeekend =>
+      _rail('happening_this_weekend', DummyData.weekendSpecial);
+  List<EventModel> get _holiday =>
+      _rail('holiday_special', DummyData.holidaySpecials);
+  List<EventModel> get _featuredPartners =>
+      _rail('featured_partners', DummyData.featuredPartners);
+  List<EventModel> get _newOnTlb => _rail('new_on_tlb', DummyData.newOnTlb);
+  List<EventModel> get _onlineEvents =>
+      _rail('online_events', DummyData.onlineEvents);
 
   void _onScroll() {
     final double offset = _scrollController.offset;
@@ -235,6 +269,7 @@ class _EventsScreenState extends State<EventsScreen> {
 
   @override
   void dispose() {
+    DiscoveryFeedState.events.version.removeListener(_onFeedChanged);
     _newOnTlbController.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
@@ -270,6 +305,7 @@ class _EventsScreenState extends State<EventsScreen> {
     await Future.wait([
       _loadCategories(),
       SavedEventsState.loadFromApi(),
+      DiscoveryFeedState.events.load(force: true),
     ]);
     if (mounted) setState(() {});
   }
@@ -407,25 +443,27 @@ class _EventsScreenState extends State<EventsScreen> {
                   ),
                 ),
 
+                      if (_trending.isNotEmpty) ...[
                       const SectionDividerWidget(topPadding: 30, title: 'Trending Events'),
                       SizedBox(
                         height: Responsive.h(context, 420, min: 400),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.trendingEvents.length,
+                          itemCount: _trending.length,
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.only(right: 16),
                               child: SizedBox(
                                 width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                                 child: TrendingEventCard(
-                                  event: DummyData.trendingEvents[index],
+                                  event: _trending[index],
                                 ),
                               ),
                             );
                           },
                         ),
                       ),
+                      ],
 
                       const SectionDividerWidget(topPadding: 30, title: 'Explore by Format'),
                       RepaintBoundary(
@@ -440,6 +478,7 @@ class _EventsScreenState extends State<EventsScreen> {
                           ),
                         ),
                       ),
+                      if (_thisWeekend.isNotEmpty) ...[
                       const SectionDividerWidget(topPadding: 30, title: 'Happening This Weekend'),
                       SizedBox(
                         // Tightened so the card hugs its content (was 190 — left
@@ -447,12 +486,12 @@ class _EventsScreenState extends State<EventsScreen> {
                         height: Responsive.h(context, 162, min: 150),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.weekendSpecial.length,
+                          itemCount: _thisWeekend.length,
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.only(right: 14),
                               child: WeekendEventCard(
-                                event: DummyData.weekendSpecial[index],
+                                event: _thisWeekend[index],
                                 width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                               ),
                             );
@@ -460,18 +499,20 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
+                      ],
+                      if (_holiday.isNotEmpty) ...[
                       const SectionDividerWidget(topPadding: 30, title: 'Holiday Special'),
                       SizedBox(
                         height: Responsive.h(context, 460, min: 430),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.holidaySpecials.length,
+                          itemCount: _holiday.length,
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.only(right: 14),
                               child: RepaintBoundary(
                                 child: HolidaySpecialCard(
-                                  event: DummyData.holidaySpecials[index],
+                                  event: _holiday[index],
                                   width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                                 ),
                               ),
@@ -480,6 +521,8 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
+                      ],
+                      if (_featuredPartners.isNotEmpty) ...[
                       const SectionDividerWidget(topPadding: 30, title: 'Featured Partners'),
                       SizedBox(
                         // Poster (0.78) + title + strapline + the meta rows
@@ -488,26 +531,28 @@ class _EventsScreenState extends State<EventsScreen> {
                         height: Responsive.h(context, 575, min: 555),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.featuredPartners.length,
+                          itemCount: _featuredPartners.length,
                           itemBuilder: (context, index) {
                             return PartnerPortraitCard(
-                              event: DummyData.featuredPartners[index],
+                              event: _featuredPartners[index],
                               width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                             );
                           },
                         ),
                       ),
 
+                      ],
+                      if (_newOnTlb.isNotEmpty) ...[
                       const SectionDividerWidget(topPadding: 30, title: 'New On TLB'),
                       SizedBox(
                         height: Responsive.h(context, 230, min: 210),
                         child: PageView.builder(
                           controller: _newOnTlbController,
-                          itemCount: DummyData.newOnTlb.length,
+                          itemCount: _newOnTlb.length,
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 6),
-                              child: NewOnTlbCard(event: DummyData.newOnTlb[index]),
+                              child: NewOnTlbCard(event: _newOnTlb[index]),
                             );
                           },
                         ),
@@ -516,7 +561,7 @@ class _EventsScreenState extends State<EventsScreen> {
                       Center(
                         child: SmoothPageIndicator(
                           controller: _newOnTlbController,
-                          count: DummyData.newOnTlb.length,
+                          count: _newOnTlb.length,
                           effect: const WormEffect(
                             dotHeight: 7,
                             dotWidth: 7,
@@ -527,23 +572,27 @@ class _EventsScreenState extends State<EventsScreen> {
                         ),
                       ),
 
+                      ],
+                      if (_onlineEvents.isNotEmpty) ...[
                       const SectionDividerWidget(topPadding: 30, title: 'Online Events'),
                       SizedBox(
                         height: Responsive.h(context, 372, min: 342),
                         child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.onlineEvents.length,
+                          itemCount: _onlineEvents.length,
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.only(right: 14),
                               child: OnlineEventCard(
-                                event: DummyData.onlineEvents[index],
+                                event: _onlineEvents[index],
                                 width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                               ),
                             );
                           },
                         ),
                       ),
+
+                      ],
 
                 // The full black starry footer (quote, logo, links).
                 AppFooter(bottomExtra: FloatingNavbar.clearance(context)),
