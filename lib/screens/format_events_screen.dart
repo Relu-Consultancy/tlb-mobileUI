@@ -155,16 +155,17 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
           children: [
             SizedBox(
               width: size,
-              height: size,
-              // Clip.none so the selected disc's artwork may spill past the
-              // tile; that growth is the selection cue.
+              // Tall enough for the grown disc, so the row's viewport does
+              // not clip its top edge. Every tile reserves the same height,
+              // so the labels stay on one line together.
+              height: size * FormatCircleLabel.selectedScale,
               child: OverflowBox(
                 maxWidth: size * 1.2,
                 maxHeight: size * 1.2,
                 child: AnimatedScale(
                   duration: const Duration(milliseconds: 220),
                   curve: Curves.easeInOut,
-                  scale: isSelected ? 1.12 : 1.0,
+                  scale: isSelected ? FormatCircleLabel.selectedScale : 1.0,
                   child: SizedBox(width: size, height: size, child: img),
                 ),
               ),
@@ -264,12 +265,10 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
                   const SizedBox(height: 18),
 
                   // Disc (90) + gap (8) + a two-line label. The selected
-                  // disc scales inside its own box rather than growing the
-                  // tile, so this height does not have to allow for it.
+                  // tile reserves the grown disc's height, so the selected
+                  // one is not clipped at the top of the viewport.
                   SizedBox(
-                    height: 90 +
-                        8 +
-                        FormatCircleLabel.boxHeight(context, 11),
+                    height: FormatCircleLabel.rowHeight(context, 90, 11),
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 16),

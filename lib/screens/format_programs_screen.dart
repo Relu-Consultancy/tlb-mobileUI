@@ -139,14 +139,17 @@ class _FormatProgramsScreenState extends State<FormatProgramsScreen> {
           children: [
             SizedBox(
               width: size,
-              height: size,
+              // Tall enough for the grown disc, so the row's viewport does
+              // not clip its top edge. Every tile reserves the same height,
+              // so the labels stay on one line together.
+              height: size * FormatCircleLabel.selectedScale,
               child: OverflowBox(
                 maxWidth: size * 1.2,
                 maxHeight: size * 1.2,
                 child: AnimatedScale(
                   duration: const Duration(milliseconds: 220),
                   curve: Curves.easeInOut,
-                  scale: isSelected ? 1.12 : 1.0,
+                  scale: isSelected ? FormatCircleLabel.selectedScale : 1.0,
                   child: Container(
                     width: size,
                     height: size,
@@ -253,7 +256,7 @@ class _FormatProgramsScreenState extends State<FormatProgramsScreen> {
                   ),
                   const SizedBox(height: 18),
                   SizedBox(
-                    height: 90 + 8 + FormatCircleLabel.boxHeight(context, 11),
+                    height: FormatCircleLabel.rowHeight(context, 90, 11),
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 16),

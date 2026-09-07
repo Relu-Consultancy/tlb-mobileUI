@@ -71,7 +71,6 @@ class _PaceClassesScreenState extends State<PaceClassesScreen> {
   String get _paceLabel =>
       (_currentPace['label'] as String).replaceAll('\n', ' ');
 
-  String get _paceSlug => _currentPace['paceSlug'] as String;
   Color get _accentColor => _currentPace['accentColor'] as Color;
 
   Future<void> _fetchClasses() async {
@@ -81,10 +80,21 @@ class _PaceClassesScreenState extends State<PaceClassesScreen> {
       _error = null;
     });
     try {
-      // Filtered server-side: unlike events, a class list row carries no
-      // format field, so it could not be narrowed after the fact anyway.
+      // No pace filter is sent, because /listings/classes/ has none.
+      //
+      // This screen used to pass `format: _paceSlug`. Every value of it —
+      // the pace slugs, the events format vocabulary, the programs one —
+      // answers {"success": false, "error": {"message": "Not found."}}, so
+      // the fetch threw and every pace showed the "Coming Soon" empty state.
+      // The endpoint takes category, subcategory, city, area, mode and
+      // search and nothing else (an unknown parameter such as `foo` is
+      // ignored, `format` is not), its metadata/formats/ route returns only
+      // the three delivery modes, and a class row carries no pace field, so
+      // the list cannot be narrowed after the fact either.
+      //
+      // Showing the real catalogue beats showing a permanent error. Add the
+      // pace back as one parameter here once the backend can express it.
       final page = await ClassesListingService.fetchClasses(
-        format: _paceSlug,
         city: LocationState().selectedCity.value,
         pageSize: 50,
       );
@@ -139,14 +149,17 @@ class _PaceClassesScreenState extends State<PaceClassesScreen> {
           children: [
             SizedBox(
               width: size,
-              height: size,
+              // Tall enough for the grown disc, so the row's viewport does
+              // not clip its top edge. Every tile reserves the same height,
+              // so the labels stay on one line together.
+              height: size * FormatCircleLabel.selectedScale,
               child: OverflowBox(
                 maxWidth: size * 1.2,
                 maxHeight: size * 1.2,
                 child: AnimatedScale(
                   duration: const Duration(milliseconds: 220),
                   curve: Curves.easeInOut,
-                  scale: isSelected ? 1.12 : 1.0,
+                  scale: isSelected ? FormatCircleLabel.selectedScale : 1.0,
                   child: Container(
                     width: size,
                     height: size,
@@ -251,7 +264,7 @@ class _PaceClassesScreenState extends State<PaceClassesScreen> {
                   ),
                   const SizedBox(height: 18),
                   SizedBox(
-                    height: 90 + 8 + FormatCircleLabel.boxHeight(context, 11),
+                    height: FormatCircleLabel.rowHeight(context, 90, 11),
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.symmetric(horizontal: 16),

@@ -234,6 +234,14 @@ class DummyData {
   /// backend vocabulary before looking anywhere else.
   ///
   /// `accentColor` tints that screen's header, as it does for formats.
+  /// The Classes tab's "Pick Your Pace" discs.
+  ///
+  /// `paceSlug` is kept ready for the day /listings/classes/ can filter by
+  /// pace. It cannot today: the endpoint takes category, subcategory, city,
+  /// area, mode and search, its metadata/formats/ route returns only the
+  /// three delivery modes, and a class row carries no pace field — so
+  /// PaceClassesScreen fetches the catalogue unfiltered rather than sending
+  /// a parameter that answers "Not found."
   static const List<Map<String, dynamic>> pickYourPace = [
     {
       'label': 'Weekly\nClasses',
