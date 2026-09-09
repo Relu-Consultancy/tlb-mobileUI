@@ -15,6 +15,7 @@ import '../widgets/category_skeleton_card.dart';
 import '../widgets/error_retry_view.dart';
 import '../widgets/format_circle_label.dart';
 import '../widgets/subcategory_empty_state.dart';
+import '../core/user_location.dart';
 
 /// Listing grid shared with the category and format screens — two up, 0.62
 /// ratio — so every "browse a slice of the catalogue" screen presents its
@@ -95,6 +96,8 @@ class _PaceClassesScreenState extends State<PaceClassesScreen> {
       // Showing the real catalogue beats showing a permanent error. Add the
       // pace back as one parameter here once the backend can express it.
       final page = await ClassesListingService.fetchClasses(
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
         city: LocationState().selectedCity.value,
         pageSize: 50,
       );
@@ -122,6 +125,7 @@ class _PaceClassesScreenState extends State<PaceClassesScreen> {
   }
 
   EventModel _toEventModel(ApiClass cls) => EventModel(
+        distanceKm: cls.distanceKm,
         id: cls.id,
         title: cls.title,
         venue: cls.category.name,

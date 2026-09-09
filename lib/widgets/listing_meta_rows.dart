@@ -75,8 +75,10 @@ class ListingMetaRows extends StatelessWidget {
         if (!locationOnLeft && showLocation)
           _row(context, Icons.location_on_outlined, event.venue,
               alignEnd: true),
-        if (showDistance)
-          _row(context, Icons.near_me_outlined, event.distanceDisplay,
+        // Only when the API measured it; an unknown distance shows nothing
+        // rather than a made-up number.
+        if (showDistance && event.distanceDisplay != null)
+          _row(context, Icons.near_me_outlined, event.distanceDisplay!,
               color: AppColors.distanceGreen, alignEnd: true),
       ];
       final int rowCount = left.length > right.length ? left.length : right.length;
@@ -109,8 +111,9 @@ class ListingMetaRows extends StatelessWidget {
         _row(context, Icons.child_care_outlined, event.ageGroupDisplay),
       if (showDateTime)
         _row(context, Icons.calendar_today_outlined, event.dateTimeDisplay),
-      if (showDistance)
-        _row(context, Icons.near_me_outlined, event.distanceDisplay,
+      // As above: no measurement, no row.
+      if (showDistance && event.distanceDisplay != null)
+        _row(context, Icons.near_me_outlined, event.distanceDisplay!,
             color: AppColors.distanceGreen),
     ]);
   }

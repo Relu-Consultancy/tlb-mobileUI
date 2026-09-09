@@ -120,7 +120,13 @@ class ApiEvent {
   final DateTime? endDatetime;
   final String? coverUrl;
 
+  /// Straight-line distance from the user in km — `distance_km`, present
+  /// only when the request carried lat/lng and this listing has
+  /// coordinates stored. Null otherwise.
+  final double? distanceKm;
+
   const ApiEvent({
+    this.distanceKm,
     required this.id,
     required this.title,
     required this.category,
@@ -159,6 +165,7 @@ class ApiEvent {
         endDatetime:
             DateTime.tryParse(json['end_datetime']?.toString() ?? ''),
         coverUrl: secureUrl(json['cover_url'] as String?),
+        distanceKm: (json['distance_km'] as num?)?.toDouble(),
       );
 }
 

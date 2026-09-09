@@ -105,6 +105,7 @@ class ApiClass {
   final int activeBatchesCount;
   final String? coverUrl;
   final double averageRating;
+
   final int totalReviews;
 
   /// A class has no end date — ClassBatch carries a daily start_time/end_time
@@ -114,12 +115,18 @@ class ApiClass {
   /// paused the listing.
   final bool isPaused;
 
+  /// Straight-line distance from the user in km — `distance_km`, present only
+  /// when the request carried lat/lng and this listing has coordinates
+  /// stored. Null otherwise.
+  final double? distanceKm;
+
   const ApiClass({
     required this.id,
     required this.title,
     this.shortDescription,
     required this.status,
     required this.isLive,
+    this.distanceKm,
     required this.category,
     required this.activeBatchesCount,
     this.coverUrl,
@@ -137,6 +144,7 @@ class ApiClass {
         category: ApiCategory.fromJson(json['category'] as Map<String, dynamic>),
         activeBatchesCount: json['active_batches_count'] as int? ?? 0,
         coverUrl: secureUrl(json['cover_url'] as String?),
+        distanceKm: (json['distance_km'] as num?)?.toDouble(),
         averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
         totalReviews: json['total_reviews'] as int? ?? 0,
         isPaused: json['is_paused'] as bool? ?? false,

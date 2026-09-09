@@ -15,6 +15,7 @@ import '../widgets/category_event_card.dart';
 import '../widgets/category_skeleton_card.dart';
 import '../widgets/subcategory_empty_state.dart';
 import '../core/date_format.dart';
+import '../core/user_location.dart';
 
 /// Listing grid shared with the category screens — two up, 0.62 ratio — so a
 /// format browse and a category browse present their results identically.
@@ -69,7 +70,11 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
     try {
       // The backend format filter is not yet live, so fetch all events and
       // filter client-side by format slug + user's selected city.
-      final page = await EventsListingService.fetchEvents(pageSize: 100);
+      final page = await EventsListingService.fetchEvents(
+        pageSize: 100,
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
+      );
       if (!mounted) return;
       final slug = _formatSlug;
       final city = LocationState().selectedCity.value.toLowerCase();
@@ -107,6 +112,7 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
         '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
 
     return EventModel(
+      distanceKm: e.distanceKm,
       id: e.id,
       title: e.title,
       venue: e.city,

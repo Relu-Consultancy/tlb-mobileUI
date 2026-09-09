@@ -645,9 +645,12 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                     _iconRow(Icons.calendar_month_outlined, scheduleText),
                     _iconRow(Icons.people_outline, ageText),
                     _iconRow(Icons.location_on_outlined, locationText),
-                    // Distance from the user (mock display data)
-                    _iconRow(Icons.near_me_outlined, event.distanceDisplay,
-                    color: AppColors.distanceGreen),
+                    // Only when the API measured it; an unknown distance
+                    // shows nothing rather than a made-up number.
+                    if (event.distanceDisplay != null)
+                      _iconRow(
+                          Icons.near_me_outlined, event.distanceDisplay!,
+                          color: AppColors.distanceGreen),
                   ],
                 ),
               ),
@@ -767,10 +770,12 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           children: [
                             _iconRow(
                                 Icons.location_on_outlined, event.venue),
-                            const SizedBox(height: 7),
-                            _iconRow(Icons.near_me_outlined,
-                                event.distanceDisplay,
-                                color: AppColors.distanceGreen),
+                            if (event.distanceDisplay != null) ...[
+                              const SizedBox(height: 7),
+                              _iconRow(Icons.near_me_outlined,
+                                  event.distanceDisplay!,
+                                  color: AppColors.distanceGreen),
+                            ],
                           ],
                         ),
                       ),
@@ -874,10 +879,12 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                             children: [
                               _iconRow(Icons.location_on_outlined,
                                   event.venue),
-                              const SizedBox(height: 7),
-                              _iconRow(Icons.near_me_outlined,
-                                  event.distanceDisplay,
-                                  color: AppColors.distanceGreen),
+                              if (event.distanceDisplay != null) ...[
+                                const SizedBox(height: 7),
+                                _iconRow(Icons.near_me_outlined,
+                                    event.distanceDisplay!,
+                                    color: AppColors.distanceGreen),
+                              ],
                             ],
                           ),
                         ),
@@ -1019,10 +1026,12 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                             children: [
                               _iconRow(Icons.workspace_premium_outlined,
                                   'Certificate Included'),
-                              const SizedBox(height: 7),
-                              _iconRow(Icons.near_me_outlined,
-                                  event.distanceDisplay,
-                                  color: AppColors.distanceGreen),
+                              if (event.distanceDisplay != null) ...[
+                                const SizedBox(height: 7),
+                                _iconRow(Icons.near_me_outlined,
+                                    event.distanceDisplay!,
+                                    color: AppColors.distanceGreen),
+                              ],
                             ],
                           ),
                         ),

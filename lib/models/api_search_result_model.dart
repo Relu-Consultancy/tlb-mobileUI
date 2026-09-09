@@ -18,6 +18,12 @@ class ApiSearchResult {
   final String? coverUrl;
   final String? partnerName;
 
+  /// Straight-line distance from the user in km — `distance_km`, present
+  /// only when the request carried lat/lng and this listing has
+  /// coordinates stored. Null otherwise.
+  final double? distanceKm;
+
+
   /// Ratings are documented on this endpoint but are absent from live rows
   /// today, so they are optional here — the card has to read fine without
   /// them rather than showing a hard "0.0".
@@ -25,6 +31,7 @@ class ApiSearchResult {
   final int? totalReviews;
 
   const ApiSearchResult({
+    this.distanceKm,
     required this.id,
     required this.listingType,
     required this.title,
@@ -72,6 +79,7 @@ class ApiSearchResult {
           : null,
       city: _text(json['city']),
       coverUrl: secureUrl(_text(json['cover_url'])),
+      distanceKm: (json['distance_km'] as num?)?.toDouble(),
       partnerName: _text(json['partner_name']),
       averageRating: (json['average_rating'] as num?)?.toDouble(),
       totalReviews: json['total_reviews'] as int?,

@@ -55,6 +55,11 @@ class EventsListingService {
     String? datePreset,
     String? priceType,
     String? search,
+    /// Sent together or not at all. With both present the API sorts by
+    /// distance and returns `distance_km` per row; listings with no
+    /// coordinates stored are excluded from those results.
+    double? lat,
+    double? lng,
     int page = 1,
     int pageSize = 10,
   }) async {
@@ -72,6 +77,12 @@ class EventsListingService {
         if (datePreset != null) 'date_preset': datePreset,
         if (priceType != null) 'price_type': priceType,
         if (search != null && search.isNotEmpty) 'search': search,
+        // Both or neither — the API answers 400 INVALID_COORDS to a
+        // lone or malformed one.
+        if (lat != null && lng != null) ...{
+          'lat': lat.toString(),
+          'lng': lng.toString(),
+        },
       };
 
       final uri = Uri.parse('$_base/api/v1/listings/events/')
@@ -167,6 +178,11 @@ class EventsListingService {
     bool? isTopRated,
     bool? isNewThisWeek,
     String? search,
+    /// Sent together or not at all. With both present the API sorts by
+    /// distance and returns `distance_km` per row; listings with no
+    /// coordinates stored are excluded from those results.
+    double? lat,
+    double? lng,
     int page = 1,
     int pageSize = 50,
   }) async {
@@ -185,6 +201,12 @@ class EventsListingService {
         if (isTopRated == true) 'is_top_rated': 'true',
         if (isNewThisWeek == true) 'is_new_this_week': 'true',
         if (search != null && search.isNotEmpty) 'search': search,
+        // Both or neither — the API answers 400 INVALID_COORDS to a
+        // lone or malformed one.
+        if (lat != null && lng != null) ...{
+          'lat': lat.toString(),
+          'lng': lng.toString(),
+        },
       };
 
       final uri = Uri.parse('$_base/api/v1/listings/venues/')

@@ -17,6 +17,7 @@ import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/subcategory_empty_state.dart';
 import '../widgets/all_categories_popup.dart';
 import '../widgets/category_skeleton_card.dart';
+import '../core/user_location.dart';
 
 class CategoryEventsScreen extends StatefulWidget {
   final List<Map<String, dynamic>> categories;
@@ -78,6 +79,8 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
     setState(() => _isLoadingMore = true);
     try {
       final next = await EventsListingService.fetchEvents(
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
         category: _categoryTitle,
         subcategory: _selectedFilterIndex <= 0 ||
                 _selectedFilterIndex >= _filters.length
@@ -109,6 +112,8 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
     });
     try {
       final page = await EventsListingService.fetchEvents(
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
         category: _categoryTitle,
         subcategory: subcategory,
         city: LocationState().selectedCity.value,
@@ -189,6 +194,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
 
   EventModel _toEventModel(ApiEvent event) {
     return EventModel(
+      distanceKm: event.distanceKm,
       id: event.id,
       title: event.title,
       venue: event.city,

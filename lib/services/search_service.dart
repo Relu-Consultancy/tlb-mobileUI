@@ -21,9 +21,15 @@ class SearchService {
   ///
   /// Pass [type] to narrow to one listing type; omit it to search all four.
   /// No auth — this is a public browse endpoint.
+  /// [lat]/[lng] are a relevance tie-breaker, not a re-sort: results stay
+  /// ordered by text relevance, and distance only decides between matches
+  /// that rank equally. A far-but-relevant result is never pushed below a
+  /// near-but-irrelevant one.
   static Future<ApiSearchPage> search(
     String query, {
     ListingKind? type,
+    double? lat,
+    double? lng,
     int page = 1,
     int pageSize = 20,
   }) async {
@@ -45,6 +51,12 @@ class SearchService {
           'page': page.toString(),
           'page_size': pageSize.toString(),
           if (type != null) 'listing_type': ApiSearchResult.wireName(type),
+          // Both or neither — the API answers 400 INVALID_COORDS to a lone
+          // or malformed one.
+          if (lat != null && lng != null) ...{
+            'lat': lat.toString(),
+            'lng': lng.toString(),
+          },
         },
       );
 

@@ -16,6 +16,16 @@ class EventModel {
   /// or `'venue'`. Drives which detail screen opens on tap. Defaults to event.
   final String listingType;
 
+  /// Straight-line distance from the user, in kilometres, as computed by the
+  /// API — `distance_km` on the listing endpoints.
+  ///
+  /// Null whenever the distance is genuinely unknown: the app had no
+  /// coordinates to send, the listing has none stored, or the response came
+  /// from an endpoint that does not compute it (the curated section feeds do
+  /// not). Cards hide the distance row in that case rather than showing a
+  /// number that means nothing — see [distanceDisplay].
+  final double? distanceKm;
+
   const EventModel({
     this.id = '',
     required this.title,
@@ -30,6 +40,7 @@ class EventModel {
     this.eventDate,
     this.eventTime,
     this.listingType = 'event',
+    this.distanceKm,
   });
 
   /// Stable identifier: uses explicit id if set, otherwise title+venue hash.
@@ -84,9 +95,15 @@ class EventModel {
     return '${days[_mockSeed % days.length]} · ${times[(_mockSeed ~/ 7) % times.length]}';
   }
 
-  /// e.g. "3.2 km away" — mock straight-line distance from the user.
-  String get distanceDisplay {
-    final km = ((_mockSeed % 95) + 5) / 10.0; // 0.5–9.9 km
+  /// e.g. "3.2 km away", or null when the distance is not known.
+  ///
+  /// This used to fabricate a plausible-looking figure from the listing's own
+  /// id — stable per listing, but unrelated to where the user actually was,
+  /// and identical for two users on opposite sides of the country. It now
+  /// reports [distanceKm] and nothing else: a real measurement or no claim.
+  String? get distanceDisplay {
+    final km = distanceKm;
+    if (km == null || km < 0) return null;
     return '${km.toStringAsFixed(1)} km away';
   }
 }

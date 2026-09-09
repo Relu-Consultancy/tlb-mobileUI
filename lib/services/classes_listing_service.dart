@@ -56,6 +56,62 @@ class ClassesListingService {
     String? format,
     String? mode,
     String? search,
+    /// Sent together or not at all. With both present the API sorts by
+    /// distance and returns `distance_km` per row; listings with no
+    /// coordinates stored are excluded from those results.
+    ///
+    /// Because of that exclusion this call retries without them when a
+    /// geo-sorted request comes back empty — see the note in the body.
+    double? lat,
+    double? lng,
+    int page = 1,
+    int pageSize = 10,
+  }) async {
+    final page1 = await _fetch(
+      category: category,
+      subcategory: subcategory,
+      city: city,
+      area: area,
+      format: format,
+      mode: mode,
+      search: search,
+      lat: lat,
+      lng: lng,
+      page: page,
+      pageSize: pageSize,
+    );
+    // A geo-sorted request excludes every class with no coordinates stored,
+    // and no partner has set any yet — so sending the user's location would
+    // empty the catalogue rather than order it. Ask again without the
+    // coordinates so the user sees the classes that exist; they simply come
+    // back unsorted, with distance_km null, and the cards omit the distance
+    // row. Drop this once class coordinates are populated.
+    if (page1.results.isEmpty && lat != null && lng != null) {
+      return _fetch(
+        category: category,
+        subcategory: subcategory,
+        city: city,
+        area: area,
+        format: format,
+        mode: mode,
+        search: search,
+        page: page,
+        pageSize: pageSize,
+      );
+    }
+    return page1;
+  }
+
+  static Future<ApiClassesPage> _fetch({
+    String? category,
+    String? subcategory,
+    String? city,
+    String? area,
+    String? format,
+    String? mode,
+    String? search,
+    double? lat,
+    double? lng,
     int page = 1,
     int pageSize = 10,
   }) async {
@@ -70,6 +126,12 @@ class ClassesListingService {
         if (format != null) 'format': format,
         if (mode != null) 'mode': mode,
         if (search != null && search.isNotEmpty) 'search': search,
+        // Both or neither — the API answers 400 INVALID_COORDS to a
+        // lone or malformed one.
+        if (lat != null && lng != null) ...{
+          'lat': lat.toString(),
+          'lng': lng.toString(),
+        },
       };
 
       final uri = Uri.parse('$_base/api/v1/listings/classes/')

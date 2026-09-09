@@ -17,6 +17,7 @@ import '../widgets/category_skeleton_card.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/subcategory_empty_state.dart';
 import 'venue_detail_screen.dart';
+import '../core/user_location.dart';
 
 class CategoryVenuesScreen extends StatefulWidget {
   final int initialCategoryIndex;
@@ -93,6 +94,8 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
     });
     try {
       final page = await EventsListingService.fetchVenues(
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
         categoryId: _matchedCategoryId(),
         city: LocationState().selectedCity.value,
         page: 1,
@@ -128,6 +131,8 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
     setState(() => _isLoadingMore = true);
     try {
       final next = await EventsListingService.fetchVenues(
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
         categoryId: _matchedCategoryId(),
         city: LocationState().selectedCity.value,
         page: _currentPage + 1,

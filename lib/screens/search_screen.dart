@@ -17,6 +17,7 @@ import 'event_detail_screen.dart';
 import 'class_detail_screen.dart';
 import 'program_detail_screen.dart';
 import 'venue_detail_screen.dart';
+import '../core/user_location.dart';
 
 class _SearchItem {
   final ListingKind type;
@@ -255,7 +256,14 @@ class _SearchScreenState extends State<SearchScreen> {
   /// those matches.
   Future<void> _runUnifiedSearch(String q, int generation) async {
     try {
-      final page = await SearchService.search(q, type: _selectedKind);
+      // Coordinates are a tie-breaker here, not a re-sort: relevance still
+      // decides the order, and distance only separates equal matches.
+      final page = await SearchService.search(
+        q,
+        type: _selectedKind,
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
+      );
       if (!mounted || generation != _searchGeneration) return;
       setState(() {
         _allResults = page.results.map(_itemFromSearchResult).toList();
@@ -275,6 +283,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return _SearchItem(
       type: r.listingType,
       eventModel: EventModel(
+        distanceKm: r.distanceKm,
         id: r.id,
         title: r.title,
         venue: subtitle,
@@ -308,6 +317,8 @@ class _SearchScreenState extends State<SearchScreen> {
     if (!_sourceMatchesFilter(ListingKind.event)) return const [];
     try {
       final page = await EventsListingService.fetchEvents(
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
         search: q.isEmpty ? null : q,
         // Events match on the exact category NAME — a slug or an id returns
         // zero rows rather than an error.
@@ -324,6 +335,7 @@ class _SearchScreenState extends State<SearchScreen> {
             _SearchItem(
               type: ListingKind.event,
               eventModel: EventModel(
+                distanceKm: e.distanceKm,
                 id: e.id,
                 title: e.title,
                 venue: e.city,
@@ -345,6 +357,8 @@ class _SearchScreenState extends State<SearchScreen> {
     if (!_sourceMatchesFilter(ListingKind.klass)) return const [];
     try {
       final page = await ClassesListingService.fetchClasses(
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
         search: q.isEmpty ? null : q,
         // Classes match on the exact name too — and on the FULL name, not the
         // truncated display label the category screens show.
@@ -361,6 +375,7 @@ class _SearchScreenState extends State<SearchScreen> {
             _SearchItem(
               type: ListingKind.klass,
               eventModel: EventModel(
+                distanceKm: c.distanceKm,
                 id: c.id,
                 title: c.title,
                 venue: c.category.name,
@@ -382,6 +397,8 @@ class _SearchScreenState extends State<SearchScreen> {
     if (!_sourceMatchesFilter(ListingKind.program)) return const [];
     try {
       final page = await ProgramsListingService.fetchPrograms(
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
         search: q.isEmpty ? null : q,
         // Programs are the mirror image of events/classes: the backend
         // ignores the name and honours only the integer id.
@@ -397,6 +414,7 @@ class _SearchScreenState extends State<SearchScreen> {
             _SearchItem(
               type: ListingKind.program,
               eventModel: EventModel(
+                distanceKm: p.distanceKm,
                 id: p.id,
                 title: p.title,
                 venue: p.city ?? p.category?.name ?? '',
@@ -418,6 +436,8 @@ class _SearchScreenState extends State<SearchScreen> {
     if (!_sourceMatchesFilter(ListingKind.venue)) return const [];
     try {
       final page = await EventsListingService.fetchVenues(
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
         search: q.isEmpty ? null : q,
         // Venues filter by integer id at both levels, like programs.
         categoryId: _selectedCategory?.ids[ListingKind.venue],

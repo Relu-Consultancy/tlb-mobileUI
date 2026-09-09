@@ -192,18 +192,24 @@ class TrendingEventCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      const Icon(Icons.near_me_outlined,
-                          size: 15, color: AppColors.distanceGreen),
-                      const SizedBox(width: 4),
-                      Text(
-                        event.distanceDisplay,
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 12),
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.distanceGreen,
+                      // Only when the API measured it; an unknown distance
+                      // shows nothing rather than a made-up number. The
+                      // spacer goes with it so the venue does not sit
+                      // against a gap.
+                      if (event.distanceDisplay != null) ...[
+                        const SizedBox(width: 8),
+                        const Icon(Icons.near_me_outlined,
+                            size: 15, color: AppColors.distanceGreen),
+                        const SizedBox(width: 4),
+                        Text(
+                          event.distanceDisplay!,
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 12),
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.distanceGreen,
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ],

@@ -20,6 +20,7 @@ import '../models/api_program_model.dart';
 import '../services/programs_listing_service.dart';
 import '../widgets/app_loader.dart';
 import 'program_detail_screen.dart';
+import '../core/user_location.dart';
 
 class CategoryProgramsScreen extends StatefulWidget {
   final int initialCategoryIndex;
@@ -127,6 +128,8 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
     setState(() => _isLoadingMore = true);
     try {
       final next = await ProgramsListingService.fetchPrograms(
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
         categoryId: _selectedCategoryId,
         subcategoryId: _selectedSubcategoryId,
         city: LocationState().selectedCity.value,
@@ -177,6 +180,8 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
     });
     try {
       final page = await ProgramsListingService.fetchPrograms(
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
         categoryId: _selectedCategoryId,
         subcategoryId: subcategoryId,
         city: LocationState().selectedCity.value,
@@ -246,6 +251,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
 
   EventModel _toEventModel(ApiProgram prg) {
     return EventModel(
+      distanceKm: prg.distanceKm,
       id: prg.id,
       title: prg.title,
       venue: prg.city ?? prg.category?.name ?? 'Multiple',

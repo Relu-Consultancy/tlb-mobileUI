@@ -15,6 +15,7 @@ import '../widgets/category_skeleton_card.dart';
 import '../widgets/error_retry_view.dart';
 import '../widgets/format_circle_label.dart';
 import '../widgets/subcategory_empty_state.dart';
+import '../core/user_location.dart';
 
 /// Listing grid shared with the category, format and pace screens — two up,
 /// 0.62 ratio — so every "browse a slice of the catalogue" screen presents its
@@ -83,6 +84,8 @@ class _FormatProgramsScreenState extends State<FormatProgramsScreen> {
       // Filtered server-side on program_format, whose enum is exactly the
       // seven discs of this row.
       final page = await ProgramsListingService.fetchPrograms(
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
         programFormat: _formatSlug,
         city: LocationState().selectedCity.value,
         pageSize: 50,
@@ -111,6 +114,7 @@ class _FormatProgramsScreenState extends State<FormatProgramsScreen> {
   }
 
   EventModel _toEventModel(ApiProgram p) => EventModel(
+        distanceKm: p.distanceKm,
         id: p.id,
         title: p.title,
         venue: p.city ?? p.category?.name ?? '',

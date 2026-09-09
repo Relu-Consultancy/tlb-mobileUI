@@ -18,6 +18,7 @@ import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/subcategory_empty_state.dart';
 import '../widgets/app_loader.dart';
 import 'class_detail_screen.dart';
+import '../core/user_location.dart';
 
 class CategoryClassesScreen extends StatefulWidget {
   final int initialCategoryIndex;
@@ -79,6 +80,8 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
     setState(() => _isLoadingMore = true);
     try {
       final next = await ClassesListingService.fetchClasses(
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
         category: _apiCategoryName,
         subcategory: _selectedFilterIndex <= 0 ||
                 _selectedFilterIndex >= _filters.length
@@ -110,6 +113,8 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
     });
     try {
       final page = await ClassesListingService.fetchClasses(
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
         category: _apiCategoryName,
         subcategory: subcategory,
         city: LocationState().selectedCity.value,
@@ -201,6 +206,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
 
   EventModel _toEventModel(ApiClass cls) {
     return EventModel(
+      distanceKm: cls.distanceKm,
       id: cls.id,
       title: cls.title,
       venue: cls.category.name, // Usually city, but classes might have organizer in another field. We'll use category or city for now.
