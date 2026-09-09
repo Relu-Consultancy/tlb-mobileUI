@@ -4,10 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tlb_mobile_ui/data/dummy_data.dart';
 import 'package:tlb_mobile_ui/widgets/category_icon_card.dart';
 
-/// The Events, Classes and Programs category artwork was replaced with the
-/// neon tile set — each icon is now a dark rounded square carrying its own
-/// glyph, cut from the supplied sheets. Because the tile is its own backdrop,
-/// no card draws a pastel disc behind it.
+/// All four category sets were replaced with the neon artwork, cut from the
+/// supplied sheets. Events, Classes and Programs are dark rounded tiles, each
+/// carrying its own backdrop, so no card draws a pastel disc behind them.
+/// Venues are circles on transparency, so nothing is washed over them.
 void main() {
   /// screen list name -> (categories, asset directory, expected count)
   final sets = <String, (List<Map<String, dynamic>>, String, int)>{
@@ -79,6 +79,58 @@ void main() {
       expect(CategoryCardMetrics.events.hasCircle, isFalse);
       expect(CategoryCardMetrics.classes.hasCircle, isFalse);
       expect(CategoryCardMetrics.programs.hasCircle, isFalse);
+    });
+  });
+
+  group('Venue category artwork', () {
+    const dir = 'assets/images/venue_categories';
+
+    test('TC_A_VEN_001 — six circles, each resolving to a real file', () {
+      final cats = DummyData.venuesSeeAllCategories;
+      expect(cats, hasLength(6));
+      for (final c in cats) {
+        // Venues key the asset as `image`, not `icon`.
+        final path = c['image'] as String;
+        expect(path, startsWith('$dir/'), reason: c['label'] as String);
+        expect(File(path).existsSync(), isTrue,
+            reason: '${c['label']} -> $path is missing');
+      }
+    });
+
+    test('TC_A_VEN_002 — no orphan asset ships', () {
+      final referenced = DummyData.venuesSeeAllCategories
+          .map((c) => (c['image'] as String).split('/').last)
+          .toSet();
+      final onDisk = Directory(dir)
+          .listSync()
+          .whereType<File>()
+          .map((f) => f.uri.pathSegments.last)
+          .where((n) => n.endsWith('.png'))
+          .toSet();
+      expect(referenced, onDisk);
+    });
+
+    test('TC_A_VEN_003 — each is a 480px square with alpha', () {
+      // Square with transparent corners: the artwork is a disc, and the row
+      // draws a golden glow behind it that must show around the edge.
+      for (final c in DummyData.venuesSeeAllCategories) {
+        final bytes = File(c['image'] as String).readAsBytesSync();
+        expect(bytes.sublist(1, 4), [0x50, 0x4E, 0x47]);
+        int be32(int o) => (bytes[o] << 24) | (bytes[o + 1] << 16) |
+            (bytes[o + 2] << 8) | bytes[o + 3];
+        expect(be32(16), be32(20), reason: '${c['label']} is not square');
+        expect(be32(16), 480, reason: '${c['label']} is not 480px');
+        expect(bytes[25], 6, reason: '${c['label']} has no alpha channel');
+      }
+    });
+
+    test('TC_A_VEN_004 — no wash is multiplied over the artwork', () {
+      // The old discs were pale and needed a gradient to deepen their fill.
+      // These carry their own colour; multiplying a tint in only dulls the
+      // neon and shifts its hue over the lower half.
+      final src = File('lib/screens/venues_screen.dart').readAsStringSync();
+      expect(src, isNot(contains('BlendMode.modulate')));
+      expect(src, isNot(contains('_deepenTint')));
     });
   });
 

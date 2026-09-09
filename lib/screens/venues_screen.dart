@@ -439,12 +439,6 @@ class _VenuesScreenState extends State<VenuesScreen> {
   }
 
   // ── What's the Plan? circles ──
-  /// Same hue, lower lightness — the bottom stop of each circle's wash.
-  static Color _deepenTint(Color c, double amount) {
-    final hsl = HSLColor.fromColor(c);
-    return hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0)).toColor();
-  }
-
   Widget _buildWhatsPlanRow(BuildContext context) {
     final cats = DummyData.venuesSeeAllCategories.take(6).toList();
     // Circles trimmed from 152 and spaced a clean 10px apart (they used to
@@ -460,8 +454,6 @@ class _VenuesScreenState extends State<VenuesScreen> {
         itemCount: cats.length,
         itemBuilder: (ctx, i) {
           final c = cats[i];
-          final Color tint =
-              (c['circleColor'] as Color?) ?? const Color(0xFFF3F4F6);
 
           return GestureDetector(
             onTap: () => Navigator.push(
@@ -498,34 +490,17 @@ class _VenuesScreenState extends State<VenuesScreen> {
                               ],
                             ),
                           ),
-                          // The artwork carries its own circle, so the gradient
-                          // is laid over it: that deepens the pale fill toward
-                          // the bottom while leaving the dark line-work alone
-                          // (a plain overlay would wash the strokes out too).
-                          //
-                          // `modulate`, not `multiply`: both give src x dst
-                          // where the two overlap, but `multiply` composites
-                          // source-over outside the artwork, so the gradient
-                          // flooded the PNG's transparent corners and the
-                          // circles read as squares. `modulate` multiplies
-                          // alpha as well, so it can't paint outside the disc.
-                          ShaderMask(
-                            blendMode: BlendMode.modulate,
-                            shaderCallback: (rect) => LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.white,
-                                _deepenTint(tint, 0.10),
-                              ],
-                            ).createShader(rect),
-                            child: Image.asset(
-                              c['image'] as String,
-                              fit: BoxFit.contain,
-                              filterQuality: FilterQuality.high,
-                              errorBuilder: (_, __, ___) => Icon(Icons.place,
-                                  size: 48, color: AppColors.primary),
-                            ),
+                          // No gradient over the artwork. The old pale discs
+                          // needed one to deepen their fill toward the bottom;
+                          // these carry their own colour, and multiplying a
+                          // tint into them only dulls the neon and shifts its
+                          // hue over the lower half.
+                          Image.asset(
+                            c['image'] as String,
+                            fit: BoxFit.contain,
+                            filterQuality: FilterQuality.high,
+                            errorBuilder: (_, __, ___) => Icon(Icons.place,
+                                size: 48, color: AppColors.primary),
                           ),
                         ],
                       ),
