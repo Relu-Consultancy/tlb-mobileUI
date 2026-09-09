@@ -7,6 +7,7 @@ import '../providers/booked_events_state.dart';
 import '../models/event_model.dart';
 import '../services/ticket_pdf_service.dart';
 import 'event_detail_screen.dart';
+import '../core/listing_image.dart';
 
 class BookingConfirmedScreen extends StatefulWidget {
   final EventModel event;
@@ -359,7 +360,7 @@ class _TicketCard extends StatelessWidget {
                                 size: 40, color: Colors.grey),
                           ),
                         )
-                      : Image.asset(
+                      : listingImageSource(
                           event.imagePath,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(

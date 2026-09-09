@@ -8,6 +8,7 @@ import '../models/event_model.dart';
 import '../widgets/app_loader.dart';
 import '../widgets/app_refresh_indicator.dart';
 import 'event_detail_screen.dart';
+import '../core/listing_image.dart';
 
 class SavedEventsScreen extends StatefulWidget {
   const SavedEventsScreen({super.key});
@@ -270,7 +271,7 @@ class _SavedRow extends StatelessWidget {
                           child: const Icon(Icons.event, color: Colors.grey),
                         ),
                       )
-                    : Image.asset(
+                    : listingImageSource(
                         event.imagePath,
                         width: 56,
                         height: 48,

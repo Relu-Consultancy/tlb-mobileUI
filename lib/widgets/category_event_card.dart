@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
 import '../core/listing_navigation.dart';
+import '../core/listing_image.dart';
 
 class CategoryEventCard extends StatelessWidget {
   final EventModel event;
@@ -39,23 +40,18 @@ class CategoryEventCard extends StatelessWidget {
               children: [
                 AspectRatio(
                   aspectRatio: 1.05,
-                  child: event.imagePath.startsWith('http')
-                      ? Image.network(
-                          event.imagePath,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: AppColors.primary.withOpacity(0.15),
-                            child: const Icon(Icons.event, size: 36, color: AppColors.textSecondary),
-                          ),
-                        )
-                      : Image.asset(
-                          event.imagePath,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: AppColors.primary.withOpacity(0.15),
-                            child: const Icon(Icons.event, size: 36, color: AppColors.textSecondary),
-                          ),
-                        ),
+                  // The hand-rolled http check this replaced loaded network
+                  // covers but left them on the API's http scheme, which
+                  // Android blocks — so they failed silently here too.
+                  child: listingImageSource(
+                    event.imagePath,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: AppColors.primary.withOpacity(0.15),
+                      child: const Icon(Icons.event,
+                          size: 36, color: AppColors.textSecondary),
+                    ),
+                  ),
                 ),
                 if ((event.tag ?? '').isNotEmpty)
                   Positioned(

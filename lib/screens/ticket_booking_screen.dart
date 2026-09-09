@@ -7,6 +7,7 @@ import '../models/api_event_model.dart';
 import '../models/event_model.dart';
 import 'date_time_selection_screen.dart';
 import 'review_pay_screen.dart';
+import '../core/listing_image.dart';
 
 /// Height of every field in the Attendee Details form, and the padding that
 /// produces it. The three fields are read as one column, so they share their
@@ -305,7 +306,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => _imageFallback(context),
                   )
-                : Image.asset(
+                : listingImageSource(
                     event.imagePath,
                     width: Responsive.w(context, 100, min: 80),
                     height: Responsive.h(context, 110, min: 90),

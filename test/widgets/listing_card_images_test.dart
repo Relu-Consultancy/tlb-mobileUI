@@ -101,4 +101,38 @@ void main() {
       });
     }
   });
+
+  group('No screen loads a listing cover as an asset either', () {
+    // The first sweep only covered lib/widgets, so the cards built inline in
+    // a screen — the four on the Programs tab, the eight on Venues — kept
+    // loading covers with Image.asset and showed placeholders for every API
+    // listing. Bundled artwork (category discs, format tiles) is untouched:
+    // those pass a map entry, not a listing's own imagePath.
+    final screens = Directory('lib/screens')
+        .listSync()
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.dart'));
+
+    test('TC_S_IMG_001 — no screen calls Image.asset on an imagePath', () {
+      final offenders = <String>[];
+      for (final f in screens) {
+        final src = f.readAsStringSync();
+        if (RegExp(r'Image\.asset\(\s*\w+\.imagePath').hasMatch(src)) {
+          offenders.add(f.uri.pathSegments.last);
+        }
+      }
+      expect(offenders, isEmpty,
+          reason: 'these screens cannot show an API cover: $offenders');
+    });
+
+    test('TC_S_IMG_002 — the card widget no longer hand-rolls the http check',
+        () {
+      // It loaded network covers but left them on the API's http scheme,
+      // which Android blocks, so they failed silently there too.
+      final src =
+          File('lib/widgets/category_event_card.dart').readAsStringSync();
+      expect(src, isNot(contains("imagePath.startsWith('http')")));
+      expect(src, contains('listingImageSource('));
+    });
+  });
 }

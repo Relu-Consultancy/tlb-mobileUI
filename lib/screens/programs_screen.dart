@@ -28,6 +28,7 @@ import 'venues_screen.dart';
 import 'category_programs_screen.dart';
 import 'format_programs_screen.dart';
 import '../providers/discovery_feed_state.dart';
+import '../core/listing_image.dart';
 
 class ProgramsScreen extends StatefulWidget {
   const ProgramsScreen({super.key});
@@ -610,7 +611,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
               // toward the right.
               ClipRRect(
                 borderRadius: BorderRadius.circular(14),
-                child: Image.asset(
+                child: listingImageSource(
                   event.imagePath,
                   width: Responsive.w(context, 176, min: 150),
                   height: double.infinity,
@@ -694,7 +695,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                   alignment: Alignment.topCenter,
                   children: [
                     Positioned.fill(
-                      child: Image.asset(
+                      child: listingImageSource(
                         event.imagePath,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
@@ -821,7 +822,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                 children: [
                   ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                    child: Image.asset(
+                    child: listingImageSource(
                       event.imagePath,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
@@ -930,7 +931,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                 children: [
                   ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                    child: Image.asset(
+                    child: listingImageSource(
                       event.imagePath,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(

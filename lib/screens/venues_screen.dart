@@ -22,6 +22,7 @@ import 'programs_screen.dart';
 import 'category_venues_screen.dart';
 import 'venue_detail_screen.dart';
 import '../providers/discovery_feed_state.dart';
+import '../core/listing_image.dart';
 
 class VenuesScreen extends StatefulWidget {
   const VenuesScreen({super.key});
@@ -552,7 +553,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                 children: [
                   ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-                    child: Image.asset(
+                    child: listingImageSource(
                       event.imagePath,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade200),
@@ -636,7 +637,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
           children: [
             ClipRRect(
               borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
-              child: Image.asset(event.imagePath, width: Responsive.w(context, 148, min: 130), height: double.infinity, fit: BoxFit.cover,
+              child: listingImageSource(event.imagePath, width: Responsive.w(context, 148, min: 130), height: double.infinity, fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(width: Responsive.w(context, 148, min: 130), color: Colors.grey.shade200)),
             ),
             Expanded(
@@ -685,7 +686,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  child: Image.asset(event.imagePath, height: Responsive.h(context, 230, min: 210), width: double.infinity, fit: BoxFit.cover,
+                  child: listingImageSource(event.imagePath, height: Responsive.h(context, 230, min: 210), width: double.infinity, fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 230, min: 210), color: Colors.grey.shade200)),
                 ),
                 if ((event.tag ?? '').isNotEmpty)
@@ -739,7 +740,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.asset(event.imagePath, fit: BoxFit.cover,
+              listingImageSource(event.imagePath, fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade300)),
               Positioned.fill(
                 child: DecoratedBox(
@@ -1042,7 +1043,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
             Expanded(
               child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-                child: Image.asset(event.imagePath, width: double.infinity, height: double.infinity, fit: BoxFit.cover,
+                child: listingImageSource(event.imagePath, width: double.infinity, height: double.infinity, fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade200)),
               ),
             ),
@@ -1091,7 +1092,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               child: Column(
                 children: [
-                  Image.asset(event.imagePath, height: Responsive.h(context, 186, min: 172), width: double.infinity, fit: BoxFit.cover,
+                  listingImageSource(event.imagePath, height: Responsive.h(context, 186, min: 172), width: double.infinity, fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(height: Responsive.h(context, 186, min: 172), color: Colors.grey.shade200)),
                   // Full-width distance band — flush against the image.
                   if ((event.tag ?? '').isNotEmpty)
@@ -1150,7 +1151,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                   Positioned.fill(
                     child: ClipRRect(
                       borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-                      child: Image.asset(event.imagePath, width: double.infinity, height: double.infinity, fit: BoxFit.cover,
+                      child: listingImageSource(event.imagePath, width: double.infinity, height: double.infinity, fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(color: Colors.grey.shade200)),
                     ),
                   ),
@@ -1297,7 +1298,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     Positioned.fill(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(14),
-                        child: Image.asset(
+                        child: listingImageSource(
                           event.imagePath,
                           width: double.infinity,
                           height: double.infinity,
