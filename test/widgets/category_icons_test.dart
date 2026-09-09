@@ -4,10 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tlb_mobile_ui/data/dummy_data.dart';
 import 'package:tlb_mobile_ui/widgets/category_icon_card.dart';
 
-/// The Events and Classes category artwork was replaced with the neon tile
-/// set — each icon is now a dark rounded square carrying its own glyph, cut
-/// from the supplied sheets. Because the tile is its own backdrop, no card
-/// draws a pastel disc behind it.
+/// The Events, Classes and Programs category artwork was replaced with the
+/// neon tile set — each icon is now a dark rounded square carrying its own
+/// glyph, cut from the supplied sheets. Because the tile is its own backdrop,
+/// no card draws a pastel disc behind it.
 void main() {
   /// screen list name -> (categories, asset directory, expected count)
   final sets = <String, (List<Map<String, dynamic>>, String, int)>{
@@ -15,6 +15,11 @@ void main() {
     'classes': (
       DummyData.classesSeeAllCategories,
       'assets/images/class_categories',
+      11
+    ),
+    'programs': (
+      DummyData.programsSeeAllCategories,
+      'assets/images/program_categories',
       11
     ),
   };
@@ -73,6 +78,7 @@ void main() {
       // the corners.
       expect(CategoryCardMetrics.events.hasCircle, isFalse);
       expect(CategoryCardMetrics.classes.hasCircle, isFalse);
+      expect(CategoryCardMetrics.programs.hasCircle, isFalse);
     });
   });
 
@@ -91,6 +97,13 @@ void main() {
       expect(
         DummyData.classesCategories.map((c) => c['icon']).toSet(),
         DummyData.classesSeeAllCategories.map((c) => c['icon']).toSet(),
+      );
+    });
+
+    test('TC_A_CAT_008 — Programs grid and See All share every icon', () {
+      expect(
+        DummyData.programsCategories.map((c) => c['icon']).toSet(),
+        DummyData.programsSeeAllCategories.map((c) => c['icon']).toSet(),
       );
     });
   });
