@@ -54,13 +54,16 @@ class CategoryCardMetrics {
   static const double _icon = 0.469;
   static const double _gap = 0.197;
 
-  /// Events: glyph on a pastel circle, label top-aligned.
+  /// Events: the artwork is its own tile — a dark rounded square with a neon
+  /// glyph — so no pastel circle sits behind it. The card keeps its pastel
+  /// tint, which comes from `circleColor` via the bottom gradient rather than
+  /// from a disc.
   static const events = CategoryCardMetrics(
     aspectRatio: _aspect,
     topPad: _top,
     iconBox: _icon,
     gap: _gap,
-    hasCircle: true,
+    hasCircle: false,
   );
 
   /// Classes: bare coloured glyph, label top-aligned.
@@ -225,8 +228,9 @@ class CategoryIconCard extends StatelessWidget {
                   width: circle,
                   height: circle,
                   child: DecoratedBox(
-                    // Classes glyphs are vivid and sit bare on the card; only
-                    // the Events mock puts them on a pastel disc.
+                    // Every set's artwork now carries its own backdrop — the
+                    // Events tiles are dark rounded squares, the Classes and
+                    // Programs glyphs sit bare — so no set draws a disc.
                     decoration: metrics.hasCircle
                         ? BoxDecoration(
                             color: circleColor,

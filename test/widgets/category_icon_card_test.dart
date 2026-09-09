@@ -223,8 +223,10 @@ void main() {
       expect(deco.color, isNull);
     });
 
-    testWidgets('TC_W_CLS_002 — events metrics still draw the circle',
+    testWidgets('TC_W_CLS_002 — events metrics draw no circle either',
         (tester) async {
+      // The Events artwork is now a dark rounded tile carrying its own
+      // backdrop, so a pastel disc behind it would show at the corners.
       final h = 110 / CategoryCardMetrics.events.aspectRatio;
       await pumpTLBApp(
         tester,
@@ -248,8 +250,8 @@ void main() {
         ).first,
       );
       final deco = iconBox.decoration as BoxDecoration;
-      expect(deco.shape, BoxShape.circle);
-      expect(deco.color, const Color(0xFFF4EFFD));
+      expect(deco.shape, BoxShape.rectangle);
+      expect(deco.color, isNull);
     });
 
     testWidgets('TC_W_CLS_003 — both classes lists carry icon + tint',
@@ -329,8 +331,9 @@ void main() {
         expect(m.iconBox, e.iconBox);
         expect(m.gap, e.gap);
       }
-      // The intended differences survive.
-      expect(CategoryCardMetrics.events.hasCircle, isTrue);
+      // The intended differences survive. No section draws a disc now —
+      // every set's artwork carries its own backdrop.
+      expect(CategoryCardMetrics.events.hasCircle, isFalse);
       expect(CategoryCardMetrics.classes.hasCircle, isFalse);
       expect(CategoryCardMetrics.programs.hasCircle, isFalse);
       expect(CategoryCardMetrics.programs.labelCentered, isTrue);
