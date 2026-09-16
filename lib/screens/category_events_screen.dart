@@ -195,6 +195,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
   EventModel _toEventModel(ApiEvent event) {
     return EventModel(
       distanceKm: event.distanceKm,
+      ageGroup: event.ageGroup?.displayRange,
       id: event.id,
       title: event.title,
       venue: event.city,

@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import '../core/listing_schedule.dart';
+import '../core/user_location.dart';
 import '../models/event_model.dart';
+import '../providers/auth_state.dart';
 import '../services/home_feed_service.dart';
 
 /// Holds the real homepage feed: each section key → ordered list of
@@ -37,7 +39,16 @@ class HomeFeedState {
     if (_loaded && !force) return;
     _loading = true;
     try {
-      final sections = await HomeFeedService.fetchSections();
+      final sections = await HomeFeedService.fetchSections(
+        // Pass the customer token so is_wishlisted is correct on every card.
+        // The endpoint never 401s on an invalid/expired token — it just falls
+        // back to is_wishlisted: false, so passing a stale token is safe.
+        token: AuthState.accessToken,
+        // Pass GPS coordinates when available so distance_km is populated
+        // on each card. Both or neither — the API rejects a lone coordinate.
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
+      );
       final map = <String, List<EventModel>>{};
       for (final s in sections) {
         // Hero first, then the rest. Home's rails have no banner slot, and

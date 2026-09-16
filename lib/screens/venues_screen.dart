@@ -1176,11 +1176,14 @@ class _VenuesScreenState extends State<VenuesScreen> {
                 children: [
                     Row(children: [
                       Expanded(child: Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                      if (event.description != null) ...[
+                      // The stated age range. This printed the listing's
+                      // short description under a people icon, so prose
+                      // read as an age band.
+                      if (event.ageGroupDisplay != null) ...[
                         const SizedBox(width: 8),
                         Icon(Icons.people_outline, size: 15, color: AppColors.textSecondary),
                         const SizedBox(width: 3),
-                        Text(event.description!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: AppColors.textSecondary)),
+                        Text(event.ageGroupDisplay!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), color: AppColors.textSecondary)),
                       ],
                     ]),
                     const SizedBox(height: 12),

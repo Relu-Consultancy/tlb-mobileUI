@@ -26,6 +26,15 @@ class EventModel {
   /// number that means nothing — see [distanceDisplay].
   final double? distanceKm;
 
+  /// The listing's age range exactly as the API states it, e.g.
+  /// `"5–16 years"`.
+  ///
+  /// Null whenever the source did not carry one. The events and programs
+  /// list endpoints do (`age_group`, `min_age`/`max_age`); classes,
+  /// venues, search results and the curated section feeds do not. Cards
+  /// hide the age row in that case — see [ageGroupDisplay].
+  final String? ageGroup;
+
   const EventModel({
     this.id = '',
     required this.title,
@@ -41,58 +50,37 @@ class EventModel {
     this.eventTime,
     this.listingType = 'event',
     this.distanceKm,
+    this.ageGroup,
   });
 
   /// Stable identifier: uses explicit id if set, otherwise title+venue hash.
   String get uniqueId => id.isNotEmpty ? id : '${title}_$venue';
 
-  // ───────────────────────── Mock display fields ─────────────────────────
-  // Temporary, display-only values for the section cards (Age Group,
-  // Date & Time, Distance). They are derived deterministically from the
-  // listing's identity so each card shows a stable, sensible value without
-  // touching the mock catalog. Replace these getters with real API fields
-  // (age range, schedule, GPS-computed distance) when the backend is wired.
+  // ────────────────────────── Card meta fields ─────────────────────────
+  // Age, schedule and distance as the API reports them.
+  //
+  // These were once invented from the listing's own id: stable per card,
+  // but unrelated to the listing itself, so a card could claim
+  // "Ages 5–10" while its own detail screen said "5–16 years". Each
+  // now reports what the API gave or nothing at all, and the cards drop
+  // the row rather than print a value that is not true.
 
-  /// Non-negative deterministic seed for picking mock values.
-  int get _mockSeed => uniqueId.hashCode & 0x7fffffff;
-
-  /// e.g. "Ages 5–10". Uses a real [ageGroup]-style value if ever present.
-  String get ageGroupDisplay {
-    const groups = [
-      'Ages 3–6',
-      'Ages 5–10',
-      'Ages 8–14',
-      'Ages 10+',
-      'All ages',
-      'Teens & up',
-    ];
-    return groups[_mockSeed % groups.length];
+  /// e.g. "5–16 years", or null when the API stated no range.
+  String? get ageGroupDisplay {
+    final a = ageGroup?.trim();
+    return (a == null || a.isEmpty) ? null : a;
   }
 
-  /// e.g. "Sat & Sun · 4–6 PM". Prefers the real [eventDate]/[eventTime]
-  /// when the catalog provides them.
-  String get dateTimeDisplay {
+  /// e.g. "Sat, 5 Sep 2026 · 10:30 AM", or null when the API gave no
+  /// schedule. A class or a venue on the section feeds carries no
+  /// `start_datetime` at all, so its card simply omits the row.
+  String? get dateTimeDisplay {
     final d = (eventDate ?? '').trim();
     final t = (eventTime ?? '').trim();
     if (d.isNotEmpty && t.isNotEmpty) return '$d · $t';
     if (d.isNotEmpty) return d;
-    const days = [
-      'Mon–Fri',
-      'Sat & Sun',
-      'Tue & Thu',
-      'Daily',
-      'Weekends',
-      'Mon · Wed · Fri',
-    ];
-    const times = [
-      '9–11 AM',
-      '4–6 PM',
-      '10 AM–12 PM',
-      '5–7 PM',
-      '3–5 PM',
-      '11 AM–1 PM',
-    ];
-    return '${days[_mockSeed % days.length]} · ${times[(_mockSeed ~/ 7) % times.length]}';
+    if (t.isNotEmpty) return t;
+    return null;
   }
 
   /// e.g. "3.2 km away", or null when the distance is not known.

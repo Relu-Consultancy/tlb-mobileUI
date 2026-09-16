@@ -413,8 +413,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                               _buildThingsToKnowRow(Icons.check_circle_outline, 'Available', '${_detail!.availableSeats} spots'),
                             ],
                           ] else ...[
-                            _buildThingsToKnowRow(Icons.group_outlined, 'Age Group', '3 - 10 yrs'),
-                            const Divider(height: 16, color: Color(0xFFEEEEEE)),
+                            // No invented age here: the range comes from
+                            // the loaded detail above, or not at all.
                             _buildThingsToKnowRow(Icons.translate, 'Language', 'English'),
                             const Divider(height: 16, color: Color(0xFFEEEEEE)),
                             _buildThingsToKnowRow(Icons.check_circle_outline, 'Available', '20 Spots available'),

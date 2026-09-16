@@ -510,8 +510,9 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                               _buildThingsToKnowRow(Icons.list_alt_outlined, 'Modules', '${_detail!.moduleCount} Modules'),
                             ],
                           ] else ...[
-                            _buildThingsToKnowRow(Icons.group_outlined, 'Age Group', '6 - 16 yrs'),
-                            const Divider(height: 16, color: Color(0xFFEEEEEE)),
+                            // As on the other detail screens: the range
+                            // comes from the loaded detail above, or not
+                            // at all.
                             _buildThingsToKnowRow(Icons.translate, 'Language', 'English'),
                             const Divider(height: 16, color: Color(0xFFEEEEEE)),
                             _buildThingsToKnowRow(Icons.event_seat_outlined, 'Slots Available', '12 Slots available'),

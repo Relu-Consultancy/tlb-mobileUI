@@ -383,11 +383,11 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Column(
                         children: [
+                          // The stated range, or no row. The old else
+                          // branch printed '6 - 16 yrs' for every class
+                          // whose API record carries no age at all.
                           if (_detail?.ageGroup != null && _detail!.ageGroup!.displayRange.isNotEmpty) ...[
                             _buildInfoRow(Icons.group_outlined, 'Age Group', _detail!.ageGroup!.displayRange),
-                            const Divider(height: 16, color: Color(0xFFEEEEEE)),
-                          ] else ...[
-                            _buildInfoRow(Icons.group_outlined, 'Age Group', '6 - 16 yrs'),
                             const Divider(height: 16, color: Color(0xFFEEEEEE)),
                           ],
                           if (_detail != null && _detail!.format.isNotEmpty) ...[

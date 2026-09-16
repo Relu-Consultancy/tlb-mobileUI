@@ -113,6 +113,7 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
 
     return EventModel(
       distanceKm: e.distanceKm,
+      ageGroup: e.ageGroup?.displayRange,
       id: e.id,
       title: e.title,
       venue: e.city,

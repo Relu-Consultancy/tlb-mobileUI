@@ -115,6 +115,7 @@ class _FormatProgramsScreenState extends State<FormatProgramsScreen> {
 
   EventModel _toEventModel(ApiProgram p) => EventModel(
         distanceKm: p.distanceKm,
+        ageGroup: p.displayAgeRange,
         id: p.id,
         title: p.title,
         venue: p.city ?? p.category?.name ?? '',

@@ -252,6 +252,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
   EventModel _toEventModel(ApiProgram prg) {
     return EventModel(
       distanceKm: prg.distanceKm,
+      ageGroup: prg.displayAgeRange,
       id: prg.id,
       title: prg.title,
       venue: prg.city ?? prg.category?.name ?? 'Multiple',

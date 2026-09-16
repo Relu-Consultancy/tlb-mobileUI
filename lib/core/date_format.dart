@@ -69,4 +69,18 @@ class DateFormat {
       short ? _weekdaysShort[d.weekday - 1] : _weekdaysFull[d.weekday - 1];
 
   static String monthOf(DateTime d) => _monthsShort[d.month - 1];
+
+  /// Splits a [card] label into the two lines a corner date badge draws:
+  /// `"Sat, 22 Mar 2026"` -> `("Sat", "22 Mar 2026")`.
+  ///
+  /// Null when there is no date to draw. The badges used to fall back to
+  /// a literal - one card always read "Sat / 12 Aug" whatever it was
+  /// showing - so a caller now hides the badge instead.
+  static (String, String)? badgeParts(String? cardLabel) {
+    final raw = (cardLabel ?? '').trim();
+    if (raw.isEmpty) return null;
+    final i = raw.indexOf(',');
+    if (i == -1) return (raw, '');
+    return (raw.substring(0, i).trim(), raw.substring(i + 1).trim());
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/date_format.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
@@ -17,11 +18,10 @@ class TrendingEventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // eventDate is "Day, DD Mon" → split into weekday + date for the badge.
-    final dateParts = (event.eventDate ?? 'Sat, 21 Mar').split(',');
-    final String dayLabel = dateParts.first.trim();
-    final String dateLabel =
-        dateParts.length > 1 ? dateParts[1].trim() : '21 Mar';
+    // The badge draws the listing's own date, split into weekday + date.
+    // Null when the API stated none: the badge is then left off rather
+    // than showing the literal 'Sat, 21 Mar' it used to fall back to.
+    final badge = DateFormat.badgeParts(event.eventDate);
 
     void openDetail() => Navigator.push(
           context,
@@ -65,7 +65,8 @@ class TrendingEventCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Date badge (top-left)
+                  // Date badge (top-left), only when there is a date.
+                  if (badge != null)
                   Positioned(
                     top: 12,
                     left: 12,
@@ -85,7 +86,7 @@ class TrendingEventCard extends StatelessWidget {
                       child: Column(
                         children: [
                           Text(
-                            dayLabel,
+                            badge.$1,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 13),
                               fontWeight: FontWeight.w500,
@@ -94,7 +95,7 @@ class TrendingEventCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            dateLabel,
+                            badge.$2,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 12),
                               fontWeight: FontWeight.w500,
@@ -160,16 +161,22 @@ class TrendingEventCard extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      const Icon(Icons.people_outline,
-                          size: 15, color: AppColors.textPrimary),
-                      const SizedBox(width: 4),
-                      Text(
-                        event.description ?? '4-12 Yrs',
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 12),
-                          color: AppColors.textSecondary,
+                      // The age the API stated, and only that. This read
+                      // the listing's short description and fell back to a
+                      // literal '4-12 Yrs', so the card contradicted its
+                      // own detail screen.
+                      if (event.ageGroupDisplay != null) ...[
+                        const Icon(Icons.people_outline,
+                            size: 15, color: AppColors.textPrimary),
+                        const SizedBox(width: 4),
+                        Text(
+                          event.ageGroupDisplay!,
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 12),
+                            color: AppColors.textSecondary,
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 10),

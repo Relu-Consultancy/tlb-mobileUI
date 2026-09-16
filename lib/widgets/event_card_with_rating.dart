@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/date_format.dart';
 import '../core/responsive.dart';
 import '../models/event_model.dart';
 import 'listing_meta_rows.dart';
@@ -30,6 +31,7 @@ class EventCardWithRating extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final badge = DateFormat.badgeParts(event.eventDate);
     return GestureDetector(
       onTap: () {
         if (onTap != null) {
@@ -75,7 +77,10 @@ class EventCardWithRating extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Date badge (top-left)
+                  // Date badge (top-left), only when there is a date.
+                  // This drew a hardcoded "Sat / 12 Aug" on every card,
+                  // whatever listing it was showing.
+                  if (badge != null)
                   Positioned(
                     top: 10,
                     left: 10,
@@ -99,7 +104,7 @@ class EventCardWithRating extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Sat',
+                            badge.$1,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 11),
                               fontWeight: FontWeight.w500,
@@ -107,7 +112,7 @@ class EventCardWithRating extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '12 Aug',
+                            badge.$2,
                             style: GoogleFonts.poppins(
                               fontSize: Responsive.sp(context, 10),
                               fontWeight: FontWeight.w500,

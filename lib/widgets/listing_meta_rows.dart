@@ -5,8 +5,9 @@ import '../core/responsive.dart';
 import '../models/event_model.dart';
 
 /// Compact meta block shown on section cards: Age Group, Date & Time, Distance
-/// and (optionally) Location. Values come from [EventModel]'s mock display
-/// getters for now (swap to real API fields later).
+/// and (optionally) Location. Values come from [EventModel] as the API
+/// reported them; a row whose value the API never stated is omitted, not
+/// filled with a placeholder.
 ///
 /// Two layouts:
 ///  - single column (default) — a stack of rows, used by compact cards.
@@ -64,10 +65,13 @@ class ListingMetaRows extends StatelessWidget {
         // When [locationOnLeft], Location leads the left column (under title).
         if (locationOnLeft && showLocation)
           _row(context, Icons.location_on_outlined, event.venue),
-        if (showAge)
-          _row(context, Icons.child_care_outlined, event.ageGroupDisplay),
-        if (showDateTime)
-          _row(context, Icons.calendar_today_outlined, event.dateTimeDisplay),
+        // Only what the API stated; an unknown age or schedule shows
+        // nothing rather than a made-up value.
+        if (showAge && event.ageGroupDisplay != null)
+          _row(context, Icons.child_care_outlined, event.ageGroupDisplay!),
+        if (showDateTime && event.dateTimeDisplay != null)
+          _row(context, Icons.calendar_today_outlined,
+              event.dateTimeDisplay!),
       ];
       final right = <Widget>[
         // Default: Location on the right. With [locationOnLeft], Distance lifts
@@ -107,10 +111,11 @@ class ListingMetaRows extends StatelessWidget {
 
     return _column(<Widget>[
       if (showLocation) _row(context, Icons.location_on_outlined, event.venue),
-      if (showAge)
-        _row(context, Icons.child_care_outlined, event.ageGroupDisplay),
-      if (showDateTime)
-        _row(context, Icons.calendar_today_outlined, event.dateTimeDisplay),
+      // As above: nothing stated, no row.
+      if (showAge && event.ageGroupDisplay != null)
+        _row(context, Icons.child_care_outlined, event.ageGroupDisplay!),
+      if (showDateTime && event.dateTimeDisplay != null)
+        _row(context, Icons.calendar_today_outlined, event.dateTimeDisplay!),
       // As above: no measurement, no row.
       if (showDistance && event.distanceDisplay != null)
         _row(context, Icons.near_me_outlined, event.distanceDisplay!,

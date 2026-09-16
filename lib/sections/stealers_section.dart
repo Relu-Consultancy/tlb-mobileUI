@@ -78,8 +78,13 @@ class StealersSection extends StatelessWidget {
                               ),
                             ),
                           ),
-                          // Top yellow countdown pill ("End in ...")
-                          if (event.description != null)
+                          // Top yellow countdown pill ("End in ...").
+                          // Only for a real countdown: this drew
+                          // whatever was in `description`, which on an
+                          // API listing is its short description, so
+                          // prose landed inside a deal timer.
+                          if (_CountdownText.looksLikeCountdown(
+                              event.description))
                             Positioned(
                               top: 0,
                               left: 0,
@@ -204,6 +209,14 @@ class _CountdownText extends StatefulWidget {
 
   const _CountdownText({required this.text, required this.style});
 
+  /// A countdown is `HH:MM:SS`, optionally behind a prefix such as
+  /// "End in ". Anything else is not a deal timer and must not be
+  /// dressed as one.
+  static final RegExp _clock = RegExp(r'(\d{1,2}):(\d{2}):(\d{2})');
+
+  static bool looksLikeCountdown(String? text) =>
+      text != null && _clock.hasMatch(text);
+
   @override
   State<_CountdownText> createState() => _CountdownTextState();
 }
@@ -231,7 +244,7 @@ class _CountdownTextState extends State<_CountdownText> {
   }
 
   void _parse() {
-    final m = RegExp(r'(\d{1,2}):(\d{2}):(\d{2})').firstMatch(widget.text);
+    final m = _CountdownText._clock.firstMatch(widget.text);
     if (m == null) return;
     _remaining = Duration(
       hours: int.parse(m.group(1)!),

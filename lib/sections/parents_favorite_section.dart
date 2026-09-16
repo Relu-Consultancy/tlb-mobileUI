@@ -139,17 +139,23 @@ class ParentsFavoriteSection extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              const Icon(Icons.people_outline,
-                                  size: 14, color: AppColors.textSecondary),
-                              const SizedBox(width: 4),
-                              Text(
-                                event.description ?? '4-12 Yrs',
-                                style: GoogleFonts.poppins(
-                                  fontSize: Responsive.sp(context, 13),
-                                  color: AppColors.textSecondary,
+                              // As on the trending card: the stated age or
+                              // nothing. The old line showed the short
+                              // description, falling back to a literal.
+                              if (event.ageGroupDisplay != null) ...[
+                                const SizedBox(width: 8),
+                                const Icon(Icons.people_outline,
+                                    size: 14,
+                                    color: AppColors.textSecondary),
+                                const SizedBox(width: 4),
+                                Text(
+                                  event.ageGroupDisplay!,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 13),
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
-                              ),
+                              ],
                             ],
                           ),
                           const SizedBox(height: 8),

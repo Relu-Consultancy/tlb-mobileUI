@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 
 import '../core/listing_schedule.dart';
+import '../core/user_location.dart';
 import '../models/event_model.dart';
+import '../providers/auth_state.dart';
 import '../services/home_feed_service.dart';
 
 /// One discovery screen's curated feed: section key → ordered [EventModel]
@@ -68,7 +70,14 @@ class DiscoveryFeedState {
     if (_loaded && !force) return;
     _loading = true;
     try {
-      final sections = await HomeFeedService.fetchScreenSections(screen);
+      final sections = await HomeFeedService.fetchScreenSections(
+        screen,
+        // Pass the customer token so is_wishlisted is live on discovery cards.
+        token: AuthState.accessToken,
+        // Both or neither — the API rejects a lone coordinate.
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
+      );
       final map = <String, List<EventModel>>{};
       final heroes = <String, EventModel>{};
       for (final s in sections) {

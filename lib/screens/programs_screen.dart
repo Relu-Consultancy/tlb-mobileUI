@@ -354,8 +354,6 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                               child: _buildSideBySideCard(
                                 context,
                                 event: e,
-                                scheduleText: 'Sat & Sun, 10:00 AM',
-                                ageText: '8-12 Yrs',
                                 locationText: 'Online',
                               ),
                             );
@@ -413,8 +411,6 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                               child: _buildSideBySideCard(
                                 context,
                                 event: e,
-                                scheduleText: 'Start with basics of programming',
-                                ageText: '8+ Yrs',
                                 locationText: e.venue,
                               ),
                             );
@@ -574,13 +570,21 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
   }
 
   // ── Side-by-side card (Weekends + Zero to Hero) ──
+  /// A rail card with its meta stacked beside the artwork.
+  ///
+  /// [scheduleText] and [ageText] default to the listing's own values;
+  /// pass one only to override it. They used to be required, and every
+  /// call site handed over a literal, so a whole rail of programs shared
+  /// one invented age band and one invented schedule.
   Widget _buildSideBySideCard(
     BuildContext context, {
     required EventModel event,
-    required String scheduleText,
-    required String ageText,
     required String locationText,
+    String? scheduleText,
+    String? ageText,
   }) {
+    final schedule = scheduleText ?? event.dateTimeDisplay;
+    final age = ageText ?? event.ageGroupDisplay;
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -643,8 +647,9 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    _iconRow(Icons.calendar_month_outlined, scheduleText),
-                    _iconRow(Icons.people_outline, ageText),
+                    if (schedule != null)
+                      _iconRow(Icons.calendar_month_outlined, schedule),
+                    if (age != null) _iconRow(Icons.people_outline, age),
                     _iconRow(Icons.location_on_outlined, locationText),
                     // Only when the API measured it; an unknown distance
                     // shows nothing rather than a made-up number.
@@ -756,11 +761,17 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _iconRow(Icons.child_care_outlined,
-                                event.ageGroupDisplay),
-                            const SizedBox(height: 7),
-                            _iconRow(Icons.calendar_today_outlined,
-                                event.dateTimeDisplay),
+                            // Only what the API stated; an unknown age or
+                            // schedule shows nothing rather than a
+                            // made-up value.
+                            if (event.ageGroupDisplay != null)
+                              _iconRow(Icons.child_care_outlined,
+                                  event.ageGroupDisplay!),
+                            if (event.dateTimeDisplay != null) ...[
+                              const SizedBox(height: 7),
+                              _iconRow(Icons.calendar_today_outlined,
+                                  event.dateTimeDisplay!),
+                            ],
                           ],
                         ),
                       ),
@@ -865,11 +876,15 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _iconRow(Icons.child_care_outlined,
-                                  event.ageGroupDisplay),
-                              const SizedBox(height: 7),
-                              _iconRow(Icons.calendar_today_outlined,
-                                  event.dateTimeDisplay),
+                              // As above: nothing stated, no row.
+                              if (event.ageGroupDisplay != null)
+                                _iconRow(Icons.child_care_outlined,
+                                    event.ageGroupDisplay!),
+                              if (event.dateTimeDisplay != null) ...[
+                                const SizedBox(height: 7),
+                                _iconRow(Icons.calendar_today_outlined,
+                                    event.dateTimeDisplay!),
+                              ],
                             ],
                           ),
                         ),
@@ -1014,9 +1029,11 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                             children: [
                               _iconRow(Icons.location_on_outlined,
                                   event.venue.split('\n').first),
-                              const SizedBox(height: 7),
-                              _iconRow(Icons.child_care_outlined,
-                                  event.ageGroupDisplay),
+                              if (event.ageGroupDisplay != null) ...[
+                                const SizedBox(height: 7),
+                                _iconRow(Icons.child_care_outlined,
+                                    event.ageGroupDisplay!),
+                              ],
                             ],
                           ),
                         ),
@@ -1038,10 +1055,13 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 7),
                     // Date runs full width — at 155pt it is the one value that
                     // will not fit a ~130pt half-column without being cut.
-                    _iconRow(Icons.calendar_today_outlined, event.dateTimeDisplay),
+                    if (event.dateTimeDisplay != null) ...[
+                      const SizedBox(height: 7),
+                      _iconRow(Icons.calendar_today_outlined,
+                          event.dateTimeDisplay!),
+                    ],
                   ],
                 ),
               ),
