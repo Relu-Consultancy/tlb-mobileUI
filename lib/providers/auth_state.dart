@@ -5,6 +5,7 @@ import '../services/token_storage.dart';
 import '../services/auth_service.dart';
 import '../core/name_case.dart';
 import 'follow_state.dart';
+import 'location_state.dart';
 
 class AuthState {
   static final ValueNotifier<bool> isLoggedIn = ValueNotifier<bool>(false);
@@ -54,6 +55,9 @@ class AuthState {
     isLoggedIn.value = true;
     final uid = user?['id'] as String?;
     if (uid != null) FollowState.loadForUser(uid).catchError((_) {});
+    // Read back the location this account saved on an earlier launch, so
+    // distances show without asking the device again.
+    if (access != null) LocationState().restoreSaved().catchError((_) {});
     if (access != null && refresh != null) {
       TokenStorage.saveTokens(
               access, refresh, user != null ? jsonEncode(user) : '{}')
@@ -159,6 +163,7 @@ class AuthState {
     avatarUrl.value = null;
     isLoggedIn.value = false;
     FollowState.clear();
+    LocationState().clearCoordinates();
     TokenStorage.clearTokens().catchError((_) {});
     // Drop the locally-picked profile picture too — different user might
     // log in next, and the previous user's photo shouldn't linger.

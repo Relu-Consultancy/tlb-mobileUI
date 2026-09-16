@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:location/location.dart' as loc;
+import '../core/city_resolver.dart';
 import '../providers/location_state.dart';
 import '../core/app_colors.dart';
 
@@ -36,35 +37,6 @@ class _LocationScreenState extends State<LocationScreen>
     {'name': 'Bengaluru', 'icon': Icons.account_balance, 'image': 'location_screen_resources/bangalore.png'},
   ];
 
-  final List<String> _allCities = [
-    'Agra',
-    'Ahmedabad',
-    'Ajmer',
-    'Aligarh',
-    'Amritsar',
-    'Bengaluru',
-    'Bhopal',
-    'Chandigarh',
-    'Chennai',
-    'Coimbatore',
-    'Delhi NCR',
-    'Goa',
-    'Guwahati',
-    'Hyderabad',
-    'Indore',
-    'Jaipur',
-    'Kanpur',
-    'Kochi',
-    'Kolkata',
-    'Lucknow',
-    'Mumbai',
-    'Nagpur',
-    'Patna',
-    'Pune',
-    'Surat',
-    'Vadodara',
-    'Visakhapatnam',
-  ];
 
   @override
   void initState() {
@@ -194,7 +166,7 @@ class _LocationScreenState extends State<LocationScreen>
       if (placemarks.isNotEmpty && mounted) {
         final p = placemarks.first;
         final rawCity = p.locality ?? p.subAdministrativeArea ?? p.administrativeArea ?? '';
-        final matched = _matchToKnownCity(rawCity);
+        final matched = CityResolver.matchKnown(rawCity);
         _selectCity(
           matched ?? rawCity,
           latitude: position.latitude,
@@ -212,37 +184,6 @@ class _LocationScreenState extends State<LocationScreen>
     } finally {
       if (mounted) setState(() => _isLoadingLocation = false);
     }
-  }
-
-  /// Tries to map a raw geocoded city name to a known city in the app's list.
-  String? _matchToKnownCity(String raw) {
-    final lower = raw.toLowerCase().trim();
-    if (lower.isEmpty) return null;
-
-    // Delhi region special case
-    if (['delhi', 'new delhi', 'gurugram', 'gurgaon', 'noida', 'faridabad', 'ghaziabad']
-        .any((k) => lower.contains(k))) {
-      return 'Delhi NCR';
-    }
-
-    // Exact match (case-insensitive)
-    for (final city in _allCities) {
-      if (city.toLowerCase() == lower) return city;
-    }
-
-    // Whole-word match — handles geocoded names that carry a suffix
-    // ("Bengaluru Urban", "Mumbai Suburban") while AVOIDING false positives
-    // from a bare substring search: "Prayagraj" used to resolve to "Agra"
-    // because the letters "agra" sit inside "pray·AGRA·j". Requiring a word
-    // boundary on both sides means a known city must appear as its own word.
-    for (final city in _allCities) {
-      final c = city.toLowerCase();
-      if (RegExp('\\b${RegExp.escape(c)}\\b').hasMatch(lower)) {
-        return city;
-      }
-    }
-
-    return null;
   }
 
   /// Bold, visually-distinct section title with a gold accent bar and a
@@ -444,13 +385,13 @@ class _LocationScreenState extends State<LocationScreen>
             ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: _allCities.length,
+              itemCount: CityResolver.allCities.length,
               separatorBuilder: (context, index) => Divider(
                 color: Colors.grey.shade200,
                 height: 1,
               ),
               itemBuilder: (context, index) {
-                final city = _allCities[index];
+                final city = CityResolver.allCities[index];
                 return InkWell(
                   onTap: () => _selectCity(city),
                   child: Padding(
