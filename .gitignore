@@ -61,3 +61,5 @@ frontend_api_integration_estimates.csv
 
 # Android Gradle build output (never shipped)
 /android/build/
+# Widget Preview related
+.widget_preview/
