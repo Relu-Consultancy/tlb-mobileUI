@@ -18,6 +18,7 @@ import 'class_detail_screen.dart';
 import 'program_detail_screen.dart';
 import 'venue_detail_screen.dart';
 import '../core/user_location.dart';
+import '../core/listing_source.dart';
 
 class _SearchItem {
   final ListingKind type;
@@ -223,7 +224,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     final items = <_SearchItem>[
       for (final l in lists)
-        if (l != null) ...l,
+        ...?l,
     ];
 
     // Relevance guard: the backend `search` param drives relevance, but if it
@@ -477,6 +478,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.search);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(

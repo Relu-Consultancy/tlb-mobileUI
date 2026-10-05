@@ -3,6 +3,8 @@ import '../widgets/app_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/app_snackbar.dart';
+import '../core/listing_filters.dart';
 import '../core/listing_schedule.dart';
 import '../widgets/error_retry_view.dart';
 import '../core/responsive.dart';
@@ -18,6 +20,7 @@ import '../widgets/subcategory_empty_state.dart';
 import '../widgets/all_categories_popup.dart';
 import '../widgets/category_skeleton_card.dart';
 import '../core/user_location.dart';
+import '../core/listing_source.dart';
 
 class CategoryEventsScreen extends StatefulWidget {
   final List<Map<String, dynamic>> categories;
@@ -36,6 +39,10 @@ class CategoryEventsScreen extends StatefulWidget {
 class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
   late int _selectedCategoryIndex;
   int _selectedFilterIndex = 0;
+
+  /// The Sort / Filters sheet's selections (applied to the loaded cards).
+  ListingSort? _sort;
+  Set<String> _pickedFilters = {};
   final ScrollController _chipScrollController = ScrollController();
   final ScrollController _listScrollController = ScrollController();
   late List<GlobalKey> _chipKeys;
@@ -86,7 +93,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                 _selectedFilterIndex >= _filters.length
             ? null
             : _filters[_selectedFilterIndex],
-        city: LocationState().selectedCity.value,
+        city: LocationState().cityOrNull,
         page: _currentPage + 1,
         pageSize: _pageSize,
       );
@@ -116,7 +123,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
         lng: UserLocation.lng,
         category: _categoryTitle,
         subcategory: subcategory,
-        city: LocationState().selectedCity.value,
+        city: LocationState().cityOrNull,
         page: 1,
         pageSize: _pageSize,
       );
@@ -185,9 +192,40 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
   // decides whether to hide, grey out, or badge them. Hidden here: a
   // finished event has nothing left to book, so surfacing it as if it were
   // current just leads to a dead end when tapped.
-  List<ApiEvent> get _filteredEvents => _apiEvents
-      .where((e) => !ListingSchedule.hasEnded(e.endDatetime))
-      .toList();
+  List<ApiEvent> get _filteredEvents {
+    final live = _apiEvents
+        .where((e) => !ListingSchedule.hasEnded(e.endDatetime))
+        .toList();
+    return ListingFilters.sort(
+      ListingFilters.apply(live, _pickedFilters, _filterOptions),
+      _sort,
+      price: _price,
+      distance: (e) => e.distanceKm,
+    );
+  }
+
+  /// A free event sorts as 0 so "Low to High" leads with it.
+  static double? _price(ApiEvent e) =>
+      e.priceType == 'free' ? 0 : ListingFilters.parsePrice(e.priceFrom);
+
+  static final List<ListingFilter<ApiEvent>> _filterOptions = [
+    for (final f in const [
+      'Workshop',
+      'Camp',
+      'Masterclass',
+      'Competition',
+      'Showcase',
+      'Demo',
+    ])
+      ListingFilter<ApiEvent>(
+          f, 'format', (e) => e.format.toLowerCase() == f.toLowerCase()),
+    ListingFilter<ApiEvent>('Free', 'cost', (e) => e.priceType == 'free'),
+    ListingFilter<ApiEvent>('Paid', 'cost', (e) => e.priceType != 'free'),
+    ...ListingFilters.priceBands<ApiEvent>(_price),
+  ];
+
+  int get _activeFilterCount =>
+      (_sort != null ? 1 : 0) + _pickedFilters.length;
 
   String get _categoryTitle =>
       (_currentCategory['label'] as String).replaceAll('\n', ' ');
@@ -205,31 +243,45 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
     );
   }
 
-  void _showFilterSheet() {
+  Future<void> _showFilterSheet() async {
     final cats = _filters.where((f) => f != 'All').toList();
-    FilterBottomSheet.show(
+    final result = await FilterBottomSheet.show(
       context,
-      sortOptions: const [
-        'Top Picks',
-        'Distance- Near to Far',
-        'Price- Low to High',
-        'Price- High to Low',
-      ],
-      filterOptions: const [
-        'Weekly Classes',
-        'Monthly Classes',
-        'Term Courses',
-        'Bootcamp',
-        'Certification Course',
-        'Trial Class',
-        'Holiday Camp',
-      ],
+      sortOptions: [for (final o in ListingSort.forType(hasPrice: true)) o.label],
+      filterOptions: [for (final f in _filterOptions) f.label],
       categoryOptions: cats,
+      singleCategory: true,
+      initialSort: _sort?.label,
+      initialFilters: _pickedFilters.toList(),
+      initialCategories: [
+        if (_selectedFilterIndex > 0 && _selectedFilterIndex < _filters.length)
+          _filters[_selectedFilterIndex],
+      ],
     );
+    if (result == null || !mounted) return;
+
+    final sort = ListingSort.fromLabel(result.selectedSort);
+    final pickedCategory = result.selectedCategories.isEmpty
+        ? 0
+        : _filters.indexOf(result.selectedCategories.first).clamp(0, _filters.length - 1);
+    setState(() {
+      _sort = sort;
+      _pickedFilters = result.selectedFilters.toSet();
+    });
+    if (sort == ListingSort.distance && !UserLocation.isKnown) {
+      AppSnackBar.show(context, 'Turn on location to sort by distance.');
+    }
+    // The category is the subcategory chip row: choosing one here is the same
+    // as tapping its chip, so it refetches.
+    if (pickedCategory != _selectedFilterIndex) {
+      setState(() => _selectedFilterIndex = pickedCategory);
+      _fetchEvents(subcategory: pickedCategory == 0 ? null : _filters[pickedCategory]);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.category);
     final safeTop = MediaQuery.of(context).padding.top;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -359,13 +411,14 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                   SliverToBoxAdapter(
                     child: SizedBox(
                       height: 42,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                        itemCount: _filters.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == 0) {
-                            return GestureDetector(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Pinned: stays put while the subcategory chips
+                          // scroll beside it.
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 0, 0),
+                            child: GestureDetector(
                               onTap: _showFilterSheet,
                               child: Container(
                                 margin: const EdgeInsets.only(right: 8),
@@ -378,7 +431,7 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      'Filters',
+                                      _activeFilterCount > 0 ? 'Filters ($_activeFilterCount)' : 'Filters',
                                       style: GoogleFonts.poppins(
                                         fontSize: Responsive.sp(context, 11.5),
                                         fontWeight: FontWeight.w500,
@@ -390,9 +443,14 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                                   ],
                                 ),
                               ),
-                            );
-                          }
-                          final filterIndex = index - 1;
+                            ),
+                          ),
+                          Expanded(child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.fromLTRB(0, 8, 16, 0),
+                        itemCount: _filters.length,
+                        itemBuilder: (context, index) {
+                          final filterIndex = index;
                           final isActive = filterIndex == _selectedFilterIndex;
                           return GestureDetector(
                             onTap: () {
@@ -425,6 +483,8 @@ class _CategoryEventsScreenState extends State<CategoryEventsScreen> {
                             ),
                           );
                         },
+                      )),
+                        ],
                       ),
                     ),
                   ),

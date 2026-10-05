@@ -18,6 +18,7 @@ import 'screens/home_screen.dart';
 import 'screens/splash_screen.dart';
 import 'widgets/login_sheet.dart';
 import 'widgets/preview_toggle_button.dart';
+import 'core/listing_source.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -117,6 +118,9 @@ class TLBApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       // Lets a tapped push/local notification route to the in-app screen.
       navigatorKey: PushNotifications.navigatorKey,
+      // Records which screen each route was opened from, so a listing's
+      // detail screen can report where the user came from (utm_source).
+      navigatorObservers: [ListingSource.observer],
       theme: AppTheme.lightTheme,
       // DevicePreview.locale / appBuilder require the DevicePreview ancestor
       // — which is only present in debug builds — so skip them in profile

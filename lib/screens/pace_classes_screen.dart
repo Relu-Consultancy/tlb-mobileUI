@@ -16,6 +16,7 @@ import '../widgets/error_retry_view.dart';
 import '../widgets/format_circle_label.dart';
 import '../widgets/subcategory_empty_state.dart';
 import '../core/user_location.dart';
+import '../core/listing_source.dart';
 
 /// Listing grid shared with the category and format screens — two up, 0.62
 /// ratio — so every "browse a slice of the catalogue" screen presents its
@@ -98,7 +99,7 @@ class _PaceClassesScreenState extends State<PaceClassesScreen> {
       final page = await ClassesListingService.fetchClasses(
         lat: UserLocation.lat,
         lng: UserLocation.lng,
-        city: LocationState().selectedCity.value,
+        city: LocationState().cityOrNull,
         pageSize: 50,
       );
       if (!mounted || generation != _generation) return;
@@ -201,6 +202,7 @@ class _PaceClassesScreenState extends State<PaceClassesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.category);
     final safeTop = MediaQuery.of(context).padding.top;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(

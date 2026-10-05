@@ -400,8 +400,9 @@ class HomeHeader extends StatelessWidget {
           ValueListenableBuilder<String>(
             valueListenable: LocationState().selectedCity,
             builder: (context, city, _) {
-              final label =
-                  city.length > 18 ? '${city.substring(0, 18)}...' : city;
+              final label = city.trim().isEmpty
+                  ? 'Select location'
+                  : (city.length > 18 ? '${city.substring(0, 18)}...' : city);
               return Text(
                 label,
                 style: GoogleFonts.poppins(

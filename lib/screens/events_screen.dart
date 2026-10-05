@@ -33,6 +33,7 @@ import '../widgets/all_categories_popup.dart';
 import 'category_events_screen.dart';
 import '../providers/discovery_feed_state.dart';
 import '../models/event_model.dart';
+import '../core/listing_source.dart';
 
 // Slug → local asset + gradient palette.
 // New API categories that don't yet have dedicated assets fall back to a
@@ -326,6 +327,7 @@ class _EventsScreenState extends State<EventsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.browse);
     final double screenH = MediaQuery.of(context).size.height;
     final double safeBottom = MediaQuery.of(context).padding.bottom;
 

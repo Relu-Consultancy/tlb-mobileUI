@@ -9,6 +9,7 @@ import '../widgets/app_loader.dart';
 import '../widgets/app_refresh_indicator.dart';
 import 'event_detail_screen.dart';
 import '../core/listing_image.dart';
+import '../core/listing_source.dart';
 
 class SavedEventsScreen extends StatefulWidget {
   const SavedEventsScreen({super.key});
@@ -47,6 +48,7 @@ class _SavedEventsScreenState extends State<SavedEventsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.wishlist);
     return Scaffold(
       backgroundColor: AppColors.lightGray,
       appBar: AppBar(

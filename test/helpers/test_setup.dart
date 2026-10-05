@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:mocktail_image_network/mocktail_image_network.dart';
 import 'package:tlb_mobile_ui/core/app_theme.dart';
 
 /// Helper to wrap widgets with a MaterialApp

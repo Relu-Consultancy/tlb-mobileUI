@@ -10,6 +10,7 @@ import '../widgets/app_loader.dart';
 import '../widgets/partner_follow_button.dart';
 import '../widgets/social_links_row.dart';
 import '../widgets/upcoming_events_section.dart';
+import '../core/listing_source.dart';
 
 class OrganizerProfileScreen extends StatefulWidget {
   final String listingId;
@@ -124,6 +125,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.partnerProfile);
     if (_isLoading) {
       return const Scaffold(backgroundColor: Colors.white, body: AppLoader());
     }

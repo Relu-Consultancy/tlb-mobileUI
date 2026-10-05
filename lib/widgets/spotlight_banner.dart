@@ -5,11 +5,11 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../core/responsive.dart';
 import '../models/event_model.dart';
-import '../screens/event_detail_screen.dart';
 import 'dark_category_section.dart';
 import 'four_point_star.dart';
 import 'wishlist_button.dart';
 import '../core/listing_image.dart';
+import '../core/listing_navigation.dart';
 
 /// The Home "Spotlight" section: a "✦ Spotlight ✦" header and a swipeable set of
 /// poster cards on the black backdrop. Each card has a glowing gold border, a
@@ -33,17 +33,37 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
   void initState() {
     super.initState();
     _controller = PageController();
-    if (widget.events.length > 1) {
-      _auto = Timer.periodic(const Duration(seconds: 5), (_) {
-        if (!mounted || !_controller.hasClients) return;
-        final next = (_index + 1) % widget.events.length;
-        _controller.animateToPage(
-          next,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
-      });
+    _syncAutoScroll();
+  }
+
+  @override
+  void didUpdateWidget(SpotlightBanner oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // The card set swaps once the feed lands (mock posters → live cards), so
+    // the count can change under a running carousel: keep the page index in
+    // range and only auto-advance when there is more than one card.
+    if (oldWidget.events.length != widget.events.length) {
+      if (_index >= widget.events.length) {
+        _index = 0;
+        if (_controller.hasClients) _controller.jumpToPage(0);
+      }
+      _syncAutoScroll();
     }
+  }
+
+  void _syncAutoScroll() {
+    _auto?.cancel();
+    _auto = null;
+    if (widget.events.length < 2) return;
+    _auto = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted || !_controller.hasClients) return;
+      final next = (_index + 1) % widget.events.length;
+      _controller.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    });
   }
 
   @override
@@ -175,7 +195,9 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
 
   Widget _buildCard(BuildContext context, EventModel e) {
     final Widget card = GestureDetector(
-      onTap: () => _openDetail(context, e),
+      // Routed by listing type: a backfilled Spotlight can hold venues,
+      // classes and programs, not just events.
+      onTap: () => openListingDetail(context, e),
       child: Container(
         // Gradient "frame": the border is drawn as a 1.8px gold gradient that
         // is bright across the top & upper sides and dims to a dark brown at
@@ -265,10 +287,16 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
       child: Row(
         children: [
-          _metaItem(context, Icons.calendar_today_rounded, e.eventDate ?? ''),
-          const SizedBox(width: 12),
-          _metaItem(context, Icons.access_time_rounded, e.eventTime ?? ''),
-          const SizedBox(width: 12),
+          // Venues and classes have no single date/time; skip the item rather
+          // than draw a bare icon with nothing beside it.
+          if ((e.eventDate ?? '').isNotEmpty) ...[
+            _metaItem(context, Icons.calendar_today_rounded, e.eventDate!),
+            const SizedBox(width: 12),
+          ],
+          if ((e.eventTime ?? '').isNotEmpty) ...[
+            _metaItem(context, Icons.access_time_rounded, e.eventTime!),
+            const SizedBox(width: 12),
+          ],
           Flexible(
             child: _metaItem(
               context,
@@ -305,13 +333,6 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
         const SizedBox(width: 4),
         flexible ? Flexible(child: label) : label,
       ],
-    );
-  }
-
-  void _openDetail(BuildContext context, EventModel e) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => EventDetailScreen(event: e)),
     );
   }
 }

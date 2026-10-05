@@ -85,13 +85,13 @@ class ProgramsListingService {
       final params = <String, String>{
         'page': page.toString(),
         'page_size': pageSize.toString(),
-        if (city != null) 'city': city,
+        'city': ?city,
         if (categoryId != null) 'category_id': categoryId.toString(),
         if (category != null && categoryId == null) 'category': category, // Fallback
         if (subcategoryId != null) 'subcategory_id': subcategoryId.toString(),
         if (subcategory != null && subcategoryId == null) 'subcategory': subcategory,
-        if (programFormat != null) 'program_format': programFormat,
-        if (deliveryMode != null) 'delivery_mode': deliveryMode,
+        'program_format': ?programFormat,
+        'delivery_mode': ?deliveryMode,
         if (tagId != null) 'tag_id': tagId.toString(),
         if (tag != null && tagId == null) 'tag': tag,
         if (minAge != null) 'min_age': minAge.toString(),
@@ -186,7 +186,7 @@ class ProgramsListingService {
         // Sending `mobile` here left the field unrecognised, so the number
         // never reached the organiser even once the URL was fixed.
         'contact_number': mobile,
-        if (studentAge != null) 'student_age': studentAge,
+        'student_age': ?studentAge,
         'message': message ?? '',
       };
 

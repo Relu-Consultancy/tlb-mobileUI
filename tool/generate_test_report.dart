@@ -469,17 +469,23 @@ Future<void> main() async {
   // 5. API findings
   content.add(pw.SizedBox(height: 10));
   content.add(sectionTitle('5', 'API & Networking Findings'));
-  for (var i = 0; i < apiFindings.length; i++) content.add(findingW(apiFindings[i], i));
+  for (var i = 0; i < apiFindings.length; i++) {
+    content.add(findingW(apiFindings[i], i));
+  }
 
   // 6. Robustness findings
   content.add(pw.SizedBox(height: 6));
   content.add(sectionTitle('6', 'Robustness, Crashes & Edge Cases'));
-  for (var i = 0; i < bugFindings.length; i++) content.add(findingW(bugFindings[i], i));
+  for (var i = 0; i < bugFindings.length; i++) {
+    content.add(findingW(bugFindings[i], i));
+  }
 
   // 7. UI/UX findings
   content.add(pw.SizedBox(height: 6));
   content.add(sectionTitle('7', 'UI / UX, Design & Accessibility Findings'));
-  for (var i = 0; i < uiFindings.length; i++) content.add(findingW(uiFindings[i], i));
+  for (var i = 0; i < uiFindings.length; i++) {
+    content.add(findingW(uiFindings[i], i));
+  }
 
   // 8. Priorities
   content.add(pw.SizedBox(height: 6));

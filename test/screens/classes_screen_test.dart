@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail_image_network/mocktail_image_network.dart';
+import 'package:tlb_mobile_ui/providers/location_state.dart';
 import 'package:tlb_mobile_ui/screens/classes_screen.dart';
 import 'package:tlb_mobile_ui/widgets/floating_navbar.dart';
 
 import '../helpers/test_setup.dart';
 
 void main() {
+  // The app starts with no city; these tests are about the tab's content, so
+  // give them a served one (as the old Mumbai default did).
+  setUp(() => LocationState().setCity('Mumbai'));
+
   group('ClassesScreen Tests', () {
     testWidgets('renders all major sections and floating navbar', (WidgetTester tester) async {
       await mockNetworkImages(() async {

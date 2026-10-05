@@ -29,6 +29,8 @@ import 'events_screen.dart';
 import 'classes_screen.dart';
 import 'programs_screen.dart';
 import 'venues_screen.dart';
+import '../core/launch_location.dart';
+import '../core/listing_source.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -54,6 +56,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    // Ask for location permission and take the city from the device fix. The
+    // city starts unset (no Mumbai default); if this is declined, Home shows
+    // "Location not selected" until the customer picks one.
+    LaunchLocation.detect();
     // Defensive — register can throw if a stale registration from a
     // previous HomeScreen still owns the singleton (happens during
     // pushAndRemoveUntil when the new HomeScreen's initState fires before
@@ -210,6 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.homepage);
     if (_shouldShowIntro) {
       _shouldShowIntro = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -231,7 +238,24 @@ class _HomeScreenState extends State<HomeScreen> {
           ValueListenableBuilder<String>(
             valueListenable: LocationState().selectedCity,
             builder: (context, city, _) {
-              return AppRefreshIndicator(
+              // The curated spotlight, or the mock posters until the feed
+              // is in.
+              final spotlight = HomeFeedState.sectionOr(
+                'spotlight',
+                DummyData.bannerEvents,
+              );
+              // Nothing to show: a city we don't serve, or one where none of
+              // the curated listings are.
+              final showEmpty = !LocationState().isLocationSupported(city) ||
+                  HomeFeedState.isEmptyForCity;
+              // Black behind the empty state, filling the whole screen. A
+              // non-positioned Stack child only gets loose constraints, so the
+              // scroll view shrank to its content and the white Scaffold showed
+              // through below it; SizedBox.expand makes it take the full height.
+              return SizedBox.expand(
+                child: ColoredBox(
+                color: showEmpty ? Colors.black : Colors.white,
+                child: AppRefreshIndicator(
                 onRefresh: _handleRefresh,
                 child: SingleChildScrollView(
                 controller: _scrollController,
@@ -240,7 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // ── Body: empty state OR one-viewport hero + feed ──
-                    if (!LocationState().isLocationSupported(city)) ...[
+                    if (showEmpty) ...[
                       _darkHeader(),
                       SizedBox(
                         // Fill the viewport beneath the header so the empty
@@ -250,7 +274,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 150)
                             .clamp(380.0, double.infinity)
                             .toDouble(),
-                        child: const EmptyLocationWidget(),
+                        child: EmptyLocationWidget(
+                          onDark: true,
+                          // Nothing chosen or detected yet (permission
+                          // declined, or still being asked) rather than a
+                          // city we don't serve.
+                          notSelected: !LocationState().hasCity,
+                        ),
                       ),
                     ] else ...[
                       // Black hero: header + a tall Spotlight card + Explore the
@@ -261,21 +291,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           children: [
                             _darkHeader(),
-                            RepaintBoundary(
-                              child: SizedBox(
-                                height:
-                                    (MediaQuery.of(context).size.height * 0.62)
-                                        .clamp(420.0, 660.0),
-                                child: SpotlightBanner(
-                                  // The curated spotlight, or the mock
-                                  // posters until the feed is in.
-                                  events: HomeFeedState.sectionOr(
-                                    'spotlight',
-                                    DummyData.bannerEvents,
-                                  ),
+                            // Collapsed outright when there is nothing to
+                            // show — a fixed-height slot around an empty
+                            // banner left a screen-tall black gap here.
+                            if (spotlight.isNotEmpty)
+                              RepaintBoundary(
+                                child: SizedBox(
+                                  height: (MediaQuery.of(context).size.height *
+                                          0.62)
+                                      .clamp(420.0, 660.0),
+                                  child: SpotlightBanner(events: spotlight),
                                 ),
                               ),
-                            ),
                             const RepaintBoundary(child: CategoriesGrid()),
                           ],
                         ),
@@ -304,6 +331,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
                 ),
+              ),
+              ),
               );
             },
           ),

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:tlb_mobile_ui/screens/change_password_screen.dart';
-import 'package:tlb_mobile_ui/services/auth_service.dart';
 import 'package:tlb_mobile_ui/providers/auth_state.dart';
 
 import '../helpers/test_setup.dart';

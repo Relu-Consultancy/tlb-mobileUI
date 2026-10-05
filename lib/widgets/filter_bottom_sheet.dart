@@ -28,6 +28,10 @@ class FilterBottomSheet extends StatefulWidget {
   final List<String> initialFilters;
   final List<String> initialCategories;
 
+  /// When true the Categories tab is pick-one (radio-style) instead of
+  /// multi-select — for screens where a category is a single chip selection.
+  final bool singleCategory;
+
   const FilterBottomSheet({
     super.key,
     required this.sortOptions,
@@ -36,6 +40,7 @@ class FilterBottomSheet extends StatefulWidget {
     this.initialSort,
     this.initialFilters = const [],
     this.initialCategories = const [],
+    this.singleCategory = false,
   });
 
   /// Convenience method to show the sheet and return the result.
@@ -47,6 +52,7 @@ class FilterBottomSheet extends StatefulWidget {
     String? initialSort,
     List<String> initialFilters = const [],
     List<String> initialCategories = const [],
+    bool singleCategory = false,
   }) {
     return showModalBottomSheet<FilterResult>(
       context: context,
@@ -60,6 +66,7 @@ class FilterBottomSheet extends StatefulWidget {
         initialSort: initialSort,
         initialFilters: initialFilters,
         initialCategories: initialCategories,
+        singleCategory: singleCategory,
       ),
     );
   }
@@ -332,6 +339,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         return _CheckboxPanel(
           key: const ValueKey('categories'),
           options: widget.categoryOptions,
+          single: widget.singleCategory,
           selected: _selectedCategories,
           onChanged: (list) => setState(() => _selectedCategories = list),
         );
@@ -421,15 +429,31 @@ class _CheckboxPanel extends StatelessWidget {
   final List<String> selected;
   final ValueChanged<List<String>> onChanged;
 
+  /// Pick-one: choosing an option replaces the selection, and choosing the
+  /// selected one again clears it.
+  final bool single;
+
   const _CheckboxPanel({
     super.key,
     required this.options,
     required this.selected,
     required this.onChanged,
+    this.single = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (options.isEmpty) {
+      return Center(
+        child: Text(
+          'Nothing to choose here yet',
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 13),
+            color: Colors.grey.shade500,
+          ),
+        ),
+      );
+    }
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       itemCount: options.length,
@@ -438,12 +462,11 @@ class _CheckboxPanel extends StatelessWidget {
         final isChecked = selected.contains(options[i]);
         return InkWell(
           onTap: () {
-            final updated = List<String>.from(selected);
-            if (isChecked) {
-              updated.remove(options[i]);
-            } else {
-              updated.add(options[i]);
-            }
+            final updated = single
+                ? (isChecked ? <String>[] : [options[i]])
+                : (List<String>.from(selected)
+                  ..remove(options[i])
+                  ..addAll(isChecked ? const [] : [options[i]]));
             onChanged(updated);
           },
           borderRadius: BorderRadius.circular(8),

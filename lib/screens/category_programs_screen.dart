@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/app_snackbar.dart';
+import '../core/listing_filters.dart';
 import '../core/listing_schedule.dart';
 import '../widgets/error_retry_view.dart';
 import '../core/responsive.dart';
@@ -21,6 +23,7 @@ import '../services/programs_listing_service.dart';
 import '../widgets/app_loader.dart';
 import 'program_detail_screen.dart';
 import '../core/user_location.dart';
+import '../core/listing_source.dart';
 
 class CategoryProgramsScreen extends StatefulWidget {
   final int initialCategoryIndex;
@@ -37,6 +40,10 @@ class CategoryProgramsScreen extends StatefulWidget {
 class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
   late int _selectedCategoryIndex;
   int _selectedFilterIndex = 0;
+
+  /// The Sort / Filters sheet's selections (applied to the loaded cards).
+  ListingSort? _sort;
+  Set<String> _pickedFilters = {};
   final ScrollController _chipScrollController = ScrollController();
   final ScrollController _listScrollController = ScrollController();
   late List<GlobalKey> _chipKeys;
@@ -132,7 +139,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
         lng: UserLocation.lng,
         categoryId: _selectedCategoryId,
         subcategoryId: _selectedSubcategoryId,
-        city: LocationState().selectedCity.value,
+        city: LocationState().cityOrNull,
         page: _currentPage + 1,
         pageSize: _pageSize,
       );
@@ -184,7 +191,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
         lng: UserLocation.lng,
         categoryId: _selectedCategoryId,
         subcategoryId: subcategoryId,
-        city: LocationState().selectedCity.value,
+        city: LocationState().cityOrNull,
         page: 1,
         pageSize: _pageSize,
       );
@@ -245,9 +252,47 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
   // A program is over only once every batch is (its end_datetime is the
   // latest active batch's end); a finished program has nothing left to
   // book, so surfacing it just leads to a dead end when tapped.
-  List<ApiProgram> get _filteredPrograms => _apiPrograms
-      .where((p) => !ListingSchedule.hasEnded(p.endDatetime))
-      .toList();
+  List<ApiProgram> get _filteredPrograms {
+    final live = _apiPrograms
+        .where((p) => !ListingSchedule.hasEnded(p.endDatetime))
+        .toList();
+    return ListingFilters.sort(
+      ListingFilters.apply(live, _pickedFilters, _filterOptions),
+      _sort,
+      price: _price,
+      distance: (p) => p.distanceKm,
+      // Top Picks: featured, then top rated, then by rating.
+      rank: (p) =>
+          (p.isFeatured ? 100 : 0) + (p.isTopRated ? 50 : 0) + p.averageRating,
+    );
+  }
+
+  static double? _price(ApiProgram p) => ListingFilters.parsePrice(p.feeFrom);
+
+  /// "short_term" / "Short-Term" / "short term" all compare as "shortterm".
+  static String _slug(String? v) =>
+      (v ?? '').toLowerCase().replaceAll(RegExp(r'[^a-z]'), '');
+
+  static final List<ListingFilter<ApiProgram>> _filterOptions = [
+    for (final f in const [
+      'Regular',
+      'Short-Term',
+      'Weekend',
+      'Camp',
+      'Batch',
+      'Holiday-based',
+      'Recorded',
+    ])
+      ListingFilter<ApiProgram>(
+          f, 'format', (p) => _slug(p.programFormat).startsWith(_slug(f))),
+    for (final m in const ['Offline', 'Online', 'Hybrid'])
+      ListingFilter<ApiProgram>(
+          m, 'mode', (p) => _slug(p.deliveryMode) == _slug(m)),
+    ...ListingFilters.priceBands<ApiProgram>(_price),
+  ];
+
+  int get _activeFilterCount =>
+      (_sort != null ? 1 : 0) + _pickedFilters.length;
 
   EventModel _toEventModel(ApiProgram prg) {
     return EventModel(
@@ -268,31 +313,52 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
     return (_currentCategory['label'] as String).replaceAll('\n', ' ');
   }
 
-  void _showFilterSheet() {
+  Future<void> _showFilterSheet() async {
     final cats = _filters.where((f) => f != 'All').toList();
-    FilterBottomSheet.show(
+    final result = await FilterBottomSheet.show(
       context,
-      sortOptions: const [
-        'Top Picks',
-        'Distance- Near to Far',
-        'Price- Low to High',
-        'Price- High to Low',
-      ],
-      filterOptions: const [
-        'Weekly Classes',
-        'Monthly Classes',
-        'Term Courses',
-        'Bootcamp',
-        'Certification Course',
-        'Trial Class',
-        'Holiday Camp',
-      ],
+      sortOptions: [for (final o in ListingSort.forType(hasPrice: true)) o.label],
+      filterOptions: [for (final f in _filterOptions) f.label],
       categoryOptions: cats,
+      singleCategory: true,
+      initialSort: _sort?.label,
+      initialFilters: _pickedFilters.toList(),
+      initialCategories: [
+        if (_selectedFilterIndex > 0 && _selectedFilterIndex < _filters.length)
+          _filters[_selectedFilterIndex],
+      ],
     );
+    if (result == null || !mounted) return;
+
+    final sort = ListingSort.fromLabel(result.selectedSort);
+    final pickedCategory = result.selectedCategories.isEmpty
+        ? 0
+        : _filters.indexOf(result.selectedCategories.first).clamp(0, _filters.length - 1);
+    setState(() {
+      _sort = sort;
+      _pickedFilters = result.selectedFilters.toSet();
+    });
+    if (sort == ListingSort.distance && !UserLocation.isKnown) {
+      AppSnackBar.show(context, 'Turn on location to sort by distance.');
+    }
+    // The category is the subcategory chip row: choosing one here is the same
+    // as tapping its chip, so it refetches.
+    if (pickedCategory != _selectedFilterIndex) {
+      int? subId;
+      if (pickedCategory > 0 && _currentSubcategories.isNotEmpty) {
+        subId = _currentSubcategories[pickedCategory - 1].id;
+      }
+      setState(() {
+        _selectedFilterIndex = pickedCategory;
+        _selectedSubcategoryId = subId;
+      });
+      _fetchPrograms(subcategoryId: subId);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.category);
     final safeTop = MediaQuery.of(context).padding.top;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -426,14 +492,14 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                   SliverToBoxAdapter(
                     child: SizedBox(
                       height: 42,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding:
-                            const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                        itemCount: _filters.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == 0) {
-                            return GestureDetector(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Pinned: stays put while the subcategory chips
+                          // scroll beside it.
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 0, 0),
+                            child: GestureDetector(
                               onTap: _showFilterSheet,
                               child: Container(
                                 margin: const EdgeInsets.only(right: 8),
@@ -447,7 +513,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      'Filters',
+                                      _activeFilterCount > 0 ? 'Filters ($_activeFilterCount)' : 'Filters',
                                       style: GoogleFonts.poppins(
                                         fontSize: Responsive.sp(context, 11.5),
                                         fontWeight: FontWeight.w500,
@@ -462,9 +528,14 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                                   ],
                                 ),
                               ),
-                            );
-                          }
-                          final filterIndex = index - 1;
+                            ),
+                          ),
+                          Expanded(child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.fromLTRB(0, 8, 16, 0),
+                        itemCount: _filters.length,
+                        itemBuilder: (context, index) {
+                          final filterIndex = index;
                           final isActive =
                               filterIndex == _selectedFilterIndex;
                           return GestureDetector(
@@ -514,6 +585,8 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                             ),
                           );
                         },
+                      )),
+                        ],
                       ),
                     ),
                   ),

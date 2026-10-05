@@ -1,3 +1,5 @@
+import '../core/app_snackbar.dart';
+import '../core/listing_filters.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,6 +21,7 @@ import '../widgets/subcategory_empty_state.dart';
 import '../widgets/app_loader.dart';
 import 'class_detail_screen.dart';
 import '../core/user_location.dart';
+import '../core/listing_source.dart';
 
 class CategoryClassesScreen extends StatefulWidget {
   final int initialCategoryIndex;
@@ -35,6 +38,10 @@ class CategoryClassesScreen extends StatefulWidget {
 class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
   late int _selectedCategoryIndex;
   int _selectedFilterIndex = 0;
+
+  /// The Sort / Filters sheet's selections (applied to the loaded cards).
+  ListingSort? _sort;
+  Set<String> _pickedFilters = {};
   final ScrollController _chipScrollController = ScrollController();
   final ScrollController _listScrollController = ScrollController();
   late List<GlobalKey> _chipKeys;
@@ -87,7 +94,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                 _selectedFilterIndex >= _filters.length
             ? null
             : _filters[_selectedFilterIndex],
-        city: LocationState().selectedCity.value,
+        city: LocationState().cityOrNull,
         page: _currentPage + 1,
         pageSize: _pageSize,
       );
@@ -117,7 +124,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
         lng: UserLocation.lng,
         category: _apiCategoryName,
         subcategory: subcategory,
-        city: LocationState().selectedCity.value,
+        city: LocationState().cityOrNull,
         page: 1,
         pageSize: _pageSize,
       );
@@ -192,8 +199,25 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
   // schedule, not a run with a finish line (see ListingSchedule's doc). The
   // partner-controlled "not currently bookable" signal here is is_paused
   // instead.
-  List<ApiClass> get _filteredClasses =>
-      _apiClasses.where((c) => !c.isPaused).toList();
+  List<ApiClass> get _filteredClasses {
+    final live = _apiClasses.where((c) => !c.isPaused).toList();
+    return ListingFilters.sort(
+      ListingFilters.apply(live, _pickedFilters, _filterOptions),
+      _sort,
+      price: (c) => c.price,
+      distance: (c) => c.distanceKm,
+      // Top Picks: best rated first, then most reviewed.
+      rank: (c) => c.averageRating * 1000 + c.totalReviews,
+    );
+  }
+
+  static final List<ListingFilter<ApiClass>> _filterOptions = [
+    ...ListingFilters.priceBands<ApiClass>((c) => c.price),
+    ListingFilter<ApiClass>('Rated 4+', 'rating', (c) => c.averageRating >= 4),
+  ];
+
+  int get _activeFilterCount =>
+      (_sort != null ? 1 : 0) + _pickedFilters.length;
 
   String get _categoryTitle {
     return (_currentCategory['label'] as String).replaceAll('\n', ' ');
@@ -218,31 +242,45 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
     );
   }
 
-  void _showFilterSheet() {
+  Future<void> _showFilterSheet() async {
     final cats = _filters.where((f) => f != 'All').toList();
-    FilterBottomSheet.show(
+    final result = await FilterBottomSheet.show(
       context,
-      sortOptions: const [
-        'Top Picks',
-        'Distance- Near to Far',
-        'Price- Low to High',
-        'Price- High to Low',
-      ],
-      filterOptions: const [
-        'Weekly Classes',
-        'Monthly Classes',
-        'Term Courses',
-        'Bootcamp',
-        'Certification Course',
-        'Trial Class',
-        'Holiday Camp',
-      ],
+      sortOptions: [for (final o in ListingSort.forType(hasPrice: true)) o.label],
+      filterOptions: [for (final f in _filterOptions) f.label],
       categoryOptions: cats,
+      singleCategory: true,
+      initialSort: _sort?.label,
+      initialFilters: _pickedFilters.toList(),
+      initialCategories: [
+        if (_selectedFilterIndex > 0 && _selectedFilterIndex < _filters.length)
+          _filters[_selectedFilterIndex],
+      ],
     );
+    if (result == null || !mounted) return;
+
+    final sort = ListingSort.fromLabel(result.selectedSort);
+    final pickedCategory = result.selectedCategories.isEmpty
+        ? 0
+        : _filters.indexOf(result.selectedCategories.first).clamp(0, _filters.length - 1);
+    setState(() {
+      _sort = sort;
+      _pickedFilters = result.selectedFilters.toSet();
+    });
+    if (sort == ListingSort.distance && !UserLocation.isKnown) {
+      AppSnackBar.show(context, 'Turn on location to sort by distance.');
+    }
+    // The category is the subcategory chip row: choosing one here is the same
+    // as tapping its chip, so it refetches.
+    if (pickedCategory != _selectedFilterIndex) {
+      setState(() => _selectedFilterIndex = pickedCategory);
+      _fetchClasses(subcategory: pickedCategory == 0 ? null : _filters[pickedCategory]);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.category);
     final safeTop = MediaQuery.of(context).padding.top;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -376,13 +414,14 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                   SliverToBoxAdapter(
                     child: SizedBox(
                       height: 42,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                        itemCount: _filters.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == 0) {
-                            return GestureDetector(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Pinned: stays put while the subcategory chips
+                          // scroll beside it.
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 0, 0),
+                            child: GestureDetector(
                               onTap: _showFilterSheet,
                               child: Container(
                                 margin: const EdgeInsets.only(right: 8),
@@ -395,7 +434,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      'Filters',
+                                      _activeFilterCount > 0 ? 'Filters ($_activeFilterCount)' : 'Filters',
                                       style: GoogleFonts.poppins(
                                         fontSize: Responsive.sp(context, 11.5),
                                         fontWeight: FontWeight.w500,
@@ -407,9 +446,14 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                                   ],
                                 ),
                               ),
-                            );
-                          }
-                          final filterIndex = index - 1;
+                            ),
+                          ),
+                          Expanded(child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.fromLTRB(0, 8, 16, 0),
+                        itemCount: _filters.length,
+                        itemBuilder: (context, index) {
+                          final filterIndex = index;
                           final isActive = filterIndex == _selectedFilterIndex;
                           return GestureDetector(
                             onTap: () {
@@ -442,6 +486,8 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                             ),
                           );
                         },
+                      )),
+                        ],
                       ),
                     ),
                   ),

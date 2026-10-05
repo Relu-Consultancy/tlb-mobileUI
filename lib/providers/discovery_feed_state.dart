@@ -1,8 +1,11 @@
 import 'package:flutter/foundation.dart';
 
+import '../core/feed_city_filter.dart';
 import '../core/listing_schedule.dart';
 import '../core/user_location.dart';
 import '../models/event_model.dart';
+import '../models/homepage_section_model.dart';
+import 'location_state.dart';
 import '../providers/auth_state.dart';
 import '../services/home_feed_service.dart';
 
@@ -28,10 +31,18 @@ class DiscoveryFeedState {
   static final DiscoveryFeedState venues = DiscoveryFeedState._('venues');
 
   final ValueNotifier<int> version = ValueNotifier<int>(0);
-  final Map<String, List<EventModel>> _sections = {};
+  /// Cards with the listing they came from, so the city filter can be
+  /// re-applied when the city changes without a refetch.
+  final Map<String, List<(HomepageListing, EventModel)>> _sections = {};
   /// Insertion-ordered, so [heroes] follows the order the API listed the
   /// sections in.
-  final Map<String, EventModel> _heroes = {};
+  final Map<String, (HomepageListing, EventModel)> _heroes = {};
+  bool _listeningToCity = false;
+
+  /// The curated feeds aren't city-aware on the server yet; see
+  /// [FeedCityFilter].
+  bool _inCity(HomepageListing l) =>
+      FeedCityFilter.keep(l, LocationState().cityOrNull);
   bool _loading = false;
   bool _loaded = false;
   bool _failed = false;
@@ -49,17 +60,26 @@ class DiscoveryFeedState {
   ///
   /// Excludes the section's hero, which the API already keeps out of its
   /// `listings` array — read [hero] for that one.
-  List<EventModel> section(String key) => _sections[key] ?? const [];
+  List<EventModel> section(String key) => [
+        for (final (listing, card) in _sections[key] ?? const <(HomepageListing, EventModel)>[])
+          if (_inCity(listing)) card,
+      ];
 
   /// The listing an admin flagged as this section's feature, or null when
   /// none is set.
-  EventModel? hero(String key) => _heroes[key];
+  EventModel? hero(String key) {
+    final h = _heroes[key];
+    return h != null && _inCity(h.$1) ? h.$2 : null;
+  }
 
   /// Every section's hero, in the order the API listed the sections.
   ///
   /// These are what the screen's top banner carousel shows: a hero is the
   /// screen's featured listing, not a second style of card inside a rail.
-  List<EventModel> get heroes => List.unmodifiable(_heroes.values);
+  List<EventModel> get heroes => List.unmodifiable([
+        for (final (listing, card) in _heroes.values)
+          if (_inCity(listing)) card,
+      ]);
 
   /// True when the section has nothing to draw at all, hero included.
   bool isSectionEmpty(String key) =>
@@ -68,6 +88,10 @@ class DiscoveryFeedState {
   Future<void> load({bool force = false}) async {
     if (_loading) return;
     if (_loaded && !force) return;
+    if (!_listeningToCity) {
+      _listeningToCity = true;
+      LocationState().selectedCity.addListener(() => version.value++);
+    }
     _loading = true;
     try {
       final sections = await HomeFeedService.fetchScreenSections(
@@ -78,18 +102,18 @@ class DiscoveryFeedState {
         lat: UserLocation.lat,
         lng: UserLocation.lng,
       );
-      final map = <String, List<EventModel>>{};
-      final heroes = <String, EventModel>{};
+      final map = <String, List<(HomepageListing, EventModel)>>{};
+      final heroes = <String, (HomepageListing, EventModel)>{};
       for (final s in sections) {
         // A finished event or program has nothing left to book. A no-op for
         // classes and venues, whose end_datetime is always null here.
         map[s.section] = s.listings
             .where((l) => !ListingSchedule.hasEnded(l.endDatetime))
-            .map((l) => l.toEventModel())
+            .map((l) => (l, l.toEventModel()))
             .toList();
         final h = s.hero;
         if (h != null && !ListingSchedule.hasEnded(h.endDatetime)) {
-          heroes[s.section] = h.toEventModel();
+          heroes[s.section] = (h, h.toEventModel());
         }
       }
       _sections

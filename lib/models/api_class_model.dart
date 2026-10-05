@@ -120,7 +120,12 @@ class ApiClass {
   /// stored. Null otherwise.
   final double? distanceKm;
 
+  /// Lowest price, as the list endpoint's `price` (a number or a numeric
+  /// string). Null when the class has none. Used to sort and filter by price.
+  final double? price;
+
   const ApiClass({
+    this.price,
     required this.id,
     required this.title,
     this.shortDescription,
@@ -145,6 +150,11 @@ class ApiClass {
         activeBatchesCount: json['active_batches_count'] as int? ?? 0,
         coverUrl: secureUrl(json['cover_url'] as String?),
         distanceKm: (json['distance_km'] as num?)?.toDouble(),
+        price: switch (json['price']) {
+          final num n => n.toDouble(),
+          final String t => double.tryParse(t.trim()),
+          _ => null,
+        },
         averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
         totalReviews: json['total_reviews'] as int? ?? 0,
         isPaused: json['is_paused'] as bool? ?? false,
@@ -187,7 +197,6 @@ class ApiClassDetail extends ApiClass {
   final bool isRefundable;
   final List<Map<String, String>> faqs;
   final String bookingType;
-  final double? price;
   final List<ApiClassBatch> batches;
   final List<ApiClassMedia> media;
 
@@ -223,7 +232,7 @@ class ApiClassDetail extends ApiClass {
     this.isRefundable = true,
     required this.faqs,
     required this.bookingType,
-    this.price,
+    super.price,
     required this.batches,
     required this.media,
   });

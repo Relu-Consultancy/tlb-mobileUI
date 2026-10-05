@@ -12,7 +12,10 @@ import 'package:tlb_mobile_ui/providers/discovery_feed_state.dart';
 /// without a network mock (the services take no injectable client). The
 /// wiring is guarded at source.
 void main() {
-  String read(String path) => File(path).readAsStringSync();
+  // Normalised to \n: git on Windows can check these files out with CRLF, and
+  // several expectations below match across line breaks.
+  String read(String path) =>
+      File(path).readAsStringSync().replaceAll('\r\n', '\n');
 
   /// Screen file → (feed instance, section slugs, mock banner list).
   const screens = <String, (String, List<String>, String)>{
@@ -133,7 +136,8 @@ void main() {
     test('the spotlight banner shows the curated section', () {
       final src = read('lib/screens/home_screen.dart');
       expect(src, contains("HomeFeedState.sectionOr(\n"
-          "                                    'spotlight',"));
+          "                'spotlight',"));
+      expect(src, contains('SpotlightBanner(events: spotlight)'));
     });
   });
 

@@ -423,6 +423,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   const SizedBox(height: 16),
 
+                  _buildLabel('Email'),
+                  _buildReadOnlyField(
+                    value: AuthState.userEmail,
+                    placeholder: 'No email on this account',
+                  ),
+                  const SizedBox(height: 16),
+
                   _buildLabel('Phone Number'),
                   _buildPhoneField(),
                   const SizedBox(height: 16),
@@ -698,6 +705,45 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             borderRadius: BorderRadius.circular(10),
             borderSide: const BorderSide(color: AppColors.primaryLight, width: 1.5),
           ),
+        ),
+      ),
+    );
+  }
+
+  /// A display-only field for values the customer can't change here — the
+  /// email is the account's sign-in identity, so it is shown but not editable
+  /// and never sent in the profile update. Greyed with a lock so it doesn't
+  /// read as a field that has simply failed to take focus.
+  Widget _buildReadOnlyField({required String? value, required String placeholder}) {
+    final hasValue = (value ?? '').trim().isNotEmpty;
+    return Semantics(
+      readOnly: true,
+      label: hasValue ? 'Email, $value, cannot be changed' : placeholder,
+      excludeSemantics: true,
+      child: Container(
+        height: Responsive.h(context, 46, min: 40),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                hasValue ? value!.trim() : placeholder,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: Responsive.sp(context, 13),
+                  color: hasValue ? Colors.grey.shade600 : Colors.grey.shade400,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(Icons.lock_outline_rounded, size: 18, color: Colors.grey.shade500),
+          ],
         ),
       ),
     );

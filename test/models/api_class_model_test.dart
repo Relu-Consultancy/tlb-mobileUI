@@ -19,7 +19,7 @@ Map<String, dynamic> _baseJson({Object? price}) {
       'active_batches_count': 0,
       'batches': [],
       'media': [],
-      if (price != null) 'price': price,
+      'price': ?price,
     },
   };
 }

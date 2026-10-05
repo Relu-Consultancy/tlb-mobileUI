@@ -38,7 +38,13 @@ void main() {
         start: '2026-08-20T23:00:00Z',
         end: '2026-09-21T10:33:00Z',
       );
-      expect(ListingSchedule.hasEnded(ongoing.endDatetime), isFalse);
+      // `now` pinned inside the run: the fixture's real dates are fixed, so
+      // against the live clock this test starts failing once they pass.
+      expect(
+        ListingSchedule.hasEnded(ongoing.endDatetime,
+            now: DateTime.utc(2026, 9, 1)),
+        isFalse,
+      );
     });
 
     test('TC_S_EEF_002 — a fully past event is filtered out', () {

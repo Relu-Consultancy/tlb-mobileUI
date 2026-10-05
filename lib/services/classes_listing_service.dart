@@ -119,12 +119,12 @@ class ClassesListingService {
       final params = <String, String>{
         'page': page.toString(),
         'page_size': pageSize.toString(),
-        if (category != null) 'category': category,
-        if (subcategory != null) 'subcategory': subcategory,
-        if (city != null) 'city': city,
-        if (area != null) 'area': area,
-        if (format != null) 'format': format,
-        if (mode != null) 'mode': mode,
+        'category': ?category,
+        'subcategory': ?subcategory,
+        'city': ?city,
+        'area': ?area,
+        'format': ?format,
+        'mode': ?mode,
         if (search != null && search.isNotEmpty) 'search': search,
         // Both or neither — the API answers 400 INVALID_COORDS to a
         // lone or malformed one.
@@ -222,11 +222,11 @@ class ClassesListingService {
       final body = {
         'attendee_name': attendeeName,
         'mobile': mobile,
-        if (studentAge != null) 'student_age': studentAge,
+        'student_age': ?studentAge,
         // Optional preferred batch. Unchanged by the trim, and still not
         // surfaced in the enquiry sheet — a customer who wants a particular
         // batch says so in the message.
-        if (batchId != null) 'batch_id': batchId,
+        'batch_id': ?batchId,
         if (message != null && message.isNotEmpty) 'message': message,
       };
 

@@ -23,6 +23,7 @@ import 'category_venues_screen.dart';
 import 'venue_detail_screen.dart';
 import '../providers/discovery_feed_state.dart';
 import '../core/listing_image.dart';
+import '../core/listing_source.dart';
 
 class VenuesScreen extends StatefulWidget {
   const VenuesScreen({super.key});
@@ -128,6 +129,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.browse);
     final double screenH = MediaQuery.of(context).size.height;
     final safeBottom = MediaQuery.of(context).padding.bottom;
 

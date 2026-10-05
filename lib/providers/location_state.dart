@@ -11,11 +11,27 @@ class LocationState {
   factory LocationState() => _instance;
   LocationState._internal();
 
-  // The globally selected city. Defaults to a supported city so the home
-  // screen shows real content on first launch instead of the empty-location
-  // state. The user can still change this via the city picker; the empty
-  // state remains for unsupported cities they pick manually.
-  final ValueNotifier<String> selectedCity = ValueNotifier<String>('Mumbai');
+  /// The globally selected city; empty until the customer has one.
+  ///
+  /// It used to default to Mumbai, which put every first launch in a city
+  /// nobody had chosen. It now starts unset: the app asks for location
+  /// permission on launch and fills it from the device fix (see
+  /// `LaunchLocation`), and a customer who declines picks a city by hand. Until
+  /// then Home shows the "Location not selected" screen. A city that is set but
+  /// not in [supportedCities] still gets the "not serving this location" state.
+  final ValueNotifier<String> selectedCity = ValueNotifier<String>('');
+
+  /// True while the launch-time permission prompt / GPS fix is in flight, so
+  /// the "Location not selected" screen doesn't flash up for the second or two
+  /// before the city is known.
+  final ValueNotifier<bool> resolvingLocation = ValueNotifier<bool>(false);
+
+  /// Whether a city has been chosen or detected.
+  bool get hasCity => selectedCity.value.trim().isNotEmpty;
+
+  /// The city for a listing request: null when none is set, so callers omit
+  /// the `city` filter rather than sending an empty one that matches nothing.
+  String? get cityOrNull => hasCity ? selectedCity.value : null;
 
   /// The GPS fix behind [selectedCity], when the city came from "use my
   /// current location". Null whenever the city was typed or picked from the
@@ -47,6 +63,7 @@ class LocationState {
     'Goa',
     'Kochi',
     'Lucknow',
+    'Prayagraj',
     'Sonipat',
     'The Palm Springs, DLF',
   ];

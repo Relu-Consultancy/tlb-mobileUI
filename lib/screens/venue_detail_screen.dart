@@ -23,6 +23,8 @@ import '../widgets/login_sheet.dart';
 import 'plan_party_screen.dart';
 import 'gallery_screen.dart';
 import '../core/date_format.dart';
+import '../core/listing_source.dart';
+import '../services/activity_service.dart';
 
 class VenueDetailScreen extends StatefulWidget {
   final EventModel event;
@@ -42,6 +44,26 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
   bool _reviewLoading = false;
 
   bool get _hasApiId => widget.event.id.isNotEmpty;
+
+  /// Whether this open has been reported. A State lives for exactly one
+  /// open of the screen, so the flag makes it once per open however often
+  /// dependencies change or the screen rebuilds.
+  bool _viewTracked = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_viewTracked) return;
+    _viewTracked = true;
+    // A Listing View: feeds the partner's view counts, conversion and
+    // traffic sources. Reported here rather than at the call sites so no
+    // way of opening a listing can miss it. Needs the route, hence not
+    // initState.
+    ActivityService.trackListingView(
+      listingId: widget.event.id,
+      source: ListingSource.originOf(context),
+    );
+  }
 
   @override
   void initState() {
@@ -231,6 +253,7 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.recommendation);
     if (_isLoading) {
       return Scaffold(
         backgroundColor: Colors.white,
@@ -628,23 +651,11 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
     );
   }
 
+  // Delegates to the shared DetailInfoRow (widgets/detail_sections.dart),
+  // which clamps a long value to one line with a measured "Show more"
+  // toggle instead of letting it run off the screen.
   Widget _buildInfoRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          // A shade darker than the label beside it, so the left rail of
-          // glyphs reads as present rather than disabled.
-          Icon(icon, size: 20, color: Colors.grey.shade700),
-          const SizedBox(width: 12),
-          Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600)),
-          const Spacer(),
-          Text(value,
-              style: GoogleFonts.poppins(
-                  fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
-        ],
-      ),
-    );
+    return DetailInfoRow(icon: icon, label: label, value: value);
   }
 
   void _showTermsBottomSheet(BuildContext context) {

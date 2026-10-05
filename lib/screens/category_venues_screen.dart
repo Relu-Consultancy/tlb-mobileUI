@@ -1,3 +1,5 @@
+import '../core/app_snackbar.dart';
+import '../core/listing_filters.dart';
 import 'package:flutter/material.dart';
 import '../widgets/app_loader.dart';
 import 'package:flutter/services.dart';
@@ -18,6 +20,7 @@ import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/subcategory_empty_state.dart';
 import 'venue_detail_screen.dart';
 import '../core/user_location.dart';
+import '../core/listing_source.dart';
 
 class CategoryVenuesScreen extends StatefulWidget {
   final int initialCategoryIndex;
@@ -34,6 +37,11 @@ class CategoryVenuesScreen extends StatefulWidget {
 class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
   late int _selectedCategoryIndex;
   int _selectedFilterIndex = 0;
+  int? _selectedSubcategoryId;
+
+  /// The Sort / Filters sheet's selections (applied to the loaded cards).
+  ListingSort? _sort;
+  Set<String> _pickedFilters = {};
   final ScrollController _chipScrollController = ScrollController();
   final ScrollController _listScrollController = ScrollController();
   final List<GlobalKey> _chipKeys = List.generate(
@@ -97,7 +105,8 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
         lat: UserLocation.lat,
         lng: UserLocation.lng,
         categoryId: _matchedCategoryId(),
-        city: LocationState().selectedCity.value,
+        subcategoryId: _selectedSubcategoryId,
+        city: LocationState().cityOrNull,
         page: 1,
         pageSize: _pageSize,
       );
@@ -134,7 +143,8 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
         lat: UserLocation.lat,
         lng: UserLocation.lng,
         categoryId: _matchedCategoryId(),
-        city: LocationState().selectedCity.value,
+        subcategoryId: _selectedSubcategoryId,
+        city: LocationState().cityOrNull,
         page: _currentPage + 1,
         pageSize: _pageSize,
       );
@@ -195,6 +205,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
     setState(() {
       _selectedCategoryIndex = index;
       _selectedFilterIndex = 0;
+      _selectedSubcategoryId = null;
     });
     _fetchVenues();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -218,37 +229,97 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
 
   Color get _accentColor => _currentGradient.last;
 
-  List<String> get _filters =>
-      DummyData.venuesSubFilters[_selectedCategoryIndex];
+  /// The matched category's real subcategories when the metadata is in (so
+  /// each chip has an id the API can filter by); the placeholder names until.
+  List<ApiCategory> get _matchedSubcategories {
+    final id = _matchedCategoryId();
+    if (id == null) return const [];
+    for (final c in _apiCategories ?? const <ApiCategory>[]) {
+      if (c.id == id) return [c];
+    }
+    return const [];
+  }
+
+  List<ApiSubcategory> get _subcategories => _matchedSubcategories.isEmpty
+      ? const []
+      : _matchedSubcategories.first.subcategories;
+
+  List<String> get _filters => _subcategories.isNotEmpty
+      ? ['All', ..._subcategories.map((s) => s.name)]
+      : DummyData.venuesSubFilters[_selectedCategoryIndex];
+
+  /// The venue list response carries no price, so there is no price sort or
+  /// price filter here — only what the response does have.
+  List<ApiVenue> get _filteredVenues => ListingFilters.sort(
+        ListingFilters.apply(_apiVenues, _pickedFilters, _filterOptions),
+        _sort,
+        distance: (v) => v.distanceKm,
+        // Top Picks: featured, then top rated, then new this week.
+        rank: (v) =>
+            (v.isFeatured ? 100 : 0) +
+            (v.isTopRated ? 50 : 0) +
+            (v.isNewThisWeek ? 10 : 0),
+      );
+
+  static final List<ListingFilter<ApiVenue>> _filterOptions = [
+    ListingFilter<ApiVenue>('Featured', 'flag', (v) => v.isFeatured),
+    ListingFilter<ApiVenue>('Top rated', 'flag', (v) => v.isTopRated),
+    ListingFilter<ApiVenue>('New this week', 'flag', (v) => v.isNewThisWeek),
+  ];
+
+  int get _activeFilterCount =>
+      (_sort != null ? 1 : 0) + _pickedFilters.length;
 
   String get _categoryTitle =>
       (_currentCategory['label'] as String).replaceAll('\n', ' ');
 
-  void _showFilterSheet() {
+  void _selectSubcategory(int index) {
+    final id = index > 0 && index - 1 < _subcategories.length
+        ? _subcategories[index - 1].id
+        : null;
+    setState(() {
+      _selectedFilterIndex = index;
+      _selectedSubcategoryId = id;
+    });
+    _fetchVenues();
+  }
+
+  Future<void> _showFilterSheet() async {
     final cats = _filters.where((f) => f != 'All').toList();
-    FilterBottomSheet.show(
+    final result = await FilterBottomSheet.show(
       context,
-      sortOptions: const [
-        'Top Picks',
-        'Distance- Near to Far',
-        'Price- Low to High',
-        'Price- High to Low',
-      ],
-      filterOptions: const [
-        'Soft Play',
-        'Trampoline Parks',
-        'Ninja Courses',
-        'Climbing Walls',
-        'Arcade & tags',
-        'VR & Simulation',
-        'Escape Rooms',
-      ],
+      sortOptions: [for (final o in ListingSort.forType(hasPrice: false)) o.label],
+      filterOptions: [for (final f in _filterOptions) f.label],
       categoryOptions: cats,
+      singleCategory: true,
+      initialSort: _sort?.label,
+      initialFilters: _pickedFilters.toList(),
+      initialCategories: [
+        if (_selectedFilterIndex > 0 && _selectedFilterIndex < _filters.length)
+          _filters[_selectedFilterIndex],
+      ],
     );
+    if (result == null || !mounted) return;
+
+    final sort = ListingSort.fromLabel(result.selectedSort);
+    final pickedCategory = result.selectedCategories.isEmpty
+        ? 0
+        : _filters.indexOf(result.selectedCategories.first).clamp(0, _filters.length - 1);
+    setState(() {
+      _sort = sort;
+      _pickedFilters = result.selectedFilters.toSet();
+    });
+    if (sort == ListingSort.distance && !UserLocation.isKnown) {
+      AppSnackBar.show(context, 'Turn on location to sort by distance.');
+    }
+    // The category is the subcategory chip row: choosing one here is the same
+    // as tapping its chip, so it refetches.
+    if (pickedCategory != _selectedFilterIndex) _selectSubcategory(pickedCategory);
   }
 
   @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.category);
     final safeTop = MediaQuery.of(context).padding.top;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -446,13 +517,14 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                   SliverToBoxAdapter(
                     child: SizedBox(
                       height: 42,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                        itemCount: _filters.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == 0) {
-                            return GestureDetector(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Pinned: stays put while the subcategory chips
+                          // scroll beside it.
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 0, 0),
+                            child: GestureDetector(
                               onTap: _showFilterSheet,
                               child: Container(
                                 margin: const EdgeInsets.only(right: 8),
@@ -466,7 +538,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      'Filters',
+                                      _activeFilterCount > 0 ? 'Filters ($_activeFilterCount)' : 'Filters',
                                       style: GoogleFonts.poppins(
                                         fontSize: Responsive.sp(context, 11.5),
                                         fontWeight: FontWeight.w500,
@@ -481,14 +553,18 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                                   ],
                                 ),
                               ),
-                            );
-                          }
-                          final filterIndex = index - 1;
+                            ),
+                          ),
+                          Expanded(child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.fromLTRB(0, 8, 16, 0),
+                        itemCount: _filters.length,
+                        itemBuilder: (context, index) {
+                          final filterIndex = index;
                           final isActive =
                               filterIndex == _selectedFilterIndex;
                           return GestureDetector(
-                            onTap: () => setState(
-                                () => _selectedFilterIndex = filterIndex),
+                            onTap: () => _selectSubcategory(filterIndex),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
                               alignment: Alignment.center,
@@ -523,6 +599,8 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                             ),
                           );
                         },
+                      )),
+                        ],
                       ),
                     ),
                   ),
@@ -553,7 +631,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                         onRetry: _fetchVenues,
                       ),
                     )
-                  else if (_apiVenues.isEmpty)
+                  else if (_filteredVenues.isEmpty)
                     SliverFillRemaining(
                       hasScrollBody: false,
                       child: SubcategoryEmptyState(
@@ -566,8 +644,9 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                       sliver: SliverGrid(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            if (index >= _apiVenues.length) return null;
-                            final venue = _apiVenues[index];
+                            final venues = _filteredVenues;
+                            if (index >= venues.length) return null;
+                            final venue = venues[index];
                             final em = _toEventModel(venue);
                             return CategoryEventCard(
                               event: em,
@@ -579,7 +658,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                               ),
                             );
                           },
-                          childCount: _apiVenues.length,
+                          childCount: _filteredVenues.length,
                         ),
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(

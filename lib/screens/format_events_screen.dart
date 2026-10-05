@@ -16,6 +16,7 @@ import '../widgets/category_skeleton_card.dart';
 import '../widgets/subcategory_empty_state.dart';
 import '../core/date_format.dart';
 import '../core/user_location.dart';
+import '../core/listing_source.dart';
 
 /// Listing grid shared with the category screens — two up, 0.62 ratio — so a
 /// format browse and a category browse present their results identically.
@@ -194,6 +195,7 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.category);
     final safeTop = MediaQuery.of(context).padding.top;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(

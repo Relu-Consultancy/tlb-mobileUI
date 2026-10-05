@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
+import '../core/feed_city_filter.dart';
 import '../core/listing_schedule.dart';
 import '../core/user_location.dart';
 import '../models/event_model.dart';
+import '../models/homepage_section_model.dart';
+import 'location_state.dart';
 import '../providers/auth_state.dart';
 import '../services/home_feed_service.dart';
 
@@ -17,12 +20,53 @@ class HomeFeedState {
   HomeFeedState._();
 
   static final ValueNotifier<int> version = ValueNotifier<int>(0);
-  static final Map<String, List<EventModel>> _sections = {};
+  /// Every curated card the API sent, with the listing it came from, so the
+  /// city filter can be re-applied when the city changes without a refetch.
+  static final Map<String, List<(HomepageListing, EventModel)>> _sections = {};
   static bool _loading = false;
   static bool _loaded = false;
+  static bool _listeningToCity = false;
 
-  /// Cards for a section key (e.g. `'hot_picks'`, `'spotlight'`); empty when none.
-  static List<EventModel> section(String key) => _sections[key] ?? const [];
+  /// Cards for a section key (e.g. `'hot_picks'`, `'spotlight'`) in the
+  /// selected city; empty when none.
+  static List<EventModel> section(String key) {
+    final city = LocationState().cityOrNull;
+    return [
+      for (final (listing, card) in _sections[key] ?? const <(HomepageListing, EventModel)>[])
+        if (FeedCityFilter.keep(listing, city)) card,
+    ];
+  }
+
+  /// True once the feed is in and none of it is in the selected city — Home
+  /// shows its empty state rather than a page of hidden sections.
+  static bool get isEmptyForCity =>
+      _loaded && _sections.keys.every((k) => section(k).isEmpty);
+
+  /// Section widgets rebuild on [version], not on the city, so a city change
+  /// bumps it — the filter is re-applied to the cards already held.
+  static void _listenToCity() {
+    if (_listeningToCity) return;
+    _listeningToCity = true;
+    LocationState().selectedCity.addListener(() => version.value++);
+  }
+
+  /// Replaces the feed as if a fetch had just landed.
+  @visibleForTesting
+  static void seedForTest(Map<String, List<HomepageListing>> sections) {
+    _sections
+      ..clear()
+      ..addAll({
+        for (final e in sections.entries)
+          e.key: [for (final l in e.value) (l, l.toEventModel())],
+      });
+    _loaded = true;
+  }
+
+  @visibleForTesting
+  static void resetForTest() {
+    _sections.clear();
+    _loaded = false;
+  }
 
   /// True once a fetch has come back with a usable feed. Sections show their
   /// mock set until then, and if the fetch could not reach the API at all, so
@@ -37,6 +81,7 @@ class HomeFeedState {
   static Future<void> load({bool force = false}) async {
     if (_loading) return;
     if (_loaded && !force) return;
+    _listenToCity();
     _loading = true;
     try {
       final sections = await HomeFeedService.fetchSections(
@@ -49,7 +94,7 @@ class HomeFeedState {
         lat: UserLocation.lat,
         lng: UserLocation.lng,
       );
-      final map = <String, List<EventModel>>{};
+      final map = <String, List<(HomepageListing, EventModel)>>{};
       for (final s in sections) {
         // Hero first, then the rest. Home's rails have no banner slot, and
         // reading `listings` alone would drop the hero outright — the API
@@ -58,7 +103,7 @@ class HomeFeedState {
             // A finished event or program has nothing left to book. A no-op
             // for classes/venues, whose end_datetime is always null here.
             .where((l) => !ListingSchedule.hasEnded(l.endDatetime))
-            .map((l) => l.toEventModel())
+            .map((l) => (l, l.toEventModel()))
             .toList();
       }
       _sections

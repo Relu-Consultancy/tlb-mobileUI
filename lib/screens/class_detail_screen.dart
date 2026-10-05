@@ -24,6 +24,8 @@ import 'gallery_screen.dart';
 import 'select_batch_screen.dart';
 import '../widgets/enquire_now_sheet.dart';
 import '../core/date_format.dart';
+import '../core/listing_source.dart';
+import '../services/activity_service.dart';
 
 class ClassDetailScreen extends StatefulWidget {
   final EventModel event;
@@ -129,16 +131,6 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
     return 'Schedule TBA';
   }
 
-  String get _ratingText {
-    if (_detail != null && _detail!.totalReviews > 0) {
-      return '${_detail!.averageRating.toStringAsFixed(1)} (${_detail!.totalReviews} reviews)';
-    }
-    return widget.event.reviewCount ?? '(0 reviews)';
-  }
-
-  int get _fullStars => (_detail?.averageRating ?? 4.5).floor();
-  bool get _hasHalfStar => ((_detail?.averageRating ?? 4.5) - _fullStars) >= 0.25;
-
   EventModel get _eventForSheets => EventModel(
     id: _detail?.id ?? widget.event.id,
     title: _title,
@@ -151,6 +143,26 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
         ? '(${_detail!.totalReviews} reviews)'
         : widget.event.reviewCount,
   );
+
+  /// Whether this open has been reported. A State lives for exactly one
+  /// open of the screen, so the flag makes it once per open however often
+  /// dependencies change or the screen rebuilds.
+  bool _viewTracked = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_viewTracked) return;
+    _viewTracked = true;
+    // A Listing View: feeds the partner's view counts, conversion and
+    // traffic sources. Reported here rather than at the call sites so no
+    // way of opening a listing can miss it. Needs the route, hence not
+    // initState.
+    ActivityService.trackListingView(
+      listingId: widget.event.id,
+      source: ListingSource.originOf(context),
+    );
+  }
 
   @override
   void initState() {
@@ -189,6 +201,7 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.recommendation);
     if (_isLoading) {
       return const Scaffold(backgroundColor: Colors.white, body: AppLoader());
     }
@@ -298,33 +311,6 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                           fontWeight: FontWeight.w700,
                           color: AppColors.textSecondary,
                         ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    // Rating
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          Row(
-                            children: List.generate(
-                              _fullStars,
-                              (index) => const Icon(Icons.star, color: Colors.amber, size: 18),
-                            ),
-                          ),
-                          if (_hasHalfStar) const Icon(Icons.star_half, color: Colors.amber, size: 18),
-                          ...List.generate(5 - _fullStars - (_hasHalfStar ? 1 : 0), (_) => const Icon(Icons.star_border, color: Colors.amber, size: 18)),
-                          const SizedBox(width: 8),
-                          Text(
-                            _ratingText,
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 13),
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                        ],
                       ),
                     ),
 
@@ -623,20 +609,10 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
     );
   }
 
+  // Delegates to the shared DetailInfoRow (widgets/detail_sections.dart),
+  // which clamps a long value to one line with a measured "Show more"
+  // toggle instead of letting it run off the screen.
   Widget _buildInfoRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          // A shade darker than the label beside it, so the left rail of
-          // glyphs reads as present rather than disabled.
-          Icon(icon, size: 20, color: Colors.grey.shade700),
-          const SizedBox(width: 12),
-          Text(label, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600)),
-          const Spacer(),
-          Text(value, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
-        ],
-      ),
-    );
+    return DetailInfoRow(icon: icon, label: label, value: value);
   }
 }

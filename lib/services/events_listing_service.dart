@@ -67,15 +67,15 @@ class EventsListingService {
       final params = <String, String>{
         'page': page.toString(),
         'page_size': pageSize.toString(),
-        if (category != null) 'category': category,
-        if (subcategory != null) 'subcategory': subcategory,
-        if (format != null) 'format': format,
-        if (mode != null) 'mode': mode,
-        if (ageGroup != null) 'age_group': ageGroup,
-        if (city != null) 'city': city,
-        if (area != null) 'area': area,
-        if (datePreset != null) 'date_preset': datePreset,
-        if (priceType != null) 'price_type': priceType,
+        'category': ?category,
+        'subcategory': ?subcategory,
+        'format': ?format,
+        'mode': ?mode,
+        'age_group': ?ageGroup,
+        'city': ?city,
+        'area': ?area,
+        'date_preset': ?datePreset,
+        'price_type': ?priceType,
         if (search != null && search.isNotEmpty) 'search': search,
         // Both or neither — the API answers 400 INVALID_COORDS to a
         // lone or malformed one.
@@ -194,9 +194,9 @@ class EventsListingService {
         // Venues filter by integer id, like programs — the name form is
         // ignored (`?subcategory=Soft Play` returns the unfiltered count).
         if (subcategoryId != null) 'subcategory_id': subcategoryId.toString(),
-        if (city != null) 'city': city,
-        if (area != null) 'area': area,
-        if (locationType != null) 'location_type': locationType,
+        'city': ?city,
+        'area': ?area,
+        'location_type': ?locationType,
         if (isFeatured == true) 'is_featured': 'true',
         if (isTopRated == true) 'is_top_rated': 'true',
         if (isNewThisWeek == true) 'is_new_this_week': 'true',

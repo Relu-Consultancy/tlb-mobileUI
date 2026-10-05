@@ -29,6 +29,7 @@ import 'category_programs_screen.dart';
 import 'format_programs_screen.dart';
 import '../providers/discovery_feed_state.dart';
 import '../core/listing_image.dart';
+import '../core/listing_source.dart';
 
 class ProgramsScreen extends StatefulWidget {
   const ProgramsScreen({super.key});
@@ -163,6 +164,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.browse);
     final double screenH = MediaQuery.of(context).size.height;
     final double safeBottom = MediaQuery.of(context).padding.bottom;
 
@@ -999,18 +1001,28 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                         ),
                         if (event.description != null) ...[
                           const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              event.description!,
-                              style: GoogleFonts.poppins(
-                                fontSize: Responsive.sp(context, 9),
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textPrimary,
+                          // Flexible, not a bare Container: an unconstrained
+                          // pill sized to the full description text (this
+                          // field can run to a full sentence) pushed clean
+                          // off the right edge of the card. It now shrinks
+                          // to whatever width the title left it and clips
+                          // to one line with an ellipsis instead.
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                event.description!,
+                                style: GoogleFonts.poppins(
+                                  fontSize: Responsive.sp(context, 9),
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textPrimary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ),

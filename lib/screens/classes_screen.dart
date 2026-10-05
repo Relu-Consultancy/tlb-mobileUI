@@ -29,6 +29,7 @@ import 'venues_screen.dart';
 import 'category_classes_screen.dart';
 import '../providers/discovery_feed_state.dart';
 import '../models/event_model.dart';
+import '../core/listing_source.dart';
 
 class ClassesScreen extends StatefulWidget {
   const ClassesScreen({super.key});
@@ -161,6 +162,7 @@ class _ClassesScreenState extends State<ClassesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.browse);
     final double screenH = MediaQuery.of(context).size.height;
     final double safeBottom = MediaQuery.of(context).padding.bottom;
 

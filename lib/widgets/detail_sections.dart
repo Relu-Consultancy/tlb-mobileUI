@@ -129,6 +129,121 @@ class DetailRowIcon extends StatelessWidget {
   }
 }
 
+/// A "Things to Know" row: a leading glyph, a label, and a right-aligned
+/// value — used for Age Group, Format, Mode, Language, Capacity, etc. across
+/// all four detail screens.
+///
+/// The value used to be an unconstrained `Text` next to a `Spacer`, which
+/// read fine for short values ("Offline", "Regular") but ran clean off the
+/// screen for a long one — a listing with six languages set, for example.
+/// Long values now clamp to one line with an ellipsis and grow a "Show more"
+/// toggle that expands the row to a full second line, mirroring the
+/// "See more" pattern [[DetailLocationRow]] already uses for addresses. The
+/// toggle only appears when the value genuinely doesn't fit — it's measured,
+/// not guessed from a character count.
+class DetailInfoRow extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const DetailInfoRow({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  State<DetailInfoRow> createState() => _DetailInfoRowState();
+}
+
+class _DetailInfoRowState extends State<DetailInfoRow> {
+  bool _expanded = false;
+
+  static const double _iconSize = 20;
+  static const double _iconGap = 12;
+
+  Widget _toggle(BuildContext context, String label) => GestureDetector(
+        onTap: () => setState(() => _expanded = !_expanded),
+        behavior: HitTestBehavior.opaque,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 12),
+              fontWeight: FontWeight.w600,
+              color: AppColors.blue,
+            ),
+          ),
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final labelStyle = GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade600);
+    final valueStyle = GoogleFonts.poppins(
+      fontSize: Responsive.sp(context, 13),
+      fontWeight: FontWeight.w500,
+      color: AppColors.textSecondary,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Same measure-don't-guess approach as DetailLocationRow: the space
+          // actually left for the value, once the icon and label have taken
+          // theirs, decides whether "Show more" appears — not a hardcoded
+          // character limit that would be wrong at another text scale.
+          final labelWidth = (TextPainter(
+            text: TextSpan(text: widget.label, style: labelStyle),
+            textDirection: TextDirection.ltr,
+          )..layout())
+              .width;
+          final valueMaxWidth = constraints.maxWidth - _iconSize - _iconGap - labelWidth;
+          final overflows = valueMaxWidth > 0 &&
+              (TextPainter(
+                text: TextSpan(text: widget.value, style: valueStyle),
+                maxLines: 1,
+                textDirection: TextDirection.ltr,
+              )..layout(maxWidth: valueMaxWidth))
+                  .didExceedMaxLines;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(widget.icon, size: _iconSize, color: Colors.grey.shade700),
+                  const SizedBox(width: _iconGap),
+                  Text(widget.label, style: labelStyle),
+                  const Spacer(),
+                  if (!_expanded)
+                    Flexible(
+                      child: Text(
+                        widget.value,
+                        style: valueStyle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                ],
+              ),
+              if (_expanded) ...[
+                const SizedBox(height: 4),
+                Text(widget.value, style: valueStyle),
+              ],
+              if (overflows) Align(alignment: Alignment.centerRight, child: _toggle(context, _expanded ? 'Show less' : 'Show more')),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
 /// The address row near the top of a detail screen: a pin, the listing's full
 /// street address, and a button that routes to it from wherever the user is.
 ///
