@@ -1,6 +1,8 @@
 import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
 import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
+import '../providers/connectivity_state.dart';
+import '../screens/network_error_screen.dart';
 import 'app_loader.dart';
 
 /// Branded pull-to-refresh indicator — replaces the default Material spinner
@@ -23,10 +25,23 @@ class AppRefreshIndicator extends StatelessWidget {
     this.offsetToArmed = 90,
   });
 
+  /// Every pull-to-refresh in the app goes through here, so this is where
+  /// "offline" is caught: rather than spinning and failing (or quietly
+  /// keeping stale content), the customer gets the No-internet screen. When
+  /// it closes because the connection is back, the refresh runs.
+  Future<void> _refresh(BuildContext context) async {
+    if (await ConnectivityState.checkNow()) return onRefresh();
+    if (!context.mounted) return;
+    // Not awaited: the spinner should settle now, not sit under the screen.
+    NetworkErrorScreen.show(context).then((backOnline) {
+      if (backOnline) onRefresh();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return CustomRefreshIndicator(
-      onRefresh: onRefresh,
+      onRefresh: () => _refresh(context),
       offsetToArmed: offsetToArmed,
       builder: (context, child, controller) {
         return AnimatedBuilder(

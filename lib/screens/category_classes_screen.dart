@@ -22,6 +22,7 @@ import '../widgets/app_loader.dart';
 import 'class_detail_screen.dart';
 import '../core/user_location.dart';
 import '../core/listing_source.dart';
+import '../services/activity_service.dart';
 
 class CategoryClassesScreen extends StatefulWidget {
   final int initialCategoryIndex;
@@ -216,6 +217,18 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
     ListingFilter<ApiClass>('Rated 4+', 'rating', (c) => c.averageRating >= 4),
   ];
 
+  /// The applied set — category, subcategory chip, sort and Filters-tab picks
+  /// — for the activity log. Once per distinct set (the service skips repeats).
+  void _reportFilters() => ActivityService.trackFilters('category_classes', {
+        'category': _categoryTitle,
+        'subcategory': _selectedFilterIndex > 0 &&
+                _selectedFilterIndex < _filters.length
+            ? _filters[_selectedFilterIndex]
+            : null,
+        'sort': _sort?.label,
+        'filters': _pickedFilters.toList(),
+      });
+
   int get _activeFilterCount =>
       (_sort != null ? 1 : 0) + _pickedFilters.length;
 
@@ -266,6 +279,10 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
     setState(() {
       _sort = sort;
       _pickedFilters = result.selectedFilters.toSet();
+    });
+    // Reported after the chip change below has been applied.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _reportFilters();
     });
     if (sort == ListingSort.distance && !UserLocation.isKnown) {
       AppSnackBar.show(context, 'Turn on location to sort by distance.');
@@ -460,6 +477,7 @@ class _CategoryClassesScreenState extends State<CategoryClassesScreen> {
                               setState(() => _selectedFilterIndex = filterIndex);
                               final sub = filterIndex == 0 ? null : _filters[filterIndex];
                               _fetchClasses(subcategory: sub);
+                              _reportFilters();
                             },
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),

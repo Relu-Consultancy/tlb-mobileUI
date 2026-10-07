@@ -129,6 +129,10 @@ class ApiVenue {
   final String? cover;
   final double? distanceKm;
 
+  /// From `average_rating` / `total_reviews`; 0 for a venue with no reviews.
+  final double averageRating;
+  final int totalReviews;
+
   const ApiVenue({
     required this.id,
     required this.title,
@@ -140,6 +144,8 @@ class ApiVenue {
     required this.isTopRated,
     this.cover,
     this.distanceKm,
+    this.averageRating = 0,
+    this.totalReviews = 0,
   });
 
   factory ApiVenue.fromJson(Map<String, dynamic> json) => ApiVenue(
@@ -155,6 +161,8 @@ class ApiVenue {
         isTopRated: (json['is_top_rated'] as bool?) ?? false,
         cover: json['cover'] as String?,
         distanceKm: (json['distance_km'] as num?)?.toDouble(),
+        averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0,
+        totalReviews: (json['total_reviews'] as num?)?.toInt() ?? 0,
       );
 }
 
@@ -212,6 +220,8 @@ class ApiVenueDetail extends ApiVenue {
     required super.isTopRated,
     super.cover,
     super.distanceKm,
+    super.averageRating,
+    super.totalReviews,
     this.description,
     this.subcategory,
     this.locationType,
@@ -259,6 +269,8 @@ class ApiVenueDetail extends ApiVenue {
             .whereType<String>()
             .firstOrNull,
         distanceKm: (json['distance_km'] as num?)?.toDouble(),
+        averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0,
+        totalReviews: (json['total_reviews'] as num?)?.toInt() ?? 0,
         description: json['description'] as String?,
         subcategory: json['subcategory'] != null
             ? ApiVenueCategory.fromJson(

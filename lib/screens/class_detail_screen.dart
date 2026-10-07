@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/listing_image.dart';
 import '../core/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -65,7 +66,6 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
   String get _title => _detail?.title ?? widget.event.title;
   String get _tag => _detail?.subcategory?.name ?? _detail?.category.name ?? widget.event.tag ?? 'Class';
   String get _coverUrl => _detail?.coverUrl ?? widget.event.imagePath;
-  bool get _isCoverNetwork => _coverUrl.startsWith('http');
 
   /// Image URLs for the gallery row — real media if present, else the cover.
   List<String> get _galleryImages {
@@ -269,18 +269,18 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
                 flexibleSpace: FlexibleSpaceBar(
                   background: ClipRRect(
                     borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
-                    child: _isCoverNetwork
-                        ? Image.network(
-                            _coverUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
+                    child: _coverUrl.isEmpty
+                        ? Container(
                               color: Colors.grey.shade300,
                               child: const Center(child: Icon(Icons.school, size: 60, color: Colors.grey)),
-                            ),
-                          )
-                        : Image.asset(
+                            )
+                        // Downsized to screen width (a raw Image.network decoded a
+                        // 1837x10000 upload at full size, ~73 MB) and anchored at the top,
+                        // so an unusually tall cover shows its heading, not its middle.
+                        : listingImageSource(
                             _coverUrl,
                             fit: BoxFit.cover,
+                            alignment: Alignment.topCenter,
                             errorBuilder: (_, __, ___) => Container(
                               color: Colors.grey.shade300,
                               child: const Center(child: Icon(Icons.school, size: 60, color: Colors.grey)),

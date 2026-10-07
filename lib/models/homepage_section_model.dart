@@ -280,7 +280,8 @@ class HomepageListing {
       description: shortDescription.isEmpty ? null : shortDescription,
       price: isFree ? null : (price != null ? double.tryParse(price!) : null),
       rating: rating != null ? double.tryParse(rating!) : null,
-      reviewCount: (reviews != null && reviews.isNotEmpty)
+      // total_reviews arrives as a string ("0"); no reviews means no count.
+      reviewCount: (int.tryParse(reviews ?? '') ?? 0) > 0
           ? '$reviews reviews'
           : null,
       listingType: listingType,

@@ -17,6 +17,7 @@ import '../widgets/format_circle_label.dart';
 import '../widgets/subcategory_empty_state.dart';
 import '../core/user_location.dart';
 import '../core/listing_source.dart';
+import '../services/activity_service.dart';
 
 /// Listing grid shared with the category and format screens — two up, 0.62
 /// ratio — so every "browse a slice of the catalogue" screen presents its
@@ -123,6 +124,8 @@ class _PaceClassesScreenState extends State<PaceClassesScreen> {
     if (index == _selectedIndex) return;
     setState(() => _selectedIndex = index);
     _fetchClasses();
+    // Picking a pace narrows the list — an applied filter.
+    ActivityService.trackFilters('pace_classes', {'pace': _paceLabel});
   }
 
   EventModel _toEventModel(ApiClass cls) => EventModel(

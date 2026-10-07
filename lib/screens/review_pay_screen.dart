@@ -61,7 +61,11 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
 
   // ── Coupon state ──
   final TextEditingController _couponCtrl = TextEditingController();
-  String? _appliedCoupon; // the validated code, or null
+  /// The code exactly as it was validated — and so exactly as it is sent to
+  /// initiate. It used to be upper-cased here, so a code validated as typed
+  /// ("save10") went to initiate as "SAVE10"; a case-sensitive lookup there
+  /// misses it and the order is created for the full amount.
+  String? _appliedCoupon;
   double _discount = 0; // discount amount from validation
   bool _validatingCoupon = false;
   String? _couponError;
@@ -130,7 +134,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
     setState(() {
       _validatingCoupon = false;
       if (result.isValid) {
-        _appliedCoupon = code.toUpperCase();
+        _appliedCoupon = code;
         _discount = result.discountAmount;
         _couponError = null;
       } else {
@@ -256,6 +260,44 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
 
       _pendingBookingId = resp.bookingId;
       _pendingBookingRef = resp.bookingReference;
+      debugPrint('Booking initiated -> amount=${resp.amount} '
+          'original=${resp.originalAmount} discount=${resp.discountAmount} '
+          'coupon_sent=$_appliedCoupon coupon_applied=${resp.couponApplied} '
+          'screen_total=$_totalAmount');
+
+      // A free booking — a free listing, or a coupon covering the whole
+      // amount — is confirmed and marked paid by initiate itself: status
+      // "confirmed", no Razorpay order, amount 0. There is nothing to pay or
+      // verify, so go straight to the confirmation screen. (This used to fall
+      // through to the "no order id" guard below and show a payment error for
+      // a booking that had in fact succeeded.)
+      if (resp.status.toLowerCase() == 'confirmed') {
+        if (!mounted) return;
+        _openConfirmation(
+          bookingReference: resp.bookingReference,
+          bookingId: resp.bookingId,
+        );
+        return;
+      }
+
+      // Razorpay charges what the backend's order is for, not what this screen
+      // shows. If a coupon was shown as applied but the order came back for
+      // more, say so before opening checkout instead of silently charging the
+      // undiscounted amount.
+      if (_appliedCoupon != null && resp.amount > _totalAmount + 0.5) {
+        if (!mounted) return;
+        final payAnyway = await showAppConfirmDialog(
+          context,
+          title: 'Coupon not applied',
+          message: "Your coupon couldn't be applied to this booking, so the "
+              'payment would be ₹${resp.amount.toStringAsFixed(2)} instead of '
+              '₹${_totalAmount.toStringAsFixed(2)}. '
+              'Do you want to pay the full amount?',
+          confirmLabel: 'Pay ₹${resp.amount.toStringAsFixed(0)}',
+          icon: Icons.local_offer_outlined,
+        );
+        if (!payAnyway || !mounted) return;
+      }
 
       // Razorpay's checkout is a native activity. Handed an empty order id or
       // a zero amount it opens and renders nothing — a black screen with no
@@ -350,48 +392,10 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
         return;
       }
 
-      if (widget.bookingType == 'venue') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => VenueBookingConfirmedScreen(
-              event: widget.event,
-              selectedDate: widget.selectedDate,
-              selectedTime: widget.selectedTime,
-              bookingReference: confirmed.bookingReference,
-              bookingId: confirmed.id,
-            ),
-          ),
-        );
-      } else if (widget.bookingType == 'program' ||
-          widget.bookingType == 'class') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ProgramBookingConfirmedScreen(
-              event: widget.event,
-              selectedDate: widget.selectedDate,
-              selectedTime: widget.selectedTime,
-              bookingReference: confirmed.bookingReference,
-              bookingType: widget.bookingType,
-              bookingId: confirmed.id,
-            ),
-          ),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => BookingConfirmedScreen(
-              event: widget.event,
-              selectedDate: widget.selectedDate,
-              selectedTime: widget.selectedTime,
-              bookingReference: confirmed.bookingReference,
-              bookingId: confirmed.id,
-            ),
-          ),
-        );
-      }
+      _openConfirmation(
+        bookingReference: confirmed.bookingReference,
+        bookingId: confirmed.id,
+      );
     } catch (e) {
       if (!mounted) return;
       Navigator.pop(context); // close loader
@@ -399,6 +403,46 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
       // Show a recoverable error — user can contact support with their ref.
       _showVerificationFailureDialog(_pendingBookingRef ?? bookingId);
     }
+  }
+
+  /// The success screen for this booking type. Shared by the paid path (after
+  /// verify-payment) and the free path (confirmed directly by initiate).
+  void _openConfirmation({
+    required String bookingReference,
+    required String bookingId,
+  }) {
+    final Widget screen;
+    if (widget.bookingType == 'venue') {
+      screen = VenueBookingConfirmedScreen(
+        event: widget.event,
+        selectedDate: widget.selectedDate,
+        selectedTime: widget.selectedTime,
+        bookingReference: bookingReference,
+        bookingId: bookingId,
+      );
+    } else if (widget.bookingType == 'program' ||
+        widget.bookingType == 'class') {
+      screen = ProgramBookingConfirmedScreen(
+        event: widget.event,
+        selectedDate: widget.selectedDate,
+        selectedTime: widget.selectedTime,
+        bookingReference: bookingReference,
+        bookingType: widget.bookingType,
+        bookingId: bookingId,
+      );
+    } else {
+      screen = BookingConfirmedScreen(
+        event: widget.event,
+        selectedDate: widget.selectedDate,
+        selectedTime: widget.selectedTime,
+        bookingReference: bookingReference,
+        bookingId: bookingId,
+      );
+    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => screen),
+    );
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
@@ -510,7 +554,9 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
                       child: AppLoaderInline(),
                     )
                   : Text(
-                      'Pay ₹${_totalAmount.toStringAsFixed(2)}',
+                      _totalAmount <= 0
+                          ? 'Confirm Booking'
+                          : 'Pay ₹${_totalAmount.toStringAsFixed(2)}',
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 16),
                         fontWeight: FontWeight.w500,
@@ -631,7 +677,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
           if (_discount > 0) ...[
             const SizedBox(height: 8),
             _priceRow(
-              'Coupon ($_appliedCoupon)',
+              'Coupon (${_appliedCoupon!.toUpperCase()})',
               '−₹${_discount.toStringAsFixed(0)}',
               valueColor: const Color(0xFF22C55E),
             ),
@@ -684,7 +730,7 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                "'$_appliedCoupon' applied",
+                "'${_appliedCoupon!.toUpperCase()}' applied",
                 style: GoogleFonts.poppins(
                   fontSize: Responsive.sp(context, 13.5),
                   fontWeight: FontWeight.w500,

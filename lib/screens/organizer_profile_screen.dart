@@ -11,6 +11,7 @@ import '../widgets/partner_follow_button.dart';
 import '../widgets/social_links_row.dart';
 import '../widgets/upcoming_events_section.dart';
 import '../core/listing_source.dart';
+import '../services/activity_service.dart';
 
 class OrganizerProfileScreen extends StatefulWidget {
   final String listingId;
@@ -44,15 +45,26 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
   ApiProvider? _provider;
   bool _isLoading = false;
   String? _error;
+  bool _viewTracked = false;
 
   @override
   void initState() {
     super.initState();
     if (widget.provider != null) {
       _provider = widget.provider;
+      _trackView();
     } else if (widget.listingId.isNotEmpty) {
       _fetchProvider();
     }
+  }
+
+  /// One profile view per open, for the partner's dashboard — as soon as the
+  /// partner's id is known. Guarded so a retry or rebuild can't send another.
+  void _trackView() {
+    final id = _provider?.id;
+    if (_viewTracked || id == null || id.isEmpty) return;
+    _viewTracked = true;
+    ActivityService.trackPartnerView(id);
   }
 
   Future<void> _fetchProvider() async {
@@ -73,6 +85,7 @@ class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
         _provider = p;
         _isLoading = false;
       });
+      _trackView();
     } catch (e) {
       if (!mounted) return;
       setState(() {

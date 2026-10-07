@@ -165,3 +165,44 @@ class ListingMetaRows extends StatelessWidget {
     );
   }
 }
+
+/// The green "x km away" row on its own, for cards that lay out their own meta
+/// instead of using [ListingMetaRows] — so every card shows distance the same
+/// way. Draws nothing when the API sent no distance (the request had no
+/// coordinates, or the listing has none stored): never a made-up number.
+class ListingDistanceRow extends StatelessWidget {
+  final EventModel event;
+  final double iconSize;
+  final double fontSize;
+
+  const ListingDistanceRow({
+    super.key,
+    required this.event,
+    this.iconSize = 13,
+    this.fontSize = 11,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final text = event.distanceDisplay;
+    if (text == null) return const SizedBox.shrink();
+    return Row(
+      children: [
+        Icon(Icons.near_me_outlined, size: iconSize, color: AppColors.distanceGreen),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, fontSize),
+              color: AppColors.distanceGreen,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

@@ -17,6 +17,7 @@ import '../widgets/subcategory_empty_state.dart';
 import '../core/date_format.dart';
 import '../core/user_location.dart';
 import '../core/listing_source.dart';
+import '../services/activity_service.dart';
 
 /// Listing grid shared with the category screens — two up, 0.62 ratio — so a
 /// format browse and a category browse present their results identically.
@@ -105,6 +106,8 @@ class _FormatEventsScreenState extends State<FormatEventsScreen> {
     if (index == _selectedIndex) return;
     setState(() => _selectedIndex = index);
     _fetchEvents();
+    // Picking a format narrows the list — an applied filter.
+    ActivityService.trackFilters('format_events', {'format': _formatLabel});
   }
 
   EventModel _toEventModel(ApiEvent e) {

@@ -26,6 +26,29 @@ class LocationState {
   /// before the city is known.
   final ValueNotifier<bool> resolvingLocation = ValueNotifier<bool>(false);
 
+  /// A short "street, area, city" label for the header when the city came
+  /// from a GPS fix (see `CityResolver.shortLabel`); null otherwise, and the
+  /// header shows the bare city. Display only — filtering and every request
+  /// still use [selectedCity].
+  final ValueNotifier<String?> placeLabel = ValueNotifier<String?>(null);
+
+  /// True when the current city was picked from the list by hand (no GPS
+  /// fix behind it). A fresh device fix must not override that choice; it may
+  /// replace a city detected on launch or restored from the account.
+  bool get cityPickedByHand => _pickedByHand;
+  bool _pickedByHand = false;
+
+  /// Back to a fresh launch: no city, no fix, no label, nothing picked.
+  @visibleForTesting
+  void resetForTest() {
+    _pickedByHand = false;
+    latitude = null;
+    longitude = null;
+    placeLabel.value = null;
+    resolvingLocation.value = false;
+    selectedCity.value = '';
+  }
+
   /// Whether a city has been chosen or detected.
   bool get hasCity => selectedCity.value.trim().isNotEmpty;
 
@@ -76,10 +99,15 @@ class LocationState {
   /// (`/customer/location/`): a fix from "Use current location" is saved,
   /// and a city picked by hand clears whatever was saved before. Signed-out
   /// users keep it on the device only.
-  void setCity(String city, {double? latitude, double? longitude}) {
+  ///
+  /// [label] is the short address for the header; it is kept only alongside
+  /// coordinates, so a city picked by hand never shows an old street.
+  void setCity(String city,
+      {double? latitude, double? longitude, String? label}) {
     if (city.trim().isEmpty) return;
     final hadCoordinates = hasCoordinates;
-    _apply(city, latitude, longitude);
+    _pickedByHand = latitude == null || longitude == null;
+    _apply(city, latitude, longitude, label: label);
     if (AuthState.isLoggedIn.value) {
       if (latitude != null && longitude != null) {
         CustomerLocationService.save(latitude, longitude);
@@ -92,7 +120,12 @@ class LocationState {
     if (hasCoordinates || hadCoordinates) _refreshGeoFeeds();
   }
 
-  void _apply(String city, double? latitude, double? longitude) {
+  void _apply(String city, double? latitude, double? longitude,
+      {String? label}) {
+    // Label first, so anything listening to the city already sees it.
+    final hasFix = latitude != null && longitude != null;
+    final l = label?.trim();
+    placeLabel.value = hasFix && l != null && l.isNotEmpty ? l : null;
     selectedCity.value = city.trim();
     this.latitude = latitude;
     this.longitude = longitude;
@@ -148,6 +181,7 @@ class LocationState {
   void clearCoordinates() {
     latitude = null;
     longitude = null;
+    placeLabel.value = null; // the street belonged to that fix
   }
 
   /// Reload whichever section feeds are already on screen so their cards

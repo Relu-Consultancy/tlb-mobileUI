@@ -389,6 +389,9 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                     ),
                   ],
                 ),
+                // Only a real rating: an unreviewed venue used to show a
+                // hard-coded "4.5 (124 reviews)".
+                if (widget.event.hasRating) ...[
                 const SizedBox(height: 6),
                 Row(
                   children: [
@@ -396,7 +399,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                         color: Color(0xFFFFB902), size: 15),
                     const SizedBox(width: 3),
                     Text(
-                      (widget.event.rating ?? 4.5).toStringAsFixed(1),
+                      widget.event.rating!.toStringAsFixed(1),
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 12),
                         fontWeight: FontWeight.w600,
@@ -406,7 +409,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                     const SizedBox(width: 5),
                     Expanded(
                       child: Text(
-                        widget.event.reviewCount ?? '(124 reviews)',
+                        widget.event.reviewCount ?? '',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
@@ -417,6 +420,7 @@ class _PlanPartyScreenState extends State<PlanPartyScreen> {
                     ),
                   ],
                 ),
+                ],
               ],
             ),
           ),

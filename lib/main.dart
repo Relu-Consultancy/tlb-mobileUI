@@ -6,9 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/app_theme.dart';
+import 'core/offline_guard.dart';
 import 'core/firebase_bootstrap.dart';
 import 'core/preview_mode.dart';
 import 'providers/auth_state.dart';
+import 'providers/connectivity_state.dart';
 import 'providers/follow_state.dart';
 import 'providers/notifications_state.dart';
 import 'providers/saved_events_state.dart';
@@ -16,6 +18,7 @@ import 'services/push_notifications.dart';
 import 'services/avatar_storage.dart';
 import 'screens/home_screen.dart';
 import 'screens/splash_screen.dart';
+import 'widgets/connectivity_toast.dart';
 import 'widgets/login_sheet.dart';
 import 'widgets/preview_toggle_button.dart';
 import 'core/listing_source.dart';
@@ -61,6 +64,11 @@ void main() async {
   );
   // Disable runtime font fetching — use bundled fonts only
   GoogleFonts.config.allowRuntimeFetching = false;
+  // Watches for the network dropping or returning — drives the top
+  // online/offline toast. Fire-and-forget; never delays launch.
+  ConnectivityState.init();
+  // ...and puts the No-internet screen over whatever is open when it drops.
+  OfflineGuard.start(PushNotifications.navigatorKey);
   runApp(TLBRoot(isLoggedIn: restored));
 }
 
@@ -133,7 +141,12 @@ class TLBApp extends StatelessWidget {
           data: MediaQuery.of(context).copyWith(
             textScaler: const TextScaler.linear(1.0),
           ),
-          child: child!,
+          // The online/offline toast sits above the navigator, so it shows
+          // over whichever screen is open.
+          child: Stack(
+            fit: StackFit.expand,
+            children: [child!, const ConnectivityToast()],
+          ),
         );
         return kDebugMode
             ? DevicePreview.appBuilder(context, clamped)

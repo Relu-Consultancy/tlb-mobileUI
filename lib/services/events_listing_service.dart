@@ -290,12 +290,24 @@ class EventsListingService {
 
   // ── Venue detail ──────────────────────────────────────────────────────────
 
-  static Future<ApiVenueDetail> fetchVenueDetail(String listingId) async {
+  /// [token] — pass it only when this fetch IS the customer opening the
+  /// venue. The backend records the venue's `view_listing` from this request
+  /// (the app deliberately doesn't send one), and an anonymous request can't
+  /// be attributed, so a signed-in customer's views went unrecorded. Screens
+  /// that fetch a venue just for its cover (Bookings) leave it null, so they
+  /// don't count as views.
+  static Future<ApiVenueDetail> fetchVenueDetail(String listingId,
+      {String? token}) async {
     try {
       final res = await http
           .get(
             Uri.parse('$_base/api/v1/listings/venues/$listingId/'),
-            headers: {'Accept': 'application/json'},
+            headers: {
+              'Accept': 'application/json',
+              'X-Client-Platform': 'app',
+              if (token != null && token.isNotEmpty)
+                'Authorization': 'Bearer $token',
+            },
           )
           .timeout(_timeout);
 

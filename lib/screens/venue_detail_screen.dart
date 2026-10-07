@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/listing_image.dart';
 import '../core/app_colors.dart';
 import '../widgets/app_loader.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -24,7 +25,6 @@ import 'plan_party_screen.dart';
 import 'gallery_screen.dart';
 import '../core/date_format.dart';
 import '../core/listing_source.dart';
-import '../services/activity_service.dart';
 
 class VenueDetailScreen extends StatefulWidget {
   final EventModel event;
@@ -48,22 +48,9 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
   /// Whether this open has been reported. A State lives for exactly one
   /// open of the screen, so the flag makes it once per open however often
   /// dependencies change or the screen rebuilds.
-  bool _viewTracked = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_viewTracked) return;
-    _viewTracked = true;
-    // A Listing View: feeds the partner's view counts, conversion and
-    // traffic sources. Reported here rather than at the call sites so no
-    // way of opening a listing can miss it. Needs the route, hence not
-    // initState.
-    ActivityService.trackListingView(
-      listingId: widget.event.id,
-      source: ListingSource.originOf(context),
-    );
-  }
+  // No view_listing from the app for venues: the backend records the view
+  // itself on GET /listings/venues/{id}/ (the detail fetch below), and an
+  // app-side event would count every venue view twice.
 
   @override
   void initState() {
@@ -92,7 +79,11 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
       _error = null;
     });
     try {
-      final detail = await EventsListingService.fetchVenueDetail(widget.event.id);
+      // Signed in: the backend records this open as the venue's view.
+      final detail = await EventsListingService.fetchVenueDetail(
+        widget.event.id,
+        token: AuthState.isLoggedIn.value ? AuthState.accessToken : null,
+      );
       if (!mounted) return;
       setState(() {
         _detail = detail;
@@ -249,6 +240,11 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
         imagePath: _isCoverNetwork ? '' : _coverUrl,
         tag: _tag.isNotEmpty ? _tag : null,
         price: _lowestPackagePrice,
+        // The real rating, so Plan Party stops inventing one.
+        rating: _detail?.averageRating,
+        reviewCount: (_detail?.totalReviews ?? 0) > 0
+            ? '(${_detail!.totalReviews} reviews)'
+            : null,
       );
 
   @override
@@ -354,28 +350,23 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
                 flexibleSpace: FlexibleSpaceBar(
                   background: ClipRRect(
                     borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
-                    child: _isCoverNetwork
-                        ? Image.network(
+                    child: _coverUrl.isEmpty
+                        ? Container(
+                              color: Colors.grey.shade300,
+                              child: const Center(child: Icon(Icons.place, size: 60, color: Colors.grey)),
+                            )
+                        // Downsized to screen width (a raw Image.network decoded a
+                        // 1837x10000 upload at full size, ~73 MB) and anchored at the top,
+                        // so an unusually tall cover shows its heading, not its middle.
+                        : listingImageSource(
                             _coverUrl,
                             fit: BoxFit.cover,
+                            alignment: Alignment.topCenter,
                             errorBuilder: (_, __, ___) => Container(
                               color: Colors.grey.shade300,
                               child: const Center(child: Icon(Icons.place, size: 60, color: Colors.grey)),
                             ),
-                          )
-                        : _coverUrl.isNotEmpty
-                            ? Image.asset(
-                                _coverUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Container(
-                                  color: Colors.grey.shade300,
-                                  child: const Center(child: Icon(Icons.place, size: 60, color: Colors.grey)),
-                                ),
-                              )
-                            : Container(
-                                color: Colors.grey.shade300,
-                                child: const Center(child: Icon(Icons.place, size: 60, color: Colors.grey)),
-                              ),
+                          ),
                   ),
                 ),
               ),

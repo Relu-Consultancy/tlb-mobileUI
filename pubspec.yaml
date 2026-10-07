@@ -39,6 +39,9 @@ dependencies:
   location: ^8.0.1
   firebase_messaging: ^15.2.10
   flutter_local_notifications: ^22.0.1
+  # Network-change events for the online/offline toast; reachability itself is
+  # confirmed with a real connection (lib/providers/connectivity_state.dart).
+  connectivity_plus: ^7.3.1
   # A regular dependency, not a dev one, although the app never calls it:
   # Flutter 3.47 drops dev-only plugins from release builds but still lists
   # them in GeneratedPluginRegistrant, so a release build failed to compile

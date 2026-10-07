@@ -5,6 +5,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../core/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
+  /// Flips to true once the splash has handed over to the first real screen.
+  /// The offline guard waits for it: a route pushed over the splash would be
+  /// the one its `pushReplacement` replaces, dropping the customer straight
+  /// past the No-internet screen.
+  static final ValueNotifier<bool> handedOff = ValueNotifier<bool>(false);
+
   final Widget nextScreen;
 
   const SplashScreen({super.key, required this.nextScreen});
@@ -74,6 +80,7 @@ class _SplashScreenState extends State<SplashScreen>
             },
           ),
         );
+        SplashScreen.handedOff.value = true;
       }
     });
   }

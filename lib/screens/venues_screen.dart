@@ -659,6 +659,11 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       const SizedBox(width: 5),
                       Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
                     ]),
+                    // Same green "x km away" row as every other card.
+                    if (event.distanceDisplay != null) ...[
+                      const SizedBox(height: 6),
+                      ListingDistanceRow(event: event, iconSize: 15, fontSize: 12),
+                    ],
                   ],
                 ),
               ),
@@ -721,6 +726,11 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       const SizedBox(width: 4),
                       Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
                     ]),
+                    // Same green "x km away" row as every other card.
+                    if (event.distanceDisplay != null) ...[
+                      const SizedBox(height: 6),
+                      ListingDistanceRow(event: event, iconSize: 15, fontSize: 12),
+                    ],
                   ],
                 ),
               ),
@@ -765,6 +775,11 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     Text(event.title, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis),
                     const SizedBox(height: 2),
                     Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: Colors.white70), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    // Same green "x km away" row as every other card.
+                    if (event.distanceDisplay != null) ...[
+                      const SizedBox(height: 6),
+                      ListingDistanceRow(event: event, iconSize: 15, fontSize: 12),
+                    ],
                   ],
                 ),
               ),
@@ -1062,6 +1077,11 @@ class _VenuesScreenState extends State<VenuesScreen> {
                     const SizedBox(width: 4),
                     Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
                   ]),
+                  // Same green "x km away" row as every other card.
+                  if (event.distanceDisplay != null) ...[
+                    const SizedBox(height: 6),
+                    ListingDistanceRow(event: event, iconSize: 15, fontSize: 12),
+                  ],
                 ],
               ),
             ),
@@ -1121,6 +1141,11 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       const SizedBox(width: 4),
                       Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
                     ]),
+                    // Same green "x km away" row as every other card.
+                    if (event.distanceDisplay != null) ...[
+                      const SizedBox(height: 6),
+                      ListingDistanceRow(event: event, iconSize: 15, fontSize: 12),
+                    ],
                   ],
                 ),
               ),
@@ -1196,6 +1221,11 @@ class _VenuesScreenState extends State<VenuesScreen> {
                         Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
                       ],
                     ),
+                    // Same green "x km away" row as every other card.
+                    if (event.distanceDisplay != null) ...[
+                      const SizedBox(height: 6),
+                      ListingDistanceRow(event: event, iconSize: 15, fontSize: 12),
+                    ],
                   ],
                 ),
               ),
@@ -1360,6 +1390,11 @@ class _VenuesScreenState extends State<VenuesScreen> {
                 const SizedBox(width: 4),
                 Expanded(child: Text(event.venue, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12.5), color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis)),
               ]),
+              // Same green "x km away" row as every other card.
+              if (event.distanceDisplay != null) ...[
+                const SizedBox(height: 6),
+                ListingDistanceRow(event: event, iconSize: 15, fontSize: 12),
+              ],
             ],
           ),
         ),

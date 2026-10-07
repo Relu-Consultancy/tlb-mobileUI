@@ -6,15 +6,15 @@ import 'package:tlb_mobile_ui/providers/auth_state.dart';
 import 'package:tlb_mobile_ui/providers/location_state.dart';
 
 void main() {
+  // detect() registers an app-lifecycle listener, which needs the binding.
+  TestWidgetsFlutterBinding.ensureInitialized();
   final state = LocationState();
 
   setUp(() {
     AuthState.isLoggedIn.value = false; // keep setCity off the network
     state.refreshGeoFeeds = () {};
     // The app starts with no city: put the singleton back there.
-    state.selectedCity.value = '';
-    state.clearCoordinates();
-    state.resolvingLocation.value = false;
+    state.resetForTest();
     LaunchLocation.resetForTest();
   });
 
@@ -41,7 +41,8 @@ void main() {
     test('TC_C_LL_003 — a granted fix sets the city and keeps the coordinates',
         () async {
       LaunchLocation.acquireFix = () async => (lat: 18.52, lng: 73.86);
-      LaunchLocation.resolveCity = (_, __) async => 'Pune';
+      LaunchLocation.resolvePlace =
+          (_, __) async => (city: 'Pune', label: 'FC Road, Shivajinagar, Pune');
 
       await LaunchLocation.detect();
 
@@ -64,7 +65,7 @@ void main() {
     test('TC_C_LL_005 — a fix the geocoder cannot name leaves it unset',
         () async {
       LaunchLocation.acquireFix = () async => (lat: 0.0, lng: 0.0);
-      LaunchLocation.resolveCity = (_, __) async => null;
+      LaunchLocation.resolvePlace = (_, __) async => null;
 
       await LaunchLocation.detect();
 
@@ -98,7 +99,8 @@ void main() {
     test('TC_C_LL_008 — a city picked meanwhile is not overridden', () async {
       final gate = Completer<({double lat, double lng})?>();
       LaunchLocation.acquireFix = () => gate.future;
-      LaunchLocation.resolveCity = (_, __) async => 'Pune';
+      LaunchLocation.resolvePlace =
+          (_, __) async => (city: 'Pune', label: 'FC Road, Shivajinagar, Pune');
 
       final pending = LaunchLocation.detect();
       state.setCity('Goa'); // the customer chose by hand
@@ -136,6 +138,73 @@ void main() {
       await LaunchLocation.detect(); // e.g. Home rebuilt after signing in
 
       expect(asked, 1);
+    });
+
+    test('TC_C_LL_011 — a fresh fix replaces a city restored from the account',
+        () async {
+      // Signed-in launch: the account's saved location lands first, carrying
+      // only a city — the header used to stay on that bare city.
+      state.setCity('Mumbai', latitude: 19.07, longitude: 72.87);
+      LaunchLocation.acquireFix = () async => (lat: 18.52, lng: 73.86);
+      LaunchLocation.resolvePlace =
+          (_, __) async => (city: 'Pune', label: 'FC Road, Shivajinagar, Pune');
+
+      await LaunchLocation.detect();
+
+      expect(state.selectedCity.value, 'Pune');
+      expect(state.placeLabel.value, 'FC Road, Shivajinagar, Pune');
+    });
+  });
+
+  group('LaunchLocation.refreshOnResume', () {
+    var silentFixes = 0;
+    var promptingFixes = 0;
+
+    setUp(() {
+      silentFixes = 0;
+      promptingFixes = 0;
+      LaunchLocation.acquireFix = () async {
+        promptingFixes++;
+        return (lat: 18.52, lng: 73.86);
+      };
+      LaunchLocation.acquireFixSilently = () async {
+        silentFixes++;
+        return (lat: 18.53, lng: 73.85);
+      };
+      LaunchLocation.resolvePlace =
+          (_, __) async => (city: 'Pune', label: 'JM Road, Deccan, Pune');
+    });
+
+    test('TC_C_LL_012 — refreshes silently, never prompting', () async {
+      await LaunchLocation.refreshOnResume();
+
+      expect(silentFixes, 1);
+      expect(promptingFixes, 0);
+      expect(state.placeLabel.value, 'JM Road, Deccan, Pune');
+    });
+
+    test('TC_C_LL_013 — a recent fix is not refreshed again', () async {
+      await LaunchLocation.detect(); // fix taken just now
+      await LaunchLocation.refreshOnResume();
+
+      expect(silentFixes, 0);
+    });
+
+    test('TC_C_LL_014 — a city picked by hand is left alone', () async {
+      state.setCity('Goa');
+      await LaunchLocation.refreshOnResume();
+
+      expect(silentFixes, 0);
+      expect(state.selectedCity.value, 'Goa');
+    });
+
+    test('TC_C_LL_015 — no permission (no silent fix) changes nothing',
+        () async {
+      LaunchLocation.acquireFixSilently = () async => null;
+      state.setCity('Mumbai', latitude: 19.07, longitude: 72.87);
+      await LaunchLocation.refreshOnResume();
+
+      expect(state.selectedCity.value, 'Mumbai');
     });
   });
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tlb_mobile_ui/models/api_class_model.dart';
 import 'package:tlb_mobile_ui/models/event_model.dart';
@@ -28,6 +29,37 @@ const _event = EventModel(
 );
 
 void main() {
+  group('SelectBatchScreen — rating', () {
+    // Bug report: unreviewed listings still showed a rating.
+    testWidgets('TC_S_SB_R01 — no reviews, no stars', (tester) async {
+      await pumpTLBApp(
+        tester,
+        SelectBatchScreen(event: _event, batches: [_batch()]),
+      );
+      expect(find.byIcon(Icons.star_outline_rounded), findsNothing);
+      expect(find.byIcon(Icons.star_rounded), findsNothing);
+    });
+
+    testWidgets('TC_S_SB_R02 — a real rating shows its stars', (tester) async {
+      await pumpTLBApp(
+        tester,
+        SelectBatchScreen(
+          event: const EventModel(
+            id: 'l2',
+            title: 'Reviewed Class',
+            venue: 'Mumbai',
+            imagePath: '',
+            rating: 4.0,
+            reviewCount: '(3 reviews)',
+          ),
+          batches: [_batch()],
+        ),
+      );
+      expect(find.byIcon(Icons.star_rounded), findsNWidgets(4));
+      expect(find.text('(3 reviews)'), findsOneWidget);
+    });
+  });
+
   group('SelectBatchScreen — date selector visibility', () {
     testWidgets(
         'TC_S_SB_001 — no Select Date row when the batch has no start_date',

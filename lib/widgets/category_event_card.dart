@@ -5,6 +5,7 @@ import '../core/app_colors.dart';
 import '../models/event_model.dart';
 import '../core/listing_navigation.dart';
 import '../core/listing_image.dart';
+import 'listing_meta_rows.dart';
 
 class CategoryEventCard extends StatelessWidget {
   final EventModel event;
@@ -119,6 +120,11 @@ class CategoryEventCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                // Same green "x km away" row as the feed cards.
+                if (event.distanceDisplay != null) ...[
+                  const SizedBox(height: 3),
+                  ListingDistanceRow(event: event, fontSize: 10.5),
+                ],
               ],
             ),
           ),

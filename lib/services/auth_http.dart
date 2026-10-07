@@ -32,20 +32,29 @@ class AuthHttp {
   // so a burst of concurrent 401s triggers exactly one refresh call.
   static Future<bool>? _refreshing;
 
+  ///
+  /// [logoutOnFailure] — false for background calls the customer never asked
+  /// for (activity tracking): they still refresh and retry, but if that fails
+  /// they hand back the 401 instead of logging the customer out. A refresh
+  /// also fails on a momentary network drop, and an analytics ping must
+  /// never be what signs someone out mid-session.
   static Future<http.Response> send(
-    Future<http.Response> Function(String token) build,
-  ) async {
+    Future<http.Response> Function(String token) build, {
+    bool logoutOnFailure = true,
+  }) async {
     final resp = await build(AuthState.accessToken ?? '');
     if (resp.statusCode != 401) return resp;
 
     final refreshed = await _refreshSession();
     if (!refreshed) {
+      if (!logoutOnFailure) return resp;
       AuthState.logout();
       throw const SessionExpiredException();
     }
 
     final retry = await build(AuthState.accessToken ?? '');
     if (retry.statusCode == 401) {
+      if (!logoutOnFailure) return retry;
       AuthState.logout();
       throw const SessionExpiredException();
     }

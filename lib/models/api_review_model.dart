@@ -10,8 +10,12 @@ class ApiReviewMedia {
   factory ApiReviewMedia.fromJson(Map<String, dynamic> json) => ApiReviewMedia(
         id: json['id'] as int,
         mediaType: (json['media_type'] as String?) ?? '',
-        file: (json['file'] as String?) ?? '',
+        // The API returns http:// media URLs; Android refuses cleartext, so a
+        // review's photo showed broken and its video could never load.
+        file: secureUrl(json['file'] as String?) ?? '',
       );
+
+  bool get isVideo => mediaType == 'video';
 
   Map<String, dynamic> toJson() => {
         'id': id,

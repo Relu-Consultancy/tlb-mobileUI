@@ -5,6 +5,7 @@ import '../core/app_colors.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
 import '../core/listing_image.dart';
+import 'listing_meta_rows.dart';
 
 class WeekendEventCard extends StatelessWidget {
   final EventModel event;
@@ -87,6 +88,9 @@ class WeekendEventCard extends StatelessWidget {
                         text: event.venue,
                       ),
                     ],
+                    // Same green "x km away" row as every other card.
+                    if (event.distanceDisplay != null)
+                      ListingDistanceRow(event: event, fontSize: 11),
                   ],
                 ),
               ),

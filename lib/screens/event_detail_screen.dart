@@ -1,4 +1,5 @@
 import 'dart:math';
+import '../core/listing_image.dart';
 import '../core/app_colors.dart';
 import '../widgets/app_loader.dart';
 import 'package:flutter/material.dart';
@@ -161,7 +162,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   String? get _description => _detail?.description ?? widget.event.description;
 
   String get _coverUrl => _detail?.coverUrl ?? widget.event.imagePath;
-  bool get _isCoverNetwork => _coverUrl.startsWith('http');
 
   double? get _lowestTicketPrice {
     if (_detail == null || _detail!.tickets.isEmpty) return widget.event.price;
@@ -327,15 +327,15 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 flexibleSpace: FlexibleSpaceBar(
                   background: ClipRRect(
                     borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
-                    child: _isCoverNetwork
-                        ? Image.network(
+                    child: _coverUrl.isEmpty
+                        ? _imagePlaceholder()
+                        // Downsized to screen width (a raw Image.network decoded a
+                        // 1837x10000 upload at full size, ~73 MB) and anchored at the top,
+                        // so an unusually tall cover shows its heading, not its middle.
+                        : listingImageSource(
                             _coverUrl,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _imagePlaceholder(),
-                          )
-                        : Image.asset(
-                            _coverUrl,
-                            fit: BoxFit.cover,
+                            alignment: Alignment.topCenter,
                             errorBuilder: (_, __, ___) => _imagePlaceholder(),
                           ),
                   ),

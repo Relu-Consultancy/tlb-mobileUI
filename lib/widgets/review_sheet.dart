@@ -13,6 +13,7 @@ import '../services/review_service.dart';
 import 'app_loader.dart';
 import 'login_sheet.dart';
 import '../core/date_format.dart';
+import '../screens/review_media_viewer.dart';
 
 // ── Public entry points ───────────────────────────────────────────────────────
 
@@ -591,16 +592,25 @@ class _ReviewTile extends StatelessWidget {
               itemCount: review.media.length,
               itemBuilder: (_, i) {
                 final m = review.media[i];
-                final isVideo = m.mediaType == 'video';
-                return Container(
-                  width: 72, height: 72,
-                  margin: const EdgeInsets.only(right: 8),
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.grey.shade200),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: isVideo
-                        ? _videoPlaceholder()
-                        : Image.network(m.file, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, color: Colors.grey)),
+                final isVideo = m.isVideo;
+                // Opens the full-screen viewer — a video's play icon used to
+                // do nothing, so an uploaded video could never be watched.
+                return Semantics(
+                  button: true,
+                  label: isVideo ? 'Play review video' : 'View review photo',
+                  child: GestureDetector(
+                    onTap: () => ReviewMediaViewer.open(context, review.media, i),
+                    child: Container(
+                      width: 72, height: 72,
+                      margin: const EdgeInsets.only(right: 8),
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.grey.shade200),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: isVideo
+                            ? _videoPlaceholder()
+                            : Image.network(m.file, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, color: Colors.grey)),
+                      ),
+                    ),
                   ),
                 );
               },

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/listing_image.dart';
 import '../core/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -159,7 +160,6 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
     return _detail!.cover ?? widget.event.imagePath;
   }
   
-  bool get _isCoverNetwork => _coverUrl.startsWith('http');
 
   String get _priceDisplay {
     if (_detail?.feeFrom != null) return '₹${_detail!.feeFrom}';
@@ -357,15 +357,15 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
                 flexibleSpace: FlexibleSpaceBar(
                   background: ClipRRect(
                     borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
-                    child: _isCoverNetwork
-                        ? Image.network(
+                    child: _coverUrl.isEmpty
+                        ? _imagePlaceholder()
+                        // Downsized to screen width (a raw Image.network decoded a
+                        // 1837x10000 upload at full size, ~73 MB) and anchored at the top,
+                        // so an unusually tall cover shows its heading, not its middle.
+                        : listingImageSource(
                             _coverUrl,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => _imagePlaceholder(),
-                          )
-                        : Image.asset(
-                            _coverUrl,
-                            fit: BoxFit.cover,
+                            alignment: Alignment.topCenter,
                             errorBuilder: (_, __, ___) => _imagePlaceholder(),
                           ),
                   ),

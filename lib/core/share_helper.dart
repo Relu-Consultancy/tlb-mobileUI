@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../services/activity_service.dart';
+
 /// Frontend-side share — opens the OS share sheet (WhatsApp, Email, Copy
 /// link, AirDrop, etc.) with a short, friendly blurb about a listing.
 ///
@@ -35,6 +37,10 @@ class ShareHelper {
       ..writeln(url)
       ..writeln()
       ..writeln('Discover kids\' classes, programs, events & venues on TLB.');
+
+    // Every share button in the app comes through here, so this is the one
+    // place it is reported. Fire-and-forget; never delays the sheet.
+    ActivityService.trackShare(type: type, id: id);
 
     await Share.share(
       body.toString(),

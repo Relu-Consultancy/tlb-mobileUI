@@ -393,25 +393,37 @@ class HomeHeader extends StatelessWidget {
         MaterialPageRoute(builder: (_) => const LocationScreen()),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.location_on_outlined,
               size: onDark ? 12 : 14, color: iconColor),
           const SizedBox(width: 3),
-          ValueListenableBuilder<String>(
-            valueListenable: LocationState().selectedCity,
-            builder: (context, city, _) {
-              final label = city.trim().isEmpty
-                  ? 'Select location'
-                  : (city.length > 18 ? '${city.substring(0, 18)}...' : city);
-              return Text(
-                label,
-                style: GoogleFonts.poppins(
-                  fontSize: Responsive.sp(context, onDark ? 11 : 12),
-                  fontWeight: FontWeight.w500,
-                  color: textColor,
-                ),
-              );
-            },
+          // The short street/area/city label after "Use current location",
+          // else the city. Clipped with an ellipsis to the space available
+          // rather than at a fixed 18 characters.
+          Flexible(
+            child: ListenableBuilder(
+              listenable: Listenable.merge([
+                LocationState().selectedCity,
+                LocationState().placeLabel,
+              ]),
+              builder: (context, _) {
+                final city = LocationState().selectedCity.value.trim();
+                final label = city.isEmpty
+                    ? 'Select location'
+                    : (LocationState().placeLabel.value ?? city);
+                return Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, onDark ? 11 : 12),
+                    fontWeight: FontWeight.w500,
+                    color: textColor,
+                  ),
+                );
+              },
+            ),
           ),
           const SizedBox(width: 2),
           Icon(Icons.keyboard_arrow_down,

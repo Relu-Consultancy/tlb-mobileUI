@@ -65,8 +65,10 @@ class _LocationScreenState extends State<LocationScreen>
   /// [latitude]/[longitude] are passed only by the "current location" flow —
   /// a city picked from the list has no fix behind it, and setCity clears any
   /// previous pair so the two can never disagree.
-  void _selectCity(String city, {double? latitude, double? longitude}) {
-    LocationState().setCity(city, latitude: latitude, longitude: longitude);
+  void _selectCity(String city,
+      {double? latitude, double? longitude, String? label}) {
+    LocationState().setCity(city,
+        latitude: latitude, longitude: longitude, label: label);
     Navigator.pop(context);
   }
 
@@ -165,12 +167,13 @@ class _LocationScreenState extends State<LocationScreen>
 
       if (placemarks.isNotEmpty && mounted) {
         final p = placemarks.first;
-        final rawCity = p.locality ?? p.subAdministrativeArea ?? p.administrativeArea ?? '';
-        final matched = CityResolver.matchKnown(rawCity);
+        final city = CityResolver.cityOf(p) ?? '';
         _selectCity(
-          matched ?? rawCity,
+          city,
           latitude: position.latitude,
           longitude: position.longitude,
+          // Shown in the header instead of the bare city.
+          label: CityResolver.shortLabel(p, city),
         );
       }
     } on TimeoutException {

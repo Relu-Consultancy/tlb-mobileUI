@@ -24,6 +24,7 @@ import '../widgets/app_loader.dart';
 import 'program_detail_screen.dart';
 import '../core/user_location.dart';
 import '../core/listing_source.dart';
+import '../services/activity_service.dart';
 
 class CategoryProgramsScreen extends StatefulWidget {
   final int initialCategoryIndex;
@@ -291,6 +292,18 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
     ...ListingFilters.priceBands<ApiProgram>(_price),
   ];
 
+  /// The applied set — category, subcategory chip, sort and Filters-tab picks
+  /// — for the activity log. Once per distinct set (the service skips repeats).
+  void _reportFilters() => ActivityService.trackFilters('category_programs', {
+        'category': _categoryTitle,
+        'subcategory': _selectedFilterIndex > 0 &&
+                _selectedFilterIndex < _filters.length
+            ? _filters[_selectedFilterIndex]
+            : null,
+        'sort': _sort?.label,
+        'filters': _pickedFilters.toList(),
+      });
+
   int get _activeFilterCount =>
       (_sort != null ? 1 : 0) + _pickedFilters.length;
 
@@ -337,6 +350,10 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
     setState(() {
       _sort = sort;
       _pickedFilters = result.selectedFilters.toSet();
+    });
+    // Reported after the chip change below has been applied.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _reportFilters();
     });
     if (sort == ListingSort.distance && !UserLocation.isKnown) {
       AppSnackBar.show(context, 'Turn on location to sort by distance.');
@@ -550,6 +567,7 @@ class _CategoryProgramsScreenState extends State<CategoryProgramsScreen> {
                                 _selectedSubcategoryId = subId;
                               });
                               _fetchPrograms(subcategoryId: subId);
+                              _reportFilters();
                             },
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),

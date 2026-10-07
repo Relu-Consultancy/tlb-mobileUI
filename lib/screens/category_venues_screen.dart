@@ -21,6 +21,7 @@ import '../widgets/subcategory_empty_state.dart';
 import 'venue_detail_screen.dart';
 import '../core/user_location.dart';
 import '../core/listing_source.dart';
+import '../services/activity_service.dart';
 
 class CategoryVenuesScreen extends StatefulWidget {
   final int initialCategoryIndex;
@@ -162,6 +163,8 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
   }
 
   EventModel _toEventModel(ApiVenue venue) => EventModel(
+        // Was dropped here, so the grid could never show distance.
+        distanceKm: venue.distanceKm,
         id: venue.id,
         title: venue.title,
         venue: [venue.area, venue.city]
@@ -267,6 +270,18 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
     ListingFilter<ApiVenue>('New this week', 'flag', (v) => v.isNewThisWeek),
   ];
 
+  /// The applied set — category, subcategory chip, sort and Filters-tab picks
+  /// — for the activity log. Once per distinct set (the service skips repeats).
+  void _reportFilters() => ActivityService.trackFilters('category_venues', {
+        'category': _categoryTitle,
+        'subcategory': _selectedFilterIndex > 0 &&
+                _selectedFilterIndex < _filters.length
+            ? _filters[_selectedFilterIndex]
+            : null,
+        'sort': _sort?.label,
+        'filters': _pickedFilters.toList(),
+      });
+
   int get _activeFilterCount =>
       (_sort != null ? 1 : 0) + _pickedFilters.length;
 
@@ -282,6 +297,7 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
       _selectedSubcategoryId = id;
     });
     _fetchVenues();
+    _reportFilters();
   }
 
   Future<void> _showFilterSheet() async {
@@ -308,6 +324,10 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
     setState(() {
       _sort = sort;
       _pickedFilters = result.selectedFilters.toSet();
+    });
+    // Reported after the chip change below has been applied.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _reportFilters();
     });
     if (sort == ListingSort.distance && !UserLocation.isKnown) {
       AppSnackBar.show(context, 'Turn on location to sort by distance.');

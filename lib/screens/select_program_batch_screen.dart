@@ -143,11 +143,14 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
                     color: AppColors.textPrimary,
                   ),
                 ),
+                // No reviews, no stars: an unrated listing used to show a
+                // row of five empty ones.
+                if (widget.event.hasRating) ...[
                 const SizedBox(height: 6),
                 Row(
                   children: [
                     ...List.generate(5, (i) {
-                      final r = widget.event.rating ?? 0.0;
+                      final r = widget.event.rating!;
                       return Icon(
                         i < r.floor()
                             ? Icons.star_rounded
@@ -169,6 +172,7 @@ class _SelectProgramBatchScreenState extends State<SelectProgramBatchScreen> {
                       ),
                   ],
                 ),
+                ],
               ],
             ),
           ),

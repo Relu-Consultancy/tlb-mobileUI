@@ -57,6 +57,14 @@ void main() {
       expect(ListingLanguages.label(const [], 'BSL'), 'BSL');
     });
 
+    test('TC_C_LL_008 — the Other checkbox is not shown as a language', () {
+      // Seen live: "English, Hindi, Other, Bhojpuri".
+      expect(ListingLanguages.label(['english', 'hindi', 'other'], 'Bhojpuri'),
+          'English, Hindi, Bhojpuri');
+      // Ticked but left blank: "Other" is all there is to say.
+      expect(ListingLanguages.label(['english', 'other'], ''), 'English, Other');
+    });
+
     test('TC_C_LL_007 — drops blank entries inside the list', () {
       expect(ListingLanguages.parse({
         'languages': ['english', '', '  ']

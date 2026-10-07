@@ -50,6 +50,28 @@ class DiscoveryFeedState {
   /// True once a fetch has come back with a usable feed.
   bool get isLoaded => _loaded;
 
+  /// Replaces the feed as if a fetch had just landed.
+  @visibleForTesting
+  void seedForTest(Map<String, List<HomepageListing>> sections) {
+    _sections
+      ..clear()
+      ..addAll({
+        for (final e in sections.entries)
+          e.key: [for (final l in e.value) (l, l.toEventModel())],
+      });
+    _heroes.clear();
+    _loaded = true;
+    _failed = false;
+  }
+
+  @visibleForTesting
+  void resetForTest() {
+    _sections.clear();
+    _heroes.clear();
+    _loaded = false;
+    _failed = false;
+  }
+
   /// True when the last attempt could not reach the API. Callers show their
   /// previous content rather than an empty screen — a network blip should not
   /// look like an empty catalogue.

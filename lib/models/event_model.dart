@@ -6,6 +6,11 @@ class EventModel {
   final double? price;
   final double? rating;
   final String? reviewCount;
+
+  /// Whether there is a real rating to show. A listing with no reviews comes
+  /// back with `average_rating: 0` — that is "unrated", not a zero-star score,
+  /// so it shows no stars and no number at all (never a placeholder).
+  bool get hasRating => (rating ?? 0) > 0;
   final String? tag;
   final String? description;
   final bool isFeatured;

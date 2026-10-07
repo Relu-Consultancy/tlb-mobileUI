@@ -19,6 +19,7 @@ import 'program_detail_screen.dart';
 import 'venue_detail_screen.dart';
 import '../core/user_location.dart';
 import '../core/listing_source.dart';
+import '../services/activity_service.dart';
 
 class _SearchItem {
   final ListingKind type;
@@ -171,6 +172,38 @@ class _SearchScreenState extends State<SearchScreen> {
     _searchController.dispose();
     super.dispose();
   }
+
+  /// The keyboard's search key: run it now and record the search. Typing
+  /// alone is never recorded — results update as you type, but a search only
+  /// counts once it is committed (here, or by opening a result).
+  void _onSearchSubmitted(String value) {
+    _debounce?.cancel();
+    final q = value.trim();
+    _doSearch(q);
+    _reportSearch(q);
+  }
+
+  void _reportSearch(String q) => ActivityService.trackSearch(
+        q,
+        scope: _chips[_selectedChip],
+        filters: _filterMetadata,
+      );
+
+  /// The applied filters, by name, for the activity log.
+  Map<String, Object?> get _filterMetadata => {
+        'type': _selectedChip != 0 ? _chips[_selectedChip] : null,
+        'category': _selectedCategory?.label,
+        'subcategory': _selectedSubcategory?.label,
+        'price': _selectedPrice,
+        'distance': _selectedDistance,
+        'age': _ageGroupSelected.toList(),
+        'mode': _selectedMode,
+        'date': _dateSelected.toList(),
+      };
+
+  /// Once per applied set; an unchanged set is skipped by the service.
+  void _reportFilters() =>
+      ActivityService.trackFilters('search', _filterMetadata);
 
   void _onSearchChanged(String value) {
     _debounce?.cancel();
@@ -467,6 +500,8 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _onTap(_SearchItem item) {
+    // Opening a result commits the search (deduplicated if already sent).
+    _reportSearch(_searchController.text);
     final Widget screen = switch (item.type) {
       ListingKind.event   => EventDetailScreen(event: item.eventModel),
       ListingKind.klass   => ClassDetailScreen(event: item.eventModel),
@@ -478,6 +513,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Listings opened from here report source = search.
     ListingSource.mark(context, ListingSource.search);
     return Scaffold(
       backgroundColor: Colors.white,
@@ -495,6 +531,8 @@ class _SearchScreenState extends State<SearchScreen> {
             controller: _searchController,
             autofocus: true,
             onChanged: _onSearchChanged,
+            textInputAction: TextInputAction.search,
+            onSubmitted: _onSearchSubmitted,
             decoration: InputDecoration(
               hintText: 'Search events, classes, venues...',
               hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: Colors.grey),
@@ -559,6 +597,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     // hold. The per-type path already fetched every type,
                     // so there it stays a local filter.
                     if (_usesUnifiedSearch) _rerunSearch();
+                    _reportFilters();
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -672,6 +711,7 @@ class _SearchScreenState extends State<SearchScreen> {
     final needsRefetch = _hasServerFilter || _selectedChip != 0;
     setState(_resetFilters);
     if (needsRefetch) _rerunSearch();
+    _reportFilters();
   }
 
   /// The single definition of "no filters", so the chip row's Clear all and
@@ -754,7 +794,10 @@ class _SearchScreenState extends State<SearchScreen> {
                   const SizedBox(width: 4),
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onTap: f.remove,
+                    onTap: () {
+                      f.remove();
+                      _reportFilters();
+                    },
                     child: Padding(
                       // Widens a small cross into a reachable target.
                       padding: const EdgeInsets.all(6),
@@ -1471,6 +1514,7 @@ class _SearchScreenState extends State<SearchScreen> {
     ).whenComplete(() {
       if (!mounted) return;
       setState(() {});
+      _reportFilters();
       if (_selectedCategory != categoryBefore ||
           _selectedSubcategory != subcategoryBefore) {
         _rerunSearch();

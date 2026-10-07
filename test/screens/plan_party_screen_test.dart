@@ -74,6 +74,37 @@ void main() {
       expect(find.byIcon(Icons.radio_button_checked), findsOneWidget);
     });
 
+    testWidgets('TC_S_PP_006 — a reviewed venue shows its real rating',
+        (tester) async {
+      await _pump(tester);
+      expect(find.text('4.5'), findsOneWidget);
+      expect(find.text('(124 reviews)'), findsOneWidget);
+    });
+
+    // Bug report: an unreviewed venue showed a hard-coded "4.5 (124 reviews)".
+    testWidgets('TC_S_PP_007 — a venue with no reviews shows no rating',
+        (tester) async {
+      await mockNetworkImages(() async {
+        await pumpTLBApp(
+          tester,
+          const PlanPartyScreen(
+            event: EventModel(
+              id: 'v2',
+              title: 'Unreviewed Hall',
+              venue: 'Andheri, Mumbai',
+              imagePath: 'assets/images/placeholder.png',
+              rating: 0,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+      });
+
+      expect(find.byIcon(Icons.star_rounded), findsNothing);
+      expect(find.text('4.5'), findsNothing);
+      expect(find.textContaining('reviews'), findsNothing);
+    });
+
     testWidgets('TC_S_PP_005 — says so when the venue has no availability',
         (tester) async {
       await _pump(tester);

@@ -12,6 +12,7 @@ import '../widgets/app_refresh_indicator.dart';
 import '../widgets/app_dialog.dart';
 import '../widgets/review_sheet.dart';
 import '../core/date_format.dart';
+import 'review_media_viewer.dart';
 
 class YourReviewsScreen extends StatefulWidget {
   const YourReviewsScreen({super.key});
@@ -258,7 +259,9 @@ class _ReviewCard extends StatelessWidget {
                 separatorBuilder: (_, __) => const SizedBox(width: 6),
                 itemBuilder: (_, i) {
                   final m = review.media[i];
-                  return ClipRRect(
+                  return GestureDetector(
+                    onTap: () => ReviewMediaViewer.open(context, review.media, i),
+                    child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: m.mediaType == 'video'
                         ? Container(
@@ -272,6 +275,7 @@ class _ReviewCard extends StatelessWidget {
                               color: Colors.grey.shade200,
                               child: const Icon(Icons.image_not_supported, size: 20, color: Colors.grey),
                             )),
+                    ),
                   );
                 },
               ),

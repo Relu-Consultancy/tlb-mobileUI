@@ -163,6 +163,9 @@ class _DetailInfoRowState extends State<DetailInfoRow> {
   static const double _iconSize = 20;
   static const double _iconGap = 12;
 
+  /// Minimum space between the label and its value.
+  static const double _labelGap = 16;
+
   Widget _toggle(BuildContext context, String label) => GestureDetector(
         onTap: () => setState(() => _expanded = !_expanded),
         behavior: HitTestBehavior.opaque,
@@ -201,7 +204,8 @@ class _DetailInfoRowState extends State<DetailInfoRow> {
             textDirection: TextDirection.ltr,
           )..layout())
               .width;
-          final valueMaxWidth = constraints.maxWidth - _iconSize - _iconGap - labelWidth;
+          final valueMaxWidth =
+              constraints.maxWidth - _iconSize - _iconGap - labelWidth - _labelGap;
           final overflows = valueMaxWidth > 0 &&
               (TextPainter(
                 text: TextSpan(text: widget.value, style: valueStyle),
@@ -218,9 +222,12 @@ class _DetailInfoRowState extends State<DetailInfoRow> {
                   Icon(widget.icon, size: _iconSize, color: Colors.grey.shade700),
                   const SizedBox(width: _iconGap),
                   Text(widget.label, style: labelStyle),
-                  const Spacer(),
+                  const SizedBox(width: _labelGap),
+                  // Expanded, not Spacer + Flexible: those split the free
+                  // space in half, so every value started at the row's
+                  // midpoint instead of sitting flush right.
                   if (!_expanded)
-                    Flexible(
+                    Expanded(
                       child: Text(
                         widget.value,
                         style: valueStyle,

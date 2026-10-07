@@ -81,6 +81,8 @@ void main() {
 
   setUp(() {
     sent = [];
+    // Clears the rate-limit window and de-duplication between tests.
+    ActivityService.resetForTest();
     ActivityService.send = (body) async => sent.add(body);
     AuthState.isLoggedIn.value = true;
   });
@@ -160,8 +162,9 @@ void main() {
     expect(sent, isEmpty);
   });
 
-  test('TC_A_VIEW_008 — all four detail screens report the view', () {
-    for (final type in ['event', 'class', 'program', 'venue']) {
+  test('TC_A_VIEW_008 — event, class and program detail report the view',
+      () {
+    for (final type in ['event', 'class', 'program']) {
       final src = File('lib/screens/${type}_detail_screen.dart')
           .readAsStringSync();
       expect(src, contains('ActivityService.trackListingView('),
@@ -171,6 +174,13 @@ void main() {
       expect(src, contains('if (_viewTracked) return;'),
           reason: '$type detail screen could report more than once per open');
     }
+  });
+
+  // The backend records a venue view itself (on GET /listings/venues/{id}/);
+  // one from the app as well would count every venue view twice.
+  test('TC_A_VIEW_011 — venue detail does not report a view', () {
+    final src = File('lib/screens/venue_detail_screen.dart').readAsStringSync();
+    expect(src, isNot(contains('ActivityService.trackListingView(')));
   });
 
   test('TC_A_VIEW_009 — every listing surface tags its source', () {

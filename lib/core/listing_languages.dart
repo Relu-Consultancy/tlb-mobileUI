@@ -54,9 +54,15 @@ class ListingLanguages {
   /// `["english", "hindi"]` with no other becomes `English, Hindi`; an
   /// `other_language` of `Marathi` is appended to it.
   static String? label(List<String> languages, String? other) {
+    final hasOther = other != null && other.trim().isNotEmpty;
     final parts = [
-      ...languages.map(_titleCase),
-      if (other != null && other.trim().isNotEmpty) _titleCase(other),
+      // "other" is the checkbox that opens the free-text box, not a language.
+      // With the box filled in it read "English, Hindi, Other, Bhojpuri";
+      // it is kept only when the partner ticked it but typed nothing.
+      ...languages
+          .where((l) => !(hasOther && l.trim().toLowerCase() == 'other'))
+          .map(_titleCase),
+      if (hasOther) _titleCase(other),
     ];
     // De-duplicated: a partner who picks "Hindi" and also types it into the
     // other box should not produce "Hindi, Hindi".
