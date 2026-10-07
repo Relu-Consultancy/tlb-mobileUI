@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/api_payment_method_model.dart';
+import '../core/api_error_text.dart';
 
 class PaymentMethodService {
   static const _base = 'https://tlb-api.reluconsultancy.in';
@@ -75,10 +76,10 @@ class PaymentMethodService {
     final err = body['error'];
     if (err is Map) {
       final msg = err['message'];
-      if (msg is String && msg.isNotEmpty) return msg;
+      if (msg is String && msg.isNotEmpty) return ApiErrorText.readable(msg);
     }
     final msg = body['message'] ?? body['detail'];
-    if (msg is String && msg.isNotEmpty) return msg;
+    if (msg is String && msg.isNotEmpty) return ApiErrorText.readable(msg);
     return 'Request failed ($statusCode). Please try again.';
   }
 }

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/api_notification_model.dart';
 import 'auth_http.dart';
+import '../core/api_error_text.dart';
 
 /// REST wrapper for the customer-side in-app notification endpoints
 /// (`/api/v1/notifications/...`). All calls use the customer's own JWT.
@@ -180,10 +181,10 @@ class NotificationService {
     final err = body['error'];
     if (err is Map) {
       final msg = err['message'];
-      if (msg is String && msg.isNotEmpty) return msg;
+      if (msg is String && msg.isNotEmpty) return ApiErrorText.readable(msg);
     }
     final msg = body['detail'] ?? body['message'];
-    if (msg is String && msg.isNotEmpty) return msg;
+    if (msg is String && msg.isNotEmpty) return ApiErrorText.readable(msg);
     return 'Could not load notifications ($statusCode).';
   }
 }

@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+
+import '../core/api_error_text.dart';
 
 /// Thin wrapper around the TLB Auth API.
 class AuthService {
@@ -453,6 +456,20 @@ class AuthService {
     return readFlag(inner) ?? readFlag(inner['user']) ?? false;
   }
 
+  /// Whether a successful verify-otp / google-login [result] belongs to an
+  /// account that has not finished signing up — a brand-new one.
+  ///
+  /// Neither endpoint sends a "new user" flag today (they return only the
+  /// tokens and `user`), so a flag is honoured when present and otherwise
+  /// the profile decides: an account created by this sign-in has no name
+  /// yet, while everyone who finished onboarding does.
+  static Future<bool> isNewAccount(Map<String, dynamic> result) async {
+    if (result['is_new_user'] == true) return true;
+    final access = result['access'] as String?;
+    if (access == null || access.isEmpty) return false;
+    return !await isAccountRegistered(accessToken: access);
+  }
+
   /// Returns true when the authenticated account has actually completed signup
   /// (a real, registered user) — i.e. the backend profile exists and is marked
   /// completed (or at least carries a first name). Used to defend against the
@@ -487,18 +504,21 @@ class AuthService {
     return d is Map<String, dynamic> ? d : null;
   }
 
-  /// Converts a caught exception into a user-readable message.
+  /// Converts a caught exception into a user-readable message. The
+  /// exception's own text is for developers — logged in debug builds, never
+  /// put in front of the customer.
   static String _networkError(Object e) {
+    if (kDebugMode) debugPrint('[AuthService] request failed: $e');
     if (e is SocketException) {
-      return 'Cannot reach server. Check your internet connection. (${e.message})';
+      return 'Cannot reach server. Please check your internet connection.';
     }
     if (e is TimeoutException) {
       return 'Request timed out. Server may be slow — try again.';
     }
     if (e is HandshakeException) {
-      return 'SSL error connecting to server. (${e.message})';
+      return 'Could not connect securely. Please try again.';
     }
-    return 'Network error: ${e.runtimeType}: $e';
+    return 'Could not connect. Please check your internet connection and try again.';
   }
 
   /// Extracts the first human-readable error from a TLB API response body.
@@ -508,29 +528,33 @@ class AuthService {
     final error = body['error'];
     if (error is Map) {
       final msg = error['message'];
-      if (msg is String && msg.isNotEmpty) return msg;
+      if (msg is String && msg.isNotEmpty) return ApiErrorText.readable(msg);
       if (msg is Map && msg.isNotEmpty) return _flattenValidationMap(msg);
-      if (msg is List && msg.isNotEmpty) return msg.first.toString();
+      if (msg is List && msg.isNotEmpty) {
+        return ApiErrorText.readable(msg.first.toString());
+      }
     }
     // DRF flat formats: 'detail', 'message', 'non_field_errors', or field-keyed dicts
     for (final key in ['detail', 'message', 'non_field_errors']) {
       final v = body[key];
-      if (v is String && v.isNotEmpty) return v;
-      if (v is List && v.isNotEmpty) return v.first.toString();
+      if (v is String && v.isNotEmpty) return ApiErrorText.readable(v);
+      if (v is List && v.isNotEmpty) return ApiErrorText.readable(v.first.toString());
     }
     // DRF validation dict at root — e.g. {"phone_number": ["Enter a valid phone number."]}
     for (final entry in body.entries) {
       final v = entry.value;
-      if (v is List && v.isNotEmpty) return '${entry.key}: ${v.first}';
-      if (v is String && v.isNotEmpty) return '${entry.key}: $v';
+      if (v is List && v.isNotEmpty) return ApiErrorText.field(entry.key, v.first);
+      if (v is String && v.isNotEmpty) return ApiErrorText.field(entry.key, v);
     }
-    return 'Something went wrong. Please try again.';
+    return ApiErrorText.fallback;
   }
 
   static String _flattenValidationMap(Map map) {
     final entry = map.entries.first;
     final val = entry.value;
-    if (val is List && val.isNotEmpty) return '${entry.key}: ${val.first}';
-    return '${entry.key}: $val';
+    return ApiErrorText.field(
+      '${entry.key}',
+      val is List && val.isNotEmpty ? val.first : val,
+    );
   }
 }

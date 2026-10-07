@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 import '../models/help_ticket_model.dart';
+import '../core/api_error_text.dart';
 
 /// REST wrapper for the Help / Support ticketing endpoints.
 ///
@@ -315,26 +316,30 @@ class HelpService {
     final error = body['error'];
     if (error is Map) {
       final msg = error['message'];
-      if (msg is String && msg.isNotEmpty) return msg;
+      if (msg is String && msg.isNotEmpty) return ApiErrorText.readable(msg);
       if (msg is Map && msg.isNotEmpty) {
         final entry = msg.entries.first;
         final val = entry.value;
-        if (val is List && val.isNotEmpty) return '${entry.key}: ${val.first}';
-        return '${entry.key}: $val';
+        return ApiErrorText.field(
+          '${entry.key}',
+          val is List && val.isNotEmpty ? val.first : val,
+        );
       }
-      if (msg is List && msg.isNotEmpty) return msg.first.toString();
+      if (msg is List && msg.isNotEmpty) {
+        return ApiErrorText.readable(msg.first.toString());
+      }
     }
     for (final key in ['detail', 'message', 'non_field_errors']) {
       final v = body[key];
-      if (v is String && v.isNotEmpty) return v;
-      if (v is List && v.isNotEmpty) return v.first.toString();
+      if (v is String && v.isNotEmpty) return ApiErrorText.readable(v);
+      if (v is List && v.isNotEmpty) return ApiErrorText.readable(v.first.toString());
     }
     for (final entry in body.entries) {
       final v = entry.value;
-      if (v is List && v.isNotEmpty) return '${entry.key}: ${v.first}';
-      if (v is String && v.isNotEmpty) return '${entry.key}: $v';
+      if (v is List && v.isNotEmpty) return ApiErrorText.field(entry.key, v.first);
+      if (v is String && v.isNotEmpty) return ApiErrorText.field(entry.key, v);
     }
-    return 'Something went wrong. Please try again.';
+    return ApiErrorText.fallback;
   }
 
   static String _networkError(Object e) {
@@ -347,6 +352,6 @@ class HelpService {
     if (e is HandshakeException) {
       return 'SSL error connecting to server.';
     }
-    return 'Network error: ${e.runtimeType}';
+    return 'Could not connect. Please check your internet connection and try again.';
   }
 }

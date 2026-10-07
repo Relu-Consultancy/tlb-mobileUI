@@ -14,14 +14,15 @@ BoxDecoration _card(WidgetTester tester) {
   return container.decoration! as BoxDecoration;
 }
 
-Future<void> _open(WidgetTester tester) async {
+Future<void> _open(WidgetTester tester,
+    [void Function(BuildContext) show = showWelcomeBackDialog]) async {
   await pumpTLBApp(
     tester,
     Scaffold(
       body: Builder(
         builder: (c) => Center(
           child: ElevatedButton(
-            onPressed: () => showWelcomeBackDialog(c),
+            onPressed: () => show(c),
             child: const Text('open'),
           ),
         ),
@@ -72,6 +73,41 @@ void main() {
       // Gold on gold would vanish.
       expect(bg, AppColors.textPrimary);
       expect(bg, isNot(AppColors.primaryLight));
+    });
+  });
+
+  // bug_login_002: a new Google account was greeted "Welcome Back" and never
+  // told its account had been created.
+  group('Welcome (new account) dialog Tests', () {
+    testWidgets(
+        'TC_W_WBD_005 — confirms the account was created, not "Welcome Back"',
+        (tester) async {
+      await _open(tester, showWelcomeNewUserDialog);
+      expect(find.text('Welcome!'), findsOneWidget);
+      expect(find.textContaining('account has been created successfully'),
+          findsOneWidget);
+      expect(find.text('Welcome Back!'), findsNothing);
+      expect(find.text('Set Up Profile'), findsOneWidget);
+    });
+
+    testWidgets('TC_W_WBD_006 — its button opens profile setup',
+        (tester) async {
+      await _open(tester, showWelcomeNewUserDialog);
+      await tester.tap(find.text('Set Up Profile'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text('Complete Your Profile'), findsOneWidget);
+      expect(find.text('Set Up Profile'), findsNothing);
+    });
+
+    testWidgets('TC_W_WBD_007 — same card and styling as Welcome Back',
+        (tester) async {
+      await _open(tester, showWelcomeNewUserDialog);
+      final gradient = _card(tester).gradient! as LinearGradient;
+      expect(gradient.colors,
+          containsAll([AppColors.headerGradientTop, AppColors.headerGradientBottom]));
+      expect(tester.widget<Text>(find.text('Welcome!')).style!.color,
+          AppColors.textPrimary);
     });
   });
 }

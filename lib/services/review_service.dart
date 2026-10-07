@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/api_review_model.dart';
 import 'auth_http.dart';
+import '../core/api_error_text.dart';
 
 class ReviewService {
   static const _base = 'https://tlb-api.reluconsultancy.in';
@@ -306,8 +307,12 @@ class ReviewService {
   static String? _extractError(dynamic body) {
     if (body is Map<String, dynamic>) {
       final err = body['error'];
-      if (err is Map) return err['message'] as String?;
-      if (body['detail'] is String) return body['detail'] as String;
+      final msg = err is Map ? err['message'] : body['detail'];
+      if (msg is! String) return null;
+      // Blank or unreadable: null, so the caller's status-specific wording
+      // applies instead of the generic fallback.
+      final text = ApiErrorText.readable(msg);
+      return text == ApiErrorText.fallback ? null : text;
     }
     return null;
   }

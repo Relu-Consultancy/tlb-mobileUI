@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/api_booking_model.dart';
 import 'auth_http.dart';
+import '../core/api_error_text.dart';
 
 class BookingService {
   static const _base = 'https://tlb-api.reluconsultancy.in';
@@ -421,10 +422,10 @@ class BookingService {
         return 'Online payment is temporarily unavailable for this booking. Please contact support.';
       }
       final msg = err['message'];
-      if (msg is String && msg.isNotEmpty) return msg;
+      if (msg is String && msg.isNotEmpty) return ApiErrorText.readable(msg);
     }
     final msg = body['message'] ?? body['detail'];
-    if (msg is String && msg.isNotEmpty) return msg;
+    if (msg is String && msg.isNotEmpty) return ApiErrorText.readable(msg);
     return 'Request failed ($statusCode). Please try again.';
   }
 }

@@ -10,7 +10,7 @@ import '../providers/auth_state.dart';
 import '../providers/saved_events_state.dart';
 import '../services/walkthrough_service.dart';
 import '../widgets/app_loader.dart';
-import 'edit_profile_screen.dart';
+import '../widgets/login_sheet.dart' show showWelcomeNewUserDialog;
 
 /// Shared OTP verification screen used by both login and signup flows.
 ///
@@ -100,22 +100,14 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     if (!mounted) return;
 
     if (result['success'] == true) {
-      final access = result['access'] as String?;
-
-      // Decide whether this account has actually completed signup. We CANNOT
-      // trust `is_new_user` alone — the backend may omit it, in which case a
-      // freshly auto-created account looks like a returning user. So if the
-      // flag doesn't already say "new", cross-check the real profile: an
-      // account with no completed profile was never truly registered.
+      // Decide whether this account has actually completed signup. The
+      // backend sends no `is_new_user` flag, so a freshly auto-created
+      // account would look like a returning user; AuthService.isNewAccount
+      // cross-checks the real profile instead.
       // (Keep the spinner up through this extra call so Verify can't be
       // double-tapped mid-request.)
-      bool needsSignup = result['is_new_user'] == true;
-      if (!needsSignup && access != null) {
-        final registered =
-            await AuthService.isAccountRegistered(accessToken: access);
-        if (!mounted) return;
-        needsSignup = !registered;
-      }
+      final needsSignup = await AuthService.isNewAccount(result);
+      if (!mounted) return;
       setState(() => _loading = false);
 
       // Reject before any state mutation: the user came here to LOG IN, but
@@ -143,12 +135,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       if (isNew) {
         await WalkthroughService.markAsNewUser();
         if (!mounted) return;
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (_) => const EditProfileScreen(isOnboarding: true),
-          ),
-          (route) => false,
-        );
+        showWelcomeNewUserDialog(context);
       } else {
         if (widget.onExistingUser != null) {
           widget.onExistingUser!(context);

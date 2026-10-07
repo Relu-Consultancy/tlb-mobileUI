@@ -5,6 +5,7 @@ import '../widgets/app_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_snackbar.dart';
+import '../core/email_validation.dart';
 import '../core/responsive.dart';
 import '../services/auth_service.dart';
 
@@ -57,7 +58,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   Future<void> _onSendOtp() async {
     final email = _emailCtrl.text.trim();
-    if (email.isEmpty || !email.contains('@')) {
+    if (!EmailAddress.isValid(email)) {
       AppSnackBar.show(context, 'Please enter a valid email address');
       return;
     }

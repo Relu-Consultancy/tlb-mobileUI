@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import '../core/app_snackbar.dart';
+import '../core/email_validation.dart';
 import '../core/firebase_bootstrap.dart';
 import '../core/google_auth_error.dart';
 import '../widgets/app_loader.dart';
@@ -48,8 +49,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _onSendOTP() async {
     final email = _emailController.text.trim();
-    if (email.isEmpty) {
-      AppSnackBar.show(context, 'Please enter your email address');
+    // Checked here so a malformed address never reaches the server.
+    final invalid = EmailAddress.validate(email);
+    if (invalid != null) {
+      AppSnackBar.show(context, invalid);
       return;
     }
     setState(() => _loading = true);
@@ -116,6 +119,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
       debugPrint('[Google Login] Firebase ID token obtained, calling API...');
       final result = await AuthService.googleSignIn(idToken: firebaseIdToken);
+      // google-login signs in and signs up alike; tell which happened before
+      // greeting (the spinner stays up through this second call).
+      final isNew =
+          result['success'] == true && await AuthService.isNewAccount(result);
 
       if (!mounted) return;
       setState(() => _loading = false);
@@ -128,16 +135,10 @@ class _LoginScreenState extends State<LoginScreen> {
         );
         SavedEventsState.loadFromApi();
 
-        final isNew = result['is_new_user'] == true;
         if (isNew) {
           await WalkthroughService.markAsNewUser();
           if (!mounted) return;
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (_) => const EditProfileScreen(isOnboarding: true),
-            ),
-            (route) => false,
-          );
+          showWelcomeNewUserDialog(context);
         } else {
           showWelcomeBackDialog(context);
         }
@@ -505,7 +506,35 @@ class _OrDivider extends StatelessWidget {
 // WELCOME BACK DIALOG
 // ─────────────────────────────────────────────
 
-void showWelcomeBackDialog(BuildContext context) {
+/// Greets a returning customer, then takes them home.
+void showWelcomeBackDialog(BuildContext context) => _showWelcomeDialog(
+      context,
+      emoji: '👋',
+      title: 'Welcome Back!',
+      message: 'Great to see you again.\nReady to explore?',
+      action: "Let's Go!",
+      next: () => const HomeScreen(),
+    );
+
+/// Confirms a brand-new account was created, then opens profile setup.
+void showWelcomeNewUserDialog(BuildContext context) => _showWelcomeDialog(
+      context,
+      emoji: '🎉',
+      title: 'Welcome!',
+      message: 'Your account has been created successfully.\n'
+          "Let's set up your profile.",
+      action: 'Set Up Profile',
+      next: () => const EditProfileScreen(isOnboarding: true),
+    );
+
+void _showWelcomeDialog(
+  BuildContext context, {
+  required String emoji,
+  required String title,
+  required String message,
+  required String action,
+  required Widget Function() next,
+}) {
   // Capture the ROOT navigator before the dialog is pushed. Using
   // rootNavigator:true guards against nested Navigators (e.g. inside a
   // showcase overlay) ending up with a stale reference, and also keeps
@@ -517,13 +546,17 @@ void showWelcomeBackDialog(BuildContext context) {
     barrierDismissible: false,
     useRootNavigator: true,
     builder: (dialogContext) => _WelcomeBackDialog(
+      emoji: emoji,
+      title: title,
+      message: message,
+      action: action,
       onDone: () {
-        // Dismiss the dialog first — pushing HomeScreen with predicate=false
-        // while a dialog is still on top leaves a one-frame gap where neither
-        // is painted, which manifests as a grey flash.
+        // Dismiss the dialog first — pushing the next screen with
+        // predicate=false while a dialog is still on top leaves a one-frame
+        // gap where neither is painted, which manifests as a grey flash.
         Navigator.of(dialogContext, rootNavigator: true).pop();
         navigator.pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          MaterialPageRoute(builder: (_) => next()),
           (route) => false,
         );
       },
@@ -532,8 +565,18 @@ void showWelcomeBackDialog(BuildContext context) {
 }
 
 class _WelcomeBackDialog extends StatefulWidget {
+  final String emoji;
+  final String title;
+  final String message;
+  final String action;
   final VoidCallback onDone;
-  const _WelcomeBackDialog({required this.onDone});
+  const _WelcomeBackDialog({
+    required this.emoji,
+    required this.title,
+    required this.message,
+    required this.action,
+    required this.onDone,
+  });
 
   @override
   State<_WelcomeBackDialog> createState() => _WelcomeBackDialogState();
@@ -634,12 +677,12 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
                     ),
                   ),
                   child: Center(
-                    child: Text('👋', style: TextStyle(fontSize: Responsive.sp(context, 58))),
+                    child: Text(widget.emoji, style: TextStyle(fontSize: Responsive.sp(context, 58))),
                   ),
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Welcome Back!',
+                  widget.title,
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 22),
                     fontWeight: FontWeight.w700,
@@ -650,7 +693,7 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Great to see you again.\nReady to explore?',
+                  widget.message,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     fontSize: Responsive.sp(context, 13),
@@ -675,7 +718,7 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
                       elevation: 0,
                     ),
                     child: Text(
-                      "Let's Go!",
+                      widget.action,
                       style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 16),
                         fontWeight: FontWeight.w600,

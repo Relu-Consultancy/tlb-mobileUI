@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import '../core/app_snackbar.dart';
+import '../core/email_validation.dart';
 import '../core/firebase_bootstrap.dart';
 import '../core/google_auth_error.dart';
 import '../services/auth_service.dart';
@@ -15,8 +16,8 @@ import '../providers/saved_events_state.dart';
 import '../core/responsive.dart';
 import '../widgets/app_loader.dart';
 import '../screens/otp_verification_screen.dart';
-import '../screens/edit_profile_screen.dart';
 import '../screens/home_screen.dart';
+import '../widgets/login_sheet.dart' show showWelcomeNewUserDialog;
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -37,8 +38,10 @@ class _SignupScreenState extends State<SignupScreen> {
 
   Future<void> _onSendOTP() async {
     final email = _emailController.text.trim();
-    if (email.isEmpty) {
-      AppSnackBar.show(context, 'Please enter your email address');
+    // Checked here so a malformed address never reaches the server.
+    final invalid = EmailAddress.validate(email);
+    if (invalid != null) {
+      AppSnackBar.show(context, invalid);
       return;
     }
     setState(() => _loading = true);
@@ -110,6 +113,10 @@ class _SignupScreenState extends State<SignupScreen> {
       debugPrint('[Google Signup] Firebase ID token obtained, calling API...');
       final result = await AuthService.googleSignIn(idToken: firebaseIdToken);
 
+      // google-login signs in and signs up alike; tell which happened.
+      final isNew =
+          result['success'] == true && await AuthService.isNewAccount(result);
+
       if (!mounted) return;
       setState(() => _loading = false);
 
@@ -121,16 +128,10 @@ class _SignupScreenState extends State<SignupScreen> {
         );
         SavedEventsState.loadFromApi();
 
-        final isNew = result['is_new_user'] == true;
         if (isNew) {
           await WalkthroughService.markAsNewUser();
           if (!mounted) return;
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (_) => const EditProfileScreen(isOnboarding: true),
-            ),
-            (route) => false,
-          );
+          showWelcomeNewUserDialog(context);
         } else {
           // Existing user signed in via Google on signup screen — take them home
           Navigator.of(context).pushAndRemoveUntil(
