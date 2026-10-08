@@ -169,8 +169,11 @@ void main() {
           .readAsStringSync();
       expect(src, contains('ActivityService.trackListingView('),
           reason: '$type detail screen does not report a Listing View');
-      expect(src, contains('source: ListingSource.originOf(context)'),
+      expect(src, contains('_source = ListingSource.originOf(context)'),
           reason: '$type detail screen drops the source');
+      // The same source goes on the event and on the detail GET.
+      expect(RegExp(r'source: _source').allMatches(src), hasLength(2),
+          reason: '$type detail screen sends the source on only one of them');
       expect(src, contains('if (_viewTracked) return;'),
           reason: '$type detail screen could report more than once per open');
     }

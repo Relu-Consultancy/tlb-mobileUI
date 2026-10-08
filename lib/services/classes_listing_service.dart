@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import '../core/listing_source.dart';
 import '../models/api_category_model.dart';
 import '../models/api_class_model.dart';
 
@@ -173,12 +174,17 @@ class ClassesListingService {
 
   // ── Class detail ──────────────────────────────────────────────────────────
 
-  static Future<ApiClassDetail> fetchClassDetail(String listingId) async {
+  /// [token] and [source] only when this fetch IS the customer opening the
+  /// class: the backend records the Listing View from this request (see
+  /// [ListingViewRequest]). Fetches for anything else leave both null.
+  static Future<ApiClassDetail> fetchClassDetail(String listingId,
+      {String? token, String? source}) async {
     try {
       final res = await http
           .get(
-            Uri.parse('$_base/api/v1/listings/classes/$listingId/'),
-            headers: {'Accept': 'application/json'},
+            ListingViewRequest.uri('$_base/api/v1/listings/classes/$listingId/',
+                source: source),
+            headers: ListingViewRequest.headers(token: token),
           )
           .timeout(_timeout);
 

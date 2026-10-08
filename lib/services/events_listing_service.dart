@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import '../core/listing_source.dart';
 import '../models/api_category_model.dart';
 import '../models/api_event_model.dart';
 import '../models/api_provider_model.dart';
@@ -119,12 +120,18 @@ class EventsListingService {
 
   /// Fetches full detail for a single published event.
   /// Response wrapper: { "success": true, "data": { ... } }
-  static Future<ApiEventDetail> fetchEventDetail(String listingId) async {
+  ///
+  /// [token] and [source] only when this fetch IS the customer opening the
+  /// event: the backend records the Listing View from this request (see
+  /// [ListingViewRequest]). Fetches for anything else leave both null.
+  static Future<ApiEventDetail> fetchEventDetail(String listingId,
+      {String? token, String? source}) async {
     try {
       final res = await http
           .get(
-            Uri.parse('$_base/api/v1/listings/events/$listingId/'),
-            headers: {'Accept': 'application/json'},
+            ListingViewRequest.uri('$_base/api/v1/listings/events/$listingId/',
+                source: source),
+            headers: ListingViewRequest.headers(token: token),
           )
           .timeout(_timeout);
 
@@ -290,24 +297,17 @@ class EventsListingService {
 
   // ── Venue detail ──────────────────────────────────────────────────────────
 
-  /// [token] — pass it only when this fetch IS the customer opening the
-  /// venue. The backend records the venue's `view_listing` from this request
-  /// (the app deliberately doesn't send one), and an anonymous request can't
-  /// be attributed, so a signed-in customer's views went unrecorded. Screens
-  /// that fetch a venue just for its cover (Bookings) leave it null, so they
-  /// don't count as views.
+  /// [token] and [source] only when this fetch IS the customer opening the
+  /// venue: the backend records the Listing View from this request (see
+  /// [ListingViewRequest]). Fetches for anything else leave both null.
   static Future<ApiVenueDetail> fetchVenueDetail(String listingId,
-      {String? token}) async {
+      {String? token, String? source}) async {
     try {
       final res = await http
           .get(
-            Uri.parse('$_base/api/v1/listings/venues/$listingId/'),
-            headers: {
-              'Accept': 'application/json',
-              'X-Client-Platform': 'app',
-              if (token != null && token.isNotEmpty)
-                'Authorization': 'Bearer $token',
-            },
+            ListingViewRequest.uri('$_base/api/v1/listings/venues/$listingId/',
+                source: source),
+            headers: ListingViewRequest.headers(token: token),
           )
           .timeout(_timeout);
 

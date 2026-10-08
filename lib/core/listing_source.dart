@@ -59,6 +59,29 @@ abstract final class ListingSource {
   static final NavigatorObserver observer = _OriginObserver();
 }
 
+/// How a listing's detail is requested — GET /listings/{type}/{id}/.
+///
+/// The backend records the Listing View from that request itself: `utm_source`
+/// says where the listing was opened from (a [ListingSource] value; without
+/// one the view counts as organic/direct), and the signed-in customer's token
+/// lets it count unique viewers. A fetch that is not the customer opening the
+/// listing — a booking card loading its cover — passes neither.
+abstract final class ListingViewRequest {
+  static Uri uri(String url, {String? source}) {
+    final base = Uri.parse(url);
+    if (source == null || source.isEmpty) return base;
+    return base.replace(
+      queryParameters: {...base.queryParameters, 'utm_source': source},
+    );
+  }
+
+  static Map<String, String> headers({String? token}) => {
+        'Accept': 'application/json',
+        'X-Client-Platform': 'app',
+        if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+      };
+}
+
 class _OriginObserver extends NavigatorObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {

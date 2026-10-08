@@ -1,6 +1,7 @@
 import '../core/responsive.dart';
 import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
+import '../widgets/category_skeleton_card.dart';
 import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -21,8 +22,9 @@ class SpecialNeedsSection extends StatelessWidget {
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
         // Real listings once the feed is in, the mock set until then.
-        final items = HomeFeedState.sectionOr('where_every_star_shines', DummyData.specialNeeds);
-        if (items.isEmpty) return const SizedBox.shrink();
+                final isLoaded = HomeFeedState.isLoaded;
+        final items = isLoaded ? HomeFeedState.section('where_every_star_shines') : DummyData.specialNeeds;
+        if (items.isEmpty && isLoaded) return const SizedBox.shrink();
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

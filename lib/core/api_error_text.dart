@@ -60,5 +60,7 @@ class ApiErrorText {
       text.startsWith('[') ||
       text.contains('Traceback') ||
       text.contains('Exception:') ||
-      text.contains('<html');
+      text.contains('<html') ||
+      text.contains('ErrorDetail') ||
+      text.contains('ValidationError');
 }

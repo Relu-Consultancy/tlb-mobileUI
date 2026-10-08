@@ -13,6 +13,8 @@ import 'package:showcaseview/showcaseview.dart';
 import '../helpers/walkthrough_keys.dart';
 import '../widgets/walkthrough_tooltip.dart';
 
+import '../widgets/category_skeleton_card.dart';
+
 class HotPicksSection extends StatelessWidget {
   const HotPicksSection({super.key});
 
@@ -21,9 +23,9 @@ class HotPicksSection extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
-        // Real listings once the feed is in, the mock set until then.
-        final items = HomeFeedState.sectionOr('hot_picks', DummyData.hotPicks);
-        if (items.isEmpty) return const SizedBox.shrink();
+        final isLoaded = HomeFeedState.isLoaded;
+        final items = isLoaded ? HomeFeedState.section('hot_picks') : DummyData.hotPicks;
+        if (items.isEmpty && isLoaded) return const SizedBox.shrink();
         return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -42,6 +44,13 @@ class HotPicksSection extends StatelessWidget {
             itemCount: items.length,
             addAutomaticKeepAlives: false,
             itemBuilder: (context, index) {
+              if (!isLoaded) {
+                return Container(
+                  width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+                  margin: const EdgeInsets.only(right: 16),
+                  child: const CategorySkeletonCard(),
+                );
+              }
               final event = items[index];
               final card = GestureDetector(
                 onTap: () => openListingDetail(context, event),

@@ -149,28 +149,35 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
   /// dependencies change or the screen rebuilds.
   bool _viewTracked = false;
 
+  /// Where this open came from (a [ListingSource] value), or null when the
+  /// screen it was opened from isn't a tagged surface.
+  String? _source;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_viewTracked) return;
     _viewTracked = true;
     // A Listing View: feeds the partner's view counts, conversion and
-    // traffic sources. Reported here rather than at the call sites so no
-    // way of opening a listing can miss it. Needs the route, hence not
-    // initState.
+    // traffic sources. Read here rather than at the call sites so no way of
+    // opening a listing can miss it; needs the route, hence not initState.
+    _source = ListingSource.originOf(context);
+    // The backend records the view from the detail GET, with _source as its
+    // utm_source. view_listing is for backends from before that change —
+    // newer ones ignore it, so the open is never counted twice.
     ActivityService.trackListingView(
       listingId: widget.event.id,
-      source: ListingSource.originOf(context),
+      source: _source,
     );
+    if (_hasApiId) _fetchDetail();
   }
 
   @override
   void initState() {
     super.initState();
-    if (_hasApiId) {
-      _fetchDetail();
-      _fetchReviews();
-    }
+    // The detail fetch starts in didChangeDependencies, once the source is
+    // known.
+    if (_hasApiId) _fetchReviews();
   }
 
   Future<void> _fetchReviews() async {
@@ -188,7 +195,11 @@ class _ClassDetailScreenState extends State<ClassDetailScreen> {
   Future<void> _fetchDetail() async {
     setState(() { _isLoading = true; _error = null; });
     try {
-      final detail = await ClassesListingService.fetchClassDetail(widget.event.id);
+      final detail = await ClassesListingService.fetchClassDetail(
+        widget.event.id,
+        token: AuthState.isLoggedIn.value ? AuthState.accessToken : null,
+        source: _source,
+      );
       if (!mounted) return;
       setState(() { _detail = detail; _isLoading = false; });
     } catch (e) {

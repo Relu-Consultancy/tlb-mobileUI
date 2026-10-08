@@ -61,7 +61,7 @@ class AuthService {
         return {
           'success': false,
           'code': 'USER_NOT_FOUND',
-          'message': 'Account not found. Please sign up first.',
+          'message': 'Account not found. Please signup first.',
         };
       }
       return {'success': false, 'code': code, 'message': _extractError(body)};

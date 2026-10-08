@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'package:http/http.dart' as http;
+import '../core/listing_source.dart';
 import '../models/api_category_model.dart';
 import '../models/api_program_model.dart';
 
@@ -129,10 +130,17 @@ class ProgramsListingService {
 
   // ── Detail ────────────────────────────────────────────────────────────────
 
-  static Future<ApiProgramDetail> fetchProgramDetail(String id) async {
+  /// [token] and [source] only when this fetch IS the customer opening the
+  /// program: the backend records the Listing View from this request (see
+  /// [ListingViewRequest]). Fetches for anything else leave both null.
+  static Future<ApiProgramDetail> fetchProgramDetail(String id,
+      {String? token, String? source}) async {
     try {
-      final url = Uri.parse('$_base/api/v1/listings/programs/$id/');
-      final res = await http.get(url, headers: {'Accept': 'application/json'}).timeout(_timeout);
+      final url = ListingViewRequest.uri('$_base/api/v1/listings/programs/$id/',
+          source: source);
+      final res = await http
+          .get(url, headers: ListingViewRequest.headers(token: token))
+          .timeout(_timeout);
       
       final body = jsonDecode(res.body) as Map<String, dynamic>;
       

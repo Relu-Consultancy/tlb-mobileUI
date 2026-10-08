@@ -2,6 +2,7 @@ import '../core/responsive.dart';
 import '../core/app_colors.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../widgets/category_skeleton_card.dart';
 import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -45,8 +46,9 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
       valueListenable: HomeFeedState.version,
       builder: (context, _, __) {
         // Real listings once the feed is in, the mock set until then.
-        final items = HomeFeedState.sectionOr('weekend_specials', DummyData.weekendSpecial);
-        if (items.isEmpty) return const SizedBox.shrink();
+                final isLoaded = HomeFeedState.isLoaded;
+        final items = isLoaded ? HomeFeedState.section('weekend_specials') : DummyData.weekendSpecial;
+        if (items.isEmpty && isLoaded) return const SizedBox.shrink();
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -64,6 +66,12 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
                 clipBehavior: Clip.hardEdge,
                 itemCount: items.length,
                 itemBuilder: (context, index) {
+                  if (!isLoaded) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      child: const CategorySkeletonCard(),
+                    );
+                  }
                   final event = items[index];
                   // `tag` carries the two-line date badge, e.g. "Sun\nmar 17".
                   final dateParts = (event.tag ?? '').split('\n');

@@ -240,10 +240,8 @@ class _HomeScreenState extends State<HomeScreen> {
             builder: (context, city, _) {
               // The curated spotlight, or the mock posters until the feed
               // is in.
-              final spotlight = HomeFeedState.sectionOr(
-                'spotlight',
-                DummyData.bannerEvents,
-              );
+              final isLoaded = HomeFeedState.isLoaded;
+              final spotlight = isLoaded ? HomeFeedState.section('spotlight') : DummyData.bannerEvents;
               // Nothing to show: a city we don't serve, or one where none of
               // the curated listings are.
               final showEmpty = !LocationState().isLocationSupported(city) ||
@@ -300,7 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   height: (MediaQuery.of(context).size.height *
                                           0.62)
                                       .clamp(420.0, 660.0),
-                                  child: SpotlightBanner(events: spotlight),
+                                  child: SpotlightBanner(events: spotlight, isLoading: !isLoaded),
                                 ),
                               ),
                             const RepaintBoundary(child: CategoriesGrid()),

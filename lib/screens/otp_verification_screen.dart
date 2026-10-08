@@ -25,7 +25,7 @@ class OtpVerificationScreen extends StatefulWidget {
   /// True when the user arrived via the login flow. In that case, verifying
   /// OTP for an email that isn't a real registered account (the backend
   /// auto-creates one, or the account never completed signup) is treated as a
-  /// bug: we surface "No account found with this email. Please sign up first."
+  /// bug: we surface "No account found with this email. Please signup first."
   /// instead of silently logging them in. "Not a real account" is detected by
   /// `is_new_user` AND, because that flag can't be trusted alone, a profile
   /// completeness cross-check (see AuthService.isAccountRegistered).
@@ -117,7 +117,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       if (needsSignup && widget.isLoginFlow) {
         AppSnackBar.error(
           context,
-          'No account found with this email. Please sign up first.',
+          'No account found with this email. Please signup first.',
         );
         Navigator.of(context).pop();
         return;

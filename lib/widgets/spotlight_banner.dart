@@ -10,6 +10,7 @@ import 'four_point_star.dart';
 import 'wishlist_button.dart';
 import '../core/listing_image.dart';
 import '../core/listing_navigation.dart';
+import 'category_skeleton_card.dart';
 
 /// The Home "Spotlight" section: a "✦ Spotlight ✦" header and a swipeable set of
 /// poster cards on the black backdrop. Each card has a glowing gold border, a
@@ -17,8 +18,13 @@ import '../core/listing_navigation.dart';
 /// card anywhere opens the listing.
 class SpotlightBanner extends StatefulWidget {
   final List<EventModel> events;
+  final bool isLoading;
 
-  const SpotlightBanner({super.key, required this.events});
+  const SpotlightBanner({
+    super.key,
+    required this.events,
+    this.isLoading = false,
+  });
 
   @override
   State<SpotlightBanner> createState() => _SpotlightBannerState();
@@ -104,8 +110,12 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
                 clipBehavior: Clip.none,
                 itemCount: widget.events.length,
                 onPageChanged: (i) => setState(() => _index = i),
-                itemBuilder: (context, i) =>
-                    _buildCard(context, widget.events[i]),
+                itemBuilder: (context, i) {
+                  if (widget.isLoading) {
+                    return _buildSkeletonCard(context);
+                  }
+                  return _buildCard(context, widget.events[i]);
+                },
               ),
             ),
           ),
@@ -192,6 +202,56 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
           offset: const Offset(0, -14),
         ),
       ];
+
+  Widget _buildSkeletonCard(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: SkeletonShimmer(
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            color: const Color(0xFF2A2A2A), // Dark base to shimmer over
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Container(color: Colors.white),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 200,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        width: 140,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildCard(BuildContext context, EventModel e) {
     final Widget card = GestureDetector(
@@ -285,25 +345,41 @@ class _SpotlightBannerState extends State<SpotlightBanner> {
   Widget _buildFooter(BuildContext context, EventModel e) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Venues and classes have no single date/time; skip the item rather
-          // than draw a bare icon with nothing beside it.
-          if ((e.eventDate ?? '').isNotEmpty) ...[
-            _metaItem(context, Icons.calendar_today_rounded, e.eventDate!),
-            const SizedBox(width: 12),
-          ],
-          if ((e.eventTime ?? '').isNotEmpty) ...[
-            _metaItem(context, Icons.access_time_rounded, e.eventTime!),
-            const SizedBox(width: 12),
-          ],
-          Flexible(
-            child: _metaItem(
-              context,
-              Icons.location_on_outlined,
-              e.venue,
-              flexible: true,
+          Text(
+            e.title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 16),
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
             ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              // Venues and classes have no single date/time; skip the item rather
+              // than draw a bare icon with nothing beside it.
+              if ((e.eventDate ?? '').isNotEmpty) ...[
+                _metaItem(context, Icons.calendar_today_rounded, e.eventDate!),
+                const SizedBox(width: 12),
+              ],
+              if ((e.eventTime ?? '').isNotEmpty) ...[
+                _metaItem(context, Icons.access_time_rounded, e.eventTime!),
+                const SizedBox(width: 12),
+              ],
+              Flexible(
+                child: _metaItem(
+                  context,
+                  Icons.location_on_outlined,
+                  e.venue,
+                  flexible: true,
+                ),
+              ),
+            ],
           ),
         ],
       ),

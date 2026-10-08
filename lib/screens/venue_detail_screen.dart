@@ -45,20 +45,34 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
 
   bool get _hasApiId => widget.event.id.isNotEmpty;
 
-  /// Whether this open has been reported. A State lives for exactly one
-  /// open of the screen, so the flag makes it once per open however often
-  /// dependencies change or the screen rebuilds.
   // No view_listing from the app for venues: the backend records the view
-  // itself on GET /listings/venues/{id}/ (the detail fetch below), and an
+  // itself from GET /listings/venues/{id}/ (the detail fetch below), and an
   // app-side event would count every venue view twice.
+
+  /// Whether the open has been read. A State lives for exactly one open of
+  /// the screen, so this runs once however often dependencies change.
+  bool _opened = false;
+
+  /// Where this open came from (a [ListingSource] value) — the utm_source of
+  /// the view the backend records from the detail GET.
+  String? _source;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_opened) return;
+    _opened = true;
+    // Needs the route, hence here and not initState.
+    _source = ListingSource.originOf(context);
+    if (_hasApiId) _fetchDetail();
+  }
 
   @override
   void initState() {
     super.initState();
-    if (_hasApiId) {
-      _fetchDetail();
-      _fetchReviews();
-    }
+    // The detail fetch starts in didChangeDependencies, once the source is
+    // known.
+    if (_hasApiId) _fetchReviews();
   }
 
   Future<void> _fetchReviews() async {
@@ -79,10 +93,10 @@ class _VenueDetailScreenState extends State<VenueDetailScreen> {
       _error = null;
     });
     try {
-      // Signed in: the backend records this open as the venue's view.
       final detail = await EventsListingService.fetchVenueDetail(
         widget.event.id,
         token: AuthState.isLoggedIn.value ? AuthState.accessToken : null,
+        source: _source,
       );
       if (!mounted) return;
       setState(() {
