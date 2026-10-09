@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 import '../models/api_provider_model.dart';
 import '../providers/auth_state.dart';
+import '../providers/follow_state.dart';
 import '../screens/organizer_profile_screen.dart';
 import '../services/events_listing_service.dart';
 import 'partner_follow_button.dart';
@@ -79,21 +80,49 @@ class _OrganizerCardState extends State<OrganizerCard> {
           ? _provider!.isFollowing
           : null;
 
+  /// Keeps the snapshot handed to the organizer profile in step with the
+  /// follow button. Without this the profile opened from here still carried
+  /// the `is_following` and follower count fetched before the tap, so it
+  /// showed "Follow" and an unchanged tally for a partner just followed.
+  void _onFollowChanged(bool following) {
+    final p = _provider;
+    if (p == null || !mounted || p.isFollowing == following) return;
+    final current = p.totalFollowers;
+    setState(() {
+      _provider = p.copyWith(
+        // Never below zero: the count predates this tap.
+        totalFollowers: current == null
+            ? null
+            : (following ? current + 1 : (current - 1).clamp(0, current)),
+        isFollowing: following,
+      );
+    });
+  }
+
+  /// The profile has its own follow button; take its outcome back so this
+  /// card does not still read "Follow" after returning.
+  Future<void> _openProfile() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => OrganizerProfileScreen(
+          listingId: widget.listingId,
+          initialName: _name,
+          initialLogoUrl: _logoUrl,
+          provider: _provider,
+          listingType: widget.listingType,
+        ),
+      ),
+    );
+    final id = _effectivePartnerId;
+    if (!mounted || id == null || AuthState.accessToken == null) return;
+    _onFollowChanged(FollowState.isFollowing(id));
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => OrganizerProfileScreen(
-            listingId: widget.listingId,
-            initialName: _name,
-            initialLogoUrl: _logoUrl,
-            provider: _provider,
-            listingType: widget.listingType,
-          ),
-        ),
-      ),
+      onTap: _openProfile,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -152,6 +181,7 @@ class _OrganizerCardState extends State<OrganizerCard> {
             PartnerFollowButton(
               partnerId: _effectivePartnerId,
               initialIsFollowing: _serverIsFollowing,
+              onChanged: _onFollowChanged,
             ),
           ],
         ),
