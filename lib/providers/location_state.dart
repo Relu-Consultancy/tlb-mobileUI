@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/city_resolver.dart';
 import '../services/customer_location_service.dart';
@@ -108,6 +109,7 @@ class LocationState {
     final hadCoordinates = hasCoordinates;
     _pickedByHand = latitude == null || longitude == null;
     _apply(city, latitude, longitude, label: label);
+    _persistPickedCity(_pickedByHand ? city.trim() : null);
     if (AuthState.isLoggedIn.value) {
       if (latitude != null && longitude != null) {
         CustomerLocationService.save(latitude, longitude);
@@ -129,6 +131,41 @@ class LocationState {
     selectedCity.value = city.trim();
     this.latitude = latitude;
     this.longitude = longitude;
+  }
+
+  static const String _pickedCityKey = 'location.picked_city';
+
+  /// Stores a city picked by hand so it survives a restart, or forgets it
+  /// ([city] null) once the customer switches to a GPS fix. Best-effort: a
+  /// storage failure must never block choosing a city.
+  Future<void> _persistPickedCity(String? city) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (city == null) {
+        await prefs.remove(_pickedCityKey);
+      } else {
+        await prefs.setString(_pickedCityKey, city);
+      }
+    } catch (_) {
+      // Storage unavailable: the choice still applies for this session.
+    }
+  }
+
+  /// Restores the city the customer picked by hand on an earlier run. Call at
+  /// startup, before the first frame. Marks it as picked by hand so the
+  /// launch-time GPS fix does not override it (see `LaunchLocation.detect`).
+  /// Does nothing when a city is already set or nothing was saved.
+  Future<void> restorePickedCity() async {
+    if (hasCity) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final city = prefs.getString(_pickedCityKey)?.trim();
+      if (city == null || city.isEmpty || hasCity) return;
+      _pickedByHand = true;
+      _apply(city, null, null);
+    } catch (_) {
+      // Unreadable storage: fall back to the normal unset-city launch.
+    }
   }
 
   /// Test seam and fallback for [restoreSaved]; the platform geocoder by

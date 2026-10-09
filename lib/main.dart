@@ -12,6 +12,7 @@ import 'core/preview_mode.dart';
 import 'providers/auth_state.dart';
 import 'providers/connectivity_state.dart';
 import 'providers/follow_state.dart';
+import 'providers/location_state.dart';
 import 'providers/notifications_state.dart';
 import 'providers/saved_events_state.dart';
 import 'services/push_notifications.dart';
@@ -40,6 +41,9 @@ void main() async {
     await PushNotifications.init();
   }
   await PreviewMode.load();
+  // A city the customer picked by hand last time (e.g. after declining
+  // location permission) is still theirs on the next launch.
+  await LocationState().restorePickedCity();
   // Local profile picture survives across launches even though backend
   // profile API has no avatar field yet.
   final localAvatar = await AvatarStorage.load();
