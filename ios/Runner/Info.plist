@@ -41,6 +41,10 @@
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
+		<key>NSCameraUsageDescription</key>
+		<string>TLB uses your camera so you can take a profile photo.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>TLB uses your photos so you can set a profile picture and add photos or videos to reviews.</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>TLB uses your location to show kids' events, classes and venues near you.</string>
 		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
