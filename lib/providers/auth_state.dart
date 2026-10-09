@@ -102,6 +102,74 @@ class AuthState {
     return (profile?['first_name'] as String? ?? '').isNotEmpty;
   }
 
+  // ── Contact verification (mobile / email, "verify later") ────────────────
+  //
+  // A contact is verified only by a successful OTP against that very contact:
+  // signing in with an email code verifies the email, not the mobile number
+  // saved on the profile, and the other way round. The server sends
+  // `email_verified` / `phone_verified`; until it does, the sign-in method
+  // is what is known.
+
+  /// Bumped whenever a contact is marked verified, so screens that show the
+  /// status can rebuild.
+  static final ValueNotifier<int> verificationChanged = ValueNotifier<int>(0);
+
+  /// The email on the account, or null when there is none (phone signup).
+  static String? get contactEmail {
+    final e = (userEmail ?? userData?['email'] as String?)?.trim();
+    return (e == null || e.isEmpty) ? null : e;
+  }
+
+  /// The mobile number to verify: the one the account signed up with, else the
+  /// one saved on the profile.
+  static String? get contactPhone {
+    final profile = userData?['profile'] as Map<String, dynamic>?;
+    final p = (userPhone ??
+            userData?['phone'] as String? ??
+            profile?['phone_number'] as String?)
+        ?.trim();
+    return (p == null || p.isEmpty) ? null : p;
+  }
+
+  static bool get isEmailVerified {
+    final flag = userData?['email_verified'];
+    if (flag is bool) return flag;
+    // Before the server reports it: an email account that signed in by code
+    // (or Google) was verified by doing so.
+    return contactEmail != null && userData?['is_verified'] == true;
+  }
+
+  static bool get isPhoneVerified {
+    final flag = userData?['phone_verified'];
+    if (flag is bool) return flag;
+    // A phone-signup account (no email) was verified by its sign-in code.
+    final signedUpWithPhone =
+        (userData?['phone'] as String?)?.trim().isNotEmpty == true &&
+            (userData?['email'] as String?)?.trim().isNotEmpty != true;
+    return signedUpWithPhone && userData?['is_verified'] == true;
+  }
+
+  /// Records that [email] and/or [phone] passed OTP verification.
+  static void markVerified({String? email, String? phone}) {
+    userData ??= {};
+    if (email != null) {
+      userData!['email'] = email;
+      userData!['email_verified'] = true;
+      userEmail = email;
+    }
+    if (phone != null) {
+      userData!['phone'] = phone;
+      userData!['phone_verified'] = true;
+      userPhone = phone;
+    }
+    if (accessToken != null && refreshToken != null) {
+      TokenStorage.saveTokens(
+        accessToken!, refreshToken!, jsonEncode(userData),
+      ).catchError((_) {});
+    }
+    verificationChanged.value++;
+  }
+
   /// Call after a successful PATCH /customer/profile/ response to sync local state.
   /// Accepts the profile object returned directly by the profile API.
   static void updateProfileData(Map<String, dynamic> profile) {
@@ -131,7 +199,11 @@ class AuthState {
       final last = profile['last_name'] as String? ?? '';
       // Capitalise the name only — the email fallback is left verbatim.
       final fullName = NameCase.of('$first $last'.trim());
-      userName.value = fullName.isNotEmpty ? fullName : (updatedUser['email'] as String? ?? 'User');
+      userName.value = fullName.isNotEmpty
+          ? fullName
+          : (updatedUser['email'] as String? ??
+              updatedUser['phone'] as String? ??
+              'User');
     }
     if (accessToken != null && refreshToken != null) {
       TokenStorage.saveTokens(

@@ -17,6 +17,8 @@ import '../core/responsive.dart';
 import '../widgets/app_loader.dart';
 import '../screens/otp_verification_screen.dart';
 import '../screens/home_screen.dart';
+import '../screens/whatsapp_signup_screen.dart';
+import '../widgets/whatsapp_auth_card.dart';
 import '../widgets/login_sheet.dart' show showWelcomeNewUserDialog;
 
 class SignupScreen extends StatefulWidget {
@@ -304,6 +306,20 @@ class _SignupScreenState extends State<SignupScreen> {
 
                   // ── Continue with Google ──────────────────────────────────
                   _GoogleButton(onTap: _loading ? null : _onGoogleSignUp),
+
+                  const SizedBox(height: 12),
+
+                  // ── Signup with WhatsApp — its own screen ─────────────────
+                  WhatsAppEntryButton(
+                    label: 'Signup with WhatsApp',
+                    onTap: _loading
+                        ? null
+                        : () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const WhatsAppSignupScreen()),
+                            ),
+                  ),
 
                   const SizedBox(height: 18),
 

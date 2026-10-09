@@ -3,12 +3,14 @@ import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_snackbar.dart';
 import '../core/avatar_image.dart';
+import '../core/phone_validation.dart';
 import '../core/responsive.dart';
 import '../widgets/app_dialog.dart';
 import '../providers/auth_state.dart';
 import '../services/auth_service.dart';
 import '../widgets/app_loader.dart';
 import '../widgets/login_sheet.dart';
+import 'verify_contact_screen.dart';
 
 class AccountSettingsScreen extends StatelessWidget {
   const AccountSettingsScreen({super.key});
@@ -50,7 +52,10 @@ class AccountSettingsScreen extends StatelessWidget {
                   ValueListenableBuilder<String?>(
                     valueListenable: AuthState.avatarUrl,
                     builder: (context, url, _) {
-                      final email = AuthState.userEmail ?? 'No email provided';
+                      // A phone-signup account has no email; show its number instead.
+                      final email = AuthState.userEmail ??
+                          AuthState.userPhone ??
+                          'No email provided';
                       final profile = AuthState.userData?['profile']
                           as Map<String, dynamic>?;
                       final initial = Uri.encodeComponent(
@@ -133,13 +138,51 @@ class AccountSettingsScreen extends StatelessWidget {
                     },
                   ),
                   const Divider(height: 1, thickness: 0.7, indent: 16, endIndent: 16, color: Color(0xFFEFEFEF)),
-                  _buildRow(
-                    context,
-                    icon: Icons.phone_outlined,
-                    label: 'Phone Number',
-                    isLast: true,
-                    onTap: () =>
-                        AppSnackBar.comingSoon(context, 'Phone Number edit'),
+                  // Verified only by a code sent to that very contact: an email
+                  // sign-in verifies the email, not the mobile number, and the
+                  // other way round — each can be confirmed here, later.
+                  ListenableBuilder(
+                    listenable: AuthState.verificationChanged,
+                    builder: (context, _) => Column(
+                      children: [
+                        _buildRow(
+                          context,
+                          icon: Icons.phone_outlined,
+                          label: 'Mobile Number',
+                          subtitle: AuthState.contactPhone == null
+                              ? 'Not added'
+                              : IndianPhone.display(AuthState.contactPhone),
+                          verified: AuthState.contactPhone == null
+                              ? null
+                              : AuthState.isPhoneVerified,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const VerifyContactScreen(
+                                  kind: VerifyContactKind.mobile),
+                            ),
+                          ),
+                        ),
+                        const Divider(height: 1, thickness: 0.7, indent: 16, endIndent: 16, color: Color(0xFFEFEFEF)),
+                        _buildRow(
+                          context,
+                          icon: Icons.mail_outline_rounded,
+                          label: 'Email',
+                          subtitle: AuthState.contactEmail ?? 'Not added',
+                          verified: AuthState.contactEmail == null
+                              ? null
+                              : AuthState.isEmailVerified,
+                          isLast: true,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const VerifyContactScreen(
+                                  kind: VerifyContactKind.email),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   // Change Password row removed — auth is OTP-only, users
                   // never set a password, so the option was a dead end.
@@ -258,6 +301,10 @@ class AccountSettingsScreen extends StatelessWidget {
     required String label,
     bool isLast = false,
     VoidCallback? onTap,
+    String? subtitle,
+
+    /// null: nothing on the account yet; otherwise whether it is verified.
+    bool? verified,
   }) {
     return Material(
       color: Colors.transparent,
@@ -273,15 +320,44 @@ class AccountSettingsScreen extends StatelessWidget {
               Icon(icon, size: 20, color: AppColors.textPrimary),
               const SizedBox(width: 14),
               Expanded(
-                child: Text(
-                  label,
-                  style: GoogleFonts.poppins(
-                    fontSize: Responsive.sp(context, 14.5),
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textPrimary,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: GoogleFonts.poppins(
+                        fontSize: Responsive.sp(context, 14.5),
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    if (subtitle != null)
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 12),
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                  ],
                 ),
               ),
+              if (verified != null) ...[
+                const SizedBox(width: 8),
+                Text(
+                  verified ? 'Verified' : 'Verify',
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 12.5),
+                    fontWeight: FontWeight.w500,
+                    color: verified
+                        ? const Color(0xFF1E8E3E)
+                        : const Color(0xFFB26A00),
+                  ),
+                ),
+                const SizedBox(width: 2),
+              ],
               const Icon(Icons.chevron_right, color: AppColors.accentBlue),
             ],
           ),

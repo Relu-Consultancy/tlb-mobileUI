@@ -29,8 +29,9 @@ void main() {
 
         // Verify personal info card elements
         expect(find.text('Personal Info'), findsOneWidget);
-        expect(find.text('john@example.com'), findsOneWidget);
-        expect(find.text('Phone Number'), findsOneWidget);
+        expect(find.text('john@example.com'), findsWidgets); // header + Email row
+        expect(find.text('Mobile Number'), findsOneWidget);
+        expect(find.text('Email'), findsOneWidget);
 
         // Verify privacy card elements
         expect(find.text('Privacy'), findsOneWidget);

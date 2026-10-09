@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_snackbar.dart';
+import '../core/phone_validation.dart';
 import '../core/responsive.dart';
 import '../services/auth_service.dart';
 import '../providers/auth_state.dart';
@@ -11,15 +12,19 @@ import '../providers/saved_events_state.dart';
 import '../services/walkthrough_service.dart';
 import '../widgets/app_loader.dart';
 import '../widgets/login_sheet.dart' show showWelcomeNewUserDialog;
+import '../widgets/whatsapp_auth_card.dart' show WhatsAppLogo;
 
 /// Shared OTP verification screen used by both login and signup flows.
 ///
-/// [identifier]     — the email the OTP was sent to.
+/// [identifier]     — where the OTP was sent: an email, or an E.164 phone
+///                    number (the code arrives on WhatsApp).
+/// [identifierType] — `phone` or `email`.
 /// [onExistingUser] — called when an EXISTING user verifies OTP successfully.
 ///                    Pass `showWelcomeBackDialog` from login_sheet.dart.
 ///                    Falls back to HomeScreen push when null.
 class OtpVerificationScreen extends StatefulWidget {
   final String identifier;
+  final String identifierType;
   final void Function(BuildContext context)? onExistingUser;
 
   /// True when the user arrived via the login flow. In that case, verifying
@@ -36,11 +41,23 @@ class OtpVerificationScreen extends StatefulWidget {
   /// client guard is defense-in-depth, not a substitute for that.
   final bool isLoginFlow;
 
+  /// "Verify later" mode — the customer is already signed in and is only
+  /// confirming a contact. These replace the sign-in calls: [verifyOverride]
+  /// checks the code, [resendOverride] sends a new one, and [onVerified] runs
+  /// on success (instead of logging in and routing home).
+  final Future<Map<String, dynamic>> Function(String otp)? verifyOverride;
+  final Future<Map<String, dynamic>> Function()? resendOverride;
+  final void Function(BuildContext context)? onVerified;
+
   const OtpVerificationScreen({
     super.key,
     required this.identifier,
+    this.identifierType = 'email',
     this.onExistingUser,
     this.isLoginFlow = false,
+    this.verifyOverride,
+    this.resendOverride,
+    this.onVerified,
   });
 
   @override
@@ -48,6 +65,14 @@ class OtpVerificationScreen extends StatefulWidget {
 }
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
+  /// The code was sent on WhatsApp to a phone number.
+  bool get _isPhone => widget.identifierType == 'phone';
+
+  /// WhatsApp's brand greens — the screen says where the code is, and this is
+  /// how people recognise it.
+  static const _waGreen = Color(0xFF25D366);
+  static const _waGreenDark = Color(0xFF128C7E);
+
   final List<TextEditingController> _controllers =
       List.generate(6, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
@@ -93,8 +118,23 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       return;
     }
     setState(() => _loading = true);
+    final verifyOverride = widget.verifyOverride;
+    if (verifyOverride != null) {
+      final result = await verifyOverride(otp);
+      if (!mounted) return;
+      setState(() => _loading = false);
+      if (result['success'] == true) {
+        widget.onVerified?.call(context);
+      } else {
+        if ('${result['code']}'.startsWith('OTP_')) _clearBoxes();
+        AppSnackBar.error(context,
+            result['message'] ?? 'Verification failed. Please try again.');
+      }
+      return;
+    }
     final result = await AuthService.verifyOtp(
       identifier: widget.identifier,
+      identifierType: widget.identifierType,
       otp: otp,
     );
     if (!mounted) return;
@@ -117,7 +157,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       if (needsSignup && widget.isLoginFlow) {
         AppSnackBar.error(
           context,
-          'No account found with this email. Please signup first.',
+          _isPhone
+              ? 'No account found with this number. Please signup first.'
+              : 'No account found with this email. Please signup first.',
         );
         Navigator.of(context).pop();
         return;
@@ -146,21 +188,39 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       }
     } else {
       setState(() => _loading = false);
+      // A wrong, expired or locked code is no use to edit digit by digit.
+      if ('${result['code']}'.startsWith('OTP_')) _clearBoxes();
       AppSnackBar.error(context, result['message'] ?? 'Verification failed. Please try again.');
     }
+  }
+
+  void _clearBoxes() {
+    for (final c in _controllers) {
+      c.clear();
+    }
+    if (_focusNodes.isNotEmpty) _focusNodes.first.requestFocus();
   }
 
   Future<void> _onResend() async {
     _startTimer();
     // Preserve the original purpose so a login resend stays gated to
-    // registered emails (and a signup resend keeps auto-create behaviour).
-    final result = await AuthService.requestOtp(
-      identifier: widget.identifier,
-      purpose: widget.isLoginFlow ? 'login' : 'register',
-    );
+    // registered accounts (and a signup resend keeps auto-create behaviour).
+    final result = widget.resendOverride != null
+        ? await widget.resendOverride!()
+        : await AuthService.requestOtp(
+            identifier: widget.identifier,
+            identifierType: widget.identifierType,
+            purpose: widget.isLoginFlow ? 'login' : 'register',
+          );
     if (!mounted) return;
     if (result['success'] == true) {
-      AppSnackBar.success(context, 'OTP resent to ${widget.identifier}');
+      _clearBoxes();
+      AppSnackBar.success(
+        context,
+        _isPhone
+            ? 'OTP resent on WhatsApp'
+            : 'OTP resent to ${widget.identifier}',
+      );
     } else {
       AppSnackBar.error(context, result['message'] ?? 'Failed to resend OTP');
     }
@@ -221,8 +281,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         Container(
                           width: 110,
                           height: 110,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFEEF2FF),
+                          decoration: BoxDecoration(
+                            color: _isPhone
+                                ? const Color(0xFFE8F8EE)
+                                : const Color(0xFFEEF2FF),
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -230,23 +292,32 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                           width: 76,
                           height: 76,
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF5C6BC0), Color(0xFF3949AB)],
+                            gradient: LinearGradient(
+                              colors: _isPhone
+                                  ? const [_waGreen, _waGreenDark]
+                                  : const [Color(0xFF5C6BC0), Color(0xFF3949AB)],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color:
-                                    const Color(0xFF5C6BC0).withOpacity(0.35),
+                                color: (_isPhone
+                                        ? _waGreen
+                                        : const Color(0xFF5C6BC0))
+                                    .withOpacity(0.35),
                                 blurRadius: 16,
                                 offset: const Offset(0, 8),
                               ),
                             ],
                           ),
-                          child: const Icon(Icons.verified_user_rounded,
-                              color: Colors.white, size: 34),
+                          child: Center(
+                            child: _isPhone
+                                ? const WhatsAppLogo(
+                                    size: 36, color: Colors.white)
+                                : const Icon(Icons.verified_user_rounded,
+                                    color: Colors.white, size: 34),
+                          ),
                         ),
                       ],
                     ),
@@ -255,7 +326,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   const SizedBox(height: 24),
 
                   Text(
-                    'OTP Verification',
+                    _isPhone ? 'WhatsApp Verification' : 'OTP Verification',
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 22),
                       fontWeight: FontWeight.w500,
@@ -264,7 +335,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Enter the 6-digit code sent to\n${widget.identifier}',
+                    _isPhone
+                        ? 'Enter the 6-digit code we sent on WhatsApp to\n${IndianPhone.display(widget.identifier)}'
+                        : 'Enter the 6-digit code sent to\n${widget.identifier}',
                     style: GoogleFonts.poppins(
                         fontSize: Responsive.sp(context, 13), color: const Color(0xFF9E9E9E)),
                     textAlign: TextAlign.center,

@@ -53,10 +53,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if ((profile[f] as String?)?.trim().isNotEmpty == true) filled++;
       }
     }
-    // Email is always present after signup, count it as a +1 baseline so
-    // a brand-new account isn't stuck at 0 %.
+    // The sign-in identifier (email, or the number a phone signup used) is
+    // always present after signup, count it as a +1 baseline so a brand-new
+    // account isn't stuck at 0 %.
     total++;
-    if ((AuthState.userEmail ?? '').trim().isNotEmpty) filled++;
+    if ((AuthState.userEmail ?? AuthState.userPhone ?? '').trim().isNotEmpty) {
+      filled++;
+    }
     // Profile picture (local or remote) counts too.
     total++;
     if ((AuthState.avatarUrl.value ?? '').trim().isNotEmpty) filled++;
@@ -81,7 +84,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildScaffold(BuildContext context) {
     final profile = AuthState.userData?['profile'] as Map<String, dynamic>?;
     final userName = AuthState.userName.value ?? 'User';
-    final userEmail = AuthState.userEmail ?? 'No email provided';
+    // A phone-signup account has no email; show its number instead.
+    final userEmail =
+        AuthState.userEmail ?? AuthState.userPhone ?? 'No email provided';
 
     String avatarUrl;
     // Prefer the live ValueNotifier — _pickAvatar writes the local file path

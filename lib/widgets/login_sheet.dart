@@ -18,6 +18,8 @@ import '../screens/home_screen.dart';
 import '../screens/edit_profile_screen.dart';
 import '../screens/otp_verification_screen.dart';
 import '../screens/signup_screen.dart';
+import '../screens/whatsapp_login_screen.dart';
+import 'whatsapp_auth_card.dart';
 import '../services/walkthrough_service.dart';
 
 void showLoginSheet(BuildContext context) {
@@ -332,6 +334,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   // ── Continue with Google ────────────────────────────────
                   _GoogleButton(
                     onTap: _loading ? null : _onGoogleSignIn,
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // ── Continue with WhatsApp — its own screen ─────────────
+                  WhatsAppEntryButton(
+                    onTap: _loading
+                        ? null
+                        : () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const WhatsAppLoginScreen()),
+                            ),
                   ),
 
                   const SizedBox(height: 18),

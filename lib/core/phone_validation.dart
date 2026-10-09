@@ -62,6 +62,14 @@ class IndianPhone {
 
   /// Number in the form the API expects.
   static String e164(String? raw) => '$dialCode${normalise(raw)}';
+
+  /// A number for display: "+91 98765 43210". Anything that isn't a full
+  /// ten-digit number is returned as given.
+  static String display(String? raw) {
+    final d = normalise(raw);
+    if (d.length != length) return raw ?? '';
+    return '$dialCode ${d.substring(0, 5)} ${d.substring(5)}';
+  }
 }
 
 /// Shared geometry for a field's leading icon — inset from the field's own

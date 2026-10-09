@@ -28,8 +28,13 @@ class AuthService {
   ///
   /// Returns `{'success': true}` on 200, `{'success': false, 'message': ...,
   /// 'code': ...}` otherwise.
+  ///
+  /// [identifierType] is `phone` (the 6-digit OTP arrives on WhatsApp;
+  /// [identifier] must be E.164, e.g. `+919876543210` — see
+  /// `IndianPhone.e164`) or `email`.
   static Future<Map<String, dynamic>> requestOtp({
     required String identifier,
+    String identifierType = 'email',
     String purpose = 'register',
   }) async {
     try {
@@ -39,7 +44,7 @@ class AuthService {
             headers: _headers,
             body: jsonEncode({
               'identifier': identifier,
-              'identifier_type': 'email',
+              'identifier_type': identifierType,
               'purpose': purpose,
             }),
           )
@@ -50,19 +55,34 @@ class AuthService {
         final inner = _inner(body);
         return {'success': true, 'message': inner?['message'] ?? 'OTP sent'};
       }
-      if (res.statusCode == 429) {
-        return {'success': false, 'message': 'Too many requests. Please wait before trying again.'};
-      }
-      // Login attempt for an email that isn't registered — backend blocks the
-      // OTP entirely. Surface a friendly, actionable message + the code so the
-      // caller can route the user to signup.
       final code = (body['error'] is Map) ? body['error']['code'] : null;
+      if (res.statusCode == 429) {
+        return {
+          'success': false,
+          'code': code,
+          'message': 'Too many requests. Please wait a few minutes and try again.',
+        };
+      }
+      // Login attempt for an email/number that isn't registered — backend
+      // blocks the OTP entirely. Surface a friendly, actionable message + the
+      // code so the caller can route the user to signup.
       if (res.statusCode == 400 && code == 'USER_NOT_FOUND') {
         return {
           'success': false,
           'code': 'USER_NOT_FOUND',
           'message': 'Account not found. Please signup first.',
         };
+      }
+      if (identifierType == 'phone' && _phoneNotSupported(body)) {
+        return {
+          'success': false,
+          'code': phoneOtpUnavailable,
+          'message': _phoneUnavailableMessage,
+        };
+      }
+      final blocked = _accountBlockedMessage(code);
+      if (blocked != null) {
+        return {'success': false, 'code': code, 'message': blocked};
       }
       return {'success': false, 'code': code, 'message': _extractError(body)};
     } catch (e) {
@@ -75,6 +95,7 @@ class AuthService {
   static Future<Map<String, dynamic>> verifyOtp({
     required String identifier,
     required String otp,
+    String identifierType = 'email',
   }) async {
     try {
       final res = await http
@@ -83,6 +104,7 @@ class AuthService {
             headers: _headers,
             body: jsonEncode({
               'identifier': identifier,
+              'identifier_type': identifierType,
               'otp': otp,
               'role': 'customer',
             }),
@@ -100,17 +122,43 @@ class AuthService {
           'user': inner['user'],
         };
       }
-      if (res.statusCode == 400) {
-        final inner = _inner(body) ?? body;
-        final code = (body['error'] as Map<String, dynamic>?)?['code'] ?? inner['code'] ?? '';
-        if (code == 'OTP_INVALID') return {'success': false, 'message': 'Incorrect OTP. Please try again.'};
-        if (code == 'OTP_EXPIRED') return {'success': false, 'message': 'OTP has expired. Please request a new one.'};
-        if (code == 'USER_ROLE_MISMATCH') return {'success': false, 'message': 'Account type mismatch.'};
+      final inner = _inner(body) ?? body;
+      final code = (body['error'] is Map ? body['error']['code'] : null) ??
+          inner['code'] ??
+          '';
+      switch (code) {
+        case 'OTP_INVALID':
+          return {'success': false, 'code': code, 'message': 'Incorrect OTP. Please try again.'};
+        case 'OTP_EXPIRED':
+          return {'success': false, 'code': code, 'message': 'OTP has expired. Please request a new one.'};
+        case 'OTP_LOCKED':
+          return {
+            'success': false,
+            'code': code,
+            'message': 'Too many incorrect attempts. Please request a new OTP.',
+          };
+        case 'USER_ROLE_MISMATCH':
+          return {
+            'success': false,
+            'code': code,
+            'message': 'This number is registered as a partner account. Use the partner app to sign in.',
+          };
+      }
+      if (identifierType == 'phone' && _phoneNotSupported(body)) {
+        return {
+          'success': false,
+          'code': phoneOtpUnavailable,
+          'message': _phoneUnavailableMessage,
+        };
+      }
+      final blocked = _accountBlockedMessage(code);
+      if (blocked != null) {
+        return {'success': false, 'code': code, 'message': blocked};
       }
       if (res.statusCode == 429) {
-        return {'success': false, 'message': 'Too many attempts. Please try again later.'};
+        return {'success': false, 'code': code, 'message': 'Too many attempts. Please try again later.'};
       }
-      return {'success': false, 'message': _extractError(body)};
+      return {'success': false, 'code': code, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -434,6 +482,33 @@ class AuthService {
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
+
+  /// `code` returned when the server doesn't accept phone numbers yet.
+  static const String phoneOtpUnavailable = 'PHONE_OTP_UNAVAILABLE';
+
+  static const String _phoneUnavailableMessage =
+      "WhatsApp OTP isn't available yet. Please use email for now.";
+
+  /// A server without WhatsApp OTP rejects `identifier_type: "phone"` as an
+  /// invalid choice — and also reports the number as "not a valid email",
+  /// which would be the wrong thing to show for a phone number.
+  static bool _phoneNotSupported(Map<String, dynamic> body) {
+    final error = body['error'];
+    final message = error is Map ? '${error['message']}' : '';
+    return message.contains('identifier_type') &&
+        message.contains('not a valid choice');
+  }
+
+  /// 403 reasons that stop an account from signing in at all.
+  static String? _accountBlockedMessage(Object? code) {
+    switch (code) {
+      case 'ACCOUNT_DELETED':
+        return 'This account has been deleted and can no longer sign in.';
+      case 'ACCOUNT_DISABLED':
+        return 'This account has been disabled. Please contact support.';
+    }
+    return null;
+  }
 
   /// Best-effort detection of whether verify-OTP / google-login just CREATED
   /// the account (vs. logging in an existing one). The backend is inconsistent
