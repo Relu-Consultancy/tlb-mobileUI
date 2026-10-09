@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import '../services/avatar_storage.dart';
 import '../services/token_storage.dart';
@@ -282,14 +283,14 @@ class AuthState {
           // Server explicitly rejected the token — clear and require re-login.
           // (Don't fall through to cache path for rejected tokens.)
           final message = (result['message'] ?? '').toString().toLowerCase();
-          debugPrint('AuthService.refreshToken message: $message');
+          if (kDebugMode) debugPrint('AuthService.refreshToken message: $message');
           if (message.contains('invalid') || message.contains('expired') || message.contains('blacklisted')) {
-            debugPrint('Token rejected by server. Clearing tokens.');
+            if (kDebugMode) debugPrint('Token rejected by server. Clearing tokens.');
             await TokenStorage.clearTokens();
             return false;
           }
         } catch (e) {
-          debugPrint('AuthService.refreshToken threw: $e');
+          if (kDebugMode) debugPrint('AuthService.refreshToken threw: $e');
           // Network error — fall through to cached restore below.
         }
       }

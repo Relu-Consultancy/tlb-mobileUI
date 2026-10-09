@@ -1,7 +1,6 @@
 import '../core/responsive.dart';
 import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
-import '../widgets/category_skeleton_card.dart';
 import '../widgets/auto_scroll_list.dart';
 import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';

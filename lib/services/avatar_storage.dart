@@ -32,7 +32,7 @@ class AvatarStorage {
       }
       return path;
     } catch (e) {
-      debugPrint('AvatarStorage.load failed: $e');
+      if (kDebugMode) debugPrint('AvatarStorage.load failed: $e');
       return null;
     }
   }
@@ -68,7 +68,7 @@ class AvatarStorage {
       }
       return dest.path;
     } catch (e) {
-      debugPrint('AvatarStorage.saveFromPickedFile failed: $e');
+      if (kDebugMode) debugPrint('AvatarStorage.saveFromPickedFile failed: $e');
       return null;
     }
   }
@@ -84,7 +84,7 @@ class AvatarStorage {
       }
       await prefs.remove(_key);
     } catch (e) {
-      debugPrint('AvatarStorage.clear failed: $e');
+      if (kDebugMode) debugPrint('AvatarStorage.clear failed: $e');
     }
   }
 }

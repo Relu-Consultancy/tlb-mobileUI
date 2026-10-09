@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../core/safe_launch.dart';
 
 import '../core/app_snackbar.dart';
 import '../core/responsive.dart';
@@ -177,10 +177,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       const SizedBox(width: 12),
                       ElevatedButton(
                         onPressed: () async {
-                          final uri = Uri.tryParse(n.actionUrl!);
-                          if (uri != null) {
-                            await launchUrl(uri, mode: LaunchMode.externalApplication);
-                          }
+                          await launchWebUrl(n.actionUrl);
                           if (ctx.mounted) {
                             Navigator.pop(ctx);
                           }

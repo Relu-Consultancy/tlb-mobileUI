@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../core/safe_launch.dart';
 import 'package:video_player/video_player.dart';
 
 import '../core/app_colors.dart';
@@ -202,10 +202,7 @@ class _ReviewVideoState extends State<_ReviewVideo> {
         message: "This video couldn't be played here.",
         // A codec the device can't decode in-app may still open elsewhere.
         actionLabel: 'Open in another app',
-        onAction: () => launchUrl(
-          Uri.parse(widget.url),
-          mode: LaunchMode.externalApplication,
-        ),
+        onAction: () => launchWebUrl(widget.url),
       );
     }
     final c = _controller;

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -260,10 +261,12 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
 
       _pendingBookingId = resp.bookingId;
       _pendingBookingRef = resp.bookingReference;
-      debugPrint('Booking initiated -> amount=${resp.amount} '
-          'original=${resp.originalAmount} discount=${resp.discountAmount} '
-          'coupon_sent=$_appliedCoupon coupon_applied=${resp.couponApplied} '
-          'screen_total=$_totalAmount');
+      if (kDebugMode) {
+        debugPrint('Booking initiated -> amount=${resp.amount} '
+            'original=${resp.originalAmount} discount=${resp.discountAmount} '
+            'coupon_sent=$_appliedCoupon coupon_applied=${resp.couponApplied} '
+            'screen_total=$_totalAmount');
+      }
 
       // A free booking — a free listing, or a coupon covering the whole
       // amount — is confirmed and marked paid by initiate itself: status
@@ -310,9 +313,11 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
       // the order, which surfaces only as its generic "something went wrong".
       final amountPaise = (resp.amount * 100).round();
       if (orderId.isEmpty || amountPaise <= 0) {
-        debugPrint('Razorpay handoff refused — '
-            'order_id="$orderId" amount=$amountPaise '
-            'currency=${resp.currency} status=${resp.status}');
+        if (kDebugMode) {
+          debugPrint('Razorpay handoff refused — '
+              'order_id="$orderId" amount=$amountPaise '
+              'currency=${resp.currency} status=${resp.status}');
+        }
         if (mounted) {
           AppSnackBar.error(
             context,
@@ -337,13 +342,15 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
         'theme': {'color': '#FFCC00'},
       };
 
-      debugPrint('Razorpay open -> order_id=$orderId amount=$amountPaise '
-          'currency=${resp.currency} key=${AppConfig.razorpayKeyId}');
+      if (kDebugMode) {
+        debugPrint('Razorpay open -> order_id=$orderId amount=$amountPaise '
+            'currency=${resp.currency} key=${AppConfig.razorpayKeyId}');
+      }
       try {
         _razorpay.open(options);
       } catch (e) {
         // open() throwing leaves nothing on screen — say so.
-        debugPrint('Razorpay open() failed: $e');
+        if (kDebugMode) debugPrint('Razorpay open() failed: $e');
         if (mounted) {
           AppSnackBar.error(
             context, "Couldn't open the payment screen. Please try again.");
@@ -450,8 +457,10 @@ class _ReviewPayScreenState extends State<ReviewPayScreen> {
     // error payload name the real reason — an order/key mismatch, an amount
     // that does not match the order, an expired order — so log them rather
     // than discarding the one diagnostic available.
-    debugPrint('Razorpay payment error: code=${response.code} '
-        'message=${response.message} error=${response.error}');
+    if (kDebugMode) {
+      debugPrint('Razorpay payment error: code=${response.code} '
+          'message=${response.message} error=${response.error}');
+    }
 
     final msg = (response.message?.isNotEmpty == true)
         ? response.message!

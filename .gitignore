@@ -63,3 +63,11 @@ frontend_api_integration_estimates.csv
 /android/build/
 # Widget Preview related
 .widget_preview/
+
+# Release signing material - never commit
+key.properties
+*.jks
+*.keystore
+!android/app/debug.keystore
+.env
+.env.*

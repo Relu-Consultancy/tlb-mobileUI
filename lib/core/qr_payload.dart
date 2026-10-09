@@ -67,7 +67,7 @@ class QrPayload {
       final bytes = base64Decode(cleaned);
       return bytes.isEmpty ? null : bytes;
     } catch (e) {
-      debugPrint('QR decode failed: $e');
+      if (kDebugMode) debugPrint('QR decode failed: $e');
       return null;
     }
   }

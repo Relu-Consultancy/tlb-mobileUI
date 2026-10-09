@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../core/safe_launch.dart';
 
 import '../core/app_colors.dart';
 import '../core/app_snackbar.dart';
@@ -46,12 +46,9 @@ class SocialLinksRow extends StatelessWidget {
   }
 
   Future<void> _open(BuildContext context, String url) async {
-    final uri = Uri.tryParse(url);
-    if (uri == null) return;
-    try {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (_) {
-      if (context.mounted) AppSnackBar.error(context, 'Could not open link.');
+    final opened = await launchWebUrl(url);
+    if (!opened && context.mounted) {
+      AppSnackBar.error(context, 'Could not open link.');
     }
   }
 

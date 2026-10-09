@@ -77,8 +77,10 @@ class _BookingQrState extends State<BookingQr> {
         // The request succeeded but carried no QR. Log what it *did* carry —
         // otherwise a renamed field is indistinguishable from a booking that
         // simply isn't confirmed yet.
-        debugPrint('BookingQr: ticket data has no QR field. '
-            'keys=${data.keys.toList()}');
+        if (kDebugMode) {
+          debugPrint('BookingQr: ticket data has no QR field. '
+              'keys=${data.keys.toList()}');
+        }
       }
 
       if (!mounted) return;
