@@ -473,6 +473,14 @@ class HomeHeader extends StatelessWidget {
     );
   }
 
+  /// The home search bar is a facade: the whole pill opens [SearchScreen],
+  /// which is where searching and filtering actually happen.
+  ///
+  /// It carries no filter glyph. One used to sit at the trailing edge, and
+  /// because the tap target is the entire bar it was not a button at all —
+  /// tapping it merely opened the search screen like tapping anywhere else,
+  /// which read as a broken control. The real filter entry point lives on
+  /// [SearchScreen], next to the results it narrows.
   Widget _buildSearchBar(BuildContext context) {
     return GestureDetector(
       onTap: () => Navigator.push(
@@ -510,7 +518,6 @@ class HomeHeader extends StatelessWidget {
               ),
             ),
           ),
-          const Icon(Icons.tune_rounded, color: Colors.white70, size: 18),
           const SizedBox(width: 16),
         ],
       ),
@@ -552,13 +559,6 @@ class HomeHeader extends StatelessWidget {
               ),
             ),
           ),
-          Container(
-            width: 1,
-            height: 22,
-            color: AppColors.textPrimary.withOpacity(0.18),
-          ),
-          const SizedBox(width: 14),
-          const Icon(Icons.tune_rounded, color: AppColors.textPrimary, size: 20),
           const SizedBox(width: 18),
         ],
       ),
