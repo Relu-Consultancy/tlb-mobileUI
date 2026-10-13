@@ -23,6 +23,11 @@ class _LocationScreenState extends State<LocationScreen>
     with WidgetsBindingObserver {
   final TextEditingController _searchController = TextEditingController();
   bool _isLoadingLocation = false;
+
+  /// What has been typed, trimmed and lower-cased for matching. Empty shows
+  /// the full lists; anything else filters both of them live, so the typed
+  /// city can simply be tapped.
+  String _query = '';
   // Set true right before we send the user to a system Settings page, so we can
   // auto-retry the location fetch when they return (e.g. after enabling GPS or
   // granting permission) instead of making them tap the button again.
@@ -60,6 +65,44 @@ class _LocationScreenState extends State<LocationScreen>
       _retryAfterSettings = false;
       _fetchCurrentLocation();
     }
+  }
+
+  /// The popular cities matching [_query].
+  List<Map<String, dynamic>> get _filteredPopular => _query.isEmpty
+      ? _popularCities
+      : _popularCities
+          .where((c) => '${c['name']}'.toLowerCase().contains(_query))
+          .toList();
+
+  /// The full city list matching [_query].
+  List<String> get _filteredCities => _query.isEmpty
+      ? CityResolver.allCities
+      : CityResolver.allCities
+          .where((c) => c.toLowerCase().contains(_query))
+          .toList();
+
+  /// Commits what has been typed. The keyboard's search key and the button in
+  /// the field both land here, so the text can be submitted even when the
+  /// keyboard has been swiped away — previously `onSubmitted` was the only
+  /// way, which left the typed city with no way to be chosen at all.
+  ///
+  /// Only a city the app actually knows is accepted. [CityResolver.matchKnown]
+  /// also maps the Delhi aliases ("Gurgaon" → "Delhi NCR"), and a query that
+  /// narrows to exactly one city takes that one, so "pun" picks Pune. Free
+  /// text used to be accepted as-is, which set the location to whatever was
+  /// typed and left Home stuck on "we don't serve this location".
+  void _submitSearch() {
+    final text = _searchController.text.trim();
+    if (text.isEmpty) return;
+    final matched = CityResolver.matchKnown(text) ??
+        (_filteredCities.length == 1 ? _filteredCities.first : null);
+    if (matched == null) {
+      AppSnackBar.show(
+          context, "We're not in \"$text\" yet. Pick a city from the list.");
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    _selectCity(matched);
   }
 
   /// [latitude]/[longitude] are passed only by the "current location" flow —
@@ -189,6 +232,89 @@ class _LocationScreenState extends State<LocationScreen>
     }
   }
 
+  /// Clear, and the button that commits the search.
+  ///
+  /// The submit button is the whole point: the keyboard's own search key is
+  /// gone the moment the keyboard is dismissed, and without this there was
+  /// nothing left on screen to act on what had been typed.
+  Widget _buildSearchActions() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 7, left: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: Icon(Icons.close_rounded,
+                size: Responsive.sp(context, 18), color: Colors.grey.shade600),
+            onPressed: () {
+              _searchController.clear();
+              setState(() => _query = '');
+            },
+            tooltip: 'Clear',
+            padding: const EdgeInsets.all(4),
+            constraints: const BoxConstraints(),
+            splashRadius: 18,
+          ),
+          const SizedBox(width: 2),
+          Semantics(
+            button: true,
+            label: 'Search',
+            child: InkWell(
+              onTap: _submitSearch,
+              borderRadius: BorderRadius.circular(18),
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: const BoxDecoration(
+                  color: AppColors.primaryLight,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.arrow_forward_rounded,
+                  size: Responsive.sp(context, 19),
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Shown when the search matches no city at all, so the screen is never
+  /// just an empty page under a filled-in search box.
+  Widget _buildNoMatches() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 48),
+      child: Column(
+        children: [
+          Icon(Icons.location_off_outlined,
+              size: 44, color: Colors.grey.shade400),
+          const SizedBox(height: 14),
+          Text(
+            'No cities match "${_searchController.text.trim()}"',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 14),
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            "We're adding new cities all the time.",
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 12.5),
+              color: Colors.grey.shade600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Bold, visually-distinct section title with a gold accent bar and a
   /// divider beneath it, so titles stand apart from the content below.
   Widget _sectionHeader(String title) {
@@ -270,6 +396,7 @@ class _LocationScreenState extends State<LocationScreen>
               ),
               child: TextField(
                 controller: _searchController,
+                textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
                   hintText: 'Search city, area or landmark...',
                   hintStyle: GoogleFonts.poppins(
@@ -277,15 +404,18 @@ class _LocationScreenState extends State<LocationScreen>
                     color: Colors.grey.shade500,
                   ),
                   prefixIcon: Icon(Icons.search, color: Colors.grey.shade600),
+                  // Only once there is something to submit or clear, so an
+                  // untouched field stays as plain as it was.
+                  suffixIcon: _query.isEmpty ? null : _buildSearchActions(),
+                  suffixIconConstraints:
+                      const BoxConstraints(minWidth: 0, minHeight: 0),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 15),
                 ),
                 style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14)),
-                onSubmitted: (value) {
-                  if (value.trim().isNotEmpty) {
-                    _selectCity(value);
-                  }
-                },
+                onChanged: (value) =>
+                    setState(() => _query = value.trim().toLowerCase()),
+                onSubmitted: (_) => _submitSearch(),
               ),
             ),
             const SizedBox(height: 24),
@@ -318,99 +448,104 @@ class _LocationScreenState extends State<LocationScreen>
             ),
             const SizedBox(height: 32),
 
-            // Popular Cities Header
-            _sectionHeader('Popular Cities'),
-            const SizedBox(height: 16),
-
-            // Popular Cities Grid
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 0.78,
-              ),
-              itemCount: _popularCities.length,
-              itemBuilder: (context, index) {
-                final city = _popularCities[index];
-                return GestureDetector(
-                  onTap: () => _selectCity(city['name'] as String),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (city.containsKey('image'))
-                          Image.asset(
-                            city['image'] as String,
-                            color: const Color(0xFFE0A000),
-                            height: 58,
-                            errorBuilder: (_, __, ___) => Icon(
-                              city['icon'] as IconData? ?? Icons.location_city,
-                              size: 50,
+            // Popular cities. The header goes with the grid, so a search
+            // that excludes every popular city leaves no stranded title.
+            if (_filteredPopular.isNotEmpty) ...[
+              _sectionHeader('Popular Cities'),
+              const SizedBox(height: 16),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 0.78,
+                ),
+                itemCount: _filteredPopular.length,
+                itemBuilder: (context, index) {
+                  final city = _filteredPopular[index];
+                  return GestureDetector(
+                    onTap: () => _selectCity(city['name'] as String),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (city.containsKey('image'))
+                            Image.asset(
+                              city['image'] as String,
                               color: const Color(0xFFE0A000),
+                              height: 58,
+                              errorBuilder: (_, __, ___) => Icon(
+                                city['icon'] as IconData? ??
+                                    Icons.location_city,
+                                size: 50,
+                                color: const Color(0xFFE0A000),
+                              ),
+                            )
+                          else
+                            Icon(
+                              city['icon'] as IconData,
+                              color: const Color(0xFFE0A000),
+                              size: 58,
                             ),
-                          )
-                        else
-                          Icon(
-                            city['icon'] as IconData,
-                            color: const Color(0xFFE0A000),
-                            size: 58,
+                          const SizedBox(height: 14),
+                          Text(
+                            city['name'] as String,
+                            style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, 13),
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textPrimary,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                        const SizedBox(height: 14),
-                        Text(
-                          city['name'] as String,
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 13),
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.textPrimary,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 32),
-
-            // All Cities Header
-            _sectionHeader('All Cities'),
-            const SizedBox(height: 8),
-
-            // All Cities List
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: CityResolver.allCities.length,
-              separatorBuilder: (context, index) => Divider(
-                color: Colors.grey.shade200,
-                height: 1,
-              ),
-              itemBuilder: (context, index) {
-                final city = CityResolver.allCities[index];
-                return InkWell(
-                  onTap: () => _selectCity(city),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Text(
-                      city,
-                      style: GoogleFonts.poppins(
-                        fontSize: Responsive.sp(context, 14),
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
+                        ],
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              ),
+              const SizedBox(height: 32),
+            ],
+
+            // Every city the app covers, filtered the same way.
+            if (_filteredCities.isNotEmpty) ...[
+              _sectionHeader(_query.isEmpty ? 'All Cities' : 'Matching Cities'),
+              const SizedBox(height: 8),
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _filteredCities.length,
+                separatorBuilder: (context, index) => Divider(
+                  color: Colors.grey.shade200,
+                  height: 1,
+                ),
+                itemBuilder: (context, index) {
+                  final city = _filteredCities[index];
+                  return InkWell(
+                    onTap: () => _selectCity(city),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        city,
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 14),
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+
+            if (_filteredPopular.isEmpty && _filteredCities.isEmpty)
+              _buildNoMatches(),
           ],
         ),
       ),
