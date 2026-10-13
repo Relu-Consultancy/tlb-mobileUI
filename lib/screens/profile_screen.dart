@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import '../core/app_colors.dart';
+import 'package:geolocator/geolocator.dart' show Geolocator;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../core/app_snackbar.dart';
@@ -33,6 +35,9 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  /// True while a camera/gallery pick is in flight — see [_pickAvatar].
+  bool _pickingAvatar = false;
+
   double _calculateCompletion() {
     final profile = AuthState.userData?['profile'] as Map<String, dynamic>?;
     // Mirror the actual fields collected by EditProfileScreen — Session 12
@@ -457,6 +462,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _pickAvatar(ImageSource source) async {
+    // A second tap while the camera is opening gets `already_active` back and
+    // loses both picks, so the first one owns the flow until it finishes.
+    if (_pickingAvatar) return;
+    _pickingAvatar = true;
     try {
       final picker = ImagePicker();
       final file = await picker.pickImage(
@@ -478,11 +487,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
       } else {
         AppSnackBar.error(context, 'Could not save the picture. Try again.');
       }
-    } catch (e) {
+    } on PlatformException catch (e) {
       if (!mounted) return;
-      AppSnackBar.error(context, 'Could not open the picker.');
+      await _reportPickerFailure(e.code, source);
+    } catch (_) {
+      if (!mounted) return;
+      AppSnackBar.error(context, _genericPickerError(source));
+    } finally {
+      _pickingAvatar = false;
     }
   }
+
+  /// Names what went wrong, and for a blocked permission offers the one place
+  /// it can be granted.
+  ///
+  /// Every failure used to collapse to "Could not open the picker", which
+  /// named neither the cause nor the cure — a customer who had denied the
+  /// camera had no way to learn that was why, or where to change it. iOS
+  /// reports the denial as `camera_access_denied`; Android hands the capture
+  /// to the camera app, which asks for its own permissions, so a denial there
+  /// simply comes back as no photo.
+  Future<void> _reportPickerFailure(String code, ImageSource source) async {
+    const denials = {'camera_access_denied', 'photo_access_denied'};
+    if (!denials.contains(code)) {
+      AppSnackBar.error(
+        context,
+        code == 'no_available_camera'
+            ? 'No camera is available on this device.'
+            : _genericPickerError(source),
+      );
+      return;
+    }
+    final camera = code == 'camera_access_denied';
+    final ok = await showAppConfirmDialog(
+      context,
+      title: camera ? 'Camera access needed' : 'Photo access needed',
+      message: camera
+          ? 'TLB needs your camera to take a profile photo. Turn it on for '
+              'TLB in app settings.'
+          : 'TLB needs access to your photos to set a profile picture. Turn '
+              'it on for TLB in app settings.',
+      confirmLabel: 'Open Settings',
+      icon: camera
+          ? Icons.photo_camera_outlined
+          : Icons.photo_library_outlined,
+    );
+    // Geolocator's opener is not location-specific — it just opens this app's
+    // own settings page on both platforms, and it is already a dependency
+    // (the location screen uses it for the same purpose). Reused here rather
+    // than taking on permission_handler for one button.
+    if (ok) await Geolocator.openAppSettings();
+  }
+
+  String _genericPickerError(ImageSource source) =>
+      source == ImageSource.camera
+          ? "Couldn't open the camera. Please try again."
+          : "Couldn't open your photos. Please try again.";
 
   void _showAvatarOptions(BuildContext context, String avatarUrl) {
     showModalBottomSheet(
