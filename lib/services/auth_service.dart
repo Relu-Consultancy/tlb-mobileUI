@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../core/api_error_text.dart';
+import '../models/otp_delivery_model.dart';
 
 /// Thin wrapper around the TLB Auth API.
 class AuthService {
@@ -32,11 +33,25 @@ class AuthService {
   /// [identifierType] is `phone` (the 6-digit OTP arrives on WhatsApp;
   /// [identifier] must be E.164, e.g. `+919876543210` — see
   /// `IndianPhone.e164`) or `email`.
+  ///
+  /// [fallbackEmail] offers an address for the WhatsApp→email fallback on a
+  /// phone login. It is the only way to give the server an address for a
+  /// number it has none for (a WhatsApp signup, say), and it is ignored for
+  /// email logins. Without it — and without an email already on the account —
+  /// `fallback_available` comes back false and there is nothing to fall back
+  /// to. The server always chooses the actual destination; this is a
+  /// suggestion, not a selection.
+  ///
+  /// On success the result also carries `'delivery'`: an [OtpDelivery] with
+  /// the `otp_id` every follow-up call needs. It is absent on a server that
+  /// does not send `otp_id` yet, so callers must treat it as nullable.
   static Future<Map<String, dynamic>> requestOtp({
     required String identifier,
     String identifierType = 'email',
     String purpose = 'register',
+    String? fallbackEmail,
   }) async {
+    final fallback = fallbackEmail?.trim();
     try {
       final res = await http
           .post(
@@ -46,6 +61,10 @@ class AuthService {
               'identifier': identifier,
               'identifier_type': identifierType,
               'purpose': purpose,
+              // Omitted rather than sent null: the field is new, and an older
+              // server rejects unknown nulls on a strict serializer.
+              if (fallback != null && fallback.isNotEmpty)
+                'fallback_email': fallback,
             }),
           )
           .timeout(const Duration(seconds: 30));
@@ -53,7 +72,11 @@ class AuthService {
       final body = _decode(res.body);
       if (res.statusCode == 200) {
         final inner = _inner(body);
-        return {'success': true, 'message': inner?['message'] ?? 'OTP sent'};
+        return {
+          'success': true,
+          'message': inner?['message'] ?? 'OTP sent',
+          'delivery': OtpDelivery.fromJson(inner),
+        };
       }
       final code = (body['error'] is Map) ? body['error']['code'] : null;
       if (res.statusCode == 429) {
@@ -163,6 +186,112 @@ class AuthService {
       return {'success': false, 'message': _networkError(e)};
     }
   }
+
+  // ── OTP delivery & channel fallback ──────────────────────────────────────────
+
+  /// Current delivery state of the challenge [otpId].
+  ///
+  /// WhatsApp accepting a message is not delivery, so the verification screen
+  /// polls this to tell "sending" from "delivered", "gave up waiting" and
+  /// "failed" — see `OtpDelivery`. Needs no auth header: it runs before login.
+  static Future<Map<String, dynamic>> otpDeliveryStatus({
+    required String otpId,
+  }) async {
+    try {
+      final res = await http
+          .get(
+            Uri.parse('$_base/api/v1/auth/otp-delivery-status/')
+                .replace(queryParameters: {'otp_id': otpId}),
+            headers: _headers,
+          )
+          .timeout(const Duration(seconds: 15));
+      return _deliveryResult(res);
+    } catch (e) {
+      return {'success': false, 'message': _networkError(e)};
+    }
+  }
+
+  /// Phone login: sends the *same* code to the account's fallback email.
+  ///
+  /// No new code is minted, so whatever the customer already received stays
+  /// valid, and verify still has to use the phone number they started with.
+  /// Each code can only be emailed once (`EMAIL_ALREADY_SENT` after that),
+  /// including when the server emailed it itself after a WhatsApp failure.
+  static Future<Map<String, dynamic>> sendOtpViaEmail({
+    required String otpId,
+  }) =>
+      _switchChannel('send-otp-via-email', otpId);
+
+  /// Email login: sends the *same* code to the account's verified phone.
+  ///
+  /// Only unlocked after enough resends (`ALTERNATE_NOT_AVAILABLE` before
+  /// that) and only when a verified number is on file
+  /// (`VERIFIED_PHONE_UNAVAILABLE` otherwise). Verify still uses the email.
+  static Future<Map<String, dynamic>> sendOtpViaWhatsApp({
+    required String otpId,
+  }) =>
+      _switchChannel('send-otp-via-whatsapp', otpId);
+
+  static Future<Map<String, dynamic>> _switchChannel(
+      String path, String otpId) async {
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$_base/api/v1/auth/$path/'),
+            headers: _headers,
+            body: jsonEncode({'otp_id': otpId}),
+          )
+          .timeout(const Duration(seconds: 30));
+      return _deliveryResult(res);
+    } catch (e) {
+      return {'success': false, 'message': _networkError(e)};
+    }
+  }
+
+  /// The shared reply shape of the three delivery endpoints:
+  /// `{'success': true, 'delivery': OtpDelivery?, 'message': ...}`, or
+  /// `{'success': false, 'code': ..., 'message': ...}`.
+  static Map<String, dynamic> _deliveryResult(http.Response res) {
+    final body = _decode(res.body);
+    if (res.statusCode == 200) {
+      final inner = _inner(body);
+      return {
+        'success': true,
+        'message': inner?['message'] ?? 'OTP sent',
+        'delivery': OtpDelivery.fromJson(inner),
+      };
+    }
+    final code = (body['error'] is Map) ? body['error']['code'] : null;
+    return {
+      'success': false,
+      'code': code,
+      'message': otpFlowMessage(code) ?? _extractError(body),
+    };
+  }
+
+  /// Plain-language text for the delivery / fallback error codes, or null for
+  /// a code this does not cover (the caller falls back to the server's own
+  /// message). Public so the verification screen can phrase the same codes
+  /// consistently when they come back from `request-otp`.
+  static String? otpFlowMessage(Object? code) => switch ('$code') {
+        'OTP_NOT_FOUND' =>
+          'This code is no longer valid. Please request a new one.',
+        'OTP_NOT_ACTIVE' =>
+          'This code has already been used or replaced. Please request a new one.',
+        'FALLBACK_EMAIL_UNAVAILABLE' =>
+          'There is no email address on file for this number.',
+        'EMAIL_ALREADY_SENT' =>
+          'The code has already been emailed. Please check your inbox, including spam.',
+        'ALTERNATE_NOT_AVAILABLE' =>
+          'Not available yet. Try Resend first.',
+        'VERIFIED_PHONE_UNAVAILABLE' =>
+          'There is no verified phone number on this account.',
+        'WHATSAPP_ALREADY_SENT' =>
+          'The code has already been sent on WhatsApp.',
+        'RATE_LIMIT_EXCEEDED' =>
+          'Too many requests. Please wait a few minutes and try again.',
+        _ => null,
+      };
 
   // ── Forgot password — 3-step OTP flow ───────────────────────────────────────
 

@@ -4,8 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../core/app_colors.dart';
 import '../core/app_snackbar.dart';
+import '../core/email_validation.dart';
 import '../core/phone_validation.dart';
 import '../core/responsive.dart';
+import '../models/otp_delivery_model.dart';
 import '../services/auth_service.dart';
 import 'app_loader.dart';
 
@@ -88,14 +90,16 @@ class WhatsAppEntryButton extends StatelessWidget {
 ///
 /// Validates the number, asks the API to send the code (`purpose` decides
 /// whether an unknown number is refused — login — or allowed — register) and
-/// hands the E.164 number to [onSent] once it is on its way.
+/// hands the E.164 number to [onSent] once it is on its way, together with
+/// the delivery state the verification screen needs to track it and to offer
+/// the email fallback.
 class WhatsAppAuthCard extends StatefulWidget {
   final String title;
   final String subtitle;
 
   /// `login` or `register` — see POST /auth/request-otp/.
   final String purpose;
-  final void Function(String e164Phone) onSent;
+  final void Function(String e164Phone, OtpDelivery? delivery) onSent;
 
   /// Switch to the other WhatsApp screen ("New here? Signup").
   final String switchPrompt;
@@ -119,11 +123,13 @@ class WhatsAppAuthCard extends StatefulWidget {
 
 class _WhatsAppAuthCardState extends State<WhatsAppAuthCard> {
   final _phone = TextEditingController();
+  final _email = TextEditingController();
   bool _loading = false;
 
   @override
   void dispose() {
     _phone.dispose();
+    _email.dispose();
     super.dispose();
   }
 
@@ -134,17 +140,29 @@ class _WhatsAppAuthCardState extends State<WhatsAppAuthCard> {
       AppSnackBar.show(context, invalid);
       return;
     }
+    // The address is optional, so only a filled-in one is validated — but a
+    // typo must not be sent silently, or the fallback would quietly go
+    // nowhere on the one send that needed it.
+    final email = _email.text.trim();
+    if (email.isNotEmpty) {
+      final badEmail = EmailAddress.validate(email);
+      if (badEmail != null) {
+        AppSnackBar.show(context, badEmail);
+        return;
+      }
+    }
     final e164 = IndianPhone.e164(_phone.text);
     setState(() => _loading = true);
     final result = await AuthService.requestOtp(
       identifier: e164,
       identifierType: 'phone',
       purpose: widget.purpose,
+      fallbackEmail: email,
     );
     if (!mounted) return;
     setState(() => _loading = false);
     if (result['success'] == true) {
-      widget.onSent(e164);
+      widget.onSent(e164, result['delivery'] as OtpDelivery?);
     } else {
       AppSnackBar.error(context, result['message'] ?? 'Failed to send OTP');
     }
@@ -296,7 +314,59 @@ class _WhatsAppAuthCardState extends State<WhatsAppAuthCard> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
+                  // Optional, and the only way to give the server an address
+                  // for a number it has none for — a WhatsApp signup creates
+                  // an account with no email at all, so without this there is
+                  // nothing for a failed WhatsApp send to fall back to.
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(26),
+                    ),
+                    child: TextField(
+                      controller: _email,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) => _loading ? null : _send(),
+                      style: GoogleFonts.poppins(
+                        fontSize: Responsive.sp(context, 14),
+                        color: const Color(0xFF1A1A1A),
+                      ),
+                      decoration: InputDecoration(
+                        prefixIcon: Padding(
+                          padding: EdgeInsets.only(
+                            left: Responsive.w(context, 6),
+                          ),
+                          child: Icon(
+                            Icons.alternate_email_rounded,
+                            size: Responsive.sp(context, 20),
+                            color: const Color(0xFFAFAFAF),
+                          ),
+                        ),
+                        hintText: 'Email (optional)',
+                        hintStyle: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 14),
+                          color: const Color(0xFFB8B8B8),
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: Responsive.w(context, 8),
+                          vertical: Responsive.h(context, 16),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Only used if WhatsApp can't deliver your code.",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 11.5),
+                      color: const Color(0xFFB0B0B0),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
                   SizedBox(
                     width: double.infinity,
                     height: 52,

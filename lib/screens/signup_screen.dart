@@ -15,6 +15,7 @@ import '../providers/auth_state.dart';
 import '../providers/saved_events_state.dart';
 import '../core/responsive.dart';
 import '../widgets/app_loader.dart';
+import '../models/otp_delivery_model.dart';
 import '../screens/otp_verification_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/whatsapp_signup_screen.dart';
@@ -60,6 +61,7 @@ class _SignupScreenState extends State<SignupScreen> {
         MaterialPageRoute(
           builder: (_) => OtpVerificationScreen(
             identifier: email,
+            delivery: result['delivery'] as OtpDelivery?,
             // For existing users who land here: navigate to HomeScreen directly.
             // New users are handled inside OtpVerificationScreen (→ EditProfileScreen).
             onExistingUser: (ctx) => Navigator.of(ctx).pushAndRemoveUntil(

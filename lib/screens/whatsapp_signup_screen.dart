@@ -18,12 +18,13 @@ class WhatsAppSignupScreen extends StatelessWidget {
       title: 'Signup with WhatsApp',
       subtitle: "We'll send a 6-digit code to your WhatsApp.",
       purpose: 'register',
-      onSent: (phone) => Navigator.push(
+      onSent: (phone, delivery) => Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => OtpVerificationScreen(
             identifier: phone,
             identifierType: 'phone',
+            delivery: delivery,
             // A number that is already registered just signs in. New
             // accounts are handled inside OtpVerificationScreen (→ welcome,
             // then profile setup).

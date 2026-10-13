@@ -16,6 +16,7 @@ import '../providers/saved_events_state.dart';
 import '../core/responsive.dart';
 import '../screens/home_screen.dart';
 import '../screens/edit_profile_screen.dart';
+import '../models/otp_delivery_model.dart';
 import '../screens/otp_verification_screen.dart';
 import '../screens/signup_screen.dart';
 import '../screens/whatsapp_login_screen.dart';
@@ -72,6 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
             identifier: email,
             onExistingUser: showWelcomeBackDialog,
             isLoginFlow: true,
+            delivery: result['delivery'] as OtpDelivery?,
           ),
         ),
       );

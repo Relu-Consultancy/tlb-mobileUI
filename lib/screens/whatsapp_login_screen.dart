@@ -18,12 +18,13 @@ class WhatsAppLoginScreen extends StatelessWidget {
       title: 'Login with WhatsApp',
       subtitle: "We'll send a 6-digit code to your WhatsApp.",
       purpose: 'login',
-      onSent: (phone) => Navigator.push(
+      onSent: (phone, delivery) => Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => OtpVerificationScreen(
             identifier: phone,
             identifierType: 'phone',
+            delivery: delivery,
             onExistingUser: showWelcomeBackDialog,
             isLoginFlow: true,
           ),
