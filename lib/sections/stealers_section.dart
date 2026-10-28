@@ -1,35 +1,64 @@
+import 'dart:async';
 import '../core/responsive.dart';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
+import '../widgets/category_skeleton_card.dart';
+import '../widgets/auto_scroll_list.dart';
+import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../widgets/section_divider_widget.dart';
+import '../widgets/listing_meta_rows.dart';
+import '../providers/home_feed_state.dart';
 import '../data/dummy_data.dart';
-import '../screens/event_detail_screen.dart';
+import '../core/listing_navigation.dart';
 
 class StealersSection extends StatelessWidget {
   const StealersSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ValueListenableBuilder<int>(
+      valueListenable: HomeFeedState.version,
+      builder: (context, _, __) {
+        // Real listings once the feed is in, the mock set until then.
+                final isLoaded = HomeFeedState.isLoaded;
+        final items = isLoaded ? HomeFeedState.section('stealers') : DummyData.stealers;
+        if (items.isEmpty && isLoaded) return const SizedBox.shrink();
+        return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionDividerWidget(title: 'Stealers'),
+        const SectionDividerWidget(
+          title: 'Stealers',
+          topPadding: 30, // 30px gap from previous section's cards
+          fontSize: 17,
+          textColor: AppColors.textPrimary, // dark navy
+        ),
         SizedBox(
-          height: Responsive.h(context, 450, min: 380),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
+          // Taller rail so the Expanded image stretches further down and fills
+          // the white space below the discount band.
+          height: Responsive.h(context, 470, min: 430),
+          child: AutoScrollList(
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
-            itemCount: DummyData.stealers.length,
+            itemCount: items.length,
             itemBuilder: (context, index) {
-              final event = DummyData.stealers[index];
-              return Container(
-                width: Responsive.cardWidth(context, fraction: 0.64, max: 250),
+              if (!isLoaded) {
+                return Container(
+                  width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
+                  margin: const EdgeInsets.only(right: 16),
+                  child: const CategorySkeletonCard(),
+                );
+              }
+              final event = items[index];
+              return GestureDetector(
+                onTap: () => openListingDetail(context, event),
+                child: Container(
+                width: Responsive.cardWidth(context, fraction: 0.82, max: 340),
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -41,171 +70,272 @@ class StealersSection extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Top Image Area
-                    Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                          child: Image.asset(
-                            event.imagePath,
-                            height: Responsive.h(context, 260, min: 180),
-                            width: double.infinity,
-                            fit: BoxFit.cover,
+                    // Top Image Area — Expanded so the image dominates the
+                    // card; flush to the edges, with the countdown pill at the
+                    // top and the discount band at the bottom.
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(16),
+                              ),
+                              child: listingImage(event.imagePath,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
-                        ),
-                        // Top Yellow Pill (End in time)
-                        if (event.description != null)
-                          Positioned(
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            child: Center(
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                                decoration: const BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Color(0xFFFFF176), // Light yellow
-                                      Color(0xFFFFEE58),
-                                    ],
+                          // Top yellow countdown pill ("End in ...").
+                          // Only for a real countdown: this drew
+                          // whatever was in `description`, which on an
+                          // API listing is its short description, so
+                          // prose landed inside a deal timer.
+                          if (_CountdownText.looksLikeCountdown(
+                              event.description))
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              child: Center(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 6),
+                                  decoration: const BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Color(0xFFFFF176), // light yellow
+                                        Color(0xFFFFEE58),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.vertical(
+                                        bottom: Radius.circular(12)),
                                   ),
-                                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
-                                ),
-                                child: Text(
-                                  event.description!,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF1A1A2E),
+                                  child: _CountdownText(
+                                    text: event.description!,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 12),
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.textPrimary,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        // Bottom Pink Banner (Discount)
-                        if (event.tag != null)
-                          Positioned(
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            child: Container(
-                              decoration: const BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Color(0xFFE040FB), // Bright pink
-                                    Color(0xFFEA80FC), // Lighter pinkish-purple
+                          // Bottom pink discount band ("60% OFF")
+                          if (event.tag != null)
+                            Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              child: ClipRect(
+                                child: Stack(
+                                  children: [
+                                    Container(
+                                      width: double.infinity,
+                                      decoration: const BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Color(0xFFE040FB), // bright pink
+                                            Color(0xFFEA80FC), // lighter pink-purple
+                                          ],
+                                        ),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 6, horizontal: 12),
+                                      child: Text(
+                                        event.tag!,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: Responsive.sp(context, 12),
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    // Left→right shine sweeping across the strip.
+                                    const Positioned.fill(
+                                      child: IgnorePointer(
+                                        child: _ShineOverlay(),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
-                              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                              child: Text(
-                                event.tag!,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
-                    
-                    // Bottom Content Area
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              event.title,
-                              style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1A1A2E),
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+
+                    // Bottom Content Area — kept tight so the image above
+                    // stretches further down (less white space).
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            event.title,
+                            style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, 16),
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
                             ),
-                            const SizedBox(height: 6),
-                            // Stars + review count
-                            Row(
-                              children: [
-                                Row(
-                                  children: List.generate(
-                                    5,
-                                    (i) => const Icon(Icons.star, size: 14, color: Colors.amber),
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  event.reviewCount ?? '3.5k reviews',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const Spacer(),
-                            // Price + Button row
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    '₹${event.price?.toInt() ?? 2000}',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w800,
-                                      color: const Color(0xFF1A1A2E),
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: Responsive.h(context, 44, min: 38),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => EventDetailScreen(event: event),
-                                        ),
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFFFFCC00),
-                                      foregroundColor: const Color(0xFF1A1A2E),
-                                      elevation: 0,
-                                      minimumSize: const Size(0, 46),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      'Grab Deal',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: Responsive.sp(context, 13),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+                          // Two-column meta: Age + Date·Time left, Location +
+                          // Distance right.
+                          ListingMetaRows(
+                            event: event,
+                            showLocation: true,
+                            twoColumn: true,
+                          ),
+                        ],
                       ),
                     ),
                   ],
+                ),
                 ),
               );
             },
           ),
         ),
       ],
+        );
+      },
+    );
+  }
+}
+
+/// Renders an "End in HH:MM:SS" label that ticks down once per second (a real
+/// countdown). If the text has no HH:MM:SS pattern it is shown unchanged.
+class _CountdownText extends StatefulWidget {
+  final String text;
+  final TextStyle style;
+
+  const _CountdownText({required this.text, required this.style});
+
+  /// A countdown is `HH:MM:SS`, optionally behind a prefix such as
+  /// "End in ". Anything else is not a deal timer and must not be
+  /// dressed as one.
+  static final RegExp _clock = RegExp(r'(\d{1,2}):(\d{2}):(\d{2})');
+
+  static bool looksLikeCountdown(String? text) =>
+      text != null && _clock.hasMatch(text);
+
+  @override
+  State<_CountdownText> createState() => _CountdownTextState();
+}
+
+class _CountdownTextState extends State<_CountdownText> {
+  Timer? _timer;
+  Duration _remaining = Duration.zero;
+  String _prefix = '';
+  bool _valid = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _parse();
+    if (_valid) {
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (!mounted) return;
+        if (_remaining.inSeconds <= 0) {
+          _timer?.cancel();
+          return;
+        }
+        setState(() => _remaining -= const Duration(seconds: 1));
+      });
+    }
+  }
+
+  void _parse() {
+    final m = _CountdownText._clock.firstMatch(widget.text);
+    if (m == null) return;
+    _remaining = Duration(
+      hours: int.parse(m.group(1)!),
+      minutes: int.parse(m.group(2)!),
+      seconds: int.parse(m.group(3)!),
+    );
+    _prefix = widget.text.substring(0, m.start);
+    _valid = true;
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  String _fmt(Duration d) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${two(d.inHours)}:${two(d.inMinutes % 60)}:${two(d.inSeconds % 60)}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final label = !_valid
+        ? widget.text
+        : (_remaining.inSeconds <= 0 ? 'Ended' : '$_prefix${_fmt(_remaining)}');
+    return Text(label, style: widget.style);
+  }
+}
+
+/// A soft white highlight that sweeps left→right across its parent on a loop,
+/// then briefly rests — a premium "shine" on the discount strip.
+class _ShineOverlay extends StatefulWidget {
+  const _ShineOverlay();
+
+  @override
+  State<_ShineOverlay> createState() => _ShineOverlayState();
+}
+
+class _ShineOverlayState extends State<_ShineOverlay>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2200),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        // Sweep across during the first ~55% of the loop, then rest off-edge.
+        final p = Curves.easeInOut
+            .transform((_controller.value / 0.55).clamp(0.0, 1.0));
+        final dx = -1.6 + 3.2 * p;
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment(dx - 0.3, -1.0),
+              end: Alignment(dx + 0.3, 1.0),
+              colors: [
+                Colors.white.withOpacity(0.0),
+                Colors.white.withOpacity(0.45),
+                Colors.white.withOpacity(0.0),
+              ],
+              stops: const [0.35, 0.5, 0.65],
+            ),
+          ),
+        );
+      },
     );
   }
 }

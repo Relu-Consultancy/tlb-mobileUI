@@ -5,6 +5,7 @@ import '../core/responsive.dart';
 import '../models/event_model.dart';
 import 'wishlist_button.dart';
 import '../screens/event_detail_screen.dart';
+import '../core/listing_image.dart';
 
 class EventCardWithPrice extends StatelessWidget {
   final EventModel event;
@@ -28,6 +29,7 @@ class EventCardWithPrice extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.06),
@@ -45,7 +47,7 @@ class EventCardWithPrice extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                child: Image.asset(
+                child: listingImageSource(
                   event.imagePath,
                   width: width ?? double.infinity,
                   height: Responsive.h(context, 200, min: 140),
@@ -74,19 +76,20 @@ class EventCardWithPrice extends StatelessWidget {
           ),
           // Content
           Padding(
-            padding: const EdgeInsets.all(14),
+            // 20px gap below the CTA button (card bottom padding).
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   event.title,
                   style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontSize: Responsive.sp(context, 16),
+                    fontWeight: FontWeight.w500,
                     color: AppColors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     const Icon(
@@ -99,7 +102,7 @@ class EventCardWithPrice extends StatelessWidget {
                       child: Text(
                         event.venue,
                         style: GoogleFonts.poppins(
-                          fontSize: 12,
+                          fontSize: Responsive.sp(context, 12),
                           color: AppColors.textSecondary,
                         ),
                         maxLines: 1,
@@ -109,31 +112,11 @@ class EventCardWithPrice extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                // Price and Book Now
+                // Book Now (price label removed)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: '₹${event.price?.toInt() ?? 0}',
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 20),
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          TextSpan(
-                            text: ' / Person',
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    const Spacer(),
                     ElevatedButton(
                       onPressed: () {
                         Navigator.push(
@@ -143,10 +126,10 @@ class EventCardWithPrice extends StatelessWidget {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryLight,
-                        foregroundColor: const Color(0xFF1A1A2E),
+                        foregroundColor: AppColors.textPrimary,
                         minimumSize: const Size(0, 46),
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
+                          horizontal: 12,
                           vertical: 10,
                         ),
                         shape: RoundedRectangleBorder(

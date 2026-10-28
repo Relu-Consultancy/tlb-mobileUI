@@ -1,258 +1,432 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
-import '../models/event_model.dart';
+import '../core/share_helper.dart';
+import '../models/api_provider_model.dart';
+import '../providers/auth_state.dart';
+import '../services/events_listing_service.dart';
+import '../widgets/app_loader.dart';
+import '../widgets/partner_follow_button.dart';
+import '../widgets/social_links_row.dart';
+import '../widgets/upcoming_events_section.dart';
+import '../core/listing_source.dart';
+import '../services/activity_service.dart';
 
-class OrganizerProfileScreen extends StatelessWidget {
-  final EventModel event;
+class OrganizerProfileScreen extends StatefulWidget {
+  final String listingId;
+  final String? initialName;
+  final String? initialLogoUrl;
 
-  const OrganizerProfileScreen({super.key, required this.event});
+  /// Pre-fetched provider data. When supplied the screen skips the API call
+  /// and displays immediately without a loading state.
+  final ApiProvider? provider;
+
+  /// The kind of listing this profile was opened from — `'event'`, `'class'`,
+  /// `'program'` or `'venue'`. When set, an "Upcoming Events" section is shown
+  /// at the bottom, populated via that type's existing list API. Null when the
+  /// profile is opened outside a detail screen (section hidden).
+  final String? listingType;
+
+  const OrganizerProfileScreen({
+    super.key,
+    required this.listingId,
+    this.initialName,
+    this.initialLogoUrl,
+    this.provider,
+    this.listingType,
+  });
+
+  @override
+  State<OrganizerProfileScreen> createState() => _OrganizerProfileScreenState();
+}
+
+class _OrganizerProfileScreenState extends State<OrganizerProfileScreen> {
+  ApiProvider? _provider;
+  bool _isLoading = false;
+  String? _error;
+  bool _viewTracked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.provider != null) {
+      _provider = widget.provider;
+      _trackView();
+    } else if (widget.listingId.isNotEmpty) {
+      _fetchProvider();
+    }
+  }
+
+  /// One profile view per open, for the partner's dashboard — as soon as the
+  /// partner's id is known. Guarded so a retry or rebuild can't send another.
+  void _trackView() {
+    final id = _provider?.id;
+    if (_viewTracked || id == null || id.isEmpty) return;
+    _viewTracked = true;
+    ActivityService.trackPartnerView(id);
+  }
+
+  Future<void> _fetchProvider() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      // Sent whenever the customer is logged in. Without it the endpoint
+      // still answers in full, but `is_following` comes back false — which
+      // reads as a bug to anyone who has already followed this partner.
+      final p = await EventsListingService.fetchProvider(
+        widget.listingId,
+        token: AuthState.accessToken,
+      );
+      if (!mounted) return;
+      setState(() {
+        _provider = p;
+        _isLoading = false;
+      });
+      _trackView();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString().replaceFirst('Exception: ', '');
+        _isLoading = false;
+      });
+    }
+  }
+
+  // ── Derived display values ────────────────────────────────────────────────
+
+  String get _name => _provider?.name ?? widget.initialName ?? 'Partner';
+  String? get _logoUrl => _provider?.logoUrl ?? widget.initialLogoUrl;
+  String get _bio => (_provider?.bio?.isNotEmpty == true)
+      ? _provider!.bio!
+      : 'We bring unique and memorable experiences to the community.';
+
+  String _formatCount(int n) {
+    if (n >= 1000) return '${(n / 1000).toStringAsFixed(1)}k';
+    return '$n';
+  }
+
+  /// Only trustworthy when the fetch carried a token: an anonymous call gets
+  /// `is_following: false` whether or not the customer follows, so passing
+  /// that straight through would show "Follow" on a partner they follow.
+  bool? get _serverIsFollowing =>
+      (_provider != null && AuthState.accessToken != null)
+          ? _provider!.isFollowing
+          : null;
+
+  /// Moves the tally with the button rather than waiting for a re-fetch this
+  /// screen never does — following a partner and watching the count sit still
+  /// looks like the tap did not register.
+  void _onFollowChanged(bool following) {
+    final p = _provider;
+    final current = p?.totalFollowers;
+    if (p == null || current == null || !mounted) return;
+    setState(() {
+      _provider = p.copyWith(
+        // Never below zero: the count was fetched before this tap, so a stale
+        // one plus an unfollow could otherwise show "-1 Followers".
+        totalFollowers:
+            following ? current + 1 : (current - 1).clamp(0, current),
+        isFollowing: following,
+      );
+    });
+  }
+
+  // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
-    // Demo upcoming events list using the event image
-    final upcomingEvents = [
-      {
-        'title': 'Creative Color Workshop',
-        'venue': 'The Arts Studio, Mumbai',
-        'image': 'assets/images/kids_party.png',
-      },
-      {
-        'title': 'Creative Storytime',
-        'venue': 'The Arts Studio, Mumbai',
-        'image': 'assets/images/story_telling.png',
-      },
-      {
-        'title': 'Weekend Fun Fest',
-        'venue': 'City Park, Mumbai',
-        'image': 'assets/images/halloween_party.png',
-      },
-    ];
+    ListingSource.mark(context, ListingSource.partnerProfile);
+    if (_isLoading) {
+      return const Scaffold(backgroundColor: Colors.white, body: AppLoader());
+    }
+
+    final topInset = MediaQuery.of(context).padding.top;
+    final sheetTop = topInset + 96;
+    const avatarSize = 100.0;
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
+      body: Stack(
+        fit: StackFit.expand,
         children: [
-          // ── Static Header with gradient ──
-          Container(
-            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFFF5A623),
-                  Color(0xFFFBD786),
-                  Colors.white,
-                ],
-                stops: [0.0, 0.5, 1.0],
+          // ── Gold gradient band at the top ──
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: sheetTop + 80,
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFFF9B233), Color(0xFFFAD27A)],
+                ),
               ),
             ),
-            child: Column(
-              children: [
-                // Nav bar
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const CircleAvatar(
-                          radius: 16,
-                          backgroundColor: Colors.white,
-                          child: Icon(Icons.arrow_back, size: 18, color: Color(0xFF1A1A2E)),
-                        ),
-                        onPressed: () => Navigator.pop(context),
+          ),
+
+          // ── White rounded sheet holding all the content ──
+          Positioned.fill(
+            top: sheetTop,
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              ),
+              child: SingleChildScrollView(
+                padding: EdgeInsets.only(top: avatarSize / 2 + 18, bottom: 32),
+                child: Column(
+                  children: [
+                    // Name
+                    Text(
+                      _name,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontSize: Responsive.sp(context, 19),
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
                       ),
-                      IconButton(
-                        icon: const CircleAvatar(
-                          radius: 16,
-                          backgroundColor: Colors.white,
-                          child: Icon(Icons.share_outlined, size: 16, color: Color(0xFF1A1A2E)),
+                    ),
+                    // Directly under the name, above the social marks: it is
+                    // the one number that says how well known this partner
+                    // is, so it belongs with their identity rather than
+                    // among the stats further down.
+                    //
+                    // Shown only when the API actually sent a count — a
+                    // hard-coded "0 Followers" beside a "Following" button
+                    // reads as a bug rather than as an unpopulated field.
+                    if (_provider?.totalFollowers != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        '${_formatCount(_provider!.totalFollowers!)} '
+                        '${_provider!.totalFollowers == 1 ? 'Follower' : 'Followers'}',
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 13),
+                          color: Colors.grey.shade500,
                         ),
-                        onPressed: () {},
                       ),
                     ],
-                  ),
-                ),
-                // Avatar with verified badge
-                Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 48,
-                      backgroundColor: Colors.grey.shade300,
-                      backgroundImage:
-                          const AssetImage('assets/images/new_home/profilepic.jpg'),
+
+                    const SizedBox(height: 6),
+                    // Draws only the profiles the partner has actually set,
+                    // and takes no height when they have set none.
+                    SocialLinksRow(
+                      instagramUrl: _provider?.instagramUrl,
+                      facebookUrl: _provider?.facebookUrl,
+                      linkedinUrl: _provider?.linkedinUrl,
+                      websiteUrl: _provider?.websiteUrl,
                     ),
-                    Positioned(
-                      bottom: 2,
-                      right: 2,
-                      child: Container(
-                        width: 22,
-                        height: 22,
-                        decoration: const BoxDecoration(
-                          color: Colors.green,
-                          shape: BoxShape.circle,
-                          border: Border.fromBorderSide(
-                            BorderSide(color: Colors.white, width: 2),
+
+                    const SizedBox(height: 18),
+                    Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: Colors.grey.shade200,
+                        indent: 20,
+                        endIndent: 20),
+
+                    // Error banner
+                    if (_error != null) ...[
+                      const SizedBox(height: 16),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.orange.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline,
+                                  size: 18, color: Colors.orange.shade700),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(_error!,
+                                    style: GoogleFonts.poppins(
+                                        fontSize: Responsive.sp(context, 12),
+                                        color: Colors.orange.shade800)),
+                              ),
+                              TextButton(
+                                onPressed: _fetchProvider,
+                                style: TextButton.styleFrom(
+                                    foregroundColor: Colors.orange.shade700),
+                                child: Text('Retry',
+                                    style: GoogleFonts.poppins(
+                                        fontSize: Responsive.sp(context, 12),
+                                        fontWeight: FontWeight.w500)),
+                              ),
+                            ],
                           ),
                         ),
-                        child: const Icon(Icons.check, size: 12, color: Colors.white),
+                      ),
+                    ],
+
+                    // About
+                    const SizedBox(height: 20),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Follow sits on the heading line rather than at
+                            // the foot of the page: down there it was below
+                            // the fold on any profile with events, so the
+                            // primary action on this screen was the one thing
+                            // you had to scroll to find.
+                            Row(
+                              children: [
+                                Text(
+                                  'About',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 17),
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const Spacer(),
+                                PartnerFollowButton(
+                                  partnerId: _provider?.id,
+                                  initialIsFollowing: _serverIsFollowing,
+                                  onChanged: _onFollowChanged,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              _bio,
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 13),
+                                height: 1.6,
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
+
+                    const SizedBox(height: 22),
+                    Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: Colors.grey.shade200,
+                        indent: 20,
+                        endIndent: 20),
+                    const SizedBox(height: 20),
+
+                    // Stats row
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        children: [
+                          _statColumn(
+                            context,
+                            _provider != null && _provider!.totalListings > 0
+                                ? '${_provider!.totalListings}+'
+                                : '0',
+                            'EVENTS HOSTED',
+                          ),
+                          _statColumn(
+                            context,
+                            (_provider?.averageRating ?? 0) > 0
+                                ? _provider!.averageRating.toStringAsFixed(1)
+                                : '-',
+                            'RATING',
+                            showStar: true,
+                          ),
+                          _statColumn(
+                            context,
+                            _provider != null && _provider!.experienceYears > 0
+                                ? '${_provider!.experienceYears}+'
+                                : '0',
+                            'EXPERIENCE',
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // ── Upcoming Events (only when opened from a detail screen) ──
+                    if (widget.listingType != null)
+                      const UpcomingEventsSection(showDivider: true),
+
                   ],
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  'Fun Event.co',
-                  style: GoogleFonts.poppins(
-                    fontSize: Responsive.sp(context, 18),
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF1A1A2E),
+              ),
+            ),
+          ),
+
+          // ── Nav buttons on the gradient ──
+          Positioned(
+            top: topInset + 6,
+            left: 16,
+            right: 16,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _circleIconButton(Icons.arrow_back, () => Navigator.pop(context)),
+                _circleIconButton(
+                  Icons.share_outlined,
+                  () => ShareHelper.shareListing(
+                    context,
+                    type: 'partner',
+                    title: _name,
+                    id: _provider?.id,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  '1.2k Followers',
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-                const SizedBox(height: 16),
               ],
             ),
           ),
 
-          // ── Moving Bottom Section ──
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          // ── Avatar straddling the sheet's top edge ──
+          Positioned(
+            top: sheetTop - avatarSize / 2,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Stack(
+                clipBehavior: Clip.none,
                 children: [
-                  const SizedBox(height: 20),
-
-                  // ── About Section ──
                   Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
+                    width: avatarSize,
+                    height: avatarSize,
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'About',
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'We specialize in bringing people together through unique and memorable community events, workshops, and social gatherings.',
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            height: 1.6,
-                            color: Colors.grey.shade600,
-                          ),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 4),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.12),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
+                    child: ClipOval(child: _buildAvatar()),
                   ),
-
-                  const SizedBox(height: 20),
-
-                  // ── Stats Row ──
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Row(
-                      children: [
-                        _buildStatItem(context, '50+', 'EVENTS HOSTED'),
-                        Container(
-                          width: 1,
-                          height: 40,
-                          color: Colors.grey.shade200,
-                        ),
-                        _buildStatItem(context, '4.8 ⭐', 'RATING'),
-                        Container(
-                          width: 1,
-                          height: 40,
-                          color: Colors.grey.shade200,
-                        ),
-                        _buildStatItem(context, '5+', 'EXPERIENCE'),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // ── Upcoming Events Header ──
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Upcoming Events',
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                  Positioned(
+                    bottom: 4,
+                    right: 4,
+                    child: Container(
+                      width: 26,
+                      height: 26,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF22C55E),
+                        shape: BoxShape.circle,
+                        border: Border.fromBorderSide(
+                            BorderSide(color: Colors.white, width: 2.5)),
                       ),
-                      Text(
-                        'See All >',
-                        style: GoogleFonts.poppins(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF3B82F6),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "shouldn't miss wonder fun experience!",
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Colors.grey.shade500,
+                      child: const Icon(Icons.verified_outlined,
+                          size: 14, color: Colors.white),
                     ),
                   ),
-                  const SizedBox(height: 16),
-
-                  // ── Upcoming Events Cards ──
-                  SizedBox(
-                    height: Responsive.h(context, 260, min: 200),
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: upcomingEvents.length,
-                      itemBuilder: (context, index) {
-                        final e = upcomingEvents[index];
-                        return _buildEventCard(
-                          context: context,
-                          image: e['image']!,
-                          title: e['title']!,
-                          venue: e['venue']!,
-                        );
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
                 ],
               ),
             ),
@@ -262,26 +436,66 @@ class OrganizerProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(BuildContext context, String value, String label) {
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  Widget _circleIconButton(IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Icon(icon, size: 18, color: AppColors.textPrimary),
+      ),
+    );
+  }
+
+  Widget _statColumn(
+    BuildContext context,
+    String value,
+    String label, {
+    bool showStar = false,
+  }) {
     return Expanded(
       child: Column(
         children: [
-          Text(
-            value,
-            style: GoogleFonts.poppins(
-              fontSize: Responsive.sp(context, 17),
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF1A1A2E),
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                value,
+                style: GoogleFonts.poppins(
+                  fontSize: Responsive.sp(context, 22),
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              if (showStar) ...[
+                const SizedBox(width: 3),
+                const Icon(Icons.star_rounded,
+                    size: 18, color: Color(0xFF22C55E)),
+              ],
+            ],
           ),
           const SizedBox(height: 4),
           Text(
             label,
+            textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
-              fontSize: 10,
+              fontSize: Responsive.sp(context, 10),
               fontWeight: FontWeight.w500,
+              letterSpacing: 0.4,
               color: Colors.grey.shade500,
-              letterSpacing: 0.5,
             ),
           ),
         ],
@@ -289,75 +503,31 @@ class OrganizerProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEventCard({
-    required BuildContext context,
-    required String image,
-    required String title,
-    required String venue,
-  }) {
-    final cardW = Responsive.cardWidth(context, fraction: 0.46, max: 180);
-    final imgH = Responsive.h(context, 160, min: 120);
+  Widget _buildAvatar() {
+    final url = _logoUrl;
+    if (url != null && url.isNotEmpty) {
+      return Image.network(
+        url,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _initialAvatar(),
+      );
+    }
+    return _initialAvatar();
+  }
+
+  Widget _initialAvatar() {
+    final initial = _name.isNotEmpty ? _name[0].toUpperCase() : '?';
     return Container(
-      width: cardW,
-      margin: const EdgeInsets.only(right: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(14),
-            child: Image.asset(
-              image,
-              height: imgH,
-              width: cardW,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                height: imgH,
-                width: cardW,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(Icons.image, size: 40, color: Colors.grey),
-              ),
-            ),
+      color: const Color(0xFFFFF5E0),
+      child: Center(
+        child: Text(
+          initial,
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 32),
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
           ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: GoogleFonts.poppins(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF1A1A2E),
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 2),
-          Row(
-            children: [
-              Icon(Icons.location_on_outlined, size: 12, color: Colors.grey.shade500),
-              const SizedBox(width: 3),
-              Expanded(
-                child: Text(
-                  venue,
-                  style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey.shade500),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Limited Seats',
-            style: GoogleFonts.poppins(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFFFF6B6B),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

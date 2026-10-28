@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
+import '../core/listing_image.dart';
+import 'listing_meta_rows.dart';
 
 class WeekendEventCard extends StatelessWidget {
   final EventModel event;
@@ -26,6 +29,7 @@ class WeekendEventCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -40,7 +44,7 @@ class WeekendEventCard extends StatelessWidget {
               borderRadius: const BorderRadius.horizontal(
                 left: Radius.circular(16),
               ),
-              child: Image.asset(
+              child: listingImageSource(
                 event.imagePath,
                 width: width * 0.42,
                 height: double.infinity,
@@ -57,19 +61,20 @@ class WeekendEventCard extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  // Fills the height the removed CTA left behind.
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Text(
                       event.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.poppins(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
+                        fontSize: Responsive.sp(context, 16),
+                        fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
                         height: 1.2,
                       ),
                     ),
-                    const SizedBox(height: 10),
                     if (event.eventDate != null)
                       _IconLine(
                         icon: Icons.calendar_today_outlined,
@@ -78,14 +83,14 @@ class WeekendEventCard extends StatelessWidget {
                             : event.eventDate!,
                       ),
                     if (event.venue.isNotEmpty) ...[
-                      const SizedBox(height: 6),
                       _IconLine(
                         icon: Icons.location_on_outlined,
                         text: event.venue,
                       ),
                     ],
-                    const Spacer(),
-                    _BookNowButton(event: event),
+                    // Same green "x km away" row as every other card.
+                    if (event.distanceDisplay != null)
+                      ListingDistanceRow(event: event, fontSize: 11),
                   ],
                 ),
               ),
@@ -115,7 +120,7 @@ class _IconLine extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.poppins(
-              fontSize: 11.5,
+              fontSize: Responsive.sp(context, 11.5),
               color: AppColors.textSecondary,
               height: 1.2,
             ),
@@ -126,37 +131,3 @@ class _IconLine extends StatelessWidget {
   }
 }
 
-class _BookNowButton extends StatelessWidget {
-  final EventModel event;
-
-  const _BookNowButton({required this.event});
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Material(
-        color: const Color(0xFFFFB902),
-        borderRadius: BorderRadius.circular(24),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(24),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 9),
-            child: Text(
-              'Book Now',
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF1A1A2E),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

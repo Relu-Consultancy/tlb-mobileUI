@@ -1,478 +1,745 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import '../models/event_model.dart';
 import '../models/category_model.dart';
 
 class DummyData {
   DummyData._();
 
-  // New Categories Array mapped to 3D icons
+  /// Home "Explore the Stage" categories. `icon` is the line-art glyph shown in
+  /// the row (shared with the floating navbar); `image`/`subtitle` are retained
+  /// for the card-style layouts that use them.
   static const List<Map<String, dynamic>> homeCategories = [
     {
       'label': 'Events',
-      'image': 'resources- tlb-ui/homescreen-categoryicons/events.png',
+      'subtitle': 'Join The Fun',
+      'icon': 'resources- tlb-ui/homescreen_Explorethestage/events.png',
     },
     {
       'label': 'Classes',
-      'image': 'resources- tlb-ui/homescreen-categoryicons/classes.png',
+      'subtitle': 'Build Your Skill',
+      'icon': 'resources- tlb-ui/homescreen_Explorethestage/classes.png',
     },
     {
-      'label': 'Program',
-      'image': 'resources- tlb-ui/homescreen-categoryicons/programs.png',
+      'label': 'Programs',
+      'subtitle': 'Master The Craft',
+      'icon': 'resources- tlb-ui/homescreen_Explorethestage/programs.png',
     },
     {
       'label': 'Venues',
-      'image': 'resources- tlb-ui/homescreen-categoryicons/venues.png',
+      'subtitle': 'Find Your Space',
+      'icon': 'resources- tlb-ui/homescreen_Explorethestage/venues.png',
     },
   ];
 
+  // Card renders [Colors.white -> gradient.last], so `.last` is the visible
+  // bottom tone — deep/saturated, matching the same categories' colors in
+  // the "View All" popup (DummyData.allCategories) for consistency.
+  // `icon` + `circleColor` drive the line-art cards (see CategoryIconCard);
+  // `image` + `gradient` are kept for the gradient variant. Values mirror the
+  // matching entries in [allCategories].
   static const List<Map<String, dynamic>> exploreCategories = [
     {
       'label': 'Arts & Crafts',
       'image': 'assets/images/event_subcategories/artcraft.png',
-      'gradient': [Color(0xFFE8E0FF), Color(0xFFD4BFFF)],
+      'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
+      'icon': 'assets/images/event_categories/arts_crafts.png',
+      'circleColor': Color(0xFFF4EFFD),
     },
     {
       'label': 'Performing Arts',
       'image': 'assets/images/event_subcategories/performarts.png',
-      'gradient': [Color(0xFFFFE0E0), Color(0xFFFFB3B3)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
+      'icon': 'assets/images/event_categories/performing_arts.png',
+      'circleColor': Color(0xFFFEF0F1),
     },
     {
       'label': 'STEM &\nInnovation',
       'image': 'assets/images/event_subcategories/stem.png',
-      'gradient': [Color(0xFFFFF0D4), Color(0xFFFFDB99)],
+      'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
+      'icon': 'assets/images/event_categories/stem_innovation.png',
+      'circleColor': Color(0xFFFEF4E6),
     },
     {
       'label': 'Sports &\nFitness',
       'image': 'assets/images/event_subcategories/sports.png',
-      'gradient': [Color(0xFFFFF8D4), Color(0xFFFFEDA1)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
+      'icon': 'assets/images/event_categories/sports_fitness.png',
+      'circleColor': Color(0xFFFEF3DA),
     },
     {
       'label': 'Languages &\nCommunication',
       'image': 'assets/images/event_subcategories/lang.png',
-      'gradient': [Color(0xFFFFE8E0), Color(0xFFFFC2AD)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
+      'icon': 'assets/images/event_categories/language_communication.png',
+      'circleColor': Color(0xFFFEEAEC),
     },
     {
       'label': 'Life Skills',
       'image': 'assets/images/event_subcategories/lifeskills.png',
-      'gradient': [Color(0xFFE0F0FF), Color(0xFFADD4FF)],
+      'gradient': [Color(0xFF38BDF8), Color(0xFF2563EB)], // sky/blue
+      'icon': 'assets/images/event_categories/life_skills.png',
+      'circleColor': Color(0xFFE6F1FD),
     },
   ];
 
+  // New circular artwork — each PNG already has its own coloured circle baked
+  // in, so the old per-format `scale`/`invertColors` zoom hacks (needed for the
+  // transparent icons) are gone: the widget clips the square to an oval and
+  // BoxFit.cover fills it. `accentColor` (used by the format detail-screen
+  // header gradient) is matched to each new circle's background tone.
   static const List<Map<String, dynamic>> exploreFormats = [
     {
-      'label': 'WORKSHOP',
-      'image': 'assets/images/explore_formats/Workshops.png',
-      'color': Color(0xFF3D2817), // Warm dark brown — matches yellow workshop badge
+      'label': 'Workshop',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/Group 1000006597.png',
+      'formatSlug': 'workshop',
+      'accentColor': Color(0xFF3E7CB1), // chalkboard / blue circle
     },
     {
-      'label': 'CAMP',
-      'image': 'assets/images/explore_formats/camp.png',
-      'color': Color(0xFF38BDF8), // Bright sky blue — matches CAMP's cyan lettering
+      'label': 'Camp',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/Group 1000006598.png',
+      'formatSlug': 'camp',
+      'accentColor': Color(0xFF7BA05B), // tent / green circle
     },
     {
-      'label': 'COMPETITION',
-      'image': 'assets/images/explore_formats/competition.png',
-      'color': Color(0xFFFFCA28), // Golden yellow — matches warmer gold badge tone
+      'label': 'Competition',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/Group 1000006599.png',
+      'formatSlug': 'competition',
+      'accentColor': Color(0xFFE0859B), // trophy / pink circle
     },
     {
-      'label': 'MASTERCLASS',
-      'image': 'assets/images/explore_formats/masterclass.png',
-      'color': Color(0xFF111111), // Near-black
+      'label': 'MasterClass',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/Group 1000006600.png',
+      'formatSlug': 'masterclass',
+      'accentColor': Color(0xFFE3A23B), // book + cap / grey circle (gold accent)
     },
     {
-      'label': 'PERFORMANCE',
-      'image': 'assets/images/explore_formats/performance.png',
-      'color': Color(0xFFEC407A), // Softer rose — matches pink badge
+      'label': 'Showcase Performance',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/Group 1000006601.png',
+      'formatSlug': 'showcase_performance',
+      'accentColor': Color(0xFFE8932E), // unveiling / orange circle
     },
     {
-      'label': 'SHOWCASE',
-      'image': 'assets/images/explore_formats/shocase.png',
-      'color': Color(0xFF66BB6A), // Softer green
-    },
-    {
-      'label': 'DEMO',
-      'image': 'assets/images/explore_formats/demo.png',
-      'color': Color(0xFFFF8A3D), // Softer orange
+      'label': 'Demo',
+      'image': 'resources- tlb-ui/event_page_subcategoryicons/Explore_by_format/Group 1000006602.png',
+      'formatSlug': 'demo',
+      'accentColor': Color(0xFF3E78B0), // classroom / blue circle
     },
   ];
 
+  // Card renders [Colors.white -> gradient.last], so `.last` is the visible
+  // bottom tone — deep/saturated, matching the same categories' colors in
+  // the "View All" popup (DummyData.classesSeeAllCategories) for consistency.
   static const List<Map<String, dynamic>> classesCategories = [
     {
       'label': 'Academic',
+      'apiName': 'Academic',
       'image': 'assets/images/class_page/academic.png',
-      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+      'gradient': [Color(0xFF6366F1), Color(0xFF312E81)], // indigo/navy
+      'icon': 'assets/images/class_categories/academic.png',
+      'circleColor': Color(0xFFEEF3F8),
     },
     {
       'label': 'Creative Arts',
+      'apiName': 'Creative Arts',
       'image': 'assets/images/class_page/creative.png',
-      'gradient': [Color(0xFFFFF0F0), Color(0xFFFFDBDB)],
+      'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
+      'icon': 'assets/images/class_categories/creative_arts.png',
+      'circleColor': Color(0xFFF2EFF7),
     },
     {
       'label': 'Tech & Innovation',
+      'apiName': 'Tech & Innovation',
       'image': 'assets/images/class_page/tech.png',
-      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+      'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
+      'icon': 'assets/images/class_categories/tech_innovation.png',
+      'circleColor': Color(0xFFFBF0EB),
     },
     {
       'label': 'Performing Arts',
+      'apiName': 'Performing Arts',
       'image': 'assets/images/class_page/performing.png',
-      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
+      'icon': 'assets/images/class_categories/performing_arts.png',
+      'circleColor': Color(0xFFF9EDF0),
     },
     {
       'label': 'Sports & Fitness',
+      'apiName': 'Sports & Fitness',
       'image': 'assets/images/class_page/sports.png',
-      'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
+      'icon': 'assets/images/class_categories/sports_fitness.png',
+      'circleColor': Color(0xFFFBF5EB),
     },
     {
       'label': 'Speech &\nCommunication',
+      'apiName': 'Speech & Communication',
       'image': 'assets/images/class_page/speech.png',
-      'gradient': [Color(0xFFFFE4E6), Color(0xFFFECDD3)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
+      'icon': 'assets/images/class_categories/speech_communication.png',
+      'circleColor': Color(0xFFF2EFF7),
     },
     {
       'label': 'Life Skills &\nPersonality Dev',
+      'apiName': 'Life Skills & Personality Development',
       'image': 'assets/images/class_page/lifeskills.png',
-      'gradient': [Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
+      'gradient': [Color(0xFF38BDF8), Color(0xFF2563EB)], // sky/blue
+      'icon': 'assets/images/class_categories/life_skills_personality.png',
+      'circleColor': Color(0xFFEFF3F7),
     },
     {
       'label': 'Creative Media',
+      'apiName': 'Creative Media',
       'image': 'assets/images/class_page/media.png',
-      'gradient': [Color(0xFFFEF3C7), Color(0xFFFDE68A)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFF97316)], // amber/orange
+      'icon': 'assets/images/class_categories/creative_media.png',
+      'circleColor': Color(0xFFFBF0EB),
     },
     {
       'label': 'Outdoor &\nNature Learning',
+      'apiName': 'Outdoor & Nature Learning',
       'image': 'assets/images/class_page/outdoor.png',
-      'gradient': [Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
+      'gradient': [Color(0xFF6EE7B7), Color(0xFF059669)], // green/emerald
+      'icon': 'assets/images/class_categories/outdoor_nature_learning.png',
+      'circleColor': Color(0xFFF4F7EF),
     },
     {
       'label': 'Culinary',
+      'apiName': 'Culinary',
       'image': 'assets/images/class_page/culinary.png',
-      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+      'gradient': [Color(0xFFFDA4AF), Color(0xFFE11D48)], // rose/red
+      'icon': 'assets/images/class_categories/culinary.png',
+      'circleColor': Color(0xFFF9EDF0),
     },
     {
       'label': 'Brain Boosters',
+      'apiName': 'Brain Boosters',
       'image': 'assets/images/class_page/brainboosters.png',
-      'gradient': [Color(0xFFF5F3FF), Color(0xFFEDE9FE)],
+      'gradient': [Color(0xFF67E8F9), Color(0xFF0891B2)], // cyan/teal
+      'icon': 'assets/images/class_categories/brain_boosters.png',
+      'circleColor': Color(0xFFEFF2F7),
     },
   ];
 
+  /// "Pick Your Pace" — how long a commitment a class asks for, browsed on
+  /// PaceClassesScreen.
+  ///
+  /// `paceSlug` is sent to the classes endpoint as its `format` query
+  /// parameter. The values follow the same snake_case convention as
+  /// [exploreFormats]' `formatSlug`, which the same backend accepts for
+  /// events. They could NOT be checked against live data: the classes
+  /// endpoint returns zero listings today, so a wrong slug and an empty
+  /// catalogue look identical — both come back HTTP 200 with no rows. If one
+  /// pace stays empty once classes are live, check its value against the
+  /// backend vocabulary before looking anywhere else.
+  ///
+  /// `accentColor` tints that screen's header, as it does for formats.
+  /// The Classes tab's "Pick Your Pace" discs.
+  ///
+  /// `paceSlug` is kept ready for the day /listings/classes/ can filter by
+  /// pace. It cannot today: the endpoint takes category, subcategory, city,
+  /// area, mode and search, its metadata/formats/ route returns only the
+  /// three delivery modes, and a class row carries no pace field — so
+  /// PaceClassesScreen fetches the catalogue unfiltered rather than sending
+  /// a parameter that answers "Not found."
   static const List<Map<String, dynamic>> pickYourPace = [
     {
       'label': 'Weekly\nClasses',
       'image': 'assets/images/pick_pace/weeklyclasses.png',
+      'paceSlug': 'weekly_classes',
+      'accentColor': Color(0xFF5B8FD4),
     },
     {
       'label': 'Monthly\nPrograms',
       'image': 'assets/images/pick_pace/monthly.png',
+      'paceSlug': 'monthly_programs',
+      'accentColor': Color(0xFFE0A055),
     },
     {
       'label': 'Term Courses',
       'image': 'assets/images/pick_pace/term.png',
+      'paceSlug': 'term_course',
+      'accentColor': Color(0xFFB0A57A),
     },
     {
       'label': 'Bootcamps',
       'image': 'assets/images/pick_pace/bootcamp.png',
+      'paceSlug': 'bootcamp',
+      'accentColor': Color(0xFF4DBBFF),
     },
     {
       'label': 'Trial Class',
       'image': 'assets/images/pick_pace/trial.png',
+      'paceSlug': 'trial_class',
+      'accentColor': Color(0xFF5FCBAC),
     },
     {
       'label': 'Certification',
       'image': 'assets/images/pick_pace/certification.png',
+      'paceSlug': 'certification',
+      'accentColor': Color(0xFFE8955F),
     },
     {
       'label': 'Holiday\nCamps',
       'image': 'assets/images/pick_pace/holiday.png',
+      'paceSlug': 'holiday_camp',
+      'accentColor': Color(0xFF8FA6C4),
     },
   ];
 
+  // NOTE: every entry carries `imageInset` + `imageScale` so the 3D character
+  // art fills the (0.8-aspect) card consistently — without them the images
+  // render small and float. Tuned for the "Pave Your Path" grid.
+  // Card renders [Colors.white -> gradient.last], so `.last` is the visible
+  // bottom tone — deep/saturated, matching the same categories' colors in
+  // the "View All" popup (DummyData.programsSeeAllCategories) for consistency.
   static const List<Map<String, dynamic>> programsCategories = [
     {
       'label': 'Future Tech & AI',
       'image': "resources- tlb-ui/events_page/futuretech'.png",
-      'gradient': [Color(0xFFDCFCE7), Color(0xFFBBF7D0)],
+      'gradient': [Color(0xFF67E8F9), Color(0xFF0891B2)], // cyan/teal
       'imageInset': 0.0,
+      'imageScale': 1.2,
+      'icon': 'assets/images/program_categories/future_tech_ai.png',
+      'circleColor': Color(0xFFEFF6FC),
     },
     {
       'label': 'Design &\nInnovation',
       'image': 'resources- tlb-ui/events_page/design.png',
-      'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
       'imageInset': 0.0,
+      'imageScale': 1.05,
+      'icon': 'assets/images/program_categories/design_innovation.png',
+      'circleColor': Color(0xFFFEF5EE),
     },
     {
       'label': 'Leadership &\nEntrepreneurship',
       'image': 'resources- tlb-ui/events_page/leadership.png',
-      'gradient': [Color(0xFFDBEAFE), Color(0xFFBFDBFE)],
+      'gradient': [Color(0xFF38BDF8), Color(0xFF2563EB)], // sky/blue
+      'imageInset': 0.0,
+      'imageScale': 0.9,
+      // tall figure — already fills the card
+      'icon': 'assets/images/program_categories/leadership_entrepreneurship.png',
+      'circleColor': Color(0xFFEFF1FE),
     },
     {
       'label': 'Media & Content\nCreation',
       'image': 'resources- tlb-ui/events_page/media.png',
-      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+      'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
+      'imageInset': 0.0,
+      'imageScale': 1.05,
+      'icon': 'assets/images/program_categories/media_content_creation.png',
+      'circleColor': Color(0xFFF4EEF8),
     },
     {
       'label': 'Stage Arts &\nPerformance',
       'image': 'resources- tlb-ui/events_page/stage.png',
-      'gradient': [Color(0xFFECFDF5), Color(0xFFD1FAE5)],
+      'gradient': [Color(0xFF6EE7B7), Color(0xFF059669)], // green/emerald
+      'imageInset': 0.0,
+      'imageScale': 1.1,
+      'icon': 'assets/images/program_categories/stage_arts_performance.png',
+      'circleColor': Color(0xFFF3F9F7),
     },
     {
       'label': 'Active Sports\n& Training',
       'image': 'resources- tlb-ui/events_page/activesports.png',
-      'gradient': [Color(0xFFFEE2E2), Color(0xFFFECACA)],
+      'gradient': [Color(0xFFFDA4AF), Color(0xFFE11D48)], // rose/red
+      'imageInset': 0.0,
+      'imageScale': 0.85,
+      // tall figure — already fills the card
+      'icon': 'assets/images/program_categories/active_sports_training.png',
+      'circleColor': Color(0xFFFEEFF2),
     },
     {
       'label': 'Academics &\nCompetitive Prep',
       'image': 'assets/images/class_page/academic.png',
-      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
+      'imageInset': 0.0,
+      'imageScale': 1.0,
+      'icon': 'assets/images/program_categories/academics_competitive_prep.png',
+      'circleColor': Color(0xFFFCF0F4),
     },
     {
       'label': 'Analytical\nThinking',
       'image': 'assets/images/class_page/brainboosters.png',
-      'gradient': [Color(0xFFFEF9C3), Color(0xFFFDE68A)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFF97316)], // amber/orange
+      'imageInset': 0.0,
+      'imageScale': 1.0,
+      'icon': 'assets/images/program_categories/analytical_thinking.png',
+      'circleColor': Color(0xFFFEF5EE),
     },
     {
       'label': 'Language &\nCommunication',
       'image': 'assets/images/class_page/speech.png',
-      'gradient': [Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
+      'imageInset': 0.0,
+      'imageScale': 1.0,
+      'icon': 'assets/images/program_categories/language_communication.png',
+      'circleColor': Color(0xFFF5EDF8),
     },
     {
       'label': 'Culinary &\nHospitality',
       'image': 'assets/images/class_page/culinary.png',
-      'gradient': [Color(0xFFFFFBEB), Color(0xFFFEF3C7)],
+      'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
+      'imageInset': 0.0,
+      'imageScale': 1.0,
+      'icon': 'assets/images/program_categories/culinary_hospitality.png',
+      'circleColor': Color(0xFFFEF5ED),
     },
     {
       'label': 'Grooming &\nPersonality Dev',
       'image': 'assets/images/class_page/lifeskills.png',
-      'gradient': [Color(0xFFFAF5FF), Color(0xFFF3E8FF)],
+      'gradient': [Color(0xFF6366F1), Color(0xFF312E81)], // indigo/navy
+      'imageInset': 0.0,
+      'imageScale': 1.0,
+      'icon': 'assets/images/program_categories/grooming_personality.png',
+      'circleColor': Color(0xFFEFF1FD),
     },
   ];
 
+  /// The Programs tab's "Find Your Fit" discs. `formatSlug` is the
+  /// `program_format` value the listings endpoint filters on (its enum is
+  /// batch / camp / holiday / regular / short_term / weekend / recorded —
+  /// one per disc), and `accentColor` tints the header of the screen the
+  /// disc opens, the way pickYourPace does for classes.
   static const List<Map<String, dynamic>> findYourFit = [
     {
       'label': 'Batch\nProgram',
-      'image': 'assets/images/new_home/eventcategory2.png',
+      'formatSlug': 'batch',
+      'accentColor': Color(0xFF5B8FD4),
+      'image': 'resources- tlb-ui/programs_findurfit_clean/batchprogram.png',
+      // Gradient sampled to match the reference discs.
+      'bg': [Color(0xFFD2E8F6), Color(0xFFF5EFD9)], // sky blue → cream
     },
     {
       'label': 'Camp\nProgram',
-      'image': 'assets/images/new_home/eventcategory3.png',
+      'formatSlug': 'camp',
+      'accentColor': Color(0xFF3F9E8C),
+      'image': 'resources- tlb-ui/programs_findurfit_clean/campprogram.png',
+      'bg': [Color(0xFFCFE5F1), Color(0xFFE3F0F7)], // light blue
     },
     {
       'label': 'Holiday-\nbased',
-      'image': 'assets/images/new_home/eventcategory4.png',
+      'formatSlug': 'holiday',
+      'accentColor': Color(0xFFE0A055),
+      'image': 'resources- tlb-ui/programs_findurfit_clean/holidaybased.png',
+      'bg': [Color(0xFFE3F5F1), Color(0xFFF4FBF9)], // light cyan
     },
     {
-      'label': 'Flexible\nPace',
-      'image': 'assets/images/new_home/eventcategory5.png',
+      'label': 'Regular\nProgram',
+      'formatSlug': 'regular',
+      'accentColor': Color(0xFF6B7FA8),
+      'image': 'resources- tlb-ui/programs_findurfit_clean/regularprogram.png',
+      'bg': [Color(0xFFE8F0F7), Color(0xFFDBE7F1)], // light blue-grey
+    },
+    {
+      'label': 'Short-Term\nProgram',
+      'formatSlug': 'short_term',
+      'accentColor': Color(0xFF8E7CC3),
+      'image': 'resources- tlb-ui/programs_findurfit_clean/shorttermprogram.png',
+      'bg': [Color(0xFFF7FAFC), Color(0xFFECF1F5)], // near-white
+    },
+    {
+      'label': 'Weekend\nProgram',
+      'formatSlug': 'weekend',
+      'accentColor': Color(0xFF4DBBFF),
+      'image': 'resources- tlb-ui/programs_findurfit_clean/weekendprogram.png',
+      'bg': [Color(0xFFE2F5F6), Color(0xFFF1FBFB)], // light cyan
+    },
+    {
+      'label': 'Recorded\nProgram',
+      'formatSlug': 'recorded',
+      'accentColor': Color(0xFFCB6A8E),
+      'image': 'resources- tlb-ui/programs_findurfit_clean/recordedprogram.png',
+      'bg': [Color(0xFFFCEFF4), Color(0xFFFADDE8)], // light pink
     },
   ];
 
+  // Card renders [Colors.white -> gradient.last], so `.last` is the visible
+  // bottom tone — deep/saturated to match the "View All" reference.
   static const List<Map<String, dynamic>> classesSeeAllCategories = [
     {
       'label': 'Academic',
       'image': 'assets/images/class_page/academic.png',
-      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+      'gradient': [Color(0xFF6366F1), Color(0xFF312E81)], // indigo/navy
+      'icon': 'assets/images/class_categories/academic.png',
+      'circleColor': Color(0xFFEEF3F8),
     },
     {
       'label': 'Creative Arts',
       'image': 'assets/images/class_page/creative.png',
-      'gradient': [Color(0xFFFFF0F0), Color(0xFFFFDBDB)],
+      'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
+      'icon': 'assets/images/class_categories/creative_arts.png',
+      'circleColor': Color(0xFFF2EFF7),
     },
     {
       'label': 'Tech & Innovation',
       'image': 'assets/images/class_page/tech.png',
-      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+      'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
+      'icon': 'assets/images/class_categories/tech_innovation.png',
+      'circleColor': Color(0xFFFBF0EB),
     },
     {
       'label': 'Performing Arts',
       'image': 'assets/images/class_page/performing.png',
-      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
+      'icon': 'assets/images/class_categories/performing_arts.png',
+      'circleColor': Color(0xFFF9EDF0),
     },
     {
       'label': 'Sports & Fitness',
       'image': 'assets/images/class_page/sports.png',
-      'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
+      'icon': 'assets/images/class_categories/sports_fitness.png',
+      'circleColor': Color(0xFFFBF5EB),
     },
     {
       'label': 'Speech & Communication',
       'image': 'assets/images/class_page/speech.png',
-      'gradient': [Color(0xFFFFE4E6), Color(0xFFFECDD3)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
+      'icon': 'assets/images/class_categories/speech_communication.png',
+      'circleColor': Color(0xFFF2EFF7),
     },
     {
       'label': 'Life Skills & Personality Development',
       'image': 'assets/images/class_page/lifeskills.png',
-      'gradient': [Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
+      'gradient': [Color(0xFF38BDF8), Color(0xFF2563EB)], // sky/blue
+      'icon': 'assets/images/class_categories/life_skills_personality.png',
+      'circleColor': Color(0xFFEFF3F7),
     },
     {
       'label': 'Creative Media',
       'image': 'assets/images/class_page/media.png',
-      'gradient': [Color(0xFFFEF3C7), Color(0xFFFDE68A)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFF97316)], // amber/orange
+      'icon': 'assets/images/class_categories/creative_media.png',
+      'circleColor': Color(0xFFFBF0EB),
     },
     {
       'label': 'Outdoor and Nature Learning',
       'image': 'assets/images/class_page/outdoor.png',
-      'gradient': [Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
+      'gradient': [Color(0xFF6EE7B7), Color(0xFF059669)], // green/emerald
+      'icon': 'assets/images/class_categories/outdoor_nature_learning.png',
+      'circleColor': Color(0xFFF4F7EF),
     },
     {
       'label': 'Culinary',
       'image': 'assets/images/class_page/culinary.png',
-      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+      'gradient': [Color(0xFFFDA4AF), Color(0xFFE11D48)], // rose/red
+      'icon': 'assets/images/class_categories/culinary.png',
+      'circleColor': Color(0xFFF9EDF0),
     },
     {
       'label': 'Brain Boosters',
       'image': 'assets/images/class_page/brainboosters.png',
-      'gradient': [Color(0xFFF5F3FF), Color(0xFFEDE9FE)],
+      'gradient': [Color(0xFF67E8F9), Color(0xFF0891B2)], // cyan/teal
+      'icon': 'assets/images/class_categories/brain_boosters.png',
+      'circleColor': Color(0xFFEFF2F7),
     },
   ];
 
   static const List<Map<String, dynamic>> venuesSeeAllCategories = [
     {
       'label': 'Play & Adventure',
-      'image': 'resources- tlb-ui/venues_page/play.png',
+      'image': 'assets/images/venue_categories/play_adventure.png',
       'gradient': <Color>[Color(0xFFF0FDF4), Color(0xFFDCFCE7)],
+      'circleColor': Color(0xFFF5F9F6),
     },
     {
       'label': 'Sports & Active',
-      'image': 'resources- tlb-ui/venues_page/sports.png',
+      'image': 'assets/images/venue_categories/sports_active.png',
       'gradient': <Color>[Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+      'circleColor': Color(0xFFFEF9F1),
     },
     {
       'label': 'Creative & DIY',
-      'image': 'resources- tlb-ui/venues_page/creativediy.png',
+      'image': 'assets/images/venue_categories/creative_diy.png',
       'gradient': <Color>[Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
+      'circleColor': Color(0xFFF6F9FD),
     },
     {
       'label': 'Party & Celebration',
-      'image': 'resources- tlb-ui/venues_page/party.png',
+      'image': 'assets/images/venue_categories/party_celebration.png',
       'gradient': <Color>[Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+      // This artwork fills its canvas more than the others — inset it so it
+      // renders at a similar visual size in the What's-the-Plan circles, and
+      // nudge it down a touch so its circle lines up vertically with them.
+      'inset': 7,
+      'nudge': 4,
+      'circleColor': Color(0xFFF7F6FC),
     },
     {
       'label': 'Science & Discovery',
-      'image': 'resources- tlb-ui/venues_page/science.png',
+      'image': 'assets/images/venue_categories/science_discovery.png',
       'gradient': <Color>[Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+      'circleColor': Color(0xFFF8F7F6),
     },
     {
       'label': 'Nature & Animals',
-      'image': 'resources- tlb-ui/venues_page/nature.png',
+      'image': 'assets/images/venue_categories/nature_animals.png',
       'gradient': <Color>[Color(0xFFECFDF5), Color(0xFFD1FAE5)],
-    },
-    {
-      'label': 'Reading & Study',
-      'image': 'assets/images/new_home/eventcategory2.png',
-      'gradient': <Color>[Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
-    },
-    {
-      'label': 'Dining & Cafes',
-      'image': 'assets/images/new_home/eventcategory3.png',
-      'gradient': <Color>[Color(0xFFF5F3FF), Color(0xFFEDE9FE)],
+      'circleColor': Color(0xFFF8F8F5),
     },
   ];
 
+  // Card renders [Colors.white -> gradient.last], so `.last` is the visible
+  // bottom tone — deep/saturated to match the "View All" reference.
   static const List<Map<String, dynamic>> programsSeeAllCategories = [
     {
       'label': 'Future Tech & AI',
       'image': "resources- tlb-ui/events_page/futuretech'.png",
-      'gradient': [Color(0xFFDCFCE7), Color(0xFFBBF7D0)],
+      'gradient': [Color(0xFF67E8F9), Color(0xFF0891B2)], // cyan/teal
+      'icon': 'assets/images/program_categories/future_tech_ai.png',
+      'circleColor': Color(0xFFEFF6FC),
     },
     {
       'label': 'Design & Innovation',
       'image': 'resources- tlb-ui/events_page/design.png',
-      'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
+      'icon': 'assets/images/program_categories/design_innovation.png',
+      'circleColor': Color(0xFFFEF5EE),
     },
     {
       'label': 'Leadership & Entrepreneurship',
       'image': 'resources- tlb-ui/events_page/leadership.png',
-      'gradient': [Color(0xFFDBEAFE), Color(0xFFBFDBFE)],
+      'gradient': [Color(0xFF38BDF8), Color(0xFF2563EB)], // sky/blue
+      'icon': 'assets/images/program_categories/leadership_entrepreneurship.png',
+      'circleColor': Color(0xFFEFF1FE),
     },
     {
       'label': 'Media & Content Creation',
       'image': 'resources- tlb-ui/events_page/media.png',
-      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+      'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
+      'icon': 'assets/images/program_categories/media_content_creation.png',
+      'circleColor': Color(0xFFF4EEF8),
     },
     {
       'label': 'Stage Arts & Performance',
       'image': 'resources- tlb-ui/events_page/stage.png',
-      'gradient': [Color(0xFFECFDF5), Color(0xFFD1FAE5)],
+      'gradient': [Color(0xFF6EE7B7), Color(0xFF059669)], // green/emerald
+      'icon': 'assets/images/program_categories/stage_arts_performance.png',
+      'circleColor': Color(0xFFF3F9F7),
     },
     {
       'label': 'Active Sports & Training',
       'image': 'resources- tlb-ui/events_page/activesports.png',
-      'gradient': [Color(0xFFFEE2E2), Color(0xFFFECACA)],
+      'gradient': [Color(0xFFFDA4AF), Color(0xFFE11D48)], // rose/red
+      'icon': 'assets/images/program_categories/active_sports_training.png',
+      'circleColor': Color(0xFFFEEFF2),
     },
     {
       'label': 'Academics & Competitive Prep',
       'image': 'assets/images/class_page/academic.png',
-      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
+      'icon': 'assets/images/program_categories/academics_competitive_prep.png',
+      'circleColor': Color(0xFFFCF0F4),
     },
     {
       'label': 'Analytical Thinking',
       'image': 'assets/images/class_page/brainboosters.png',
-      'gradient': [Color(0xFFFEF9C3), Color(0xFFFDE68A)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFF97316)], // amber/orange
+      'icon': 'assets/images/program_categories/analytical_thinking.png',
+      'circleColor': Color(0xFFFEF5EE),
     },
     {
       'label': 'Language & Communication',
       'image': 'assets/images/class_page/speech.png',
-      'gradient': [Color(0xFFE0F2FE), Color(0xFFBAE6FD)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
+      'icon': 'assets/images/program_categories/language_communication.png',
+      'circleColor': Color(0xFFF5EDF8),
     },
     {
       'label': 'Culinary & Hospitality',
       'image': 'assets/images/class_page/culinary.png',
-      'gradient': [Color(0xFFFFFBEB), Color(0xFFFEF3C7)],
+      'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
+      'icon': 'assets/images/program_categories/culinary_hospitality.png',
+      'circleColor': Color(0xFFFEF5ED),
     },
     {
-      'label': 'Grooming & Personality Development',
+      'label': 'Grooming & Personality Dev.',
       'image': 'assets/images/class_page/lifeskills.png',
-      'gradient': [Color(0xFFFAF5FF), Color(0xFFF3E8FF)],
+      'gradient': [Color(0xFF6366F1), Color(0xFF312E81)], // indigo/navy
+      'icon': 'assets/images/program_categories/grooming_personality.png',
+      'circleColor': Color(0xFFEFF1FD),
     },
   ];
 
+  // Card renders [Colors.white -> gradient.last], so `.last` is the visible
+  // bottom tone — deep/saturated per the reference (was near-white pastel).
+  //
+  // `icon` + `circleColor` drive the clean line-art treatment used by the
+  // "View All" popup (see CategoryIconCard); `image` + `gradient` remain for
+  // the in-page gradient cards. Circle tones are the exact values sampled
+  // from the approved design mock.
   static const List<Map<String, dynamic>> allCategories = [
     {
       'label': 'Arts & Crafts',
       'image': 'assets/images/event_subcategories/artcraft.png',
-      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+      'gradient': [Color(0xFFA78BFA), Color(0xFF7C3AED)], // violet
+      'icon': 'assets/images/event_categories/arts_crafts.png',
+      'circleColor': Color(0xFFF4EFFD), // lavender
     },
     {
       'label': 'Performing Arts',
       'image': 'assets/images/event_subcategories/performarts.png',
-      'gradient': [Color(0xFFFFF0F0), Color(0xFFFFDBDB)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFDB2777)], // pink
+      'icon': 'assets/images/event_categories/performing_arts.png',
+      'circleColor': Color(0xFFFEF0F1), // blush
     },
     {
       'label': 'STEM & Innovation',
       'image': 'assets/images/event_subcategories/stem.png',
-      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+      'gradient': [Color(0xFFFDBA74), Color(0xFFEA580C)], // orange
+      'icon': 'assets/images/event_categories/stem_innovation.png',
+      'circleColor': Color(0xFFFEF4E6), // cream
     },
     {
       'label': 'Sports & Fitness',
       'image': 'assets/images/event_subcategories/sports.png',
-      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFD97706)], // amber/gold
+      'icon': 'assets/images/event_categories/sports_fitness.png',
+      'circleColor': Color(0xFFFEF3DA), // light amber
     },
     {
       'label': 'Languages & Communication',
       'image': 'assets/images/event_subcategories/lang.png',
-      'gradient': [Color(0xFFFEF9C3), Color(0xFFFEF08A)],
+      'gradient': [Color(0xFFF472B6), Color(0xFFC026D3)], // magenta/fuchsia
+      'icon': 'assets/images/event_categories/language_communication.png',
+      'circleColor': Color(0xFFFEEAEC), // rose
     },
     {
       'label': 'Life Skills',
       'image': 'assets/images/event_subcategories/lifeskills.png',
-      'gradient': [Color(0xFFFFE4E6), Color(0xFFFECDD3)],
+      'gradient': [Color(0xFF38BDF8), Color(0xFF2563EB)], // sky/blue
+      'icon': 'assets/images/event_categories/life_skills.png',
+      'circleColor': Color(0xFFE6F1FD), // light blue
     },
     {
       'label': 'Mind & Strategy Games',
       'image': 'assets/images/event_subcategories/mindstrat.png',
-      'gradient': [Color(0xFFF3F4F6), Color(0xFFE5E7EB)],
+      'gradient': [Color(0xFF6366F1), Color(0xFF312E81)], // indigo/navy
+      'icon': 'assets/images/event_categories/mind_strategy_games.png',
+      'circleColor': Color(0xFFF2EAFD), // lilac
     },
     {
       'label': 'Edutainment & Experiences',
       'image': 'assets/images/event_subcategories/Educainment.png',
-      'gradient': [Color(0xFFFFF7ED), Color(0xFFFFEDD5)],
+      'gradient': [Color(0xFFFCD34D), Color(0xFFF97316)], // amber/orange
+      'icon': 'assets/images/event_categories/edutainment_experiences.png',
+      'circleColor': Color(0xFFFDE6CA), // peach
     },
     {
       'label': 'Nature & Outdoors',
       'image': 'assets/images/event_subcategories/nature.png',
-      'gradient': [Color(0xFFFCE7F3), Color(0xFFFBCFE8)],
+      'gradient': [Color(0xFF67E8F9), Color(0xFF0891B2)], // cyan/teal
+      'icon': 'assets/images/event_categories/nature_outdoors.png',
+      'circleColor': Color(0xFFE6F4E4), // light green
     },
     {
       'label': 'Festivals & Celebrations',
       'image': 'assets/images/event_subcategories/festivals.png',
-      'gradient': [Color(0xFFFFE4E6), Color(0xFFFECDD3)],
+      'gradient': [Color(0xFFFDA4AF), Color(0xFFE11D48)], // rose/red
+      'icon': 'assets/images/event_categories/festivals_celebrations.png',
+      'circleColor': Color(0xFFFDEBEC), // pink
     },
   ];
 
@@ -492,11 +759,40 @@ class DummyData {
     ),
   ];
 
+  // Full-design portrait hero banners for the Spotlight stage (each image is a
+  // self-contained design with its own logo + CTA, shown edge-to-edge).
   static const List<EventModel> bannerEvents = [
     EventModel(
-      title: 'Little Chefs',
-      venue: 'Easy & fun recipes for tiny hands!',
-      imagePath: 'assets/images/new_home/spotlight_banner.jpeg',
+      title: 'The Little Puppet Show',
+      venue: 'TLB Studio, Kharghar',
+      tag: 'LIVE SHOW',
+      eventDate: 'Sat, 24 May 2026',
+      eventTime: '11:00 AM',
+      imagePath: 'resources- tlb-ui/spotlight/banners/banner1.png',
+    ),
+    EventModel(
+      title: 'Story Time Theatre',
+      venue: 'TLB Studio, Vashi',
+      tag: 'LIVE SHOW',
+      eventDate: 'Sun, 25 May 2026',
+      eventTime: '4:00 PM',
+      imagePath: 'resources- tlb-ui/spotlight/banners/banner2.png',
+    ),
+    EventModel(
+      title: 'Stories That Stay',
+      venue: 'TLB Studio, Belapur',
+      tag: 'WORKSHOP',
+      eventDate: 'Sat, 31 May 2026',
+      eventTime: '10:00 AM',
+      imagePath: 'resources- tlb-ui/spotlight/banners/banner3.png',
+    ),
+    EventModel(
+      title: 'For Little Dreamers',
+      venue: 'TLB Studio, Panvel',
+      tag: 'LIVE SHOW',
+      eventDate: 'Sun, 1 Jun 2026',
+      eventTime: '5:00 PM',
+      imagePath: 'resources- tlb-ui/spotlight/banners/banner4.png',
     ),
   ];
 
@@ -508,6 +804,27 @@ class DummyData {
       tag: 'EDUCATION',
       description: 'Explore robotics, dance, music, coding & more – All in one place',
     ),
+    EventModel(
+      title: 'Hands-On Workshops',
+      venue: '',
+      imagePath: 'resources- tlb-ui/workshop.png',
+      tag: 'WORKSHOPS',
+      description: 'Learn by doing with expert-led practical sessions',
+    ),
+    EventModel(
+      title: 'Creative Learning Spaces',
+      venue: '',
+      imagePath: 'resources- tlb-ui/spaces.png',
+      tag: 'CREATIVE',
+      description: 'Inspiring studios designed to spark young imaginations',
+    ),
+    EventModel(
+      title: 'Discover New Skills',
+      venue: '',
+      imagePath: 'resources- tlb-ui/header.jpg',
+      tag: 'SKILLS',
+      description: 'From art to coding – find a class your child will love',
+    ),
   ];
 
   static const List<EventModel> eventsScreenBanners = [
@@ -515,6 +832,29 @@ class DummyData {
       title: 'Summer Robotics Camp',
       venue: '',
       imagePath: 'assets/images/eventbanner.png',
+      tag: 'EVENTS',
+      description: 'Hands-on robotics fun for curious young builders',
+    ),
+    EventModel(
+      title: 'Halloween Funfest',
+      venue: '',
+      imagePath: 'resources- tlb-ui/hallowween.jpg',
+      tag: 'SEASONAL',
+      description: 'Spooky games, costumes & treats for the whole family',
+    ),
+    EventModel(
+      title: 'World Book Day Special',
+      venue: '',
+      imagePath: 'resources- tlb-ui/worldbookday.png',
+      tag: 'STORYTELLING',
+      description: 'Celebrate reading with live story sessions & activities',
+    ),
+    EventModel(
+      title: 'Weekend Workshops',
+      venue: '',
+      imagePath: 'resources- tlb-ui/workshop.png',
+      tag: 'WEEKEND',
+      description: 'Creative hands-on sessions every Saturday & Sunday',
     ),
   ];
 
@@ -526,15 +866,54 @@ class DummyData {
       tag: 'PROGRAMS',
       description: 'Build smart AI projects in 8 weeks(Online+ Offline, Age: 10 – 15 yrs)',
     ),
+    EventModel(
+      title: 'Future Tech Programs',
+      venue: '',
+      imagePath: 'resources- tlb-ui/program.png',
+      tag: 'TECH',
+      description: 'Coding, robotics & design tracks for tomorrow\'s innovators',
+    ),
+    EventModel(
+      title: 'Year-Round Learning',
+      venue: '',
+      imagePath: 'resources- tlb-ui/events.png',
+      tag: 'CONTINUOUS',
+      description: 'Structured journeys that grow with your child',
+    ),
+    EventModel(
+      title: 'Build Real Projects',
+      venue: '',
+      imagePath: 'resources- tlb-ui/header.jpg',
+      tag: 'HANDS-ON',
+      description: 'Apply skills to real-world projects & showcase them',
+    ),
   ];
 
   // ── Venues screen data ──
   static const List<EventModel> venuesScreenBanners = [
     EventModel(
-      title: 'Plan Your Perfect Weekend',
+      title: 'Creative Spaces for Kids',
       venue: '',
-      imagePath: 'resources- tlb-ui/spaces.png',
-      description: 'Discover top rated venues near you with expert instructors',
+      imagePath: 'resources- tlb-ui/spot.jpg',
+      description: 'Book memorable experiences at top-rated venues near you',
+    ),
+    EventModel(
+      title: 'Birth & Celebration Venues',
+      venue: '',
+      imagePath: 'resources- tlb-ui/worldstorytelling.jpg',
+      description: 'Throw the perfect party at curated celebration spaces',
+    ),
+    EventModel(
+      title: 'Indoor Play & Party Zones',
+      venue: '',
+      imagePath: 'resources- tlb-ui/kidspartybanner.png',
+      description: 'Safe, fun-filled play areas for every age group',
+    ),
+    EventModel(
+      title: 'Premium Event Halls',
+      venue: '',
+      imagePath: 'resources- tlb-ui/eventbanner.png',
+      description: 'Elegant halls for big days and special occasions',
     ),
   ];
 
@@ -565,7 +944,7 @@ class DummyData {
   static const List<Map<String, dynamic>> venuesGetMoving = [
     {
       'sport': 'Football',
-      'image': 'assets/images/new_home/hotpics1.jpg',
+      'image': 'resources- tlb-ui/venues_page/getmoving/1.png',
       'gradient': <Color>[Color(0xFF56CFB2), Color(0xFF2BC0B4)],
       'slotsText': 'Slots Available today',
       'venues': <Map<String, dynamic>>[
@@ -575,8 +954,8 @@ class DummyData {
     },
     {
       'sport': 'Climbing',
-      'image': 'assets/images/new_home/hotpic2.png',
-      'gradient': <Color>[Color(0xFF60A5FA), Color(0xFF3B82F6)],
+      'image': 'resources- tlb-ui/venues_page/getmoving/2.png',
+      'gradient': <Color>[Color(0xFF60A5FA), AppColors.blue],
       'slotsText': 'Slots Available today',
       'venues': <Map<String, dynamic>>[
         {'name': 'Rock Climb Zone', 'location': 'Andheri • 5 Kms', 'image': 'assets/images/new_home/hotpic3.png', 'slots': <String>['10:00 AM', '11:00 AM', '12:00 PM']},
@@ -610,14 +989,12 @@ class DummyData {
 
   // ── Venues subcategory screen data ──
   static const List<List<String>> venuesSubFilters = [
-    ['All', 'Indoor', 'Outdoor', 'Water Play', 'Adventure'],       // Play & Adventure
-    ['All', 'Football', 'Cricket', 'Swimming', 'Cycling'],         // Sports & Active
-    ['All', 'Pottery', 'Painting', 'Craft', 'Workshops'],          // Creative & DIY
-    ['All', 'Birthday', 'Private', 'Group', 'Premium'],            // Party & Celebration
-    ['All', 'Labs', 'Robotics', 'Museum', 'Planetarium'],          // Science & Discovery
-    ['All', 'Zoo', 'Farms', 'Parks', 'Aquarium'],                  // Nature & Animals
-    ['All', 'Library', 'Tutoring', 'Olympiad', 'Study Cafe'],      // Reading & Study
-    ['All', 'Cafes', 'Kids Menu', 'Play Cafes', 'Events'],         // Dining & Cafes
+    ['All', 'Soft Play', 'Trampoline Parks', 'Ninja Courses', 'Climbing Walls', 'Arcade & Tag', 'VR & Simulation', 'Escape Rooms', 'Sensory Play'],          // Play & Adventure
+    ['All', 'Turf Sports', 'Racket Sports', 'Swimming', 'Combat Arts', 'Gymnastics & Yoga', 'Skating', 'Archery & Bowling', 'Adaptive Sports'],               // Sports & Active
+    ['All', 'Art & Painting', 'Pottery Cafes', 'Maker Spaces', 'Baking Studios', 'Music & Media', 'Therapeutic Art'],                                         // Creative & DIY
+    ['All', 'Banquet Halls', 'Rooftop Venues', 'Private Cinemas', 'Party Suites', 'Garden Spaces'],                                                           // Party & Celebration
+    ['All', 'Kids\' Museums', 'STEM Labs', 'Planetariums', 'Tech Exhibits', 'Nature Museums', 'Experience Centers'],                                           // Science & Discovery
+    ['All', 'Petting Zoos', 'Organic Farms', 'Botanic Gardens', 'Stables', 'Bird Parks', 'Therapy Farms', 'Farm Stay'],                                       // Nature & Animals
   ];
 
   static const List<List<EventModel>> venuesByCategory = [
@@ -662,20 +1039,6 @@ class DummyData {
       EventModel(title: 'Open Ground Park', venue: 'Malad • 2 kms', imagePath: 'assets/images/new_home/weekendspl4.png', rating: 4.3, reviewCount: '620 reviews', tag: 'Parks'),
       EventModel(title: 'Lakeside Farm', venue: 'Navi Mumbai • 15 kms', imagePath: 'assets/images/new_home/hotpic4.png', rating: 4.6, reviewCount: '980 reviews', tag: 'Farms'),
       EventModel(title: 'Aqua World', venue: 'Thane • 12 kms', imagePath: 'assets/images/new_home/hotpic3.png', rating: 4.7, reviewCount: '1.6k reviews', tag: 'Aquarium'),
-    ],
-    // Reading & Study
-    [
-      EventModel(title: 'Community Library', venue: 'Andheri • 4 kms', imagePath: 'assets/images/new_home/weekendspl2.png', rating: 4.4, reviewCount: '560 reviews', tag: 'Library'),
-      EventModel(title: 'Study Brew Cafe', venue: 'Bandra • 5 kms', imagePath: 'assets/images/new_home/weekendspl3.png', rating: 4.6, reviewCount: '1.0k reviews', tag: 'Study Cafe'),
-      EventModel(title: 'Tutoring Hub', venue: 'Powai • 6 kms', imagePath: 'assets/images/new_home/weekendspl1.png', rating: 4.5, reviewCount: '800 reviews', tag: 'Tutoring'),
-      EventModel(title: 'Olympiad Centre', venue: 'Dadar • 8 kms', imagePath: 'assets/images/new_home/hotpic4.png', rating: 4.7, reviewCount: '1.3k reviews', tag: 'Olympiad'),
-    ],
-    // Dining & Cafes
-    [
-      EventModel(title: 'Kid-Friendly Café', venue: 'Juhu • 3 kms', imagePath: 'assets/images/new_home/weekendspl1.png', rating: 4.7, reviewCount: '1.9k reviews', tag: 'Cafes'),
-      EventModel(title: 'Play Café & More', venue: 'Andheri • 5 kms', imagePath: 'assets/images/new_home/weekendspl4.png', rating: 4.6, reviewCount: '1.4k reviews', tag: 'Play Cafes'),
-      EventModel(title: 'Family Dine Inn', venue: 'Bandra • 4 kms', imagePath: 'assets/images/new_home/hotpic2.png', rating: 4.5, reviewCount: '1.0k reviews', tag: 'Kids Menu'),
-      EventModel(title: 'Event Kitchen', venue: 'Powai • 7 kms', imagePath: 'assets/images/new_home/hotpic3.png', rating: 4.4, reviewCount: '730 reviews', tag: 'Events'),
     ],
   ];
 
@@ -724,6 +1087,32 @@ class DummyData {
       tag: 'Sun\nmar 17',
       eventDate: 'Sun, 17 Mar 2026',
       eventTime: '09:00 AM',
+    ),
+  ];
+
+  // Programs "The Holiday Edit" — `tag` holds the camp-name pill,
+  // `reviewCount` holds the age range, `venue` holds the location line.
+  static const List<EventModel> programsHolidayEdit = [
+    EventModel(
+      title: 'Painting + DIY Crafts',
+      venue: 'Powai',
+      imagePath: 'assets/images/new_home/weekendspl1.png',
+      reviewCount: '6-10 yrs',
+      tag: 'Winter Art Camp',
+    ),
+    EventModel(
+      title: 'Clay & Pottery Camp',
+      venue: 'Andheri',
+      imagePath: 'assets/images/new_home/hotpic2.png',
+      reviewCount: '7-12 yrs',
+      tag: 'Holiday Workshop',
+    ),
+    EventModel(
+      title: 'Robotics Winter Lab',
+      venue: 'Bandra',
+      imagePath: 'assets/images/new_home/hotpics1.jpg',
+      reviewCount: '9-14 yrs',
+      tag: 'Tech Camp',
     ),
   ];
 
@@ -778,19 +1167,21 @@ class DummyData {
     ),
   ];
 
+  // "Where Every Star Shines" — horizontal split cards. `venue` holds the
+  // "area • distance" line and `tag` holds the pink pill label.
   static const List<EventModel> specialNeeds = [
     EventModel(
-      title: 'Sensory Play Activity Kit',
-      venue: '',
+      title: 'Sensory Play Area',
+      venue: 'Bandra • 2 km',
       imagePath: 'assets/images/new_home/specialneeds1.png',
-      rating: 5.0,
-      reviewCount: '3.5k reviews',
+      rating: 4.5,
+      reviewCount: '4.5k reviews',
       price: 200.0,
-      tag: 'Therapist Recommended', // We'll hijack 'tag' for the bottom banner
+      tag: 'Sensory Friendly',
     ),
     EventModel(
       title: 'Therapeutic Art Class',
-      venue: '',
+      venue: 'Andheri • 3 km',
       imagePath: 'assets/images/new_home/specialneeds2.png',
       rating: 4.8,
       reviewCount: '1.2k reviews',
@@ -828,21 +1219,21 @@ class DummyData {
       venue: 'Central Park',
       imagePath: 'assets/images/new_home/stealers1.png',
       tag: 'Summer Special',
-      eventDate: 'Saturday, 27 Apr',
+      eventDate: 'Sat, 27 Apr 2026',
     ),
     EventModel(
       title: 'Holi Splash',
       venue: 'City Plaza',
       imagePath: 'assets/images/new_home/stealers2.png',
       tag: 'Festival Special',
-      eventDate: 'Monday, 25 Mar',
+      eventDate: 'Mon, 25 Mar 2026',
     ),
     EventModel(
       title: 'Diwali Diya Workshop',
       venue: 'Art Center',
       imagePath: 'assets/images/new_home/weekendspl3.png',
       tag: 'Diwali Special',
-      eventDate: 'Sunday, 03 Nov',
+      eventDate: 'Sun, 3 Nov 2026',
     ),
   ];
 
@@ -861,9 +1252,9 @@ class DummyData {
 
   static const List<EventModel> newOnTlb = [
     EventModel(
-      title: 'Slime Making Class',
-      venue: 'Calm Space Studio',
-      imagePath: 'assets/images/new_home/newontlb1.jpg',
+      title: 'Soccer Trail',
+      venue: 'Central Park',
+      imagePath: 'resources- tlb-ui/events_page/activesports.png',
       rating: 5.0,
       reviewCount: '3.5k reviews',
       price: 200.0,
@@ -886,22 +1277,117 @@ class DummyData {
     ),
   ];
 
+  // "New on the Block" — recently-added listings. `venue` holds the
+  // "area • distance" line and `tag` holds the time-ago badge text.
+  static const List<EventModel> newOnTheBlock = [
+    EventModel(
+      title: 'Robotics Lab',
+      venue: 'Andheri • 4 kms',
+      imagePath: 'assets/images/new_home/weekendspl4.png',
+      tag: '2 days ago',
+    ),
+    EventModel(
+      title: 'Storytelling Club',
+      venue: 'Andheri • 4 kms',
+      imagePath: 'resources- tlb-ui/worldstorytelling.jpg',
+      tag: 'Just now',
+    ),
+    EventModel(
+      title: 'Pottery Basics',
+      venue: 'Bandra • 6 kms',
+      imagePath: 'assets/images/new_home/weekendspl2.png',
+      tag: '5 days ago',
+    ),
+  ];
+
+  // "Trending Events" — vertical cards. `eventDate` holds "Day, DD Mon" for
+  // the date badge, `tag` the category chip, `description` the age range,
+  // `venue` the city line.
+  static const List<EventModel> trendingEvents = [
+    EventModel(
+      title: 'Kids Party – Fun at the Stable',
+      venue: 'Bangalore',
+      imagePath: 'assets/images/new_home/hotpics1.jpg',
+      tag: 'Workshop',
+      description: '4-12 Yrs',
+      rating: 4.8,
+      reviewCount: '3.5k reviews',
+      price: 800.0,
+      eventDate: 'Sat, 21 Mar 2026',
+    ),
+    EventModel(
+      title: 'Kids Pottery & Clay Day',
+      venue: 'Kidsville, Pune',
+      imagePath: 'assets/images/new_home/weekendspl2.png',
+      tag: 'Workshop',
+      description: '6-14 Yrs',
+      rating: 4.7,
+      reviewCount: '2.1k reviews',
+      price: 1000.0,
+      eventDate: 'Sat, 15 Aug 2026',
+    ),
+    EventModel(
+      title: 'Family Creativity Day',
+      venue: 'Mumbai',
+      imagePath: 'assets/images/new_home/hotpic2.png',
+      tag: 'Camp',
+      description: '3-10 Yrs',
+      rating: 4.9,
+      reviewCount: '1.8k reviews',
+      price: 650.0,
+      eventDate: 'Sun, 23 Mar 2026',
+    ),
+  ];
+
+  // "Parents' Favorite" — `description` holds the age range, `rating` /
+  // `reviewCount` / `price` drive the rating + price rows. Every card shows
+  // the fixed "Loved by Parents" badge.
+  static const List<EventModel> parentsFavorite = [
+    EventModel(
+      title: 'Abacus Classes',
+      venue: 'Andheri',
+      imagePath: 'assets/images/new_home/weekendspl3.png',
+      description: '4-12 Yrs',
+      rating: 4.8,
+      reviewCount: '3.5k reviews',
+      price: 800.0,
+    ),
+    EventModel(
+      title: 'Chess Academy',
+      venue: 'Bandra',
+      imagePath: 'resources- tlb-ui/class_page/brainboosters.png',
+      description: '6-14 Yrs',
+      rating: 4.9,
+      reviewCount: '2.1k reviews',
+      price: 1000.0,
+    ),
+    EventModel(
+      title: 'Phonics & Reading',
+      venue: 'Powai',
+      imagePath: 'assets/images/new_home/weekendspl2.png',
+      description: '3-8 Yrs',
+      rating: 4.7,
+      reviewCount: '1.8k reviews',
+      price: 650.0,
+    ),
+  ];
+
   static const List<EventModel> onlineEvents = [
     EventModel(
       title: 'Online Coding Workshop',
       venue: 'Learn basics of programming',
-      imagePath: 'assets/images/new_home/onlineevent1.jpg',
+      imagePath: 'resources- tlb-ui/class_page/tech.png',
       tag: 'Workshop',
       description: '8-12 Yrs',
-      eventDate: 'Saturday, 27 Apr',
+      eventDate: 'Sat, 27 Apr 2026',
     ),
     EventModel(
       title: 'Virtual Art Tour',
       venue: 'Explore global art museums online',
-      imagePath: 'assets/images/new_home/onlineevent2.jpg',
+      imagePath: 'resources- tlb-ui/class_page/creative.png',
       tag: 'Tour',
       description: '6-14 Yrs',
-      eventDate: 'Sunday, 28 Apr',
+      eventDate: 'Sun, 28 Apr 2026',
     ),
   ];
 
@@ -932,12 +1418,12 @@ class DummyData {
 
   // Sub-filters per explore category (index matches exploreCategories)
   static const List<List<String>> categorySubFilters = [
-    ['All', 'Painting', 'Drawing', 'DIY', 'Pottery', 'Origami'],          // Arts & Crafts
-    ['All', 'Dance', 'Music', 'Theater', 'Drama', 'Singing'],              // Performing Arts
-    ['All', 'Robotics', 'Coding', 'Science', 'Math', 'Engineering'],       // STEM & Innovation
-    ['All', 'Football', 'Cricket', 'Swimming', 'Yoga', 'Gymnastics'],      // Sports & Fitness
-    ['All', 'English', 'Hindi', 'French', 'Storytelling', 'Public Speaking'], // Languages
-    ['All', 'Cooking', 'Leadership', 'Finance', 'Social Skills', 'Mindfulness'], // Life Skills
+    ['All', 'Painting', 'Drawing', 'DIY Craft', 'Pottery & Clay', 'Origami', 'Calligraphy', 'Creative Design'], // Arts & Crafts
+    ['All', 'Dance', 'Music', 'Singing', 'Instrumental', 'Theatre / Drama', 'Acting'], // Performing Arts
+    ['All', 'Robotics', 'Coding', 'Artificial Intelligence', 'Electronics', 'Science Experiments', 'Astronomy', 'Engineering Activities'], // STEM & Innovation
+    ['All', 'Football', 'Cricket', 'Tennis', 'Basketball', 'Martial Arts', 'Yoga', 'Gymnastics', 'Athletics'], // Sports & Fitness
+    ['All', 'Public Speaking', 'Debate', 'Creative Writing', 'Content Creation', 'Story Writing', 'English Communication', 'Foreign Languages'], // Languages & Communication
+    ['All', 'Leadership', 'Entrepreneurship', 'Financial Literacy', 'Personality Development', 'Critical Thinking', 'Problem Solving'], // Life Skills
   ];
 
   // Events per explore category (index matches exploreCategories)
@@ -974,7 +1460,7 @@ class DummyData {
         reviewCount: '2.3k reviews',
         tag: 'Pottery',
         description: 'Shape, mould and glaze your own clay bowl.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 750,
       ),
       const EventModel(
@@ -985,7 +1471,7 @@ class DummyData {
         reviewCount: '640 reviews',
         tag: 'Origami',
         description: 'Fold animals, boats and flowers step by step.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 400,
       ),
       const EventModel(
@@ -1043,7 +1529,7 @@ class DummyData {
         reviewCount: '870 reviews',
         tag: 'Singing',
         description: 'Breathing, pitch and ear-training fundamentals.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 600,
       ),
       const EventModel(
@@ -1054,7 +1540,7 @@ class DummyData {
         reviewCount: '1.1k reviews',
         tag: 'Drama',
         description: 'Confidence building through storytelling and drama.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 650,
       ),
     ],
@@ -1090,7 +1576,7 @@ class DummyData {
         reviewCount: '1.6k reviews',
         tag: 'Science',
         description: 'Volcanoes, slime and chemical reactions — safe and fun!',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 700,
       ),
       const EventModel(
@@ -1101,7 +1587,7 @@ class DummyData {
         reviewCount: '740 reviews',
         tag: 'Math',
         description: 'Puzzles, patterns and mental math tricks.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 500,
       ),
     ],
@@ -1137,7 +1623,7 @@ class DummyData {
         reviewCount: '1.3k reviews',
         tag: 'Swimming',
         description: 'Water safety, floating and basic strokes covered.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 900,
       ),
       const EventModel(
@@ -1148,7 +1634,7 @@ class DummyData {
         reviewCount: '860 reviews',
         tag: 'Gymnastics',
         description: 'Rolls, cartwheels and balance beam fundamentals.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 750,
       ),
     ],
@@ -1184,7 +1670,7 @@ class DummyData {
         reviewCount: '2.0k reviews',
         tag: 'Public Speaking',
         description: 'Overcome stage fright and speak with confidence.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 700,
       ),
       const EventModel(
@@ -1195,7 +1681,7 @@ class DummyData {
         reviewCount: '530 reviews',
         tag: 'French',
         description: 'Songs, games and basic conversations in French.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 550,
       ),
     ],
@@ -1231,7 +1717,7 @@ class DummyData {
         reviewCount: '680 reviews',
         tag: 'Finance',
         description: 'Savings, budgeting and the value of money — simplified.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 500,
       ),
       const EventModel(
@@ -1242,7 +1728,7 @@ class DummyData {
         reviewCount: '920 reviews',
         tag: 'Mindfulness',
         description: 'Breathing exercises, journaling and focus games.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 400,
       ),
     ],
@@ -1258,7 +1744,7 @@ class DummyData {
       rating: 3.5,
       reviewCount: '8-12 Yrs',
       tag: 'Trending #1',
-      eventDate: 'Sat, 12 Aug',
+      eventDate: 'Sat, 12 Aug 2026',
     ),
     EventModel(
       title: 'Kids Pottery Class',
@@ -1267,7 +1753,7 @@ class DummyData {
       rating: 4.8,
       reviewCount: '5-10 Yrs',
       tag: 'Filling Fast',
-      eventDate: 'Sat, 15 Aug',
+      eventDate: 'Sat, 15 Aug 2026',
     ),
     EventModel(
       title: 'Creative Writing Workshop',
@@ -1276,7 +1762,7 @@ class DummyData {
       rating: 4.6,
       reviewCount: '7-14 Yrs',
       tag: 'New',
-      eventDate: 'Sun, 16 Aug',
+      eventDate: 'Sun, 16 Aug 2026',
     ),
   ];
 
@@ -1315,21 +1801,21 @@ class DummyData {
       title: 'Piano & Keyboard Classes',
       venue: 'Harmony Studio',
       imagePath: 'assets/images/new_home/specialneeds1.png',
-      eventDate: 'Saturday, 27 Apr',
+      eventDate: 'Sat, 27 Apr 2026',
       eventTime: '10:00 AM',
     ),
     EventModel(
       title: 'Watercolor Painting',
       venue: 'Creative Canvas Studio',
       imagePath: 'assets/images/new_home/specialneeds2.png',
-      eventDate: 'Sunday, 28 Apr',
+      eventDate: 'Sun, 28 Apr 2026',
       eventTime: '11:00 AM',
     ),
     EventModel(
       title: 'Robotics for Beginners',
       venue: 'TechMinds Lab',
       imagePath: 'assets/images/new_home/hotpic4.png',
-      eventDate: 'Monday, 29 Apr',
+      eventDate: 'Mon, 29 Apr 2026',
       eventTime: '03:00 PM',
     ),
   ];
@@ -1417,17 +1903,17 @@ class DummyData {
 
   // Sub-filters per Classes category (index matches classesCategories)
   static const List<List<String>> classesSubFilters = [
-    ['All', 'Math', 'Science', 'English', 'Olympiad', 'Reading'],                  // Academic
-    ['All', 'Painting', 'Drawing', 'Pottery', 'DIY Craft', 'Sculpting'],            // Creative Arts
-    ['All', 'Coding', 'Robotics', 'AI', '3D Printing', 'Electronics'],              // Tech & Innovation
-    ['All', 'Dance', 'Music', 'Theater', 'Singing', 'Drama'],                       // Performing Arts
-    ['All', 'Swimming', 'Yoga', 'Football', 'Cricket', 'Martial Arts'],             // Sports & Fitness
-    ['All', 'Public Speaking', 'Debate', 'Storytelling', 'Phonics', 'Elocution'],   // Speech & Communication
-    ['All', 'Life Skills', 'Leadership', 'Finance', 'Mindfulness', 'Social Skills'], // Life Skills & Personality Dev
-    ['All', 'Photography', 'Video Editing', 'Animation', 'Podcasting', 'Design'],   // Creative Media
-    ['All', 'Gardening', 'Nature Art', 'Bird Watching', 'Hiking', 'Eco Science'],   // Outdoor & Nature Learning
-    ['All', 'Baking', 'Cooking', 'Pastry', 'Nutrition', 'Food Science'],             // Culinary
-    ['All', 'Chess', 'Puzzles', 'Memory Games', 'Logic', 'Math Games'],              // Brain Boosters
+    ['All', 'School Subjects', 'Olympiad Preparation', 'Entrance Exam Preparation', 'Homework Support'],                                                                                    // Academic
+    ['All', 'Painting', 'Pottery', 'Sketching', 'Clay Modelling', 'DIY Crafts', 'Origami', 'Sculpture', 'Calligraphy', 'Fashion Designing', 'Textile Art', 'Resin Art'],                   // Creative Arts
+    ['All', 'Coding', 'Robotics', 'Artificial Intelligence', 'Game Development', 'App Development', 'Web Development', 'Electronics', 'UI / UX Design', 'Cybersecurity'],                  // Tech & Innovation
+    ['All', 'Dance', 'Singing / Vocal Music', 'Instrument Learning', 'Theatre / Acting'],                                                                                                  // Performing Arts
+    ['All', 'Football', 'Cricket', 'Basketball', 'Chess', 'Yoga', 'Martial Arts', 'Gymnastics', 'Skating', 'Pickle Ball', 'Golf', 'Hockey', 'Badminton', 'Tennis', 'Swimming'],            // Sports & Fitness
+    ['All', 'Public Speaking', 'Debate', 'Storytelling', 'Creative Writing', 'Spoken English', 'Foreign Languages', 'Indian Languages', 'Phonics'],                                        // Speech & Communication
+    ['All', 'Personality Development', 'Entrepreneurship', 'Financial Literacy', 'Emotional Intelligence'],                                                                                 // Life Skills & Personality Development
+    ['All', 'Photography', 'Video Creation', 'Graphic Design', 'Content Creation', 'Podcasting', 'Animation'],                                                                             // Creative Media
+    ['All', 'Gardening', 'Nature Exploration', 'Environmental Education', 'Adventure Skills', 'Wildlife Learning'],                                                                         // Outdoor & Nature Learning
+    ['All', 'Cooking', 'Baking', 'Food Presentation & Styling'],                                                                                                                           // Culinary
+    ['All', 'Abacus', 'Vedic Maths', 'Memory Skills', 'Problem Solving', 'Rubix Cube'],                                                                                                    // Brain Boosters
   ];
 
   // Classes per Classes category (index matches classesCategories)
@@ -1464,7 +1950,7 @@ class DummyData {
         reviewCount: '1.9k reviews',
         tag: 'Science',
         description: 'Hands-on experiments in physics, chemistry and biology.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 900,
       ),
       const EventModel(
@@ -1475,7 +1961,7 @@ class DummyData {
         reviewCount: '820 reviews',
         tag: 'English',
         description: 'Build strong grammar foundations with fun activities.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 550,
       ),
       const EventModel(
@@ -1544,7 +2030,7 @@ class DummyData {
         reviewCount: '640 reviews',
         tag: 'DIY Craft',
         description: 'Build, paint and take home your own creation.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 400,
       ),
       const EventModel(
@@ -1602,7 +2088,7 @@ class DummyData {
         reviewCount: '1.6k reviews',
         tag: 'AI',
         description: 'Intro to machine learning with fun real-world projects.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 1500,
       ),
       const EventModel(
@@ -1613,7 +2099,7 @@ class DummyData {
         reviewCount: '890 reviews',
         tag: '3D Printing',
         description: 'Design and print your own 3D models from scratch.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 1100,
       ),
       const EventModel(
@@ -1671,7 +2157,7 @@ class DummyData {
         reviewCount: '920 reviews',
         tag: 'Music',
         description: 'Learn guitar basics from scratch with fun songs.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 800,
       ),
       const EventModel(
@@ -1682,7 +2168,7 @@ class DummyData {
         reviewCount: '1.5k reviews',
         tag: 'Theater',
         description: 'Act, script and perform a mini-play on stage.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 850,
       ),
       const EventModel(
@@ -1740,7 +2226,7 @@ class DummyData {
         reviewCount: '1.8k reviews',
         tag: 'Football',
         description: 'Build dribbling, passing and teamwork skills.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 800,
       ),
       const EventModel(
@@ -1751,7 +2237,7 @@ class DummyData {
         reviewCount: '1.3k reviews',
         tag: 'Cricket',
         description: 'Batting, bowling and fielding drills with certified coaches.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 850,
       ),
       const EventModel(
@@ -1809,7 +2295,7 @@ class DummyData {
         reviewCount: '890 reviews',
         tag: 'Storytelling',
         description: 'Bring stories to life with voice and expression.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 500,
       ),
       const EventModel(
@@ -1820,7 +2306,7 @@ class DummyData {
         reviewCount: '1.1k reviews',
         tag: 'Phonics',
         description: 'Master letter sounds and fluent reading.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 550,
       ),
       const EventModel(
@@ -1878,7 +2364,7 @@ class DummyData {
         reviewCount: '920 reviews',
         tag: 'Mindfulness',
         description: 'Breathing exercises, journaling and focus games.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 400,
       ),
       const EventModel(
@@ -1889,7 +2375,7 @@ class DummyData {
         reviewCount: '1.1k reviews',
         tag: 'Social Skills',
         description: 'Empathy, communication and friendship-building activities.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 600,
       ),
       const EventModel(
@@ -1936,7 +2422,7 @@ class DummyData {
         reviewCount: '1.4k reviews',
         tag: 'Animation',
         description: 'Create simple 2D animations using beginner-friendly tools.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 1100,
       ),
       const EventModel(
@@ -1947,7 +2433,7 @@ class DummyData {
         reviewCount: '540 reviews',
         tag: 'Podcasting',
         description: 'Record, edit and publish your own podcast episode.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 800,
       ),
       const EventModel(
@@ -1994,7 +2480,7 @@ class DummyData {
         reviewCount: '1.3k reviews',
         tag: 'Eco Science',
         description: 'Composting, water cycles and sustainability experiments.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 700,
       ),
       const EventModel(
@@ -2005,7 +2491,7 @@ class DummyData {
         reviewCount: '480 reviews',
         tag: 'Bird Watching',
         description: 'Spot, identify and record bird species with expert guides.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 450,
       ),
     ],
@@ -2041,7 +2527,7 @@ class DummyData {
         reviewCount: '1.4k reviews',
         tag: 'Pastry',
         description: 'Tarts, eclairs and macarons with a pastry chef.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 850,
       ),
       const EventModel(
@@ -2052,7 +2538,7 @@ class DummyData {
         reviewCount: '640 reviews',
         tag: 'Nutrition',
         description: 'Learn about food groups, balanced meals and healthy eating.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 450,
       ),
     ],
@@ -2088,7 +2574,7 @@ class DummyData {
         reviewCount: '830 reviews',
         tag: 'Memory Games',
         description: 'Mnemonics, association techniques and memory palace methods.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 600,
       ),
       const EventModel(
@@ -2099,7 +2585,7 @@ class DummyData {
         reviewCount: '1.5k reviews',
         tag: 'Math Games',
         description: 'Fun, game-based approach to sharpen number skills.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 400,
       ),
       const EventModel(
@@ -2118,17 +2604,17 @@ class DummyData {
 
   // ── Programs sub-filters (index matches programsCategories) ──────────────
   static const List<List<String>> programsSubFilters = [
-    ['All', 'Coding', 'AI', 'Robotics', 'Cybersecurity', 'Data Science'],            // 0: Future Tech & AI
-    ['All', 'UI/UX', 'Graphic Design', '3D Design', 'Architecture', 'Product'],      // 1: Design & Innovation
-    ['All', 'Startups', 'Public Speaking', 'Finance', 'Marketing', 'Team Building'], // 2: Leadership
-    ['All', 'Photography', 'Video', 'Podcasting', 'Writing', 'Social Media'],        // 3: Media & Content
-    ['All', 'Theater', 'Dance', 'Music', 'Stand-up', 'Musical'],                     // 4: Stage Arts
-    ['All', 'Football', 'Cricket', 'Swimming', 'Athletics', 'Martial Arts'],         // 5: Active Sports
-    ['All', 'Olympiad', 'JEE Prep', 'NEET Prep', 'SAT', 'Scholarship'],              // 6: Academics
-    ['All', 'Chess', 'Logic', 'Puzzles', 'Data', 'Problem Solving'],                 // 7: Analytical Thinking
-    ['All', 'English', 'Hindi', 'French', 'Debate', 'Creative Writing'],             // 8: Language & Comm
-    ['All', 'Baking', 'Cooking', 'Pastry', 'Barista', 'Food Science'],               // 9: Culinary
-    ['All', 'Etiquette', 'Confidence', 'Interview', 'Style', 'Mindfulness'],         // 10: Grooming
+    ['All', 'Coding & Programming', 'Robotics & Automation', 'Artificial Intelligence (AI)', 'Game Development', 'App Development', 'Electronics & IoT'],                                  // 0: Future Tech & AI
+    ['All', 'Visual Arts', 'Craft & DIY Creations', 'Fashion & Textile Design', 'Graphic & Digital Design', 'Design Thinking & Innovation'],                                               // 1: Design & Innovation
+    ['All', 'Entrepreneurship & Startups', 'Financial Literacy', 'Leadership & Confidence', 'Business & Marketing Basics', 'Problem Solving & Decision Making'],                           // 2: Leadership & Entrepreneurship
+    ['All', 'Animation', 'Video Creation & Editing', 'Filmmaking', 'Content Creation', 'Photography', 'Journalism & Mass Communication'],                                                  // 3: Media & Content Creation
+    ['All', 'Dance', 'Music (Vocal & Instrumental)', 'Theatre & Acting', 'Stage Performance'],                                                                                             // 4: Stage Arts & Performance
+    ['All', 'Sports Coaching', 'Fitness & Strength Training', 'Yoga & Mindfulness', 'Adventure & Outdoor Programs', 'Motorsports Training'],                                               // 5: Active Sports & Training
+    ['All', 'Subject-Focused Programs', 'Olympiad Preparation', 'Entrance Exam Preparation', 'Smart Study Skills'],                                                                        // 6: Academics & Competitive Prep
+    ['All', 'Abacus', 'Vedic Maths', 'Logical Reasoning', 'Problem Solving', 'Memory & Focus Development'],                                                                               // 7: Analytical Thinking
+    ['All', 'Spoken English', 'Public Speaking', 'Debate & Communication Skills', 'Creative Writing', 'Foreign Languages', 'Indian Languages'],                                            // 8: Language & Communication
+    ['All', 'Cooking & Baking', 'Culinary Arts', 'Chef Programs', 'Hospitality & Hotel Management', 'Food Presentation & Service Skills'],                                                 // 9: Culinary & Hospitality
+    ['All', 'Personal Grooming', 'Etiquette & Manners', 'Personality Development', 'Confidence Building', 'Personal Styling'],                                                             // 10: Grooming & Personality Development
   ];
 
   // ── Programs per category (index matches programsCategories) ─────────────
@@ -2165,7 +2651,7 @@ class DummyData {
         reviewCount: '1.2k reviews',
         tag: 'Robotics',
         description: 'Build and program robots to solve real challenges.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 2000,
       ),
       const EventModel(
@@ -2176,7 +2662,7 @@ class DummyData {
         reviewCount: '890 reviews',
         tag: 'Cybersecurity',
         description: 'Ethical hacking basics and digital safety skills.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 1800,
       ),
     ],
@@ -2212,7 +2698,7 @@ class DummyData {
         reviewCount: '2.0k reviews',
         tag: '3D Design',
         description: 'Create 3D models using Blender and Tinkercad.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 1500,
       ),
       const EventModel(
@@ -2223,7 +2709,7 @@ class DummyData {
         reviewCount: '1.4k reviews',
         tag: 'Product',
         description: 'Prototype real-world solutions using design thinking.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 1800,
       ),
     ],
@@ -2259,7 +2745,7 @@ class DummyData {
         reviewCount: '1.6k reviews',
         tag: 'Finance',
         description: 'Savings, budgeting and investing basics for teens.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 900,
       ),
       const EventModel(
@@ -2270,7 +2756,7 @@ class DummyData {
         reviewCount: '2.8k reviews',
         tag: 'Team Building',
         description: 'Intensive 3-day leadership program with real projects.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 3500,
       ),
     ],
@@ -2306,7 +2792,7 @@ class DummyData {
         reviewCount: '1.1k reviews',
         tag: 'Podcasting',
         description: 'Record and publish your own podcast episode.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 900,
       ),
       const EventModel(
@@ -2317,7 +2803,7 @@ class DummyData {
         reviewCount: '1.7k reviews',
         tag: 'Writing',
         description: 'Story arcs, dialogue and character building.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 800,
       ),
     ],
@@ -2353,7 +2839,7 @@ class DummyData {
         reviewCount: '1.4k reviews',
         tag: 'Music',
         description: 'Learn to play, compose and perform as a band.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 1800,
       ),
       const EventModel(
@@ -2364,7 +2850,7 @@ class DummyData {
         reviewCount: '1.8k reviews',
         tag: 'Stand-up',
         description: 'Write and perform your own 5-minute comedy set.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 800,
       ),
     ],
@@ -2400,7 +2886,7 @@ class DummyData {
         reviewCount: '1.8k reviews',
         tag: 'Swimming',
         description: 'Learn strokes and water safety in a fun environment.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 1200,
       ),
       const EventModel(
@@ -2411,7 +2897,7 @@ class DummyData {
         reviewCount: '2.0k reviews',
         tag: 'Martial Arts',
         description: 'Build discipline, strength and self-defence skills.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 1500,
       ),
     ],
@@ -2447,7 +2933,7 @@ class DummyData {
         reviewCount: '1.5k reviews',
         tag: 'Scholarship',
         description: 'Master common scholarship exam formats and tricks.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 1200,
       ),
       const EventModel(
@@ -2458,7 +2944,7 @@ class DummyData {
         reviewCount: '1.9k reviews',
         tag: 'SAT',
         description: 'Comprehensive SAT Math and English preparation.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 4000,
       ),
     ],
@@ -2494,7 +2980,7 @@ class DummyData {
         reviewCount: '1.6k reviews',
         tag: 'Problem Solving',
         description: 'STEM challenges that build lateral thinking skills.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 1500,
       ),
       const EventModel(
@@ -2505,7 +2991,7 @@ class DummyData {
         reviewCount: '980 reviews',
         tag: 'Data',
         description: 'Read charts, spot patterns and make data decisions.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 1200,
       ),
     ],
@@ -2541,7 +3027,7 @@ class DummyData {
         reviewCount: '1.2k reviews',
         tag: 'French',
         description: 'Basic French speaking, reading and vocabulary.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 1200,
       ),
       const EventModel(
@@ -2552,7 +3038,7 @@ class DummyData {
         reviewCount: '2.4k reviews',
         tag: 'Creative Writing',
         description: 'Plot, character and world-building from scratch.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 900,
       ),
     ],
@@ -2588,7 +3074,7 @@ class DummyData {
         reviewCount: '1.9k reviews',
         tag: 'Pastry',
         description: 'Tarts, éclairs and French pastry fundamentals.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 2200,
       ),
       const EventModel(
@@ -2599,7 +3085,7 @@ class DummyData {
         reviewCount: '1.1k reviews',
         tag: 'Food Science',
         description: 'The chemistry and science behind cooking and baking.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 1200,
       ),
     ],
@@ -2635,7 +3121,7 @@ class DummyData {
         reviewCount: '1.4k reviews',
         tag: 'Interview',
         description: 'How to pitch yourself and ace any interview.',
-        eventDate: 'Sat, 03 May 2026',
+        eventDate: 'Sat, 3 May 2026',
         price: 1500,
       ),
       const EventModel(
@@ -2646,7 +3132,7 @@ class DummyData {
         reviewCount: '2.1k reviews',
         tag: 'Mindfulness',
         description: 'Breathing, journaling and focus techniques for teens.',
-        eventDate: 'Sun, 04 May 2026',
+        eventDate: 'Sun, 4 May 2026',
         price: 900,
       ),
     ],

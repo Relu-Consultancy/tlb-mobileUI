@@ -1,7 +1,12 @@
 import 'dart:math';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
+import '../widgets/app_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/app_snackbar.dart';
+import '../core/email_validation.dart';
+import '../core/responsive.dart';
 import '../services/auth_service.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -53,8 +58,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   Future<void> _onSendOtp() async {
     final email = _emailCtrl.text.trim();
-    if (email.isEmpty || !email.contains('@')) {
-      _snack('Please enter a valid email address');
+    if (!EmailAddress.isValid(email)) {
+      AppSnackBar.show(context, 'Please enter a valid email address');
       return;
     }
     setState(() => _loading = true);
@@ -67,7 +72,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         _step = 1;
       });
     } else {
-      _snack(result['message'] ?? 'Failed to send OTP', isError: true);
+      AppSnackBar.error(context, result['message'] ?? 'Failed to send OTP');
     }
   }
 
@@ -76,7 +81,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Future<void> _onVerifyOtp() async {
     final code = _otpCtrl.map((c) => c.text).join();
     if (code.length < 6) {
-      _snack('Enter all 6 digits');
+      AppSnackBar.show(context, 'Enter all 6 digits');
       return;
     }
     setState(() => _loading = true);
@@ -90,7 +95,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         _step = 2;
       });
     } else {
-      _snack(result['message'] ?? 'Invalid OTP', isError: true);
+      AppSnackBar.error(context, result['message'] ?? 'Invalid OTP');
     }
   }
 
@@ -98,9 +103,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final result = await AuthService.forgotPassword(email: _identifier);
     if (!mounted) return;
     if (result['success'] == true) {
-      _snack('OTP resent to $_identifier');
+      AppSnackBar.success(context, 'OTP resent to $_identifier');
     } else {
-      _snack(result['message'] ?? 'Failed to resend OTP', isError: true);
+      AppSnackBar.error(context, result['message'] ?? 'Failed to resend OTP');
     }
   }
 
@@ -110,11 +115,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final newPass = _newPassCtrl.text;
     final confirmPass = _confirmPassCtrl.text;
     if (newPass.isEmpty || confirmPass.isEmpty) {
-      _snack('Please fill in both password fields');
+      AppSnackBar.show(context, 'Please fill in both password fields');
       return;
     }
     if (newPass != confirmPass) {
-      _snack('Passwords do not match', isError: true);
+      AppSnackBar.error(context, 'Passwords do not match');
       return;
     }
     setState(() => _loading = true);
@@ -128,7 +133,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (result['success'] == true) {
       _showSuccessDialog();
     } else {
-      _snack(result['message'] ?? 'Failed to reset password', isError: true);
+      AppSnackBar.error(context, result['message'] ?? 'Failed to reset password');
     }
   }
 
@@ -142,13 +147,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         },
       ),
     );
-  }
-
-  void _snack(String msg, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor: isError ? const Color(0xFFE53935) : null,
-    ));
   }
 
   // ── Build ───────────────────────────────────────────────────────────────────
@@ -219,8 +217,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           'Forgot Password?',
           style: GoogleFonts.poppins(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
+            fontSize: Responsive.sp(context, 22),
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A1A),
           ),
         ),
@@ -228,7 +226,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           "Enter your registered email and we'll\nsend you a verification code.",
           style: GoogleFonts.poppins(
-            fontSize: 13,
+            fontSize: Responsive.sp(context, 13),
             color: const Color(0xFF9E9E9E),
             height: 1.5,
           ),
@@ -259,8 +257,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           'Enter OTP',
           style: GoogleFonts.poppins(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
+            fontSize: Responsive.sp(context, 22),
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A1A),
           ),
         ),
@@ -268,7 +266,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           "We've sent a 6-digit code to",
           style: GoogleFonts.poppins(
-            fontSize: 13,
+            fontSize: Responsive.sp(context, 13),
             color: const Color(0xFF9E9E9E),
             height: 1.5,
           ),
@@ -277,8 +275,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           _identifier,
           style: GoogleFonts.poppins(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
+            fontSize: Responsive.sp(context, 13),
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A1A),
           ),
           textAlign: TextAlign.center,
@@ -291,9 +289,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           child: Text(
             'Resend OTP',
             style: GoogleFonts.poppins(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF3B82F6),
+              fontSize: Responsive.sp(context, 13),
+              fontWeight: FontWeight.w500,
+              color: AppColors.blue,
             ),
           ),
         ),
@@ -318,8 +316,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           'Set New Password',
           style: GoogleFonts.poppins(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
+            fontSize: Responsive.sp(context, 22),
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF1A1A1A),
           ),
         ),
@@ -327,7 +325,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Text(
           'Choose a strong new password',
           style: GoogleFonts.poppins(
-            fontSize: 13,
+            fontSize: Responsive.sp(context, 13),
             color: const Color(0xFF9E9E9E),
           ),
           textAlign: TextAlign.center,
@@ -360,15 +358,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   // ── Shared sub-widgets ──────────────────────────────────────────────────────
 
   Widget _illustration(IconData icon) {
+    final ctx = context;
     return SizedBox(
-      width: 140,
-      height: 140,
+      width: Responsive.w(ctx, 140),
+      height: Responsive.h(ctx, 140),
       child: Stack(
         alignment: Alignment.center,
         children: [
           Container(
-            width: 120,
-            height: 120,
+            width: Responsive.w(ctx, 120),
+            height: Responsive.h(ctx, 120),
             decoration: const BoxDecoration(
               color: Color(0xFFFDE8EC),
               shape: BoxShape.circle,
@@ -379,14 +378,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             height: 82,
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
+                colors: [AppColors.blue, AppColors.accentBlue],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF3B82F6).withOpacity(0.35),
+                  color: AppColors.blue.withOpacity(0.35),
                   blurRadius: 18,
                   offset: const Offset(0, 8),
                 ),
@@ -432,13 +431,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       child: TextField(
         controller: _emailCtrl,
         keyboardType: TextInputType.emailAddress,
-        style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF1A1A1A)),
+        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFF1A1A1A)),
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.mail_outline_rounded,
               size: 20, color: Color(0xFFAFAFAF)),
           hintText: 'Enter your email',
           hintStyle:
-              GoogleFonts.poppins(fontSize: 14, color: const Color(0xFFB8B8B8)),
+              GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFFB8B8B8)),
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
@@ -476,8 +475,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 LengthLimitingTextInputFormatter(1),
               ],
               style: GoogleFonts.poppins(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
+                fontSize: Responsive.sp(context, 20),
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A1A),
               ),
               decoration: InputDecoration(
@@ -498,6 +497,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               onChanged: (val) {
                 if (val.isNotEmpty && i < 5) {
                   _otpFocus[i + 1].requestFocus();
+                } else if (val.isNotEmpty && i == 5) {
+                  // Last digit entered — dismiss the keyboard so the
+                  // Verify OTP button below the row stays visible.
+                  FocusScope.of(context).unfocus();
                 }
               },
             ),
@@ -522,7 +525,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         controller: controller,
         obscureText: obscure,
         keyboardType: TextInputType.visiblePassword,
-        style: GoogleFonts.poppins(fontSize: 14, color: const Color(0xFF1A1A1A)),
+        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFF1A1A1A)),
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.lock_outline_rounded,
               size: 20, color: Color(0xFFAFAFAF)),
@@ -536,7 +539,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
           hintText: hint,
           hintStyle:
-              GoogleFonts.poppins(fontSize: 14, color: const Color(0xFFB8B8B8)),
+              GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFFB8B8B8)),
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
@@ -566,28 +569,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       child: ElevatedButton(
         onPressed: onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFFCC00),
+          backgroundColor: AppColors.primaryLight,
           foregroundColor: const Color(0xFF1A1A1A),
-          disabledBackgroundColor: const Color(0xFFFFCC00).withOpacity(0.7),
+          disabledBackgroundColor: AppColors.primaryLight.withOpacity(0.7),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
           ),
         ),
         child: loading
-            ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: Color(0xFF1A1A1A),
-                ),
-              )
+            ? const AppLoaderInline(dotSize: 7, spacing: 4, color: AppColors.textPrimary)
             : Text(
                 label,
                 style: GoogleFonts.poppins(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
+                  fontSize: Responsive.sp(context, 15),
+                  fontWeight: FontWeight.w500,
                   color: const Color(0xFF1A1A1A),
                 ),
               ),
@@ -601,14 +597,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       child: RichText(
         text: TextSpan(
           style: GoogleFonts.poppins(
-              fontSize: 13, color: const Color(0xFF9E9E9E)),
+              fontSize: Responsive.sp(context, 13), color: const Color(0xFF9E9E9E)),
           children: [
             const TextSpan(text: 'Remember your password? '),
             TextSpan(
               text: 'Log In',
               style: GoogleFonts.poppins(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
+                fontSize: Responsive.sp(context, 13),
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF1A1A1A),
               ),
             ),
@@ -696,8 +692,8 @@ class _PasswordResetSuccessDialogState
                   Text(
                     'Password Reset!',
                     style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
+                      fontSize: Responsive.sp(context, 20),
+                      fontWeight: FontWeight.w500,
                       color: Colors.white,
                     ),
                     textAlign: TextAlign.center,
@@ -706,7 +702,7 @@ class _PasswordResetSuccessDialogState
                   Text(
                     'Your password has been successfully\nreset. You can now log in.',
                     style: GoogleFonts.poppins(
-                      fontSize: 13,
+                      fontSize: Responsive.sp(context, 13),
                       color: Colors.white.withOpacity(0.8),
                       height: 1.5,
                     ),
@@ -721,8 +717,8 @@ class _PasswordResetSuccessDialogState
                         widget.onOkay();
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFCC00),
-                        foregroundColor: const Color(0xFF1A1A2E),
+                        backgroundColor: AppColors.primaryLight,
+                        foregroundColor: AppColors.textPrimary,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
@@ -732,8 +728,8 @@ class _PasswordResetSuccessDialogState
                       child: Text(
                         'Back to Login',
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
+                          fontSize: Responsive.sp(context, 14),
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
@@ -761,7 +757,7 @@ class _Particle {
         rotation = rng.nextDouble() * 2 * pi,
         rotSpeed = (rng.nextDouble() - 0.5) * 6,
         color = [
-          const Color(0xFFFFCC00),
+          AppColors.primaryLight,
           const Color(0xFF60A5FA),
           const Color(0xFF34D399),
           const Color(0xFFF472B6),

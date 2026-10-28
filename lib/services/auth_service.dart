@@ -1,7 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+
+import '../core/api_error_text.dart';
+import '../models/otp_delivery_model.dart';
 
 /// Thin wrapper around the TLB Auth API.
 class AuthService {
@@ -12,71 +16,282 @@ class AuthService {
     'accept': 'application/json',
   };
 
-  // ── Signup ──────────────────────────────────────────────────────────────────
+  // ── OTP Login / Signup ───────────────────────────────────────────────────────
 
-  /// Returns `{'success': true}` on 201 or `{'success': false, 'message': '...'}`.
-  static Future<Map<String, dynamic>> signup({
-    required String firstName,
-    required String email,
-    required String password,
-    required String passwordConfirm,
-    String? lastName,
+  /// Step 1: Sends a 6-digit OTP to [identifier] (email).
+  ///
+  /// [purpose] gates account auto-creation on the backend:
+  ///  • `'login'`    — OTP is only sent if the email is already registered.
+  ///                   Unregistered emails get a 400 `USER_NOT_FOUND` and NO
+  ///                   OTP is delivered (returned here as `code: 'USER_NOT_FOUND'`).
+  ///  • `'register'` — OTP is sent to any email and the account is created on
+  ///                   verify. Use for the signup flow.
+  ///
+  /// Returns `{'success': true}` on 200, `{'success': false, 'message': ...,
+  /// 'code': ...}` otherwise.
+  ///
+  /// [identifierType] is `phone` (the 6-digit OTP arrives on WhatsApp;
+  /// [identifier] must be E.164, e.g. `+919876543210` — see
+  /// `IndianPhone.e164`) or `email`.
+  ///
+  /// [fallbackEmail] offers an address for the WhatsApp→email fallback on a
+  /// phone login. It is the only way to give the server an address for a
+  /// number it has none for (a WhatsApp signup, say), and it is ignored for
+  /// email logins. Without it — and without an email already on the account —
+  /// `fallback_available` comes back false and there is nothing to fall back
+  /// to. The server always chooses the actual destination; this is a
+  /// suggestion, not a selection.
+  ///
+  /// On success the result also carries `'delivery'`: an [OtpDelivery] with
+  /// the `otp_id` every follow-up call needs. It is absent on a server that
+  /// does not send `otp_id` yet, so callers must treat it as nullable.
+  static Future<Map<String, dynamic>> requestOtp({
+    required String identifier,
+    String identifierType = 'email',
+    String purpose = 'register',
+    String? fallbackEmail,
   }) async {
+    final fallback = fallbackEmail?.trim();
     try {
       final res = await http
           .post(
-            Uri.parse('$_base/api/v1/auth/customer/email/signup/'),
+            Uri.parse('$_base/api/v1/auth/request-otp/'),
             headers: _headers,
             body: jsonEncode({
-              'first_name': firstName,
-              'last_name': lastName ?? '',
-              'email': email,
-              'password': password,
-              'password_confirm': passwordConfirm,
+              'identifier': identifier,
+              'identifier_type': identifierType,
+              'purpose': purpose,
+              // Omitted rather than sent null: the field is new, and an older
+              // server rejects unknown nulls on a strict serializer.
+              if (fallback != null && fallback.isNotEmpty)
+                'fallback_email': fallback,
             }),
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
-      if (res.statusCode == 201) {
-        return {'success': true, 'message': data['message'] ?? ''};
+      final body = _decode(res.body);
+      if (res.statusCode == 200) {
+        final inner = _inner(body);
+        return {
+          'success': true,
+          'message': inner?['message'] ?? 'OTP sent',
+          'delivery': OtpDelivery.fromJson(inner),
+        };
       }
-      return {'success': false, 'message': _extractError(data)};
+      final code = (body['error'] is Map) ? body['error']['code'] : null;
+      if (res.statusCode == 429) {
+        return {
+          'success': false,
+          'code': code,
+          'message': 'Too many requests. Please wait a few minutes and try again.',
+        };
+      }
+      // Login attempt for an email/number that isn't registered — backend
+      // blocks the OTP entirely. Surface a friendly, actionable message + the
+      // code so the caller can route the user to signup.
+      if (res.statusCode == 400 && code == 'USER_NOT_FOUND') {
+        return {
+          'success': false,
+          'code': 'USER_NOT_FOUND',
+          'message': 'Account not found. Please signup first.',
+        };
+      }
+      if (identifierType == 'phone' && _phoneNotSupported(body)) {
+        return {
+          'success': false,
+          'code': phoneOtpUnavailable,
+          'message': _phoneUnavailableMessage,
+        };
+      }
+      final blocked = _accountBlockedMessage(code);
+      if (blocked != null) {
+        return {'success': false, 'code': code, 'message': blocked};
+      }
+      return {'success': false, 'code': code, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
   }
 
-  // ── Login ────────────────────────────────────────────────────────────────────
-
-  /// Returns `{'success': true, 'access': ..., 'refresh': ..., 'user': {...}}` on 200.
-  static Future<Map<String, dynamic>> login({
-    required String email,
-    required String password,
+  /// Step 2: Verifies OTP. Creates account automatically if email is not registered.
+  /// Returns `{'success': true, 'access': ..., 'refresh': ..., 'is_new_user': bool, 'user': {...}}` on 200.
+  static Future<Map<String, dynamic>> verifyOtp({
+    required String identifier,
+    required String otp,
+    String identifierType = 'email',
   }) async {
     try {
       final res = await http
           .post(
-            Uri.parse('$_base/api/v1/auth/customer/email/login/'),
+            Uri.parse('$_base/api/v1/auth/verify-otp/'),
             headers: _headers,
-            body: jsonEncode({'email': email, 'password': password}),
+            body: jsonEncode({
+              'identifier': identifier,
+              'identifier_type': identifierType,
+              'otp': otp,
+              'role': 'customer',
+            }),
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
+        final inner = _inner(body) ?? body;
         return {
           'success': true,
-          'access': data['access'],
-          'refresh': data['refresh'],
-          'user': data['user'],
+          'access': inner['access_token'] ?? inner['access'],
+          'refresh': inner['refresh_token'] ?? inner['refresh'],
+          'is_new_user': _detectNewUser(inner),
+          'user': inner['user'],
         };
       }
-      return {'success': false, 'message': _extractError(data)};
+      final inner = _inner(body) ?? body;
+      final code = (body['error'] is Map ? body['error']['code'] : null) ??
+          inner['code'] ??
+          '';
+      switch (code) {
+        case 'OTP_INVALID':
+          return {'success': false, 'code': code, 'message': 'Incorrect OTP. Please try again.'};
+        case 'OTP_EXPIRED':
+          return {'success': false, 'code': code, 'message': 'OTP has expired. Please request a new one.'};
+        case 'OTP_LOCKED':
+          return {
+            'success': false,
+            'code': code,
+            'message': 'Too many incorrect attempts. Please request a new OTP.',
+          };
+        case 'USER_ROLE_MISMATCH':
+          return {
+            'success': false,
+            'code': code,
+            'message': 'This number is registered as a partner account. Use the partner app to sign in.',
+          };
+      }
+      if (identifierType == 'phone' && _phoneNotSupported(body)) {
+        return {
+          'success': false,
+          'code': phoneOtpUnavailable,
+          'message': _phoneUnavailableMessage,
+        };
+      }
+      final blocked = _accountBlockedMessage(code);
+      if (blocked != null) {
+        return {'success': false, 'code': code, 'message': blocked};
+      }
+      if (res.statusCode == 429) {
+        return {'success': false, 'code': code, 'message': 'Too many attempts. Please try again later.'};
+      }
+      return {'success': false, 'code': code, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
   }
+
+  // ── OTP delivery & channel fallback ──────────────────────────────────────────
+
+  /// Current delivery state of the challenge [otpId].
+  ///
+  /// WhatsApp accepting a message is not delivery, so the verification screen
+  /// polls this to tell "sending" from "delivered", "gave up waiting" and
+  /// "failed" — see `OtpDelivery`. Needs no auth header: it runs before login.
+  static Future<Map<String, dynamic>> otpDeliveryStatus({
+    required String otpId,
+  }) async {
+    try {
+      final res = await http
+          .get(
+            Uri.parse('$_base/api/v1/auth/otp-delivery-status/')
+                .replace(queryParameters: {'otp_id': otpId}),
+            headers: _headers,
+          )
+          .timeout(const Duration(seconds: 15));
+      return _deliveryResult(res);
+    } catch (e) {
+      return {'success': false, 'message': _networkError(e)};
+    }
+  }
+
+  /// Phone login: sends the *same* code to the account's fallback email.
+  ///
+  /// No new code is minted, so whatever the customer already received stays
+  /// valid, and verify still has to use the phone number they started with.
+  /// Each code can only be emailed once (`EMAIL_ALREADY_SENT` after that),
+  /// including when the server emailed it itself after a WhatsApp failure.
+  static Future<Map<String, dynamic>> sendOtpViaEmail({
+    required String otpId,
+  }) =>
+      _switchChannel('send-otp-via-email', otpId);
+
+  /// Email login: sends the *same* code to the account's verified phone.
+  ///
+  /// Only unlocked after enough resends (`ALTERNATE_NOT_AVAILABLE` before
+  /// that) and only when a verified number is on file
+  /// (`VERIFIED_PHONE_UNAVAILABLE` otherwise). Verify still uses the email.
+  static Future<Map<String, dynamic>> sendOtpViaWhatsApp({
+    required String otpId,
+  }) =>
+      _switchChannel('send-otp-via-whatsapp', otpId);
+
+  static Future<Map<String, dynamic>> _switchChannel(
+      String path, String otpId) async {
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$_base/api/v1/auth/$path/'),
+            headers: _headers,
+            body: jsonEncode({'otp_id': otpId}),
+          )
+          .timeout(const Duration(seconds: 30));
+      return _deliveryResult(res);
+    } catch (e) {
+      return {'success': false, 'message': _networkError(e)};
+    }
+  }
+
+  /// The shared reply shape of the three delivery endpoints:
+  /// `{'success': true, 'delivery': OtpDelivery?, 'message': ...}`, or
+  /// `{'success': false, 'code': ..., 'message': ...}`.
+  static Map<String, dynamic> _deliveryResult(http.Response res) {
+    final body = _decode(res.body);
+    if (res.statusCode == 200) {
+      final inner = _inner(body);
+      return {
+        'success': true,
+        'message': inner?['message'] ?? 'OTP sent',
+        'delivery': OtpDelivery.fromJson(inner),
+      };
+    }
+    final code = (body['error'] is Map) ? body['error']['code'] : null;
+    return {
+      'success': false,
+      'code': code,
+      'message': otpFlowMessage(code) ?? _extractError(body),
+    };
+  }
+
+  /// Plain-language text for the delivery / fallback error codes, or null for
+  /// a code this does not cover (the caller falls back to the server's own
+  /// message). Public so the verification screen can phrase the same codes
+  /// consistently when they come back from `request-otp`.
+  static String? otpFlowMessage(Object? code) => switch ('$code') {
+        'OTP_NOT_FOUND' =>
+          'This code is no longer valid. Please request a new one.',
+        'OTP_NOT_ACTIVE' =>
+          'This code has already been used or replaced. Please request a new one.',
+        'FALLBACK_EMAIL_UNAVAILABLE' =>
+          'There is no email address on file for this number.',
+        'EMAIL_ALREADY_SENT' =>
+          'The code has already been emailed. Please check your inbox, including spam.',
+        'ALTERNATE_NOT_AVAILABLE' =>
+          'Not available yet. Try Resend first.',
+        'VERIFIED_PHONE_UNAVAILABLE' =>
+          'There is no verified phone number on this account.',
+        'WHATSAPP_ALREADY_SENT' =>
+          'The code has already been sent on WhatsApp.',
+        'RATE_LIMIT_EXCEEDED' =>
+          'Too many requests. Please wait a few minutes and try again.',
+        _ => null,
+      };
 
   // ── Forgot password — 3-step OTP flow ───────────────────────────────────────
 
@@ -93,11 +308,11 @@ class AuthService {
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
-        return {'success': true, 'message': data['message'] ?? ''};
+        return {'success': true, 'message': _inner(body)?['message'] ?? ''};
       }
-      return {'success': false, 'message': _extractError(data)};
+      return {'success': false, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -117,11 +332,11 @@ class AuthService {
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
-        return {'success': true, 'reset_token': data['reset_token'] ?? ''};
+        return {'success': true, 'reset_token': _inner(body)?['reset_token'] ?? ''};
       }
-      return {'success': false, 'message': _extractError(data)};
+      return {'success': false, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -146,11 +361,11 @@ class AuthService {
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
-        return {'success': true, 'message': data['message'] ?? ''};
+        return {'success': true, 'message': _inner(body)?['message'] ?? ''};
       }
-      return {'success': false, 'message': _extractError(data)};
+      return {'success': false, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -158,30 +373,48 @@ class AuthService {
 
   // ── Google sign-in ───────────────────────────────────────────────────────────
 
-  /// Exchanges a Firebase ID token for TLB JWT tokens.
+  /// Exchanges a Google ID token (from Google Sign-In SDK) for TLB JWT tokens.
   static Future<Map<String, dynamic>> googleSignIn({
-    required String firebaseIdToken,
+    required String idToken,
   }) async {
     try {
       final res = await http
           .post(
-            Uri.parse('$_base/api/v1/auth/customer/google/'),
+            Uri.parse('$_base/api/v1/auth/google-login/'),
             headers: _headers,
-            body: jsonEncode({'firebase_id_token': firebaseIdToken}),
+            body: jsonEncode({'id_token': idToken}),
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
+        final inner = _inner(body) ?? body;
         return {
           'success': true,
-          'access': data['access'],
-          'refresh': data['refresh'],
-          'is_new_user': data['is_new_user'] ?? false,
-          'user': data['user'],
+          'access': inner['access_token'] ?? inner['access'],
+          'refresh': inner['refresh_token'] ?? inner['refresh'],
+          'is_new_user': _detectNewUser(inner),
+          'user': inner['user'],
         };
       }
-      return {'success': false, 'message': _extractError(data)};
+      // Surface the three documented error codes with friendly text;
+      // anything else falls back to the generic extractor.
+      final code = (body['error'] is Map) ? body['error']['code'] : null;
+      String msg;
+      switch (code) {
+        case 'INVALID_GOOGLE_TOKEN':
+          msg = 'Your Google sign-in token was rejected. Please try again.';
+          break;
+        case 'UNVERIFIED_EMAIL':
+          msg = 'Your Google account email is not verified. Verify it in your Google account and try again.';
+          break;
+        case 'USER_ROLE_MISMATCH':
+          msg = 'This email is already registered as a partner account. Use the partner app to sign in.';
+          break;
+        default:
+          msg = _extractError(body);
+      }
+      return {'success': false, 'message': msg, 'code': code};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -212,11 +445,11 @@ class AuthService {
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
-        return {'success': true, 'message': data['message'] ?? 'Password changed successfully.'};
+        return {'success': true, 'message': _inner(body)?['message'] ?? 'Password changed successfully.'};
       }
-      return {'success': false, 'message': _extractError(data)};
+      return {'success': false, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -231,67 +464,129 @@ class AuthService {
     try {
       final res = await http
           .post(
-            Uri.parse('$_base/api/v1/auth/token/refresh/'),
+            Uri.parse('$_base/api/v1/auth/refresh-token/'),
             headers: _headers,
-            body: jsonEncode({'refresh': refresh}),
+            body: jsonEncode({'refresh_token': refresh}),
           )
           .timeout(const Duration(seconds: 30));
 
-      final data = _decode(res.body);
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
-        return {'success': true, 'access': data['access'], 'refresh': data['refresh']};
+        final inner = _inner(body) ?? body;
+        return {
+          'success': true,
+          'access': inner['access_token'] ?? inner['access'],
+          'refresh': inner['refresh_token'] ?? inner['refresh'],
+        };
       }
-      return {'success': false, 'message': _extractError(data)};
+      return {'success': false, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
   }
 
-  // ── Update profile ───────────────────────────────────────────────────────────
+  // ── Customer Profile ─────────────────────────────────────────────────────────
 
-  /// PATCH /api/v1/auth/users/me/ — only sends fields that are non-null.
-  /// Returns `{'success': true, 'user': {...}}` on 200.
-  static Future<Map<String, dynamic>> updateProfile({
+  /// GET /api/v1/customer/profile/ — returns profile with `is_completed` flag.
+  static Future<Map<String, dynamic>> getProfile({
     required String accessToken,
-    File? avatarFile,
-    String? firstName,
-    String? lastName,
-    String? dateOfBirth,
-    String? city,
-    String? state,
-    String? guardianName,
-    String? institutionName,
-    String? institutionType,
   }) async {
     try {
-      final uri = Uri.parse('$_base/api/v1/auth/users/me/');
-      final request = http.MultipartRequest('PATCH', uri);
-      request.headers['Authorization'] = 'Bearer $accessToken';
-      request.headers['accept'] = 'application/json';
+      final res = await http
+          .get(
+            Uri.parse('$_base/api/v1/customer/profile/'),
+            headers: {
+              ..._headers,
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 30));
 
-      if (firstName != null) request.fields['first_name'] = firstName;
-      if (lastName != null) request.fields['last_name'] = lastName;
-      if (dateOfBirth != null) request.fields['date_of_birth'] = dateOfBirth;
-      if (city != null) request.fields['city'] = city;
-      if (state != null) request.fields['state'] = state;
-      if (guardianName != null) request.fields['guardian_name'] = guardianName;
-      if (institutionName != null) request.fields['institution_name'] = institutionName;
-      if (institutionType != null) request.fields['institution_type'] = institutionType;
-
-      if (avatarFile != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath('avatar', avatarFile.path),
-        );
-      }
-
-      final streamed = await request.send().timeout(const Duration(seconds: 30));
-      final res = await http.Response.fromStream(streamed);
-      final data = _decode(res.body);
-
+      final body = _decode(res.body);
       if (res.statusCode == 200) {
-        return {'success': true, 'user': data};
+        return {'success': true, 'profile': _inner(body) ?? body};
       }
-      return {'success': false, 'message': _extractError(data)};
+      return {'success': false, 'message': _extractError(body)};
+    } catch (e) {
+      return {'success': false, 'message': _networkError(e)};
+    }
+  }
+
+  /// PATCH /api/v1/customer/profile/ — partial update, only sends non-null fields.
+  /// Returns `{'success': true, 'profile': {...}}` on 200.
+  static Future<Map<String, dynamic>> updateProfile({
+    required String accessToken,
+    String? firstName,
+    String? lastName,
+    String? phoneNumber,
+    String? gender,
+    String? birthdate,
+    String? region,
+  }) async {
+    try {
+      final reqBody = <String, dynamic>{};
+      if (firstName != null) reqBody['first_name'] = firstName;
+      if (lastName != null) reqBody['last_name'] = lastName;
+      if (phoneNumber != null) reqBody['phone_number'] = phoneNumber;
+      if (gender != null) reqBody['gender'] = gender;
+      if (birthdate != null) reqBody['birthdate'] = birthdate;
+      if (region != null) reqBody['region'] = region;
+
+      final res = await http
+          .patch(
+            Uri.parse('$_base/api/v1/customer/profile/'),
+            headers: {
+              ..._headers,
+              'Authorization': 'Bearer $accessToken',
+            },
+            body: jsonEncode(reqBody),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      final body = _decode(res.body);
+      if (res.statusCode == 200) {
+        return {'success': true, 'profile': _inner(body) ?? body};
+      }
+      return {'success': false, 'message': _extractError(body)};
+    } catch (e) {
+      return {'success': false, 'message': _networkError(e)};
+    }
+  }
+
+  /// DELETE /api/v1/customer/account/ — soft-deletes the customer account.
+  /// Access is revoked immediately on success; the backend keeps profile and
+  /// booking history but the user can no longer authenticate.
+  /// Returns `{'success': true}` on 200, `{'success': false, 'message': ...}` otherwise.
+  static Future<Map<String, dynamic>> deleteAccount({
+    required String accessToken,
+  }) async {
+    try {
+      final res = await http
+          .delete(
+            Uri.parse('$_base/api/v1/customer/account/'),
+            headers: {
+              ..._headers,
+              'Authorization': 'Bearer $accessToken',
+            },
+          )
+          .timeout(const Duration(seconds: 30));
+
+      if (res.statusCode == 200) return {'success': true};
+      if (res.statusCode == 401) {
+        return {
+          'success': false,
+          'message': 'Your session has expired. Please log in again.',
+        };
+      }
+      if (res.statusCode == 403) {
+        return {
+          'success': false,
+          'message':
+              'This account type cannot be deleted from the mobile app.',
+        };
+      }
+      final body = _decode(res.body);
+      return {'success': false, 'message': _extractError(body)};
     } catch (e) {
       return {'success': false, 'message': _networkError(e)};
     }
@@ -306,7 +601,7 @@ class AuthService {
           .post(
             Uri.parse('$_base/api/v1/auth/logout/'),
             headers: _headers,
-            body: jsonEncode({'refresh': refresh}),
+            body: jsonEncode({'refresh_token': refresh}),
           )
           .timeout(const Duration(seconds: 30));
       return res.statusCode == 200;
@@ -317,6 +612,87 @@ class AuthService {
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
+  /// `code` returned when the server doesn't accept phone numbers yet.
+  static const String phoneOtpUnavailable = 'PHONE_OTP_UNAVAILABLE';
+
+  static const String _phoneUnavailableMessage =
+      "WhatsApp OTP isn't available yet. Please use email for now.";
+
+  /// A server without WhatsApp OTP rejects `identifier_type: "phone"` as an
+  /// invalid choice — and also reports the number as "not a valid email",
+  /// which would be the wrong thing to show for a phone number.
+  static bool _phoneNotSupported(Map<String, dynamic> body) {
+    final error = body['error'];
+    final message = error is Map ? '${error['message']}' : '';
+    return message.contains('identifier_type') &&
+        message.contains('not a valid choice');
+  }
+
+  /// 403 reasons that stop an account from signing in at all.
+  static String? _accountBlockedMessage(Object? code) {
+    switch (code) {
+      case 'ACCOUNT_DELETED':
+        return 'This account has been deleted and can no longer sign in.';
+      case 'ACCOUNT_DISABLED':
+        return 'This account has been disabled. Please contact support.';
+    }
+    return null;
+  }
+
+  /// Best-effort detection of whether verify-OTP / google-login just CREATED
+  /// the account (vs. logging in an existing one). The backend is inconsistent
+  /// about this flag — it may live under several keys, inside the `user`
+  /// object, or be absent entirely. Returns false only when no positive signal
+  /// is found; callers MUST treat a freshly-created account that needs signup
+  /// as untrusted and additionally verify profile completeness via
+  /// [isAccountRegistered], because this flag cannot be relied on alone.
+  static bool _detectNewUser(Map<String, dynamic> inner) {
+    bool? readFlag(dynamic m) {
+      if (m is! Map) return null;
+      for (final k in ['is_new_user', 'is_new', 'new_user', 'created']) {
+        final v = m[k];
+        if (v is bool) return v;
+        if (v is String && (v == 'true' || v == 'false')) return v == 'true';
+      }
+      return null;
+    }
+
+    return readFlag(inner) ?? readFlag(inner['user']) ?? false;
+  }
+
+  /// Whether a successful verify-otp / google-login [result] belongs to an
+  /// account that has not finished signing up — a brand-new one.
+  ///
+  /// Neither endpoint sends a "new user" flag today (they return only the
+  /// tokens and `user`), so a flag is honoured when present and otherwise
+  /// the profile decides: an account created by this sign-in has no name
+  /// yet, while everyone who finished onboarding does.
+  static Future<bool> isNewAccount(Map<String, dynamic> result) async {
+    if (result['is_new_user'] == true) return true;
+    final access = result['access'] as String?;
+    if (access == null || access.isEmpty) return false;
+    return !await isAccountRegistered(accessToken: access);
+  }
+
+  /// Returns true when the authenticated account has actually completed signup
+  /// (a real, registered user) — i.e. the backend profile exists and is marked
+  /// completed (or at least carries a first name). Used to defend against the
+  /// backend auto-creating accounts for unregistered emails during an OTP
+  /// LOGIN: such an account authenticates but is NOT a registered user.
+  ///
+  /// Defaults to `true` on a network/parse failure so we never lock a genuine
+  /// returning user out because of a transient profile-fetch error — the
+  /// security-critical rejection still hinges on [_detectNewUser] in that case.
+  static Future<bool> isAccountRegistered({required String accessToken}) async {
+    final res = await getProfile(accessToken: accessToken);
+    if (res['success'] != true) return true; // fail open — don't lock out
+    final profile = res['profile'];
+    if (profile is! Map) return true;
+    if (profile['is_completed'] == true) return true;
+    final firstName = (profile['first_name'] as String?) ?? '';
+    return firstName.trim().isNotEmpty;
+  }
+
   static Map<String, dynamic> _decode(String body) {
     try {
       return jsonDecode(body) as Map<String, dynamic>;
@@ -325,31 +701,64 @@ class AuthService {
     }
   }
 
-  /// Converts a caught exception into a user-readable message.
+  /// Unwraps the `{"success":..., "data": {...}, "error":...}` envelope.
+  /// Returns the inner `data` map, or null if it is absent/not a map.
+  static Map<String, dynamic>? _inner(Map<String, dynamic> body) {
+    final d = body['data'];
+    return d is Map<String, dynamic> ? d : null;
+  }
+
+  /// Converts a caught exception into a user-readable message. The
+  /// exception's own text is for developers — logged in debug builds, never
+  /// put in front of the customer.
   static String _networkError(Object e) {
+    if (kDebugMode) debugPrint('[AuthService] request failed: $e');
     if (e is SocketException) {
-      return 'Cannot reach server. Check your internet connection. (${e.message})';
+      return 'Cannot reach server. Please check your internet connection.';
     }
     if (e is TimeoutException) {
       return 'Request timed out. Server may be slow — try again.';
     }
     if (e is HandshakeException) {
-      return 'SSL error connecting to server. (${e.message})';
+      return 'Could not connect securely. Please try again.';
     }
-    return 'Network error: ${e.runtimeType}: $e';
+    return 'Could not connect. Please check your internet connection and try again.';
   }
 
-  /// Extracts the first human-readable error from a DRF response body.
-  static String _extractError(Map<String, dynamic> data) {
-    for (final key in ['message', 'detail', 'non_field_errors']) {
-      final v = data[key];
-      if (v is String && v.isNotEmpty) return v;
-      if (v is List && v.isNotEmpty) return v.first.toString();
+  /// Extracts the first human-readable error from a TLB API response body.
+  /// Handles flat strings, lists, and DRF-style validation dicts without casting.
+  static String _extractError(Map<String, dynamic> body) {
+    // TLB envelope: {"error": {"code": "...", "message": "..." | {...} | [...]}}
+    final error = body['error'];
+    if (error is Map) {
+      final msg = error['message'];
+      if (msg is String && msg.isNotEmpty) return ApiErrorText.readable(msg);
+      if (msg is Map && msg.isNotEmpty) return _flattenValidationMap(msg);
+      if (msg is List && msg.isNotEmpty) {
+        return ApiErrorText.readable(msg.first.toString());
+      }
     }
-    for (final v in data.values) {
-      if (v is String && v.isNotEmpty) return v;
-      if (v is List && v.isNotEmpty) return v.first.toString();
+    // DRF flat formats: 'detail', 'message', 'non_field_errors', or field-keyed dicts
+    for (final key in ['detail', 'message', 'non_field_errors']) {
+      final v = body[key];
+      if (v is String && v.isNotEmpty) return ApiErrorText.readable(v);
+      if (v is List && v.isNotEmpty) return ApiErrorText.readable(v.first.toString());
     }
-    return 'Something went wrong. Please try again.';
+    // DRF validation dict at root — e.g. {"phone_number": ["Enter a valid phone number."]}
+    for (final entry in body.entries) {
+      final v = entry.value;
+      if (v is List && v.isNotEmpty) return ApiErrorText.field(entry.key, v.first);
+      if (v is String && v.isNotEmpty) return ApiErrorText.field(entry.key, v);
+    }
+    return ApiErrorText.fallback;
+  }
+
+  static String _flattenValidationMap(Map map) {
+    final entry = map.entries.first;
+    final val = entry.value;
+    return ApiErrorText.field(
+      '${entry.key}',
+      val is List && val.isNotEmpty ? val.first : val,
+    );
   }
 }

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
+import 'listing_meta_rows.dart';
 import '../screens/class_detail_screen.dart';
 import '../screens/event_detail_screen.dart';
-import 'inquire_now_sheet.dart';
+import '../core/listing_image.dart';
 
 class ClassNearbyCard extends StatelessWidget {
   final EventModel event;
   final double width;
-  final String buttonLabel;
+  final String? buttonLabel;
   final Color? tagColor;
   final VoidCallback? onTap;
 
@@ -30,8 +31,8 @@ class ClassNearbyCard extends StatelessWidget {
         if (onTap != null) {
           onTap!();
         } else if (buttonLabel == 'Send Enquiry') {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event, buttonLabel: buttonLabel)));
-        } else if (buttonLabel == 'Check Availability') {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event, buttonLabel: buttonLabel!)));
+        } else if (buttonLabel == 'Check Availability' || buttonLabel == 'View Details') {
           Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
         } else {
           Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
@@ -42,6 +43,7 @@ class ClassNearbyCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.07),
@@ -60,8 +62,10 @@ class ClassNearbyCard extends StatelessWidget {
               child: Stack(
                 children: [
                   AspectRatio(
-                    aspectRatio: 1.6,
-                    child: Image.asset(
+                    // Taller image (more coverage) — meta is now a compact
+                    // two-column block.
+                    aspectRatio: 1.15,
+                    child: listingImageSource(
                       event.imagePath,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
@@ -83,8 +87,8 @@ class ClassNearbyCard extends StatelessWidget {
                         child: Text(
                           event.tag!,
                           style: GoogleFonts.poppins(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
+                            fontSize: Responsive.sp(context, 11.5),
+                            fontWeight: FontWeight.w500,
                             color: Colors.white,
                           ),
                         ),
@@ -110,143 +114,21 @@ class ClassNearbyCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
+                            fontSize: Responsive.sp(context, 16),
+                            fontWeight: FontWeight.w600,
                             color: AppColors.textPrimary,
                             height: 1.2,
                           ),
                         ),
                       ),
-                      if ((event.reviewCount ?? '').isNotEmpty) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE8F5FD),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.people_outline_rounded, size: 12, color: Color(0xFF0284C7)),
-                              const SizedBox(width: 4),
-                              Text(
-                                event.reviewCount!,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF0284C7),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                   const SizedBox(height: 8),
-
-                  // Venue
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on_outlined, size: 13, color: AppColors.textSecondary),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          event.venue,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                            fontSize: 11.5,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-
-                  // Rating
-                  if (event.rating != null)
-                    Row(
-                      children: [
-                        RatingBarIndicator(
-                          rating: event.rating!,
-                          itemBuilder: (_, __) => const Icon(Icons.star, color: AppColors.starFilled),
-                          unratedColor: AppColors.starEmpty,
-                          itemCount: 5,
-                          itemSize: 13,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          event.rating!.toStringAsFixed(1),
-                          style: GoogleFonts.poppins(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                  // Description
-                  if ((event.description ?? '').isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    RichText(
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'Description – ',
-                            style: GoogleFonts.poppins(
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          TextSpan(
-                            text: event.description!,
-                            style: GoogleFonts.poppins(
-                              fontSize: 11.5,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-
-                  // Join Now button
-                  Material(
-                    color: const Color(0xFFFFB902),
-                    borderRadius: BorderRadius.circular(24),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(24),
-                      onTap: () {
-                        if (onTap != null) {
-                          onTap!();
-                        } else if (buttonLabel == 'Send Enquiry') {
-                          showInquireNow(context);
-                        } else if (buttonLabel == 'Check Availability') {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => ClassDetailScreen(event: event)));
-                        } else {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
-                        }
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
-                        child: Text(
-                          buttonLabel,
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                        ),
-                      ),
-                    ),
+                  // Two-column meta: Age + Date·Time left, Location + Distance right.
+                  ListingMetaRows(
+                    event: event,
+                    showLocation: true,
+                    twoColumn: true,
                   ),
                 ],
               ),

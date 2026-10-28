@@ -7,6 +7,7 @@ import '../core/responsive.dart';
 import '../models/event_model.dart';
 import 'wishlist_button.dart';
 import '../screens/event_detail_screen.dart';
+import '../core/listing_image.dart';
 
 class TrendingCard extends StatefulWidget {
   final List<EventModel> events;
@@ -49,6 +50,7 @@ class _TrendingCardState extends State<TrendingCard> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.events.isEmpty) return const SizedBox.shrink();
     return Column(
       children: [
         SizedBox(
@@ -86,7 +88,7 @@ class _TrendingCardState extends State<TrendingCard> {
                             borderRadius: const BorderRadius.horizontal(
                               left: Radius.circular(16),
                             ),
-                            child: Image.asset(
+                            child: listingImageSource(
                               event.imagePath,
                               width: Responsive.w(context, 130, min: 100),
                               height: Responsive.h(context, 180, min: 150),
@@ -116,7 +118,8 @@ class _TrendingCardState extends State<TrendingCard> {
                       // Content
                       Expanded(
                         child: Padding(
-                          padding: const EdgeInsets.all(14),
+                          // 20px gap below the CTA button (card bottom padding).
+                          padding: const EdgeInsets.fromLTRB(14, 14, 14, 20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -134,8 +137,8 @@ class _TrendingCardState extends State<TrendingCard> {
                                   child: Text(
                                     event.tag!,
                                     style: GoogleFonts.poppins(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: Responsive.sp(context, 11),
+                                      fontWeight: FontWeight.w500,
                                       color: AppColors.tagProgram,
                                     ),
                                   ),
@@ -144,8 +147,8 @@ class _TrendingCardState extends State<TrendingCard> {
                               Text(
                                 event.title,
                                 style: GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize: Responsive.sp(context, 16),
+                                  fontWeight: FontWeight.w500,
                                   color: AppColors.textPrimary,
                                 ),
                               ),
@@ -154,8 +157,8 @@ class _TrendingCardState extends State<TrendingCard> {
                                 child: Text(
                                   event.description ?? '',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondary,
+                                    fontSize: Responsive.sp(context, 12),
+                                    color: AppColors.textDescription,
                                     height: 1.4,
                                   ),
                                   maxLines: 3,
@@ -175,10 +178,10 @@ class _TrendingCardState extends State<TrendingCard> {
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColors.primaryLight,
-                                    foregroundColor: const Color(0xFF1A1A2E),
+                                    foregroundColor: AppColors.textPrimary,
                                     minimumSize: const Size(0, 46),
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 20,
+                                      horizontal: 12,
                                     ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20),

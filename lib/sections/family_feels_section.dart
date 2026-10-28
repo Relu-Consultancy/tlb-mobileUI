@@ -1,36 +1,62 @@
 import '../core/responsive.dart';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
+import '../widgets/category_skeleton_card.dart';
+import '../widgets/auto_scroll_list.dart';
+import '../core/listing_image.dart';
 import '../widgets/section_divider_widget.dart';
+import '../widgets/listing_meta_rows.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../providers/home_feed_state.dart';
 import '../data/dummy_data.dart';
-import '../screens/event_detail_screen.dart';
+import '../core/listing_navigation.dart';
 
 class FamilyFeelsSection extends StatelessWidget {
   const FamilyFeelsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ValueListenableBuilder<int>(
+      valueListenable: HomeFeedState.version,
+      builder: (context, _, __) {
+        // Real listings once the feed is in, the mock set until then.
+                final isLoaded = HomeFeedState.isLoaded;
+        final items = isLoaded ? HomeFeedState.section('family_feels') : DummyData.familyFeels;
+        if (items.isEmpty && isLoaded) return const SizedBox.shrink();
+        return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionDividerWidget(title: 'Family Feels'),
+        const SectionDividerWidget(
+          title: 'Family Feels',
+          topPadding: 30, // 30px gap from previous section's cards
+          fontSize: 17,
+          textColor: AppColors.textPrimary, // dark navy
+        ),
         SizedBox(
-          height: Responsive.h(context, 200, min: 170),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
+          height: Responsive.h(context, 210, min: 196),
+          child: AutoScrollList(
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
-            itemCount: DummyData.familyFeels.length,
+            itemCount: items.length,
             addAutomaticKeepAlives: false,
             itemBuilder: (context, index) {
-              final event = DummyData.familyFeels[index];
-              return Container(
-                width: Responsive.cardWidth(context, fraction: 0.88, max: 350),
+              if (!isLoaded) {
+                return Container(
+                  width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
+                  margin: const EdgeInsets.only(right: 16),
+                  child: const CategorySkeletonCard(),
+                );
+              }
+              final event = items[index];
+              return GestureDetector(
+                onTap: () => openListingDetail(context, event),
+                child: Container(
+                width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
                 margin: const EdgeInsets.only(right: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.04),
@@ -46,9 +72,8 @@ class FamilyFeelsSection extends StatelessWidget {
                       padding: const EdgeInsets.all(12.0),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
-                        child: Image.asset(
-                          event.imagePath,
-                          width: Responsive.w(context, 130, min: 110),
+                        child: listingImage(event.imagePath,
+                          width: Responsive.w(context, 200, min: 170),
                           height: double.infinity,
                           fit: BoxFit.cover,
                         ),
@@ -61,117 +86,55 @@ class FamilyFeelsSection extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(0, 12, 12, 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          // Fills the height the removed CTA left behind.
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            Text(
+                              event.title,
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 16),
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+
+                            // Location Row
+                            Row(
                               children: [
-                                Text(
-                                  event.title,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF1A1A2E),
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 6),
-                                
-                                // Location Row
-                                Row(
-                                  children: [
-                                    const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
-                                    const SizedBox(width: 4),
-                                    Expanded(
-                                      child: Text(
-                                        event.venue,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                                const Icon(Icons.location_on_outlined, size: 14, color: AppColors.textSecondary),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    event.venue,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 13),
+                                      color: AppColors.textSecondary,
+                                      fontWeight: FontWeight.w500,
                                     ),
-                                  ],
-                                ),
-                                const SizedBox(height: 6),
-                                
-                                // Stars + review count
-                                Row(
-                                  children: [
-                                    const Icon(Icons.star, size: 14, color: Colors.amber),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      event.reviewCount ?? '3.5k reviews',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 6),
-                                
-                                // Pricing Text
-                                Text(
-                                  'Starting from ₹${event.price?.toInt() ?? 200}',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF4A4A68),
-                                    decoration: TextDecoration.underline,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
-                            
-                            // Button row
-                            SizedBox(
-                              width: double.infinity,
-                              height: 36,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => EventDetailScreen(event: event),
-                                    ),
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFFFCC00),
-                                  foregroundColor: const Color(0xFF1A1A2E),
-                                  elevation: 0,
-                                  padding: EdgeInsets.zero,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                                child: Text(
-                                  'Book Now',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 12),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
+                            // Age Group · Date & Time · Distance (mock data)
+                            ListingMetaRows(event: event),
                           ],
                         ),
                       ),
                     ),
                   ],
                 ),
+                ),
               );
             },
           ),
         ),
       ],
+        );
+      },
     );
   }
 }

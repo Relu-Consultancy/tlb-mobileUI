@@ -10,6 +10,12 @@ class AppColors {
   static const Color amber = Color(0xFFFFB800);
 
   // Background
+  /// Flat golden ground of the splash screen.
+  ///
+  /// Must stay in sync with `color` in `flutter_native_splash.yaml` — the
+  /// native splash hands off to the Flutter one, and any difference between
+  /// the two shows up as a colour flash on cold start.
+  static const Color splashGold = Color(0xFFFFC93C);
   static const Color background = Color(0xFFFFF8EE);
   static const Color cardBackground = Colors.white;
   static const Color headerGradientTop = Color(0xFFFFCC02);
@@ -17,12 +23,16 @@ class AppColors {
 
   // Text
   static const Color textPrimary = Color(0xFF1A1A2E);
-  static const Color textSecondary = Color(0xFF6B7280);
+  // Darkened progressively (0xFF6B7280 → 0xFF333333 → 0xFF262626) for stronger,
+  // more legible secondary text + leading icons on cards (age, venue, etc.).
+  static const Color textSecondary = Color(0xFF262626);   // card/secondary text — black @ ~0.85
+  static const Color textDescription = Color(0xFF262626); // card description body — black @ ~0.85
   static const Color textWhite = Colors.white;
 
   // Accent
   static const Color blue = Color(0xFF3B82F6);
-  static const Color seeAllBlue = Color(0xFF2196F3);
+  static const Color seeAllBlue = Color(0xFF0068E7);       // "See All" links app-wide
+  static const Color accentBlue = Color(0xFF2563EB);       // ticket / notification / help accent
 
   // Category colors
   static const Color categoryOrange = Color(0xFFFFA726);
@@ -46,4 +56,14 @@ class AppColors {
   static const Color bookNowBg = Color(0xFFFFCC00);
   static const Color tagProgram = Color(0xFFF48FB1);
   static const Color tagFeatured = Color(0xFFEF5350);
+
+  // Extended palette — fills gaps found across screens
+  static const Color dividerGold = Color(0xFFE4CD89);      // section divider lines
+  static const Color indigo = Color(0xFF5B5BD6);           // links / underlines
+  static const Color lightGray = Color(0xFFF2F2F7);        // iOS surface color
+  static const Color bookingBlue = Color(0xFF1A3A8F);      // booking confirmation header
+  static const Color successGreen = Color(0xFF34C759);     // booking confirmed badge
+  static const Color distanceGreen = Color(0xFF1FA85B);    // "x km away" on cards
+  static const Color starAmber = Color(0xFFFFB902);        // star/rating amber
+  static const Color inputFill = Color(0xFFF8F9FA);        // text-field fill (review sheet)
 }

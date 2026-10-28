@@ -1,171 +1,134 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
-import '../screens/event_detail_screen.dart';
+import '../core/listing_navigation.dart';
+import '../core/listing_image.dart';
+import 'listing_meta_rows.dart';
 
 class CategoryEventCard extends StatelessWidget {
   final EventModel event;
-  final Color badgeColor;
+  final VoidCallback? onTap;
 
   const CategoryEventCard({
     super.key,
     required this.event,
-    required this.badgeColor,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.07),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Image with badge overlay
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              child: Stack(
-                children: [
-                  AspectRatio(
-                    aspectRatio: 1.05,
-                    child: Image.asset(
-                      event.imagePath,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        color: AppColors.primary.withOpacity(0.15),
-                        child: const Icon(Icons.event, size: 36, color: AppColors.textSecondary),
+      // This card has no card-shaped background of its own (image + bare text
+      // below), so a deferToChild hit test would only catch the image and the
+      // glyphs — the gaps between the meta rows, and the space right of a
+      // short title, would silently do nothing. Opaque makes the card's whole
+      // rectangle tappable.
+      behavior: HitTestBehavior.opaque,
+      // Routes on the listing's own type rather than always opening the
+      // event detail screen. The grids that show classes, programs or venues
+      // used to have to pass their own onTap to avoid that, and the two that
+      // did not — the pace and fit screens — opened the wrong screen.
+      onTap: onTap ?? () => openListingDetail(context, event),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Image with badge overlay — rounded corners, no card wrapper
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              children: [
+                AspectRatio(
+                  aspectRatio: 1.05,
+                  // The hand-rolled http check this replaced loaded network
+                  // covers but left them on the API's http scheme, which
+                  // Android blocks — so they failed silently here too.
+                  child: listingImageSource(
+                    event.imagePath,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: AppColors.primary.withOpacity(0.15),
+                      child: const Icon(Icons.event,
+                          size: 36, color: AppColors.textSecondary),
+                    ),
+                  ),
+                ),
+                if ((event.tag ?? '').isNotEmpty)
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: const BoxDecoration(
+                        // Warm-orange tab attached flush to the image's
+                        // bottom-left corner: outer corner rounded to match the
+                        // image, inner corner rounded for the tab look.
+                        // Fixed orange (not the faint per-category accent) so the
+                        // white label stays clearly visible on every category.
+                        color: Color(0xFFE8941A),
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(12),
+                          topRight: Radius.circular(10),
+                        ),
+                      ),
+                      child: Text(
+                        event.tag!,
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 9.5),
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
-                  if ((event.tag ?? '').isNotEmpty)
-                    Positioned(
-                      bottom: 8,
-                      left: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: badgeColor,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          event.tag!,
-                          style: GoogleFonts.poppins(
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
+              ],
+            ),
+          ),
+          // Info section — sits directly on white background
+          Padding(
+            padding: const EdgeInsets.fromLTRB(2, 8, 2, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  event.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 12.5),
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(Icons.location_on, size: 13, color: AppColors.textPrimary),
+                    const SizedBox(width: 2),
+                    Expanded(
+                      child: Text(
+                        event.venue,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 10.5),
+                          color: AppColors.textSecondary,
                         ),
                       ),
                     ),
+                  ],
+                ),
+                // Same green "x km away" row as the feed cards.
+                if (event.distanceDisplay != null) ...[
+                  const SizedBox(height: 3),
+                  ListingDistanceRow(event: event, fontSize: 10.5),
                 ],
-              ),
+              ],
             ),
-            // Info section
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    event.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.poppins(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                      height: 1.3,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on_outlined, size: 11, color: AppColors.textSecondary),
-                      const SizedBox(width: 3),
-                      Expanded(
-                        child: Text(
-                          event.venue,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                            fontSize: 10.5,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (event.rating != null) ...[
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(Icons.star_rounded, size: 12, color: Color(0xFFFFB902)),
-                        const SizedBox(width: 3),
-                        Text(
-                          event.rating!.toStringAsFixed(1),
-                          style: GoogleFonts.poppins(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        if ((event.reviewCount ?? '').isNotEmpty) ...[
-                          const SizedBox(width: 3),
-                          Text(
-                            '(${event.reviewCount!})',
-                            style: GoogleFonts.poppins(
-                              fontSize: 10,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                  if ((event.description ?? '').isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      event.description!,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.poppins(
-                        fontSize: 10.5,
-                        color: AppColors.textSecondary,
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
-                  if (event.price != null) ...[
-                    const SizedBox(height: 6),
-                    Text(
-                      '₹${event.price!.toInt()}',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

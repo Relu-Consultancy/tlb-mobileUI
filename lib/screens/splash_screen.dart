@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+import '../core/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
+  /// Flips to true once the splash has handed over to the first real screen.
+  /// The offline guard waits for it: a route pushed over the splash would be
+  /// the one its `pushReplacement` replaces, dropping the customer straight
+  /// past the No-internet screen.
+  static final ValueNotifier<bool> handedOff = ValueNotifier<bool>(false);
+
   final Widget nextScreen;
 
   const SplashScreen({super.key, required this.nextScreen});
@@ -13,56 +23,47 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
-  late Animation<double> _logoAppear;
-  late Animation<double> _logoShrink;
-  late Animation<Color?> _bgColor;
-  late Animation<double> _subtitleReveal;
+  late Animation<double> _logoScale;
+  late Animation<double> _logoFade;
+  late Animation<double> _dotsFade;
   late Animation<double> _fadeOut;
 
   @override
   void initState() {
     super.initState();
 
+    // Total splash time = 5 s. Intervals below keep the entrance crisp (same
+    // absolute timing as before) and add a longer hold before the end fade.
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3600),
+      duration: const Duration(milliseconds: 5000),
     );
 
-    _logoAppear = Tween<double>(begin: 0.0, end: 1.15).animate(
+    // Logo pops in (elastic) and fades in.
+    _logoScale = Tween<double>(begin: 0.7, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.0, 0.32, curve: Curves.elasticOut),
+        curve: const Interval(0.0, 0.27, curve: Curves.elasticOut),
+      ),
+    );
+    _logoFade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.14, curve: Curves.easeOut),
       ),
     );
 
-    _logoShrink = Tween<double>(begin: 1.15, end: 0.65).animate(
+    _dotsFade = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.32, 0.52, curve: Curves.easeInOut),
-      ),
-    );
-
-    _bgColor = ColorTween(
-      begin: Colors.white,
-      end: const Color(0xFFFFB902),
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.52, 0.75, curve: Curves.easeInOut),
-      ),
-    );
-
-    _subtitleReveal = Tween<double>(begin: 0.55, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.62, 0.82, curve: Curves.easeOut),
+        curve: const Interval(0.31, 0.42, curve: Curves.easeOut),
       ),
     );
 
     _fadeOut = Tween<double>(begin: 1.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.90, 1.0, curve: Curves.easeIn),
+        curve: const Interval(0.92, 1.0, curve: Curves.easeIn),
       ),
     );
 
@@ -79,6 +80,7 @@ class _SplashScreenState extends State<SplashScreen>
             },
           ),
         );
+        SplashScreen.handedOff.value = true;
       }
     });
   }
@@ -89,62 +91,88 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
-  double get _logoScale {
-    if (_controller.value <= 0.32) return _logoAppear.value;
-    return _logoShrink.value;
-  }
-
   @override
   Widget build(BuildContext context) {
     final screenW = MediaQuery.of(context).size.width;
-    final screenH = MediaQuery.of(context).size.height;
-    final logoSize = (screenW * 0.55).clamp(120.0, 280.0);
+    final logoSize = (screenW * 0.62).clamp(150.0, 320.0);
 
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        final clipFraction = _subtitleReveal.value;
-
-        return FadeTransition(
-          opacity: _fadeOut,
-          child: Scaffold(
-            backgroundColor: _bgColor.value,
-            body: SizedBox(
-              width: screenW,
-              height: screenH,
-              child: Center(
-                child: Transform.scale(
-                  scale: _logoScale,
-                  child: SizedBox(
-                    width: logoSize,
-                    height: logoSize,
-                    child: ClipRect(
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: SizedBox(
-                          height: logoSize * clipFraction,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          return FadeTransition(
+            opacity: _fadeOut,
+            child: Scaffold(
+              body: Container(
+                width: double.infinity,
+                height: double.infinity,
+                // Flat golden ground — the same colour the native splash
+                // paints, so the handoff into Flutter is invisible.
+                color: AppColors.splashGold,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Logo.
+                    Opacity(
+                      opacity: _logoFade.value.clamp(0.0, 1.0),
+                      child: Transform.scale(
+                        scale: _logoScale.value,
+                        child: SvgPicture.asset(
+                          'assets/icons/the_little_broadway_logo.svg',
                           width: logoSize,
-                          child: OverflowBox(
-                            alignment: Alignment.topCenter,
-                            maxWidth: logoSize,
-                            maxHeight: logoSize,
-                            child: Image.asset(
-                              'assets/images/tlb_logo.png',
-                              width: logoSize,
-                              height: logoSize,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
+                          fit: BoxFit.contain,
                         ),
                       ),
                     ),
-                  ),
+
+                    // Loading dots near the bottom.
+                    Positioned(
+                      bottom: 56,
+                      child: FadeTransition(
+                        opacity: _dotsFade,
+                        child: _LoadingDots(controller: _controller),
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Three small dots that pulse in sequence — a subtle "loading" cue.
+class _LoadingDots extends StatelessWidget {
+  final AnimationController controller;
+  const _LoadingDots({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(3, (i) {
+        // Staggered pulse driven off the main controller's tail.
+        final t = ((controller.value * 3) + i * 0.33) % 1.0;
+        final scale = 0.6 + 0.4 * (1 - (2 * t - 1).abs());
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Transform.scale(
+            scale: scale,
+            child: Container(
+              width: 9,
+              height: 9,
+              decoration: BoxDecoration(
+                color: const Color(0xFF3A2A12).withOpacity(0.55),
+                shape: BoxShape.circle,
               ),
             ),
           ),
         );
-      },
+      }),
     );
   }
 }

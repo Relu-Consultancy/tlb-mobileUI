@@ -12,3 +12,13 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Exception: a shared DEBUG-only keystore, committed on purpose so every
+# machine signs debug/release-for-now builds with the same certificate.
+# Google Sign-In's SHA-1 allowlist is per-certificate — without this, each
+# developer's own auto-generated ~/.android/debug.keystore has a different
+# fingerprint, and Sign-In breaks on every new machine until someone
+# manually registers that machine's SHA-1 in Firebase. This is the
+# well-known, non-secret Android debug key (password "android"), not a
+# release signing key — safe to share within the team.
+!app/debug.keystore

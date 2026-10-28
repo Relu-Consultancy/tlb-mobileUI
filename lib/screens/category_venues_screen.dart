@@ -1,10 +1,27 @@
+import '../core/app_snackbar.dart';
+import '../core/listing_filters.dart';
 import 'package:flutter/material.dart';
+import '../widgets/app_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../widgets/error_retry_view.dart';
+import '../core/responsive.dart';
 import '../data/dummy_data.dart';
+import '../models/api_category_model.dart';
+import '../models/api_venue_model.dart';
 import '../models/event_model.dart';
+import '../providers/location_state.dart';
+import '../services/events_listing_service.dart';
+import '../widgets/category_event_card.dart';
+import '../widgets/category_screen_header.dart';
+import '../widgets/category_skeleton_card.dart';
 import '../widgets/filter_bottom_sheet.dart';
+import '../widgets/subcategory_empty_state.dart';
+import 'venue_detail_screen.dart';
+import '../core/user_location.dart';
+import '../core/listing_source.dart';
+import '../services/activity_service.dart';
 
 class CategoryVenuesScreen extends StatefulWidget {
   final int initialCategoryIndex;
@@ -21,22 +38,146 @@ class CategoryVenuesScreen extends StatefulWidget {
 class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
   late int _selectedCategoryIndex;
   int _selectedFilterIndex = 0;
+  int? _selectedSubcategoryId;
+
+  /// The Sort / Filters sheet's selections (applied to the loaded cards).
+  ListingSort? _sort;
+  Set<String> _pickedFilters = {};
   final ScrollController _chipScrollController = ScrollController();
+  final ScrollController _listScrollController = ScrollController();
   final List<GlobalKey> _chipKeys = List.generate(
     DummyData.venuesSeeAllCategories.length,
     (_) => GlobalKey(),
   );
+
+  static const int _pageSize = 20;
+  List<ApiCategory>? _apiCategories;
+  List<ApiVenue> _apiVenues = [];
+  bool _isLoadingVenues = false;
+  String? _venuesError;
+  bool _isLoadingMore = false;
+  bool _hasMore = false;
+  int _currentPage = 1;
 
   @override
   void initState() {
     super.initState();
     _selectedCategoryIndex = widget.initialCategoryIndex
         .clamp(0, DummyData.venuesSeeAllCategories.length - 1);
+    _listScrollController.addListener(_onScroll);
+    _loadApiCategoriesThenFetch();
   }
+
+  Future<void> _loadApiCategoriesThenFetch() async {
+    try {
+      final cats = await EventsListingService.fetchVenueCategories();
+      if (!mounted) return;
+      _apiCategories = cats;
+    } catch (_) {
+      // Categories metadata endpoint may not be live yet — proceed without it.
+    }
+    _fetchVenues();
+  }
+
+  int? _matchedCategoryId() {
+    if (_apiCategories == null || _apiCategories!.isEmpty) return null;
+    final label = _categoryTitle.toLowerCase();
+    for (final cat in _apiCategories!) {
+      final name = cat.name.toLowerCase();
+      if (name == label) return cat.id;
+    }
+    for (final cat in _apiCategories!) {
+      final name = cat.name.toLowerCase();
+      final words = label.split(' ').where((w) => w.length > 3);
+      if (words.any((w) => name.contains(w))) return cat.id;
+    }
+    return null;
+  }
+
+  Future<void> _fetchVenues() async {
+    setState(() {
+      _isLoadingVenues = true;
+      _venuesError = null;
+      _currentPage = 1;
+      _hasMore = false;
+    });
+    try {
+      final page = await EventsListingService.fetchVenues(
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
+        categoryId: _matchedCategoryId(),
+        subcategoryId: _selectedSubcategoryId,
+        city: LocationState().cityOrNull,
+        page: 1,
+        pageSize: _pageSize,
+      );
+      if (!mounted) return;
+      setState(() {
+        _apiVenues = page.results;
+        _hasMore = _pageSize < page.count;
+        _isLoadingVenues = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      setState(() {
+        _apiVenues = [];
+        _venuesError = msg;
+        _isLoadingVenues = false;
+      });
+    }
+  }
+
+  void _onScroll() {
+    if (_listScrollController.position.pixels >=
+        _listScrollController.position.maxScrollExtent - 300 &&
+        _hasMore && !_isLoadingMore && !_isLoadingVenues) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _loadMore() async {
+    if (_isLoadingMore || !_hasMore) return;
+    setState(() => _isLoadingMore = true);
+    try {
+      final next = await EventsListingService.fetchVenues(
+        lat: UserLocation.lat,
+        lng: UserLocation.lng,
+        categoryId: _matchedCategoryId(),
+        subcategoryId: _selectedSubcategoryId,
+        city: LocationState().cityOrNull,
+        page: _currentPage + 1,
+        pageSize: _pageSize,
+      );
+      if (!mounted) return;
+      setState(() {
+        _apiVenues = [..._apiVenues, ...next.results];
+        _currentPage += 1;
+        _hasMore = _currentPage * _pageSize < next.count;
+        _isLoadingMore = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isLoadingMore = false);
+    }
+  }
+
+  EventModel _toEventModel(ApiVenue venue) => EventModel(
+        // Was dropped here, so the grid could never show distance.
+        distanceKm: venue.distanceKm,
+        id: venue.id,
+        title: venue.title,
+        venue: [venue.area, venue.city]
+            .where((s) => s != null && s.isNotEmpty)
+            .join(', '),
+        imagePath: venue.cover ?? '',
+        tag: venue.category.name.isNotEmpty ? venue.category.name : null,
+      );
 
   @override
   void dispose() {
     _chipScrollController.dispose();
+    _listScrollController.dispose();
     super.dispose();
   }
 
@@ -67,7 +208,9 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
     setState(() {
       _selectedCategoryIndex = index;
       _selectedFilterIndex = 0;
+      _selectedSubcategoryId = null;
     });
+    _fetchVenues();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final key = _chipKeys[index];
       if (key.currentContext != null) {
@@ -89,295 +232,276 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
 
   Color get _accentColor => _currentGradient.last;
 
-  List<String> get _filters =>
-      DummyData.venuesSubFilters[_selectedCategoryIndex];
-
-  List<EventModel> get _filteredVenues {
-    final all = DummyData.venuesByCategory[_selectedCategoryIndex];
-    if (_selectedFilterIndex == 0) return all;
-    final filterTag = _filters[_selectedFilterIndex];
-    return all.where((e) => e.tag == filterTag).toList();
+  /// The matched category's real subcategories when the metadata is in (so
+  /// each chip has an id the API can filter by); the placeholder names until.
+  List<ApiCategory> get _matchedSubcategories {
+    final id = _matchedCategoryId();
+    if (id == null) return const [];
+    for (final c in _apiCategories ?? const <ApiCategory>[]) {
+      if (c.id == id) return [c];
+    }
+    return const [];
   }
+
+  List<ApiSubcategory> get _subcategories => _matchedSubcategories.isEmpty
+      ? const []
+      : _matchedSubcategories.first.subcategories;
+
+  List<String> get _filters => _subcategories.isNotEmpty
+      ? ['All', ..._subcategories.map((s) => s.name)]
+      : DummyData.venuesSubFilters[_selectedCategoryIndex];
+
+  /// The venue list response carries no price, so there is no price sort or
+  /// price filter here — only what the response does have.
+  List<ApiVenue> get _filteredVenues => ListingFilters.sort(
+        ListingFilters.apply(_apiVenues, _pickedFilters, _filterOptions),
+        _sort,
+        distance: (v) => v.distanceKm,
+        // Top Picks: featured, then top rated, then new this week.
+        rank: (v) =>
+            (v.isFeatured ? 100 : 0) +
+            (v.isTopRated ? 50 : 0) +
+            (v.isNewThisWeek ? 10 : 0),
+      );
+
+  static final List<ListingFilter<ApiVenue>> _filterOptions = [
+    ListingFilter<ApiVenue>('Featured', 'flag', (v) => v.isFeatured),
+    ListingFilter<ApiVenue>('Top rated', 'flag', (v) => v.isTopRated),
+    ListingFilter<ApiVenue>('New this week', 'flag', (v) => v.isNewThisWeek),
+  ];
+
+  /// The applied set — category, subcategory chip, sort and Filters-tab picks
+  /// — for the activity log. Once per distinct set (the service skips repeats).
+  void _reportFilters() => ActivityService.trackFilters('category_venues', {
+        'category': _categoryTitle,
+        'subcategory': _selectedFilterIndex > 0 &&
+                _selectedFilterIndex < _filters.length
+            ? _filters[_selectedFilterIndex]
+            : null,
+        'sort': _sort?.label,
+        'filters': _pickedFilters.toList(),
+      });
+
+  int get _activeFilterCount =>
+      (_sort != null ? 1 : 0) + _pickedFilters.length;
 
   String get _categoryTitle =>
       (_currentCategory['label'] as String).replaceAll('\n', ' ');
 
-  void _showFilterSheet() {
+  void _selectSubcategory(int index) {
+    final id = index > 0 && index - 1 < _subcategories.length
+        ? _subcategories[index - 1].id
+        : null;
+    setState(() {
+      _selectedFilterIndex = index;
+      _selectedSubcategoryId = id;
+    });
+    _fetchVenues();
+    _reportFilters();
+  }
+
+  Future<void> _showFilterSheet() async {
     final cats = _filters.where((f) => f != 'All').toList();
-    FilterBottomSheet.show(
+    final result = await FilterBottomSheet.show(
       context,
-      sortOptions: const [
-        'Top Picks',
-        'Distance- Near to Far',
-        'Price- Low to High',
-        'Price- High to Low',
-      ],
-      filterOptions: const [
-        'Soft Play',
-        'Trampoline Parks',
-        'Ninja Courses',
-        'Climbing Walls',
-        'Arcade & tags',
-        'VR & Simulation',
-        'Escape Rooms',
-      ],
+      sortOptions: [for (final o in ListingSort.forType(hasPrice: false)) o.label],
+      filterOptions: [for (final f in _filterOptions) f.label],
       categoryOptions: cats,
+      singleCategory: true,
+      initialSort: _sort?.label,
+      initialFilters: _pickedFilters.toList(),
+      initialCategories: [
+        if (_selectedFilterIndex > 0 && _selectedFilterIndex < _filters.length)
+          _filters[_selectedFilterIndex],
+      ],
     );
+    if (result == null || !mounted) return;
+
+    final sort = ListingSort.fromLabel(result.selectedSort);
+    final pickedCategory = result.selectedCategories.isEmpty
+        ? 0
+        : _filters.indexOf(result.selectedCategories.first).clamp(0, _filters.length - 1);
+    setState(() {
+      _sort = sort;
+      _pickedFilters = result.selectedFilters.toSet();
+    });
+    // Reported after the chip change below has been applied.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _reportFilters();
+    });
+    if (sort == ListingSort.distance && !UserLocation.isKnown) {
+      AppSnackBar.show(context, 'Turn on location to sort by distance.');
+    }
+    // The category is the subcategory chip row: choosing one here is the same
+    // as tapping its chip, so it refetches.
+    if (pickedCategory != _selectedFilterIndex) _selectSubcategory(pickedCategory);
   }
 
   @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.category);
     final safeTop = MediaQuery.of(context).padding.top;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF7F7F7),
+        backgroundColor: Colors.white,
         body: Column(
           children: [
-            // ── Gradient Header ──────────────────────────────────────────
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [_currentGradient.first, _accentColor],
-                ),
-              ),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(16, safeTop + 12, 16, 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.5),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.arrow_back_ios_new_rounded,
-                              size: 16,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            _categoryTitle,
-                            style: GoogleFonts.poppins(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.5),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.tune_rounded,
-                              size: 18,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    Container(
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.75),
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 14),
-                          const Icon(Icons.search_rounded,
-                              size: 20, color: AppColors.textSecondary),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Search $_categoryTitle venues...',
-                                hintStyle: GoogleFonts.poppins(
-                                  fontSize: 13,
-                                  color: AppColors.textSecondary,
-                                ),
-                                border: InputBorder.none,
-                                isDense: true,
-                                contentPadding: EdgeInsets.zero,
-                              ),
-                              style: GoogleFonts.poppins(
-                                  fontSize: 13,
-                                  color: AppColors.textPrimary),
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            // ── Header ──────────────────────────────────────────────────
+            CategoryScreenHeader(
+              title: _categoryTitle,
+              safeTop: safeTop,
+              onBack: () => Navigator.pop(context),
+              onFilterTap: _showFilterSheet,
+              gradientColors: _currentGradient,
             ),
 
             // ── Scrollable Body ──────────────────────────────────────────
             Expanded(
               child: CustomScrollView(
+                controller: _listScrollController,
                 physics: const ClampingScrollPhysics(),
                 slivers: [
-                  // ── Explore other Venues label ──
+                  // ── Explore other Venues label + tinted background ──
                   SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
-                      child: Row(
-                        children: [
-                          Text(
-                            'Explore other Venues',
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const Spacer(),
-                          GestureDetector(
-                            onTap: _showAllCategories,
-                            child: Text(
-                              'See All >',
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF2563EB),
-                              ),
-                            ),
-                          ),
-                        ],
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      decoration: BoxDecoration(
+                        color: _accentColor.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                    ),
-                  ),
-
-                  // ── Circle chip row ──
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 128,
-                      child: ListView.builder(
-                        controller: _chipScrollController,
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                        itemCount: DummyData.venuesSeeAllCategories.length,
-                        itemBuilder: (context, index) {
-                          final cat = DummyData.venuesSeeAllCategories[index];
-                          final isSelected = index == _selectedCategoryIndex;
-                          final catGradient =
-                              (cat['gradient'] as List<Color>);
-                          return GestureDetector(
-                            key: _chipKeys[index],
-                            onTap: () => _selectCategory(index),
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 16),
-                              child: SizedBox(
-                                width: 78,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    // Circle with overflow image
-                                    SizedBox(
-                                      width: 78,
-                                      height: 88,
-                                      child: Stack(
-                                        clipBehavior: Clip.none,
-                                        alignment: Alignment.bottomCenter,
-                                        children: [
-                                          Positioned(
-                                            bottom: 0,
-                                            left: 5,
-                                            right: 5,
-                                            child: AnimatedContainer(
-                                              duration: const Duration(
-                                                  milliseconds: 200),
-                                              width: 68,
-                                              height: 68,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                gradient: LinearGradient(
-                                                  begin: Alignment.topLeft,
-                                                  end: Alignment.bottomRight,
-                                                  colors: catGradient,
-                                                ),
-                                                border: isSelected
-                                                    ? Border.all(
-                                                        color:
-                                                            catGradient.last,
-                                                        width: 2.5)
-                                                    : null,
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: catGradient.last
-                                                        .withOpacity(isSelected
-                                                            ? 0.50
-                                                            : 0.20),
-                                                    blurRadius:
-                                                        isSelected ? 12 : 6,
-                                                    offset: const Offset(0, 4),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+                            child: Row(
+                              children: [
+                                Text(
+                                  'Explore other Venues',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 13),
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                                const Spacer(),
+                                GestureDetector(
+                                  onTap: _showAllCategories,
+                                  child: Text(
+                                    'See All >',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 12),
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.seeAllBlue,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // ── Circle chip row ──
+                          SizedBox(
+                            height: Responsive.h(context, 142),
+                            child: ListView.builder(
+                              controller: _chipScrollController,
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                              itemCount: DummyData.venuesSeeAllCategories.length,
+                              itemBuilder: (context, index) {
+                                final cat = DummyData.venuesSeeAllCategories[index];
+                                final isSelected = index == _selectedCategoryIndex;
+                                final catGradient = (cat['gradient'] as List<Color>);
+                                return AnimatedScale(
+                                  scale: isSelected ? 1.12 : 1.0,
+                                  duration: const Duration(milliseconds: 200),
+                                  curve: Curves.easeInOut,
+                                  child: GestureDetector(
+                                    key: _chipKeys[index],
+                                    onTap: () => _selectCategory(index),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(right: 16),
+                                      child: SizedBox(
+                                        width: 78,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            // Circle with overflow image
+                                            SizedBox(
+                                              width: 78,
+                                              height: 88,
+                                              child: Stack(
+                                                clipBehavior: Clip.none,
+                                                alignment: Alignment.bottomCenter,
+                                                children: [
+                                                  Positioned(
+                                                    bottom: 0,
+                                                    left: 5,
+                                                    right: 5,
+                                                    child: AnimatedContainer(
+                                                      duration: const Duration(milliseconds: 200),
+                                                      width: 68,
+                                                      height: 68,
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        gradient: LinearGradient(
+                                                          begin: Alignment.topLeft,
+                                                          end: Alignment.bottomRight,
+                                                          colors: catGradient,
+                                                        ),
+                                                        border: isSelected
+                                                            ? Border.all(color: catGradient.last, width: 2.5)
+                                                            : Border.all(color: Colors.black.withOpacity(0.07), width: 2.5),
+                                                        boxShadow: [
+                                                          BoxShadow(
+                                                            color: catGradient.last.withOpacity(isSelected ? 0.50 : 0.20),
+                                                            blurRadius: isSelected ? 12 : 6,
+                                                            offset: const Offset(0, 4),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Positioned(
+                                                    bottom: 2,
+                                                    child: Image.asset(
+                                                      cat['image'] as String,
+                                                      width: 78,
+                                                      height: 84,
+                                                      fit: BoxFit.contain,
+                                                      errorBuilder: (_, __, ___) =>
+                                                          Icon(Icons.place, size: 36, color: catGradient.last),
+                                                    ),
                                                   ),
                                                 ],
                                               ),
                                             ),
-                                          ),
-                                          Positioned(
-                                            bottom: 2,
-                                            child: Image.asset(
-                                              cat['image'] as String,
-                                              width: 78,
-                                              height: 84,
-                                              fit: BoxFit.contain,
-                                              errorBuilder: (_, __, ___) =>
-                                                  Icon(Icons.place,
-                                                      size: 36,
-                                                      color:
-                                                          catGradient.last),
+                                            const SizedBox(height: 5),
+                                            Text(
+                                              cat['label'] as String,
+                                              textAlign: TextAlign.center,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: GoogleFonts.poppins(
+                                                fontSize: Responsive.sp(context, 9.5),
+                                                fontWeight: isSelected ? FontWeight.w500 : FontWeight.w500,
+                                                height: 1.2,
+                                                color: AppColors.textPrimary,
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                    const SizedBox(height: 5),
-                                    Text(
-                                      cat['label'] as String,
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 9.5,
-                                        fontWeight: isSelected
-                                            ? FontWeight.w700
-                                            : FontWeight.w500,
-                                        height: 1.2,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                                  ),
+                                );
+                              },
                             ),
-                          );
-                        },
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -388,24 +512,21 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                       padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
                       child: Row(
                         children: [
-                          Container(
-                              width: 28,
-                              height: 1.5,
-                              color: const Color(0xFFFFB902)),
+                          Expanded(
+                            child: Container(height: 1.5, color: AppColors.starAmber),
+                          ),
                           const SizedBox(width: 10),
                           Text(
                             'All $_categoryTitle',
                             style: GoogleFonts.poppins(
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w700,
+                              fontSize: Responsive.sp(context, 17),
+                              fontWeight: FontWeight.w600,
                               color: AppColors.textPrimary,
                             ),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Container(
-                                height: 1.5,
-                                color: const Color(0xFFFFB902)),
+                            child: Container(height: 1.5, color: AppColors.starAmber),
                           ),
                         ],
                       ),
@@ -416,13 +537,14 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                   SliverToBoxAdapter(
                     child: SizedBox(
                       height: 42,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                        itemCount: _filters.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == 0) {
-                            return GestureDetector(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Pinned: stays put while the subcategory chips
+                          // scroll beside it.
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 0, 0),
+                            child: GestureDetector(
                               onTap: _showFilterSheet,
                               child: Container(
                                 margin: const EdgeInsets.only(right: 8),
@@ -436,10 +558,10 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      'Filters',
+                                      _activeFilterCount > 0 ? 'Filters ($_activeFilterCount)' : 'Filters',
                                       style: GoogleFonts.poppins(
-                                        fontSize: 11.5,
-                                        fontWeight: FontWeight.w600,
+                                        fontSize: Responsive.sp(context, 11.5),
+                                        fontWeight: FontWeight.w500,
                                         color: Colors.white,
                                       ),
                                     ),
@@ -451,36 +573,43 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                                   ],
                                 ),
                               ),
-                            );
-                          }
-                          final filterIndex = index - 1;
+                            ),
+                          ),
+                          Expanded(child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.fromLTRB(0, 8, 16, 0),
+                        itemCount: _filters.length,
+                        itemBuilder: (context, index) {
+                          final filterIndex = index;
                           final isActive =
                               filterIndex == _selectedFilterIndex;
                           return GestureDetector(
-                            onTap: () => setState(
-                                () => _selectedFilterIndex = filterIndex),
+                            onTap: () => _selectSubcategory(filterIndex),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
+                              alignment: Alignment.center,
                               margin: const EdgeInsets.only(right: 8),
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 14, vertical: 5),
                               decoration: BoxDecoration(
+                                // Selected: transparent golden tint + dark-yellow border.
                                 color: isActive
-                                    ? const Color(0xFFFFCC00)
+                                    ? const Color(0x26FFCC00)
                                     : Colors.white,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                   color: isActive
-                                      ? Colors.transparent
+                                      ? const Color(0xFFE6A800)
                                       : const Color(0xFFE0E0E0),
+                                  width: isActive ? 1.5 : 1,
                                 ),
                               ),
                               child: Text(
                                 _filters[filterIndex],
                                 style: GoogleFonts.poppins(
-                                  fontSize: 11.5,
+                                  fontSize: Responsive.sp(context, 11.5),
                                   fontWeight: isActive
-                                      ? FontWeight.w700
+                                      ? FontWeight.w500
                                       : FontWeight.w500,
                                   color: isActive
                                       ? AppColors.textPrimary
@@ -490,44 +619,43 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                             ),
                           );
                         },
+                      )),
+                        ],
                       ),
                     ),
                   ),
 
-                  // ── Venue cards grid ──
+                  // ── Venue cards grid (API) ──
                   const SliverToBoxAdapter(child: SizedBox(height: 14)),
-                  if (_filteredVenues.isEmpty)
+                  if (_isLoadingVenues)
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: SliverGrid(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => const CategorySkeletonCard(),
+                          childCount: 6,
+                        ),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 14,
+                          crossAxisSpacing: 14,
+                          childAspectRatio: 0.62,
+                        ),
+                      ),
+                    )
+                  else if (_venuesError != null)
                     SliverFillRemaining(
                       hasScrollBody: false,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Icon(Icons.location_city_outlined,
-                                size: 48,
-                                color: _accentColor.withOpacity(0.6)),
-                            const SizedBox(height: 12),
-                            Text(
-                              'No venues in "${_filters[_selectedFilterIndex]}" yet',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'Try another filter to see what\'s available.',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
-                                fontSize: 11.5,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
+                      child: ErrorRetryView(
+                        message: _venuesError!,
+                        onRetry: _fetchVenues,
+                      ),
+                    )
+                  else if (_filteredVenues.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: SubcategoryEmptyState(
+                        onExploreOtherCategories: () => Navigator.pop(context),
                       ),
                     )
                   else
@@ -538,9 +666,16 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                           (context, index) {
                             final venues = _filteredVenues;
                             if (index >= venues.length) return null;
-                            return _VenueCard(
-                              event: venues[index],
-                              accentColor: _accentColor,
+                            final venue = venues[index];
+                            final em = _toEventModel(venue);
+                            return CategoryEventCard(
+                              event: em,
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => VenueDetailScreen(event: em),
+                                ),
+                              ),
                             );
                           },
                           childCount: _filteredVenues.length,
@@ -550,8 +685,15 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
                           crossAxisCount: 2,
                           mainAxisSpacing: 14,
                           crossAxisSpacing: 14,
-                          childAspectRatio: 0.72,
+                          childAspectRatio: 0.62,
                         ),
+                      ),
+                    ),
+                  if (_isLoadingMore)
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Center(child: AppLoaderInline()),
                       ),
                     ),
                   const SliverToBoxAdapter(child: SizedBox(height: 40)),
@@ -565,163 +707,6 @@ class _CategoryVenuesScreenState extends State<CategoryVenuesScreen> {
   }
 }
 
-// ── Venue card widget ────────────────────────────────────────────────────────
-class _VenueCard extends StatelessWidget {
-  final EventModel event;
-  final Color accentColor;
-
-  const _VenueCard({required this.event, required this.accentColor});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.07),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image with tag overlay
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(16)),
-                child: Image.asset(
-                  event.imagePath,
-                  height: 120,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                      Container(height: 120, color: Colors.grey.shade200),
-                ),
-              ),
-              if (event.tag != null)
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: accentColor.withOpacity(0.92),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      event.tag!,
-                      style: GoogleFonts.poppins(
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          // Content
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 9, 10, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    event.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.poppins(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF1A1A2E),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on_outlined,
-                          size: 11, color: Colors.grey),
-                      const SizedBox(width: 3),
-                      Expanded(
-                        child: Text(
-                          event.venue,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.poppins(
-                              fontSize: 10.5,
-                              color: Colors.grey.shade500),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (event.rating != null) ...[
-                    const SizedBox(height: 3),
-                    Row(
-                      children: [
-                        const Icon(Icons.star_rounded,
-                            size: 12, color: Color(0xFFFFB902)),
-                        const SizedBox(width: 3),
-                        Text(
-                          '${event.rating}',
-                          style: GoogleFonts.poppins(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                        ),
-                        const SizedBox(width: 3),
-                        Expanded(
-                          child: Text(
-                            '(${event.reviewCount})',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.poppins(
-                                fontSize: 10,
-                                color: Colors.grey.shade500),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                  const Spacer(),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 30,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFCC00),
-                        foregroundColor: const Color(0xFF1A1A2E),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20)),
-                        padding: EdgeInsets.zero,
-                      ),
-                      child: Text(
-                        'Book Now',
-                        style: GoogleFonts.poppins(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ── All Categories bottom sheet ──────────────────────────────────────────────
 class _VenuesAllCategoriesSheet extends StatefulWidget {
@@ -800,11 +785,11 @@ class _VenuesAllCategoriesSheetState
               child: TextField(
                 controller: _controller,
                 onChanged: _onSearch,
-                style: GoogleFonts.poppins(fontSize: 13),
+                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13)),
                 decoration: InputDecoration(
                   hintText: 'Search venue categories...',
                   hintStyle: GoogleFonts.poppins(
-                      fontSize: 13, color: Colors.grey.shade400),
+                      fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
                   prefixIcon:
                       const Icon(Icons.search, color: Colors.grey, size: 20),
                   suffixIcon: GestureDetector(
@@ -827,15 +812,15 @@ class _VenuesAllCategoriesSheetState
                 Text(
                   'All Categories',
                   style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF1A1A2E)),
+                      fontSize: Responsive.sp(context, 16),
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textPrimary),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '(${_filtered.length} Results Found)',
                   style: GoogleFonts.poppins(
-                      fontSize: 12, color: Colors.grey.shade500),
+                      fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500),
                 ),
               ],
             ),
@@ -846,7 +831,7 @@ class _VenuesAllCategoriesSheetState
                 ? Center(
                     child: Text('No categories found',
                         style: GoogleFonts.poppins(
-                            fontSize: 14, color: Colors.grey)))
+                            fontSize: Responsive.sp(context, 14), color: Colors.grey)))
                 : GridView.builder(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                     gridDelegate:
@@ -893,9 +878,9 @@ class _VenuesAllCategoriesSheetState
                             Text(
                               cat['label'] as String,
                               style: GoogleFonts.poppins(
-                                  fontSize: 11,
+                                  fontSize: Responsive.sp(context, 11),
                                   fontWeight: FontWeight.w500,
-                                  color: const Color(0xFF1A1A2E)),
+                                  color: AppColors.textPrimary),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),

@@ -1,35 +1,85 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/saved_events_state.dart';
 import '../providers/auth_state.dart';
 import '../models/event_model.dart';
+import '../widgets/app_loader.dart';
+import '../widgets/app_refresh_indicator.dart';
 import 'event_detail_screen.dart';
+import '../core/listing_image.dart';
+import '../core/listing_source.dart';
 
-class SavedEventsScreen extends StatelessWidget {
+class SavedEventsScreen extends StatefulWidget {
   const SavedEventsScreen({super.key});
 
   @override
+  State<SavedEventsScreen> createState() => _SavedEventsScreenState();
+}
+
+class _SavedEventsScreenState extends State<SavedEventsScreen> {
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetch();
+  }
+
+  Future<void> _fetch() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      await SavedEventsState.loadFromApi(silent: false);
+      if (!mounted) return;
+      setState(() => _loading = false);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString().replaceFirst('Exception: ', '');
+        _loading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.wishlist);
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: AppColors.lightGray,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF2F2F7),
+        backgroundColor: AppColors.lightGray,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Favorites',
           style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF1A1A2E),
+            fontSize: Responsive.sp(context, 18),
+            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
           ),
         ),
       ),
-      body: SingleChildScrollView(
+      body: _buildBody(context),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    if (_loading) return const AppLoader();
+    if (_error != null) return _buildError(context);
+
+    return AppRefreshIndicator(
+      onRefresh: _fetch,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,18 +92,23 @@ class SavedEventsScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Hi ${AuthState.firstName},',
-                        style: GoogleFonts.poppins(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: const Color(0xFF1A1A2E),
-                        ),
+                      ValueListenableBuilder<String?>(
+                        valueListenable: AuthState.userName,
+                        builder: (context, _, __) {
+                          return Text(
+                            'Hi ${AuthState.firstName},',
+                            style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, 22),
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textPrimary,
+                            ),
+                          );
+                        },
                       ),
                       Text(
                         'Here are your saved activities.',
                         style: GoogleFonts.poppins(
-                          fontSize: 13,
+                          fontSize: Responsive.sp(context, 13),
                           color: Colors.grey.shade500,
                         ),
                       ),
@@ -62,7 +117,7 @@ class SavedEventsScreen extends StatelessWidget {
                 ),
                 Image.asset(
                   'resources- tlb-ui/accounts_page/wishlist.png',
-                  width: 80,
+                  width: 110,
                   errorBuilder: (_, __, ___) => const Icon(
                     Icons.favorite_rounded,
                     size: 64,
@@ -77,9 +132,9 @@ class SavedEventsScreen extends StatelessWidget {
             Text(
               'Saved Activities',
               style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF1A1A2E),
+                fontSize: Responsive.sp(context, 14),
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 10),
@@ -98,7 +153,7 @@ class SavedEventsScreen extends StatelessWidget {
                           Text(
                             'No saved activities yet',
                             style: GoogleFonts.poppins(
-                              fontSize: 15,
+                              fontSize: Responsive.sp(context, 15),
                               color: Colors.grey.shade400,
                             ),
                           ),
@@ -106,7 +161,7 @@ class SavedEventsScreen extends StatelessWidget {
                           Text(
                             'Tap the heart icon on any event to save it',
                             style: GoogleFonts.poppins(
-                              fontSize: 12,
+                              fontSize: Responsive.sp(context, 12),
                               color: Colors.grey.shade400,
                             ),
                             textAlign: TextAlign.center,
@@ -144,6 +199,45 @@ class SavedEventsScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildError(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.wifi_off_rounded,
+                size: 48, color: Color(0xFFCCCCCC)),
+            const SizedBox(height: 16),
+            Text(
+              _error!,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: Responsive.sp(context, 13),
+                color: Colors.grey.shade500,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _fetch,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryLight,
+                foregroundColor: AppColors.textPrimary,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
+              ),
+              child: Text('Retry',
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _SavedRow extends StatelessWidget {
@@ -166,27 +260,40 @@ class _SavedRow extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.asset(
-                  event.imagePath,
-                  width: 56,
-                  height: 48,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    width: 56,
-                    height: 48,
-                    color: Colors.grey.shade200,
-                    child: const Icon(Icons.event, color: Colors.grey),
-                  ),
-                ),
+                child: event.imagePath.startsWith('http')
+                    ? Image.network(
+                        event.imagePath,
+                        width: 56,
+                        height: 48,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          width: 56,
+                          height: 48,
+                          color: Colors.grey.shade200,
+                          child: const Icon(Icons.event, color: Colors.grey),
+                        ),
+                      )
+                    : listingImageSource(
+                        event.imagePath,
+                        width: 56,
+                        height: 48,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          width: 56,
+                          height: 48,
+                          color: Colors.grey.shade200,
+                          child: const Icon(Icons.event, color: Colors.grey),
+                        ),
+                      ),
               ),
               const SizedBox(width: 14),
               Expanded(
                 child: Text(
                   event.title,
                   style: GoogleFonts.poppins(
-                    fontSize: 14,
+                    fontSize: Responsive.sp(context, 16),
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

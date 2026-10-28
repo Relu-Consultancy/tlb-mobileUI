@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/responsive.dart';
 
@@ -27,6 +28,10 @@ class FilterBottomSheet extends StatefulWidget {
   final List<String> initialFilters;
   final List<String> initialCategories;
 
+  /// When true the Categories tab is pick-one (radio-style) instead of
+  /// multi-select — for screens where a category is a single chip selection.
+  final bool singleCategory;
+
   const FilterBottomSheet({
     super.key,
     required this.sortOptions,
@@ -35,6 +40,7 @@ class FilterBottomSheet extends StatefulWidget {
     this.initialSort,
     this.initialFilters = const [],
     this.initialCategories = const [],
+    this.singleCategory = false,
   });
 
   /// Convenience method to show the sheet and return the result.
@@ -46,6 +52,7 @@ class FilterBottomSheet extends StatefulWidget {
     String? initialSort,
     List<String> initialFilters = const [],
     List<String> initialCategories = const [],
+    bool singleCategory = false,
   }) {
     return showModalBottomSheet<FilterResult>(
       context: context,
@@ -59,6 +66,7 @@ class FilterBottomSheet extends StatefulWidget {
         initialSort: initialSort,
         initialFilters: initialFilters,
         initialCategories: initialCategories,
+        singleCategory: singleCategory,
       ),
     );
   }
@@ -151,28 +159,46 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                         onTap: () => setState(() => _activeTab = i),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 180),
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 18, horizontal: 12),
+                          padding: EdgeInsets.symmetric(
+                            vertical: Responsive.h(context, 18, min: 14),
+                            // Scales with the rail it sits in. Fixed padding
+                            // ate a bigger share of a narrow rail, which is
+                            // what left "Categories" too little room.
+                            horizontal: Responsive.w(context, 12, min: 8),
+                          ),
                           decoration: BoxDecoration(
                             color: isActive ? Colors.white : Colors.transparent,
                             border: Border(
                               left: BorderSide(
                                 color: isActive
-                                    ? const Color(0xFFFFB902)
+                                    ? AppColors.starAmber
                                     : Colors.transparent,
                                 width: 3,
                               ),
                             ),
                           ),
-                          child: Text(
-                            _tabLabels[i],
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 14),
-                              fontWeight:
-                                  isActive ? FontWeight.w600 : FontWeight.w500,
-                              color: isActive
-                                  ? const Color(0xFF1A1A1A)
-                                  : const Color(0xFF757575),
+                          // The rail's width scales linearly with the screen
+                          // but the label's font size stops shrinking at 80%
+                          // (see Responsive.sp's clamp), so below roughly
+                          // 340dp the longest label no longer fits and used
+                          // to wrap — dropping the "s" of "Categories" onto a
+                          // second line. scaleDown gives up a little type
+                          // size instead, and only on the screens that need
+                          // it; everywhere else this changes nothing.
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: AlignmentDirectional.centerStart,
+                            child: Text(
+                              _tabLabels[i],
+                              maxLines: 1,
+                              softWrap: false,
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 14),
+                                fontWeight: FontWeight.w500,
+                                color: isActive
+                                    ? const Color(0xFF1A1A1A)
+                                    : const Color(0xFF757575),
+                              ),
                             ),
                           ),
                         ),
@@ -194,9 +220,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                             Text(
                               _tabLabels[_activeTab],
                               style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF1A1A2E),
+                                fontSize: Responsive.sp(context, 16),
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textPrimary,
                               ),
                             ),
                             IconButton(
@@ -209,7 +235,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(Icons.close,
-                                    size: 16, color: Color(0xFF1A1A2E)),
+                                    size: 16, color: AppColors.textPrimary),
                               ),
                             ),
                           ],
@@ -249,9 +275,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                                 child: Text(
                                   'Clear All',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF1A1A2E),
+                                    fontSize: Responsive.sp(context, 13),
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textPrimary,
                                   ),
                                 ),
                               ),
@@ -261,8 +287,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                               child: ElevatedButton(
                                 onPressed: _apply,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFFFCC00),
-                                  foregroundColor: const Color(0xFF1A1A2E),
+                                  backgroundColor: AppColors.primaryLight,
+                                  foregroundColor: AppColors.textPrimary,
                                   elevation: 0,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(24),
@@ -273,8 +299,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                                 child: Text(
                                   'Apply',
                                   style: GoogleFonts.poppins(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
+                                    fontSize: Responsive.sp(context, 13),
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ),
@@ -313,6 +339,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         return _CheckboxPanel(
           key: const ValueKey('categories'),
           options: widget.categoryOptions,
+          single: widget.singleCategory,
           selected: _selectedCategories,
           onChanged: (list) => setState(() => _selectedCategories = list),
         );
@@ -357,7 +384,7 @@ class _SortByPanel extends StatelessWidget {
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isSelected
-                          ? const Color(0xFFFFB902)
+                          ? AppColors.starAmber
                           : Colors.grey.shade400,
                       width: 2,
                     ),
@@ -369,7 +396,7 @@ class _SortByPanel extends StatelessWidget {
                             height: 10,
                             decoration: const BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Color(0xFFFFB902),
+                              color: AppColors.starAmber,
                             ),
                           ),
                         )
@@ -380,10 +407,10 @@ class _SortByPanel extends StatelessWidget {
                   child: Text(
                     options[i],
                     style: GoogleFonts.poppins(
-                      fontSize: 13,
+                      fontSize: Responsive.sp(context, 13),
                       fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.w400,
-                      color: const Color(0xFF1A1A2E),
+                          isSelected ? FontWeight.w500 : FontWeight.w400,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -402,15 +429,31 @@ class _CheckboxPanel extends StatelessWidget {
   final List<String> selected;
   final ValueChanged<List<String>> onChanged;
 
+  /// Pick-one: choosing an option replaces the selection, and choosing the
+  /// selected one again clears it.
+  final bool single;
+
   const _CheckboxPanel({
     super.key,
     required this.options,
     required this.selected,
     required this.onChanged,
+    this.single = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (options.isEmpty) {
+      return Center(
+        child: Text(
+          'Nothing to choose here yet',
+          style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 13),
+            color: Colors.grey.shade500,
+          ),
+        ),
+      );
+    }
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       itemCount: options.length,
@@ -419,12 +462,11 @@ class _CheckboxPanel extends StatelessWidget {
         final isChecked = selected.contains(options[i]);
         return InkWell(
           onTap: () {
-            final updated = List<String>.from(selected);
-            if (isChecked) {
-              updated.remove(options[i]);
-            } else {
-              updated.add(options[i]);
-            }
+            final updated = single
+                ? (isChecked ? <String>[] : [options[i]])
+                : (List<String>.from(selected)
+                  ..remove(options[i])
+                  ..addAll(isChecked ? const [] : [options[i]]));
             onChanged(updated);
           },
           borderRadius: BorderRadius.circular(8),
@@ -439,12 +481,12 @@ class _CheckboxPanel extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: isChecked
-                          ? const Color(0xFFFFB902)
+                          ? AppColors.starAmber
                           : Colors.grey.shade400,
                       width: 1.5,
                     ),
                     color: isChecked
-                        ? const Color(0xFFFFB902)
+                        ? AppColors.starAmber
                         : Colors.transparent,
                   ),
                   child: isChecked
@@ -456,10 +498,10 @@ class _CheckboxPanel extends StatelessWidget {
                   child: Text(
                     options[i],
                     style: GoogleFonts.poppins(
-                      fontSize: 13,
+                      fontSize: Responsive.sp(context, 13),
                       fontWeight:
-                          isChecked ? FontWeight.w600 : FontWeight.w400,
-                      color: const Color(0xFF1A1A2E),
+                          isChecked ? FontWeight.w500 : FontWeight.w400,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),

@@ -1,0 +1,238 @@
+import 'dart:async';
+import 'dart:math' as math;
+import 'package:flutter/material.dart';
+import '../core/responsive.dart';
+
+/// A "quote of the moment" shown at the top of the starry black footer: a
+/// large gold opening quote-mark, the quote in white between, and a gold
+/// closing quote-mark. A new quote cross-fades in every 10 seconds.
+class FooterQuoteCarousel extends StatefulWidget {
+  const FooterQuoteCarousel({super.key});
+
+  /// Relatable quotes about kids — their energy, playful chaos and
+  /// growing-up moments. Rotated one at a time.
+  static const List<String> quotes = [
+    '“Children don’t walk into a room — they arrive like a full energy storm.”',
+    '“A child’s battery works differently — somehow 1% energy still means running everywhere.”',
+    '“Silence around kids usually means either magic… or trouble.”',
+    '“Children turn ordinary days into unexpected adventures.”',
+    '“Their energy says ‘one more game’ even when the whole world says bedtime.”',
+    '“Kids can be tired, sleepy, hungry — and still somehow have energy to jump around.”',
+    '“A child’s imagination can turn a sofa into a spaceship in seconds.”',
+    '“Growing up means learning; being a child means learning while running.”',
+    '“Children don’t count memories — they create them loudly.”',
+    '“The louder the laughter, the better the childhood.”',
+    '“Children carry endless questions and unlimited energy.”',
+    '“Every child is a tiny bundle of chaos mixed with wonder.”',
+    '“Their happiness is simple: snacks, fun, and one more hour outside.”',
+    '“Children remind us that joy doesn’t need a reason.”',
+    '“They fall, laugh, get up, and run again — that’s childhood.”',
+    '“A child’s day isn’t complete without turning something normal into a game.”',
+    '“High energy today, unforgettable memories tomorrow.”',
+    '“Kids don’t believe in limits — only in ‘let me try once more.’”',
+    '“Childhood is powered by curiosity and unlimited imagination.”',
+    '“Their tiny feet somehow create the loudest footsteps in the house.”',
+    '“Children are proof that happiness often comes running at full speed.”',
+    '“One child can fill an entire home with laughter, noise, and life.”',
+    '“Being around children means never knowing what adventure starts next.”',
+    '“The energy of childhood is the closest thing to magic.”',
+    '“Children may grow older, but the playful spark never truly disappears.”',
+    '“A kid’s superpower? Turning five minutes into five hours of fun.”',
+    '“Childhood is messy, loud, energetic — and absolutely beautiful.”',
+    '“Young hearts run faster because life still feels like an adventure.”',
+    '“Children teach us that excitement can exist in the smallest things.”',
+    '“Behind every energetic child is a heart full of dreams and curiosity.”',
+  ];
+
+  @override
+  State<FooterQuoteCarousel> createState() => _FooterQuoteCarouselState();
+}
+
+class _FooterQuoteCarouselState extends State<FooterQuoteCarousel>
+    with SingleTickerProviderStateMixin {
+  int _index = 0;
+  Timer? _timer;
+
+  /// How long a quote rests before the next one replaces it.
+  static const Duration _hold = Duration(seconds: 10);
+  static const Duration _outDuration = Duration(milliseconds: 420);
+  static const Duration _inDuration = Duration(milliseconds: 560);
+
+  /// Settle level of the quote on screen: 1 = fully in place, 0 = fully gone.
+  late final AnimationController _settle;
+
+  /// True while the current quote is on its way out, which flips the drift
+  /// direction so the old line keeps rising as the new one rises in after it,
+  /// rather than reversing back down the way it came.
+  bool _leaving = false;
+
+  /// Guards against a tick landing on top of a transition still in flight.
+  bool _animating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _settle = AnimationController(
+      vsync: this,
+      duration: _inDuration,
+      value: 1,
+    );
+    _timer = Timer.periodic(_hold, (_) => _cycle());
+  }
+
+  /// Swaps in the next quote: the current one leaves *completely* before the
+  /// next arrives. Only one quote is ever built, so the two can never be
+  /// visible at the same time — which is what a cross-fade cannot avoid.
+  Future<void> _cycle() async {
+    if (!mounted || _animating) return;
+    _animating = true;
+    try {
+      setState(() => _leaving = true);
+      await _settle.animateTo(0, duration: _outDuration, curve: Curves.easeIn);
+      if (!mounted) return;
+
+      setState(() {
+        _index = (_index + 1) % FooterQuoteCarousel.quotes.length;
+        _leaving = false;
+      });
+      await _settle.animateTo(1,
+          duration: _inDuration, curve: Curves.easeOutCubic);
+    } on TickerCanceled {
+      // The widget was disposed mid-transition; nothing to finish.
+    } finally {
+      _animating = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _settle.dispose();
+    super.dispose();
+  }
+
+  /// Warm gold used for the quote marks.
+  static const Color _gold = Color(0xFFE8B11E);
+
+  /// Vertical distance a quote travels as it leaves or arrives. Small on
+  /// purpose — enough to give the swap a direction without the text visibly
+  /// sliding around inside the footer.
+  static const double _travel = 14;
+
+  /// Strip the surrounding curly quotes from a quote (explicit quote-mark
+  /// glyphs are shown above and below instead).
+  String _clean(String q) =>
+      q.replaceAll('“', '').replaceAll('”', '').replaceAll('"', '').trim();
+
+  @override
+  Widget build(BuildContext context) {
+    // Sized against the type, not against the box: a quote mark reads as
+    // punctuation at roughly twice the text size. Deriving it from the panel
+    // height instead is what previously produced 67px marks beside 15sp text.
+    final markHeight = Responsive.h(context, 30, min: 26);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(28, 10, 28, 10),
+      // A Column rather than a fraction-positioned Stack: each row reserves
+      // its own space, so the marks and the text cannot overlap however long
+      // the quote runs or however the text scales.
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Opening marks — rotated 180° into true opening quotes. The
+          // artwork is drawn as a closing pair (bowl above, tail descending);
+          // an opening pair is its point reflection.
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Transform.rotate(
+              angle: math.pi,
+              child: _CommaQuoteMarks(height: markHeight, color: _gold),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: Responsive.h(context, 74, min: 70),
+            child: Center(
+              child: AnimatedBuilder(
+                animation: _settle,
+                builder: (context, child) {
+                  final t = _settle.value;
+                  // One continuous upward travel: the outgoing line lifts away
+                  // and the incoming one rises into the space it left, so the
+                  // motion reads as a single cycle rather than two crossing
+                  // fades.
+                  final dy = _leaving ? -(1 - t) * _travel : (1 - t) * _travel;
+                  return Opacity(
+                    opacity: t.clamp(0.0, 1.0),
+                    child: Transform.translate(
+                      offset: Offset(0, dy),
+                      child: child,
+                    ),
+                  );
+                },
+                child: Text(
+                  _clean(FooterQuoteCarousel.quotes[_index]),
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  // Elegant italic serif to match the footer reference. Uses
+                  // the platform serif family (runtime Google-font fetching is
+                  // off, so a GoogleFonts serif wouldn't load).
+                  style: TextStyle(
+                    fontFamily: 'serif',
+                    fontSize: Responsive.sp(context, 15),
+                    height: 1.35,
+                    fontWeight: FontWeight.w500,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.white.withOpacity(0.92),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Closing marks — the artwork as drawn, diagonally opposite the
+          // opening pair.
+          Align(
+            alignment: Alignment.centerRight,
+            child: _CommaQuoteMarks(height: markHeight, color: _gold),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The pair of quotation marks used in the footer, from the supplied artwork
+/// (`assets/icons/quote_marks.png` — a 491x363 transparent PNG, cropped to the
+/// glyphs so [height] maps directly onto the marks with no dead margin).
+///
+/// The source art is black; it is tinted at draw time with a `srcIn` colour
+/// filter so the same asset can take the footer's gold, and would take any
+/// other colour without a second file.
+class _CommaQuoteMarks extends StatelessWidget {
+  /// Height of the pair. Width follows the artwork's own aspect ratio.
+  final double height;
+  final Color color;
+
+  /// Width : height of the cropped artwork.
+  static const double _aspect = 491 / 363;
+
+  const _CommaQuoteMarks({required this.height, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return ColorFiltered(
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+      child: Image.asset(
+        'assets/icons/quote_marks.png',
+        height: height,
+        width: height * _aspect,
+        fit: BoxFit.contain,
+        // The marks are decorative; the quote itself carries the meaning.
+        excludeFromSemantics: true,
+      ),
+    );
+  }
+}

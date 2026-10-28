@@ -1,39 +1,61 @@
 import '../core/responsive.dart';
+import '../core/app_colors.dart';
 import 'package:flutter/material.dart';
+import '../widgets/auto_scroll_list.dart';
+import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../widgets/wishlist_button.dart';
 import '../widgets/section_divider_widget.dart';
+import '../widgets/listing_meta_rows.dart';
+import '../providers/home_feed_state.dart';
 import '../data/dummy_data.dart';
-import '../screens/event_detail_screen.dart';
+import '../core/listing_navigation.dart';
+import '../widgets/shining_star_badge.dart';
+import '../widgets/animated_gradient_tag.dart';
 
 class SpecialNeedsSection extends StatelessWidget {
   const SpecialNeedsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ValueListenableBuilder<int>(
+      valueListenable: HomeFeedState.version,
+      builder: (context, _, __) {
+        // Real listings once the feed is in, the mock set until then.
+                final isLoaded = HomeFeedState.isLoaded;
+        final items = isLoaded ? HomeFeedState.section('where_every_star_shines') : DummyData.specialNeeds;
+        if (items.isEmpty && isLoaded) return const SizedBox.shrink();
+        return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionDividerWidget(title: 'Special Needs Kids'),
+        const SectionDividerWidget(
+          title: 'Where Every Star Shines',
+          topPadding: 30, // 30px gap from previous section's cards
+          fontSize: 17,
+          textColor: AppColors.textPrimary, // dark navy
+        ),
         SizedBox(
-          height: Responsive.h(context, 200, min: 160),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
+          height: Responsive.h(context, 285, min: 258),
+          child: AutoScrollList(
             clipBehavior: Clip.hardEdge,
             padding: const EdgeInsets.only(left: 16, right: 8),
-            itemCount: DummyData.specialNeeds.length > 1 
-                ? DummyData.specialNeeds.length 
-                : 3, // Duplicate for scroll test if only 1
+            itemCount: items.length > 1
+                ? items.length
+                : 3,
             itemBuilder: (context, index) {
-              final modelIndex = index % DummyData.specialNeeds.length;
-              final event = DummyData.specialNeeds[modelIndex];
-              return Container(
-                width: Responsive.cardWidth(context, fraction: 0.85, max: 340),
+              final modelIndex = index % items.length;
+              final event = items[modelIndex];
+              return GestureDetector(
+                onTap: () => openListingDetail(context, event),
+                child: Container(
+                width: Responsive.cardWidth(context, fraction: 0.92, max: 380),
                 margin: const EdgeInsets.only(right: 16),
+                // Clip the flush image to the card's rounded corners so it
+                // touches the left/top/bottom borders (per reference design).
+                clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -43,132 +65,104 @@ class SpecialNeedsSection extends StatelessWidget {
                   ],
                 ),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Left Image Area
+                    // Left image with red circular star badge
                     SizedBox(
-                      width: Responsive.w(context, 140, min: 120),
+                      // Trimmed from 215: the content column was only 119pt
+                      // wide, which truncated the date/time row ("Sat & Sun ·
+                      // 4-6 P…"). At 185 the column gets 149pt and every meta
+                      // line fits whole.
+                      width: Responsive.w(context, 185, min: 160),
                       child: Stack(
+                        clipBehavior: Clip.none,
                         children: [
-                          ClipRRect(
-                            borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
-                            child: Image.asset(
-                              event.imagePath,
-                              height: double.infinity,
-                              width: double.infinity,
+                          Positioned.fill(
+                            child: listingImage(event.imagePath,
                               fit: BoxFit.cover,
                             ),
                           ),
-                          // Heart Icon
-                          Positioned(
+                          // Shining star badge (top-left) — pink→orange
+                          // gradient star with a looping left→right shine.
+                          const Positioned(
                             top: 8,
-                            right: 8,
-                            child: WishlistButton(event: event, containerSize: 28, showShadow: true),
+                            left: 8,
+                            child: ShiningStarBadge(size: 40),
                           ),
-                          // Bottom black banner
-                          if (event.tag != null)
-                            Positioned(
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              child: Container(
-                                color: Colors.black.withOpacity(0.8),
-                                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                                child: Text(
-                                  event.tag!,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 10,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ),
                         ],
                       ),
                     ),
-                    
-                    // Right Content Area
+                    // Right content
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          // The CTA used to sit at the bottom of this column;
+                          // without it the content bunched at the top and left
+                          // ~40% of the card blank. Spreading the blocks evenly
+                          // (rather than stacking them with fixed gaps) lets the
+                          // data occupy the full card height.
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            // "Sensory Friendly" pill — animated pink→purple
+                            // gradient that slides continuously (medium pace).
+                            if (event.tag != null)
+                              AnimatedGradientTag(
+                                text: event.tag!,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                softWrap: false,
+                                showChrome: false,
+                                period: const Duration(seconds: 4),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 3),
+                                borderRadius: BorderRadius.circular(20),
+                                gradientColors: const [
+                                  Color(0xFFF53C9B), // pink
+                                  Color(0xFFB13CF5), // purple
+                                  Color(0xFFF53C9B), // pink (seamless loop)
+                                ],
+                              ),
+                            // Title
+                            Text(
+                              event.title,
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 16),
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            // Location
+                            Row(
                               children: [
-                                Text(
-                                  event.title,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF1A1A2E),
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 6),
-                                // Stars + review count
-                                Row(
-                                  children: [
-                                    const Icon(Icons.star, size: 14, color: Colors.amber),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      event.reviewCount ?? '3.5k reviews',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 11,
-                                        color: Colors.grey,
-                                      ),
+                                const Icon(Icons.location_on_outlined,
+                                    size: 14, color: AppColors.textSecondary),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    event.venue,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 13),
+                                      color: AppColors.textSecondary,
                                     ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Price - ₹${event.price?.toInt() ?? 200}',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF1A1A2E),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
-                            
-                            // Button row
-                            SizedBox(
-                              width: double.infinity,
-                              height: Responsive.h(context, 38, min: 32),
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => EventDetailScreen(event: event),
-                                    ),
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFFFCC00),
-                                  foregroundColor: const Color(0xFF1A1A2E),
-                                  elevation: 0,
-                                  padding: EdgeInsets.zero,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                                child: Text(
-                                  'Shop Now',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: Responsive.sp(context, 12),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
+                            // Age Group · Date & Time · Distance (mock data).
+                            // Sized up from the defaults so the meta block
+                            // carries its share of the reclaimed height.
+                            ListingMetaRows(
+                              event: event,
+                              // Font stays at the default 11 — 12 pushed the
+                              // date/time line past the column width again.
+                              // Only the row gap opens up.
+                              rowGap: 8,
                             ),
                           ],
                         ),
@@ -176,11 +170,14 @@ class SpecialNeedsSection extends StatelessWidget {
                     ),
                   ],
                 ),
+                ),
               );
             },
           ),
         ),
       ],
+        );
+      },
     );
   }
 }

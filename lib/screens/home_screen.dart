@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:showcaseview/showcaseview.dart';
-import '../core/responsive.dart';
 import '../data/dummy_data.dart';
 import '../providers/location_state.dart';
-import '../sections/home_header.dart';
-import '../widgets/banner_carousel.dart';
+import '../providers/saved_events_state.dart';
+import '../providers/notifications_state.dart';
+import '../services/push_notifications.dart';
+import '../providers/home_feed_state.dart';
+import '../widgets/dark_glow_header.dart';
+import '../widgets/spotlight_banner.dart';
 import '../widgets/categories_grid.dart';
-import '../widgets/section_divider_widget.dart';
 import '../widgets/empty_location_widget.dart';
 import '../sections/hot_picks_section.dart';
 import '../sections/weekend_special_section.dart';
@@ -15,7 +17,10 @@ import '../sections/special_needs_section.dart';
 import '../sections/stealers_section.dart';
 import '../sections/discover_near_you_section.dart';
 import '../sections/family_feels_section.dart';
+import '../sections/new_on_the_block_section.dart';
+import '../sections/parents_favorite_section.dart';
 import '../sections/app_footer.dart';
+import '../widgets/app_refresh_indicator.dart';
 import '../widgets/floating_navbar.dart';
 import '../helpers/walkthrough_keys.dart';
 import '../services/walkthrough_service.dart';
@@ -24,6 +29,8 @@ import 'events_screen.dart';
 import 'classes_screen.dart';
 import 'programs_screen.dart';
 import 'venues_screen.dart';
+import '../core/launch_location.dart';
+import '../core/listing_source.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -35,17 +42,83 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool _shouldShowIntro = false;
 
+  final ScrollController _scrollController = ScrollController();
+  // 0 = floating navbar fully hidden (top of page), 1 = fully revealed. Driven
+  // by scroll offset so the navbar fades + slides into view once the reader
+  // scrolls past the hero (Explore the Stage scrolling away).
+  final ValueNotifier<double> _navReveal = ValueNotifier<double>(0.0);
+
+  // Navbar begins revealing after this much scroll and is fully in by the end.
+  static const double _navFadeStart = 120;
+  static const double _navFadeEnd = 280;
+
   @override
   void initState() {
     super.initState();
-    ShowcaseView.register();
+    _scrollController.addListener(_onScroll);
+    // Ask for location permission and take the city from the device fix. The
+    // city starts unset (no Mumbai default); if this is declined, Home shows
+    // "Location not selected" until the customer picks one.
+    LaunchLocation.detect();
+    // Defensive — register can throw if a stale registration from a
+    // previous HomeScreen still owns the singleton (happens during
+    // pushAndRemoveUntil when the new HomeScreen's initState fires before
+    // the old HomeScreen's dispose).
+    try {
+      ShowcaseView.register();
+    } catch (_) {}
     _checkAndStartWalkthrough();
+    // Pull the unread notification count so the header bell badge is accurate
+    // as soon as the home screen appears (after login / session restore).
+    NotificationsState.refreshFromApi();
+    // Mirror any new in-app notifications to the system tray, and make sure
+    // this device's push token is registered with the backend (covers the
+    // fresh-login path — main() only does this on a restored session).
+    NotificationsState.syncAndNotify();
+    PushNotifications.registerToken();
+    // Load the real homepage feed (sections + hydrated cards). Sections
+    // render reactively once this completes; until then, and if it cannot be
+    // reached, they show their mock set.
+    // The section widgets watch HomeFeedState.version themselves; the
+    // spotlight banner is built here, so this screen has to repaint too.
+    HomeFeedState.version.addListener(_onFeedChanged);
+    HomeFeedState.load();
   }
 
   @override
   void dispose() {
-    ShowcaseView.get().unregister();
+    HomeFeedState.version.removeListener(_onFeedChanged);
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _navReveal.dispose();
+    // Same defensive guard. get() resolves to the *current* singleton,
+    // which during a HomeScreen replacement may already be the NEW one;
+    // .unregister() there would either unregister the wrong instance or
+    // throw and crash the dispose path.
+    try {
+      ShowcaseView.get().unregister();
+    } catch (_) {}
     super.dispose();
+  }
+
+  void _onFeedChanged() {
+    if (mounted) setState(() {});
+  }
+
+  void _onScroll() {
+    final double offset = _scrollController.offset;
+    final double t = ((offset - _navFadeStart) / (_navFadeEnd - _navFadeStart))
+        .clamp(0.0, 1.0);
+    if (_navReveal.value != t) _navReveal.value = t;
+  }
+
+  // Pull-to-refresh: reload live wishlist/saved state and rebuild the feed.
+  Future<void> _handleRefresh() async {
+    await Future.wait([
+      SavedEventsState.loadFromApi(),
+      HomeFeedState.load(force: true),
+    ]);
+    if (mounted) setState(() {});
   }
 
   Future<void> _checkAndStartWalkthrough() async {
@@ -56,17 +129,24 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _launchWalkthrough() async {
-    await showGeneralDialog<void>(
+    // true = "Take the Tour", false/null = "Skip for now" or dismissed. Only
+    // the former should actually start the coach-mark sequence — the intro
+    // used to have no way out at all, so every path led into the tour.
+    final wantsTour = await showGeneralDialog<bool>(
       context: context,
       barrierDismissible: false,
       barrierLabel: '',
       barrierColor: Colors.transparent,
       transitionDuration: Duration.zero,
       pageBuilder: (ctx, _, __) => WalkthroughIntroOverlay(
-        onNext: () => Navigator.of(ctx).pop(),
+        onNext: () => Navigator.of(ctx).pop(true),
+        onSkip: () => Navigator.of(ctx).pop(false),
       ),
     );
-    if (!mounted) return;
+    if (!mounted || wantsTour != true) return;
+    // Reveal the floating navbar for the onboarding tour (it starts hidden at
+    // the top of the page, but the walkthrough highlights the nav tabs).
+    _navReveal.value = 1.0;
     ShowcaseView.get().startShowCase(WalkthroughKeys.orderedKeys);
   }
 
@@ -82,12 +162,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+
+
   int _currentNavIndex = 0;
 
   void _onNavTapped(int index) {
     if (index == _currentNavIndex) return;
     
-    // Only handling Home -> Events routing for now.
     if (index == 1) { // Events
       Navigator.push(
         context,
@@ -123,10 +204,19 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  /// The dark Home header — TLB logo + greeting + search on a black backdrop
+  /// with a warm golden radiance glowing from the top (behind the logo / status
+  /// bar) and fading into the black toward the search bar.
+  Widget _darkHeader() {
+    return DarkGlowHeader(
+      profileShowcaseConfig: kProfileShowcaseConfig,
+      locationShowcaseConfig: kLocationShowcaseConfig,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final safeBottom = MediaQuery.of(context).padding.bottom;
-
+    ListingSource.mark(context, ListingSource.homepage);
     if (_shouldShowIntro) {
       _shouldShowIntro = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -134,77 +224,166 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
 
+    // Extra bottom space so the last section isn't hidden behind the
+    // floating navbar (which is overlaid via Positioned).
+    final double navOverlap = FloatingNavbar.clearance(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          Column(
-            children: [
-              // Fixed header at top
-              HomeHeader(
-                profileShowcaseConfig: kProfileShowcaseConfig,
-                locationShowcaseConfig: kLocationShowcaseConfig,
-              ),
-
-              // Scrollable feed or Empty State
-              Expanded(
-                child: ValueListenableBuilder<String>(
-                  valueListenable: LocationState().selectedCity,
-                  builder: (context, city, _) {
-                    if (!LocationState().isLocationSupported(city)) {
-                      return const EmptyLocationWidget();
-                    }
-                      return SingleChildScrollView(
-                        physics: const ClampingScrollPhysics(),
+          // Single scroll view — the gradient header scrolls together with
+          // the rest of the page so the whole screen feels like one
+          // continuous surface (Session-48 fix for the "partial scroll" bug).
+          ValueListenableBuilder<String>(
+            valueListenable: LocationState().selectedCity,
+            builder: (context, city, _) {
+              // The curated spotlight, or the mock posters until the feed
+              // is in.
+              final isLoaded = HomeFeedState.isLoaded;
+              final spotlight = isLoaded ? HomeFeedState.section('spotlight') : DummyData.bannerEvents;
+              // Nothing to show: a city we don't serve, or one where none of
+              // the curated listings are.
+              final showEmpty = !LocationState().isLocationSupported(city) ||
+                  HomeFeedState.isEmptyForCity;
+              // Black behind the empty state, filling the whole screen. A
+              // non-positioned Stack child only gets loose constraints, so the
+              // scroll view shrank to its content and the white Scaffold showed
+              // through below it; SizedBox.expand makes it take the full height.
+              return SizedBox.expand(
+                child: ColoredBox(
+                color: showEmpty ? Colors.black : Colors.white,
+                child: AppRefreshIndicator(
+                onRefresh: _handleRefresh,
+                child: SingleChildScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ── Body: empty state OR one-viewport hero + feed ──
+                    if (showEmpty) ...[
+                      _darkHeader(),
+                      SizedBox(
+                        // Fill the viewport beneath the header so the empty
+                        // state centres in the space that's left.
+                        height: (MediaQuery.of(context).size.height -
+                                MediaQuery.of(context).padding.top -
+                                150)
+                            .clamp(380.0, double.infinity)
+                            .toDouble(),
+                        child: EmptyLocationWidget(
+                          onDark: true,
+                          // Nothing chosen or detected yet (permission
+                          // declined, or still being asked) rather than a
+                          // city we don't serve.
+                          notSelected: !LocationState().hasCity,
+                        ),
+                      ),
+                    ] else ...[
+                      // Black hero: header + a tall Spotlight card + Explore the
+                      // Stage. The floating navbar is hidden here (revealed on
+                      // scroll), so the hero owns the whole first screen.
+                      ColoredBox(
+                        color: Colors.black,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Spotlight section divider
-                            const SectionDividerWidget(title: 'Spotlight'),
-                            RepaintBoundary(
-                              child: BannerCarousel(
-                                events: DummyData.bannerEvents,
-                                height: Responsive.h(context, 386, min: 286),
+                            _darkHeader(),
+                            // Collapsed outright when there is nothing to
+                            // show — a fixed-height slot around an empty
+                            // banner left a screen-tall black gap here.
+                            if (spotlight.isNotEmpty)
+                              RepaintBoundary(
+                                child: SizedBox(
+                                  height: (MediaQuery.of(context).size.height *
+                                          0.62)
+                                      .clamp(420.0, 660.0),
+                                  child: SpotlightBanner(events: spotlight, isLoading: !isLoaded),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 24),
-                            
-                            // Categories Grid (3x2 layout)
                             const RepaintBoundary(child: CategoriesGrid()),
-                            
-                            const SizedBox(height: 8),
-                            
-                            // Sections
-                            const RepaintBoundary(child: HotPicksSection()),
-                            const RepaintBoundary(child: WeekendSpecialSection()),
-                            const RepaintBoundary(child: DiscoverNearYouSection()),
-                            const RepaintBoundary(child: FamilyFeelsSection()),
-                            
-                            const RepaintBoundary(child: TlbSignatureSection()),
-                            const RepaintBoundary(child: SpecialNeedsSection()),
-                            const RepaintBoundary(child: StealersSection()),
-
-                            // AppFooter with upward gradient
-                            const AppFooter(),
                           ],
                         ),
-                    );
-                  },
+                      ),
+
+                      // The black hero ends cleanly here — the white feed below
+                      // starts directly, with no grey black→white blend.
+
+                      // Sections
+                      const RepaintBoundary(child: HotPicksSection()),
+                      const RepaintBoundary(child: WeekendSpecialSection()),
+                      const RepaintBoundary(child: DiscoverNearYouSection()),
+                      const RepaintBoundary(child: FamilyFeelsSection()),
+                      const RepaintBoundary(child: NewOnTheBlockSection()),
+                      const RepaintBoundary(child: ParentsFavoriteSection()),
+                      const RepaintBoundary(child: StealersSection()),
+                      // "Where Every Star Shines" (renamed Special Needs)
+                      const RepaintBoundary(child: SpecialNeedsSection()),
+                      const RepaintBoundary(child: TlbSignatureSection()),
+
+                      // AppFooter — the full black starry footer (quote, logo,
+                      // links) stretched past the floating navbar (bottomExtra)
+                      // so there's no gap at the screen bottom.
+                      AppFooter(bottomExtra: navOverlap),
+                    ],
+                  ],
+                ),
                 ),
               ),
-            ],
+              ),
+              );
+            },
           ),
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
-            child: Align(
-              alignment: Alignment.center,
-              child: FloatingNavbar(
-                currentIndex: _currentNavIndex,
-                onTap: _onNavTapped,
-                bottomPadding: safeBottom > 0 ? safeBottom + 15 : 30,
-                showcaseConfigs: kNavShowcaseConfigs,
+            // Hidden at the top of the page; materialises into view as the
+            // reader scrolls past the hero — multi-layered reveal: eased
+            // opacity bloom, gentle scale-up, reduced slide, and a soft
+            // backdrop blur that gives the pill a glassmorphic entrance.
+            child: ValueListenableBuilder<double>(
+              valueListenable: _navReveal,
+              builder: (context, t, child) {
+                // Apply easing curves so the animation feels organic rather
+                // than mechanically linear. Opacity leads (appears early),
+                // scale and slide follow a slightly snappier curve.
+                final double easedOpacity =
+                    Curves.easeOutCubic.transform(t);
+                final double easedMotion =
+                    Curves.easeOutQuart.transform(t);
+
+                // Scale: the pill starts slightly smaller (0.92) and grows
+                // to full size, giving the feel of rising toward the viewer.
+                final double scale = 0.92 + 0.08 * easedMotion;
+
+                // Slide: 40px upward travel (down from 60) — enough motion
+                // to feel deliberate but not jarring.
+                final double slideY = (1 - easedMotion) * 40;
+
+                return IgnorePointer(
+                  ignoring: t < 0.05,
+                  child: Opacity(
+                    opacity: easedOpacity,
+                    child: Transform.translate(
+                      offset: Offset(0, slideY),
+                      child: Transform.scale(
+                        scale: scale,
+                        alignment: Alignment.bottomCenter,
+                        child: child,
+                      ),
+                    ),
+                  ),
+                );
+              },
+              child: Align(
+                alignment: Alignment.center,
+                child: FloatingNavbar(
+                  currentIndex: _currentNavIndex,
+                  onTap: _onNavTapped,
+                  bottomPadding: FloatingNavbar.bottomInset(context),
+                  showcaseConfigs: kNavShowcaseConfigs,
+                ),
               ),
             ),
           ),

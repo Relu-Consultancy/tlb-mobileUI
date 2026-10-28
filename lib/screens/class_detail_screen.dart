@@ -1,15 +1,34 @@
 import 'package:flutter/material.dart';
+import '../core/listing_image.dart';
+import '../core/app_colors.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/app_snackbar.dart';
+import '../core/share_helper.dart';
+import '../providers/auth_state.dart';
+import '../providers/location_state.dart';
+import '../widgets/login_sheet.dart';
 import '../core/responsive.dart';
+import '../core/time_format.dart';
 import '../widgets/wishlist_button.dart';
-import '../providers/user_reviews_state.dart';
+import '../widgets/review_sheet.dart';
+import '../widgets/organizer_card.dart';
+import '../widgets/detail_sections.dart';
+import '../widgets/upcoming_events_section.dart';
 import '../models/event_model.dart';
+import '../models/api_class_model.dart';
+import '../services/classes_listing_service.dart';
+import '../services/review_service.dart';
+import '../models/api_review_model.dart';
+import '../widgets/app_loader.dart';
 import 'gallery_screen.dart';
-import 'organizer_profile_screen.dart';
 import 'select_batch_screen.dart';
-import '../widgets/inquire_now_sheet.dart';
+import '../widgets/enquire_now_sheet.dart';
+import '../core/date_format.dart';
+import '../core/listing_source.dart';
+import '../services/activity_service.dart';
 
-class ClassDetailScreen extends StatelessWidget {
+class ClassDetailScreen extends StatefulWidget {
   final EventModel event;
   final String buttonLabel;
   final VoidCallback? onBookTapped;
@@ -17,22 +36,208 @@ class ClassDetailScreen extends StatelessWidget {
   const ClassDetailScreen({
     super.key,
     required this.event,
-    this.buttonLabel = 'Check Availability',
+    this.buttonLabel = 'Send Enquiry',
     this.onBookTapped,
   });
 
   @override
+  State<ClassDetailScreen> createState() => _ClassDetailScreenState();
+}
+
+class _ClassDetailScreenState extends State<ClassDetailScreen> {
+  ApiClassDetail? _detail;
+  bool _isLoading = false;
+  String? _error;
+
+  ApiReviewPage? _reviewPage;
+  bool _reviewLoading = false;
+
+  bool get _hasApiId => widget.event.id.isNotEmpty;
+
+  // ── Derived display helpers ──
+  /// True when there is anything to put in the Terms & Conditions sheet.
+  /// The API returns a single `terms` object; `cancellation_policy` and
+  /// `refund_policy` are only present on classes, so both are checked.
+  bool get _hasTerms =>
+      (_detail?.terms?.hasContent ?? false) ||
+      (_detail?.cancellationPolicy?.isNotEmpty == true) ||
+      (_detail?.refundPolicy?.isNotEmpty == true);
+
+  String get _title => _detail?.title ?? widget.event.title;
+  String get _tag => _detail?.subcategory?.name ?? _detail?.category.name ?? widget.event.tag ?? 'Class';
+  String get _coverUrl => _detail?.coverUrl ?? widget.event.imagePath;
+
+  /// Image URLs for the gallery row — real media if present, else the cover.
+  List<String> get _galleryImages {
+    final media =
+        _detail?.media.where((m) => m.mediaType != 'cover').toList() ?? [];
+    if (media.isNotEmpty) return media.map((m) => m.url).toList();
+    return [_coverUrl];
+  }
+
+  Future<void> _openDirections() async {
+    if (!AuthState.isLoggedIn.value) {
+      showLoginSheet(context);
+      return;
+    }
+    if (LocationState().selectedCity.value == 'Bhopal City') {
+      if (mounted) AppSnackBar.show(context, 'Please set your current location');
+      return;
+    }
+    // The full street address, not the area/city summary: it routes to the
+    // actual door rather than the middle of the neighbourhood.
+    final destination = Uri.encodeComponent(_addressText);
+    final url = Uri.parse(
+        'https://www.google.com/maps/dir/?api=1&destination=$destination');
+    try {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      if (mounted) AppSnackBar.error(context, 'Could not open map.');
+    }
+  }
+  String? get _description => _detail?.description ?? widget.event.description;
+
+  String get _locationText {
+    if (_detail == null) return widget.event.venue;
+    if (_detail!.mode == 'online') return 'Online';
+    final parts = <String>[];
+    if (_detail!.area != null && _detail!.area!.isNotEmpty) parts.add(_detail!.area!);
+    if (_detail!.city.isNotEmpty) parts.add(_detail!.city);
+    return parts.isEmpty ? 'Location TBA' : parts.join(', ');
+  }
+
+  bool get _isOnline => _detail?.mode == 'online';
+
+  /// Languages the partner set on the listing, or null when they set none —
+  /// in which case the row is left off rather than shown blank.
+  String? get _languageText => _detail?.languageLabel;
+
+  /// What the location row shows. Prefers the full street address — the map
+  /// card that used to carry it is gone, so this row is now its only home —
+  /// and falls back to the area/city summary (or "Online") otherwise.
+  String get _addressText {
+    if (_isOnline) return _locationText;
+    final address = _detail?.address?.trim();
+    return (address != null && address.isNotEmpty) ? address : _locationText;
+  }
+
+  String get _scheduleText {
+    if (_detail == null) return widget.event.eventDate ?? 'Schedule TBA';
+    if (_detail!.batches.isNotEmpty) {
+      final b = _detail!.batches.first;
+      final days = DateFormat.weekdayList(b.days);
+      return '$days • ${TimeFormat.h12(b.startTime)} – ${TimeFormat.h12(b.endTime)}';
+    }
+    return 'Schedule TBA';
+  }
+
+  EventModel get _eventForSheets => EventModel(
+    id: _detail?.id ?? widget.event.id,
+    title: _title,
+    venue: _locationText,
+    imagePath: _coverUrl,
+    tag: _tag.isNotEmpty ? _tag : null,
+    price: _detail?.price ?? widget.event.price,
+    rating: _detail?.averageRating ?? widget.event.rating,
+    reviewCount: _detail != null && _detail!.totalReviews > 0
+        ? '(${_detail!.totalReviews} reviews)'
+        : widget.event.reviewCount,
+  );
+
+  /// Whether this open has been reported. A State lives for exactly one
+  /// open of the screen, so the flag makes it once per open however often
+  /// dependencies change or the screen rebuilds.
+  bool _viewTracked = false;
+
+  /// Where this open came from (a [ListingSource] value), or null when the
+  /// screen it was opened from isn't a tagged surface.
+  String? _source;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_viewTracked) return;
+    _viewTracked = true;
+    // A Listing View: feeds the partner's view counts, conversion and
+    // traffic sources. Read here rather than at the call sites so no way of
+    // opening a listing can miss it; needs the route, hence not initState.
+    _source = ListingSource.originOf(context);
+    // The backend records the view from the detail GET, with _source as its
+    // utm_source. view_listing is for backends from before that change —
+    // newer ones ignore it, so the open is never counted twice.
+    ActivityService.trackListingView(
+      listingId: widget.event.id,
+      source: _source,
+    );
+    if (_hasApiId) _fetchDetail();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // The detail fetch starts in didChangeDependencies, once the source is
+    // known.
+    if (_hasApiId) _fetchReviews();
+  }
+
+  Future<void> _fetchReviews() async {
+    setState(() => _reviewLoading = true);
+    try {
+      final page = await ReviewService.fetchReviews(widget.event.id, pageSize: 3);
+      if (!mounted) return;
+      setState(() { _reviewPage = page; _reviewLoading = false; });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _reviewLoading = false);
+    }
+  }
+
+  Future<void> _fetchDetail() async {
+    setState(() { _isLoading = true; _error = null; });
+    try {
+      final detail = await ClassesListingService.fetchClassDetail(
+        widget.event.id,
+        token: AuthState.isLoggedIn.value ? AuthState.accessToken : null,
+        source: _source,
+      );
+      if (!mounted) return;
+      setState(() { _detail = detail; _isLoading = false; });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() { _error = e.toString().replaceFirst('Exception: ', ''); _isLoading = false; });
+    }
+  }
+
+  static String _capitalize(String s) => s.isEmpty ? s : '${s[0].toUpperCase()}${s.substring(1)}';
+
+  @override
   Widget build(BuildContext context) {
+    ListingSource.mark(context, ListingSource.recommendation);
+    if (_isLoading) {
+      return const Scaffold(backgroundColor: Colors.white, body: AppLoader());
+    }
+    if (_error != null && _detail == null) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Icon(Icons.wifi_off_rounded, size: 48, color: Colors.grey),
+          const SizedBox(height: 16),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 32), child: Text(_error!, textAlign: TextAlign.center, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: Colors.grey.shade600))),
+          const SizedBox(height: 20),
+          ElevatedButton(onPressed: _fetchDetail, style: ElevatedButton.styleFrom(backgroundColor: AppColors.textSecondary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12)), child: Text('Retry', style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w500))),
+        ])),
+      );
+    }
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: kDetailBg,
       body: Stack(
         children: [
           CustomScrollView(
             slivers: [
               SliverAppBar(
-                backgroundColor: Colors.white,
-                surfaceTintColor: Colors.white,
-                expandedHeight: Responsive.h(context, 300, min: 220),
+                backgroundColor: kDetailBg,
+                surfaceTintColor: kDetailBg,
+                expandedHeight: Responsive.h(context, 250, min: 210),
                 pinned: true,
                 leading: Container(
                   margin: const EdgeInsets.all(8),
@@ -41,7 +246,7 @@ class ClassDetailScreen extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E), size: 20),
+                    icon: const Icon(Icons.arrow_back, color: AppColors.textSecondary, size: 20),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
@@ -49,7 +254,7 @@ class ClassDetailScreen extends StatelessWidget {
                   Container(
                     margin: const EdgeInsets.symmetric(vertical: 8),
                     child: WishlistButton(
-                      event: event,
+                      event: _eventForSheets,
                       containerSize: 40,
                       showShadow: false,
                     ),
@@ -62,24 +267,36 @@ class ClassDetailScreen extends StatelessWidget {
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.share_outlined, color: Color(0xFF1A1A2E), size: 20),
-                      onPressed: () {},
+                      icon: const Icon(Icons.share_outlined, color: AppColors.textSecondary, size: 20),
+                      onPressed: () => ShareHelper.shareListing(
+                        context,
+                        type: 'class',
+                        title: _title,
+                        id: _detail?.id ?? widget.event.id,
+                      ),
                     ),
                   ),
                 ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: ClipRRect(
                     borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
-                    child: Image.asset(
-                      event.imagePath,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        color: Colors.grey.shade300,
-                        child: const Center(
-                          child: Icon(Icons.school, size: 60, color: Colors.grey),
-                        ),
-                      ),
-                    ),
+                    child: _coverUrl.isEmpty
+                        ? Container(
+                              color: Colors.grey.shade300,
+                              child: const Center(child: Icon(Icons.school, size: 60, color: Colors.grey)),
+                            )
+                        // Downsized to screen width (a raw Image.network decoded a
+                        // 1837x10000 upload at full size, ~73 MB) and anchored at the top,
+                        // so an unusually tall cover shows its heading, not its middle.
+                        : listingImageSource(
+                            _coverUrl,
+                            fit: BoxFit.cover,
+                            alignment: Alignment.topCenter,
+                            errorBuilder: (_, __, ___) => Container(
+                              color: Colors.grey.shade300,
+                              child: const Center(child: Icon(Icons.school, size: 60, color: Colors.grey)),
+                            ),
+                          ),
                   ),
                 ),
               ),
@@ -91,24 +308,7 @@ class ClassDetailScreen extends StatelessWidget {
                     const SizedBox(height: 16),
 
                     // Tag
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFCC00),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          event.tag ?? 'Class',
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
+                    if (_tag.isNotEmpty) DetailCategoryTag(_tag),
 
                     const SizedBox(height: 12),
 
@@ -116,92 +316,45 @@ class ClassDetailScreen extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
-                        event.title,
+                        _title,
                         style: GoogleFonts.poppins(
                           fontSize: Responsive.sp(context, 20),
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1A1A2E),
+                          color: AppColors.textSecondary,
                         ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    // Rating
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          Row(
-                            children: List.generate(
-                              4,
-                              (index) => const Icon(Icons.star, color: Colors.amber, size: 18),
-                            ),
-                          ),
-                          const Icon(Icons.star_half, color: Colors.amber, size: 18),
-                          const SizedBox(width: 8),
-                          Text(
-                            event.reviewCount ?? '(124 reviews)',
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                        ],
                       ),
                     ),
 
                     const SizedBox(height: 20),
 
                     // Location
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.location_on_outlined, size: 20, color: Colors.grey),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              event.venue,
-                              style: GoogleFonts.poppins(
-                                fontSize: 13,
-                                color: const Color(0xFF1A1A2E),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    DetailLocationRow(
+                      text: _addressText,
+                      icon: _isOnline
+                          ? Icons.videocam_outlined
+                          : Icons.location_on_outlined,
+                      // Online classes have no address to route to.
+                      onNavigate: _isOnline ? null : _openDirections,
                     ),
 
-                    const SizedBox(height: 12),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Divider(height: 24, thickness: 1, color: kRowDivider),
+                    ),
 
                     // Schedule
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.calendar_today_outlined, size: 20, color: Colors.grey),
-                          ),
+                          const DetailRowIcon(Icons.calendar_today_outlined),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              event.eventDate ?? 'Mon, Wed, Fri • 4:00 – 5:00 PM',
+                              _scheduleText,
                               style: GoogleFonts.poppins(
-                                fontSize: 13,
-                                color: const Color(0xFF1A1A2E),
+                                fontSize: Responsive.sp(context, 13),
+                                color: AppColors.textSecondary,
                               ),
                             ),
                           ),
@@ -209,478 +362,123 @@ class ClassDetailScreen extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // About Class
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8F9FA),
-                        borderRadius: BorderRadius.circular(12),
+                    if ((_description ?? '').isNotEmpty)
+                      ExpandableAboutCard(
+                        title: 'About Class',
+                        text: _description!,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'About Class',
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1A1A2E),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            event.description ??
-                                'Join our expertly guided class and develop new skills in a fun, supportive environment. Sessions are designed for all levels, from beginners to advanced learners.',
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              color: Colors.grey.shade600,
-                              height: 1.5,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          GestureDetector(
-                            onTap: () {},
-                            child: Text(
-                              'Learn More',
-                              style: GoogleFonts.poppins(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF3B82F6),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // Things to Know
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'Things to Know',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1A1A2E),
-                        ),
-                      ),
-                    ),
+                    const DetailSectionTitle('Things to Know'),
                     const SizedBox(height: 12),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Column(
                         children: [
-                          _buildInfoRow(Icons.group_outlined, 'Age Group', '6 - 16 yrs'),
-                          const Divider(height: 16, color: Color(0xFFEEEEEE)),
-                          _buildInfoRow(Icons.translate, 'Language', 'English'),
-                          const Divider(height: 16, color: Color(0xFFEEEEEE)),
-                          _buildInfoRow(Icons.event_seat_outlined, 'Slots Available', '12 Slots available'),
+                          // The stated range, or no row. The old else
+                          // branch printed '6 - 16 yrs' for every class
+                          // whose API record carries no age at all.
+                          if (_detail?.ageGroup != null && _detail!.ageGroup!.displayRange.isNotEmpty) ...[
+                            _buildInfoRow(Icons.group_outlined, 'Age Group', _detail!.ageGroup!.displayRange),
+                            const Divider(height: 16, color: Color(0xFFEEEEEE)),
+                          ],
+                          if (_detail != null && _detail!.format.isNotEmpty) ...[
+                            _buildInfoRow(Icons.style_outlined, 'Format', _capitalize(_detail!.format)),
+                            const Divider(height: 16, color: Color(0xFFEEEEEE)),
+                          ],
+                          if (_detail != null && _detail!.mode.isNotEmpty)
+                            _buildInfoRow(
+                              _detail!.mode == 'online' ? Icons.videocam_outlined : Icons.place_outlined,
+                              'Mode',
+                              _capitalize(_detail!.mode),
+                            )
+                          else
+                            _buildInfoRow(Icons.event_seat_outlined, 'Slots Available', '12 Slots available'),
+                          if (_languageText != null) ...[
+                            const Divider(height: 16, color: Color(0xFFEEEEEE)),
+                            _buildInfoRow(
+                                Icons.translate, 'Language', _languageText!),
+                          ],
                         ],
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // Gallery
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Gallery',
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1A1A2E),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => GalleryScreen(event: event)),
-                            ),
-                            child: Text(
-                              'See All >',
-                              style: GoogleFonts.poppins(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF3B82F6),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'Sneak peek into what awaits you!',
-                        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      height: Responsive.h(context, 100, min: 80),
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: 4,
-                        itemBuilder: (context, index) {
-                          return Container(
-                            margin: const EdgeInsets.only(right: 12),
-                            width: Responsive.w(context, 120, min: 90),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: Colors.grey.shade200,
-                              image: DecorationImage(
-                                image: AssetImage(event.imagePath),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                    DetailGallery(
+                      images: _galleryImages,
+                      onSeeAll: () => Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => GalleryScreen(
+                              event: _eventForSheets,
+                              images: _galleryImages))),
                     ),
 
-                    const SizedBox(height: 24),
-
-                    // Location map
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'Location',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1A1A2E),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      height: Responsive.h(context, 180, min: 140),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        color: const Color(0xFFE8F0E8),
-                      ),
-                      child: Stack(
-                        children: [
-                          Positioned.fill(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: CustomPaint(painter: _MapPlaceholderPainter()),
-                            ),
-                          ),
-                          Positioned(
-                            top: 12,
-                            left: 0,
-                            right: 0,
-                            child: Icon(Icons.location_on, size: 36, color: Colors.red.shade600),
-                          ),
-                          Positioned.fill(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                gradient: LinearGradient(
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                  colors: [Colors.black.withOpacity(0.8), Colors.transparent],
-                                ),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 16,
-                            left: 16,
-                            right: 90,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  event.venue,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Free parking available on-site',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 11,
-                                    color: const Color(0xFFFFCC00),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                SizedBox(
-                                  height: Responsive.h(context, 44, min: 38),
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {},
-                                    icon: const Icon(Icons.directions, size: 16),
-                                    label: Text(
-                                      'Get Direction',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: Responsive.sp(context, 12),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFFFFCC00),
-                                      foregroundColor: const Color(0xFF1A1A2E),
-                                      elevation: 0,
-                                      minimumSize: const Size(0, 46),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
                     // Organizer
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => OrganizerProfileScreen(event: event)),
-                            ),
-                            child: Container(
-                              width: Responsive.w(context, 54, min: 46),
-                              height: Responsive.w(context, 54, min: 46),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 2),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(27),
-                                child: Image.asset(
-                                  'assets/images/new_home/profilepic.jpg',
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'ORGANIZED BY',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                    color: const Color(0xFFF5A623),
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Fun Event Co.',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF1A1A2E),
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  '1.2k Followers',
-                                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500),
-                                ),
-                              ],
-                            ),
-                          ),
-                          OutlinedButton(
-                            onPressed: () {},
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(color: Colors.grey.shade400),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                            ),
-                            child: Text(
-                              'Follow',
-                              style: GoogleFonts.poppins(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    OrganizerCard(
+                      listingId: widget.event.id,
+                      partnerId: _detail?.organizer?.partnerId,
+                      initialName: _detail?.organizer?.businessName,
+                      initialLogoUrl: _detail?.organizer?.logoUrl,
+                      listingType: 'class',
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
+
 
                     // Terms & Conditions
-                    GestureDetector(
+                    if (_hasTerms) DetailTermsRow(
                       onTap: () => _showTermsBottomSheet(context),
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.description_outlined, size: 24, color: Colors.grey.shade600),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Text(
-                                'Terms & Conditions',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF1A1A2E),
-                                ),
-                              ),
-                            ),
-                            Icon(Icons.chevron_right, color: Colors.blue.shade500, size: 24),
-                          ],
-                        ),
-                      ),
                     ),
 
-                    const SizedBox(height: 24),
+                    // FAQs
+                    if (_detail != null && _detail!.faqs.isNotEmpty && _hasTerms)
+                      const SizedBox(height: 16),
+                    if (_detail != null && _detail!.faqs.isNotEmpty)
+                      DetailTermsRow(
+                        title: 'FAQs',
+                        icon: Icons.help_outline,
+                        onTap: () =>
+                            showListingFaqsSheet(context, _detail!.faqs),
+                      ),
+
+                    const SizedBox(height: 32),
 
                     // Reviews
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Reviews',
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1A1A2E),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () => _showReviewsBottomSheet(context),
-                            child: Text(
-                              'See All >',
-                              style: GoogleFonts.poppins(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF3B82F6),
-                              ),
-                            ),
-                          ),
-                        ],
+                    if (_hasApiId) ...[
+                      const SizedBox(height: 8),
+                      buildReviewInlineSection(
+                        context,
+                        listingId: widget.event.id,
+                        listingTitle: _title,
+                        listingImage: _coverUrl,
+                        reviewPage: _reviewPage,
+                        isLoading: _reviewLoading,
+                        onRefresh: _fetchReviews,
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          Text(
-                            'Overall Rating: ',
-                            style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600),
-                          ),
-                          const Icon(Icons.star, color: Colors.amber, size: 18),
-                          Text(
-                            ' 4.5',
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1A1A2E),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildReviewCard('Rohit Sharma', 5, 'Amazing class! My kids improved so much. Highly recommended.'),
-                    _buildReviewCard('Priya Mehta', 4, 'Well organized and fun. Trainer is very patient and skilled.'),
+                    ],
 
-                    const SizedBox(height: 24),
-
-                    // Related Classes
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Related Classes',
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1A1A2E),
-                            ),
-                          ),
-                          Text(
-                            'See All >',
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF3B82F6),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      height: Responsive.h(context, 220, min: 180),
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        children: [
-                          _buildRelatedCard(context, 'Guitar Basics', 'assets/images/halloween_party.png', 'Music Hub, Bangalore', 'Beginner'),
-                          _buildRelatedCard(context, 'Yoga for Kids', 'assets/images/kids_party.png', 'Wellness Studio, Pune', 'All Levels'),
-                          _buildRelatedCard(context, 'Coding Club', 'assets/images/story_telling.png', 'TechSpace, Mumbai', 'Age 8–14'),
-                        ],
-                      ),
+                    // ── Upcoming Events ───────────────────────────────────
+                    UpcomingEventsSection(
+                      // Never advertise the listing being viewed.
+                      excludeListingId: widget.event.id,
                     ),
 
-                    const SizedBox(height: 100),
+                    SizedBox(height: Responsive.h(context, 100)),
                   ],
                 ),
               ),
             ],
           ),
 
-          // Sticky bottom bar with Check Availability
+          // Sticky bottom bar
           Positioned(
             left: 0,
             right: 0,
@@ -689,328 +487,68 @@ class ClassDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
               decoration: BoxDecoration(
                 color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 10,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 10, offset: const Offset(0, -2))],
               ),
-              child: Row(
-                children: [
-                  if (event.price != null)
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: '₹${event.price!.toStringAsFixed(0)}',
-                            style: GoogleFonts.poppins(
-                              fontSize: Responsive.sp(context, 20),
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1A1A2E),
-                            ),
-                          ),
-                          TextSpan(
-                            text: '/mo',
-                            style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                    ),
-                  if (event.price != null) const Spacer(),
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (buttonLabel == 'Send Enquiry') {
-                          showInquireNow(context);
-                        } else if (onBookTapped != null) {
-                          onBookTapped!();
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => SelectBatchScreen(event: event)),
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFCC00),
-                        foregroundColor: const Color(0xFF1A1A2E),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        buttonLabel,
-                        style: GoogleFonts.poppins(
-                          fontSize: Responsive.sp(context, 15),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  static final List<Map<String, dynamic>> _reviews = [
-    {'name': 'Laxman', 'stars': 4, 'comment': 'Fantastic experience! My kids loved every session.'},
-    {'name': 'Sameer', 'stars': 5, 'comment': 'Great instructor and very engaging curriculum.'},
-    {'name': 'Rohit Sharma', 'stars': 5, 'comment': 'Amazing class! Kids had a blast. Highly recommended for families.'},
-    {'name': 'Priya Mehta', 'stars': 4, 'comment': 'Well organized and fun. Trainer is very patient and skilled.'},
-  ];
-
-  void _showAddReviewBottomSheet(BuildContext context) {
-    int rating = 5;
-    final TextEditingController reviewController = TextEditingController();
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setState) {
-          return Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Write a Review',
-                          style: GoogleFonts.poppins(
-                            fontSize: Responsive.sp(context, 17),
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => Navigator.pop(ctx),
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(color: Colors.grey.shade200, shape: BoxShape.circle),
-                            child: const Icon(Icons.close, size: 20, color: Color(0xFF1A1A2E)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Tap to Rate:',
-                          style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: List.generate(5, (index) {
-                            return GestureDetector(
-                              onTap: () => setState(() => rating = index + 1),
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 8),
-                                child: Icon(
-                                  index < rating ? Icons.star : Icons.star_border,
-                                  color: Colors.amber,
-                                  size: 32,
+              child: Builder(builder: (context) {
+                final isDirectBooking =
+                    _detail?.bookingType == 'direct_booking';
+                final price = _detail?.price ?? widget.event.price;
+                final showPrice = isDirectBooking && price != null;
+                return Row(
+                  children: [
+                    if (showPrice)
+                      // No `from:` — a class fee is exact, not a floor.
+                      DetailPriceLabel('₹${price.toStringAsFixed(0)}'),
+                    // Fixed gap, not a Spacer with a flex:2 button: that
+                    // split the leftover 1:2 and could starve the CTA.
+                    if (showPrice) const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (!_hasApiId) {
+                            AppSnackBar.show(
+                              context,
+                              'This is a featured highlight, not a bookable class yet. Browse Classes to find one you can book.',
+                            );
+                            return;
+                          }
+                          if (isDirectBooking) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => SelectBatchScreen(
+                                  event: _eventForSheets,
+                                  batches: _detail?.batches ?? [],
                                 ),
                               ),
                             );
-                          }),
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          'Your Review:',
-                          style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)),
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: reviewController,
-                          maxLines: 4,
-                          decoration: InputDecoration(
-                            hintText: 'Share your experience about this class...',
-                            hintStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade400),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Color(0xFFFFCC00)),
-                            ),
-                            filled: true,
-                            fillColor: const Color(0xFFF8F9FA),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              final text = reviewController.text.trim();
-                              if (text.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Please write a review text first.')),
-                                );
-                                return;
-                              }
-                              final now = DateTime.now();
-                              final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                              final dateString = '${months[now.month - 1]} ${now.day}, ${now.year}';
-                              UserReviewsState().addReview({
-                                'eventName': event.title,
-                                'image': event.imagePath,
-                                'rating': rating,
-                                'date': dateString,
-                                'text': text,
-                                'helpful': 0,
-                              });
-                              Navigator.pop(ctx);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Review submitted successfully!')),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFFCC00),
-                              foregroundColor: const Color(0xFF1A1A2E),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                              elevation: 0,
-                            ),
-                            child: Text(
-                              'Submit Review',
-                              style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  void _showReviewsBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Reviews',
-                    style: GoogleFonts.poppins(
-                      fontSize: Responsive.sp(context, 17),
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF1A1A2E),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pop(ctx);
-                          _showAddReviewBottomSheet(context);
+                          } else {
+                            showEnquireNow(context,
+                                listingId: _detail?.id ?? widget.event.id);
+                          }
                         },
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(color: Colors.amber.shade100, shape: BoxShape.circle),
-                          child: const Icon(Icons.edit, size: 20, color: Color(0xFFDE7104)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryLight,
+                          foregroundColor: AppColors.textSecondary,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28)),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          isDirectBooking ? 'Check Availability' : 'Enquire Now',
+                          style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, 15),
+                              fontWeight: FontWeight.w600),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: () => Navigator.pop(ctx),
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(color: Colors.grey.shade200, shape: BoxShape.circle),
-                          child: const Icon(Icons.close, size: 20, color: Color(0xFF1A1A2E)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                );
+              }),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Overall Rating: 4.5', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500, color: const Color(0xFF1A1A2E))),
-                  const SizedBox(height: 6),
-                  Row(children: [...List.generate(4, (_) => const Icon(Icons.star, color: Colors.amber, size: 22)), const Icon(Icons.star_half, color: Colors.amber, size: 22)]),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Divider(height: 1),
-            Flexible(
-              child: ListView.separated(
-                shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                itemCount: _reviews.length,
-                separatorBuilder: (_, __) => Divider(height: 24, color: Colors.grey.shade300),
-                itemBuilder: (context, index) {
-                  final r = _reviews[index];
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(r['name'] as String, style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: List.generate(5, (i) => Icon(i < (r['stars'] as int) ? Icons.star : Icons.star_border, color: Colors.amber, size: 18)),
-                      ),
-                      const SizedBox(height: 6),
-                      Text('"${r['comment']}"', style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700, height: 1.4)),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -1036,14 +574,14 @@ class ClassDetailScreen extends StatelessWidget {
                 children: [
                   Text(
                     'Terms & Conditions',
-                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E)),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                   ),
                   GestureDetector(
                     onTap: () => Navigator.pop(ctx),
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(color: Colors.grey.shade200, shape: BoxShape.circle),
-                      child: const Icon(Icons.close, size: 20, color: Color(0xFF1A1A2E)),
+                      child: const Icon(Icons.close, size: 20, color: AppColors.textSecondary),
                     ),
                   ),
                 ],
@@ -1056,15 +594,22 @@ class ClassDetailScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Attendance & Participation', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
-                    const SizedBox(height: 10),
-                    _buildTermsBullet('Regular Attendance:', 'Students are expected to attend all scheduled sessions. Frequent absences may result in loss of the enrolled slot.'),
-                    _buildTermsBullet('Make-up Sessions:', 'Make-up sessions are subject to availability and must be requested at least 24 hours in advance.'),
-                    const SizedBox(height: 20),
-                    Text('Safety & Conduct', style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A2E))),
-                    const SizedBox(height: 10),
-                    _buildTermsBullet('Appropriate Attire:', 'Students must wear appropriate clothing and footwear as specified for each class type.'),
-                    _buildTermsBullet('Respectful Conduct:', 'All participants must treat instructors and fellow students with respect at all times.'),
+                    if (_detail?.terms?.content?.trim().isNotEmpty == true) ...[
+                      Text(_detail!.terms!.content!.trim(), style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
+                      const SizedBox(height: 20),
+                    ],
+                    if (_detail?.cancellationPolicy?.isNotEmpty == true) ...[
+                      Text('Cancellation Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
+                      const SizedBox(height: 10),
+                      Text(_detail!.cancellationPolicy!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
+                      const SizedBox(height: 20),
+                    ],
+                    if (_detail?.refundPolicy?.isNotEmpty == true) ...[
+                      Text('Refund Policy', style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
+                      const SizedBox(height: 10),
+                      Text(_detail!.refundPolicy!, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade700, height: 1.5)),
+                      const SizedBox(height: 20),
+                    ],
                   ],
                 ),
               ),
@@ -1075,142 +620,10 @@ class ClassDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTermsBullet(String label, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
-          const SizedBox(height: 4),
-          Text(text, style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700, height: 1.5)),
-        ],
-      ),
-    );
-  }
-
+  // Delegates to the shared DetailInfoRow (widgets/detail_sections.dart),
+  // which clamps a long value to one line with a measured "Show more"
+  // toggle instead of letting it run off the screen.
   Widget _buildInfoRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: Colors.grey.shade600),
-          const SizedBox(width: 12),
-          Text(label, style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade600)),
-          const Spacer(),
-          Text(value, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
-        ],
-      ),
-    );
+    return DetailInfoRow(icon: icon, label: label, value: value);
   }
-
-  Widget _buildReviewCard(String name, int stars, String review) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: const Color(0xFFF8F9FA), borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: Colors.grey.shade300,
-                child: Text(name[0], style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
-              ),
-              const SizedBox(width: 10),
-              Expanded(child: Text(name, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E)))),
-              Row(
-                children: List.generate(5, (i) => Icon(i < stars ? Icons.star : Icons.star_border, color: Colors.amber, size: 16)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(review, style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600, height: 1.4)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRelatedCard(BuildContext context, String title, String imagePath, String location, String tag) {
-    return Container(
-      width: Responsive.cardWidth(context, fraction: 0.41, max: 160),
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                child: Image.asset(
-                  imagePath,
-                  width: Responsive.cardWidth(context, fraction: 0.41, max: 160),
-                  height: Responsive.h(context, 120, min: 90),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Positioned(
-                top: 8,
-                left: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(color: const Color(0xFF0D9488), borderRadius: BorderRadius.circular(6)),
-                  child: Text(tag, style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.white)),
-                ),
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600, color: const Color(0xFF1A1A2E))),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(Icons.location_on_outlined, size: 12, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Expanded(child: Text(location, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.poppins(fontSize: 11, color: Colors.grey))),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MapPlaceholderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final bgPaint = Paint()..color = const Color(0xFFE8F0E8);
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), bgPaint);
-    final roadPaint = Paint()
-      ..color = const Color(0xFFD0D8D0)
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
-    for (double y = 0; y < size.height; y += 30) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), roadPaint);
-    }
-    for (double x = 0; x < size.width; x += 40) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), roadPaint);
-    }
-    final accentPaint = Paint()..color = const Color(0xFFC8E0C8)..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(size.width * 0.2, size.height * 0.3), 12, accentPaint);
-    canvas.drawCircle(Offset(size.width * 0.7, size.height * 0.6), 16, accentPaint);
-    canvas.drawCircle(Offset(size.width * 0.5, size.height * 0.15), 10, accentPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

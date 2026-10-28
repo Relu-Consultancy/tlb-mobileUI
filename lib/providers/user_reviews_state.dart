@@ -1,50 +1,88 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/api_review_model.dart';
+import '../providers/auth_state.dart';
+import '../services/review_service.dart';
 
 class UserReviewsState {
-  static final UserReviewsState _instance = UserReviewsState._internal();
-  factory UserReviewsState() => _instance;
-  UserReviewsState._internal();
+  static final ValueNotifier<List<ApiReview>> reviewsNotifier = ValueNotifier([]);
+  static bool _loaded = false;
 
-  final ValueNotifier<List<Map<String, dynamic>>> reviewsNotifier = ValueNotifier([
-    {
-      'eventName': 'Halloween Party 2025',
-      'image': 'assets/images/halloween_party.png',
-      'rating': 5,
-      'date': 'Feb 28, 2025',
-      'text':
-          'Absolutely amazing event! The decorations were top-notch and my kids had a blast. The storytelling session was the highlight. Would definitely recommend!',
-      'helpful': 12,
-    },
-    {
-      'eventName': 'World Storytelling Day',
-      'image': 'assets/images/story_telling.png',
-      'rating': 4,
-      'date': 'Feb 20, 2025',
-      'text':
-          'Great event with wonderful storytellers. The venue was a bit crowded but the overall experience was really enjoyable. Kids loved every minute of it.',
-      'helpful': 8,
-    },
-    {
-      'eventName': 'Art & Craft Workshop',
-      'image': 'assets/images/kids_party.png',
-      'rating': 5,
-      'date': 'Feb 15, 2025',
-      'text':
-          'Such a creative and fun workshop! The instructors were patient and encouraging. My daughter made a beautiful painting that we framed at home.',
-      'helpful': 15,
-    },
-    {
-      'eventName': 'Summer Dance Camp',
-      'image': 'assets/images/story_telling.png',
-      'rating': 3,
-      'date': 'Feb 10, 2025',
-      'text':
-          'The dance camp was okay. The choreography was interesting but the session felt a bit short. Would have liked more time for practice.',
-      'helpful': 3,
-    },
-  ]);
+  static const _prefsKey = 'user_reviews_v1';
 
-  void addReview(Map<String, dynamic> review) {
-    reviewsNotifier.value = [review, ...reviewsNotifier.value];
+  // ── Persistence ─────────────────────────────────────────────────────────────
+
+  static Future<void> _persist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final encoded = reviewsNotifier.value.map((r) => jsonEncode(r.toJson())).toList();
+      await prefs.setStringList(_prefsKey, encoded);
+    } catch (_) {}
+  }
+
+  static Future<void> _loadFromStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getStringList(_prefsKey) ?? [];
+      if (raw.isEmpty) return;
+      reviewsNotifier.value = List.unmodifiable(
+        raw.map((s) => ApiReview.fromJson(jsonDecode(s) as Map<String, dynamic>)).toList(),
+      );
+      _loaded = true;
+    } catch (_) {}
+  }
+
+  // ── Public API ───────────────────────────────────────────────────────────────
+
+  /// Fetches the authenticated customer's reviews from
+  /// `GET /api/v1/customer/reviews/` and caches them locally.
+  /// Falls back to local cache if the API is unreachable or the user
+  /// is not logged in. Never throws.
+  static Future<void> loadFromApi() async {
+    final token = AuthState.accessToken;
+    if (token == null) {
+      await _loadFromStorage();
+      return;
+    }
+    try {
+      final reviews = await ReviewService.fetchCustomerReviews(token);
+      reviewsNotifier.value = List.unmodifiable(reviews);
+      _loaded = true;
+      await _persist();
+    } catch (_) {
+      if (!_loaded) await _loadFromStorage();
+    }
+  }
+
+  static bool get isLoaded => _loaded;
+
+  /// Adds a new review or replaces an existing one (matched by id).
+  static Future<void> upsert(ApiReview review) async {
+    final current = List<ApiReview>.from(reviewsNotifier.value);
+    final idx = current.indexWhere((r) => r.id == review.id);
+    if (idx >= 0) {
+      current[idx] = review;
+    } else {
+      current.insert(0, review);
+    }
+    reviewsNotifier.value = List.unmodifiable(current);
+    await _persist();
+  }
+
+  static Future<void> remove(int reviewId) async {
+    reviewsNotifier.value = List.unmodifiable(
+      reviewsNotifier.value.where((r) => r.id != reviewId).toList(),
+    );
+    await _persist();
+  }
+
+  static Future<void> clear() async {
+    reviewsNotifier.value = [];
+    _loaded = false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_prefsKey);
+    } catch (_) {}
   }
 }

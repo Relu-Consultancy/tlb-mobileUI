@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
+import 'listing_meta_rows.dart';
 import '../screens/event_detail_screen.dart';
+import '../core/listing_image.dart';
 
 class PartnerPortraitCard extends StatelessWidget {
   final EventModel event;
@@ -27,6 +30,7 @@ class PartnerPortraitCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.08),
@@ -43,7 +47,7 @@ class PartnerPortraitCard extends StatelessWidget {
               borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
               child: AspectRatio(
                 aspectRatio: 0.78, // portrait poster
-                child: Image.asset(
+                child: listingImageSource(
                   event.imagePath,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
@@ -55,7 +59,7 @@ class PartnerPortraitCard extends StatelessWidget {
             ),
             // Content block under the poster
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -64,8 +68,8 @@ class PartnerPortraitCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                      fontSize: Responsive.sp(context, 16),
+                      fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
                   ),
@@ -75,40 +79,16 @@ class PartnerPortraitCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.poppins(
-                      fontSize: 12.5,
+                      fontSize: Responsive.sp(context, 12.5),
                       color: AppColors.textSecondary,
                       height: 1.3,
                     ),
                   ),
-                  const SizedBox(height: 14),
-                  // Full-width yellow pill Book Now
-                  SizedBox(
-                    width: double.infinity,
-                    height: 40,
-                    child: Material(
-                      color: const Color(0xFFFFB902),
-                      borderRadius: BorderRadius.circular(24),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(24),
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => EventDetailScreen(event: event),
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Book Now',
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  const SizedBox(height: 10),
+                  // Age Group · Date & Time · Distance, as the other section
+                  // cards show. Location is off: on this card `venue` carries
+                  // the partner's strapline, not a place.
+                  ListingMetaRows(event: event),
                 ],
               ),
             ),

@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../core/app_snackbar.dart';
+import '../core/avatar_image.dart';
+import '../core/phone_validation.dart';
+import '../core/responsive.dart';
+import '../widgets/app_dialog.dart';
 import '../providers/auth_state.dart';
-import 'change_password_screen.dart';
+import '../services/auth_service.dart';
+import '../widgets/app_loader.dart';
+import '../widgets/login_sheet.dart';
+import 'verify_contact_screen.dart';
 
 class AccountSettingsScreen extends StatelessWidget {
   const AccountSettingsScreen({super.key});
@@ -9,21 +18,21 @@ class AccountSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: AppColors.lightGray,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF2F2F7),
+        backgroundColor: AppColors.lightGray,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Account Settings',
           style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF1A1A2E),
+            fontSize: Responsive.sp(context, 18),
+            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -43,20 +52,22 @@ class AccountSettingsScreen extends StatelessWidget {
                   ValueListenableBuilder<String?>(
                     valueListenable: AuthState.avatarUrl,
                     builder: (context, url, _) {
-                      final email = AuthState.userEmail ?? 'No email provided';
-                      final profile = AuthState.userData?['profile'] as Map<String, dynamic>?;
-                      final String imageUrl;
-                      if (url != null && url.isNotEmpty) {
-                        imageUrl = url;
-                      } else {
-                        final initial = Uri.encodeComponent(
-                          (profile?['first_name'] as String? ?? '').isNotEmpty
-                              ? profile!['first_name'] as String
-                              : (AuthState.userEmail?.substring(0, 1).toUpperCase() ?? 'U'),
-                        );
-                        imageUrl =
-                            'https://ui-avatars.com/api/?name=$initial&background=FFCC00&color=1A1A2E&size=200';
-                      }
+                      // A phone-signup account has no email; show its number instead.
+                      final email = AuthState.userEmail ??
+                          AuthState.userPhone ??
+                          'No email provided';
+                      final profile = AuthState.userData?['profile']
+                          as Map<String, dynamic>?;
+                      final initial = Uri.encodeComponent(
+                        (profile?['first_name'] as String? ?? '').isNotEmpty
+                            ? profile!['first_name'] as String
+                            : (AuthState.userEmail
+                                    ?.substring(0, 1)
+                                    .toUpperCase() ??
+                                'U'),
+                      );
+                      final fallbackUrl =
+                          'https://ui-avatars.com/api/?name=$initial&background=FFCC00&color=1A1A2E&size=200';
 
                       return Padding(
                         padding: const EdgeInsets.all(16),
@@ -67,7 +78,10 @@ class AccountSettingsScreen extends StatelessWidget {
                                 CircleAvatar(
                                   radius: 32,
                                   backgroundColor: Colors.grey.shade200,
-                                  backgroundImage: NetworkImage(imageUrl),
+                                  backgroundImage: avatarImageProvider(
+                                    url,
+                                    fallback: NetworkImage(fallbackUrl),
+                                  ),
                                   onBackgroundImageError: (_, __) {},
                                 ),
                                 Positioned(
@@ -77,7 +91,7 @@ class AccountSettingsScreen extends StatelessWidget {
                                     width: 22,
                                     height: 22,
                                     decoration: const BoxDecoration(
-                                      color: Color(0xFF1A1A2E),
+                                      color: AppColors.textPrimary,
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(Icons.camera_alt, size: 12, color: Colors.white),
@@ -93,22 +107,22 @@ class AccountSettingsScreen extends StatelessWidget {
                                   Text(
                                     'Personal',
                                     style: GoogleFonts.poppins(
-                                      fontSize: 11,
+                                      fontSize: Responsive.sp(context, 11),
                                       color: Colors.grey.shade500,
                                     ),
                                   ),
                                   Text(
                                     'Personal Info',
                                     style: GoogleFonts.poppins(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFF1A1A2E),
+                                      fontSize: Responsive.sp(context, 15),
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.textPrimary,
                                     ),
                                   ),
                                   Text(
                                     email,
                                     style: GoogleFonts.poppins(
-                                      fontSize: 12,
+                                      fontSize: Responsive.sp(context, 12),
                                       color: Colors.grey.shade500,
                                     ),
                                     maxLines: 1,
@@ -117,25 +131,61 @@ class AccountSettingsScreen extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            const Icon(Icons.chevron_right, color: Color(0xFF2563EB)),
+                            const Icon(Icons.chevron_right, color: AppColors.accentBlue),
                           ],
                         ),
                       );
                     },
                   ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildRow(icon: Icons.phone_outlined, label: 'Phone Number'),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildRow(
-                    icon: Icons.lock_outline,
-                    label: 'Change Password',
-                    isLast: true,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const ChangePasswordScreen()),
+                  const Divider(height: 1, thickness: 0.7, indent: 16, endIndent: 16, color: Color(0xFFEFEFEF)),
+                  // Verified only by a code sent to that very contact: an email
+                  // sign-in verifies the email, not the mobile number, and the
+                  // other way round — each can be confirmed here, later.
+                  ListenableBuilder(
+                    listenable: AuthState.verificationChanged,
+                    builder: (context, _) => Column(
+                      children: [
+                        _buildRow(
+                          context,
+                          icon: Icons.phone_outlined,
+                          label: 'Mobile Number',
+                          subtitle: AuthState.contactPhone == null
+                              ? 'Not added'
+                              : IndianPhone.display(AuthState.contactPhone),
+                          verified: AuthState.contactPhone == null
+                              ? null
+                              : AuthState.isPhoneVerified,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const VerifyContactScreen(
+                                  kind: VerifyContactKind.mobile),
+                            ),
+                          ),
+                        ),
+                        const Divider(height: 1, thickness: 0.7, indent: 16, endIndent: 16, color: Color(0xFFEFEFEF)),
+                        _buildRow(
+                          context,
+                          icon: Icons.mail_outline_rounded,
+                          label: 'Email',
+                          subtitle: AuthState.contactEmail ?? 'Not added',
+                          verified: AuthState.contactEmail == null
+                              ? null
+                              : AuthState.isEmailVerified,
+                          isLast: true,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const VerifyContactScreen(
+                                  kind: VerifyContactKind.email),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                  // Change Password row removed — auth is OTP-only, users
+                  // never set a password, so the option was a dead end.
                 ],
               ),
             ),
@@ -156,16 +206,28 @@ class AccountSettingsScreen extends StatelessWidget {
                     child: Text(
                       'Privacy',
                       style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1A1A2E),
+                        fontSize: Responsive.sp(context, 13),
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildRow(icon: Icons.settings_outlined, label: 'Manage Permissions'),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildRow(icon: Icons.delete_outline, label: 'Delete Account', isLast: true),
+                  const Divider(height: 1, thickness: 0.7, indent: 16, endIndent: 16, color: Color(0xFFEFEFEF)),
+                  _buildRow(
+                    context,
+                    icon: Icons.settings_outlined,
+                    label: 'Manage Permissions',
+                    onTap: () => AppSnackBar.comingSoon(
+                        context, 'Manage Permissions'),
+                  ),
+                  const Divider(height: 1, thickness: 0.7, indent: 16, endIndent: 16, color: Color(0xFFEFEFEF)),
+                  _buildRow(
+                    context,
+                    icon: Icons.delete_outline,
+                    label: 'Delete Account',
+                    isLast: true,
+                    onTap: () => _confirmDeleteAccount(context),
+                  ),
                 ],
               ),
             ),
@@ -177,11 +239,72 @@ class AccountSettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRow({
+  // ── Delete account ────────────────────────────────────────────────────────
+
+  Future<void> _confirmDeleteAccount(BuildContext context) async {
+    final confirmed = await showAppConfirmDialog(
+      context,
+      title: 'Delete account?',
+      message:
+          'Your account will be deactivated immediately and you will be signed out. Your booking history is retained for legal records. This action cannot be undone from the app.',
+      confirmLabel: 'Delete',
+      icon: Icons.person_off_rounded,
+      destructive: true,
+    );
+
+    if (!confirmed || !context.mounted) return;
+    await _performDelete(context);
+  }
+
+  Future<void> _performDelete(BuildContext context) async {
+    final token = AuthState.accessToken;
+    if (token == null) {
+      AppSnackBar.error(context, 'Please log in again.');
+      return;
+    }
+
+    // Blocking spinner while the request runs — root navigator so it lives
+    // above the screen Stack and we can pop it from anywhere.
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      useRootNavigator: true,
+      builder: (_) => const Center(
+        child: SizedBox(width: 56, height: 56, child: AppLoader()),
+      ),
+    );
+
+    final result = await AuthService.deleteAccount(accessToken: token);
+
+    if (!context.mounted) return;
+    Navigator.of(context, rootNavigator: true).pop(); // close spinner
+
+    if (result['success'] == true) {
+      AuthState.logout();
+      if (!context.mounted) return;
+      AppSnackBar.success(context, 'Your account has been deleted.');
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
+    } else {
+      AppSnackBar.error(
+        context,
+        result['message']?.toString() ??
+            'Could not delete your account. Please try again.',
+      );
+    }
+  }
+
+  Widget _buildRow(BuildContext context, {
     required IconData icon,
     required String label,
     bool isLast = false,
     VoidCallback? onTap,
+    String? subtitle,
+
+    /// null: nothing on the account yet; otherwise whether it is verified.
+    bool? verified,
   }) {
     return Material(
       color: Colors.transparent,
@@ -194,19 +317,48 @@ class AccountSettingsScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
-              Icon(icon, size: 20, color: const Color(0xFF1A1A2E)),
+              Icon(icon, size: 20, color: AppColors.textPrimary),
               const SizedBox(width: 14),
               Expanded(
-                child: Text(
-                  label,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14.5,
-                    fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A2E),
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: GoogleFonts.poppins(
+                        fontSize: Responsive.sp(context, 14.5),
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    if (subtitle != null)
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 12),
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Color(0xFF2563EB)),
+              if (verified != null) ...[
+                const SizedBox(width: 8),
+                Text(
+                  verified ? 'Verified' : 'Verify',
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 12.5),
+                    fontWeight: FontWeight.w500,
+                    color: verified
+                        ? const Color(0xFF1E8E3E)
+                        : const Color(0xFFB26A00),
+                  ),
+                ),
+                const SizedBox(width: 2),
+              ],
+              const Icon(Icons.chevron_right, color: AppColors.accentBlue),
             ],
           ),
         ),

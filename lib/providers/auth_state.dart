@@ -1,7 +1,12 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
+import '../services/avatar_storage.dart';
 import '../services/token_storage.dart';
 import '../services/auth_service.dart';
+import '../core/name_case.dart';
+import 'follow_state.dart';
+import 'location_state.dart';
 
 class AuthState {
   static final ValueNotifier<bool> isLoggedIn = ValueNotifier<bool>(false);
@@ -23,25 +28,65 @@ class AuthState {
     Map<String, dynamic>? user,
   }) {
     final profile = user?['profile'] as Map<String, dynamic>?;
-    userName.value = name ??
-        (profile != null
-            ? '${profile['first_name'] ?? ''} ${profile['last_name'] ?? ''}'.trim()
-            : null) ??
-        user?['email'] ??
-        'User';
+    final profileName = profile != null
+        ? NameCase.of(
+            '${profile['first_name'] ?? ''} ${profile['last_name'] ?? ''}'.trim())
+        : '';
+    // Google hands back whatever the account holds, which is often all
+    // lowercase — the greeting reads this, so capitalise it here rather than
+    // waiting for the user to open Edit Profile.
+    final resolvedName = (name != null && name.trim().isNotEmpty)
+        ? NameCase.of(name.trim())
+        : (profileName.isNotEmpty ? profileName : null);
+    // Never fall back to email here — the home greeting reads this value
+    // and showing "Hello user@example.com" is worse than "Hello There".
+    userName.value = resolvedName;
     userEmail = email ?? user?['email'] as String?;
     userPhone = phone ?? user?['phone'] as String?;
     accessToken = access;
     refreshToken = refresh;
     userData = user;
-    avatarUrl.value = (user?['profile'] as Map<String, dynamic>?)?['avatar_url'] as String?;
+    // Preserve a locally-picked avatar (file path) when the API payload
+    // doesn't carry one — backend profile has no avatar field yet, and
+    // setting null would blank out the photo the user picked locally.
+    final apiAvatar = profile?['avatar_url'] as String?;
+    if (apiAvatar != null && apiAvatar.isNotEmpty) {
+      avatarUrl.value = apiAvatar;
+    }
     isLoggedIn.value = true;
+    final uid = user?['id'] as String?;
+    if (uid != null) FollowState.loadForUser(uid).catchError((_) {});
+    // Read back the location this account saved on an earlier launch, so
+    // distances show without asking the device again.
+    if (access != null) LocationState().restoreSaved().catchError((_) {});
     if (access != null && refresh != null) {
       TokenStorage.saveTokens(
               access, refresh, user != null ? jsonEncode(user) : '{}')
           .catchError((_) {});
+      // OTP/Google sign-in responses often omit `profile`, leaving the
+      // greeting blank. Pull the canonical profile from the API so the
+      // home header shows the real first name without waiting for the
+      // user to open Edit Profile.
+      if (resolvedName == null) {
+        _refreshProfileFromApi(access);
+      }
     }
   }
+
+  /// Fire-and-forget profile fetch — called from [login] when the verify-OTP
+  /// payload didn't carry a `profile` block. Updates [userName] and persists
+  /// the fresh user data via [updateProfileData].
+  static Future<void> _refreshProfileFromApi(String token) async {
+    try {
+      final result = await AuthService.getProfile(accessToken: token);
+      if (result['success'] == true && result['profile'] is Map) {
+        updateProfileData(Map<String, dynamic>.from(result['profile'] as Map));
+      }
+    } catch (_) {}
+  }
+
+  /// UUID of the authenticated customer — used to detect review ownership.
+  static String? get userId => userData?['id'] as String?;
 
   /// First word of the stored full name, falling back to "User".
   /// Use this wherever a greeting like "Hi $firstName" is needed.
@@ -51,29 +96,134 @@ class AuthState {
     return name.trim().split(' ').first;
   }
 
-  /// True when the user has at least filled in their first name.
+  /// True when the profile `is_completed` flag is set, or first_name is non-empty as fallback.
   static bool get isProfileComplete {
     final profile = userData?['profile'] as Map<String, dynamic>?;
-    final firstName = profile?['first_name'] as String? ?? '';
-    return firstName.isNotEmpty;
+    if (profile?['is_completed'] == true) return true;
+    return (profile?['first_name'] as String? ?? '').isNotEmpty;
   }
 
-  /// Call after a successful updateProfile API response to sync local state.
+  // ── Contact verification (mobile / email, "verify later") ────────────────
+  //
+  // A contact is verified only by a successful OTP against that very contact:
+  // signing in with an email code verifies the email, not the mobile number
+  // saved on the profile, and the other way round. The server sends
+  // `email_verified` / `phone_verified`; until it does, the sign-in method
+  // is what is known.
+
+  /// Bumped whenever a contact is marked verified, so screens that show the
+  /// status can rebuild.
+  static final ValueNotifier<int> verificationChanged = ValueNotifier<int>(0);
+
+  /// The email on the account, or null when there is none (phone signup).
+  static String? get contactEmail {
+    final e = (userEmail ?? userData?['email'] as String?)?.trim();
+    return (e == null || e.isEmpty) ? null : e;
+  }
+
+  /// The mobile number to verify: the one the account signed up with, else the
+  /// one saved on the profile.
+  static String? get contactPhone {
+    final profile = userData?['profile'] as Map<String, dynamic>?;
+    final p = (userPhone ??
+            userData?['phone'] as String? ??
+            profile?['phone_number'] as String?)
+        ?.trim();
+    return (p == null || p.isEmpty) ? null : p;
+  }
+
+  static bool get isEmailVerified {
+    final flag = userData?['email_verified'];
+    if (flag is bool) return flag;
+    // Before the server reports it: an email account that signed in by code
+    // (or Google) was verified by doing so.
+    return contactEmail != null && userData?['is_verified'] == true;
+  }
+
+  static bool get isPhoneVerified {
+    final flag = userData?['phone_verified'];
+    if (flag is bool) return flag;
+    // A phone-signup account (no email) was verified by its sign-in code.
+    final signedUpWithPhone =
+        (userData?['phone'] as String?)?.trim().isNotEmpty == true &&
+            (userData?['email'] as String?)?.trim().isNotEmpty != true;
+    return signedUpWithPhone && userData?['is_verified'] == true;
+  }
+
+  /// Records that [email] and/or [phone] passed OTP verification.
+  static void markVerified({String? email, String? phone}) {
+    userData ??= {};
+    if (email != null) {
+      userData!['email'] = email;
+      userData!['email_verified'] = true;
+      userEmail = email;
+    }
+    if (phone != null) {
+      userData!['phone'] = phone;
+      userData!['phone_verified'] = true;
+      userPhone = phone;
+    }
+    if (accessToken != null && refreshToken != null) {
+      TokenStorage.saveTokens(
+        accessToken!, refreshToken!, jsonEncode(userData),
+      ).catchError((_) {});
+    }
+    verificationChanged.value++;
+  }
+
+  /// Call after a successful PATCH /customer/profile/ response to sync local state.
+  /// Accepts the profile object returned directly by the profile API.
+  static void updateProfileData(Map<String, dynamic> profile) {
+    userData ??= {};
+    userData!['profile'] = profile;
+    final first = profile['first_name'] as String? ?? '';
+    final last = profile['last_name'] as String? ?? '';
+    final fullName = NameCase.of('$first $last'.trim());
+    if (fullName.isNotEmpty) userName.value = fullName;
+    if (accessToken != null && refreshToken != null) {
+      TokenStorage.saveTokens(
+        accessToken!, refreshToken!, jsonEncode(userData),
+      ).catchError((_) {});
+    }
+  }
+
+  /// Legacy: call after a successful updateProfile API response to sync local state.
   static void updateUserProfile(Map<String, dynamic> updatedUser) {
     userData = updatedUser;
     final profile = updatedUser['profile'] as Map<String, dynamic>?;
-    avatarUrl.value = profile?['avatar_url'] as String?;
+    final apiAvatar = profile?['avatar_url'] as String?;
+    if (apiAvatar != null && apiAvatar.isNotEmpty) {
+      avatarUrl.value = apiAvatar;
+    }
     if (profile != null) {
       final first = profile['first_name'] as String? ?? '';
       final last = profile['last_name'] as String? ?? '';
-      final fullName = '$first $last'.trim();
-      userName.value = fullName.isNotEmpty ? fullName : (updatedUser['email'] as String? ?? 'User');
+      // Capitalise the name only — the email fallback is left verbatim.
+      final fullName = NameCase.of('$first $last'.trim());
+      userName.value = fullName.isNotEmpty
+          ? fullName
+          : (updatedUser['email'] as String? ??
+              updatedUser['phone'] as String? ??
+              'User');
     }
     if (accessToken != null && refreshToken != null) {
       TokenStorage.saveTokens(
         accessToken!, refreshToken!, jsonEncode(updatedUser),
       ).catchError((_) {});
     }
+  }
+
+  /// Replaces the access/refresh tokens after a successful silent refresh
+  /// (triggered by [AuthHttp] on a 401), persisting them while preserving the
+  /// current user/profile state.
+  static void updateTokens({required String access, required String refresh}) {
+    accessToken = access;
+    refreshToken = refresh;
+    TokenStorage.saveTokens(
+      access,
+      refresh,
+      userData != null ? jsonEncode(userData) : '{}',
+    ).catchError((_) {});
   }
 
   static void logout() {
@@ -85,30 +235,31 @@ class AuthState {
     userData = null;
     avatarUrl.value = null;
     isLoggedIn.value = false;
+    FollowState.clear();
+    LocationState().clearCoordinates();
     TokenStorage.clearTokens().catchError((_) {});
+    // Drop the locally-picked profile picture too — different user might
+    // log in next, and the previous user's photo shouldn't linger.
+    AvatarStorage.clear();
   }
 
   /// On app start: exchange stored refresh token for a fresh access token.
   /// Returns true if session was restored, false if re-login is needed.
+  /// Falls back to cached tokens when the network is unavailable so the
+  /// user isn't forced to re-login every cold start on flaky connections.
   static Future<bool> tryRestoreSession() async {
     try {
       final stored = await TokenStorage.loadTokens();
       final refresh = stored['refresh'];
-      if (refresh == null || refresh.isEmpty) return false;
+      final cachedAccess = stored['access'];
 
-      final result = await AuthService.refreshToken(refresh: refresh);
-      if (result['success'] != true) {
-        await TokenStorage.clearTokens();
+      // Nothing stored at all — fresh install or explicit logout.
+      if ((refresh == null || refresh.isEmpty) &&
+          (cachedAccess == null || cachedAccess.isEmpty)) {
         return false;
       }
 
-      final newAccess = result['access'] as String?;
-      final newRefresh = result['refresh'] as String? ?? refresh;
-      if (newAccess == null) {
-        await TokenStorage.clearTokens();
-        return false;
-      }
-
+      // Parse cached user data once (used in both paths below).
       Map<String, dynamic>? user;
       final userJson = stored['user_json'];
       if (userJson != null && userJson.isNotEmpty) {
@@ -117,10 +268,47 @@ class AuthState {
         } catch (_) {}
       }
 
-      login(access: newAccess, refresh: newRefresh, user: user);
-      return true;
+      // Try to exchange the refresh token for a fresh access token.
+      if (refresh != null && refresh.isNotEmpty) {
+        try {
+          final result = await AuthService.refreshToken(refresh: refresh);
+          if (result['success'] == true) {
+            final newAccess = result['access'] as String?;
+            final newRefresh = result['refresh'] as String? ?? refresh;
+            if (newAccess != null) {
+              login(access: newAccess, refresh: newRefresh, user: user);
+              return true;
+            }
+          }
+          // Server explicitly rejected the token — clear and require re-login.
+          // (Don't fall through to cache path for rejected tokens.)
+          final message = (result['message'] ?? '').toString().toLowerCase();
+          if (kDebugMode) debugPrint('AuthService.refreshToken message: $message');
+          if (message.contains('invalid') || message.contains('expired') || message.contains('blacklisted')) {
+            if (kDebugMode) debugPrint('Token rejected by server. Clearing tokens.');
+            await TokenStorage.clearTokens();
+            return false;
+          }
+        } catch (e) {
+          if (kDebugMode) debugPrint('AuthService.refreshToken threw: $e');
+          // Network error — fall through to cached restore below.
+        }
+      }
+
+      // Fallback: restore session from cached tokens so the user stays
+      // logged in even when the network is unavailable at startup.
+      if (cachedAccess != null && cachedAccess.isNotEmpty) {
+        login(
+          access: cachedAccess,
+          refresh: refresh,
+          user: user,
+        );
+        return true;
+      }
+
+      return false;
     } catch (_) {
-      await TokenStorage.clearTokens();
+      // Catastrophic error — don't clear tokens, just skip restore.
       return false;
     }
   }

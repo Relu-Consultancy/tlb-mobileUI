@@ -1,0 +1,108 @@
+import 'package:flutter/material.dart';
+
+import 'secure_url.dart';
+
+/// Renders a listing cover that may be a **network URL** (real API data) or a
+/// bundled **asset path** (legacy/dummy), with a graceful grey fallback when
+/// the path is empty or fails to load. Use this anywhere a card shows an
+/// `EventModel.imagePath` so both data sources render correctly.
+///
+/// Images are decoded at (roughly) their display resolution via `cacheWidth`
+/// so a large source — especially an arbitrarily-sized network image — doesn't
+/// balloon into tens of MB of RAM. A 4000×3000 photo decoded full-size costs
+/// ~48 MB; capped to the widget width it's a few hundred KB.
+Widget listingImage(
+  String rawPath, {
+  BoxFit fit = BoxFit.cover,
+  double? width,
+  double? height,
+  int? cacheWidth,
+}) {
+  // Android blocks cleartext by default and the API serves media over http;
+  // without this every network cover falls back to the grey placeholder.
+  final path = secureUrl(rawPath) ?? rawPath;
+  Widget fallback() => Container(
+        width: width,
+        height: height,
+        color: const Color(0xFFEDEDED),
+        child: Icon(Icons.image_outlined, color: Colors.grey.shade400, size: 28),
+      );
+
+  if (path.isEmpty) return fallback();
+
+  // Decode target: caller override → ~3× the logical width (covers 3x DPI) →
+  // a sensible full-width cap when the width is unbounded (double.infinity).
+  final int decodeWidth = cacheWidth ??
+      ((width != null && width.isFinite && width > 0)
+          ? (width * 3).ceil()
+          : 1080);
+
+  if (path.startsWith('http')) {
+    return Image.network(
+      path,
+      width: width,
+      height: height,
+      fit: fit,
+      cacheWidth: decodeWidth,
+      errorBuilder: (_, __, ___) => fallback(),
+    );
+  }
+  return Image.asset(
+    path,
+    width: width,
+    height: height,
+    fit: fit,
+    cacheWidth: decodeWidth,
+    errorBuilder: (_, __, ___) => fallback(),
+  );
+}
+
+/// A drop-in replacement for `Image.asset` on a **listing cover**.
+///
+/// The cards were built against bundled artwork and call `Image.asset` with
+/// `EventModel.imagePath`. That path is now a network URL for anything coming
+/// from the API, and `Image.asset` cannot load one — so every real listing
+/// fell straight through to the card's own error placeholder, which is what
+/// "no images in any section" looked like.
+///
+/// This routes a URL to [Image.network] and an asset path to [Image.asset],
+/// keeping the caller's own `errorBuilder` and sizing so each card's styled
+/// fallback survives. Prefer [listingImage] in new code; this exists so the
+/// existing cards change by one identifier each.
+Image listingImageSource(
+  String rawPath, {
+  double? width,
+  double? height,
+  BoxFit? fit,
+  Alignment alignment = Alignment.center,
+  ImageErrorWidgetBuilder? errorBuilder,
+  int? cacheWidth,
+}) {
+  // Android blocks cleartext by default and the API serves media over http.
+  final path = secureUrl(rawPath) ?? rawPath;
+  final int decodeWidth = cacheWidth ??
+      ((width != null && width.isFinite && width > 0)
+          ? (width * 3).ceil()
+          : 1080);
+
+  if (path.startsWith('http')) {
+    return Image.network(
+      path,
+      width: width,
+      height: height,
+      fit: fit,
+      alignment: alignment,
+      cacheWidth: decodeWidth,
+      errorBuilder: errorBuilder,
+    );
+  }
+  return Image.asset(
+    path,
+    width: width,
+    height: height,
+    fit: fit,
+    alignment: alignment,
+    cacheWidth: decodeWidth,
+    errorBuilder: errorBuilder,
+  );
+}

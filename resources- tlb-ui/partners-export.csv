@@ -1,0 +1,12 @@
+partner_id,email,business_name,business_type,contact_person_name,base_city,categories,status,is_active,is_verified,created_at
+ef099bb1-5708-4ae6-b3d0-0369acce0578,prabhukaushal1@gmail.com,Painter,Company,Pabu,Santokgarh,"Events, Classes",approved,True,True,2026-06-10 05:29:08
+5c549edc-ae8b-4da0-9f1d-d5928cfd5efa,2221307.aiml.coe@cgc.edu.in,lala,Company,biju,Mumbai,"Events, Classes, Programs, Venues",approved,True,True,2026-06-05 06:05:27
+0666d1a9-5460-43e2-843d-4b3d86d0746b,partner5@tlb.dev,BrightMinds Learning Hub,LLP,Neha Patel,Mumbai,"Programs, Classes, Venues",approved,True,True,2026-06-01 18:29:43
+c600ddd7-d7f0-4c52-9701-ed7464525da6,partner4@tlb.dev,Stagecraft Academy,Partnership,Rahul Kulkarni,Mumbai,"Events, Classes, Programs",approved,True,True,2026-06-01 18:29:43
+68afc862-f99c-42ff-b45b-2ab1fb2671ce,partner3@tlb.dev,ActiveSprouts,Sole Proprietor,Anjali Rao,Mumbai,"Events, Venues",approved,True,True,2026-06-01 18:29:43
+f09ae87f-045c-4ebc-9ed1-3e3e346a684b,partner2@tlb.dev,TechKids Mumbai,Company,Vikram Desai,Mumbai,"Events, Programs",approved,True,True,2026-06-01 18:29:43
+dfd26de5-2bc6-4a3c-b5a9-44cf0c1f4cec,partner1@tlb.dev,Little Creators Studio,Individual,Meera Joshi,Mumbai,"Events, Classes",approved,True,True,2026-06-01 18:29:42
+7e28d486-cdc5-403b-8aca-511983c20b47,agent001@mailinator.com,,,,,"Events, Classes, Programs, Venues",category_selected,False,False,2026-05-29 12:58:05
+a09318fb-10a0-403c-bfd9-4a7f7893632b,hello@mailinator.com,,,,,"Events, Classes, Programs, Venues",category_selected,False,False,2026-05-28 13:58:38
+46714796-911c-4145-a4ee-10586fd39905,sanjay@mailinator.com,Socialvengers,Sole Proprietor,Sanjay,Mumbai,"Events, Classes, Programs, Venues",approved,True,True,2026-05-22 08:49:33
+ee09bb1a-af15-4263-8e3b-45c7553859d3,vishesh@mailinator.com,Hello,Company,Hello,Mumbai,"Events, Classes, Programs, Venues",approved,True,True,2026-05-07 08:49:49

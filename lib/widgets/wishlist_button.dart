@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
 import 'package:like_button/like_button.dart';
 import '../providers/saved_events_state.dart';
 import '../models/event_model.dart';
@@ -19,11 +20,14 @@ class WishlistButton extends StatelessWidget {
     this.iconSize = 20,
     this.iconType = WishlistIconType.favorite,
     this.showShadow = false,
+    this.backgroundColor = Colors.white,
+    this.borderColor,
+    this.unlikedColor,
   });
 
   final EventModel event;
 
-  /// Outer white circle diameter.
+  /// Outer circle diameter.
   final double containerSize;
 
   /// [LikeButton] tap‑target size.
@@ -36,6 +40,17 @@ class WishlistButton extends StatelessWidget {
 
   /// Add a subtle drop‑shadow behind the circle.
   final bool showShadow;
+
+  /// Fill of the circular container. Defaults to white; pass a dark/translucent
+  /// colour to blend the button into a dark card (e.g. the Spotlight banner).
+  final Color backgroundColor;
+
+  /// Optional hairline border around the circle.
+  final Color? borderColor;
+
+  /// Icon colour when NOT saved. Defaults to [AppColors.textPrimary]; pass a
+  /// light colour when the button sits on a dark background.
+  final Color? unlikedColor;
 
   @override
   Widget build(BuildContext context) {
@@ -60,8 +75,11 @@ class WishlistButton extends StatelessWidget {
                   alignment: Alignment.center,
                   clipBehavior: Clip.hardEdge,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: backgroundColor,
                     shape: BoxShape.circle,
+                    border: borderColor != null
+                        ? Border.all(color: borderColor!, width: 1)
+                        : null,
                     boxShadow: showShadow
                         ? [
                             BoxShadow(
@@ -71,30 +89,45 @@ class WishlistButton extends StatelessWidget {
                           ]
                         : null,
                   ),
-                  child: LikeButton(
-                    padding: EdgeInsets.zero,
-                    size: containerSize, // Make LikeButton tap area fill the container
-                    isLiked: isSaved,
-                    circleColor: const CircleColor(
-                      start: Color(0xFFFF5252),
-                      end: Colors.red,
+                  // A fixed-size box (smaller than the circle) holds the
+                  // LikeButton, centered by the Container's alignment. This
+                  // keeps the heart evenly inset on all sides and prevents the
+                  // LikeButton from overflowing the circle (the old "OVERFLOWED"
+                  // stripe). No OverflowBox — that gave the button infinite
+                  // width and pushed the heart off-centre.
+                  child: SizedBox(
+                    width: buttonSize,
+                    height: buttonSize,
+                    child: LikeButton(
+                      padding: EdgeInsets.zero,
+                      // Remove the package's default 3px left-padding on the
+                      // (empty) like-count widget — it was offsetting the heart
+                      // to the left inside the centered Row, leaving uneven
+                      // spacing around it in the circle.
+                      likeCountPadding: EdgeInsets.zero,
+                      size: buttonSize,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      isLiked: isSaved,
+                      circleColor: const CircleColor(
+                        start: Color(0xFFFF5252),
+                        end: Colors.red,
+                      ),
+                      bubblesColor: const BubblesColor(
+                        dotPrimaryColor: Colors.red,
+                        dotSecondaryColor: Colors.redAccent,
+                      ),
+                      onTap: (bool isLiked) =>
+                          SavedEventsState.toggle(event, context),
+                      likeBuilder: (bool isLiked) {
+                        return Icon(
+                          isLiked ? iconType.filled : iconType.outlined,
+                          color: isLiked
+                              ? Colors.red
+                              : (unlikedColor ?? AppColors.textPrimary),
+                          size: iconSize,
+                        );
+                      },
                     ),
-                    bubblesColor: const BubblesColor(
-                      dotPrimaryColor: Colors.red,
-                      dotSecondaryColor: Colors.redAccent,
-                    ),
-                    onTap: (bool isLiked) async {
-                      if (!isLoggedIn) return isLiked;
-                      final success = SavedEventsState.toggle(event, context);
-                      return success ? !isLiked : isLiked;
-                    },
-                    likeBuilder: (bool isLiked) {
-                      return Icon(
-                        isLiked ? iconType.filled : iconType.outlined,
-                        color: isLiked ? Colors.red : const Color(0xFF1A1A2E),
-                        size: iconSize,
-                      );
-                    },
                   ),
                 ),
               ),

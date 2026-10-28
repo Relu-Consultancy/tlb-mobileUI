@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'pace_classes_screen.dart';
+import '../widgets/auto_scroll_list.dart';
+import '../widgets/shining_star_badge.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../core/responsive.dart';
+import '../widgets/empty_location_widget.dart';
 import '../data/dummy_data.dart';
-import '../sections/home_header.dart';
+import '../providers/saved_events_state.dart';
 import '../widgets/banner_carousel.dart';
+import '../widgets/dark_category_section.dart';
+import '../widgets/dark_glow_header.dart';
 import '../widgets/section_divider_widget.dart';
+import '../widgets/category_icon_card.dart';
 import '../widgets/explore_categories_grid.dart';
 import '../widgets/event_card_with_rating.dart';
 import '../widgets/class_nearby_card.dart';
@@ -13,12 +20,16 @@ import '../widgets/new_on_tlb_card.dart';
 import '../widgets/holiday_special_card.dart';
 import '../widgets/build_skill_card.dart';
 import '../sections/app_footer.dart';
+import '../widgets/app_refresh_indicator.dart';
 import '../widgets/floating_navbar.dart';
 import '../widgets/all_categories_popup.dart';
 import 'events_screen.dart';
 import 'programs_screen.dart';
 import 'venues_screen.dart';
 import 'category_classes_screen.dart';
+import '../providers/discovery_feed_state.dart';
+import '../models/event_model.dart';
+import '../core/listing_source.dart';
 
 class ClassesScreen extends StatefulWidget {
   const ClassesScreen({super.key});
@@ -30,10 +41,82 @@ class ClassesScreen extends StatefulWidget {
 class _ClassesScreenState extends State<ClassesScreen> {
   int _currentNavIndex = 2;
 
+  // Scroll-driven floating navbar: hidden over the black hero (header → banner →
+  // categories), then fades + slides into view as that region scrolls away.
+  final ScrollController _scrollController = ScrollController();
+  final ValueNotifier<double> _navReveal = ValueNotifier<double>(0.0);
+  double _navFadeStart = 400;
+  double _navFadeEnd = 700;
+
+  @override
+  void initState() {
+    super.initState();
+    DiscoveryFeedState.classes.version.addListener(_onFeedChanged);
+    DiscoveryFeedState.classes.load();
+    _scrollController.addListener(_onScroll);
+  }
+
+  /// The cards for one curated rail.
+  ///
+  /// Real listings once the feed is in. Until then — and if the fetch
+  /// could not reach the API at all — the mock set stands in, so a slow
+  /// connection or an outage shows the screen it always did rather than
+  /// a blank page. A section the feed returns empty genuinely is empty,
+  /// and its rail is hidden.
+  List<EventModel> _rail(String key, List<EventModel> fallback) =>
+      DiscoveryFeedState.classes.isLoaded
+          ? DiscoveryFeedState.classes.section(key)
+          : fallback;
+
+  List<EventModel> get _whatEveryoneJoining =>
+      _rail('whats_everyone_joining', DummyData.classesWhatEveryoneJoining);
+  List<EventModel> get _rightAroundYou =>
+      _rail('right_around_you', DummyData.classesRightAroundYou);
+  List<EventModel> get _topPicks =>
+      _rail('top_picks_for_you', DummyData.classesTopPicks);
+  List<EventModel> get _holidaySpecial =>
+      _rail('holiday_special', DummyData.classesHolidaySpecial);
+  List<EventModel> get _buildNewSkills =>
+      _rail('build_new_skills', DummyData.classesBuildNewSkills);
+  List<EventModel> get _specialFocus =>
+      _rail('special_focus', DummyData.classesSpecialFocus);
+
+  /// The slides for the top banner: the listings an admin flagged as
+  /// their sections' heroes. The mock banners stand in until the feed
+  /// is in, and whenever nothing is flagged.
+  List<EventModel> get _banners {
+    final feed = DiscoveryFeedState.classes;
+    if (!feed.isLoaded || feed.heroes.isEmpty) return DummyData.classesScreenBanners;
+    return feed.heroes;
+  }
+
+  void _onFeedChanged() {
+    if (mounted) setState(() {});
+  }
+
+  void _onScroll() {
+    final double offset = _scrollController.offset;
+    final double t = ((offset - _navFadeStart) / (_navFadeEnd - _navFadeStart))
+        .clamp(0.0, 1.0);
+    if (_navReveal.value != t) _navReveal.value = t;
+  }
+
+  @override
+  void dispose() {
+    DiscoveryFeedState.classes.version.removeListener(_onFeedChanged);
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _navReveal.dispose();
+    super.dispose();
+  }
+
   void _showAllCategoriesPopup(BuildContext context) {
     AllCategoriesPopup.show(
       context,
       DummyData.classesSeeAllCategories,
+      lineIcons: true,
+      darkBackground: true,
+      cardMetrics: CategoryCardMetrics.classes,
       onCategoryTap: (index) {
         Navigator.push(
           context,
@@ -70,137 +153,292 @@ class _ClassesScreenState extends State<ClassesScreen> {
     }
   }
 
+  // Pull-to-refresh: reload live wishlist/saved state and rebuild the feed.
+  Future<void> _handleRefresh() async {
+    await DiscoveryFeedState.classes.load(force: true);
+    await SavedEventsState.loadFromApi();
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
-    final safeBottom = MediaQuery.of(context).padding.bottom;
+    ListingSource.mark(context, ListingSource.browse);
+    final double screenH = MediaQuery.of(context).size.height;
+    final double safeBottom = MediaQuery.of(context).padding.bottom;
+
+    // Tall banner (matches the Venues page): fills the viewport minus the header
+    // block and the navbar area.
+    final double bannerH = (screenH -
+            MediaQuery.of(context).padding.top -
+            156 -
+            (safeBottom > 0 ? safeBottom + 15 : 30) -
+            140)
+        .clamp(300.0, 700.0);
+    final double bannerCardWidth = MediaQuery.of(context).size.width - 32;
+
+    // Reveal the navbar as the top banner scrolls away (tied to the banner
+    // height, not a fixed screen fraction).
+    final double heroTop = MediaQuery.of(context).padding.top + 169;
+    _navFadeStart = heroTop + bannerH * 0.65;
+    _navFadeEnd = heroTop + bannerH;
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
+      // An unserviced city shows the empty state in place of this tab's whole
+      // body, matching Home — which used to be the only screen that checked.
+      body: LocationGate(
+        emptyTitle: 'No classes here yet',
+        // The header and navbar sit in the same Stack as the feed, so they
+        // are handed to the gate separately — swapping the Stack wholesale
+        // stripped both, leaving no location chip and no way to change tab.
+        header: const ColoredBox(
+          color: Colors.black,
+          child: SafeArea(bottom: false, child: DarkGlowHeader()),
+        ),
+        footer: Align(
+          alignment: Alignment.bottomCenter,
+          child: FloatingNavbar(
+            currentIndex: 2,
+            onTap: _onNavTapped,
+            bottomPadding: FloatingNavbar.bottomInset(context),
+          ),
+        ),
+        child: Stack(
         children: [
-          Column(
-            children: [
-              const HomeHeader(),
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const ClampingScrollPhysics(),
+          // Single scroll view — header scrolls with body (Session-48 fix).
+          AppRefreshIndicator(
+            onRefresh: _handleRefresh,
+            child: SingleChildScrollView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
                     children: [
-                      const SizedBox(height: 16),
-
-                      // ── Education Banner ────────────────────────────────
-                      RepaintBoundary(
-                        child: BannerCarousel(
-                          events: DummyData.classesScreenBanners,
-                          height: Responsive.h(context, 386, min: 286),
-                          showGlow: false,
-                          overlayStyle: true,
-                          ctaText: 'Explore Classes',
-                        ),
-                      ),
-
-                      // ── Let's Begin Here ─────────────────────────────────
-                      const SectionDividerWidget(title: "Let's Begin Here"),
-                      RepaintBoundary(
-                        child: ExploreCategoriesGrid(
-                          categories: DummyData.classesCategories,
-                          scrollable: true,
-                          visibleRows: 2.3,
-                          onViewAll: () => _showAllCategoriesPopup(context),
-                          onCategoryTap: (index) => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => CategoryClassesScreen(
-                                initialCategoryIndex: index,
+                      // ── Black "night theatre" region: header → categories ──
+                      ColoredBox(
+                        color: Colors.black,
+                        child: Column(
+                          children: [
+                            const DarkGlowHeader(),
+                            const SizedBox(height: 14),
+                            // Tall banner. The black fill and gold side-glow
+                            // belong to each card, so they travel with it as
+                            // the carousel scrolls — a plate behind the
+                            // carousel would sit still while the banners slid
+                            // across it. The fill also backs the image, so the
+                            // glow can't bleed through the artwork's
+                            // transparent areas.
+                            RepaintBoundary(
+                              child: BannerCarousel(
+                                events: _banners,
+                                height: bannerH,
+                                showGlow: false,
+                                overlayStyle: true,
+                                ctaText: 'Explore Classes',
+                                fixedCardWidth: bannerCardWidth,
+                                cornerRadius: 22,
+                                overlayDots: true,
+                                cardColor: Colors.black,
+                                cardShadow: goldBannerSideGlow(),
                               ),
                             ),
-                          ),
+                            const SizedBox(height: 26),
+                            const DarkCategoryTitle("Let's Begin Here"),
+                            const SizedBox(height: 18),
+                            // Grid with the "View All" pill floated over the
+                            // bottom row (seamlessly blended).
+                            // Reserve space so the floated pill stays INSIDE the
+                            // Stack bounds (a Positioned child hanging past the
+                            // Stack isn't hit-testable).
+                            Stack(
+                              alignment: Alignment.bottomCenter,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 24),
+                                  child: RepaintBoundary(
+                                    child: ExploreCategoriesGrid(
+                                      categories: DummyData.classesCategories,
+                                      scrollable: true,
+                                      visibleRows: 2.3,
+                                      maxScrollRows: 3,
+                                      lineIcons: true,
+                                      cardMetrics: CategoryCardMetrics.classes,
+                                      onCategoryTap: (index) => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => CategoryClassesScreen(
+                                            initialCategoryIndex: index,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  left: 0,
+                                  right: 0,
+                                  child: DarkViewAllButton(
+                                    onTap: () =>
+                                        _showAllCategoriesPopup(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 26),
+                          ],
                         ),
                       ),
 
                       // ── What's Everyone Joining? ──────────────────────────
-                      const SectionDividerWidget(title: "What's Everyone Joining?"),
+                      if (_whatEveryoneJoining.isNotEmpty) ...[
+                      const SectionDividerWidget(
+                        title: "What's Everyone Joining?",
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                      ),
                       SizedBox(
-                        height: Responsive.h(context, 380, min: 340),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        height: Responsive.h(context, 525, min: 495),
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.classesWhatEveryoneJoining.length,
+                          itemCount: _whatEveryoneJoining.length,
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.only(right: 16),
                               child: SizedBox(
-                                width: 240,
+                                width: Responsive.w(context, 290),
                                 child: EventCardWithRating(
-                                  event: DummyData.classesWhatEveryoneJoining[index],
-                                  buttonLabel: 'Check Availability',
+                                  event: _whatEveryoneJoining[index],
+                                  buttonLabel: 'View Details',
                                 ),
                               ),
                             );
                           },
                         ),
                       ),
+                      ],
 
                       // ── Pick Your Pace ────────────────────────────────────
-                      const SectionDividerWidget(title: 'Pick Your Pace'),
+                      const SectionDividerWidget(
+                        title: 'Pick Your Pace',
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                      ),
                       SizedBox(
-                        height: 148,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        // Discs sized so two full circles + a half of the third
+                        // are visible, hinting the row scrolls.
+                        height: (MediaQuery.of(context).size.width - 32) / 2.5 + 8,
+                        child: AutoScrollList(
                           padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
                           itemCount: DummyData.pickYourPace.length,
                           itemBuilder: (context, index) {
                             final item = DummyData.pickYourPace[index];
+                            final label = item['label'] as String;
+
+                            LinearGradient getGradient(String lbl) {
+                              switch (lbl) {
+                                case 'Weekly\nClasses':
+                                  return const LinearGradient(colors: [Color(0xFFEAF2FF), Color(0xFFD6E7FF)], begin: Alignment.topCenter, end: Alignment.bottomCenter);
+                                case 'Monthly\nPrograms':
+                                  return const LinearGradient(colors: [Color(0xFFFFF3E0), Color(0xFFFFE6C7)], begin: Alignment.topCenter, end: Alignment.bottomCenter);
+                                case 'Term Courses':
+                                  return const LinearGradient(colors: [Color(0xFFF9F8F2), Color(0xFFF2EFE0)], begin: Alignment.topCenter, end: Alignment.bottomCenter);
+                                case 'Bootcamps':
+                                  return const LinearGradient(colors: [Color(0xFF7AD6FF), Color(0xFF4DBBFF)], begin: Alignment.topCenter, end: Alignment.bottomCenter);
+                                case 'Certification':
+                                  return const LinearGradient(colors: [Color(0xFFFFF0E6), Color(0xFFFFDCC4)], begin: Alignment.topCenter, end: Alignment.bottomCenter);
+                                case 'Trial Class':
+                                  return const LinearGradient(colors: [Color(0xFFC2F6E6), Color(0xFF8CECD1)], begin: Alignment.topCenter, end: Alignment.bottomCenter);
+                                case 'Holiday\nCamps':
+                                  return const LinearGradient(colors: [Colors.white, Colors.white]);
+                                default:
+                                  return const LinearGradient(colors: [Color(0xFFF0F4FF), Color(0xFFE0E8FF)]);
+                              }
+                            }
+
+                            // Two full circles + a half peek of the third,
+                            // with tighter spacing between them.
+                            final double paceSize =
+                                (MediaQuery.of(context).size.width - 32) / 2.5;
                             return Padding(
-                              padding: const EdgeInsets.only(right: 20),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: 90,
-                                    height: 90,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: const Color(0xFFF0F4FF),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.07),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 3),
-                                        ),
-                                      ],
+                              padding: const EdgeInsets.only(right: 8),
+                              child: GestureDetector(
+                                // The pace discs were inert artwork until now.
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => PaceClassesScreen(
+                                      initialPaceIndex: index,
                                     ),
-                                    child: ClipOval(
+                                  ),
+                                ),
+                                child: Container(
+                                width: paceSize,
+                                height: paceSize,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: getGradient(label),
+                                  border: Border.all(
+                                    color: Colors.black.withOpacity(0.04),
+                                    width: 1,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.06),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const SizedBox(height: 12),
+                                    Expanded(
                                       child: Padding(
-                                        padding: const EdgeInsets.all(12),
-                                        child: Image.asset(
-                                          item['image'] as String,
-                                          fit: BoxFit.contain,
-                                          errorBuilder: (_, __, ___) => const Icon(
-                                            Icons.school_outlined,
-                                            size: 36,
-                                            color: AppColors.textSecondary,
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: label == 'Holiday\nCamps' ? 2.0 : 16.0,
+                                        ),
+                                        child: Transform.scale(
+                                          scale: label == 'Holiday\nCamps' ? 1.25 : 1.0,
+                                          child: Image.asset(
+                                            item['image'] as String,
+                                            fit: BoxFit.contain,
+                                            errorBuilder: (_, __, ___) => const Icon(
+                                              Icons.school_outlined,
+                                              size: 32,
+                                              color: AppColors.textSecondary,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  SizedBox(
-                                    width: 90,
-                                    child: Text(
-                                      item['label'] as String,
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.textPrimary,
-                                        height: 1.3,
+                                    const SizedBox(height: 4),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                                      child: Text(
+                                        label,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 2,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: Responsive.sp(context, 10),
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.textPrimary,
+                                          height: 1.1,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 12),
+                                  ],
+                                ),
+                              ),
                               ),
                             );
                           },
@@ -208,112 +446,148 @@ class _ClassesScreenState extends State<ClassesScreen> {
                       ),
 
                       // ── Right Around You ──────────────────────────────────
-                      const SectionDividerWidget(title: 'Right Around You'),
+                      if (_rightAroundYou.isNotEmpty) ...[
+                      const SectionDividerWidget(
+                        title: 'Right Around You',
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                      ),
                       SizedBox(
-                        height: Responsive.h(context, 420, min: 380),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        height: Responsive.h(context, 385, min: 365),
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.classesRightAroundYou.length,
+                          itemCount: _rightAroundYou.length,
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.only(right: 14),
                               child: ClassNearbyCard(
-                                event: DummyData.classesRightAroundYou[index],
-                                buttonLabel: 'Check Availability',
+                                event: _rightAroundYou[index],
+                                width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
+                                buttonLabel: null,
                               ),
                             );
                           },
                         ),
                       ),
+                      ],
 
                       // ── Top Picks For You ─────────────────────────────────
-                      const SectionDividerWidget(title: 'Top Picks For You'),
+                      if (_topPicks.isNotEmpty) ...[
+                      const SectionDividerWidget(
+                        title: 'Top Picks For You',
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                      ),
                       SizedBox(
-                        height: Responsive.h(context, 130, min: 115),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        height: Responsive.h(context, 224, min: 210),
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.classesTopPicks.length,
+                          itemCount: _topPicks.length,
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.only(right: 14),
                               child: SizedBox(
-                                width: MediaQuery.of(context).size.width - 48,
+                                width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
                                 child: NewOnTlbCard(
-                                  event: DummyData.classesTopPicks[index],
-                                  buttonLabel: 'Send Enquiry',
+                                  event: _topPicks[index],
+                                  buttonLabel: 'View Details',
                                 ),
                               ),
                             );
                           },
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Center(
-                        child: SmoothPageIndicator(
-                          controller: PageController(),
-                          count: DummyData.classesTopPicks.length,
-                          effect: const WormEffect(
-                            dotHeight: 7,
-                            dotWidth: 7,
-                            activeDotColor: Color(0xFF1A1A2E),
-                            dotColor: Color(0xFFE0E0E0),
-                            spacing: 5,
-                          ),
-                        ),
-                      ),
+                      ],
 
                       // ── Holiday Special ───────────────────────────────────
-                      const SectionDividerWidget(title: 'Holiday Special'),
+                      if (_holidaySpecial.isNotEmpty) ...[
+                      const SectionDividerWidget(
+                        title: 'Holiday Special',
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                      ),
                       SizedBox(
-                        height: Responsive.h(context, 400, min: 360),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        height: Responsive.h(context, 450, min: 410),
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.classesHolidaySpecial.length,
+                          itemCount: _holidaySpecial.length,
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.only(right: 14),
                               child: RepaintBoundary(
                                 child: HolidaySpecialCard(
-                                  event: DummyData.classesHolidaySpecial[index],
-                                  buttonLabel: 'Send Enquiry',
+                                  event: _holidaySpecial[index],
+                                  width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
+                                  buttonLabel: 'View Details',
                                 ),
                               ),
                             );
                           },
                         ),
                       ),
+                      ],
 
                       // ── Build New Skills ──────────────────────────────────
-                      const SectionDividerWidget(title: 'Build New Skills'),
+                      if (_buildNewSkills.isNotEmpty) ...[
+                      const SectionDividerWidget(
+                        title: 'Build New Skills',
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                      ),
                       SizedBox(
-                        height: Responsive.h(context, 170, min: 155),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        // Grown to fit the BuildSkillCard's taller inner height
+                        // (now carries the Age/Date·Time/Distance meta rows) —
+                        // avoids a BOTTOM OVERFLOW in the fixed-height list.
+                        height: Responsive.h(context, 259, min: 244),
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.classesBuildNewSkills.length,
+                          itemCount: _buildNewSkills.length,
                           itemBuilder: (context, index) {
                             return Padding(
                               padding: const EdgeInsets.only(right: 14),
                               child: BuildSkillCard(
-                                event: DummyData.classesBuildNewSkills[index],
-                                ctaLabel: 'Send Enquiry',
+                                event: _buildNewSkills[index],
+                                width: Responsive.cardWidth(context, fraction: 0.85, max: 360),
+                                ctaLabel: 'View Details',
                               ),
                             );
                           },
                         ),
                       ),
+                      ],
 
                       // ── Special Focus ─────────────────────────────────────
-                      const SectionDividerWidget(title: 'Special Focus'),
+                      if (_specialFocus.isNotEmpty) ...[
+                      const SectionDividerWidget(
+                        title: 'Special Focus',
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        textColor: Color(0xFF3A3A3A), // charcoal
+                        lineLength: 100,
+                        lineThickness: 1.5,
+                        lineColor: Color(0xFFD4A537), // warm gold
+                      ),
                       SizedBox(
-                        height: Responsive.h(context, 430, min: 390),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
+                        height: Responsive.h(context, 452, min: 428),
+                        child: AutoScrollList(
                           padding: const EdgeInsets.only(left: 16),
-                          itemCount: DummyData.classesSpecialFocus.length,
+                          itemCount: _specialFocus.length,
                           itemBuilder: (context, index) {
                             const tagColors = [
                               Color(0xFFDC2626),
@@ -322,38 +596,89 @@ class _ClassesScreenState extends State<ClassesScreen> {
                             ];
                             return Padding(
                               padding: const EdgeInsets.only(right: 14),
-                              child: ClassNearbyCard(
-                                event: DummyData.classesSpecialFocus[index],
-                                buttonLabel: 'Join Class',
-                                tagColor: tagColors[index % tagColors.length],
+                              child: Stack(
+                                children: [
+                                  ClassNearbyCard(
+                                    event: _specialFocus[index],
+                                    width: Responsive.cardWidth(context,
+                                        fraction: 0.85, max: 360),
+                                    buttonLabel: 'View Details',
+                                    tagColor:
+                                        tagColors[index % tagColors.length],
+                                  ),
+                                  // Shining star badge over the card's image.
+                                  const Positioned(
+                                    top: 10,
+                                    left: 10,
+                                    child: ShiningStarBadge(size: 40),
+                                  ),
+                                ],
                               ),
                             );
                           },
                         ),
                       ),
+                      ],
                       const SizedBox(height: 16),
 
-                      const AppFooter(),
+                      AppFooter(
+                          bottomExtra: FloatingNavbar.clearance(context)),
                     ],
                   ),
                 ),
-              ),
-            ],
           ),
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
-            child: Align(
-              alignment: Alignment.center,
-              child: FloatingNavbar(
-                currentIndex: _currentNavIndex,
-                onTap: _onNavTapped,
-                bottomPadding: safeBottom > 0 ? safeBottom + 15 : 30,
+            // Hidden over the black hero; fades + slides up as the categories
+            // region scrolls away.
+            child: ValueListenableBuilder<double>(
+              valueListenable: _navReveal,
+              builder: (context, t, child) {
+                // Apply easing curves so the animation feels organic rather
+                // than mechanically linear. Opacity leads (appears early),
+                // scale and slide follow a slightly snappier curve.
+                final double easedOpacity =
+                    Curves.easeOutCubic.transform(t);
+                final double easedMotion =
+                    Curves.easeOutQuart.transform(t);
+
+                // Scale: the pill starts slightly smaller (0.92) and grows
+                // to full size, giving the feel of rising toward the viewer.
+                final double scale = 0.92 + 0.08 * easedMotion;
+
+                // Slide: 40px upward travel (down from 60) — enough motion
+                // to feel deliberate but not jarring.
+                final double slideY = (1 - easedMotion) * 40;
+
+                return IgnorePointer(
+                  ignoring: t < 0.05,
+                  child: Opacity(
+                    opacity: easedOpacity,
+                    child: Transform.translate(
+                      offset: Offset(0, slideY),
+                      child: Transform.scale(
+                        scale: scale,
+                        alignment: Alignment.bottomCenter,
+                        child: child,
+                      ),
+                    ),
+                  ),
+                );
+              },
+              child: Align(
+                alignment: Alignment.center,
+                child: FloatingNavbar(
+                  currentIndex: _currentNavIndex,
+                  onTap: _onNavTapped,
+                  bottomPadding: FloatingNavbar.bottomInset(context),
+                ),
               ),
             ),
           ),
         ],
+        ),
       ),
     );
   }

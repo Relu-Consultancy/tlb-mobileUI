@@ -1,8 +1,11 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
+import '../widgets/app_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
+import '../core/phone_validation.dart';
+import '../core/name_case.dart';
 import '../core/responsive.dart';
+import '../core/app_snackbar.dart';
 import '../providers/auth_state.dart';
 import '../services/auth_service.dart';
 import 'home_screen.dart';
@@ -20,60 +23,125 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _firstNameCtrl = TextEditingController();
   final _lastNameCtrl = TextEditingController();
-  final _cityCtrl = TextEditingController();
-  final _stateCtrl = TextEditingController();
-  final _guardianNameCtrl = TextEditingController();
-  final _institutionNameCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
+  final _regionCtrl = TextEditingController();
 
-  String? _institutionType;
-  DateTime? _dateOfBirth;
-  String? _avatarUrl;
-  File? _selectedAvatar;
+  String? _gender;
+  DateTime? _birthdate;
   bool _loading = false;
+  bool _fetchingProfile = false;
+  bool _prefetchFailed = false;
 
-  static const _institutionTypes = [
-    ('school', 'School'),
-    ('college', 'College'),
-    ('university', 'University'),
+  /// True while the picker is on +91, which is the default. Indian validation
+  /// applies only then — the picker exists so a customer abroad can still save
+  /// a reachable number.
+  bool get _isIndia => _selectedCountry.$1 == IndianPhone.dialCode;
+
+  // Country code picker state — defaults to India
+  (String, String, String) _selectedCountry = _countryCodes[0];
+
+  static const _countryCodes = [
+    ('+91',  '🇮🇳', 'India'),
+    ('+1',   '🇺🇸', 'United States'),
+    ('+1',   '🇨🇦', 'Canada'),
+    ('+44',  '🇬🇧', 'United Kingdom'),
+    ('+971', '🇦🇪', 'United Arab Emirates'),
+    ('+65',  '🇸🇬', 'Singapore'),
+    ('+61',  '🇦🇺', 'Australia'),
+    ('+60',  '🇲🇾', 'Malaysia'),
+    ('+966', '🇸🇦', 'Saudi Arabia'),
+    ('+974', '🇶🇦', 'Qatar'),
+    ('+973', '🇧🇭', 'Bahrain'),
+    ('+968', '🇴🇲', 'Oman'),
+    ('+92',  '🇵🇰', 'Pakistan'),
+    ('+880', '🇧🇩', 'Bangladesh'),
+    ('+94',  '🇱🇰', 'Sri Lanka'),
+    ('+977', '🇳🇵', 'Nepal'),
+    ('+49',  '🇩🇪', 'Germany'),
+    ('+33',  '🇫🇷', 'France'),
+    ('+39',  '🇮🇹', 'Italy'),
+    ('+34',  '🇪🇸', 'Spain'),
+    ('+81',  '🇯🇵', 'Japan'),
+    ('+82',  '🇰🇷', 'South Korea'),
+    ('+86',  '🇨🇳', 'China'),
+    ('+55',  '🇧🇷', 'Brazil'),
+    ('+27',  '🇿🇦', 'South Africa'),
+    ('+234', '🇳🇬', 'Nigeria'),
+    ('+254', '🇰🇪', 'Kenya'),
+    ('+20',  '🇪🇬', 'Egypt'),
+  ];
+
+  static const _genders = [
+    ('male', 'Male'),
+    ('female', 'Female'),
     ('other', 'Other'),
+    ('prefer_not_to_say', 'Prefer not to say'),
   ];
 
   @override
   void initState() {
     super.initState();
+    // errorText only repaints on rebuild, so the field has to drive one as the
+    // number is typed.
+    _phoneCtrl.addListener(() => setState(() {}));
     _prefillFromAuthState();
+    _fetchAndPrefill();
+  }
+
+  Future<void> _fetchAndPrefill() async {
+    final token = AuthState.accessToken;
+    if (token == null) return;
+    setState(() => _fetchingProfile = true);
+    try {
+      final result = await AuthService.getProfile(accessToken: token);
+      if (!mounted) return;
+      if (result['success'] == true) {
+        final profile = result['profile'] as Map<String, dynamic>;
+        AuthState.updateProfileData(profile);
+        _prefillFromAuthState();
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _prefetchFailed = true);
+      AppSnackBar.error(context, 'Could not load your profile data. Please review your details before saving.');
+    } finally {
+      if (mounted) setState(() => _fetchingProfile = false);
+    }
   }
 
   void _prefillFromAuthState() {
     final profile = AuthState.userData?['profile'] as Map<String, dynamic>?;
-    // Cache avatar URL once so build() never re-fetches on keystroke
-    final rawAvatar = profile?['avatar_url'] as String?;
-    if (rawAvatar != null && rawAvatar.isNotEmpty) {
-      _avatarUrl = rawAvatar;
-    } else {
-      final initials = Uri.encodeComponent(
-        ((profile?['first_name'] as String? ?? '').isNotEmpty
-            ? profile!['first_name'] as String
-            : AuthState.userEmail?.substring(0, 1).toUpperCase() ?? 'U'),
-      );
-      _avatarUrl = 'https://ui-avatars.com/api/?name=$initials&background=FFCC00&color=1A1A2E&size=200';
-    }
     if (profile == null) return;
-    _firstNameCtrl.text = profile['first_name'] as String? ?? '';
-    _lastNameCtrl.text = profile['last_name'] as String? ?? '';
-    _cityCtrl.text = profile['city'] as String? ?? '';
-    _stateCtrl.text = profile['state'] as String? ?? '';
-    _guardianNameCtrl.text = profile['guardian_name'] as String? ?? '';
-    _institutionNameCtrl.text = profile['institution_name'] as String? ?? '';
-    final it = profile['institution_type'] as String?;
-    if (it != null && _institutionTypes.any((e) => e.$1 == it)) {
-      _institutionType = it;
+    // Google sign-in fills these from the account, which often holds an
+    // all-lowercase name; show it the way it will be saved.
+    _firstNameCtrl.text = NameCase.of(profile['first_name'] as String? ?? '');
+    _lastNameCtrl.text = NameCase.of(profile['last_name'] as String? ?? '');
+    final raw = profile['phone_number'] as String? ?? '';
+    if (raw.startsWith('+')) {
+      // Match longest dial code first so '+1' doesn't shadow '+1xxx' variants
+      final sorted = [..._countryCodes]..sort((a, b) => b.$1.length.compareTo(a.$1.length));
+      bool found = false;
+      for (final c in sorted) {
+        if (raw.startsWith(c.$1)) {
+          _selectedCountry = _countryCodes.firstWhere(
+            (x) => x.$1 == c.$1 && x.$2 == c.$2,
+            orElse: () => c,
+          );
+          _phoneCtrl.text = raw.substring(c.$1.length).trim();
+          found = true;
+          break;
+        }
+      }
+      if (!found) _phoneCtrl.text = raw;
+    } else {
+      _phoneCtrl.text = raw;
     }
-    final dob = profile['date_of_birth'] as String?;
-    if (dob != null && dob.isNotEmpty) {
-      try {
-        _dateOfBirth = DateTime.parse(dob);
-      } catch (_) {}
+    _regionCtrl.text = profile['region'] as String? ?? '';
+    final g = profile['gender'] as String?;
+    if (g != null && _genders.any((e) => e.$1 == g)) _gender = g;
+    final bd = profile['birthdate'] as String?;
+    if (bd != null && bd.isNotEmpty) {
+      try { _birthdate = DateTime.parse(bd); } catch (_) {}
     }
   }
 
@@ -81,10 +149,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void dispose() {
     _firstNameCtrl.dispose();
     _lastNameCtrl.dispose();
-    _cityCtrl.dispose();
-    _stateCtrl.dispose();
-    _guardianNameCtrl.dispose();
-    _institutionNameCtrl.dispose();
+    _phoneCtrl.dispose();
+    _regionCtrl.dispose();
     super.dispose();
   }
 
@@ -97,48 +163,43 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _dateOfBirth ?? DateTime(2000),
+      initialDate: _birthdate ?? DateTime(2000),
       firstDate: DateTime(1950),
       lastDate: DateTime.now(),
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
-          colorScheme: const ColorScheme.light(primary: Color(0xFFFFCC00)),
+          colorScheme: const ColorScheme.light(primary: AppColors.primaryLight),
         ),
         child: child!,
       ),
     );
-    if (picked != null) setState(() => _dateOfBirth = picked);
+    if (picked != null) setState(() => _birthdate = picked);
   }
 
-  Future<void> _pickAvatar() async {
-    try {
-      final picker = ImagePicker();
-      final picked = await picker.pickImage(source: ImageSource.gallery);
-      if (picked != null) {
-        setState(() => _selectedAvatar = File(picked.path));
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to pick image.')),
-      );
-    }
-  }
+  /// The name as it should be stored — trimmed, with each word capitalised.
+  String _name(TextEditingController c) => NameCase.of(c.text.trim());
 
   Future<void> _onSave() async {
-    final firstName = _firstNameCtrl.text.trim();
+    final firstName = _name(_firstNameCtrl);
     if (firstName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('First name is required')),
-      );
+      AppSnackBar.show(context, 'First name is required');
       return;
+    }
+
+    // Stop an unreachable number being saved. Only applies on +91; other dial
+    // codes have their own formats and are left to the server.
+    if (_isIndia) {
+      final phoneError =
+          IndianPhone.validate(_phoneCtrl.text, required: false);
+      if (phoneError != null) {
+        AppSnackBar.show(context, phoneError);
+        return;
+      }
     }
 
     final token = AuthState.accessToken;
     if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Session expired. Please log in again.')),
-      );
+      AppSnackBar.error(context, 'Session expired. Please log in again.');
       return;
     }
 
@@ -146,44 +207,65 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     final result = await AuthService.updateProfile(
       accessToken: token,
-      avatarFile: _selectedAvatar,
-      firstName: firstName.isNotEmpty ? firstName : null,
-      lastName: _lastNameCtrl.text.trim().isNotEmpty ? _lastNameCtrl.text.trim() : null,
-      dateOfBirth: _dateOfBirth != null ? _isoDate(_dateOfBirth!) : null,
-      city: _cityCtrl.text.trim().isNotEmpty ? _cityCtrl.text.trim() : null,
-      state: _stateCtrl.text.trim().isNotEmpty ? _stateCtrl.text.trim() : null,
-      guardianName: _guardianNameCtrl.text.trim().isNotEmpty ? _guardianNameCtrl.text.trim() : null,
-      institutionName: _institutionNameCtrl.text.trim().isNotEmpty ? _institutionNameCtrl.text.trim() : null,
-      institutionType: _institutionType,
+      firstName: firstName,
+      lastName: _name(_lastNameCtrl).isNotEmpty ? _name(_lastNameCtrl) : null,
+      phoneNumber: _phoneCtrl.text.trim().isNotEmpty
+          ? '${_selectedCountry.$1}${_phoneCtrl.text.trim().replaceAll(RegExp(r'[\s\-()]'), '')}'
+          : null,
+      gender: _gender,
+      birthdate: _birthdate != null ? _isoDate(_birthdate!) : null,
+      region: _regionCtrl.text.trim().isNotEmpty ? _regionCtrl.text.trim() : null,
     );
 
     if (!mounted) return;
     setState(() => _loading = false);
 
     if (result['success'] == true) {
-      AuthState.updateUserProfile(result['user'] as Map<String, dynamic>);
+      AuthState.updateProfileData(result['profile'] as Map<String, dynamic>);
       if (widget.isOnboarding) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const HomeScreen()),
           (route) => false,
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated!')),
-        );
+        AppSnackBar.success(context, 'Profile updated!');
         Navigator.pop(context);
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message'] ?? 'Update failed. Try again.'),
-          backgroundColor: const Color(0xFFE53935),
-        ),
-      );
+      AppSnackBar.error(context, result['message'] ?? 'Update failed. Try again.');
     }
   }
 
-  void _skip() {
+  Future<void> _skip() async {
+    final firstName = _name(_firstNameCtrl);
+    if (firstName.isEmpty) {
+      AppSnackBar.show(
+        context,
+        'Please enter your first name to continue.',
+      );
+      return;
+    }
+
+    // Save only the first name so the home greeting works immediately and
+    // the walkthrough that fires on the next screen can read it. Other
+    // fields are intentionally left for the user to fill later.
+    setState(() => _loading = true);
+    final token = AuthState.accessToken;
+    if (token != null) {
+      final result = await AuthService.updateProfile(
+        accessToken: token,
+        firstName: firstName,
+      );
+      if (result['success'] == true && result['profile'] is Map) {
+        AuthState.updateProfileData(
+          Map<String, dynamic>.from(result['profile'] as Map),
+        );
+      }
+    }
+
+    if (!mounted) return;
+    setState(() => _loading = false);
+
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const HomeScreen()),
       (route) => false,
@@ -218,7 +300,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ],
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E), size: 20),
+                      icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 20),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
@@ -228,19 +310,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             widget.isOnboarding ? 'Complete Your Profile' : 'Edit Profile',
             style: GoogleFonts.poppins(
               fontSize: Responsive.sp(context, 18),
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF1A1A2E),
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
             ),
           ),
           actions: widget.isOnboarding
               ? [
                   TextButton(
-                    onPressed: _skip,
+                    onPressed: (_loading || _fetchingProfile) ? null : _skip,
                     child: Text(
                       'Skip',
                       style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
+                        fontSize: Responsive.sp(context, 14),
+                        fontWeight: FontWeight.w500,
                         color: const Color(0xFF2F80ED),
                       ),
                     ),
@@ -257,7 +339,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   "Let's set up your profile so we can personalise your experience.",
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    fontSize: 13,
+                    fontSize: Responsive.sp(context, 13),
                     color: Colors.grey.shade500,
                     height: 1.5,
                   ),
@@ -265,50 +347,52 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 const SizedBox(height: 20),
               ],
 
-              // ── Avatar ──
-              Center(
-                child: Stack(
-                  children: [
-                    Container(
-                      width: Responsive.w(context, 90, min: 70),
-                      height: Responsive.w(context, 90, min: 70),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.grey.shade200,
-                        image: DecorationImage(
-                          image: _selectedAvatar != null
-                              ? FileImage(_selectedAvatar!) as ImageProvider
-                              : NetworkImage(_avatarUrl ?? 'https://ui-avatars.com/api/?name=U&background=FFCC00&color=1A1A2E&size=200'),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 4,
-                      child: GestureDetector(
-                        onTap: _pickAvatar,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.grey.shade300, width: 1.5),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 4,
+              if (_prefetchFailed) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF3E0),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFFFB300), width: 1),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.warning_amber_rounded, color: Color(0xFFE65100), size: 18),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Profile data could not be loaded',
+                              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w500, color: const Color(0xFFE65100)),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Fields may be empty or outdated. Please fill them in carefully before saving.',
+                              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: const Color(0xFF7A4000), height: 1.4),
+                            ),
+                            const SizedBox(height: 6),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() => _prefetchFailed = false);
+                                _fetchAndPrefill();
+                              },
+                              child: Text(
+                                'Tap to retry',
+                                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), fontWeight: FontWeight.w500, color: const Color(0xFFE65100), decoration: TextDecoration.underline),
                               ),
-                            ],
-                          ),
-                          child: const Icon(Icons.edit_outlined, size: 16, color: Color(0xFF424242)),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 28),
+              ],
 
               // ── Basic Info ──
               _buildSection(
@@ -321,7 +405,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _buildLabel('First Name *'),
-                            _buildTextField(controller: _firstNameCtrl, hint: 'First name'),
+                            _buildTextField(controller: _firstNameCtrl, hint: 'First name', isName: true),
                           ],
                         ),
                       ),
@@ -331,11 +415,31 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             _buildLabel('Last Name'),
-                            _buildTextField(controller: _lastNameCtrl, hint: 'Last name'),
+                            _buildTextField(controller: _lastNameCtrl, hint: 'Last name', isName: true),
                           ],
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  _buildLabel('Email'),
+                  _buildReadOnlyField(
+                    value: AuthState.userEmail,
+                    placeholder: 'No email on this account',
+                  ),
+                  const SizedBox(height: 16),
+
+                  _buildLabel('Phone Number'),
+                  _buildPhoneField(),
+                  const SizedBox(height: 16),
+
+                  _buildLabel('Gender'),
+                  _buildDropdown(
+                    value: _gender,
+                    hint: 'Select gender',
+                    items: _genders.map((e) => DropdownMenuItem(value: e.$1, child: Text(e.$2))).toList(),
+                    onChanged: (v) => setState(() => _gender = v),
                   ),
                   const SizedBox(height: 16),
 
@@ -343,58 +447,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   _buildDateField(),
                   const SizedBox(height: 16),
 
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel('City'),
-                            _buildTextField(controller: _cityCtrl, hint: 'e.g. Mumbai'),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLabel('State'),
-                            _buildTextField(controller: _stateCtrl, hint: 'e.g. Maharashtra'),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // ── Education ──
-              _buildSection(
-                title: 'Education',
-                children: [
-                  _buildLabel('Institution Name'),
-                  _buildTextField(controller: _institutionNameCtrl, hint: 'School / College name'),
-                  const SizedBox(height: 16),
-
-                  _buildLabel('Institution Type'),
-                  _buildDropdown(
-                    value: _institutionType,
-                    hint: 'Select type',
-                    items: _institutionTypes.map((e) => DropdownMenuItem(value: e.$1, child: Text(e.$2))).toList(),
-                    onChanged: (v) => setState(() => _institutionType = v),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // ── Guardian ──
-              _buildSection(
-                title: 'Guardian Details',
-                children: [
-                  _buildLabel('Guardian Name'),
-                  _buildTextField(controller: _guardianNameCtrl, hint: 'Parent / Guardian name'),
+                  _buildLabel('Region / City'),
+                  _buildTextField(controller: _regionCtrl, hint: 'e.g. Mumbai'),
                 ],
               ),
               const SizedBox(height: 30),
@@ -404,26 +458,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 width: double.infinity,
                 height: Responsive.h(context, 50, min: 44),
                 child: ElevatedButton(
-                  onPressed: _loading ? null : _onSave,
+                  onPressed: (_loading || _fetchingProfile) ? null : _onSave,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFCC00),
-                    foregroundColor: const Color(0xFF1A1A2E),
-                    disabledBackgroundColor: const Color(0xFFFFCC00).withOpacity(0.6),
+                    backgroundColor: AppColors.primaryLight,
+                    foregroundColor: AppColors.textPrimary,
+                    disabledBackgroundColor: AppColors.primaryLight.withOpacity(0.6),
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
                   ),
-                  child: _loading
-                      ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: Color(0xFF1A1A2E),
-                          ),
-                        )
+                  child: (_loading || _fetchingProfile)
+                      ? const AppLoaderInline(dotSize: 7, spacing: 4, color: AppColors.textPrimary)
                       : Text(
                           widget.isOnboarding ? 'Save & Continue' : 'Update Profile',
-                          style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w600),
+                          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500),
                         ),
                 ),
               ),
@@ -449,9 +496,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           Text(
             title,
             style: GoogleFonts.poppins(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF1A1A2E),
+              fontSize: Responsive.sp(context, 14),
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
@@ -469,28 +516,186 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       child: Text(
         text,
         style: GoogleFonts.poppins(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
+          fontSize: Responsive.sp(context, 12),
+          fontWeight: FontWeight.w500,
           color: const Color(0xFF424242),
         ),
       ),
     );
   }
 
+  Widget _buildPhoneField() {
+    final h = Responsive.h(context, 46, min: 40);
+    return Container(
+      height: h,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Row(
+        children: [
+          // Country code prefix — tappable
+          GestureDetector(
+            onTap: _showCountryPicker,
+            child: Container(
+              height: h,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                border: Border(right: BorderSide(color: Colors.grey.shade300)),
+                borderRadius: const BorderRadius.horizontal(left: Radius.circular(10)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(_selectedCountry.$2, style: TextStyle(fontSize: Responsive.sp(context, 18))),
+                  const SizedBox(width: 4),
+                  Text(
+                    _selectedCountry.$1,
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF424242)),
+                  ),
+                  const SizedBox(width: 2),
+                  Icon(Icons.keyboard_arrow_down, size: 16, color: Colors.grey.shade500),
+                ],
+              ),
+            ),
+          ),
+          // Phone number input
+          Expanded(
+            child: TextField(
+              controller: _phoneCtrl,
+              keyboardType: TextInputType.phone,
+              // Only constrain the input when India is the selected country —
+              // this field has a picker, and other dial codes have their own
+              // lengths and leading digits.
+              inputFormatters: _isIndia ? IndianPhone.inputFormatters : null,
+              style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF424242)),
+              decoration: InputDecoration(
+                errorText: _isIndia
+                    ? IndianPhone.validate(_phoneCtrl.text, required: false)
+                    : null,
+                hintText: 'Phone number',
+                hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showCountryPicker() async {
+    final searchCtrl = TextEditingController();
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) {
+          final query = searchCtrl.text.toLowerCase();
+          final filtered = _countryCodes
+              .where((c) => c.$3.toLowerCase().contains(query) || c.$1.contains(query))
+              .toList();
+          return Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+            child: SizedBox(
+              height: MediaQuery.of(ctx).size.height * 0.62,
+              child: Column(
+                children: [
+                  // Drag handle
+                  Container(
+                    width: 40, height: 4,
+                    margin: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    child: TextField(
+                      controller: searchCtrl,
+                      autofocus: true,
+                      onChanged: (_) => setLocal(() {}),
+                      style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14)),
+                      decoration: InputDecoration(
+                        hintText: 'Search country or code...',
+                        hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
+                        prefixIcon: const Icon(Icons.search, size: 20),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: AppColors.primaryLight, width: 1.5),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: filtered.length,
+                      itemBuilder: (_, i) {
+                        final c = filtered[i];
+                        final isSelected = c.$1 == _selectedCountry.$1 && c.$2 == _selectedCountry.$2;
+                        return ListTile(
+                          dense: true,
+                          leading: Text(c.$2, style: TextStyle(fontSize: Responsive.sp(context, 22))),
+                          title: Text(c.$3, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14))),
+                          trailing: Text(
+                            c.$1,
+                            style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, 13),
+                              color: isSelected ? const Color(0xFFDE7104) : Colors.grey.shade600,
+                              fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                            ),
+                          ),
+                          selected: isSelected,
+                          selectedTileColor: const Color(0xFFFFF8E1),
+                          onTap: () {
+                            setState(() => _selectedCountry = c);
+                            Navigator.pop(ctx);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    searchCtrl.dispose();
+  }
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String hint,
     TextInputType keyboardType = TextInputType.text,
+    bool isName = false,
   }) {
     return SizedBox(
       height: Responsive.h(context, 46, min: 40),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
-        style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF424242)),
+        // The keyboard only *suggests* capitals, and not at all when the text
+        // is pasted or autofilled — the formatter is what actually enforces it.
+        textCapitalization:
+            isName ? TextCapitalization.words : TextCapitalization.none,
+        inputFormatters: isName ? const [NameCaseFormatter()] : null,
+        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF424242)),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade400),
+          hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400),
           contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
@@ -498,8 +703,47 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Color(0xFFFFCC00), width: 1.5),
+            borderSide: const BorderSide(color: AppColors.primaryLight, width: 1.5),
           ),
+        ),
+      ),
+    );
+  }
+
+  /// A display-only field for values the customer can't change here — the
+  /// email is the account's sign-in identity, so it is shown but not editable
+  /// and never sent in the profile update. Greyed with a lock so it doesn't
+  /// read as a field that has simply failed to take focus.
+  Widget _buildReadOnlyField({required String? value, required String placeholder}) {
+    final hasValue = (value ?? '').trim().isNotEmpty;
+    return Semantics(
+      readOnly: true,
+      label: hasValue ? 'Email, $value, cannot be changed' : placeholder,
+      excludeSemantics: true,
+      child: Container(
+        height: Responsive.h(context, 46, min: 40),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                hasValue ? value!.trim() : placeholder,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontSize: Responsive.sp(context, 13),
+                  color: hasValue ? Colors.grey.shade600 : Colors.grey.shade400,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(Icons.lock_outline_rounded, size: 18, color: Colors.grey.shade500),
+          ],
         ),
       ),
     );
@@ -520,10 +764,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           children: [
             Expanded(
               child: Text(
-                _dateOfBirth != null ? _formatDate(_dateOfBirth!) : 'Select date of birth',
+                _birthdate != null ? _formatDate(_birthdate!) : 'Select date of birth',
                 style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  color: _dateOfBirth != null ? const Color(0xFF424242) : Colors.grey.shade400,
+                  fontSize: Responsive.sp(context, 13),
+                  color: _birthdate != null ? const Color(0xFF424242) : Colors.grey.shade400,
                 ),
               ),
             ),
@@ -550,10 +794,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
-          hint: Text(hint, style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade400)),
+          hint: Text(hint, style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: Colors.grey.shade400)),
           isExpanded: true,
           icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade500, size: 20),
-          style: GoogleFonts.poppins(fontSize: 13, color: const Color(0xFF424242)),
+          style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 13), color: const Color(0xFF424242)),
           items: items,
           onChanged: onChanged,
         ),

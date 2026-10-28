@@ -1,17 +1,27 @@
 import 'dart:async';
+import '../core/app_colors.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
+import '../core/app_snackbar.dart';
+import '../core/email_validation.dart';
+import '../core/firebase_bootstrap.dart';
+import '../core/google_auth_error.dart';
+import '../widgets/app_loader.dart';
 import '../services/auth_service.dart';
 import '../providers/auth_state.dart';
+import '../providers/saved_events_state.dart';
 import '../core/responsive.dart';
 import '../screens/home_screen.dart';
-import '../screens/signup_screen.dart';
-import '../screens/forgot_password_screen.dart';
 import '../screens/edit_profile_screen.dart';
+import '../models/otp_delivery_model.dart';
+import '../screens/otp_verification_screen.dart';
+import '../screens/signup_screen.dart';
+import '../screens/whatsapp_login_screen.dart';
+import 'whatsapp_auth_card.dart';
+import '../services/walkthrough_service.dart';
 
 void showLoginSheet(BuildContext context) {
   Navigator.push(
@@ -31,101 +41,92 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  bool _isPasswordMode = false;
-  bool _obscurePassword = true;
+  final TextEditingController _emailController = TextEditingController();
   bool _loading = false;
 
   @override
   void dispose() {
-    _phoneController.dispose();
-    _passwordController.dispose();
+    _emailController.dispose();
     super.dispose();
   }
 
-  void _onSendOTP() {
-    final phone = _phoneController.text.trim();
-    if (phone.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter phone number or email')),
-      );
+  Future<void> _onSendOTP() async {
+    final email = _emailController.text.trim();
+    // Checked here so a malformed address never reaches the server.
+    final invalid = EmailAddress.validate(email);
+    if (invalid != null) {
+      AppSnackBar.show(context, invalid);
       return;
     }
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => _OTPVerificationScreen(phoneOrEmail: phone)),
-    );
-  }
-
-  Future<void> _onSignInWithPassword() async {
-    final email = _phoneController.text.trim();
-    final password = _passwordController.text;
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter email and password')),
-      );
-      return;
-    }
-
     setState(() => _loading = true);
-
-    final result = await AuthService.login(email: email, password: password);
-
+    // purpose: 'login' — backend rejects unregistered emails (USER_NOT_FOUND)
+    // and never sends an OTP, instead of auto-creating an account.
+    final result =
+        await AuthService.requestOtp(identifier: email, purpose: 'login');
     if (!mounted) return;
     setState(() => _loading = false);
-
     if (result['success'] == true) {
-      AuthState.login(
-        access: result['access'] as String?,
-        refresh: result['refresh'] as String?,
-        user: result['user'] as Map<String, dynamic>?,
-      );
-      showWelcomeBackDialog(context);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message'] ?? 'Login failed'),
-          backgroundColor: const Color(0xFFE53935),
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => OtpVerificationScreen(
+            identifier: email,
+            onExistingUser: showWelcomeBackDialog,
+            isLoginFlow: true,
+            delivery: result['delivery'] as OtpDelivery?,
+          ),
         ),
       );
+    } else {
+      AppSnackBar.error(context, result['message'] ?? 'Failed to send OTP');
     }
   }
 
   Future<void> _onGoogleSignIn() async {
     setState(() => _loading = true);
     try {
-      final googleSignIn = GoogleSignIn(
-        serverClientId: '690253990877-jqog76u6vcre0a9qbd9d8p0g7o47scue.apps.googleusercontent.com',
-        scopes: ['email', 'profile'],
-      );
+      // Make sure Firebase is initialised before any FirebaseAuth access —
+      // see comment in signup_screen._onGoogleSignUp.
+      await FirebaseBootstrap.ensureInitialized();
+
+      // Force the account picker every time
+      final googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
       await googleSignIn.signOut();
       final googleUser = await googleSignIn.signIn();
+
       if (googleUser == null) {
-        setState(() => _loading = false);
-        return; // user cancelled
-      }
-
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final fbCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
-      final firebaseToken = await fbCredential.user?.getIdToken();
-
-      if (firebaseToken == null) {
+        // User cancelled the picker
         if (!mounted) return;
         setState(() => _loading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Google sign-in failed. Try again.')),
-        );
         return;
       }
 
-      final result = await AuthService.googleSignIn(firebaseIdToken: firebaseToken);
+      // Get Google credentials
+      final googleAuth = await googleUser.authentication;
+
+      // Sign into Firebase with the Google credential to get a Firebase ID token.
+      // The backend verifies this Firebase token, not the raw Google token.
+      final credential = fb.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      final fbCredential =
+          await fb.FirebaseAuth.instance.signInWithCredential(credential);
+      final firebaseIdToken = await fbCredential.user?.getIdToken();
+
+      if (firebaseIdToken == null) {
+        if (!mounted) return;
+        setState(() => _loading = false);
+        AppSnackBar.error(context, 'Google authentication failed. Please try again.');
+        return;
+      }
+
+      debugPrint('[Google Login] Firebase ID token obtained, calling API...');
+      final result = await AuthService.googleSignIn(idToken: firebaseIdToken);
+      // google-login signs in and signs up alike; tell which happened before
+      // greeting (the spinner stays up through this second call).
+      final isNew =
+          result['success'] == true && await AuthService.isNewAccount(result);
 
       if (!mounted) return;
       setState(() => _loading = false);
@@ -136,31 +137,30 @@ class _LoginScreenState extends State<LoginScreen> {
           refresh: result['refresh'] as String?,
           user: result['user'] as Map<String, dynamic>?,
         );
-        showWelcomeBackDialog(context);
+        SavedEventsState.loadFromApi();
+
+        if (isNew) {
+          await WalkthroughService.markAsNewUser();
+          if (!mounted) return;
+          showWelcomeNewUserDialog(context);
+        } else {
+          showWelcomeBackDialog(context);
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result['message'] ?? 'Google sign-in failed'),
-            backgroundColor: const Color(0xFFE53935),
-          ),
-        );
+        debugPrint('[Google Login] API error: ${result['message']}');
+        AppSnackBar.error(context, result['message'] ?? 'Google sign-in failed. Please try again.');
       }
-    } catch (e) {
+    } catch (e, stack) {
       if (!mounted) return;
       setState(() => _loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Google sign-in error: ${e.toString()}'),
-          backgroundColor: const Color(0xFFE53935),
-        ),
-      );
+      debugPrint('[Google Login] Exception (${e.runtimeType}): $e\n$stack');
+      AppSnackBar.error(context, googleAuthErrorMessage(e));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Light grey background matches design
       backgroundColor: const Color(0xFFD9D9D9),
       body: SafeArea(
         child: Center(
@@ -192,27 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
 
-                  // ── Skip ───────────────────────────────────────────────
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () => Navigator.popUntil(context, (r) => r.isFirst),
-                      style: TextButton.styleFrom(
-                        minimumSize: Size.zero,
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                      ),
-                      child: Text(
-                        'Skip',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF2F80ED),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
 
                   // ── Illustration ────────────────────────────────────────
                   SizedBox(
@@ -221,7 +201,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        // Soft pink outer circle
                         Container(
                           width: 132,
                           height: 132,
@@ -230,7 +209,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             shape: BoxShape.circle,
                           ),
                         ),
-                        // Yellow dot — top right
                         Positioned(
                           top: 14,
                           right: 18,
@@ -243,7 +221,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
-                        // Yellow dot — bottom left
                         Positioned(
                           bottom: 20,
                           left: 14,
@@ -256,7 +233,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
-                        // Tilted hot-pink rounded square with party popper
                         Transform.rotate(
                           angle: -0.13,
                           child: Container(
@@ -264,14 +240,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             height: 90,
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [Color(0xFFFF3D7F), Color(0xFFFF8FAB)],
+                                colors: [
+                                  Color(0xFFFF3D7F),
+                                  Color(0xFFFF8FAB)
+                                ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
                               borderRadius: BorderRadius.circular(22),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFFFF3D7F).withOpacity(0.35),
+                                  color:
+                                      const Color(0xFFFF3D7F).withOpacity(0.35),
                                   blurRadius: 18,
                                   offset: const Offset(0, 8),
                                 ),
@@ -313,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     "Let's Get Started!",
                     style: GoogleFonts.poppins(
                       fontSize: Responsive.sp(context, 22),
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       color: const Color(0xFF1A1A1A),
                     ),
                   ),
@@ -329,88 +309,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 28),
 
-                  // ── Phone / Email input ─────────────────────────────────
+                  // ── Email input ─────────────────────────────────────────
                   _InputField(
-                    controller: _phoneController,
-                    hint: 'Phone Number / Email',
+                    controller: _emailController,
+                    hint: 'Email Address',
                     icon: Icons.mail_outline_rounded,
                     keyboardType: TextInputType.emailAddress,
                   ),
 
-                  if (_isPasswordMode) ...[
-                    const SizedBox(height: 14),
-                    _InputField(
-                      controller: _passwordController,
-                      hint: 'Password',
-                      icon: Icons.lock_outline_rounded,
-                      obscureText: _obscurePassword,
-                      suffix: GestureDetector(
-                        onTap: () => setState(() => _obscurePassword = !_obscurePassword),
-                        child: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          size: 20,
-                          color: const Color(0xFFAFAFAF),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const ForgotPasswordScreen()),
-                        ),
-                        style: TextButton.styleFrom(
-                          minimumSize: Size.zero,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 4, vertical: 4),
-                        ),
-                        child: Text(
-                          'Forgot Password?',
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF2F80ED),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-
                   const SizedBox(height: 18),
 
-                  // ── Primary button ──────────────────────────────────────
+                  // ── Send OTP button ─────────────────────────────────────
                   _PrimaryButton(
-                    label: _isPasswordMode ? 'Sign In' : 'Send OTP',
+                    label: 'Send OTP',
                     loading: _loading,
-                    onTap: _isPasswordMode ? _onSignInWithPassword : _onSendOTP,
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  // ── Toggle mode link ────────────────────────────────────
-                  TextButton(
-                    onPressed: () => setState(() {
-                      _isPasswordMode = !_isPasswordMode;
-                      _passwordController.clear();
-                      _obscurePassword = true;
-                    }),
-                    style: TextButton.styleFrom(
-                      minimumSize: Size.zero,
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    ),
-                    child: Text(
-                      _isPasswordMode ? 'Use OTP instead' : 'Sign in with Password',
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF5B5BD6),
-                      ),
-                    ),
+                    onTap: _onSendOTP,
                   ),
 
                   const SizedBox(height: 14),
@@ -421,295 +334,53 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 24),
 
                   // ── Continue with Google ────────────────────────────────
-                  _GoogleButton(onTap: _onGoogleSignIn),
+                  _GoogleButton(
+                    onTap: _loading ? null : _onGoogleSignIn,
+                  ),
 
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 12),
 
-                  // ── Continue as Event Partner ───────────────────────────
-                  TextButton(
-                    onPressed: () {},
-                    style: TextButton.styleFrom(
-                      minimumSize: Size.zero,
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    ),
-                    child: Text(
-                      'Continue as Event Partner',
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFFE6A800),
-                      ),
-                    ),
+                  // ── Continue with WhatsApp — its own screen ─────────────
+                  WhatsAppEntryButton(
+                    onTap: _loading
+                        ? null
+                        : () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const WhatsAppLoginScreen()),
+                            ),
                   ),
 
                   const SizedBox(height: 18),
 
-                  // ── Don't have an account? ──────────────────────────────
+                  // ── New user — navigate to Signup screen ────────────────
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Don't have an account? ",
+                        "New here? ",
                         style: GoogleFonts.poppins(
-                          fontSize: 13.5,
+                          fontSize: Responsive.sp(context, 13.5),
                           color: const Color(0xFF9E9E9E),
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {
-                          // push (not pushReplacement) so Login stays in stack
-                          // — this lets the "Log In" button on Signup pop back here
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const SignupScreen()),
-                          );
-                        },
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const SignupScreen()),
+                        ),
                         child: Text(
-                          'Sign Up',
+                          'Signup',
                           style: GoogleFonts.poppins(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w700,
+                            fontSize: Responsive.sp(context, 13.5),
+                            fontWeight: FontWeight.w500,
                             color: const Color(0xFF1A1A1A),
                           ),
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────
-// OTP VERIFICATION SCREEN
-// ─────────────────────────────────────────────
-class _OTPVerificationScreen extends StatefulWidget {
-  final String phoneOrEmail;
-  const _OTPVerificationScreen({required this.phoneOrEmail});
-
-  @override
-  State<_OTPVerificationScreen> createState() => _OTPVerificationScreenState();
-}
-
-class _OTPVerificationScreenState extends State<_OTPVerificationScreen> {
-  final List<TextEditingController> _otpControllers =
-      List.generate(6, (_) => TextEditingController());
-  final List<FocusNode> _otpFocusNodes = List.generate(6, (_) => FocusNode());
-
-  int _resendSeconds = 30;
-  Timer? _resendTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    _startResendTimer();
-  }
-
-  void _startResendTimer() {
-    _resendSeconds = 30;
-    _resendTimer?.cancel();
-    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_resendSeconds <= 0) {
-        timer.cancel();
-      } else {
-        setState(() => _resendSeconds--);
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _resendTimer?.cancel();
-    for (final c in _otpControllers) { c.dispose(); }
-    for (final f in _otpFocusNodes) { f.dispose(); }
-    super.dispose();
-  }
-
-  void _onVerify() {
-    final otp = _otpControllers.map((c) => c.text).join();
-    if (otp.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter the 6-digit OTP')),
-      );
-      return;
-    }
-    // TODO: replace with real OTP verification API call and pass access/refresh tokens
-    AuthState.login(phone: widget.phoneOrEmail);
-    final messenger = ScaffoldMessenger.of(context);
-    Navigator.popUntil(context, (route) => route.isFirst);
-    messenger.showSnackBar(
-      const SnackBar(content: Text('OTP Verified! Logged in successfully.')),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFD9D9D9),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 22, vertical: 32),
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(32),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.10),
-                    blurRadius: 32,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Container(
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF5F5F5),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.arrow_back_ios_new_rounded,
-                            size: 16, color: Color(0xFF1A1A1A)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 28),
-                  // OTP Illustration
-                  SizedBox(
-                    width: 130,
-                    height: 130,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          width: 110,
-                          height: 110,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFEEF2FF),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        Container(
-                          width: 76,
-                          height: 76,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF5C6BC0), Color(0xFF3949AB)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF5C6BC0).withOpacity(0.35),
-                                blurRadius: 16,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(Icons.verified_user_rounded,
-                              color: Colors.white, size: 34),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'OTP Verification',
-                    style: GoogleFonts.poppins(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF1A1A1A)),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Enter the 6-digit code sent to\n${widget.phoneOrEmail}',
-                    style: GoogleFonts.poppins(
-                        fontSize: 13, color: const Color(0xFF9E9E9E)),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 36),
-                  LayoutBuilder(builder: (context, constraints) {
-                    final boxW = ((constraints.maxWidth - 50) / 6).clamp(36.0, 50.0);
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: List.generate(6, (i) {
-                        return SizedBox(
-                          width: boxW,
-                          height: boxW * 1.25,
-                          child: TextField(
-                            controller: _otpControllers[i],
-                            focusNode: _otpFocusNodes[i],
-                            textAlign: TextAlign.center,
-                            keyboardType: TextInputType.number,
-                            maxLength: 1,
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                            style: GoogleFonts.poppins(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF1A1A1A)),
-                            decoration: InputDecoration(
-                              counterText: '',
-                              filled: true,
-                              fillColor: const Color(0xFFF5F5F5),
-                              contentPadding: EdgeInsets.zero,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                    color: Color(0xFFFFD014), width: 2),
-                              ),
-                            ),
-                            onChanged: (v) {
-                              if (v.isNotEmpty && i < 5) {
-                                _otpFocusNodes[i + 1].requestFocus();
-                              } else if (v.isEmpty && i > 0) {
-                                _otpFocusNodes[i - 1].requestFocus();
-                              }
-                            },
-                          ),
-                        );
-                      }),
-                    );
-                  }),
-                  const SizedBox(height: 32),
-                  _PrimaryButton(label: 'Verify & Continue', onTap: _onVerify),
-                  const SizedBox(height: 24),
-                  if (_resendSeconds > 0)
-                    Text(
-                      'Resend in 00:${_resendSeconds.toString().padLeft(2, '0')}',
-                      style: GoogleFonts.poppins(
-                          fontSize: 13, color: const Color(0xFF9E9E9E)),
-                    )
-                  else
-                    TextButton(
-                      onPressed: _startResendTimer,
-                      child: Text(
-                        'Resend OTP',
-                        style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFFFFD014)),
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -729,16 +400,12 @@ class _InputField extends StatelessWidget {
   final String hint;
   final IconData icon;
   final TextInputType? keyboardType;
-  final bool obscureText;
-  final Widget? suffix;
 
   const _InputField({
     required this.controller,
     required this.hint,
     required this.icon,
     this.keyboardType,
-    this.obscureText = false,
-    this.suffix,
   });
 
   @override
@@ -752,21 +419,24 @@ class _InputField extends StatelessWidget {
         controller: controller,
         keyboardType: keyboardType,
         textCapitalization: TextCapitalization.none,
-        obscureText: obscureText,
-        style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFF1A1A1A)),
+        style: GoogleFonts.poppins(
+            fontSize: Responsive.sp(context, 14),
+            color: const Color(0xFF1A1A1A)),
         decoration: InputDecoration(
           prefixIcon: Padding(
             padding: EdgeInsets.only(left: Responsive.w(context, 6)),
-            child: Icon(icon, size: Responsive.sp(context, 20), color: const Color(0xFFAFAFAF)),
+            child: Icon(icon,
+                size: Responsive.sp(context, 20),
+                color: const Color(0xFFAFAFAF)),
           ),
           hintText: hint,
-          hintStyle: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14), color: const Color(0xFFB8B8B8)),
+          hintStyle: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 14),
+              color: const Color(0xFFB8B8B8)),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: Responsive.w(context, 8), vertical: Responsive.h(context, 16)),
-          suffixIcon: suffix == null
-              ? null
-              : Padding(padding: const EdgeInsets.only(right: 14), child: suffix),
-          suffixIconConstraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+          contentPadding: EdgeInsets.symmetric(
+              horizontal: Responsive.w(context, 8),
+              vertical: Responsive.h(context, 16)),
         ),
       ),
     );
@@ -791,39 +461,29 @@ class _PrimaryButton extends StatelessWidget {
       height: 52,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFFFD014).withOpacity(0.5),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
-          ),
-        ],
       ),
       child: ElevatedButton(
         onPressed: loading ? null : onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFFCC00),
+          backgroundColor: AppColors.primaryLight,
           foregroundColor: const Color(0xFF1A1A1A),
-          disabledBackgroundColor: const Color(0xFFFFCC00).withOpacity(0.7),
+          disabledBackgroundColor: AppColors.primaryLight.withOpacity(0.7),
           elevation: 0,
+          // No drop shadow / tonal overlay (M3 paints these even at elevation 0).
+          shadowColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
           ),
         ),
         child: loading
-            ? const SizedBox(
-                width: 22,
-                height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: Color(0xFF1A1A1A),
-                ),
-              )
+            ? const AppLoaderInline(
+                dotSize: 7, spacing: 4, color: AppColors.textPrimary)
             : Text(
                 label,
                 style: GoogleFonts.poppins(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
+                  fontSize: Responsive.sp(context, 15),
+                  fontWeight: FontWeight.w500,
                   color: const Color(0xFF1A1A1A),
                 ),
               ),
@@ -839,19 +499,21 @@ class _OrDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Expanded(child: Divider(color: Color(0xFFE8E8E8), thickness: 1.2)),
+        const Expanded(
+            child: Divider(color: Color(0xFFE8E8E8), thickness: 1.2)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Text(
             'OR',
             style: GoogleFonts.poppins(
-              fontSize: 12,
+              fontSize: Responsive.sp(context, 12),
               fontWeight: FontWeight.w500,
               color: const Color(0xFFBBBBBB),
             ),
           ),
         ),
-        const Expanded(child: Divider(color: Color(0xFFE8E8E8), thickness: 1.2)),
+        const Expanded(
+            child: Divider(color: Color(0xFFE8E8E8), thickness: 1.2)),
       ],
     );
   }
@@ -861,33 +523,77 @@ class _OrDivider extends StatelessWidget {
 // WELCOME BACK DIALOG
 // ─────────────────────────────────────────────
 
-void showWelcomeBackDialog(BuildContext context) {
+/// Greets a returning customer, then takes them home.
+void showWelcomeBackDialog(BuildContext context) => _showWelcomeDialog(
+      context,
+      emoji: '👋',
+      title: 'Welcome Back!',
+      message: 'Great to see you again.\nReady to explore?',
+      action: "Let's Go!",
+      next: () => const HomeScreen(),
+    );
+
+/// Confirms a brand-new account was created, then opens profile setup.
+void showWelcomeNewUserDialog(BuildContext context) => _showWelcomeDialog(
+      context,
+      emoji: '🎉',
+      title: 'Welcome!',
+      message: 'Your account has been created successfully.\n'
+          "Let's set up your profile.",
+      action: 'Set Up Profile',
+      next: () => const EditProfileScreen(isOnboarding: true),
+    );
+
+void _showWelcomeDialog(
+  BuildContext context, {
+  required String emoji,
+  required String title,
+  required String message,
+  required String action,
+  required Widget Function() next,
+}) {
+  // Capture the ROOT navigator before the dialog is pushed. Using
+  // rootNavigator:true guards against nested Navigators (e.g. inside a
+  // showcase overlay) ending up with a stale reference, and also keeps
+  // this safe to call from a context whose underlying route has been
+  // removed by the post-dialog pushAndRemoveUntil.
+  final navigator = Navigator.of(context, rootNavigator: true);
   showDialog(
     context: context,
     barrierDismissible: false,
-    builder: (_) => _WelcomeBackDialog(
+    useRootNavigator: true,
+    builder: (dialogContext) => _WelcomeBackDialog(
+      emoji: emoji,
+      title: title,
+      message: message,
+      action: action,
       onDone: () {
-        if (!AuthState.isProfileComplete) {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (_) => const EditProfileScreen(isOnboarding: true),
-            ),
-            (route) => false,
-          );
-        } else {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
-            (route) => false,
-          );
-        }
+        // Dismiss the dialog first — pushing the next screen with
+        // predicate=false while a dialog is still on top leaves a one-frame
+        // gap where neither is painted, which manifests as a grey flash.
+        Navigator.of(dialogContext, rootNavigator: true).pop();
+        navigator.pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => next()),
+          (route) => false,
+        );
       },
     ),
   );
 }
 
 class _WelcomeBackDialog extends StatefulWidget {
+  final String emoji;
+  final String title;
+  final String message;
+  final String action;
   final VoidCallback onDone;
-  const _WelcomeBackDialog({required this.onDone});
+  const _WelcomeBackDialog({
+    required this.emoji,
+    required this.title,
+    required this.message,
+    required this.action,
+    required this.onDone,
+  });
 
   @override
   State<_WelcomeBackDialog> createState() => _WelcomeBackDialogState();
@@ -898,15 +604,17 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
   late final AnimationController _ctrl;
   late final List<_WbParticle> _particles;
 
+  /// Confetti in the app's own colours. The previous rainbow -- teal, coral,
+  /// mint, violet -- belonged to no part of this product. Deliberately mixes
+  /// light and dark: the burst crosses both the gold card and the dark scrim
+  /// behind it, and a single-tone palette would vanish over one or the other.
   static const _kColors = [
-    Color(0xFFFFCC00),
-    Color(0xFFFF6B6B),
-    Color(0xFF4ECDC4),
-    Color(0xFF45B7D1),
-    Color(0xFF96CEB4),
-    Color(0xFFFF9A3C),
-    Color(0xFFA78BFA),
+    AppColors.textPrimary,
     Colors.white,
+    Color(0xFFFFE9A8), // pale gold
+    AppColors.primaryLight,
+    AppColors.primary,
+    AppColors.primaryDark,
   ];
 
   @override
@@ -949,8 +657,25 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
           Container(
             padding: const EdgeInsets.fromLTRB(24, 36, 24, 28),
             decoration: BoxDecoration(
-              color: const Color(0xFF7C3AED),
+              // The app's own header gradient -- the one the home header and
+              // the organizer profile already wear. The card was a hard-coded
+              // violet that appeared nowhere else in the product.
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.headerGradientTop,
+                  AppColors.headerGradientBottom,
+                ],
+              ),
               borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryDark.withOpacity(0.38),
+                  blurRadius: 30,
+                  offset: const Offset(0, 14),
+                ),
+              ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -959,29 +684,37 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
                   width: 120,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.18),
+                    // White, not the old black wash: a dark disc on gold reads
+                    // as a hole punched in the card.
+                    color: Colors.white.withOpacity(0.30),
                     shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.55),
+                      width: 1.5,
+                    ),
                   ),
-                  child: const Center(
-                    child: Text('👋', style: TextStyle(fontSize: 58)),
+                  child: Center(
+                    child: Text(widget.emoji, style: TextStyle(fontSize: Responsive.sp(context, 58))),
                   ),
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Welcome Back!',
+                  widget.title,
                   style: GoogleFonts.poppins(
-                    fontSize: 22,
+                    fontSize: Responsive.sp(context, 22),
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    // Navy on gold measures ~11:1. White on this gradient
+                    // would be ~1.8:1 -- unreadable at the light end.
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Great to see you again.\nReady to explore?',
+                  widget.message,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: Colors.white.withOpacity(0.82),
+                    fontSize: Responsive.sp(context, 13),
+                    color: AppColors.textPrimary.withOpacity(0.78),
                     height: 1.55,
                   ),
                 ),
@@ -992,18 +725,20 @@ class _WelcomeBackDialogState extends State<_WelcomeBackDialog>
                   child: ElevatedButton(
                     onPressed: widget.onDone,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFCC00),
-                      foregroundColor: const Color(0xFF1A1A2E),
+                      // Inverted against the card. Yellow was the right call
+                      // on violet; on gold it disappears.
+                      backgroundColor: AppColors.textPrimary,
+                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
                       elevation: 0,
                     ),
                     child: Text(
-                      "Let's Go!",
+                      widget.action,
                       style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                        fontSize: Responsive.sp(context, 16),
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -1059,12 +794,14 @@ class _WbConfettiPainter extends CustomPainter {
       final y = cy + p.vy * t * 160 + 320 * t * t;
       final alpha = t < 0.55 ? 1.0 : 1.0 - ((t - 0.55) / 0.45);
       if (alpha <= 0) continue;
-      final paint = Paint()..color = p.color.withOpacity(alpha.clamp(0.0, 1.0));
+      final paint = Paint()
+        ..color = p.color.withOpacity(alpha.clamp(0.0, 1.0));
       canvas.save();
       canvas.translate(x, y);
       canvas.rotate(p.rotation + t * p.rotSpeed);
       canvas.drawRect(
-        Rect.fromCenter(center: Offset.zero, width: p.size, height: p.size * 0.45),
+        Rect.fromCenter(
+            center: Offset.zero, width: p.size, height: p.size * 0.45),
         paint,
       );
       canvas.restore();
@@ -1078,7 +815,7 @@ class _WbConfettiPainter extends CustomPainter {
 // ─────────────────────────────────────────────
 
 class _GoogleButton extends StatelessWidget {
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   const _GoogleButton({required this.onTap});
 
   @override
@@ -1100,7 +837,7 @@ class _GoogleButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/images/google_logo.png',
+              'resources- tlb-ui/google.png',
               width: 20,
               height: 20,
               errorBuilder: (_, __, ___) => const Icon(
@@ -1113,8 +850,8 @@ class _GoogleButton extends StatelessWidget {
             Text(
               'Continue with Google',
               style: GoogleFonts.poppins(
-                fontSize: 14.5,
-                fontWeight: FontWeight.w600,
+                fontSize: Responsive.sp(context, 14.5),
+                fontWeight: FontWeight.w500,
                 color: const Color(0xFF3C3C3C),
               ),
             ),

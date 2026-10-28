@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
+import '../core/responsive.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
 import '../models/event_model.dart';
 import 'wishlist_button.dart';
 import '../screens/event_detail_screen.dart';
+import '../core/listing_image.dart';
 
 class EventCard extends StatelessWidget {
   final EventModel event;
   final double width;
   final double imageHeight;
+  final bool showBoxShadow;
 
   const EventCard({
     super.key,
     required this.event,
     this.width = 260,
     this.imageHeight = 200,
+    this.showBoxShadow = true,
   });
 
   @override
@@ -29,13 +33,16 @@ class EventCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.cardBackground,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
+          boxShadow: showBoxShadow
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,7 +52,7 @@ class EventCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  child: Image.asset(
+                  child: listingImageSource(
                     event.imagePath,
                     width: width,
                     height: imageHeight,
@@ -88,8 +95,8 @@ class EventCard extends StatelessWidget {
                   Text(
                     event.title,
                     style: GoogleFonts.poppins(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
+                      fontSize: Responsive.sp(context, 15),
+                      fontWeight: FontWeight.w500,
                       color: AppColors.textPrimary,
                     ),
                     maxLines: 1,
@@ -108,7 +115,7 @@ class EventCard extends StatelessWidget {
                         child: Text(
                           event.venue,
                           style: GoogleFonts.poppins(
-                            fontSize: 12,
+                            fontSize: Responsive.sp(context, 12),
                             color: AppColors.textSecondary,
                           ),
                           maxLines: 1,

@@ -1,0 +1,8 @@
+﻿00:00 +0: loading E:/tlb-mobileUI/test/screens/classes_screen_test.dart
+00:00 +0: E:/tlb-mobileUI/test/screens/classes_screen_test.dart: ClassesScreen Tests renders all major sections and floating navbar
+00:02 +1: E:/tlb-mobileUI/test/screens/programs_screen_test.dart: ProgramsScreen Tests renders all major sections and floating navbar
+00:02 +2: E:/tlb-mobileUI/test/screens/venues_screen_test.dart: VenuesScreen Tests renders all major sections and floating navbar
+00:03 +3: E:/tlb-mobileUI/test/screens/classes_screen_test.dart: ClassesScreen Tests scrolls and shows more content
+00:03 +4: E:/tlb-mobileUI/test/screens/programs_screen_test.dart: ProgramsScreen Tests scrolls to reveal more content
+00:03 +5: E:/tlb-mobileUI/test/screens/venues_screen_test.dart: VenuesScreen Tests scrolls and shows more content
+00:04 +6: All tests passed!

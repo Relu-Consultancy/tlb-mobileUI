@@ -1,20 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show PlatformException;
+import '../core/app_colors.dart';
+import 'package:geolocator/geolocator.dart' show Geolocator;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import '../core/app_snackbar.dart';
+import '../core/avatar_image.dart';
 import '../services/auth_service.dart';
+import '../services/avatar_storage.dart';
 import '../providers/auth_state.dart';
 import '../core/responsive.dart';
 import '../providers/saved_events_state.dart';
 import '../providers/booked_events_state.dart';
+import '../providers/user_reviews_state.dart';
 import 'bookings_screen.dart';
 import 'saved_events_screen.dart';
 import 'help_centre_screen.dart';
 import 'account_settings_screen.dart';
+import 'about_us_screen.dart';
 import 'edit_profile_screen.dart';
 import 'payment_settings_screen.dart';
 import 'your_reviews_screen.dart';
+import 'followed_partners_screen.dart';
 import 'notification_screen.dart';
-import 'reminders_screen.dart';
-import 'home_screen.dart';
+import '../widgets/login_sheet.dart';
+import '../widgets/app_dialog.dart';
+// import 'reminders_screen.dart'; // Reminders entry temporarily hidden — restore when the feature is ready.
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -24,38 +35,83 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  /// True while a camera/gallery pick is in flight — see [_pickAvatar].
+  bool _pickingAvatar = false;
+
   double _calculateCompletion() {
     final profile = AuthState.userData?['profile'] as Map<String, dynamic>?;
+    // Mirror the actual fields collected by EditProfileScreen — Session 12
+    // renamed several fields and dropped guardian/institution entirely.
+    // Email + locally-picked avatar also count toward "complete".
+    const fields = [
+      'first_name',
+      'last_name',
+      'phone_number',
+      'gender',
+      'birthdate',
+      'region',
+    ];
     int filled = 0;
-    const totalFields = 8;
+    int total = fields.length;
     if (profile != null) {
-      if ((profile['first_name'] as String?)?.isNotEmpty == true) filled++;
-      if ((profile['last_name'] as String?)?.isNotEmpty == true) filled++;
-      if ((profile['date_of_birth'] as String?)?.isNotEmpty == true) filled++;
-      if ((profile['city'] as String?)?.isNotEmpty == true) filled++;
-      if ((profile['state'] as String?)?.isNotEmpty == true) filled++;
-      if ((profile['guardian_name'] as String?)?.isNotEmpty == true) filled++;
-      if ((profile['institution_name'] as String?)?.isNotEmpty == true) filled++;
-      if ((profile['institution_type'] as String?)?.isNotEmpty == true) filled++;
+      for (final f in fields) {
+        if ((profile[f] as String?)?.trim().isNotEmpty == true) filled++;
+      }
     }
-    return filled / totalFields;
+    // The sign-in identifier (email, or the number a phone signup used) is
+    // always present after signup, count it as a +1 baseline so a brand-new
+    // account isn't stuck at 0 %.
+    total++;
+    if ((AuthState.userEmail ?? AuthState.userPhone ?? '').trim().isNotEmpty) {
+      filled++;
+    }
+    // Profile picture (local or remote) counts too.
+    total++;
+    if ((AuthState.avatarUrl.value ?? '').trim().isNotEmpty) filled++;
+    return total == 0 ? 0 : filled / total;
   }
 
   @override
   Widget build(BuildContext context) {
+    // Rebuild on either name OR avatar change so the completion tracker
+    // and avatar render stay in sync when EditProfileScreen pops back.
+    return ValueListenableBuilder<String?>(
+      valueListenable: AuthState.userName,
+      builder: (context, _, __) {
+        return ValueListenableBuilder<String?>(
+          valueListenable: AuthState.avatarUrl,
+          builder: (context, _, __) => _buildScaffold(context),
+        );
+      },
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context) {
     final profile = AuthState.userData?['profile'] as Map<String, dynamic>?;
     final userName = AuthState.userName.value ?? 'User';
-    final userEmail = AuthState.userEmail ?? 'No email provided';
-    
+    // A phone-signup account has no email; show its number instead.
+    final userEmail =
+        AuthState.userEmail ?? AuthState.userPhone ?? 'No email provided';
+
     String avatarUrl;
+    // Prefer the live ValueNotifier — _pickAvatar writes the local file path
+    // there, and AvatarStorage.load() repopulates it on cold start. The
+    // userData['profile']['avatar_url'] copy is only updated by API refreshes
+    // and won't reflect a freshly picked photo.
+    final liveAvatar = AuthState.avatarUrl.value;
     final rawAvatar = profile?['avatar_url'] as String?;
-    if (rawAvatar != null && rawAvatar.isNotEmpty) {
+    if (liveAvatar != null && liveAvatar.trim().isNotEmpty) {
+      avatarUrl = liveAvatar;
+    } else if (rawAvatar != null && rawAvatar.isNotEmpty) {
       avatarUrl = rawAvatar;
     } else {
+      final firstChar = AuthState.userEmail?.isNotEmpty == true
+          ? AuthState.userEmail!.substring(0, 1).toUpperCase()
+          : 'U';
       final initials = Uri.encodeComponent(
         ((profile?['first_name'] as String? ?? '').isNotEmpty
             ? profile!['first_name'] as String
-            : AuthState.userEmail?.substring(0, 1).toUpperCase() ?? 'U'),
+            : firstChar),
       );
       avatarUrl = 'https://ui-avatars.com/api/?name=$initials&background=FFCC00&color=1A1A2E&size=200';
     }
@@ -69,16 +125,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E), size: 22),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 22),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: Text(
           'My Profile',
           style: GoogleFonts.poppins(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF1A1A2E),
+            fontSize: Responsive.sp(context, 17),
+            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -87,130 +143,159 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             const SizedBox(height: 20),
 
-            // ── Profile header (centered layout matching Figma) ────────────
-            Center(
-              child: Column(
+            // ── Profile header — big avatar on the left, details on the right ──
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Avatar with camera badge
+                  // Big avatar with camera badge (bottom-right)
                   GestureDetector(
                     onTap: () => _showAvatarOptions(context, avatarUrl),
                     child: Stack(
                       children: [
                         Container(
-                          width: 90,
-                          height: 90,
+                          width: 128,
+                          height: 128,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.grey.shade300, width: 3),
-                            image: DecorationImage(
-                              image: NetworkImage(avatarUrl),
+                          ),
+                          child: ClipOval(
+                            child: Image(
+                              image: avatarImageProvider(
+                                avatarUrl,
+                                fallback: const AssetImage(
+                                    'assets/images/new_home/profilepic.jpg'),
+                              ),
                               fit: BoxFit.cover,
+                              width: 128,
+                              height: 128,
+                              errorBuilder: (_, __, ___) => Image.asset(
+                                'assets/images/new_home/profilepic.jpg',
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                         ),
                         Positioned(
-                          bottom: 0,
-                          left: 0,
+                          bottom: 4,
+                          right: 4,
                           child: Container(
-                            padding: const EdgeInsets.all(6),
+                            padding: const EdgeInsets.all(7),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.grey.shade300, width: 1.5),
                             ),
                             child: const Icon(Icons.camera_alt_outlined,
-                                size: 15, color: Color(0xFF555555)),
+                                size: 16, color: Color(0xFF555555)),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(width: 18),
 
-                  // Name
-                  Text(
-                    userName,
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF1A1A2E),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-
-                  // Email
-                  Text(
-                    userEmail,
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      color: Colors.grey.shade500,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Edit Profile button (dark rounded pill)
-                  SizedBox(
-                    height: 36,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const EditProfileScreen()),
-                      ).then((_) => setState(() {})),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0A1F11),
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 28),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20)),
-                      ),
-                      child: Text(
-                        'Edit Profile',
-                        style: GoogleFonts.poppins(
-                            fontSize: 13, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Profile Completion Progress
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                  // Name + email + Edit Profile, stacked to the right
+                  Expanded(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Profile Completion',
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                            Text(
-                              '${(completion * 100).toInt()}%',
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF1A1A2E),
-                              ),
-                            ),
-                          ],
+                        // Name
+                        Text(
+                          userName,
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 20),
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 6),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: LinearProgressIndicator(
-                            value: completion,
-                            backgroundColor: Colors.grey.shade200,
-                            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFFFCC00)),
-                            minHeight: 6,
+                        const SizedBox(height: 4),
+
+                        // Email
+                        Text(
+                          userEmail,
+                          style: GoogleFonts.poppins(
+                            fontSize: Responsive.sp(context, 12.5),
+                            color: Colors.grey.shade500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Edit Profile button (dark green pill)
+                        SizedBox(
+                          height: 42,
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const EditProfileScreen()),
+                            ).then((_) => setState(() {})),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF0A1F11),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(horizontal: 30),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(24)),
+                            ),
+                            child: Text(
+                              'Edit Profile',
+                              style: GoogleFonts.poppins(
+                                  fontSize: Responsive.sp(context, 13.5),
+                                  fontWeight: FontWeight.w500),
+                            ),
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 22),
+
+            // ── Profile Completion Progress (full width) ───────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Profile Completion',
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 12),
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      Text(
+                        '${(completion * 100).toInt()}%',
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 12),
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: completion,
+                      backgroundColor: Colors.grey.shade200,
+                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryLight),
+                      minHeight: 6,
                     ),
                   ),
                 ],
@@ -253,6 +338,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       builder: (_) => const YourReviewsScreen())),
             ),
             _item(
+              icon: Icons.people_alt_outlined,
+              label: 'Followed Partners',
+              onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const FollowedPartnersScreen())),
+            ),
+            _item(
               icon: Icons.notifications_none_rounded,
               label: 'Notifications',
               onTap: () => Navigator.push(
@@ -260,14 +353,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   MaterialPageRoute(
                       builder: (_) => const NotificationScreen())),
             ),
-            _item(
-              icon: Icons.alarm_outlined,
-              label: 'Reminders',
-              onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const RemindersScreen())),
-            ),
+            // Reminders entry temporarily hidden — restore when the feature is ready.
+            // _item(
+            //   icon: Icons.alarm_outlined,
+            //   label: 'Reminders',
+            //   onTap: () => Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //           builder: (_) => const RemindersScreen())),
+            // ),
 
             const SizedBox(height: 4),
             const Divider(height: 1, color: Color(0xFFF0F0F0), indent: 20, endIndent: 20),
@@ -287,6 +381,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               label: 'Help',
               onTap: () => Navigator.push(context,
                   MaterialPageRoute(builder: (_) => const HelpCentreScreen())),
+            ),
+            _item(
+              icon: Icons.info_outline_rounded,
+              label: 'About Us',
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const AboutUsScreen())),
             ),
             _item(
               icon: Icons.logout_rounded,
@@ -320,7 +420,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       title: Text(
         label,
         style: GoogleFonts.poppins(
-          fontSize: 15,
+          fontSize: Responsive.sp(context, 15),
           fontWeight: FontWeight.w500,
           color: labelColor,
         ),
@@ -332,50 +432,117 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Log Out',
-            style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
-                fontSize: Responsive.sp(context, 17))),
-        content: Text('Are you sure you want to log out?',
-            style: GoogleFonts.poppins(
-                fontSize: 14, color: Colors.grey.shade700)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel',
-                style: GoogleFonts.poppins(color: Colors.grey, fontSize: 14)),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final refresh = AuthState.refreshToken;
-              if (refresh != null) {
-                await AuthService.logout(refresh: refresh);
-              }
-              AuthState.logout();
-              SavedEventsState.savedEvents.value = [];
-              BookedEventsState.bookings.value = [];
-              if (!context.mounted) return;
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const HomeScreen()),
-                (route) => false,
-              );
-            },
-            child: Text('Log Out',
-                style: GoogleFonts.poppins(
-                    color: const Color(0xFFE53935),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14)),
-          ),
-        ],
-      ),
+  Future<void> _showLogoutDialog(BuildContext context) async {
+    final ok = await showAppConfirmDialog(
+      context,
+      title: 'Log Out',
+      message: 'Are you sure you want to log out?',
+      confirmLabel: 'Log Out',
+      icon: Icons.logout_rounded,
+      destructive: true,
+    );
+    if (!ok) return;
+
+    final refresh = AuthState.refreshToken;
+    if (refresh != null) {
+      await AuthService.logout(refresh: refresh);
+    }
+    AuthState.logout();
+    SavedEventsState.savedEvents.value = [];
+    BookedEventsState.bookings.value = [];
+    await UserReviewsState.clear();
+    if (!context.mounted) return;
+    // Send the user to the login screen rather than a guest HomeScreen —
+    // matches the cold-start behaviour (Session 47) and avoids a second
+    // HomeScreen racing the ShowcaseView register/unregister lifecycle.
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
     );
   }
+
+  Future<void> _pickAvatar(ImageSource source) async {
+    // A second tap while the camera is opening gets `already_active` back and
+    // loses both picks, so the first one owns the flow until it finishes.
+    if (_pickingAvatar) return;
+    _pickingAvatar = true;
+    try {
+      final picker = ImagePicker();
+      final file = await picker.pickImage(
+        source: source,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 85,
+      );
+      if (file == null) return; // user cancelled
+
+      final saved = await AvatarStorage.saveFromPickedFile(file.path);
+      if (!mounted) return;
+
+      if (saved != null) {
+        // Triggers ValueListenableBuilders in home_header, profile, account.
+        AuthState.avatarUrl.value = saved;
+        setState(() {});
+        AppSnackBar.success(context, 'Profile picture updated.');
+      } else {
+        AppSnackBar.error(context, 'Could not save the picture. Try again.');
+      }
+    } on PlatformException catch (e) {
+      if (!mounted) return;
+      await _reportPickerFailure(e.code, source);
+    } catch (_) {
+      if (!mounted) return;
+      AppSnackBar.error(context, _genericPickerError(source));
+    } finally {
+      _pickingAvatar = false;
+    }
+  }
+
+  /// Names what went wrong, and for a blocked permission offers the one place
+  /// it can be granted.
+  ///
+  /// Every failure used to collapse to "Could not open the picker", which
+  /// named neither the cause nor the cure — a customer who had denied the
+  /// camera had no way to learn that was why, or where to change it. iOS
+  /// reports the denial as `camera_access_denied`; Android hands the capture
+  /// to the camera app, which asks for its own permissions, so a denial there
+  /// simply comes back as no photo.
+  Future<void> _reportPickerFailure(String code, ImageSource source) async {
+    const denials = {'camera_access_denied', 'photo_access_denied'};
+    if (!denials.contains(code)) {
+      AppSnackBar.error(
+        context,
+        code == 'no_available_camera'
+            ? 'No camera is available on this device.'
+            : _genericPickerError(source),
+      );
+      return;
+    }
+    final camera = code == 'camera_access_denied';
+    final ok = await showAppConfirmDialog(
+      context,
+      title: camera ? 'Camera access needed' : 'Photo access needed',
+      message: camera
+          ? 'TLB needs your camera to take a profile photo. Turn it on for '
+              'TLB in app settings.'
+          : 'TLB needs access to your photos to set a profile picture. Turn '
+              'it on for TLB in app settings.',
+      confirmLabel: 'Open Settings',
+      icon: camera
+          ? Icons.photo_camera_outlined
+          : Icons.photo_library_outlined,
+    );
+    // Geolocator's opener is not location-specific — it just opens this app's
+    // own settings page on both platforms, and it is already a dependency
+    // (the location screen uses it for the same purpose). Reused here rather
+    // than taking on permission_handler for one button.
+    if (ok) await Geolocator.openAppSettings();
+  }
+
+  String _genericPickerError(ImageSource source) =>
+      source == ImageSource.camera
+          ? "Couldn't open the camera. Please try again."
+          : "Couldn't open your photos. Please try again.";
 
   void _showAvatarOptions(BuildContext context, String avatarUrl) {
     showModalBottomSheet(
@@ -400,13 +567,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 16),
               ListTile(
-                leading: const Icon(Icons.account_circle_outlined, color: Color(0xFF1A1A2E)),
+                leading: const Icon(Icons.account_circle_outlined, color: AppColors.textPrimary),
                 title: Text(
                   'View Profile Picture',
                   style: GoogleFonts.poppins(
-                    fontSize: 15,
+                    fontSize: Responsive.sp(context, 15),
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 onTap: () {
@@ -415,24 +582,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.camera_alt_outlined, color: Color(0xFF1A1A2E)),
+                leading: const Icon(Icons.camera_alt_outlined,
+                    color: AppColors.textPrimary),
                 title: Text(
-                  'Change Profile Picture',
+                  'Take a Photo',
                   style: GoogleFonts.poppins(
-                    fontSize: 15,
+                    fontSize: Responsive.sp(context, 15),
                     fontWeight: FontWeight.w500,
-                    color: const Color(0xFF1A1A2E),
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 onTap: () {
                   Navigator.pop(ctx);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const EditProfileScreen()),
-                  ).then((_) => setState(() {}));
+                  _pickAvatar(ImageSource.camera);
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined,
+                    color: AppColors.textPrimary),
+                title: Text(
+                  'Choose from Gallery',
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 15),
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickAvatar(ImageSource.gallery);
+                },
+              ),
+              if (AuthState.avatarUrl.value != null &&
+                  AuthState.avatarUrl.value!.isNotEmpty)
+                ListTile(
+                  leading: const Icon(Icons.delete_outline,
+                      color: Color(0xFFE53935)),
+                  title: Text(
+                    'Remove Profile Picture',
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 15),
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFFE53935),
+                    ),
+                  ),
+                  onTap: () async {
+                    Navigator.pop(ctx);
+                    await AvatarStorage.clear();
+                    AuthState.avatarUrl.value = null;
+                    setState(() {});
+                  },
+                ),
               const SizedBox(height: 16),
             ],
           ),
@@ -452,9 +652,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: Image.network(
-                avatarUrl,
+              child: Image(
+                image: avatarImageProvider(
+                  avatarUrl,
+                  fallback: const AssetImage(
+                      'assets/images/new_home/profilepic.jpg'),
+                ),
                 fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => Image.asset(
+                  'assets/images/new_home/profilepic.jpg',
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
             Positioned(

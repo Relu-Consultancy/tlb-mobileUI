@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../core/responsive.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:showcaseview/showcaseview.dart';
 import '../helpers/walkthrough_keys.dart';
+import 'walkthrough_tooltip.dart';
 
 class NavbarItemData {
   final String label;
@@ -32,29 +35,49 @@ class FloatingNavbar extends StatelessWidget {
     this.showcaseConfigs,
   });
 
+  // Dark "night theatre" navbar palette (matches the black home redesign).
+  static const Color _pillBg = Color(0xFF0D0D0D);      // near-black pill
+  static const Color _pillBorder = Color(0xFF2A2A2A);  // hairline edge
+  static const Color _activeChip = Color(0xFF262626);  // selected-tab chip
+  static const Color _gold = Color(0xFFF5C042);        // active icon + label
+  static const Color _inactiveIcon = Color(0xFF8A8A8A); // muted grey icons
+
+  /// Rendered height of the white pill: icon (22) + item vertical padding
+  /// (9·2) + item border (2·2) + pill vertical padding (6·2) + pill border
+  /// (2·2) ≈ 60. Fixed in logical px — it does NOT shrink on small screens,
+  /// which is exactly why content clearance must be derived from it rather
+  /// than from a hard-coded guess.
+  static const double pillHeight = 60;
+
+  /// The gap the navbar keeps from the screen bottom (device safe-area inset
+  /// plus a little breathing room, or a fixed 30 on devices without an inset).
+  /// Pass this as [bottomPadding] so the pill and the content clearance below
+  /// stay in sync on every device.
+  static double bottomInset(BuildContext context) {
+    final safeBottom = MediaQuery.of(context).padding.bottom;
+    return safeBottom > 0 ? safeBottom + 15.0 : 30.0;
+  }
+
+  /// Total vertical space scrollable content must reserve at its bottom so the
+  /// floating pill never overlaps real content. = bottom inset + pill height +
+  /// a comfortable [gap]. Adapts to the device, fixing the small-screen
+  /// overlap where the old hard-coded `+64` under-reserved by ~8–14px.
+  static double clearance(BuildContext context, {double gap = 18}) {
+    return bottomInset(context) + pillHeight + gap;
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
     final pill = Container(
       width: screenWidth * 0.92,
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.white, width: 2),
-        color: Colors.white,
+        border: Border.all(color: _pillBorder, width: 1),
+        color: _pillBg,
         borderRadius: BorderRadius.circular(50),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-          BoxShadow(
-            color: Colors.white.withOpacity(0.8),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
-          ),
-        ],
+        boxShadow: const [],
       ),
       clipBehavior: Clip.antiAlias,
       child: SingleChildScrollView(
@@ -78,18 +101,14 @@ class FloatingNavbar extends StatelessWidget {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOutCubic,
-                    padding: EdgeInsets.symmetric(horizontal: isActive ? 16 : 14, vertical: 12),
+                    padding: EdgeInsets.symmetric(horizontal: isActive ? 16 : 14, vertical: 9),
                     decoration: BoxDecoration(
-                      color: isActive ? const Color(0xFFFFCC00) : Colors.transparent,
-                      border: isActive ? Border.all(color: Colors.white, width: 2) : null,
+                      color: isActive ? _activeChip : Colors.transparent,
+                      border: isActive
+                          ? Border.all(color: Colors.white.withOpacity(0.06), width: 1)
+                          : null,
                       borderRadius: BorderRadius.circular(30),
-                      boxShadow: isActive ? [
-                        BoxShadow(
-                          color: const Color(0xFFFFCC00).withOpacity(0.4),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        )
-                      ] : null,
+                      boxShadow: null,
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -99,8 +118,8 @@ class FloatingNavbar extends StatelessWidget {
                           item.iconPath,
                           width: 22,
                           height: 22,
-                          colorFilter: const ColorFilter.mode(
-                            Color(0xFF1E293B),
+                          colorFilter: ColorFilter.mode(
+                            isActive ? _gold : _inactiveIcon,
                             BlendMode.srcIn,
                           ),
                         ),
@@ -113,10 +132,10 @@ class FloatingNavbar extends StatelessWidget {
                                   padding: const EdgeInsets.only(left: 8.0),
                                   child: Text(
                                     item.label,
-                                    style: const TextStyle(
-                                      color: Color(0xFF1E293B),
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 14,
+                                    style: GoogleFonts.poppins(
+                                      color: _gold,
+                                      fontWeight: FontWeight.w600, // little bold
+                                      fontSize: Responsive.sp(context, 14),
                                     ),
                                   ),
                                 )
@@ -131,17 +150,26 @@ class FloatingNavbar extends StatelessWidget {
               final config = showcaseConfigs?[index];
               if (config == null) return navItemWidget;
 
-              return Showcase(
+              return Showcase.withWidget(
                 key: config.showcaseKey,
-                title: config.title,
-                description: config.description,
-                overlayOpacity: 0.78,
-                tooltipBackgroundColor: const Color(0xFF1A1A2E),
-                textColor: Colors.white,
-                scaleAnimationDuration: const Duration(milliseconds: 350),
-                scaleAnimationCurve: Curves.easeInOut,
-                movingAnimationDuration: const Duration(milliseconds: 350),
+                // Matches the pill's own shape (borderRadius: 30 above) so the
+                // spotlight cutout hugs the real target instead of the
+                // package's generic rounded-rect default.
+                targetShapeBorder:
+                    const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(30))),
+                blurValue: 3,
+                overlayOpacity: 0.6,
                 targetPadding: const EdgeInsets.all(6),
+                targetTooltipGap: 14,
+                container: WalkthroughTooltip(
+                  icon: config.icon,
+                  title: config.title,
+                  description: config.description,
+                  stepIndex: config.stepIndex,
+                  totalSteps: WalkthroughKeys.totalSteps,
+                  onNext: () => ShowcaseView.get().next(),
+                  onSkip: () => ShowcaseView.get().dismiss(),
+                ),
                 child: navItemWidget,
               );
             }),
@@ -158,7 +186,7 @@ class FloatingNavbar extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [
             const Color(0xFF242424).withOpacity(0),
-            const Color(0xFF000000).withOpacity(1.0),
+            const Color(0xFF000000).withOpacity(0.6),
           ],
           stops: const [0.0, 1.0],
         ),

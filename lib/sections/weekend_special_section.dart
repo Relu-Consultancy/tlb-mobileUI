@@ -1,12 +1,17 @@
 import '../core/responsive.dart';
+import '../core/app_colors.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../widgets/category_skeleton_card.dart';
+import '../core/listing_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../widgets/wishlist_button.dart';
 import '../widgets/section_divider_widget.dart';
+import '../widgets/listing_meta_rows.dart';
+import '../providers/home_feed_state.dart';
 import '../data/dummy_data.dart';
-import '../screens/event_detail_screen.dart';
+import '../core/listing_navigation.dart';
 
 class WeekendSpecialSection extends StatefulWidget {
   const WeekendSpecialSection({super.key});
@@ -16,13 +21,15 @@ class WeekendSpecialSection extends StatefulWidget {
 }
 
 class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
-  final PageController _pageController = PageController(viewportFraction: 0.88);
+  final PageController _pageController = PageController(viewportFraction: 0.92);
   Timer? _autoSlideTimer;
 
   @override
   void initState() {
     super.initState();
-    _startAutoSlide();
+    // Auto-slide disabled — section carousels no longer auto-advance (only the
+    // top image banners + Spotlight do). The PageView is still swipeable.
+    // _startAutoSlide();
   }
 
   @override
@@ -32,259 +39,203 @@ class _WeekendSpecialSectionState extends State<WeekendSpecialSection> {
     super.dispose();
   }
 
-  void _startAutoSlide() {
-    _autoSlideTimer = Timer.periodic(const Duration(seconds: 4), (_) {
-      if (!_pageController.hasClients || DummyData.weekendSpecial.isEmpty) return;
-      final nextPage = ((_pageController.page?.round() ?? 0) + 1) %
-          DummyData.weekendSpecial.length;
-      _pageController.animateToPage(
-        nextPage,
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
-      );
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SectionDividerWidget(title: 'Weekend Special'),
-        SizedBox(
-          height: Responsive.h(context, 420, min: 350),
-          child: PageView.builder(
-            controller: _pageController,
-            clipBehavior: Clip.hardEdge,
-            itemCount: DummyData.weekendSpecial.length,
-            itemBuilder: (context, index) {
-              final event = DummyData.weekendSpecial[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade200),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.06),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Image with badge and heart icon
-                      Stack(
-                        children: [
-                          ClipRRect(
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(16),
-                            ),
-                            child: Image.asset(
-                              event.imagePath,
-                              height: Responsive.h(context, 220, min: 160),
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          // Date badge (top-left)
-                          if (event.tag != null)
-                            Positioned(
-                              top: 12,
-                              left: 12,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 6,
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      'Sat',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w700,
-                                        color: const Color(0xFF1A1A2E),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'mar 16',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w700,
-                                        color: const Color(0xFF0066CC), // Blue color from design
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          // Heart icon (top-right)
-                          Positioned(
-                            top: 12,
-                            right: 12,
-                            child: WishlistButton(event: event, showShadow: true),
+    return ValueListenableBuilder<int>(
+      valueListenable: HomeFeedState.version,
+      builder: (context, _, __) {
+        // Real listings once the feed is in, the mock set until then.
+                final isLoaded = HomeFeedState.isLoaded;
+        final items = isLoaded ? HomeFeedState.section('weekend_specials') : DummyData.weekendSpecial;
+        if (items.isEmpty && isLoaded) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SectionDividerWidget(
+              title: 'Weekend Specials',
+              topPadding: 30, // 30px gap from previous section's cards
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              textColor: AppColors.textPrimary, // dark navy
+            ),
+            SizedBox(
+              height: Responsive.h(context, 420, min: 390),
+              child: PageView.builder(
+                controller: _pageController,
+                clipBehavior: Clip.hardEdge,
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  if (!isLoaded) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      child: const CategorySkeletonCard(),
+                    );
+                  }
+                  final event = items[index];
+                  // `tag` carries the two-line date badge, e.g. "Sun\nmar 17".
+                  final dateParts = (event.tag ?? '').split('\n');
+                  final dayStr = dateParts.isNotEmpty ? dateParts[0] : '';
+                  final dateStr = dateParts.length > 1 ? dateParts[1] : '';
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    child: GestureDetector(
+                      onTap: () => openListingDetail(context, event),
+                      child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                            color: Colors.black.withOpacity(0.1), width: 0.7),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.06),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
-
-                      // Content below image
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                event.title,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF1A1A2E),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // ── Top image with date badge + heart ──
+                          SizedBox(
+                            // Taller image so it fills the card down to the
+                            // content (removes the white gap below the meta).
+                            // Grown to fill the space freed by the removed CTA,
+                            // trimmed slightly to leave white space under meta.
+                            height: Responsive.h(context, 322, min: 300),
+                            width: double.infinity,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(16),
+                                  ),
+                                  child: listingImage(event.imagePath,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        // Stars + review count
-                                        Row(
-                                          children: [
-                                            Row(
-                                              children: List.generate(
-                                                5,
-                                                (i) => const Icon(
-                                                  Icons.star,
-                                                  size: 14,
-                                                  color: Colors.amber,
-                                                ),
-                                              ),
+                                // Date badge (top-left)
+                                if (dayStr.isNotEmpty)
+                                  Positioned(
+                                    top: 10,
+                                    left: 10,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.10),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            dayStr,
+                                            style: GoogleFonts.poppins(
+                                              fontSize: Responsive.sp(context, 13),
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.textPrimary,
                                             ),
-                                            const SizedBox(width: 6),
-                                            Flexible(
-                                              child: Text(
-                                                event.reviewCount ?? '3.5k reviews',
-                                                style: GoogleFonts.poppins(
-                                                  fontSize: 12,
-                                                  color: Colors.grey,
-                                                ),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
+                                          ),
+                                          Text(
+                                            dateStr,
+                                            style: GoogleFonts.poppins(
+                                              fontSize: Responsive.sp(context, 12),
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.accentBlue,
                                             ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 8),
-                                        // Location
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                              Icons.location_on_outlined,
-                                              size: 14,
-                                              color: Colors.grey,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Expanded(
-                                              child: Text(
-                                                event.venue,
-                                                style: GoogleFonts.poppins(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: const Color(0xFF4A4A68),
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  // View Details button on the right
-                                  SizedBox(
-                                    height: Responsive.h(context, 38, min: 34),
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => EventDetailScreen(event: event),
-                                          ),
-                                        );
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFFFFCC00),
-                                        foregroundColor: const Color(0xFF1A1A2E),
-                                        elevation: 0,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(20),
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 16,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        'View Details',
-                                        style: GoogleFonts.poppins(
-                                          fontSize: Responsive.sp(context, 12),
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
+                                // Heart (top-right)
+                                Positioned(
+                                  top: 10,
+                                  right: 10,
+                                  child: WishlistButton(
+                                    event: event,
+                                    containerSize: 36,
+                                    showShadow: true,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // ── Content (title + meta; CTA removed) ──
+                          Expanded(
+                            child: Padding(
+                              // ≥10px white space kept below the meta (bottom
+                              // padding + top-aligned content).
+                              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    event.title,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: Responsive.sp(context, 16),
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
                                     ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  // Two-column meta: Age + Date·Time left,
+                                  // Location + Distance right.
+                                  ListingMetaRows(
+                                    event: event,
+                                    showLocation: true,
+                                    twoColumn: true,
                                   ),
                                 ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 12),
-        // Dot indicators
-        Center(
-          child: SmoothPageIndicator(
-            controller: _pageController,
-            count: DummyData.weekendSpecial.length,
-            effect: const WormEffect(
-              dotHeight: 8,
-              dotWidth: 8,
-              activeDotColor: Color(0xFFDE7104),
-              dotColor: Color(0xFFE0E0E0),
-              spacing: 6,
+                    ),
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-        ),
-        const SizedBox(height: 16),
-      ],
+            const SizedBox(height: 12),
+            // Dot indicators
+            Center(
+              child: SmoothPageIndicator(
+                controller: _pageController,
+                count: items.length,
+                effect: const WormEffect(
+                  dotHeight: 8,
+                  dotWidth: 8,
+                  activeDotColor: Color(0xFFDE7104),
+                  dotColor: Color(0xFFE0E0E0),
+                  spacing: 6,
+                ),
+              ),
+            ),
+            // Trailing space removed — the next section's 30px topPadding
+            // provides the gap below the dots indicator.
+          ],
+        );
+      },
     );
   }
 }

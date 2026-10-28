@@ -1,6 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- Required to post notifications on Android 13+ (API 33). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
+        android:allowBackup="false"
         android:label="TLB"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
@@ -26,6 +31,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Default FCM notification channel — matches the channel created in
+             PushNotifications.init() so server pushes land in the right place. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="tlb_default_channel" />
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
@@ -41,6 +51,24 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <!-- Allow url_launcher to query https URLs (Android 11+ package visibility) -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
+        <!-- Allow querying Google Maps specifically -->
+        <package android:name="com.google.android.apps.maps"/>
+        <!-- Taking a profile photo hands off to the system camera app
+             (image_picker fires MediaStore.ACTION_IMAGE_CAPTURE). Under
+             Android 11+ package visibility an intent only resolves if its
+             action is declared here, so without this "Take a Photo" can fail
+             to open anything at all. No CAMERA permission is declared on
+             purpose: the camera app takes the picture and asks for its own
+             permissions, so declaring it here would add a prompt we would
+             then have to request ourselves. -->
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE"/>
         </intent>
     </queries>
 </manifest>

@@ -1,21 +1,63 @@
+import 'package:device_preview/device_preview.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'core/app_theme.dart';
+import 'core/offline_guard.dart';
+import 'core/firebase_bootstrap.dart';
+import 'core/preview_mode.dart';
 import 'providers/auth_state.dart';
+import 'providers/connectivity_state.dart';
+import 'providers/follow_state.dart';
+import 'providers/location_state.dart';
+import 'providers/notifications_state.dart';
+import 'providers/saved_events_state.dart';
+import 'services/push_notifications.dart';
+import 'services/avatar_storage.dart';
 import 'screens/home_screen.dart';
 import 'screens/splash_screen.dart';
+import 'widgets/connectivity_toast.dart';
+import 'widgets/login_sheet.dart';
+import 'widgets/preview_toggle_button.dart';
+import 'core/listing_source.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Tolerate startup-time init failures here — the Google sign-in screens
+  // retry [FirebaseBootstrap.ensureInitialized] before touching FirebaseAuth
+  // and will surface the real error to the user if it still fails there.
   try {
-    await Firebase.initializeApp();
-  } catch (e) {
-    debugPrint('Firebase init skipped: $e');
+    await FirebaseBootstrap.ensureInitialized();
+  } catch (_) {
+    /* swallowed — retried on-demand in Google sign-in flows */
   }
-  await AuthState.tryRestoreSession();
+  // Push notifications need Firebase. Register the background handler + set up
+  // FCM/local notifications only if Firebase actually came up.
+  if (FirebaseBootstrap.isInitialized) {
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    await PushNotifications.init();
+  }
+  await PreviewMode.load();
+  // A city the customer picked by hand last time (e.g. after declining
+  // location permission) is still theirs on the next launch.
+  await LocationState().restorePickedCity();
+  // Local profile picture survives across launches even though backend
+  // profile API has no avatar field yet.
+  final localAvatar = await AvatarStorage.load();
+  if (localAvatar != null) AuthState.avatarUrl.value = localAvatar;
+  final restored = await AuthState.tryRestoreSession();
+  if (restored) {
+    SavedEventsState.loadFromApi(); // fire-and-forget
+    final uid = AuthState.userId;
+    if (uid != null) FollowState.loadForUser(uid); // fire-and-forget
+    if (FirebaseBootstrap.isInitialized) {
+      PushNotifications.registerToken(); // fire-and-forget
+    }
+    NotificationsState.syncAndNotify(); // mirror any new items to the tray
+  }
   // Request highest refresh rate (90Hz / 120Hz depending on device)
   await FlutterDisplayMode.setHighRefreshRate();
   SystemChrome.setSystemUIOverlayStyle(
@@ -26,19 +68,95 @@ void main() async {
   );
   // Disable runtime font fetching — use bundled fonts only
   GoogleFonts.config.allowRuntimeFetching = false;
-  runApp(const TLBApp());
+  // Watches for the network dropping or returning — drives the top
+  // online/offline toast. Fire-and-forget; never delays launch.
+  ConnectivityState.init();
+  // ...and puts the No-internet screen over whatever is open when it drops.
+  OfflineGuard.start(PushNotifications.navigatorKey);
+  runApp(TLBRoot(isLoggedIn: restored));
 }
 
-class TLBApp extends StatelessWidget {
-  const TLBApp({super.key});
+class TLBRoot extends StatelessWidget {
+  /// True when [AuthState.tryRestoreSession] succeeded at startup. Used to
+  /// decide whether the splash routes to the dashboard or the login screen.
+  final bool isLoggedIn;
+
+  const TLBRoot({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Dev tools (DevicePreview wrapper + floating toggle button) only
+          // mount in *debug* mode. Profile and release builds skip them
+          // entirely so end users never see the developer chrome.
+          if (kDebugMode)
+            ValueListenableBuilder<bool>(
+              valueListenable: PreviewMode.enabled,
+              builder: (_, isEnabled, __) {
+                return DevicePreview(
+                  enabled: isEnabled,
+                  builder: (_) => TLBApp(isLoggedIn: isLoggedIn),
+                );
+              },
+            )
+          else
+            TLBApp(isLoggedIn: isLoggedIn),
+          if (kDebugMode) const PreviewToggleButton(),
+        ],
+      ),
+    );
+  }
+}
+
+class TLBApp extends StatelessWidget {
+  final bool isLoggedIn;
+
+  const TLBApp({super.key, required this.isLoggedIn});
+
+  @override
+  Widget build(BuildContext context) {
+    // First launch with no saved session → land on the login screen after the
+    // splash. Existing users with a restored session keep their previous
+    // behaviour and go straight to the dashboard.
+    final Widget nextScreen =
+        isLoggedIn ? const HomeScreen() : const LoginScreen();
+
     return MaterialApp(
       title: 'TLB',
       debugShowCheckedModeBanner: false,
+      // Lets a tapped push/local notification route to the in-app screen.
+      navigatorKey: PushNotifications.navigatorKey,
+      // Records which screen each route was opened from, so a listing's
+      // detail screen can report where the user came from (utm_source).
+      navigatorObservers: [ListingSource.observer],
       theme: AppTheme.lightTheme,
-      home: const SplashScreen(nextScreen: HomeScreen()),
+      // DevicePreview.locale / appBuilder require the DevicePreview ancestor
+      // — which is only present in debug builds — so skip them in profile
+      // and release.
+      locale: kDebugMode ? DevicePreview.locale(context) : null,
+      // Clamp OS text-scaling to 1.0 so system "Large Text" settings
+      // cannot overflow fixed-height layouts across all 44 screens.
+      builder: (context, child) {
+        final clamped = MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: const TextScaler.linear(1.0),
+          ),
+          // The online/offline toast sits above the navigator, so it shows
+          // over whichever screen is open.
+          child: Stack(
+            fit: StackFit.expand,
+            children: [child!, const ConnectivityToast()],
+          ),
+        );
+        return kDebugMode
+            ? DevicePreview.appBuilder(context, clamped)
+            : clamped;
+      },
+      home: SplashScreen(nextScreen: nextScreen),
     );
   }
 }

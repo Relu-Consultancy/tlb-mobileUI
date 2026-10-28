@@ -1,3 +1,6 @@
+# Local development assets (screenshots, design refs — not for version control)
+Development/
+
 # Miscellaneous
 *.class
 *.log
@@ -44,6 +47,27 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# API documentation (local reference only)
+# Gradle caches (local only — can grow to hundreds of MB; never shipped)
+/android/.gradle/
+.gradle/
+
+# Dev-context / documentation files (local reference only — not shipped in repo)
 API_DOCUMENTATION.md
+PROJECT_DOCUMENTATION.md
+pro_flutterdeveloper.md
+dev_graph.md
+testing_report.md
 frontend_api_integration_estimates.csv
+
+# Android Gradle build output (never shipped)
+/android/build/
+# Widget Preview related
+.widget_preview/
+
+# Release signing material - never commit
+key.properties
+*.jks
+*.keystore
+!android/app/debug.keystore
+.env
+.env.*

@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart';
+import '../core/app_snackbar.dart';
+import '../core/responsive.dart';
+import '../widgets/app_loader.dart';
+import '../widgets/app_dialog.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:async';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:location/location.dart' as loc;
+import '../core/city_resolver.dart';
 import '../providers/location_state.dart';
 import '../core/app_colors.dart';
 
@@ -10,47 +19,335 @@ class LocationScreen extends StatefulWidget {
   State<LocationScreen> createState() => _LocationScreenState();
 }
 
-class _LocationScreenState extends State<LocationScreen> {
+class _LocationScreenState extends State<LocationScreen>
+    with WidgetsBindingObserver {
   final TextEditingController _searchController = TextEditingController();
+  bool _isLoadingLocation = false;
+
+  /// What has been typed, trimmed and lower-cased for matching. Empty shows
+  /// the full lists; anything else filters both of them live, so the typed
+  /// city can simply be tapped.
+  String _query = '';
+  // Set true right before we send the user to a system Settings page, so we can
+  // auto-retry the location fetch when they return (e.g. after enabling GPS or
+  // granting permission) instead of making them tap the button again.
+  bool _retryAfterSettings = false;
 
   final List<Map<String, dynamic>> _popularCities = [
     {'name': 'Delhi NCR', 'icon': Icons.account_balance, 'image': 'assets/images/new_home/india-gate.png'},
     {'name': 'Mumbai', 'icon': Icons.apartment, 'image': 'assets/images/new_home/gateway.png'},
     {'name': 'Hyderabad', 'icon': Icons.location_city, 'image': 'assets/images/new_home/charminar.png'},
-    {'name': 'Kolkata', 'icon': Icons.museum},
-    {'name': 'Pune', 'icon': Icons.villa},
-    {'name': 'Bengaluru', 'icon': Icons.account_balance},
+    {'name': 'Kolkata', 'icon': Icons.museum, 'image': 'location_screen_resources/kolkata.png'},
+    {'name': 'Pune', 'icon': Icons.villa, 'image': 'location_screen_resources/pune.png'},
+    {'name': 'Bengaluru', 'icon': Icons.account_balance, 'image': 'location_screen_resources/bangalore.png'},
   ];
 
-  final List<String> _allCities = [
-    'Agra',
-    'Ahmedabad',
-    'Ajmer',
-    'Aligarh',
-    'Amritsar',
-    'Bengaluru',
-    'Bhopal',
-    'Chennai',
-    'Delhi NCR',
-    'Goa',
-    'Hyderabad',
-    'Jaipur',
-    'Kochi',
-    'Kolkata',
-    'Lucknow',
-    'Mumbai',
-    'Pune',
-  ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
     super.dispose();
   }
 
-  void _selectCity(String city) {
-    LocationState().setCity(city);
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Returning from the system Settings page — if we sent the user there to
+    // enable GPS / grant permission, retry the fetch automatically so the
+    // button "just works" without a second tap.
+    if (state == AppLifecycleState.resumed && _retryAfterSettings) {
+      _retryAfterSettings = false;
+      _fetchCurrentLocation();
+    }
+  }
+
+  /// The popular cities matching [_query].
+  List<Map<String, dynamic>> get _filteredPopular => _query.isEmpty
+      ? _popularCities
+      : _popularCities
+          .where((c) => '${c['name']}'.toLowerCase().contains(_query))
+          .toList();
+
+  /// The full city list matching [_query].
+  List<String> get _filteredCities => _query.isEmpty
+      ? CityResolver.allCities
+      : CityResolver.allCities
+          .where((c) => c.toLowerCase().contains(_query))
+          .toList();
+
+  /// Commits what has been typed. The keyboard's search key and the button in
+  /// the field both land here, so the text can be submitted even when the
+  /// keyboard has been swiped away — previously `onSubmitted` was the only
+  /// way, which left the typed city with no way to be chosen at all.
+  ///
+  /// Only a city the app actually knows is accepted. [CityResolver.matchKnown]
+  /// also maps the Delhi aliases ("Gurgaon" → "Delhi NCR"), and a query that
+  /// narrows to exactly one city takes that one, so "pun" picks Pune. Free
+  /// text used to be accepted as-is, which set the location to whatever was
+  /// typed and left Home stuck on "we don't serve this location".
+  void _submitSearch() {
+    final text = _searchController.text.trim();
+    if (text.isEmpty) return;
+    final matched = CityResolver.matchKnown(text) ??
+        (_filteredCities.length == 1 ? _filteredCities.first : null);
+    if (matched == null) {
+      AppSnackBar.show(
+          context, "We're not in \"$text\" yet. Pick a city from the list.");
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    _selectCity(matched);
+  }
+
+  /// [latitude]/[longitude] are passed only by the "current location" flow —
+  /// a city picked from the list has no fix behind it, and setCity clears any
+  /// previous pair so the two can never disagree.
+  void _selectCity(String city,
+      {double? latitude, double? longitude, String? label}) {
+    LocationState().setCity(city,
+        latitude: latitude, longitude: longitude, label: label);
     Navigator.pop(context);
+  }
+
+  /// Confirmation dialog used when location is blocked at the OS level. The
+  /// "Open Settings" action runs [onOpen] (app settings or location settings).
+  Future<void> _showSettingsDialog({
+    required String title,
+    required String message,
+    required Future<bool> Function() onOpen,
+  }) async {
+    if (!mounted) return;
+    final ok = await showAppConfirmDialog(
+      context,
+      title: title,
+      message: message,
+      confirmLabel: 'Open Settings',
+      icon: Icons.location_on_outlined,
+    );
+    if (ok) await onOpen();
+  }
+
+  Future<void> _fetchCurrentLocation() async {
+    setState(() => _isLoadingLocation = true);
+
+    try {
+      // Make sure device location services (GPS) are ON. On Android this shows
+      // the native in-app "Turn on device location" dialog via the `location`
+      // plugin — the user enables GPS without leaving the app and we carry
+      // straight on. iOS can't toggle location services from an app, so
+      // requestService() is effectively a no-op there and we fall back to
+      // routing the user to Settings.
+      final loc.Location locationService = loc.Location();
+      bool serviceEnabled = await locationService.serviceEnabled();
+      if (!serviceEnabled) {
+        serviceEnabled = await locationService.requestService();
+      }
+      if (!serviceEnabled) {
+        // Still off (user declined the native dialog, or iOS) — offer the
+        // Settings route and auto-retry once they come back with it enabled.
+        if (!mounted) return;
+        setState(() => _isLoadingLocation = false);
+        await _showSettingsDialog(
+          title: 'Turn on location',
+          message:
+              'Location services (GPS) are turned off. Enable them to use your current location.',
+          onOpen: () async {
+            _retryAfterSettings = true;
+            return Geolocator.openLocationSettings();
+          },
+        );
+        return;
+      }
+
+      // Check / request permission — triggers the OS permission dialog.
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      // Permanently denied ("Don't ask again" / iOS denied) — the OS will no
+      // longer show a prompt, so route the user to app settings instead.
+      if (permission == LocationPermission.deniedForever) {
+        if (!mounted) return;
+        setState(() => _isLoadingLocation = false);
+        await _showSettingsDialog(
+          title: 'Location permission needed',
+          message:
+              'Location permission is blocked. Please enable it for TLB in app settings to use your current location.',
+          onOpen: () async {
+            _retryAfterSettings = true;
+            return Geolocator.openAppSettings();
+          },
+        );
+        return;
+      }
+
+      // Denied this time but not permanently — nothing more we can do now.
+      if (permission == LocationPermission.denied) {
+        if (!mounted) return;
+        AppSnackBar.show(context, 'Location permission denied.');
+        return;
+      }
+
+      // Fetch position with a 15-second timeout to avoid infinite loading
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium),
+      ).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () => throw TimeoutException('GPS timed out'),
+      );
+
+      final placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      ).timeout(const Duration(seconds: 10));
+
+      if (placemarks.isNotEmpty && mounted) {
+        final p = placemarks.first;
+        final city = CityResolver.cityOf(p) ?? '';
+        _selectCity(
+          city,
+          latitude: position.latitude,
+          longitude: position.longitude,
+          // Shown in the header instead of the bare city.
+          label: CityResolver.shortLabel(p, city),
+        );
+      }
+    } on TimeoutException {
+      if (mounted) {
+        AppSnackBar.error(context, 'Location request timed out. Please try again.');
+      }
+    } catch (_) {
+      if (mounted) {
+        AppSnackBar.error(context, 'Could not determine your location. Please try again.');
+      }
+    } finally {
+      if (mounted) setState(() => _isLoadingLocation = false);
+    }
+  }
+
+  /// Clear, and the button that commits the search.
+  ///
+  /// The submit button is the whole point: the keyboard's own search key is
+  /// gone the moment the keyboard is dismissed, and without this there was
+  /// nothing left on screen to act on what had been typed.
+  Widget _buildSearchActions() {
+    return Padding(
+      padding: const EdgeInsets.only(right: 7, left: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: Icon(Icons.close_rounded,
+                size: Responsive.sp(context, 18), color: Colors.grey.shade600),
+            onPressed: () {
+              _searchController.clear();
+              setState(() => _query = '');
+            },
+            tooltip: 'Clear',
+            padding: const EdgeInsets.all(4),
+            constraints: const BoxConstraints(),
+            splashRadius: 18,
+          ),
+          const SizedBox(width: 2),
+          Semantics(
+            button: true,
+            label: 'Search',
+            child: InkWell(
+              onTap: _submitSearch,
+              borderRadius: BorderRadius.circular(18),
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: const BoxDecoration(
+                  color: AppColors.primaryLight,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.arrow_forward_rounded,
+                  size: Responsive.sp(context, 19),
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Shown when the search matches no city at all, so the screen is never
+  /// just an empty page under a filled-in search box.
+  Widget _buildNoMatches() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 48),
+      child: Column(
+        children: [
+          Icon(Icons.location_off_outlined,
+              size: 44, color: Colors.grey.shade400),
+          const SizedBox(height: 14),
+          Text(
+            'No cities match "${_searchController.text.trim()}"',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 14),
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            "We're adding new cities all the time.",
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 12.5),
+              color: Colors.grey.shade600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Bold, visually-distinct section title with a gold accent bar and a
+  /// divider beneath it, so titles stand apart from the content below.
+  Widget _sectionHeader(String title) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            // Gold accent bar — ties the header to the city-icon accent colour.
+            Container(
+              width: 4,
+              height: 20,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE0A000),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              title,
+              style: GoogleFonts.poppins(
+                fontSize: Responsive.sp(context, 18),
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Divider(color: Colors.grey.shade300, thickness: 1, height: 1),
+      ],
+    );
   }
 
   @override
@@ -69,7 +366,7 @@ class _LocationScreenState extends State<LocationScreen> {
             shape: BoxShape.circle,
           ),
           child: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E), size: 20),
+            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 20),
             onPressed: () => Navigator.pop(context),
             splashRadius: 24,
           ),
@@ -77,9 +374,9 @@ class _LocationScreenState extends State<LocationScreen> {
         title: Text(
           'Select Location',
           style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF1A1A2E),
+            fontSize: Responsive.sp(context, 18),
+            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
           ),
         ),
         centerTitle: true,
@@ -99,22 +396,26 @@ class _LocationScreenState extends State<LocationScreen> {
               ),
               child: TextField(
                 controller: _searchController,
+                textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
                   hintText: 'Search city, area or landmark...',
                   hintStyle: GoogleFonts.poppins(
-                    fontSize: 14,
+                    fontSize: Responsive.sp(context, 14),
                     color: Colors.grey.shade500,
                   ),
                   prefixIcon: Icon(Icons.search, color: Colors.grey.shade600),
+                  // Only once there is something to submit or clear, so an
+                  // untouched field stays as plain as it was.
+                  suffixIcon: _query.isEmpty ? null : _buildSearchActions(),
+                  suffixIconConstraints:
+                      const BoxConstraints(minWidth: 0, minHeight: 0),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 15),
                 ),
-                style: GoogleFonts.poppins(fontSize: 14),
-                onSubmitted: (value) {
-                  if (value.trim().isNotEmpty) {
-                    _selectCity(value);
-                  }
-                },
+                style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14)),
+                onChanged: (value) =>
+                    setState(() => _query = value.trim().toLowerCase()),
+                onSubmitted: (_) => _submitSearch(),
               ),
             ),
             const SizedBox(height: 24),
@@ -124,18 +425,20 @@ class _LocationScreenState extends State<LocationScreen> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton.icon(
-                onPressed: () => _selectCity('Sonipat'), // Dummy current location
-                icon: const Icon(Icons.my_location, color: Color(0xFF1A1A2E), size: 20),
+                onPressed: _isLoadingLocation ? null : _fetchCurrentLocation,
+                icon: _isLoadingLocation
+                    ? const AppLoaderInline(dotSize: 6, spacing: 3, color: AppColors.textPrimary)
+                    : const Icon(Icons.my_location, color: AppColors.textPrimary, size: 20),
                 label: Text(
-                  'Use current location',
+                  _isLoadingLocation ? 'Fetching location...' : 'Use current location',
                   style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1A1A2E),
+                    fontSize: Responsive.sp(context, 14),
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryLight, // #FFCC02 Bright Yellow
+                  backgroundColor: AppColors.primaryLight,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -145,108 +448,104 @@ class _LocationScreenState extends State<LocationScreen> {
             ),
             const SizedBox(height: 32),
 
-            // Popular Cities Header
-            Text(
-              'Popular Cities',
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF1A1A2E),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Popular Cities Grid
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 0.9, // Slightly taller cards
-              ),
-              itemCount: _popularCities.length,
-              itemBuilder: (context, index) {
-                final city = _popularCities[index];
-                return GestureDetector(
-                  onTap: () => _selectCity(city['name'] as String),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (city.containsKey('image'))
-                          Image.asset(
-                            city['image'] as String,
-                            color: const Color(0xFFE0A000), // Dark yellow
-                            height: 42,
-                          )
-                        else
-                          Icon(
-                            city['icon'] as IconData,
-                            color: const Color(0xFFE0A000), // Match the dark yellow
-                            size: 42,
+            // Popular cities. The header goes with the grid, so a search
+            // that excludes every popular city leaves no stranded title.
+            if (_filteredPopular.isNotEmpty) ...[
+              _sectionHeader('Popular Cities'),
+              const SizedBox(height: 16),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 0.78,
+                ),
+                itemCount: _filteredPopular.length,
+                itemBuilder: (context, index) {
+                  final city = _filteredPopular[index];
+                  return GestureDetector(
+                    onTap: () => _selectCity(city['name'] as String),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (city.containsKey('image'))
+                            Image.asset(
+                              city['image'] as String,
+                              color: const Color(0xFFE0A000),
+                              height: 58,
+                              errorBuilder: (_, __, ___) => Icon(
+                                city['icon'] as IconData? ??
+                                    Icons.location_city,
+                                size: 50,
+                                color: const Color(0xFFE0A000),
+                              ),
+                            )
+                          else
+                            Icon(
+                              city['icon'] as IconData,
+                              color: const Color(0xFFE0A000),
+                              size: 58,
+                            ),
+                          const SizedBox(height: 14),
+                          Text(
+                            city['name'] as String,
+                            style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, 13),
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textPrimary,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                        const SizedBox(height: 12),
-                        Text(
-                          city['name'] as String,
-                          style: GoogleFonts.poppins(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF1A1A2E),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 32),
-
-            // All Cities Header
-            Text(
-              'All Cities',
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF1A1A2E),
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            // All Cities List
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _allCities.length,
-              separatorBuilder: (context, index) => Divider(
-                color: Colors.grey.shade200,
-                height: 1,
-              ),
-              itemBuilder: (context, index) {
-                final city = _allCities[index];
-                return InkWell(
-                  onTap: () => _selectCity(city),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Text(
-                      city,
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF1A1A2E),
+                        ],
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              ),
+              const SizedBox(height: 32),
+            ],
+
+            // Every city the app covers, filtered the same way.
+            if (_filteredCities.isNotEmpty) ...[
+              _sectionHeader(_query.isEmpty ? 'All Cities' : 'Matching Cities'),
+              const SizedBox(height: 8),
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _filteredCities.length,
+                separatorBuilder: (context, index) => Divider(
+                  color: Colors.grey.shade200,
+                  height: 1,
+                ),
+                itemBuilder: (context, index) {
+                  final city = _filteredCities[index];
+                  return InkWell(
+                    onTap: () => _selectCity(city),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        city,
+                        style: GoogleFonts.poppins(
+                          fontSize: Responsive.sp(context, 14),
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+
+            if (_filteredPopular.isEmpty && _filteredCities.isEmpty)
+              _buildNoMatches(),
           ],
         ),
       ),

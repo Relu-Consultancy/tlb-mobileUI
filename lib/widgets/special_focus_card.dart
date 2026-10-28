@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/app_colors.dart';
+import '../core/responsive.dart';
 import '../models/event_model.dart';
 import '../screens/event_detail_screen.dart';
+import '../core/listing_image.dart';
 
 class SpecialFocusCard extends StatelessWidget {
   final EventModel event;
@@ -27,6 +28,7 @@ class SpecialFocusCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
           boxShadow: [
             BoxShadow(
               color: accentColor.withOpacity(0.10),
@@ -36,7 +38,7 @@ class SpecialFocusCard extends StatelessWidget {
           ],
         ),
         child: SizedBox(
-          height: 155,
+          height: Responsive.h(context, 155, min: 130),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -68,8 +70,8 @@ class SpecialFocusCard extends StatelessWidget {
                           child: Text(
                             event.tag!,
                             style: GoogleFonts.poppins(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.w700,
+                              fontSize: Responsive.sp(context, 10.5),
+                              fontWeight: FontWeight.w500,
                               color: accentColor,
                               letterSpacing: 0.4,
                             ),
@@ -83,29 +85,14 @@ class SpecialFocusCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
+                          fontSize: Responsive.sp(context, 14),
+                          fontWeight: FontWeight.w500,
                           color: AppColors.textPrimary,
                           height: 1.25,
                         ),
                       ),
                       const SizedBox(height: 5),
 
-                      // Age group
-                      if ((event.reviewCount ?? '').isNotEmpty)
-                        Row(
-                          children: [
-                            Icon(Icons.people_outline_rounded, size: 13, color: accentColor),
-                            const SizedBox(width: 4),
-                            Text(
-                              event.reviewCount!,
-                              style: GoogleFonts.poppins(
-                                fontSize: 11,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
                       const SizedBox(height: 3),
 
                       // Venue
@@ -119,24 +106,13 @@ class SpecialFocusCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.poppins(
-                                fontSize: 11,
+                                fontSize: Responsive.sp(context, 11),
                                 color: AppColors.textSecondary,
                               ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 3),
-
-                      // Rating
-                      if (event.rating != null)
-                        RatingBarIndicator(
-                          rating: event.rating!,
-                          itemBuilder: (_, __) => const Icon(Icons.star, color: AppColors.starFilled),
-                          unratedColor: AppColors.starEmpty,
-                          itemCount: 5,
-                          itemSize: 12,
-                        ),
 
                       // Description
                       if ((event.description ?? '').isNotEmpty) ...[
@@ -146,8 +122,8 @@ class SpecialFocusCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.poppins(
-                            fontSize: 10.5,
-                            color: AppColors.textSecondary,
+                            fontSize: Responsive.sp(context, 10.5),
+                            color: AppColors.textDescription,
                             height: 1.4,
                           ),
                         ),
@@ -160,13 +136,13 @@ class SpecialFocusCard extends StatelessWidget {
               // Right image
               ClipRRect(
                 borderRadius: const BorderRadius.horizontal(right: Radius.circular(20)),
-                child: Image.asset(
+                child: listingImageSource(
                   event.imagePath,
-                  width: 120,
+                  width: Responsive.w(context, 120, min: 96),
                   height: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
-                    width: 120,
+                    width: Responsive.w(context, 120, min: 96),
                     color: accentColor.withOpacity(0.12),
                     child: Icon(Icons.favorite_border_rounded, size: 40, color: accentColor),
                   ),

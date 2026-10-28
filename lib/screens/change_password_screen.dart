@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
+import '../core/app_snackbar.dart';
+import '../core/responsive.dart';
+import '../widgets/app_loader.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
 import '../providers/auth_state.dart';
@@ -36,9 +40,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     final confirmPwd = _confirmPasswordCtrl.text;
 
     if (oldPwd.isEmpty || newPwd.isEmpty || confirmPwd.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
-      );
+      AppSnackBar.show(context, 'Please fill in all fields');
       return;
     }
 
@@ -80,12 +82,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     if (result['success'] == true) {
       _showSuccessDialog();
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message'] ?? 'Failed to change password'),
-          backgroundColor: const Color(0xFFE53935),
-        ),
-      );
+      AppSnackBar.error(context, result['message'] ?? 'Failed to change password');
     }
   }
 
@@ -122,16 +119,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               Text(
                 'Password Changed!',
                 style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF1A1A2E),
+                  fontSize: Responsive.sp(context, 18),
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Your password has been updated\nsuccessfully.',
                 style: GoogleFonts.poppins(
-                  fontSize: 13,
+                  fontSize: Responsive.sp(context, 13),
                   color: Colors.grey.shade600,
                   height: 1.5,
                 ),
@@ -146,8 +143,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     Navigator.of(context).pop(); // go back to account settings
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFFCC00),
-                    foregroundColor: const Color(0xFF1A1A2E),
+                    backgroundColor: AppColors.primaryLight,
+                    foregroundColor: AppColors.textPrimary,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -157,8 +154,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   child: Text(
                     'Done',
                     style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
+                      fontSize: Responsive.sp(context, 14),
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
@@ -173,21 +170,21 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: AppColors.lightGray,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF2F2F7),
+        backgroundColor: AppColors.lightGray,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Change Password',
           style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF1A1A2E),
+            fontSize: Responsive.sp(context, 18),
+            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -207,13 +204,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               child: Row(
                 children: [
                   const Icon(Icons.info_outline_rounded,
-                      size: 18, color: Color(0xFF2563EB)),
+                      size: 18, color: AppColors.accentBlue),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       'Password must be at least 8 characters long.',
                       style: GoogleFonts.poppins(
-                        fontSize: 12,
+                        fontSize: Responsive.sp(context, 12),
                         color: const Color(0xFF1D4ED8),
                       ),
                     ),
@@ -272,7 +269,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           Text(
                             _confirmError!,
                             style: GoogleFonts.poppins(
-                              fontSize: 12,
+                              fontSize: Responsive.sp(context, 12),
                               color: const Color(0xFFE53935),
                             ),
                           ),
@@ -293,29 +290,22 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               child: ElevatedButton(
                 onPressed: _loading ? null : _onSubmit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFCC00),
-                  foregroundColor: const Color(0xFF1A1A2E),
+                  backgroundColor: AppColors.primaryLight,
+                  foregroundColor: AppColors.textPrimary,
                   disabledBackgroundColor:
-                      const Color(0xFFFFCC00).withOpacity(0.6),
+                      AppColors.primaryLight.withOpacity(0.6),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(28),
                   ),
                 ),
                 child: _loading
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Color(0xFF1A1A2E),
-                        ),
-                      )
+                    ? const AppLoaderInline(dotSize: 7, spacing: 4, color: AppColors.textPrimary)
                     : Text(
                         'Update Password',
                         style: GoogleFonts.poppins(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
+                          fontSize: Responsive.sp(context, 15),
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
               ),
@@ -354,8 +344,8 @@ class _PasswordField extends StatelessWidget {
         Text(
           label,
           style: GoogleFonts.poppins(
-            fontSize: 12.5,
-            fontWeight: FontWeight.w600,
+            fontSize: Responsive.sp(context, 12.5),
+            fontWeight: FontWeight.w500,
             color: const Color(0xFF6B7280),
           ),
         ),
@@ -375,13 +365,13 @@ class _PasswordField extends StatelessWidget {
             controller: controller,
             obscureText: obscure,
             style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: const Color(0xFF1A1A2E),
+              fontSize: Responsive.sp(context, 14),
+              color: AppColors.textPrimary,
             ),
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: GoogleFonts.poppins(
-                fontSize: 14,
+                fontSize: Responsive.sp(context, 14),
                 color: const Color(0xFFB8B8B8),
               ),
               prefixIcon: const Icon(Icons.lock_outline_rounded,

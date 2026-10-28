@@ -1,0 +1,167 @@
+import '../core/responsive.dart';
+import '../core/app_colors.dart';
+import 'package:flutter/material.dart';
+import '../widgets/category_skeleton_card.dart';
+import '../widgets/auto_scroll_list.dart';
+import '../core/listing_image.dart';
+import '../widgets/section_divider_widget.dart';
+import '../widgets/listing_meta_rows.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../providers/home_feed_state.dart';
+import '../data/dummy_data.dart';
+
+class NewOnTheBlockSection extends StatelessWidget {
+  const NewOnTheBlockSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<int>(
+      valueListenable: HomeFeedState.version,
+      builder: (context, _, __) {
+        // Real listings once the feed is in, the mock set until then.
+                final isLoaded = HomeFeedState.isLoaded;
+        final items = isLoaded ? HomeFeedState.section('new_on_the_block') : DummyData.newOnTheBlock;
+        if (items.isEmpty && isLoaded) return const SizedBox.shrink();
+        return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SectionDividerWidget(
+          title: 'New on the Block',
+          topPadding: 30, // 30px gap from previous section's cards
+          fontSize: 17,
+          textColor: AppColors.textPrimary, // dark navy
+        ),
+        SizedBox(
+          height: Responsive.h(context, 330, min: 290),
+          child: AutoScrollList(
+            clipBehavior: Clip.hardEdge,
+            padding: const EdgeInsets.only(left: 16, right: 8),
+            itemCount: items.length,
+            addAutomaticKeepAlives: false,
+            itemBuilder: (context, index) {
+              if (!isLoaded) {
+                return Container(
+                  width: Responsive.cardWidth(context, fraction: 0.72, max: 300),
+                  margin: const EdgeInsets.only(right: 16),
+                  child: const CategorySkeletonCard(),
+                );
+              }
+              final event = items[index];
+              return Container(
+                width: Responsive.cardWidth(context, fraction: 0.72, max: 300),
+                margin: const EdgeInsets.only(right: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.black.withOpacity(0.1), width: 0.7),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Top Image Area — Expanded so the image dominates the
+                    // card; flush to the card edges with a time-ago band at
+                    // the bottom.
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(16),
+                              ),
+                              child: listingImage(event.imagePath,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          // Dark navy gradient band with the time-ago text
+                          // TEMPORARILY DISABLED — `event.tag` currently carries
+                          // the raw category string from the API. Re-enable once
+                          // the tag/category value is cleaned up.
+                          /*
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              padding: const EdgeInsets.only(
+                                top: 24,
+                                bottom: 10,
+                              ),
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Color(0xCC0E2340), // dark navy, ~80% opacity
+                                  ],
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  event.tag ?? 'New',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: Responsive.sp(context, 13),
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          */
+                        ],
+                      ),
+                    ),
+
+                    // Bottom Content Area — natural height.
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 18),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Title
+                          Text(
+                            event.title,
+                            style: GoogleFonts.poppins(
+                              fontSize: Responsive.sp(context, 16),
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+
+                          // Two-column meta: Age + Date·Time left, Location +
+                          // Distance right.
+                          ListingMetaRows(
+                            event: event,
+                            showLocation: true,
+                            twoColumn: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+        );
+      },
+    );
+  }
+}

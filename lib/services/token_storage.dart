@@ -1,7 +1,9 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TokenStorage {
-  static const _storage = FlutterSecureStorage();
+  static const _storage = FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
   static const _keyAccess = 'tlb_access_token';
   static const _keyRefresh = 'tlb_refresh_token';
   static const _keyUser = 'tlb_user_json';

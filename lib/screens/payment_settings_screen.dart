@@ -1,28 +1,280 @@
 import 'package:flutter/material.dart';
+import '../core/app_colors.dart';
+import '../core/app_snackbar.dart';
+import '../core/responsive.dart';
+import '../widgets/app_dialog.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_state.dart';
+import '../services/payment_method_service.dart';
+import '../models/api_payment_method_model.dart';
+import '../services/token_storage.dart';
 
-class PaymentSettingsScreen extends StatelessWidget {
+class PaymentSettingsScreen extends StatefulWidget {
   const PaymentSettingsScreen({super.key});
+
+  @override
+  State<PaymentSettingsScreen> createState() => _PaymentSettingsScreenState();
+}
+
+class _PaymentSettingsScreenState extends State<PaymentSettingsScreen> {
+  List<ApiPaymentMethod>? _methods;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchMethods();
+  }
+
+  Future<void> _fetchMethods() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      final tokens = await TokenStorage.loadTokens();
+      final token = tokens['access'];
+      if (token == null) throw Exception('Not authenticated');
+      final methods = await PaymentMethodService.listPaymentMethods(token: token);
+      if (!mounted) return;
+      setState(() {
+        _methods = methods;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString().replaceFirst('Exception: ', '');
+        _isLoading = false;
+      });
+    }
+  }
+
+  Widget _buildError() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 32, 20, 32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.wifi_off_rounded, size: 48, color: Colors.grey.shade400),
+          const SizedBox(height: 14),
+          Text(
+            _error ?? 'Something went wrong.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 13),
+              color: Colors.grey.shade700,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 18),
+          ElevatedButton.icon(
+            onPressed: _fetchMethods,
+            icon: const Icon(Icons.refresh, size: 18, color: AppColors.textPrimary),
+            label: Text(
+              'Retry',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryLight,
+              elevation: 0,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteMethod(ApiPaymentMethod method) async {
+    final confirmed = await showAppConfirmDialog(
+      context,
+      title: 'Remove Payment Method?',
+      message:
+          'Are you sure you want to remove this ${method.methodType == 'card' ? 'card' : 'UPI ID'}?',
+      confirmLabel: 'Remove',
+      icon: Icons.credit_card_off_rounded,
+      destructive: true,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      final tokens = await TokenStorage.loadTokens();
+      final token = tokens['access'];
+      if (token == null) return;
+      await PaymentMethodService.deletePaymentMethod(token: token, id: method.id);
+      if (mounted) AppSnackBar.success(context, 'Payment method removed');
+      _fetchMethods();
+    } catch (e) {
+      if (mounted) AppSnackBar.error(context, e.toString());
+    }
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 32, 20, 32),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: AppColors.lightGray,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.credit_card_off_outlined,
+              color: Colors.grey,
+              size: 30,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No saved payment methods',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 15),
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Your saved cards and UPI IDs will appear here. You can save them during your next booking checkout.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: Responsive.sp(context, 12.5),
+              color: Colors.grey.shade600,
+              height: 1.45,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMethodCard(ApiPaymentMethod method) {
+    final isCard = method.methodType == 'card';
+    String title = '';
+    String subtitle = '';
+    IconData iconData = Icons.payment;
+    Color iconBg = const Color(0xFFEDF4FF);
+    Color iconColor = AppColors.accentBlue;
+
+    if (isCard) {
+      final network = method.cardNetwork ?? 'Card';
+      final type = method.cardType != null ? '${method.cardType![0].toUpperCase()}${method.cardType!.substring(1)}' : '';
+      title = '$network $type ···${method.cardLast4 ?? 'XXXX'}';
+      subtitle = method.cardIssuer ?? '';
+      iconData = Icons.credit_card;
+    } else if (method.methodType == 'upi') {
+      title = 'UPI';
+      subtitle = method.upiVpaMasked ?? '';
+      iconData = Icons.account_balance_wallet_outlined;
+      iconBg = const Color(0xFFE8F5E9);
+      iconColor = const Color(0xFF2E7D32);
+    } else {
+      title = method.methodType.toUpperCase();
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(iconData, color: iconColor),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontSize: Responsive.sp(context, 14),
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                if (subtitle.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.poppins(
+                      fontSize: Responsive.sp(context, 12),
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, color: Colors.grey, size: 20),
+            onPressed: () => _deleteMethod(method),
+            tooltip: 'Remove payment method',
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: AppColors.lightGray,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF2F2F7),
+        backgroundColor: AppColors.lightGray,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A2E)),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Payment Settings',
           style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF1A1A2E),
+            fontSize: Responsive.sp(context, 18),
+            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
           ),
         ),
       ),
@@ -44,19 +296,24 @@ class PaymentSettingsScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Hi ${AuthState.firstName},',
-                          style: GoogleFonts.poppins(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            color: const Color(0xFF1A1A2E),
-                          ),
+                        ValueListenableBuilder<String?>(
+                          valueListenable: AuthState.userName,
+                          builder: (context, _, __) {
+                            return Text(
+                              'Hi ${AuthState.firstName},',
+                              style: GoogleFonts.poppins(
+                                fontSize: Responsive.sp(context, 20),
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textPrimary,
+                              ),
+                            );
+                          },
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Manage  and  secure your saved\npayment methods.',
                           style: GoogleFonts.poppins(
-                            fontSize: 12,
+                            fontSize: Responsive.sp(context, 12),
                             color: Colors.grey.shade500,
                             height: 1.5,
                           ),
@@ -66,189 +323,58 @@ class PaymentSettingsScreen extends StatelessWidget {
                   ),
                   Image.asset(
                     'resources- tlb-ui/accounts_page/payments.png',
-                    width: 80,
+                    width: 110,
                     errorBuilder: (_, __, ___) => const Icon(
                       Icons.account_balance_wallet,
                       size: 64,
-                      color: Color(0xFFFFB902),
+                      color: AppColors.starAmber,
                     ),
                   ),
                 ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            Text(
-              'Saved Method',
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF1A1A2E),
-              ),
-            ),
-            const SizedBox(height: 10),
-
-            // ── Visa card ──
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1A3A8F),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'VISA',
-                            style: GoogleFonts.poppins(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Visa**** 4578',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF1A1A2E),
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    'Expires 09/29',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 11.5,
-                                      color: Colors.grey.shade500,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFFFF8E1),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Text(
-                                      'Default',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                        color: const Color(0xFFFFB902),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(Icons.more_horiz, color: Colors.grey),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'UPI',
-                            style: GoogleFonts.poppins(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF1A1A2E),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'UPI: designer@upi',
-                            style: GoogleFonts.poppins(
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF1A1A2E),
-                            ),
-                          ),
-                        ),
-                        const Icon(Icons.more_horiz, color: Colors.grey),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 14),
-
-            // ── Add New Method ──
-            Material(
-              color: const Color(0xFFFFB902),
-              borderRadius: BorderRadius.circular(28),
-              child: InkWell(
-                onTap: () {},
-                borderRadius: BorderRadius.circular(28),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.add, color: Color(0xFF1A1A2E), size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Add New Method',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF1A1A2E),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ),
             ),
 
             const SizedBox(height: 24),
 
+            // ── Saved Methods ──
+            if (_isLoading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 40),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (_error != null)
+              _buildError()
+            else if (_methods == null || _methods!.isEmpty)
+              _buildEmptyState()
+            else ...[
+              Text(
+                'Saved Methods',
+                style: GoogleFonts.poppins(
+                  fontSize: Responsive.sp(context, 14),
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ..._methods!.map(_buildMethodCard),
+            ],
+
+            const SizedBox(height: 32),
+
             // ── Need more help ──
             Text(
               'Need more help?',
               style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF1A1A2E),
+                fontSize: Responsive.sp(context, 14),
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               'Our support team is ready to assist you.',
               style: GoogleFonts.poppins(
-                fontSize: 12,
+                fontSize: Responsive.sp(context, 12),
                 color: Colors.grey.shade500,
               ),
             ),
@@ -267,24 +393,26 @@ class PaymentSettingsScreen extends StatelessWidget {
                     color: const Color(0xFFEDF4FF),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.chat_bubble_outline, color: Color(0xFF2563EB), size: 20),
+                  child: const Icon(Icons.chat_bubble_outline, color: AppColors.accentBlue, size: 20),
                 ),
                 title: Text(
                   'Chat with support',
                   style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1A1A2E),
+                    fontSize: Responsive.sp(context, 14),
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 subtitle: Text(
                   'We usually reply in minutes',
-                  style: GoogleFonts.poppins(fontSize: 11.5, color: Colors.grey.shade500),
+                  style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 11.5), color: Colors.grey.shade500),
                 ),
-                trailing: const Icon(Icons.chevron_right, color: Color(0xFF2563EB)),
+                trailing: const Icon(Icons.chevron_right, color: AppColors.accentBlue),
+                onTap: () =>
+                    AppSnackBar.comingSoon(context, 'Chat with support'),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 40),
           ],
         ),
       ),

@@ -5,7 +5,7 @@ import 'package:tlb_mobile_ui/main.dart';
 
 void main() {
   testWidgets('App smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(const TLBApp());
+    await tester.pumpWidget(const TLBApp(isLoggedIn: false));
 
     expect(find.byType(MaterialApp), findsOneWidget);
   });
